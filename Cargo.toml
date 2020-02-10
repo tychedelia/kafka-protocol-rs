@@ -1,0 +1,28 @@
+[workspace]
+members = ["franz_derive", "franz_protocol"]
+
+[package]
+name = "franz"
+version = "0.1.0"
+authors = ["Diggory Blake <diggsey@googlemail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tokio = { version = "0.2.11", features = ["tcp", "io-util", "sync", "time", "rt-core", "stream", "macros"] }
+tokio-util = { version = "0.2.0", features = ["codec"] }
+bytes = "0.5.4"
+uuid = "0.8.1"
+log = "0.4.8"
+futures = "0.3.4"
+async-trait = "0.1.24"
+chashmap = "2.2.2"
+franz_derive = { version = "0.1", path = "franz_derive" }
+franz_protocol = { version = "0.1", path = "franz_protocol" }
+
+[build-dependencies]
+async-trait = "0.1.24"
+
+[patch.crates-io]
+bytes = { path = '../bytes' }
