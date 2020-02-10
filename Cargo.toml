@@ -25,4 +25,4 @@ franz_protocol = { version = "0.1", path = "franz_protocol" }
 async-trait = "0.1.24"
 
 [patch.crates-io]
-bytes = { path = '../bytes' }
+bytes = { git = "https://github.com/Diggsey/bytes.git", branch = "try_get" }

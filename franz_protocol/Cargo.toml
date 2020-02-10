@@ -10,6 +10,3 @@ edition = "2018"
 bytes = "0.5.4"
 uuid = "0.8.1"
 log = "0.4.8"
-
-[patch.crates-io]
-bytes = { path = '../bytes' }
