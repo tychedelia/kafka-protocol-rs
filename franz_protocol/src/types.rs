@@ -1,23 +1,49 @@
-use bytes::{Buf, BufMut};
+use std::string::String as StdString;
+use std::hash::Hash;
 
-use super::{DecodeError, EncodeError, Encoder, Decoder, Primitive, Encodable, Decodable};
+use bytes::{Buf, BufMut};
+use indexmap::IndexMap;
+
+use super::{DecodeError, EncodeError, Encoder, Decoder, Encodable, Decodable, MapEncodable, MapDecodable, NewType};
+
+macro_rules! define_copy_impl {
+    ($e:ident, $t:ty) => (
+        impl Encoder<$t> for $e {
+            fn encode<B: BufMut>(&self, buf: &mut B, value: $t) -> Result<(), EncodeError> {
+                self.encode(buf, &value)
+            }
+            fn compute_size(&self, value: $t) -> Result<usize, EncodeError> {
+                self.compute_size(&value)
+            }
+            fn fixed_size(&self) -> Option<usize> {
+                <Self as Encoder<&$t>>::fixed_size(self)
+            }
+        }
+    )
+}
 
 #[derive(Debug, Copy, Clone, Default)]
 pub struct Boolean;
 
-impl Primitive for Boolean {}
-
-impl Encoder<bool> for Boolean {
-    fn encode<B: BufMut>(&self, buf: &mut B, value: bool) -> Result<(), EncodeError> {
-        Ok(buf.put_u8(if value { 1 } else { 0 }))
+impl<T: NewType<bool>> Encoder<&T> for Boolean {
+    fn encode<B: BufMut>(&self, buf: &mut B, value: &T) -> Result<(), EncodeError> {
+        Ok(buf.put_u8(if *value.borrow() { 1 } else { 0 }))
+    }
+    fn compute_size(&self, _value: &T) -> Result<usize, EncodeError> {
+        Ok(1)
+    }
+    fn fixed_size(&self) -> Option<usize> {
+        Some(1)
     }
 }
 
-impl Decoder<bool> for Boolean {
-    fn decode<B: Buf>(&self, buf: &mut B) -> Result<bool, DecodeError> {
-        Ok(buf.try_get_u8()? != 0)
+impl<T: NewType<bool>> Decoder<T> for Boolean {
+    fn decode<B: Buf>(&self, buf: &mut B) -> Result<T, DecodeError> {
+        Ok((buf.try_get_u8()? != 0).into())
     }
 }
+
+define_copy_impl!(Boolean, bool);
 
 macro_rules! define_simple_ints {
     ($($name:ident: $t:ty [$put:ident, $get:ident],)*) => (
@@ -25,19 +51,25 @@ macro_rules! define_simple_ints {
             #[derive(Debug, Copy, Clone)]
             pub struct $name;
 
-            impl Primitive for $name {}
-
-            impl Encoder<$t> for $name {
-                fn encode<B: BufMut>(&self, buf: &mut B, value: $t) -> Result<(), EncodeError> {
-                    Ok(buf.$put(value))
+            impl<T: NewType<$t>> Encoder<&T> for $name {
+                fn encode<B: BufMut>(&self, buf: &mut B, value: &T) -> Result<(), EncodeError> {
+                    Ok(buf.$put(*value.borrow()))
+                }
+                fn compute_size(&self, _value: &T) -> Result<usize, EncodeError> {
+                    Ok(std::mem::size_of::<$t>())
+                }
+                fn fixed_size(&self) -> Option<usize> {
+                    Some(std::mem::size_of::<$t>())
                 }
             }
 
-            impl Decoder<$t> for $name {
-                fn decode<B: Buf>(&self, buf: &mut B) -> Result<$t, DecodeError> {
-                    Ok(buf.$get()?)
+            impl<T: NewType<$t>> Decoder<T> for $name {
+                fn decode<B: Buf>(&self, buf: &mut B) -> Result<T, DecodeError> {
+                    Ok(buf.$get()?.into())
                 }
             }
+
+            define_copy_impl!($name, $t);
         )*
     )
 }
@@ -53,10 +85,9 @@ define_simple_ints!{
 #[derive(Debug, Copy, Clone, Default)]
 pub struct UnsignedVarInt;
 
-impl Primitive for UnsignedVarInt {}
-
-impl Encoder<u32> for UnsignedVarInt {
-    fn encode<B: BufMut>(&self, buf: &mut B, mut value: u32) -> Result<(), EncodeError> {
+impl<T: NewType<u32>> Encoder<&T> for UnsignedVarInt {
+    fn encode<B: BufMut>(&self, buf: &mut B, value: &T) -> Result<(), EncodeError> {
+        let mut value = *value.borrow();
         while value >= 0x80 {
             buf.put_u8((value as u8) | 0x80);
             value >>= 7;
@@ -64,10 +95,20 @@ impl Encoder<u32> for UnsignedVarInt {
         buf.put_u8(value as u8);
         Ok(())
     }
+    fn compute_size(&self, value: &T) -> Result<usize, EncodeError> {
+        let value = *value.borrow();
+        Ok(match value {
+            0x0..=0x7f => 1,
+            0x80..=0x3fff => 2,
+            0x4000..=0x1fffff => 3,
+            0x200000..=0xfffffff => 4,
+            0x10000000..=0xffffffff => 5,
+        })
+    }
 }
 
-impl Decoder<u32> for UnsignedVarInt {
-    fn decode<B: Buf>(&self, buf: &mut B) -> Result<u32, DecodeError> {
+impl<T: NewType<u32>> Decoder<T> for UnsignedVarInt {
+    fn decode<B: Buf>(&self, buf: &mut B) -> Result<T, DecodeError> {
         let mut value = 0;
         for i in 0..5 {
             let b = buf.try_get_u8()? as u32;
@@ -76,17 +117,18 @@ impl Decoder<u32> for UnsignedVarInt {
                 break;
             }
         }
-        Ok(value)
+        Ok(value.into())
     }
 }
+
+define_copy_impl!(UnsignedVarInt, u32);
 
 #[derive(Debug, Copy, Clone, Default)]
 pub struct UnsignedVarLong;
 
-impl Primitive for UnsignedVarLong {}
-
-impl Encoder<u64> for UnsignedVarLong {
-    fn encode<B: BufMut>(&self, buf: &mut B, mut value: u64) -> Result<(), EncodeError> {
+impl<T: NewType<u64>> Encoder<&T> for UnsignedVarLong {
+    fn encode<B: BufMut>(&self, buf: &mut B, value: &T) -> Result<(), EncodeError> {
+        let mut value = *value.borrow();
         while value >= 0x80 {
             buf.put_u8((value as u8) | 0x80);
             value >>= 7;
@@ -94,10 +136,25 @@ impl Encoder<u64> for UnsignedVarLong {
         buf.put_u8(value as u8);
         Ok(())
     }
+    fn compute_size(&self, value: &T) -> Result<usize, EncodeError> {
+        let value = *value.borrow();
+        Ok(match value {
+            0x0..=0x7f => 1,
+            0x80..=0x3fff => 2,
+            0x4000..=0x1fffff => 3,
+            0x200000..=0xfffffff => 4,
+            0x10000000..=0x7ffffffff => 5,
+            0x800000000..=0x3ffffffffff => 6,
+            0x40000000000..=0x1ffffffffffff => 7,
+            0x2000000000000..=0xffffffffffffff => 8,
+            0x100000000000000..=0x7fffffffffffffff => 9,
+            0x8000000000000000..=0xffffffffffffffff => 10,
+        })
+    }
 }
 
-impl Decoder<u64> for UnsignedVarLong {
-    fn decode<B: Buf>(&self, buf: &mut B) -> Result<u64, DecodeError> {
+impl<T: NewType<u64>> Decoder<T> for UnsignedVarLong {
+    fn decode<B: Buf>(&self, buf: &mut B) -> Result<T, DecodeError> {
         let mut value = 0;
         for i in 0..10 {
             let b = buf.try_get_u8()? as u64;
@@ -106,66 +163,86 @@ impl Decoder<u64> for UnsignedVarLong {
                 break;
             }
         }
-        Ok(value)
+        Ok(value.into())
     }
 }
+
+define_copy_impl!(UnsignedVarLong, u64);
 
 #[derive(Debug, Copy, Clone, Default)]
 pub struct VarInt;
 
-impl Primitive for VarInt {}
-
-impl Encoder<i32> for VarInt {
-    fn encode<B: BufMut>(&self, buf: &mut B, value: i32) -> Result<(), EncodeError> {
+impl<T: NewType<i32>> Encoder<&T> for VarInt {
+    fn encode<B: BufMut>(&self, buf: &mut B, value: &T) -> Result<(), EncodeError> {
+        let value = *value.borrow();
         let zigzag = ((value << 1) ^ (value >> 31)) as u32;
         UnsignedVarInt.encode(buf, zigzag)
     }
-}
-
-impl Decoder<i32> for VarInt {
-    fn decode<B: Buf>(&self, buf: &mut B) -> Result<i32, DecodeError> {
-        let zigzag = UnsignedVarInt.decode(buf)?;
-        Ok(((zigzag >> 1) as i32) ^ (-((zigzag & 1) as i32)))
+    fn compute_size(&self, value: &T) -> Result<usize, EncodeError> {
+        let value = *value.borrow();
+        let zigzag = ((value << 1) ^ (value >> 31)) as u32;
+        UnsignedVarInt.compute_size(zigzag)
     }
 }
+
+impl<T: NewType<i32>> Decoder<T> for VarInt {
+    fn decode<B: Buf>(&self, buf: &mut B) -> Result<T, DecodeError> {
+        let zigzag: u32 = UnsignedVarInt.decode(buf)?;
+        Ok((((zigzag >> 1) as i32) ^ (-((zigzag & 1) as i32))).into())
+    }
+}
+
+define_copy_impl!(VarInt, i32);
 
 #[derive(Debug, Copy, Clone, Default)]
 pub struct VarLong;
 
-impl Primitive for VarLong {}
-
-impl Encoder<i64> for VarLong {
-    fn encode<B: BufMut>(&self, buf: &mut B, value: i64) -> Result<(), EncodeError> {
+impl<T: NewType<i64>> Encoder<&T> for VarLong {
+    fn encode<B: BufMut>(&self, buf: &mut B, value: &T) -> Result<(), EncodeError> {
+        let value = *value.borrow();
         let zigzag = ((value << 1) ^ (value >> 63)) as u64;
         UnsignedVarLong.encode(buf, &zigzag)
     }
-}
-
-impl Decoder<i64> for VarLong {
-    fn decode<B: Buf>(&self, buf: &mut B) -> Result<i64, DecodeError> {
-        let zigzag = UnsignedVarLong.decode(buf)?;
-        Ok(((zigzag >> 1) as i64) ^ (-((zigzag & 1) as i64)))
+    fn compute_size(&self, value: &T) -> Result<usize, EncodeError> {
+        let value = *value.borrow();
+        let zigzag = ((value << 1) ^ (value >> 63)) as u64;
+        UnsignedVarLong.compute_size(zigzag)
     }
 }
+
+impl<T: NewType<i64>> Decoder<T> for VarLong {
+    fn decode<B: Buf>(&self, buf: &mut B) -> Result<T, DecodeError> {
+        let zigzag: u64 = UnsignedVarLong.decode(buf)?;
+        Ok((((zigzag >> 1) as i64) ^ (-((zigzag & 1) as i64))).into())
+    }
+}
+
+define_copy_impl!(VarLong, i64);
 
 #[derive(Debug, Copy, Clone, Default)]
 pub struct Uuid;
 
-impl Primitive for Uuid {}
-
-impl Encoder<uuid::Uuid> for Uuid {
-    fn encode<B: BufMut>(&self, buf: &mut B, value: uuid::Uuid) -> Result<(), EncodeError> {
-        Ok(buf.put_slice(value.as_bytes()))
+impl<T: NewType<uuid::Uuid>> Encoder<&T> for Uuid {
+    fn encode<B: BufMut>(&self, buf: &mut B, value: &T) -> Result<(), EncodeError> {
+        Ok(buf.put_slice(value.borrow().as_bytes()))
+    }
+    fn compute_size(&self, _value: &T) -> Result<usize, EncodeError> {
+        Ok(16)
+    }
+    fn fixed_size(&self) -> Option<usize> {
+        Some(16)
     }
 }
 
-impl Decoder<uuid::Uuid> for Uuid {
-    fn decode<B: Buf>(&self, buf: &mut B) -> Result<uuid::Uuid, DecodeError> {
+impl<T: NewType<uuid::Uuid>> Decoder<T> for Uuid {
+    fn decode<B: Buf>(&self, buf: &mut B) -> Result<T, DecodeError> {
         let mut result = [0; 16];
         buf.try_copy_to_slice(&mut result)?;
-        Ok(uuid::Uuid::from_bytes(result))
+        Ok(uuid::Uuid::from_bytes(result).into())
     }
 }
+
+define_copy_impl!(Uuid, uuid::Uuid);
 
 #[derive(Debug, Copy, Clone, Default)]
 pub struct String;
@@ -186,17 +263,35 @@ impl Encoder<Option<&str>> for String {
             Ok(())
         }
     }
-}
-
-impl Encoder<Option<&std::string::String>> for String {
-    fn encode<B: BufMut>(&self, buf: &mut B, value: Option<&std::string::String>) -> Result<(), EncodeError> {
-        String.encode(buf, value.map(|s| s.as_str()))
+    fn compute_size(&self, value: Option<&str>) -> Result<usize, EncodeError> {
+        if let Some(s) = value {
+            if s.len() > std::i16::MAX as usize {
+                error!("String is too long to encode ({} bytes)", s.len());
+                Err(EncodeError)
+            } else {
+                Ok(2 + s.len())
+            }
+        } else {
+            Ok(2)
+        }
     }
 }
 
-impl Encoder<&Option<std::string::String>> for String {
-    fn encode<B: BufMut>(&self, buf: &mut B, value: &Option<std::string::String>) -> Result<(), EncodeError> {
+impl<T: NewType<StdString>> Encoder<Option<&T>> for String {
+    fn encode<B: BufMut>(&self, buf: &mut B, value: Option<&T>) -> Result<(), EncodeError> {
+        String.encode(buf, value.map(|s| s.borrow().as_str()))
+    }
+    fn compute_size(&self, value: Option<&T>) -> Result<usize, EncodeError> {
+        String.compute_size(value.map(|s| s.borrow().as_str()))
+    }
+}
+
+impl<T: NewType<StdString>> Encoder<&Option<T>> for String {
+    fn encode<B: BufMut>(&self, buf: &mut B, value: &Option<T>) -> Result<(), EncodeError> {
         String.encode(buf, value.as_ref())
+    }
+    fn compute_size(&self, value: &Option<T>) -> Result<usize, EncodeError> {
+        String.compute_size(value.as_ref())
     }
 }
 
@@ -204,22 +299,28 @@ impl Encoder<&str> for String {
     fn encode<B: BufMut>(&self, buf: &mut B, value: &str) -> Result<(), EncodeError> {
         String.encode(buf, Some(value))
     }
-}
-
-impl Encoder<&std::string::String> for String {
-    fn encode<B: BufMut>(&self, buf: &mut B, value: &std::string::String) -> Result<(), EncodeError> {
-        String.encode(buf, Some(value))
+    fn compute_size(&self, value: &str) -> Result<usize, EncodeError> {
+        String.compute_size(Some(value))
     }
 }
 
-impl Decoder<Option<std::string::String>> for String {
-    fn decode<B: Buf>(&self, buf: &mut B) -> Result<Option<std::string::String>, DecodeError> {
+impl<T: NewType<StdString>> Encoder<&T> for String {
+    fn encode<B: BufMut>(&self, buf: &mut B, value: &T) -> Result<(), EncodeError> {
+        String.encode(buf, Some(value))
+    }
+    fn compute_size(&self, value: &T) -> Result<usize, EncodeError> {
+        String.compute_size(Some(value))
+    }
+}
+
+impl<T: NewType<StdString>> Decoder<Option<T>> for String {
+    fn decode<B: Buf>(&self, buf: &mut B) -> Result<Option<T>, DecodeError> {
         match Int16.decode(buf)? {
             -1 => Ok(None),
             n if n >= 0 => {
                 let mut strbuf = vec![0; n as usize];
                 buf.try_copy_to_slice(&mut strbuf)?;
-                Ok(Some(std::string::String::from_utf8(strbuf)?))
+                Ok(Some(std::string::String::from_utf8(strbuf)?.into()))
             },
             n => {
                 error!("String length is negative ({})", n);
@@ -229,8 +330,8 @@ impl Decoder<Option<std::string::String>> for String {
     }
 }
 
-impl Decoder<std::string::String> for String {
-    fn decode<B: Buf>(&self, buf: &mut B) -> Result<std::string::String, DecodeError> {
+impl<T: NewType<StdString>> Decoder<T> for String {
+    fn decode<B: Buf>(&self, buf: &mut B) -> Result<T, DecodeError> {
         match String.decode(buf) {
             Ok(None) => {
                 error!("String length is negative (-1)");
@@ -262,17 +363,36 @@ impl Encoder<Option<&str>> for CompactString {
             Ok(())
         }
     }
-}
-
-impl Encoder<Option<&std::string::String>> for CompactString {
-    fn encode<B: BufMut>(&self, buf: &mut B, value: Option<&std::string::String>) -> Result<(), EncodeError> {
-        CompactString.encode(buf, value.map(|s| s.as_str()))
+    fn compute_size(&self, value: Option<&str>) -> Result<usize, EncodeError> {
+        if let Some(s) = value {
+            // Use >= because we're going to add one to the length
+            if s.len() >= std::u32::MAX as usize {
+                error!("CompactString is too long to encode ({} bytes)", s.len());
+                Err(EncodeError)
+            } else {
+                Ok(UnsignedVarInt.compute_size((s.len() as u32) + 1)? + s.len())
+            }
+        } else {
+            Ok(1)
+        }
     }
 }
 
-impl Encoder<&Option<std::string::String>> for CompactString {
-    fn encode<B: BufMut>(&self, buf: &mut B, value: &Option<std::string::String>) -> Result<(), EncodeError> {
+impl<T: NewType<StdString>> Encoder<Option<&T>> for CompactString {
+    fn encode<B: BufMut>(&self, buf: &mut B, value: Option<&T>) -> Result<(), EncodeError> {
+        CompactString.encode(buf, value.map(|s| s.borrow().as_str()))
+    }
+    fn compute_size(&self, value: Option<&T>) -> Result<usize, EncodeError> {
+        CompactString.compute_size(value.map(|s| s.borrow().as_str()))
+    }
+}
+
+impl<T: NewType<StdString>> Encoder<&Option<T>> for CompactString {
+    fn encode<B: BufMut>(&self, buf: &mut B, value: &Option<T>) -> Result<(), EncodeError> {
         CompactString.encode(buf, value.as_ref())
+    }
+    fn compute_size(&self, value: &Option<T>) -> Result<usize, EncodeError> {
+        CompactString.compute_size(value.as_ref())
     }
 }
 
@@ -280,29 +400,35 @@ impl Encoder<&str> for CompactString {
     fn encode<B: BufMut>(&self, buf: &mut B, value: &str) -> Result<(), EncodeError> {
         CompactString.encode(buf, Some(value))
     }
-}
-
-impl Encoder<&std::string::String> for CompactString {
-    fn encode<B: BufMut>(&self, buf: &mut B, value: &std::string::String) -> Result<(), EncodeError> {
-        CompactString.encode(buf, Some(value))
+    fn compute_size(&self, value: &str) -> Result<usize, EncodeError> {
+        CompactString.compute_size(Some(value))
     }
 }
 
-impl Decoder<Option<std::string::String>> for CompactString {
-    fn decode<B: Buf>(&self, buf: &mut B) -> Result<Option<std::string::String>, DecodeError> {
+impl<T: NewType<StdString>> Encoder<&T> for CompactString {
+    fn encode<B: BufMut>(&self, buf: &mut B, value: &T) -> Result<(), EncodeError> {
+        CompactString.encode(buf, Some(value))
+    }
+    fn compute_size(&self, value: &T) -> Result<usize, EncodeError> {
+        CompactString.compute_size(Some(value))
+    }
+}
+
+impl<T: NewType<StdString>> Decoder<Option<T>> for CompactString {
+    fn decode<B: Buf>(&self, buf: &mut B) -> Result<Option<T>, DecodeError> {
         match UnsignedVarInt.decode(buf)? {
             0 => Ok(None),
             n => {
                 let mut strbuf = vec![0; (n-1) as usize];
                 buf.try_copy_to_slice(&mut strbuf)?;
-                Ok(Some(std::string::String::from_utf8(strbuf)?))
+                Ok(Some(std::string::String::from_utf8(strbuf)?.into()))
             },
         }
     }
 }
 
-impl Decoder<std::string::String> for CompactString {
-    fn decode<B: Buf>(&self, buf: &mut B) -> Result<std::string::String, DecodeError> {
+impl<T: NewType<StdString>> Decoder<T> for CompactString {
+    fn decode<B: Buf>(&self, buf: &mut B) -> Result<T, DecodeError> {
         match CompactString.decode(buf) {
             Ok(None) => {
                 error!("CompactString length is negative (-1)");
@@ -333,11 +459,26 @@ impl Encoder<Option<&[u8]>> for Bytes {
             Ok(())
         }
     }
+    fn compute_size(&self, value: Option<&[u8]>) -> Result<usize, EncodeError> {
+        if let Some(s) = value {
+            if s.len() > std::i32::MAX as usize {
+                error!("Data is too long to encode ({} bytes)", s.len());
+                Err(EncodeError)
+            } else {
+                Ok(4 + s.len())
+            }
+        } else {
+            Ok(4)
+        }
+    }
 }
 
 impl Encoder<Option<&Vec<u8>>> for Bytes {
     fn encode<B: BufMut>(&self, buf: &mut B, value: Option<&Vec<u8>>) -> Result<(), EncodeError> {
         Bytes.encode(buf, value.map(|s| s.as_slice()))
+    }
+    fn compute_size(&self, value: Option<&Vec<u8>>) -> Result<usize, EncodeError> {
+        Bytes.compute_size(value.map(|s| s.as_slice()))
     }
 }
 
@@ -345,17 +486,26 @@ impl Encoder<&Option<Vec<u8>>> for Bytes {
     fn encode<B: BufMut>(&self, buf: &mut B, value: &Option<Vec<u8>>) -> Result<(), EncodeError> {
         Bytes.encode(buf, value.as_ref())
     }
+    fn compute_size(&self, value: &Option<Vec<u8>>) -> Result<usize, EncodeError> {
+        Bytes.compute_size(value.as_ref())
+    }
 }
 
 impl Encoder<&[u8]> for Bytes {
     fn encode<B: BufMut>(&self, buf: &mut B, value: &[u8]) -> Result<(), EncodeError> {
         Bytes.encode(buf, Some(value))
     }
+    fn compute_size(&self, value: &[u8]) -> Result<usize, EncodeError> {
+        Bytes.compute_size(Some(value))
+    }
 }
 
 impl Encoder<&Vec<u8>> for Bytes {
     fn encode<B: BufMut>(&self, buf: &mut B, value: &Vec<u8>) -> Result<(), EncodeError> {
         Bytes.encode(buf, Some(value))
+    }
+    fn compute_size(&self, value: &Vec<u8>) -> Result<usize, EncodeError> {
+        Bytes.compute_size(Some(value))
     }
 }
 
@@ -409,11 +559,27 @@ impl Encoder<Option<&[u8]>> for CompactBytes {
             Ok(())
         }
     }
+    fn compute_size(&self, value: Option<&[u8]>) -> Result<usize, EncodeError> {
+        if let Some(s) = value {
+            // Use >= because we're going to add one to the length
+            if s.len() >= std::u32::MAX as usize {
+                error!("CompactBytes is too long to encode ({} bytes)", s.len());
+                Err(EncodeError)
+            } else {
+                Ok(UnsignedVarInt.compute_size((s.len() as u32) + 1)? + s.len())
+            }
+        } else {
+            Ok(1)
+        }
+    }
 }
 
 impl Encoder<Option<&Vec<u8>>> for CompactBytes {
     fn encode<B: BufMut>(&self, buf: &mut B, value: Option<&Vec<u8>>) -> Result<(), EncodeError> {
         CompactBytes.encode(buf, value.map(|s| s.as_slice()))
+    }
+    fn compute_size(&self, value: Option<&Vec<u8>>) -> Result<usize, EncodeError> {
+        CompactBytes.compute_size(value.map(|s| s.as_slice()))
     }
 }
 
@@ -421,17 +587,26 @@ impl Encoder<&Option<Vec<u8>>> for CompactBytes {
     fn encode<B: BufMut>(&self, buf: &mut B, value: &Option<Vec<u8>>) -> Result<(), EncodeError> {
         CompactBytes.encode(buf, value.as_ref())
     }
+    fn compute_size(&self, value: &Option<Vec<u8>>) -> Result<usize, EncodeError> {
+        CompactBytes.compute_size(value.as_ref())
+    }
 }
 
 impl Encoder<&[u8]> for CompactBytes {
     fn encode<B: BufMut>(&self, buf: &mut B, value: &[u8]) -> Result<(), EncodeError> {
         CompactBytes.encode(buf, Some(value))
     }
+    fn compute_size(&self, value: &[u8]) -> Result<usize, EncodeError> {
+        CompactBytes.compute_size(Some(value))
+    }
 }
 
 impl Encoder<&Vec<u8>> for CompactBytes {
     fn encode<B: BufMut>(&self, buf: &mut B, value: &Vec<u8>) -> Result<(), EncodeError> {
         CompactBytes.encode(buf, Some(value))
+    }
+    fn compute_size(&self, value: &Vec<u8>) -> Result<usize, EncodeError> {
+        CompactBytes.compute_size(Some(value))
     }
 }
 
@@ -462,17 +637,37 @@ impl Decoder<Vec<u8>> for CompactBytes {
 }
 
 #[derive(Debug, Copy, Clone, Default)]
-pub struct Struct;
+pub struct Struct {
+    pub version: i16
+}
 
 impl<T: Encodable> Encoder<&T> for Struct {
     fn encode<B: BufMut>(&self, buf: &mut B, value: &T) -> Result<(), EncodeError> {
-        value.encode(buf)
+        value.encode(buf, self.version)
+    }
+    fn compute_size(&self, value: &T) -> Result<usize, EncodeError> {
+        value.compute_size(self.version)
     }
 }
 
 impl<T: Decodable> Decoder<T> for Struct {
     fn decode<B: Buf>(&self, buf: &mut B) -> Result<T, DecodeError> {
-        T::decode(buf)
+        T::decode(buf, self.version)
+    }
+}
+
+impl<T: MapEncodable> Encoder<(&T::Key, &T)> for Struct {
+    fn encode<B: BufMut>(&self, buf: &mut B, (key, value): (&T::Key, &T)) -> Result<(), EncodeError> {
+        value.encode(key, buf, self.version)
+    }
+    fn compute_size(&self, (key, value): (&T::Key, &T)) -> Result<usize, EncodeError> {
+        value.compute_size(key, self.version)
+    }
+}
+
+impl<T: MapDecodable> Decoder<(T::Key, T)> for Struct {
+    fn decode<B: Buf>(&self, buf: &mut B) -> Result<(T::Key, T), DecodeError> {
+        T::decode(buf, self.version)
     }
 }
 
@@ -497,11 +692,32 @@ impl<T, E: for<'a> Encoder<&'a T>> Encoder<Option<&[T]>> for Array<E> {
             Ok(())
         }
     }
+    fn compute_size(&self, value: Option<&[T]>) -> Result<usize, EncodeError> {
+        if let Some(a) = value {
+            if a.len() > std::i32::MAX as usize {
+                error!("Array is too long to encode ({} items)", a.len());
+                Err(EncodeError)
+            } else if let Some(fixed_size) = self.0.fixed_size() {
+                Ok(4 + a.len() * fixed_size)
+            } else {
+                let mut total_size = 4;
+                for item in a {
+                    total_size += self.0.compute_size(item)?;
+                }
+                Ok(total_size)
+            }
+        } else {
+            Ok(4)
+        }
+    }
 }
 
 impl<T, E: for<'a> Encoder<&'a T>> Encoder<Option<&Vec<T>>> for Array<E> {
     fn encode<B: BufMut>(&self, buf: &mut B, value: Option<&Vec<T>>) -> Result<(), EncodeError> {
         self.encode(buf, value.map(|s| s.as_slice()))
+    }
+    fn compute_size(&self, value: Option<&Vec<T>>) -> Result<usize, EncodeError> {
+        self.compute_size(value.map(|s| s.as_slice()))
     }
 }
 
@@ -509,17 +725,82 @@ impl<T, E: for<'a> Encoder<&'a T>> Encoder<&Option<Vec<T>>> for Array<E> {
     fn encode<B: BufMut>(&self, buf: &mut B, value: &Option<Vec<T>>) -> Result<(), EncodeError> {
         self.encode(buf, value.as_ref())
     }
+    fn compute_size(&self, value: &Option<Vec<T>>) -> Result<usize, EncodeError> {
+        self.compute_size(value.as_ref())
+    }
 }
 
 impl<T, E: for<'a> Encoder<&'a T>> Encoder<&[T]> for Array<E> {
     fn encode<B: BufMut>(&self, buf: &mut B, value: &[T]) -> Result<(), EncodeError> {
         self.encode(buf, Some(value))
     }
+    fn compute_size(&self, value: &[T]) -> Result<usize, EncodeError> {
+        self.compute_size(Some(value))
+    }
 }
 
 impl<T, E: for<'a> Encoder<&'a T>> Encoder<&Vec<T>> for Array<E> {
     fn encode<B: BufMut>(&self, buf: &mut B, value: &Vec<T>) -> Result<(), EncodeError> {
         self.encode(buf, Some(value))
+    }
+    fn compute_size(&self, value: &Vec<T>) -> Result<usize, EncodeError> {
+        self.compute_size(Some(value))
+    }
+}
+
+impl<K: Eq + Hash, V, E: for<'a> Encoder<(&'a K, &'a V)>> Encoder<Option<&IndexMap<K, V>>> for Array<E> {
+    fn encode<B: BufMut>(&self, buf: &mut B, value: Option<&IndexMap<K, V>>) -> Result<(), EncodeError> {
+        if let Some(a) = value {
+            if a.len() > std::i32::MAX as usize {
+                error!("Array is too long to encode ({} items)", a.len());
+                Err(EncodeError)
+            } else {
+                Int32.encode(buf, a.len() as i32)?;
+                for item in a {
+                    self.0.encode(buf, item)?;
+                }
+                Ok(())
+            }
+        } else {
+            Int32.encode(buf, -1)?;
+            Ok(())
+        }
+    }
+    fn compute_size(&self, value: Option<&IndexMap<K, V>>) -> Result<usize, EncodeError> {
+        if let Some(a) = value {
+            if a.len() > std::i32::MAX as usize {
+                error!("Array is too long to encode ({} items)", a.len());
+                Err(EncodeError)
+            } else if let Some(fixed_size) = self.0.fixed_size() {
+                Ok(4 + a.len() * fixed_size)
+            } else {
+                let mut total_size = 4;
+                for item in a {
+                    total_size += self.0.compute_size(item)?;
+                }
+                Ok(total_size)
+            }
+        } else {
+            Ok(4)
+        }
+    }
+}
+
+impl<K: Eq + Hash, V, E: for<'a> Encoder<(&'a K, &'a V)>> Encoder<&Option<IndexMap<K, V>>> for Array<E> {
+    fn encode<B: BufMut>(&self, buf: &mut B, value: &Option<IndexMap<K, V>>) -> Result<(), EncodeError> {
+        self.encode(buf, value.as_ref())
+    }
+    fn compute_size(&self, value: &Option<IndexMap<K, V>>) -> Result<usize, EncodeError> {
+        self.compute_size(value.as_ref())
+    }
+}
+
+impl<K: Eq + Hash, V, E: for<'a> Encoder<(&'a K, &'a V)>> Encoder<&IndexMap<K, V>> for Array<E> {
+    fn encode<B: BufMut>(&self, buf: &mut B, value: &IndexMap<K, V>) -> Result<(), EncodeError> {
+        self.encode(buf, Some(value))
+    }
+    fn compute_size(&self, value: &IndexMap<K, V>) -> Result<usize, EncodeError> {
+        self.compute_size(Some(value))
     }
 }
 
@@ -555,6 +836,39 @@ impl<T, E: Decoder<T>> Decoder<Vec<T>> for Array<E> {
     }
 }
 
+impl<K: Eq + Hash, V, E: Decoder<(K, V)>> Decoder<Option<IndexMap<K, V>>> for Array<E> {
+    fn decode<B: Buf>(&self, buf: &mut B) -> Result<Option<IndexMap<K, V>>, DecodeError> {
+        match Int32.decode(buf)? {
+            -1 => Ok(None),
+            n if n >= 0 => {
+                let mut result = IndexMap::new();
+                for _ in 0..n {
+                    let (k, v) = self.0.decode(buf)?;
+                    result.insert(k, v);
+                }
+                Ok(Some(result))
+            },
+            n => {
+                error!("Array length is negative ({})", n);
+                Err(DecodeError)
+            }
+        }
+    }
+}
+
+impl<K: Eq + Hash, V, E: Decoder<(K, V)>> Decoder<IndexMap<K, V>> for Array<E> {
+    fn decode<B: Buf>(&self, buf: &mut B) -> Result<IndexMap<K, V>, DecodeError> {
+        match self.decode(buf) {
+            Ok(None) => {
+                error!("Array length is negative (-1)");
+                Err(DecodeError)
+            },
+            Ok(Some(s)) => Ok(s),
+            Err(e) => Err(e),
+        }
+    }
+}
+
 #[derive(Debug, Copy, Clone)]
 pub struct CompactArray<E>(pub E);
 
@@ -577,11 +891,33 @@ impl<T, E: for<'a> Encoder<&'a T>> Encoder<Option<&[T]>> for CompactArray<E> {
             Ok(())
         }
     }
+    fn compute_size(&self, value: Option<&[T]>) -> Result<usize, EncodeError> {
+        if let Some(a) = value {
+            // Use >= because we're going to add one to the length
+            if a.len() >= std::u32::MAX as usize {
+                error!("CompactArray is too long to encode ({} items)", a.len());
+                Err(EncodeError)
+            } else if let Some(fixed_size) = self.0.fixed_size() {
+                Ok(UnsignedVarInt.compute_size((a.len() as u32) + 1)? + a.len()*fixed_size)
+            } else {
+                let mut total_size = UnsignedVarInt.compute_size((a.len() as u32) + 1)?;
+                for item in a {
+                    total_size += self.0.compute_size(item)?;
+                }
+                Ok(total_size)
+            }
+        } else {
+            Ok(1)
+        }
+    }
 }
 
 impl<T, E: for<'a> Encoder<&'a T>> Encoder<Option<&Vec<T>>> for CompactArray<E> {
     fn encode<B: BufMut>(&self, buf: &mut B, value: Option<&Vec<T>>) -> Result<(), EncodeError> {
         self.encode(buf, value.map(|s| s.as_slice()))
+    }
+    fn compute_size(&self, value: Option<&Vec<T>>) -> Result<usize, EncodeError> {
+        self.compute_size(value.map(|s| s.as_slice()))
     }
 }
 
@@ -589,17 +925,84 @@ impl<T, E: for<'a> Encoder<&'a T>> Encoder<&Option<Vec<T>>> for CompactArray<E> 
     fn encode<B: BufMut>(&self, buf: &mut B, value: &Option<Vec<T>>) -> Result<(), EncodeError> {
         self.encode(buf, value.as_ref())
     }
+    fn compute_size(&self, value: &Option<Vec<T>>) -> Result<usize, EncodeError> {
+        self.compute_size(value.as_ref())
+    }
 }
 
 impl<T, E: for<'a> Encoder<&'a T>> Encoder<&[T]> for CompactArray<E> {
     fn encode<B: BufMut>(&self, buf: &mut B, value: &[T]) -> Result<(), EncodeError> {
         self.encode(buf, Some(value))
     }
+    fn compute_size(&self, value: &[T]) -> Result<usize, EncodeError> {
+        self.compute_size(Some(value))
+    }
 }
 
 impl<T, E: for<'a> Encoder<&'a T>> Encoder<&Vec<T>> for CompactArray<E> {
     fn encode<B: BufMut>(&self, buf: &mut B, value: &Vec<T>) -> Result<(), EncodeError> {
         self.encode(buf, Some(value))
+    }
+    fn compute_size(&self, value: &Vec<T>) -> Result<usize, EncodeError> {
+        self.compute_size(Some(value))
+    }
+}
+
+impl<K: Eq + Hash, V, E: for<'a> Encoder<(&'a K, &'a V)>> Encoder<Option<&IndexMap<K, V>>> for CompactArray<E> {
+    fn encode<B: BufMut>(&self, buf: &mut B, value: Option<&IndexMap<K, V>>) -> Result<(), EncodeError> {
+        if let Some(a) = value {
+            // Use >= because we're going to add one to the length
+            if a.len() >= std::u32::MAX as usize {
+                error!("CompactArray is too long to encode ({} items)", a.len());
+                Err(EncodeError)
+            } else {
+                UnsignedVarInt.encode(buf, (a.len() as u32) + 1)?;
+                for item in a {
+                    self.0.encode(buf, item)?;
+                }
+                Ok(())
+            }
+        } else {
+            UnsignedVarInt.encode(buf, 0)?;
+            Ok(())
+        }
+    }
+    fn compute_size(&self, value: Option<&IndexMap<K, V>>) -> Result<usize, EncodeError> {
+        if let Some(a) = value {
+            // Use >= because we're going to add one to the length
+            if a.len() >= std::u32::MAX as usize {
+                error!("CompactArray is too long to encode ({} items)", a.len());
+                Err(EncodeError)
+            } else if let Some(fixed_size) = self.0.fixed_size() {
+                Ok(UnsignedVarInt.compute_size((a.len() as u32) + 1)? + a.len()*fixed_size)
+            } else {
+                let mut total_size = UnsignedVarInt.compute_size((a.len() as u32) + 1)?;
+                for item in a {
+                    total_size += self.0.compute_size(item)?;
+                }
+                Ok(total_size)
+            }
+        } else {
+            Ok(1)
+        }
+    }
+}
+
+impl<K: Eq + Hash, V, E: for<'a> Encoder<(&'a K, &'a V)>> Encoder<&Option<IndexMap<K, V>>> for CompactArray<E> {
+    fn encode<B: BufMut>(&self, buf: &mut B, value: &Option<IndexMap<K, V>>) -> Result<(), EncodeError> {
+        self.encode(buf, value.as_ref())
+    }
+    fn compute_size(&self, value: &Option<IndexMap<K, V>>) -> Result<usize, EncodeError> {
+        self.compute_size(value.as_ref())
+    }
+}
+
+impl<K: Eq + Hash, V, E: for<'a> Encoder<(&'a K, &'a V)>> Encoder<&IndexMap<K, V>> for CompactArray<E> {
+    fn encode<B: BufMut>(&self, buf: &mut B, value: &IndexMap<K, V>) -> Result<(), EncodeError> {
+        self.encode(buf, Some(value))
+    }
+    fn compute_size(&self, value: &IndexMap<K, V>) -> Result<usize, EncodeError> {
+        self.compute_size(Some(value))
     }
 }
 
@@ -609,7 +1012,7 @@ impl<T, E: Decoder<T>> Decoder<Option<Vec<T>>> for CompactArray<E> {
             0 => Ok(None),
             n => {
                 let mut result = Vec::with_capacity((n-1) as usize);
-                for _ in 0..n {
+                for _ in 1..n {
                     result.push(self.0.decode(buf)?);
                 }
                 Ok(Some(result))
@@ -620,6 +1023,35 @@ impl<T, E: Decoder<T>> Decoder<Option<Vec<T>>> for CompactArray<E> {
 
 impl<T, E: Decoder<T>> Decoder<Vec<T>> for CompactArray<E> {
     fn decode<B: Buf>(&self, buf: &mut B) -> Result<Vec<T>, DecodeError> {
+        match self.decode(buf) {
+            Ok(None) => {
+                error!("CompactArray length is negative (-1)");
+                Err(DecodeError)
+            },
+            Ok(Some(s)) => Ok(s),
+            Err(e) => Err(e),
+        }
+    }
+}
+
+impl<K: Eq + Hash, V, E: Decoder<(K, V)>> Decoder<Option<IndexMap<K, V>>> for CompactArray<E> {
+    fn decode<B: Buf>(&self, buf: &mut B) -> Result<Option<IndexMap<K, V>>, DecodeError> {
+        match UnsignedVarInt.decode(buf)? {
+            0 => Ok(None),
+            n => {
+                let mut result = IndexMap::new();
+                for _ in 1..n {
+                    let (k, v) = self.0.decode(buf)?;
+                    result.insert(k, v);
+                }
+                Ok(Some(result))
+            },
+        }
+    }
+}
+
+impl<K: Eq + Hash, V, E: Decoder<(K, V)>> Decoder<IndexMap<K, V>> for CompactArray<E> {
+    fn decode<B: Buf>(&self, buf: &mut B) -> Result<IndexMap<K, V>, DecodeError> {
         match self.decode(buf) {
             Ok(None) => {
                 error!("CompactArray length is negative (-1)");

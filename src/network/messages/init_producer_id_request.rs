@@ -1,0 +1,177 @@
+//! THIS CODE IS AUTOMATICALLY GENERATED. DO NOT EDIT.
+#![allow(unused)]
+
+use std::borrow::Borrow;
+use std::collections::BTreeMap;
+
+use bytes::{Buf, BufMut};
+use log::error;
+
+use franz_protocol::{
+    Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+};
+
+
+/// Valid versions: 0-3
+#[derive(Debug, Clone)]
+pub struct InitProducerIdRequest {
+    /// The transactional id, or null if the producer is not transactional.
+    /// 
+    /// Supported API versions: 0-3
+    pub transactional_id: Option<super::TransactionalId>,
+
+    /// The time in ms to wait before aborting idle transactions sent by this producer. This is only relevant if a TransactionalId has been defined.
+    /// 
+    /// Supported API versions: 0-3
+    pub transaction_timeout_ms: i32,
+
+    /// The producer id. This is used to disambiguate requests if a transactional id is reused following its expiration.
+    /// 
+    /// Supported API versions: 3
+    pub producer_id: i64,
+
+    /// The producer's current epoch. This will be checked against the producer epoch on the broker, and the request will return an error if they do not match.
+    /// 
+    /// Supported API versions: 3
+    pub producer_epoch: i16,
+
+    /// Other tagged fields
+    pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Encodable for InitProducerIdRequest {
+    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+        if version >= 2 {
+            types::CompactString.encode(buf, &self.transactional_id)?;
+        } else {
+            types::String.encode(buf, &self.transactional_id)?;
+        }
+        types::Int32.encode(buf, &self.transaction_timeout_ms)?;
+        if version == 3 {
+            types::Int64.encode(buf, &self.producer_id)?;
+        } else {
+            if self.producer_id != -1 {
+                return Err(EncodeError)
+            }
+        }
+        if version == 3 {
+            types::Int16.encode(buf, &self.producer_epoch)?;
+        } else {
+            if self.producer_epoch != -1 {
+                return Err(EncodeError)
+            }
+        }
+        if version >= 2 {
+            let num_tagged_fields = self.unknown_tagged_fields.len();
+            if num_tagged_fields > std::u32::MAX as usize {
+                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                return Err(EncodeError);
+            }
+            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+
+            write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
+        }
+        Ok(())
+    }
+    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+        let mut total_size = 0;
+        if version >= 2 {
+            total_size += types::CompactString.compute_size(&self.transactional_id)?;
+        } else {
+            total_size += types::String.compute_size(&self.transactional_id)?;
+        }
+        total_size += types::Int32.compute_size(&self.transaction_timeout_ms)?;
+        if version == 3 {
+            total_size += types::Int64.compute_size(&self.producer_id)?;
+        } else {
+            if self.producer_id != -1 {
+                return Err(EncodeError)
+            }
+        }
+        if version == 3 {
+            total_size += types::Int16.compute_size(&self.producer_epoch)?;
+        } else {
+            if self.producer_epoch != -1 {
+                return Err(EncodeError)
+            }
+        }
+        if version >= 2 {
+            let num_tagged_fields = self.unknown_tagged_fields.len();
+            if num_tagged_fields > std::u32::MAX as usize {
+                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                return Err(EncodeError);
+            }
+            total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
+
+            total_size += compute_unknown_tagged_fields_size(&self.unknown_tagged_fields)?;
+        }
+        Ok(total_size)
+    }
+}
+
+impl Decodable for InitProducerIdRequest {
+    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+        let transactional_id = if version >= 2 {
+            types::CompactString.decode(buf)?
+        } else {
+            types::String.decode(buf)?
+        };
+        let transaction_timeout_ms = types::Int32.decode(buf)?;
+        let producer_id = if version == 3 {
+            types::Int64.decode(buf)?
+        } else {
+            -1
+        };
+        let producer_epoch = if version == 3 {
+            types::Int16.decode(buf)?
+        } else {
+            -1
+        };
+        let mut unknown_tagged_fields = BTreeMap::new();
+        if version >= 2 {
+            let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
+            for _ in 0..num_tagged_fields {
+                let tag: u32 = types::UnsignedVarInt.decode(buf)?;
+                let size: u32 = types::UnsignedVarInt.decode(buf)?;
+                let mut unknown_value = vec![0; size as usize];
+                buf.try_copy_to_slice(&mut unknown_value)?;
+                unknown_tagged_fields.insert(tag as i32, unknown_value);
+            }
+        }
+        Ok(Self {
+            transactional_id,
+            transaction_timeout_ms,
+            producer_id,
+            producer_epoch,
+            unknown_tagged_fields,
+        })
+    }
+}
+
+impl Default for InitProducerIdRequest {
+    fn default() -> Self {
+        Self {
+            transactional_id: Some(Default::default()),
+            transaction_timeout_ms: 0,
+            producer_id: -1,
+            producer_epoch: -1,
+            unknown_tagged_fields: BTreeMap::new(),
+        }
+    }
+}
+
+impl Message for InitProducerIdRequest {
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+}
+
+impl HeaderVersion for InitProducerIdRequest {
+    fn header_version(version: i16) -> i16 {
+        if version >= 2 {
+            2
+        } else {
+            1
+        }
+    }
+}
+

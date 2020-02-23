@@ -10,15 +10,12 @@ use futures::future::FutureExt;
 use async_trait::async_trait;
 use tokio::time::Elapsed;
 
-use franz_protocol::{RequestType, Request, CompatibilityError, DecodeCompatible};
+use franz_protocol::{VersionRange, Request, Encodable, Decodable, EncodeError, DecodeError, HeaderVersion};
 
-use super::messages::api_versions::{ApiVersions, ApiVersions1Request};
-use super::messages::header::RequestHeader0;
+use super::messages::{RequestHeader, ResponseHeader, ApiVersionsRequest};
 use super::service::{Service, ServiceBase, ServiceExt, BoxService, RecvFuture, Pipeline, Shutdown, EagerService};
 
 const MAX_FRAME_LENGTH: usize = std::i32::MAX as usize;
-
-type RequestHeader = RequestHeader0;
 
 #[derive(Debug, Clone)]
 pub struct ClientConfig {
@@ -35,12 +32,6 @@ impl Default for ClientConfig {
             request_timeout: Duration::from_secs(30),
         }
     }
-}
-
-#[derive(Debug, Copy, Clone)]
-struct VersionRange {
-    min: i16,
-    max: i16,
 }
 
 pub struct ClientState {
@@ -63,7 +54,7 @@ where
     async fn send(&'async_trait mut self, req: Req) -> Result<RecvFuture<Self::Response, Self::Error>, Self::Error> {
         // Encode the request
         let EncodedRequest {
-            buffer, header_decoder, body_decoder, correlation_id
+            buffer, api_version, correlation_id
         } = self.encode_request(req)?;
 
         println!("Sending: {:?}", buffer);
@@ -73,17 +64,18 @@ where
 
         Ok(async move {
             // Wait for a response
-            let mut buf = res.await?.into();
+            let mut buf: Bytes = res.await?.into();
 
             println!("Received: {:?}", buf);
 
             // Decode the response
-            let header = header_decoder.decode_compatible(&mut buf)?;
+            let response_header_version = Req::Response::header_version(api_version);
+            let header = ResponseHeader::decode(&mut buf, response_header_version)?;
             if header.correlation_id != correlation_id {
                 return Err(ClientError::CorrelationMismatch);
             }
 
-            let body = body_decoder.decode_compatible(&mut buf)?;
+            let body = Req::Response::decode(&mut buf, api_version)?;
 
             Ok(body)
         }.boxed())
@@ -96,13 +88,20 @@ pub enum ClientError {
     Timeout,
     CorrelationMismatch,
     Setup,
-    Compatibility(CompatibilityError),
+    Encode(EncodeError),
+    Decode(DecodeError),
     Io(Error),
 }
 
-impl From<CompatibilityError> for ClientError {
-    fn from(other: CompatibilityError) -> Self {
-        ClientError::Compatibility(other)
+impl From<EncodeError> for ClientError {
+    fn from(other: EncodeError) -> Self {
+        ClientError::Encode(other)
+    }
+}
+
+impl From<DecodeError> for ClientError {
+    fn from(other: DecodeError) -> Self {
+        ClientError::Decode(other)
     }
 }
 
@@ -124,40 +123,43 @@ impl From<Elapsed> for ClientError {
     }
 }
 
-struct EncodedRequest<Req: Request> {
+struct EncodedRequest {
     buffer: Bytes,
-    header_decoder: DecodeCompatible<RequestHeader>,
-    body_decoder: DecodeCompatible<Req>,
+    api_version: i16,
     correlation_id: i32,
 }
 
 impl ClientState {
-    fn encode_request<Req: Request>(&mut self, req: Req) -> Result<EncodedRequest<Req>, CompatibilityError> {
+    fn encode_request<Req: Request>(&mut self, req: Req) -> Result<EncodedRequest, EncodeError> {
         let mut buf = BytesMut::new();
 
         // Determine versions
-        let api_key = Req::Type::KEY;
-        let ver_range = self.supported_versions.get(&api_key).ok_or(CompatibilityError::Downgrade)?;
-        let api_version = Req::find_compatible_version(ver_range.min, ver_range.max)?;
+        let api_key = Req::KEY;
+        let server_range = self.supported_versions.get(&api_key).ok_or(EncodeError)?;
+        let supported_range = server_range.intersect(&Req::VERSIONS);
+        if supported_range.is_empty() {
+            return Err(EncodeError);
+        }
+        let api_version = supported_range.max;
+
         let correlation_id = self.correlation_id;
         self.correlation_id += 1;
 
-        // Encode header
-        let header = RequestHeader {
-            api_key,
-            api_version,
-            correlation_id,
-            client_id: None,
-        };
-        let header_decoder = header.encode_compatible(&mut buf, api_version)?;
+        // Construct header
+        let mut header = RequestHeader::default();
+        header.request_api_key = api_key;
+        header.request_api_version = api_version;
+        header.correlation_id = correlation_id;
+
+        let request_header_version = Req::header_version(api_version);
+        header.encode(&mut buf, request_header_version)?;
 
         // Encode body
-        let body_decoder = req.encode_compatible(&mut buf, api_version)?;
+        req.encode(&mut buf, api_version)?;
 
         Ok(EncodedRequest {
             buffer: buf.into(),
-            header_decoder,
-            body_decoder,
+            api_version,
             correlation_id,
         })
     }
@@ -177,7 +179,7 @@ async fn connect_internal(addr: SocketAddr, config: ClientConfig) -> Result<Clie
         .timeout(config.request_timeout);
 
     let mut supported_versions = HashMap::new();
-    supported_versions.insert(ApiVersions::KEY, VersionRange {
+    supported_versions.insert(ApiVersionsRequest::KEY, VersionRange {
         min: 0,
         max: 0,
     });
@@ -196,11 +198,10 @@ async fn connect_and_setup(addr: SocketAddr, config: ClientConfig) -> Result<Cli
 
     // Find out the supported API versions
     println!("Discovering supported API versions...");
-    let supported_versions = client.call(ApiVersions1Request {}).await?;
+    let supported_versions = client.call(ApiVersionsRequest::default()).await?;
     client.supported_versions = supported_versions.api_keys
-        .ok_or(ClientError::Setup)?
         .into_iter()
-        .map(|x| (x.api_key, VersionRange { min: x.min_version, max: x.max_version }))
+        .map(|(k, v)| (k, VersionRange { min: v.min_version, max: v.max_version }))
         .collect();
     println!("Supported API versions:\n{:?}", client.supported_versions);
 
