@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -24,14 +24,14 @@ pub struct SaslHandshakeResponse {
     /// The mechanisms enabled in the server.
     /// 
     /// Supported API versions: 0-2
-    pub mechanisms: Vec<String>,
+    pub mechanisms: Vec<StrBytes>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
 }
 
 impl Encodable for SaslHandshakeResponse {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int16.encode(buf, &self.error_code)?;
         if version == 2 {
             types::CompactArray(types::CompactString).encode(buf, &self.mechanisms)?;
@@ -73,7 +73,7 @@ impl Encodable for SaslHandshakeResponse {
 }
 
 impl Decodable for SaslHandshakeResponse {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let error_code = types::Int16.decode(buf)?;
         let mechanisms = if version == 2 {
             types::CompactArray(types::CompactString).decode(buf)?

@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -25,7 +25,7 @@ pub struct AlterReplicaLogDirTopic {
 
 impl MapEncodable for AlterReplicaLogDirTopic {
     type Key = super::TopicName;
-    fn encode<B: BufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::String.encode(buf, key)?;
         types::Array(types::Int32).encode(buf, &self.partitions)?;
 
@@ -42,7 +42,7 @@ impl MapEncodable for AlterReplicaLogDirTopic {
 
 impl MapDecodable for AlterReplicaLogDirTopic {
     type Key = super::TopicName;
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
         let key_field = types::String.decode(buf)?;
         let partitions = types::Array(types::Int32).decode(buf)?;
         Ok((key_field, Self {
@@ -74,8 +74,8 @@ pub struct AlterReplicaLogDir {
 }
 
 impl MapEncodable for AlterReplicaLogDir {
-    type Key = String;
-    fn encode<B: BufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    type Key = StrBytes;
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::String.encode(buf, key)?;
         types::Array(types::Struct { version }).encode(buf, &self.topics)?;
 
@@ -91,8 +91,8 @@ impl MapEncodable for AlterReplicaLogDir {
 }
 
 impl MapDecodable for AlterReplicaLogDir {
-    type Key = String;
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+    type Key = StrBytes;
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
         let key_field = types::String.decode(buf)?;
         let topics = types::Array(types::Struct { version }).decode(buf)?;
         Ok((key_field, Self {
@@ -119,12 +119,12 @@ pub struct AlterReplicaLogDirsRequest {
     /// The alterations to make for each directory.
     /// 
     /// Supported API versions: 0-1
-    pub dirs: indexmap::IndexMap<String, AlterReplicaLogDir>,
+    pub dirs: indexmap::IndexMap<StrBytes, AlterReplicaLogDir>,
 
 }
 
 impl Encodable for AlterReplicaLogDirsRequest {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Array(types::Struct { version }).encode(buf, &self.dirs)?;
 
         Ok(())
@@ -138,7 +138,7 @@ impl Encodable for AlterReplicaLogDirsRequest {
 }
 
 impl Decodable for AlterReplicaLogDirsRequest {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let dirs = types::Array(types::Struct { version }).decode(buf)?;
         Ok(Self {
             dirs,

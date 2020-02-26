@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -39,7 +39,7 @@ pub struct ListOffsetPartition {
 }
 
 impl Encodable for ListOffsetPartition {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.partition_index)?;
         if version >= 4 {
             types::Int32.encode(buf, &self.current_leader_epoch)?;
@@ -83,7 +83,7 @@ impl Encodable for ListOffsetPartition {
 }
 
 impl Decodable for ListOffsetPartition {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let partition_index = types::Int32.decode(buf)?;
         let current_leader_epoch = if version >= 4 {
             types::Int32.decode(buf)?
@@ -136,7 +136,7 @@ pub struct ListOffsetTopic {
 }
 
 impl Encodable for ListOffsetTopic {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::String.encode(buf, &self.name)?;
         types::Array(types::Struct { version }).encode(buf, &self.partitions)?;
 
@@ -152,7 +152,7 @@ impl Encodable for ListOffsetTopic {
 }
 
 impl Decodable for ListOffsetTopic {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let name = types::String.decode(buf)?;
         let partitions = types::Array(types::Struct { version }).decode(buf)?;
         Ok(Self {
@@ -196,7 +196,7 @@ pub struct ListOffsetRequest {
 }
 
 impl Encodable for ListOffsetRequest {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.replica_id)?;
         if version >= 2 {
             types::Int8.encode(buf, &self.isolation_level)?;
@@ -226,7 +226,7 @@ impl Encodable for ListOffsetRequest {
 }
 
 impl Decodable for ListOffsetRequest {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let replica_id = types::Int32.decode(buf)?;
         let isolation_level = if version >= 2 {
             types::Int8.decode(buf)?

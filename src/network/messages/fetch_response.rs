@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -29,7 +29,7 @@ pub struct AbortedTransaction {
 }
 
 impl Encodable for AbortedTransaction {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version >= 4 {
             types::Int64.encode(buf, &self.producer_id)?;
         } else {
@@ -69,7 +69,7 @@ impl Encodable for AbortedTransaction {
 }
 
 impl Decodable for AbortedTransaction {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let producer_id = if version >= 4 {
             types::Int64.decode(buf)?
         } else {
@@ -141,12 +141,12 @@ pub struct FetchablePartitionResponse {
     /// The record data.
     /// 
     /// Supported API versions: 0-11
-    pub records: Option<Vec<u8>>,
+    pub records: Option<Bytes>,
 
 }
 
 impl Encodable for FetchablePartitionResponse {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.partition_index)?;
         types::Int16.encode(buf, &self.error_code)?;
         types::Int64.encode(buf, &self.high_watermark)?;
@@ -198,7 +198,7 @@ impl Encodable for FetchablePartitionResponse {
 }
 
 impl Decodable for FetchablePartitionResponse {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let partition_index = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
         let high_watermark = types::Int64.decode(buf)?;
@@ -271,7 +271,7 @@ pub struct FetchableTopicResponse {
 }
 
 impl Encodable for FetchableTopicResponse {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::String.encode(buf, &self.name)?;
         types::Array(types::Struct { version }).encode(buf, &self.partitions)?;
 
@@ -287,7 +287,7 @@ impl Encodable for FetchableTopicResponse {
 }
 
 impl Decodable for FetchableTopicResponse {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let name = types::String.decode(buf)?;
         let partitions = types::Array(types::Struct { version }).decode(buf)?;
         Ok(Self {
@@ -336,7 +336,7 @@ pub struct FetchResponse {
 }
 
 impl Encodable for FetchResponse {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version >= 1 {
             types::Int32.encode(buf, &self.throttle_time_ms)?;
         }
@@ -384,7 +384,7 @@ impl Encodable for FetchResponse {
 }
 
 impl Decodable for FetchResponse {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let throttle_time_ms = if version >= 1 {
             types::Int32.decode(buf)?
         } else {

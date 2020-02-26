@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -24,14 +24,14 @@ pub struct AclCreationResult {
     /// The result message, or null if there was no error.
     /// 
     /// Supported API versions: 0-2
-    pub error_message: Option<String>,
+    pub error_message: Option<StrBytes>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
 }
 
 impl Encodable for AclCreationResult {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int16.encode(buf, &self.error_code)?;
         if version == 2 {
             types::CompactString.encode(buf, &self.error_message)?;
@@ -73,7 +73,7 @@ impl Encodable for AclCreationResult {
 }
 
 impl Decodable for AclCreationResult {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let error_code = types::Int16.decode(buf)?;
         let error_message = if version == 2 {
             types::CompactString.decode(buf)?
@@ -131,7 +131,7 @@ pub struct CreateAclsResponse {
 }
 
 impl Encodable for CreateAclsResponse {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         if version == 2 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.results)?;
@@ -173,7 +173,7 @@ impl Encodable for CreateAclsResponse {
 }
 
 impl Decodable for CreateAclsResponse {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let throttle_time_ms = types::Int32.decode(buf)?;
         let results = if version == 2 {
             types::CompactArray(types::Struct { version }).decode(buf)?

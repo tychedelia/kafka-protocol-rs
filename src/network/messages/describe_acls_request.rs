@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -24,7 +24,7 @@ pub struct DescribeAclsRequest {
     /// The resource name, or null to match any resource name.
     /// 
     /// Supported API versions: 0-2
-    pub resource_name_filter: Option<String>,
+    pub resource_name_filter: Option<StrBytes>,
 
     /// The resource pattern to match.
     /// 
@@ -34,12 +34,12 @@ pub struct DescribeAclsRequest {
     /// The principal to match, or null to match any principal.
     /// 
     /// Supported API versions: 0-2
-    pub principal_filter: Option<String>,
+    pub principal_filter: Option<StrBytes>,
 
     /// The host to match, or null to match any host.
     /// 
     /// Supported API versions: 0-2
-    pub host_filter: Option<String>,
+    pub host_filter: Option<StrBytes>,
 
     /// The operation to match.
     /// 
@@ -56,7 +56,7 @@ pub struct DescribeAclsRequest {
 }
 
 impl Encodable for DescribeAclsRequest {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int8.encode(buf, &self.resource_type_filter)?;
         if version == 2 {
             types::CompactString.encode(buf, &self.resource_name_filter)?;
@@ -136,7 +136,7 @@ impl Encodable for DescribeAclsRequest {
 }
 
 impl Decodable for DescribeAclsRequest {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let resource_type_filter = types::Int8.decode(buf)?;
         let resource_name_filter = if version == 2 {
             types::CompactString.decode(buf)?

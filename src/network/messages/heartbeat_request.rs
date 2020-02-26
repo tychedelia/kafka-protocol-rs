@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -29,19 +29,19 @@ pub struct HeartbeatRequest {
     /// The member ID.
     /// 
     /// Supported API versions: 0-4
-    pub member_id: String,
+    pub member_id: StrBytes,
 
     /// The unique identifier of the consumer instance provided by end user.
     /// 
     /// Supported API versions: 3-4
-    pub group_instance_id: Option<String>,
+    pub group_instance_id: Option<StrBytes>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
 }
 
 impl Encodable for HeartbeatRequest {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version == 4 {
             types::CompactString.encode(buf, &self.group_id)?;
         } else {
@@ -115,7 +115,7 @@ impl Encodable for HeartbeatRequest {
 }
 
 impl Decodable for HeartbeatRequest {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let group_id = if version == 4 {
             types::CompactString.decode(buf)?
         } else {

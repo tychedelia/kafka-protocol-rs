@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -25,7 +25,7 @@ pub struct AddPartitionsToTxnPartitionResult {
 
 impl MapEncodable for AddPartitionsToTxnPartitionResult {
     type Key = i32;
-    fn encode<B: BufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, key)?;
         types::Int16.encode(buf, &self.error_code)?;
 
@@ -42,7 +42,7 @@ impl MapEncodable for AddPartitionsToTxnPartitionResult {
 
 impl MapDecodable for AddPartitionsToTxnPartitionResult {
     type Key = i32;
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
         let key_field = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
         Ok((key_field, Self {
@@ -75,7 +75,7 @@ pub struct AddPartitionsToTxnTopicResult {
 
 impl MapEncodable for AddPartitionsToTxnTopicResult {
     type Key = super::TopicName;
-    fn encode<B: BufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::String.encode(buf, key)?;
         types::Array(types::Struct { version }).encode(buf, &self.results)?;
 
@@ -92,7 +92,7 @@ impl MapEncodable for AddPartitionsToTxnTopicResult {
 
 impl MapDecodable for AddPartitionsToTxnTopicResult {
     type Key = super::TopicName;
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
         let key_field = types::String.decode(buf)?;
         let results = types::Array(types::Struct { version }).decode(buf)?;
         Ok((key_field, Self {
@@ -129,7 +129,7 @@ pub struct AddPartitionsToTxnResponse {
 }
 
 impl Encodable for AddPartitionsToTxnResponse {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         types::Array(types::Struct { version }).encode(buf, &self.results)?;
 
@@ -145,7 +145,7 @@ impl Encodable for AddPartitionsToTxnResponse {
 }
 
 impl Decodable for AddPartitionsToTxnResponse {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let throttle_time_ms = types::Int32.decode(buf)?;
         let results = types::Array(types::Struct { version }).decode(buf)?;
         Ok(Self {

@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -24,12 +24,12 @@ pub struct SaslAuthenticateResponse {
     /// The error message, or null if there was no error.
     /// 
     /// Supported API versions: 0-2
-    pub error_message: Option<String>,
+    pub error_message: Option<StrBytes>,
 
     /// The SASL authentication bytes from the server, as defined by the SASL mechanism.
     /// 
     /// Supported API versions: 0-2
-    pub auth_bytes: Vec<u8>,
+    pub auth_bytes: Bytes,
 
     /// The SASL authentication bytes from the server, as defined by the SASL mechanism.
     /// 
@@ -41,7 +41,7 @@ pub struct SaslAuthenticateResponse {
 }
 
 impl Encodable for SaslAuthenticateResponse {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int16.encode(buf, &self.error_code)?;
         if version == 2 {
             types::CompactString.encode(buf, &self.error_message)?;
@@ -99,7 +99,7 @@ impl Encodable for SaslAuthenticateResponse {
 }
 
 impl Decodable for SaslAuthenticateResponse {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let error_code = types::Int16.decode(buf)?;
         let error_message = if version == 2 {
             types::CompactString.decode(buf)?

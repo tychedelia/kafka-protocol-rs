@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -19,7 +19,7 @@ pub struct FindCoordinatorRequest {
     /// The coordinator key.
     /// 
     /// Supported API versions: 0-3
-    pub key: String,
+    pub key: StrBytes,
 
     /// The coordinator key type.  (Group, transaction, etc.)
     /// 
@@ -31,7 +31,7 @@ pub struct FindCoordinatorRequest {
 }
 
 impl Encodable for FindCoordinatorRequest {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version == 3 {
             types::CompactString.encode(buf, &self.key)?;
         } else {
@@ -85,7 +85,7 @@ impl Encodable for FindCoordinatorRequest {
 }
 
 impl Decodable for FindCoordinatorRequest {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let key = if version == 3 {
             types::CompactString.decode(buf)?
         } else {

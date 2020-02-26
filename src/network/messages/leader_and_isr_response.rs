@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -36,7 +36,7 @@ pub struct LeaderAndIsrPartitionError {
 }
 
 impl Encodable for LeaderAndIsrPartitionError {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version == 4 {
             types::CompactString.encode(buf, &self.topic_name)?;
         } else {
@@ -80,7 +80,7 @@ impl Encodable for LeaderAndIsrPartitionError {
 }
 
 impl Decodable for LeaderAndIsrPartitionError {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let topic_name = if version == 4 {
             types::CompactString.decode(buf)?
         } else {
@@ -141,7 +141,7 @@ pub struct LeaderAndIsrResponse {
 }
 
 impl Encodable for LeaderAndIsrResponse {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int16.encode(buf, &self.error_code)?;
         if version == 4 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.partition_errors)?;
@@ -183,7 +183,7 @@ impl Encodable for LeaderAndIsrResponse {
 }
 
 impl Decodable for LeaderAndIsrResponse {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let error_code = types::Int16.decode(buf)?;
         let partition_errors = if version == 4 {
             types::CompactArray(types::Struct { version }).decode(buf)?

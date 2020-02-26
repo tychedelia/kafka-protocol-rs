@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -27,7 +27,7 @@ pub struct DeletableGroupResult {
 
 impl MapEncodable for DeletableGroupResult {
     type Key = super::GroupId;
-    fn encode<B: BufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version == 2 {
             types::CompactString.encode(buf, key)?;
         } else {
@@ -70,7 +70,7 @@ impl MapEncodable for DeletableGroupResult {
 
 impl MapDecodable for DeletableGroupResult {
     type Key = super::GroupId;
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
         let key_field = if version == 2 {
             types::CompactString.decode(buf)?
         } else {
@@ -126,7 +126,7 @@ pub struct DeleteGroupsResponse {
 }
 
 impl Encodable for DeleteGroupsResponse {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         if version == 2 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.results)?;
@@ -168,7 +168,7 @@ impl Encodable for DeleteGroupsResponse {
 }
 
 impl Decodable for DeleteGroupsResponse {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let throttle_time_ms = types::Int32.decode(buf)?;
         let results = if version == 2 {
             types::CompactArray(types::Struct { version }).decode(buf)?

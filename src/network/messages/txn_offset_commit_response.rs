@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -31,7 +31,7 @@ pub struct TxnOffsetCommitResponsePartition {
 }
 
 impl Encodable for TxnOffsetCommitResponsePartition {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.partition_index)?;
         types::Int16.encode(buf, &self.error_code)?;
         if version == 3 {
@@ -65,7 +65,7 @@ impl Encodable for TxnOffsetCommitResponsePartition {
 }
 
 impl Decodable for TxnOffsetCommitResponsePartition {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let partition_index = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
@@ -119,7 +119,7 @@ pub struct TxnOffsetCommitResponseTopic {
 }
 
 impl Encodable for TxnOffsetCommitResponseTopic {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version == 3 {
             types::CompactString.encode(buf, &self.name)?;
         } else {
@@ -169,7 +169,7 @@ impl Encodable for TxnOffsetCommitResponseTopic {
 }
 
 impl Decodable for TxnOffsetCommitResponseTopic {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let name = if version == 3 {
             types::CompactString.decode(buf)?
         } else {
@@ -231,7 +231,7 @@ pub struct TxnOffsetCommitResponse {
 }
 
 impl Encodable for TxnOffsetCommitResponse {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         if version == 3 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
@@ -273,7 +273,7 @@ impl Encodable for TxnOffsetCommitResponse {
 }
 
 impl Decodable for TxnOffsetCommitResponse {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let throttle_time_ms = types::Int32.decode(buf)?;
         let topics = if version == 3 {
             types::CompactArray(types::Struct { version }).decode(buf)?

@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -24,14 +24,14 @@ pub struct ListedGroup {
     /// The group protocol type.
     /// 
     /// Supported API versions: 0-3
-    pub protocol_type: String,
+    pub protocol_type: StrBytes,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
 }
 
 impl Encodable for ListedGroup {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version == 3 {
             types::CompactString.encode(buf, &self.group_id)?;
         } else {
@@ -81,7 +81,7 @@ impl Encodable for ListedGroup {
 }
 
 impl Decodable for ListedGroup {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let group_id = if version == 3 {
             types::CompactString.decode(buf)?
         } else {
@@ -148,7 +148,7 @@ pub struct ListGroupsResponse {
 }
 
 impl Encodable for ListGroupsResponse {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version >= 1 {
             types::Int32.encode(buf, &self.throttle_time_ms)?;
         }
@@ -196,7 +196,7 @@ impl Encodable for ListGroupsResponse {
 }
 
 impl Decodable for ListGroupsResponse {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let throttle_time_ms = if version >= 1 {
             types::Int32.decode(buf)?
         } else {

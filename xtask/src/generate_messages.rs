@@ -48,7 +48,7 @@ pub fn run() -> Result<(), Error> {
 
     writeln!(module_file, "//! THIS CODE IS AUTOMATICALLY GENERATED. DO NOT EDIT.")?;
     writeln!(module_file)?;
-    writeln!(module_file, "use franz_protocol::{{NewType, Request}};")?;
+    writeln!(module_file, "use franz_protocol::{{NewType, Request, StrBytes}};")?;
     writeln!(module_file)?;
 
     for input_file_path in &input_file_paths {

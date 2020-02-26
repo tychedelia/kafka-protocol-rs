@@ -139,8 +139,8 @@ impl PrimitiveType {
             Self::Int32 => "i32",
             Self::Int64 => "i64",
             Self::Float64 => "f64",
-            Self::String => "String",
-            Self::Bytes => "Vec<u8>",
+            Self::String => "StrBytes",
+            Self::Bytes => "Bytes",
         }
     }
     pub fn name(&self, flexible: bool) -> &str {

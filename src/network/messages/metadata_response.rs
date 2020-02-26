@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -19,7 +19,7 @@ pub struct MetadataResponseBroker {
     /// The broker hostname.
     /// 
     /// Supported API versions: 0-9
-    pub host: String,
+    pub host: StrBytes,
 
     /// The broker port.
     /// 
@@ -29,7 +29,7 @@ pub struct MetadataResponseBroker {
     /// The rack of the broker, or null if it has not been assigned to a rack.
     /// 
     /// Supported API versions: 1-9
-    pub rack: Option<String>,
+    pub rack: Option<StrBytes>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
@@ -37,7 +37,7 @@ pub struct MetadataResponseBroker {
 
 impl MapEncodable for MetadataResponseBroker {
     type Key = super::BrokerId;
-    fn encode<B: BufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, key)?;
         if version == 9 {
             types::CompactString.encode(buf, &self.host)?;
@@ -96,7 +96,7 @@ impl MapEncodable for MetadataResponseBroker {
 
 impl MapDecodable for MetadataResponseBroker {
     type Key = super::BrokerId;
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
         let key_field = types::Int32.decode(buf)?;
         let host = if version == 9 {
             types::CompactString.decode(buf)?
@@ -191,7 +191,7 @@ pub struct MetadataResponsePartition {
 }
 
 impl Encodable for MetadataResponsePartition {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int16.encode(buf, &self.error_code)?;
         types::Int32.encode(buf, &self.partition_index)?;
         types::Int32.encode(buf, &self.leader_id)?;
@@ -267,7 +267,7 @@ impl Encodable for MetadataResponsePartition {
 }
 
 impl Decodable for MetadataResponsePartition {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let error_code = types::Int16.decode(buf)?;
         let partition_index = types::Int32.decode(buf)?;
         let leader_id = types::Int32.decode(buf)?;
@@ -367,7 +367,7 @@ pub struct MetadataResponseTopic {
 
 impl MapEncodable for MetadataResponseTopic {
     type Key = super::TopicName;
-    fn encode<B: BufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int16.encode(buf, &self.error_code)?;
         if version == 9 {
             types::CompactString.encode(buf, key)?;
@@ -440,7 +440,7 @@ impl MapEncodable for MetadataResponseTopic {
 
 impl MapDecodable for MetadataResponseTopic {
     type Key = super::TopicName;
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
         let error_code = types::Int16.decode(buf)?;
         let key_field = if version == 9 {
             types::CompactString.decode(buf)?
@@ -515,7 +515,7 @@ pub struct MetadataResponse {
     /// The cluster ID that responding broker belongs to.
     /// 
     /// Supported API versions: 2-9
-    pub cluster_id: Option<String>,
+    pub cluster_id: Option<StrBytes>,
 
     /// The ID of the controller broker.
     /// 
@@ -537,7 +537,7 @@ pub struct MetadataResponse {
 }
 
 impl Encodable for MetadataResponse {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version >= 3 {
             types::Int32.encode(buf, &self.throttle_time_ms)?;
         }
@@ -627,7 +627,7 @@ impl Encodable for MetadataResponse {
 }
 
 impl Decodable for MetadataResponse {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let throttle_time_ms = if version >= 3 {
             types::Int32.decode(buf)?
         } else {

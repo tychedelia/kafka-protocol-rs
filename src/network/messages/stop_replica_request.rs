@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -31,7 +31,7 @@ pub struct StopReplicaPartitionV0 {
 }
 
 impl Encodable for StopReplicaPartitionV0 {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version == 0 {
             types::String.encode(buf, &self.topic_name)?;
         } else {
@@ -89,7 +89,7 @@ impl Encodable for StopReplicaPartitionV0 {
 }
 
 impl Decodable for StopReplicaPartitionV0 {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let topic_name = if version == 0 {
             types::String.decode(buf)?
         } else {
@@ -151,7 +151,7 @@ pub struct StopReplicaTopic {
 }
 
 impl Encodable for StopReplicaTopic {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version >= 1 {
             if version == 2 {
                 types::CompactString.encode(buf, &self.name)?;
@@ -225,7 +225,7 @@ impl Encodable for StopReplicaTopic {
 }
 
 impl Decodable for StopReplicaTopic {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let name = if version >= 1 {
             if version == 2 {
                 types::CompactString.decode(buf)?
@@ -315,7 +315,7 @@ pub struct StopReplicaRequest {
 }
 
 impl Encodable for StopReplicaRequest {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.controller_id)?;
         types::Int32.encode(buf, &self.controller_epoch)?;
         if version >= 1 {
@@ -393,7 +393,7 @@ impl Encodable for StopReplicaRequest {
 }
 
 impl Decodable for StopReplicaRequest {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let controller_id = types::Int32.decode(buf)?;
         let controller_epoch = types::Int32.decode(buf)?;
         let broker_epoch = if version >= 1 {

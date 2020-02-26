@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -19,12 +19,12 @@ pub struct DescribeConfigsSynonym {
     /// The synonym name.
     /// 
     /// Supported API versions: 1-2
-    pub name: String,
+    pub name: StrBytes,
 
     /// The synonym value.
     /// 
     /// Supported API versions: 1-2
-    pub value: Option<String>,
+    pub value: Option<StrBytes>,
 
     /// The synonym source.
     /// 
@@ -34,7 +34,7 @@ pub struct DescribeConfigsSynonym {
 }
 
 impl Encodable for DescribeConfigsSynonym {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version >= 1 {
             types::String.encode(buf, &self.name)?;
         } else {
@@ -88,7 +88,7 @@ impl Encodable for DescribeConfigsSynonym {
 }
 
 impl Decodable for DescribeConfigsSynonym {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let name = if version >= 1 {
             types::String.decode(buf)?
         } else {
@@ -132,12 +132,12 @@ pub struct DescribeConfigsResourceResult {
     /// The configuration name.
     /// 
     /// Supported API versions: 0-2
-    pub name: String,
+    pub name: StrBytes,
 
     /// The configuration value.
     /// 
     /// Supported API versions: 0-2
-    pub value: Option<String>,
+    pub value: Option<StrBytes>,
 
     /// True if the configuration is read-only.
     /// 
@@ -167,7 +167,7 @@ pub struct DescribeConfigsResourceResult {
 }
 
 impl Encodable for DescribeConfigsResourceResult {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::String.encode(buf, &self.name)?;
         types::String.encode(buf, &self.value)?;
         types::Boolean.encode(buf, &self.read_only)?;
@@ -213,7 +213,7 @@ impl Encodable for DescribeConfigsResourceResult {
 }
 
 impl Decodable for DescribeConfigsResourceResult {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let name = types::String.decode(buf)?;
         let value = types::String.decode(buf)?;
         let read_only = types::Boolean.decode(buf)?;
@@ -274,7 +274,7 @@ pub struct DescribeConfigsResult {
     /// The error message, or null if we were able to successfully describe the configurations.
     /// 
     /// Supported API versions: 0-2
-    pub error_message: Option<String>,
+    pub error_message: Option<StrBytes>,
 
     /// The resource type.
     /// 
@@ -284,7 +284,7 @@ pub struct DescribeConfigsResult {
     /// The resource name.
     /// 
     /// Supported API versions: 0-2
-    pub resource_name: String,
+    pub resource_name: StrBytes,
 
     /// Each listed configuration.
     /// 
@@ -294,7 +294,7 @@ pub struct DescribeConfigsResult {
 }
 
 impl Encodable for DescribeConfigsResult {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int16.encode(buf, &self.error_code)?;
         types::String.encode(buf, &self.error_message)?;
         types::Int8.encode(buf, &self.resource_type)?;
@@ -316,7 +316,7 @@ impl Encodable for DescribeConfigsResult {
 }
 
 impl Decodable for DescribeConfigsResult {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let error_code = types::Int16.decode(buf)?;
         let error_message = types::String.decode(buf)?;
         let resource_type = types::Int8.decode(buf)?;
@@ -364,7 +364,7 @@ pub struct DescribeConfigsResponse {
 }
 
 impl Encodable for DescribeConfigsResponse {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         types::Array(types::Struct { version }).encode(buf, &self.results)?;
 
@@ -380,7 +380,7 @@ impl Encodable for DescribeConfigsResponse {
 }
 
 impl Decodable for DescribeConfigsResponse {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let throttle_time_ms = types::Int32.decode(buf)?;
         let results = types::Array(types::Struct { version }).decode(buf)?;
         Ok(Self {

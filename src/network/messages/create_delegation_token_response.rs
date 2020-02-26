@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -24,12 +24,12 @@ pub struct CreateDelegationTokenResponse {
     /// The principal type of the token owner.
     /// 
     /// Supported API versions: 0-2
-    pub principal_type: String,
+    pub principal_type: StrBytes,
 
     /// The name of the token owner.
     /// 
     /// Supported API versions: 0-2
-    pub principal_name: String,
+    pub principal_name: StrBytes,
 
     /// When this token was generated.
     /// 
@@ -49,12 +49,12 @@ pub struct CreateDelegationTokenResponse {
     /// The token UUID.
     /// 
     /// Supported API versions: 0-2
-    pub token_id: String,
+    pub token_id: StrBytes,
 
     /// HMAC of the delegation token.
     /// 
     /// Supported API versions: 0-2
-    pub hmac: Vec<u8>,
+    pub hmac: Bytes,
 
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 
@@ -66,7 +66,7 @@ pub struct CreateDelegationTokenResponse {
 }
 
 impl Encodable for CreateDelegationTokenResponse {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int16.encode(buf, &self.error_code)?;
         if version == 2 {
             types::CompactString.encode(buf, &self.principal_type)?;
@@ -146,7 +146,7 @@ impl Encodable for CreateDelegationTokenResponse {
 }
 
 impl Decodable for CreateDelegationTokenResponse {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let error_code = types::Int16.decode(buf)?;
         let principal_type = if version == 2 {
             types::CompactString.decode(buf)?

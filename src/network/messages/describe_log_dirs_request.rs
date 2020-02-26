@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -29,7 +29,7 @@ pub struct DescribableLogDirTopic {
 }
 
 impl Encodable for DescribableLogDirTopic {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::String.encode(buf, &self.topic)?;
         types::Array(types::Int32).encode(buf, &self.partition_index)?;
 
@@ -45,7 +45,7 @@ impl Encodable for DescribableLogDirTopic {
 }
 
 impl Decodable for DescribableLogDirTopic {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let topic = types::String.decode(buf)?;
         let partition_index = types::Array(types::Int32).decode(buf)?;
         Ok(Self {
@@ -79,7 +79,7 @@ pub struct DescribeLogDirsRequest {
 }
 
 impl Encodable for DescribeLogDirsRequest {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Array(types::Struct { version }).encode(buf, &self.topics)?;
 
         Ok(())
@@ -93,7 +93,7 @@ impl Encodable for DescribeLogDirsRequest {
 }
 
 impl Decodable for DescribeLogDirsRequest {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let topics = types::Array(types::Struct { version }).decode(buf)?;
         Ok(Self {
             topics,

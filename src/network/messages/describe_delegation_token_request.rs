@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -19,19 +19,19 @@ pub struct DescribeDelegationTokenOwner {
     /// The owner principal type.
     /// 
     /// Supported API versions: 0-2
-    pub principal_type: String,
+    pub principal_type: StrBytes,
 
     /// The owner principal name.
     /// 
     /// Supported API versions: 0-2
-    pub principal_name: String,
+    pub principal_name: StrBytes,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
 }
 
 impl Encodable for DescribeDelegationTokenOwner {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version == 2 {
             types::CompactString.encode(buf, &self.principal_type)?;
         } else {
@@ -81,7 +81,7 @@ impl Encodable for DescribeDelegationTokenOwner {
 }
 
 impl Decodable for DescribeDelegationTokenOwner {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let principal_type = if version == 2 {
             types::CompactString.decode(buf)?
         } else {
@@ -138,7 +138,7 @@ pub struct DescribeDelegationTokenRequest {
 }
 
 impl Encodable for DescribeDelegationTokenRequest {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version == 2 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.owners)?;
         } else {
@@ -178,7 +178,7 @@ impl Encodable for DescribeDelegationTokenRequest {
 }
 
 impl Decodable for DescribeDelegationTokenRequest {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let owners = if version == 2 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {

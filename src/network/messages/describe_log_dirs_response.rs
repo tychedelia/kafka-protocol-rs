@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -39,7 +39,7 @@ pub struct DescribeLogDirsPartition {
 }
 
 impl Encodable for DescribeLogDirsPartition {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.partition_index)?;
         types::Int64.encode(buf, &self.partition_size)?;
         types::Int64.encode(buf, &self.offset_lag)?;
@@ -59,7 +59,7 @@ impl Encodable for DescribeLogDirsPartition {
 }
 
 impl Decodable for DescribeLogDirsPartition {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let partition_index = types::Int32.decode(buf)?;
         let partition_size = types::Int64.decode(buf)?;
         let offset_lag = types::Int64.decode(buf)?;
@@ -104,7 +104,7 @@ pub struct DescribeLogDirsTopic {
 }
 
 impl Encodable for DescribeLogDirsTopic {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::String.encode(buf, &self.name)?;
         types::Array(types::Struct { version }).encode(buf, &self.partitions)?;
 
@@ -120,7 +120,7 @@ impl Encodable for DescribeLogDirsTopic {
 }
 
 impl Decodable for DescribeLogDirsTopic {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let name = types::String.decode(buf)?;
         let partitions = types::Array(types::Struct { version }).decode(buf)?;
         Ok(Self {
@@ -154,7 +154,7 @@ pub struct DescribeLogDirsResult {
     /// The absolute log directory path.
     /// 
     /// Supported API versions: 0-1
-    pub log_dir: String,
+    pub log_dir: StrBytes,
 
     /// Each topic.
     /// 
@@ -164,7 +164,7 @@ pub struct DescribeLogDirsResult {
 }
 
 impl Encodable for DescribeLogDirsResult {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int16.encode(buf, &self.error_code)?;
         types::String.encode(buf, &self.log_dir)?;
         types::Array(types::Struct { version }).encode(buf, &self.topics)?;
@@ -182,7 +182,7 @@ impl Encodable for DescribeLogDirsResult {
 }
 
 impl Decodable for DescribeLogDirsResult {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let error_code = types::Int16.decode(buf)?;
         let log_dir = types::String.decode(buf)?;
         let topics = types::Array(types::Struct { version }).decode(buf)?;
@@ -224,7 +224,7 @@ pub struct DescribeLogDirsResponse {
 }
 
 impl Encodable for DescribeLogDirsResponse {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         types::Array(types::Struct { version }).encode(buf, &self.results)?;
 
@@ -240,7 +240,7 @@ impl Encodable for DescribeLogDirsResponse {
 }
 
 impl Decodable for DescribeLogDirsResponse {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let throttle_time_ms = types::Int32.decode(buf)?;
         let results = types::Array(types::Struct { version }).decode(buf)?;
         Ok(Self {

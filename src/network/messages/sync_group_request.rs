@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -19,19 +19,19 @@ pub struct SyncGroupRequestAssignment {
     /// The ID of the member to assign.
     /// 
     /// Supported API versions: 0-5
-    pub member_id: String,
+    pub member_id: StrBytes,
 
     /// The member assignment.
     /// 
     /// Supported API versions: 0-5
-    pub assignment: Vec<u8>,
+    pub assignment: Bytes,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
 }
 
 impl Encodable for SyncGroupRequestAssignment {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version >= 4 {
             types::CompactString.encode(buf, &self.member_id)?;
         } else {
@@ -81,7 +81,7 @@ impl Encodable for SyncGroupRequestAssignment {
 }
 
 impl Decodable for SyncGroupRequestAssignment {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let member_id = if version >= 4 {
             types::CompactString.decode(buf)?
         } else {
@@ -141,22 +141,22 @@ pub struct SyncGroupRequest {
     /// The member ID assigned by the group.
     /// 
     /// Supported API versions: 0-5
-    pub member_id: String,
+    pub member_id: StrBytes,
 
     /// The unique identifier of the consumer instance provided by end user.
     /// 
     /// Supported API versions: 3-5
-    pub group_instance_id: Option<String>,
+    pub group_instance_id: Option<StrBytes>,
 
     /// The group protocol type.
     /// 
     /// Supported API versions: 5
-    pub protocol_type: Option<String>,
+    pub protocol_type: Option<StrBytes>,
 
     /// The group protocol name.
     /// 
     /// Supported API versions: 5
-    pub protocol_name: Option<String>,
+    pub protocol_name: Option<StrBytes>,
 
     /// Each assignment.
     /// 
@@ -168,7 +168,7 @@ pub struct SyncGroupRequest {
 }
 
 impl Encodable for SyncGroupRequest {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version >= 4 {
             types::CompactString.encode(buf, &self.group_id)?;
         } else {
@@ -264,7 +264,7 @@ impl Encodable for SyncGroupRequest {
 }
 
 impl Decodable for SyncGroupRequest {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let group_id = if version >= 4 {
             types::CompactString.decode(buf)?
         } else {

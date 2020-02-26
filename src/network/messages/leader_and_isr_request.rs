@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -76,7 +76,7 @@ pub struct LeaderAndIsrPartitionState {
 }
 
 impl Encodable for LeaderAndIsrPartitionState {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version <= 1 {
             types::String.encode(buf, &self.topic_name)?;
         }
@@ -176,7 +176,7 @@ impl Encodable for LeaderAndIsrPartitionState {
 }
 
 impl Decodable for LeaderAndIsrPartitionState {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let topic_name = if version <= 1 {
             types::String.decode(buf)?
         } else {
@@ -289,7 +289,7 @@ pub struct LeaderAndIsrTopicState {
 }
 
 impl Encodable for LeaderAndIsrTopicState {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version >= 2 {
             if version == 4 {
                 types::CompactString.encode(buf, &self.topic_name)?;
@@ -363,7 +363,7 @@ impl Encodable for LeaderAndIsrTopicState {
 }
 
 impl Decodable for LeaderAndIsrTopicState {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let topic_name = if version >= 2 {
             if version == 4 {
                 types::CompactString.decode(buf)?
@@ -426,7 +426,7 @@ pub struct LeaderAndIsrLiveLeader {
     /// The leader's hostname.
     /// 
     /// Supported API versions: 0-4
-    pub host_name: String,
+    pub host_name: StrBytes,
 
     /// The leader's port.
     /// 
@@ -438,7 +438,7 @@ pub struct LeaderAndIsrLiveLeader {
 }
 
 impl Encodable for LeaderAndIsrLiveLeader {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.broker_id)?;
         if version == 4 {
             types::CompactString.encode(buf, &self.host_name)?;
@@ -482,7 +482,7 @@ impl Encodable for LeaderAndIsrLiveLeader {
 }
 
 impl Decodable for LeaderAndIsrLiveLeader {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let broker_id = types::Int32.decode(buf)?;
         let host_name = if version == 4 {
             types::CompactString.decode(buf)?
@@ -563,7 +563,7 @@ pub struct LeaderAndIsrRequest {
 }
 
 impl Encodable for LeaderAndIsrRequest {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.controller_id)?;
         types::Int32.encode(buf, &self.controller_epoch)?;
         if version >= 2 {
@@ -649,7 +649,7 @@ impl Encodable for LeaderAndIsrRequest {
 }
 
 impl Decodable for LeaderAndIsrRequest {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let controller_id = types::Int32.decode(buf)?;
         let controller_epoch = types::Int32.decode(buf)?;
         let broker_epoch = if version >= 2 {

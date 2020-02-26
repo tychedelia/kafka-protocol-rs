@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -19,19 +19,19 @@ pub struct DescribedDelegationTokenRenewer {
     /// The renewer principal type
     /// 
     /// Supported API versions: 0-2
-    pub principal_type: String,
+    pub principal_type: StrBytes,
 
     /// The renewer principal name
     /// 
     /// Supported API versions: 0-2
-    pub principal_name: String,
+    pub principal_name: StrBytes,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
 }
 
 impl Encodable for DescribedDelegationTokenRenewer {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version == 2 {
             types::CompactString.encode(buf, &self.principal_type)?;
         } else {
@@ -81,7 +81,7 @@ impl Encodable for DescribedDelegationTokenRenewer {
 }
 
 impl Decodable for DescribedDelegationTokenRenewer {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let principal_type = if version == 2 {
             types::CompactString.decode(buf)?
         } else {
@@ -131,12 +131,12 @@ pub struct DescribedDelegationToken {
     /// The token principal type.
     /// 
     /// Supported API versions: 0-2
-    pub principal_type: String,
+    pub principal_type: StrBytes,
 
     /// The token principal name.
     /// 
     /// Supported API versions: 0-2
-    pub principal_name: String,
+    pub principal_name: StrBytes,
 
     /// The token issue timestamp in milliseconds.
     /// 
@@ -156,12 +156,12 @@ pub struct DescribedDelegationToken {
     /// The token ID.
     /// 
     /// Supported API versions: 0-2
-    pub token_id: String,
+    pub token_id: StrBytes,
 
     /// The token HMAC.
     /// 
     /// Supported API versions: 0-2
-    pub hmac: Vec<u8>,
+    pub hmac: Bytes,
 
     /// Those who are able to renew this token before it expires.
     /// 
@@ -173,7 +173,7 @@ pub struct DescribedDelegationToken {
 }
 
 impl Encodable for DescribedDelegationToken {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version == 2 {
             types::CompactString.encode(buf, &self.principal_type)?;
         } else {
@@ -259,7 +259,7 @@ impl Encodable for DescribedDelegationToken {
 }
 
 impl Decodable for DescribedDelegationToken {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let principal_type = if version == 2 {
             types::CompactString.decode(buf)?
         } else {
@@ -356,7 +356,7 @@ pub struct DescribeDelegationTokenResponse {
 }
 
 impl Encodable for DescribeDelegationTokenResponse {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int16.encode(buf, &self.error_code)?;
         if version == 2 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.tokens)?;
@@ -400,7 +400,7 @@ impl Encodable for DescribeDelegationTokenResponse {
 }
 
 impl Decodable for DescribeDelegationTokenResponse {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let error_code = types::Int16.decode(buf)?;
         let tokens = if version == 2 {
             types::CompactArray(types::Struct { version }).decode(buf)?

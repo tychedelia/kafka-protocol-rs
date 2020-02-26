@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -24,12 +24,12 @@ pub struct BatchIndexAndErrorMessage {
     /// The error message of the record that caused the batch to be dropped
     /// 
     /// Supported API versions: 8
-    pub batch_index_error_message: Option<String>,
+    pub batch_index_error_message: Option<StrBytes>,
 
 }
 
 impl Encodable for BatchIndexAndErrorMessage {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version == 8 {
             types::Int32.encode(buf, &self.batch_index)?;
         } else {
@@ -69,7 +69,7 @@ impl Encodable for BatchIndexAndErrorMessage {
 }
 
 impl Decodable for BatchIndexAndErrorMessage {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let batch_index = if version == 8 {
             types::Int32.decode(buf)?
         } else {
@@ -136,12 +136,12 @@ pub struct PartitionProduceResponse {
     /// The global error message summarizing the common root cause of the records that caused the batch to be dropped
     /// 
     /// Supported API versions: 8
-    pub error_message: Option<String>,
+    pub error_message: Option<StrBytes>,
 
 }
 
 impl Encodable for PartitionProduceResponse {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.partition_index)?;
         types::Int16.encode(buf, &self.error_code)?;
         types::Int64.encode(buf, &self.base_offset)?;
@@ -183,7 +183,7 @@ impl Encodable for PartitionProduceResponse {
 }
 
 impl Decodable for PartitionProduceResponse {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let partition_index = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
         let base_offset = types::Int64.decode(buf)?;
@@ -253,7 +253,7 @@ pub struct TopicProduceResponse {
 }
 
 impl Encodable for TopicProduceResponse {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::String.encode(buf, &self.name)?;
         types::Array(types::Struct { version }).encode(buf, &self.partitions)?;
 
@@ -269,7 +269,7 @@ impl Encodable for TopicProduceResponse {
 }
 
 impl Decodable for TopicProduceResponse {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let name = types::String.decode(buf)?;
         let partitions = types::Array(types::Struct { version }).decode(buf)?;
         Ok(Self {
@@ -308,7 +308,7 @@ pub struct ProduceResponse {
 }
 
 impl Encodable for ProduceResponse {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Array(types::Struct { version }).encode(buf, &self.responses)?;
         if version >= 1 {
             types::Int32.encode(buf, &self.throttle_time_ms)?;
@@ -328,7 +328,7 @@ impl Encodable for ProduceResponse {
 }
 
 impl Decodable for ProduceResponse {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let responses = types::Array(types::Struct { version }).decode(buf)?;
         let throttle_time_ms = if version >= 1 {
             types::Int32.decode(buf)?

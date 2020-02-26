@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -34,14 +34,14 @@ pub struct TxnOffsetCommitRequestPartition {
     /// Any associated metadata the client wants to keep.
     /// 
     /// Supported API versions: 0-3
-    pub committed_metadata: Option<String>,
+    pub committed_metadata: Option<StrBytes>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
 }
 
 impl Encodable for TxnOffsetCommitRequestPartition {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.partition_index)?;
         types::Int64.encode(buf, &self.committed_offset)?;
         if version >= 2 {
@@ -91,7 +91,7 @@ impl Encodable for TxnOffsetCommitRequestPartition {
 }
 
 impl Decodable for TxnOffsetCommitRequestPartition {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let partition_index = types::Int32.decode(buf)?;
         let committed_offset = types::Int64.decode(buf)?;
         let committed_leader_epoch = if version >= 2 {
@@ -159,7 +159,7 @@ pub struct TxnOffsetCommitRequestTopic {
 }
 
 impl Encodable for TxnOffsetCommitRequestTopic {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version == 3 {
             types::CompactString.encode(buf, &self.name)?;
         } else {
@@ -209,7 +209,7 @@ impl Encodable for TxnOffsetCommitRequestTopic {
 }
 
 impl Decodable for TxnOffsetCommitRequestTopic {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let name = if version == 3 {
             types::CompactString.decode(buf)?
         } else {
@@ -259,7 +259,7 @@ pub struct TxnOffsetCommitRequest {
     /// The ID of the transaction.
     /// 
     /// Supported API versions: 0-3
-    pub transactional_id: String,
+    pub transactional_id: StrBytes,
 
     /// The ID of the group.
     /// 
@@ -284,12 +284,12 @@ pub struct TxnOffsetCommitRequest {
     /// The member ID assigned by the group coordinator.
     /// 
     /// Supported API versions: 3
-    pub member_id: String,
+    pub member_id: StrBytes,
 
     /// The unique identifier of the consumer instance provided by end user.
     /// 
     /// Supported API versions: 3
-    pub group_instance_id: Option<String>,
+    pub group_instance_id: Option<StrBytes>,
 
     /// Each topic that we want to commit offsets for.
     /// 
@@ -301,7 +301,7 @@ pub struct TxnOffsetCommitRequest {
 }
 
 impl Encodable for TxnOffsetCommitRequest {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version == 3 {
             types::CompactString.encode(buf, &self.transactional_id)?;
         } else {
@@ -407,7 +407,7 @@ impl Encodable for TxnOffsetCommitRequest {
 }
 
 impl Decodable for TxnOffsetCommitRequest {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let transactional_id = if version == 3 {
             types::CompactString.decode(buf)?
         } else {
@@ -428,7 +428,7 @@ impl Decodable for TxnOffsetCommitRequest {
         let member_id = if version == 3 {
             types::CompactString.decode(buf)?
         } else {
-            "".to_owned()
+            StrBytes::from_str("")
         };
         let group_instance_id = if version == 3 {
             types::CompactString.decode(buf)?
@@ -473,7 +473,7 @@ impl Default for TxnOffsetCommitRequest {
             producer_id: (0).into(),
             producer_epoch: 0,
             generation_id: -1,
-            member_id: "".to_owned(),
+            member_id: StrBytes::from_str(""),
             group_instance_id: None,
             topics: Default::default(),
             unknown_tagged_fields: BTreeMap::new(),

@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -29,7 +29,7 @@ pub struct WritableTxnMarkerPartitionResult {
 }
 
 impl Encodable for WritableTxnMarkerPartitionResult {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.partition_index)?;
         types::Int16.encode(buf, &self.error_code)?;
 
@@ -45,7 +45,7 @@ impl Encodable for WritableTxnMarkerPartitionResult {
 }
 
 impl Decodable for WritableTxnMarkerPartitionResult {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let partition_index = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
         Ok(Self {
@@ -84,7 +84,7 @@ pub struct WritableTxnMarkerTopicResult {
 }
 
 impl Encodable for WritableTxnMarkerTopicResult {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::String.encode(buf, &self.name)?;
         types::Array(types::Struct { version }).encode(buf, &self.partitions)?;
 
@@ -100,7 +100,7 @@ impl Encodable for WritableTxnMarkerTopicResult {
 }
 
 impl Decodable for WritableTxnMarkerTopicResult {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let name = types::String.decode(buf)?;
         let partitions = types::Array(types::Struct { version }).decode(buf)?;
         Ok(Self {
@@ -139,7 +139,7 @@ pub struct WritableTxnMarkerResult {
 }
 
 impl Encodable for WritableTxnMarkerResult {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int64.encode(buf, &self.producer_id)?;
         types::Array(types::Struct { version }).encode(buf, &self.topics)?;
 
@@ -155,7 +155,7 @@ impl Encodable for WritableTxnMarkerResult {
 }
 
 impl Decodable for WritableTxnMarkerResult {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let producer_id = types::Int64.decode(buf)?;
         let topics = types::Array(types::Struct { version }).decode(buf)?;
         Ok(Self {
@@ -189,7 +189,7 @@ pub struct WriteTxnMarkersResponse {
 }
 
 impl Encodable for WriteTxnMarkersResponse {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Array(types::Struct { version }).encode(buf, &self.markers)?;
 
         Ok(())
@@ -203,7 +203,7 @@ impl Encodable for WriteTxnMarkersResponse {
 }
 
 impl Decodable for WriteTxnMarkersResponse {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let markers = types::Array(types::Struct { version }).decode(buf)?;
         Ok(Self {
             markers,

@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -29,14 +29,14 @@ pub struct PartitionResult {
     /// The result message, or null if there was no error.
     /// 
     /// Supported API versions: 0-2
-    pub error_message: Option<String>,
+    pub error_message: Option<StrBytes>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
 }
 
 impl Encodable for PartitionResult {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.partition_id)?;
         types::Int16.encode(buf, &self.error_code)?;
         if version == 2 {
@@ -80,7 +80,7 @@ impl Encodable for PartitionResult {
 }
 
 impl Decodable for PartitionResult {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let partition_id = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
         let error_message = if version == 2 {
@@ -141,7 +141,7 @@ pub struct ReplicaElectionResult {
 }
 
 impl Encodable for ReplicaElectionResult {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version == 2 {
             types::CompactString.encode(buf, &self.topic)?;
         } else {
@@ -191,7 +191,7 @@ impl Encodable for ReplicaElectionResult {
 }
 
 impl Decodable for ReplicaElectionResult {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let topic = if version == 2 {
             types::CompactString.decode(buf)?
         } else {
@@ -258,7 +258,7 @@ pub struct ElectLeadersResponse {
 }
 
 impl Encodable for ElectLeadersResponse {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         if version >= 1 {
             types::Int16.encode(buf, &self.error_code)?;
@@ -314,7 +314,7 @@ impl Encodable for ElectLeadersResponse {
 }
 
 impl Decodable for ElectLeadersResponse {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let throttle_time_ms = types::Int32.decode(buf)?;
         let error_code = if version >= 1 {
             types::Int16.decode(buf)?

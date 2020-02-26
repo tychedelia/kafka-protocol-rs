@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -39,14 +39,14 @@ pub struct OffsetCommitRequestPartition {
     /// Any associated metadata the client wants to keep.
     /// 
     /// Supported API versions: 0-8
-    pub committed_metadata: Option<String>,
+    pub committed_metadata: Option<StrBytes>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
 }
 
 impl Encodable for OffsetCommitRequestPartition {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.partition_index)?;
         types::Int64.encode(buf, &self.committed_offset)?;
         if version >= 6 {
@@ -110,7 +110,7 @@ impl Encodable for OffsetCommitRequestPartition {
 }
 
 impl Decodable for OffsetCommitRequestPartition {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let partition_index = types::Int32.decode(buf)?;
         let committed_offset = types::Int64.decode(buf)?;
         let committed_leader_epoch = if version >= 6 {
@@ -185,7 +185,7 @@ pub struct OffsetCommitRequestTopic {
 }
 
 impl Encodable for OffsetCommitRequestTopic {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version == 8 {
             types::CompactString.encode(buf, &self.name)?;
         } else {
@@ -235,7 +235,7 @@ impl Encodable for OffsetCommitRequestTopic {
 }
 
 impl Decodable for OffsetCommitRequestTopic {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let name = if version == 8 {
             types::CompactString.decode(buf)?
         } else {
@@ -295,12 +295,12 @@ pub struct OffsetCommitRequest {
     /// The member ID assigned by the group coordinator.
     /// 
     /// Supported API versions: 1-8
-    pub member_id: String,
+    pub member_id: StrBytes,
 
     /// The unique identifier of the consumer instance provided by end user.
     /// 
     /// Supported API versions: 7-8
-    pub group_instance_id: Option<String>,
+    pub group_instance_id: Option<StrBytes>,
 
     /// The time period in ms to retain the offset.
     /// 
@@ -317,7 +317,7 @@ pub struct OffsetCommitRequest {
 }
 
 impl Encodable for OffsetCommitRequest {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version == 8 {
             types::CompactString.encode(buf, &self.group_id)?;
         } else {
@@ -415,7 +415,7 @@ impl Encodable for OffsetCommitRequest {
 }
 
 impl Decodable for OffsetCommitRequest {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let group_id = if version == 8 {
             types::CompactString.decode(buf)?
         } else {

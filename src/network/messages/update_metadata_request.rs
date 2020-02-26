@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -66,7 +66,7 @@ pub struct UpdateMetadataPartitionState {
 }
 
 impl Encodable for UpdateMetadataPartitionState {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version <= 4 {
             types::String.encode(buf, &self.topic_name)?;
         }
@@ -146,7 +146,7 @@ impl Encodable for UpdateMetadataPartitionState {
 }
 
 impl Decodable for UpdateMetadataPartitionState {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let topic_name = if version <= 4 {
             types::String.decode(buf)?
         } else {
@@ -241,7 +241,7 @@ pub struct UpdateMetadataTopicState {
 }
 
 impl Encodable for UpdateMetadataTopicState {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version >= 5 {
             if version == 6 {
                 types::CompactString.encode(buf, &self.topic_name)?;
@@ -315,7 +315,7 @@ impl Encodable for UpdateMetadataTopicState {
 }
 
 impl Decodable for UpdateMetadataTopicState {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let topic_name = if version >= 5 {
             if version == 6 {
                 types::CompactString.decode(buf)?
@@ -378,12 +378,12 @@ pub struct UpdateMetadataEndpoint {
     /// The hostname of this endpoint
     /// 
     /// Supported API versions: 1-6
-    pub host: String,
+    pub host: StrBytes,
 
     /// The listener name.
     /// 
     /// Supported API versions: 3-6
-    pub listener: String,
+    pub listener: StrBytes,
 
     /// The security protocol type.
     /// 
@@ -395,7 +395,7 @@ pub struct UpdateMetadataEndpoint {
 }
 
 impl Encodable for UpdateMetadataEndpoint {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version >= 1 {
             types::Int32.encode(buf, &self.port)?;
         } else {
@@ -489,7 +489,7 @@ impl Encodable for UpdateMetadataEndpoint {
 }
 
 impl Decodable for UpdateMetadataEndpoint {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let port = if version >= 1 {
             types::Int32.decode(buf)?
         } else {
@@ -566,7 +566,7 @@ pub struct UpdateMetadataBroker {
     /// The broker hostname.
     /// 
     /// Supported API versions: 0
-    pub v0_host: String,
+    pub v0_host: StrBytes,
 
     /// The broker port.
     /// 
@@ -581,14 +581,14 @@ pub struct UpdateMetadataBroker {
     /// The rack which this broker belongs to.
     /// 
     /// Supported API versions: 2-6
-    pub rack: Option<String>,
+    pub rack: Option<StrBytes>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
 }
 
 impl Encodable for UpdateMetadataBroker {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.id)?;
         if version == 0 {
             types::String.encode(buf, &self.v0_host)?;
@@ -660,7 +660,7 @@ impl Encodable for UpdateMetadataBroker {
 }
 
 impl Decodable for UpdateMetadataBroker {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let id = types::Int32.decode(buf)?;
         let v0_host = if version == 0 {
             types::String.decode(buf)?
@@ -767,7 +767,7 @@ pub struct UpdateMetadataRequest {
 }
 
 impl Encodable for UpdateMetadataRequest {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.controller_id)?;
         types::Int32.encode(buf, &self.controller_epoch)?;
         if version >= 5 {
@@ -853,7 +853,7 @@ impl Encodable for UpdateMetadataRequest {
 }
 
 impl Decodable for UpdateMetadataRequest {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let controller_id = types::Int32.decode(buf)?;
         let controller_epoch = types::Int32.decode(buf)?;
         let broker_epoch = if version >= 5 {

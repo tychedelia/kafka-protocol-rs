@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -19,24 +19,24 @@ pub struct JoinGroupResponseMember {
     /// The group member ID.
     /// 
     /// Supported API versions: 0-7
-    pub member_id: String,
+    pub member_id: StrBytes,
 
     /// The unique identifier of the consumer instance provided by end user.
     /// 
     /// Supported API versions: 5-7
-    pub group_instance_id: Option<String>,
+    pub group_instance_id: Option<StrBytes>,
 
     /// The group member metadata.
     /// 
     /// Supported API versions: 0-7
-    pub metadata: Vec<u8>,
+    pub metadata: Bytes,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
 }
 
 impl Encodable for JoinGroupResponseMember {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version >= 6 {
             types::CompactString.encode(buf, &self.member_id)?;
         } else {
@@ -108,7 +108,7 @@ impl Encodable for JoinGroupResponseMember {
 }
 
 impl Decodable for JoinGroupResponseMember {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let member_id = if version >= 6 {
             types::CompactString.decode(buf)?
         } else {
@@ -184,22 +184,22 @@ pub struct JoinGroupResponse {
     /// The group protocol name.
     /// 
     /// Supported API versions: 7
-    pub protocol_type: Option<String>,
+    pub protocol_type: Option<StrBytes>,
 
     /// The group protocol selected by the coordinator.
     /// 
     /// Supported API versions: 0-7
-    pub protocol_name: Option<String>,
+    pub protocol_name: Option<StrBytes>,
 
     /// The leader of the group.
     /// 
     /// Supported API versions: 0-7
-    pub leader: String,
+    pub leader: StrBytes,
 
     /// The member ID assigned by the group coordinator.
     /// 
     /// Supported API versions: 0-7
-    pub member_id: String,
+    pub member_id: StrBytes,
 
     /// 
     /// 
@@ -211,7 +211,7 @@ pub struct JoinGroupResponse {
 }
 
 impl Encodable for JoinGroupResponse {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version >= 2 {
             types::Int32.encode(buf, &self.throttle_time_ms)?;
         }
@@ -297,7 +297,7 @@ impl Encodable for JoinGroupResponse {
 }
 
 impl Decodable for JoinGroupResponse {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let throttle_time_ms = if version >= 2 {
             types::Int32.decode(buf)?
         } else {

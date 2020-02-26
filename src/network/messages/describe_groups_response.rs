@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -19,39 +19,39 @@ pub struct DescribedGroupMember {
     /// The member ID assigned by the group coordinator.
     /// 
     /// Supported API versions: 0-5
-    pub member_id: String,
+    pub member_id: StrBytes,
 
     /// The unique identifier of the consumer instance provided by end user.
     /// 
     /// Supported API versions: 4-5
-    pub group_instance_id: Option<String>,
+    pub group_instance_id: Option<StrBytes>,
 
     /// The client ID used in the member's latest join group request.
     /// 
     /// Supported API versions: 0-5
-    pub client_id: String,
+    pub client_id: StrBytes,
 
     /// The client host.
     /// 
     /// Supported API versions: 0-5
-    pub client_host: String,
+    pub client_host: StrBytes,
 
     /// The metadata corresponding to the current group protocol in use.
     /// 
     /// Supported API versions: 0-5
-    pub member_metadata: Vec<u8>,
+    pub member_metadata: Bytes,
 
     /// The current assignment provided by the group leader.
     /// 
     /// Supported API versions: 0-5
-    pub member_assignment: Vec<u8>,
+    pub member_assignment: Bytes,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
 }
 
 impl Encodable for DescribedGroupMember {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version == 5 {
             types::CompactString.encode(buf, &self.member_id)?;
         } else {
@@ -153,7 +153,7 @@ impl Encodable for DescribedGroupMember {
 }
 
 impl Decodable for DescribedGroupMember {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let member_id = if version == 5 {
             types::CompactString.decode(buf)?
         } else {
@@ -245,17 +245,17 @@ pub struct DescribedGroup {
     /// The group state string, or the empty string.
     /// 
     /// Supported API versions: 0-5
-    pub group_state: String,
+    pub group_state: StrBytes,
 
     /// The group protocol type, or the empty string.
     /// 
     /// Supported API versions: 0-5
-    pub protocol_type: String,
+    pub protocol_type: StrBytes,
 
     /// The group protocol data, or the empty string.
     /// 
     /// Supported API versions: 0-5
-    pub protocol_data: String,
+    pub protocol_data: StrBytes,
 
     /// The group members.
     /// 
@@ -272,7 +272,7 @@ pub struct DescribedGroup {
 }
 
 impl Encodable for DescribedGroup {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int16.encode(buf, &self.error_code)?;
         if version == 5 {
             types::CompactString.encode(buf, &self.group_id)?;
@@ -368,7 +368,7 @@ impl Encodable for DescribedGroup {
 }
 
 impl Decodable for DescribedGroup {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let error_code = types::Int16.decode(buf)?;
         let group_id = if version == 5 {
             types::CompactString.decode(buf)?
@@ -461,7 +461,7 @@ pub struct DescribeGroupsResponse {
 }
 
 impl Encodable for DescribeGroupsResponse {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version >= 1 {
             types::Int32.encode(buf, &self.throttle_time_ms)?;
         }
@@ -507,7 +507,7 @@ impl Encodable for DescribeGroupsResponse {
 }
 
 impl Decodable for DescribeGroupsResponse {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let throttle_time_ms = if version >= 1 {
             types::Int32.decode(buf)?
         } else {

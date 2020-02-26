@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -24,7 +24,7 @@ pub struct AlterConfigsResourceResponse {
     /// The resource error message, or null if there was no error.
     /// 
     /// Supported API versions: 0-1
-    pub error_message: Option<String>,
+    pub error_message: Option<StrBytes>,
 
     /// The resource type.
     /// 
@@ -34,14 +34,14 @@ pub struct AlterConfigsResourceResponse {
     /// The resource name.
     /// 
     /// Supported API versions: 0-1
-    pub resource_name: String,
+    pub resource_name: StrBytes,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
 }
 
 impl Encodable for AlterConfigsResourceResponse {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int16.encode(buf, &self.error_code)?;
         if version == 1 {
             types::CompactString.encode(buf, &self.error_message)?;
@@ -95,7 +95,7 @@ impl Encodable for AlterConfigsResourceResponse {
 }
 
 impl Decodable for AlterConfigsResourceResponse {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let error_code = types::Int16.decode(buf)?;
         let error_message = if version == 1 {
             types::CompactString.decode(buf)?
@@ -163,7 +163,7 @@ pub struct IncrementalAlterConfigsResponse {
 }
 
 impl Encodable for IncrementalAlterConfigsResponse {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         if version == 1 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.responses)?;
@@ -205,7 +205,7 @@ impl Encodable for IncrementalAlterConfigsResponse {
 }
 
 impl Decodable for IncrementalAlterConfigsResponse {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let throttle_time_ms = types::Int32.decode(buf)?;
         let responses = if version == 1 {
             types::CompactArray(types::Struct { version }).decode(buf)?

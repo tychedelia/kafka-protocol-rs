@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -29,7 +29,7 @@ pub struct DeleteRecordsPartition {
 }
 
 impl Encodable for DeleteRecordsPartition {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.partition_index)?;
         types::Int64.encode(buf, &self.offset)?;
 
@@ -45,7 +45,7 @@ impl Encodable for DeleteRecordsPartition {
 }
 
 impl Decodable for DeleteRecordsPartition {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let partition_index = types::Int32.decode(buf)?;
         let offset = types::Int64.decode(buf)?;
         Ok(Self {
@@ -84,7 +84,7 @@ pub struct DeleteRecordsTopic {
 }
 
 impl Encodable for DeleteRecordsTopic {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::String.encode(buf, &self.name)?;
         types::Array(types::Struct { version }).encode(buf, &self.partitions)?;
 
@@ -100,7 +100,7 @@ impl Encodable for DeleteRecordsTopic {
 }
 
 impl Decodable for DeleteRecordsTopic {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let name = types::String.decode(buf)?;
         let partitions = types::Array(types::Struct { version }).decode(buf)?;
         Ok(Self {
@@ -139,7 +139,7 @@ pub struct DeleteRecordsRequest {
 }
 
 impl Encodable for DeleteRecordsRequest {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Array(types::Struct { version }).encode(buf, &self.topics)?;
         types::Int32.encode(buf, &self.timeout_ms)?;
 
@@ -155,7 +155,7 @@ impl Encodable for DeleteRecordsRequest {
 }
 
 impl Decodable for DeleteRecordsRequest {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let topics = types::Array(types::Struct { version }).decode(buf)?;
         let timeout_ms = types::Int32.decode(buf)?;
         Ok(Self {

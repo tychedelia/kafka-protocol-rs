@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -19,19 +19,19 @@ pub struct MemberIdentity {
     /// The member ID to remove from the group.
     /// 
     /// Supported API versions: 3-4
-    pub member_id: String,
+    pub member_id: StrBytes,
 
     /// The group instance ID to remove from the group.
     /// 
     /// Supported API versions: 3-4
-    pub group_instance_id: Option<String>,
+    pub group_instance_id: Option<StrBytes>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
 }
 
 impl Encodable for MemberIdentity {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version >= 3 {
             if version == 4 {
                 types::CompactString.encode(buf, &self.member_id)?;
@@ -105,7 +105,7 @@ impl Encodable for MemberIdentity {
 }
 
 impl Decodable for MemberIdentity {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let member_id = if version >= 3 {
             if version == 4 {
                 types::CompactString.decode(buf)?
@@ -168,7 +168,7 @@ pub struct LeaveGroupRequest {
     /// The member ID to remove from the group.
     /// 
     /// Supported API versions: 0-2
-    pub member_id: String,
+    pub member_id: StrBytes,
 
     /// List of leaving member identities.
     /// 
@@ -180,7 +180,7 @@ pub struct LeaveGroupRequest {
 }
 
 impl Encodable for LeaveGroupRequest {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version == 4 {
             types::CompactString.encode(buf, &self.group_id)?;
         } else {
@@ -256,7 +256,7 @@ impl Encodable for LeaveGroupRequest {
 }
 
 impl Decodable for LeaveGroupRequest {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let group_id = if version == 4 {
             types::CompactString.decode(buf)?
         } else {

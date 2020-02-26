@@ -153,7 +153,7 @@ impl PreparedDefault {
                 Self::Boolean(true) => Expr::new_atom("true"),
                 Self::Boolean(false) => Expr::new_atom("false"),
                 Self::Numeric(v) => Expr::new_unary(v),
-                Self::String(s) => Expr::new_str(s).method("to_owned", ""),
+                Self::String(s) => Expr::new_atom(&format!("StrBytes::from_str({:?})", s)),
             }
         }
     }
@@ -705,9 +705,9 @@ fn write_struct_def<W: Write>(
     w.block(|w| {
         if let Some(key) = &map_key {
             writeln!(w, "type Key = {};", key.rust_name())?;
-            write!(w, "fn encode<B: BufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> ")?;
+            write!(w, "fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> ")?;
         } else {
-            write!(w, "fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> ")?;
+            write!(w, "fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> ")?;
         }
         w.block(|w| {
             for prepared_field in &prepared_fields {
@@ -745,9 +745,9 @@ fn write_struct_def<W: Write>(
     w.block(|w| {
         if let Some(key) = &map_key {
             writeln!(w, "type Key = {};", key.rust_name())?;
-            write!(w, "fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> ")?;
+            write!(w, "fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> ")?;
         } else {
-            write!(w, "fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> ")?;
+            write!(w, "fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> ")?;
         }
         w.block(|w| {
             for prepared_field in &prepared_fields {
@@ -836,12 +836,12 @@ fn write_file_header<W: Write>(
     writeln!(w, "use std::borrow::Borrow;")?;
     writeln!(w, "use std::collections::BTreeMap;")?;
     writeln!(w)?;
-    writeln!(w, "use bytes::{{Buf, BufMut}};")?;
+    writeln!(w, "use bytes::Bytes;")?;
     writeln!(w, "use log::error;")?;
     writeln!(w)?;
     writeln!(w, "use franz_protocol::{{")?;
     writeln!(w, "    Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,")?;
-    writeln!(w, "    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,")?;
+    writeln!(w, "    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{{ByteBuf, ByteBufMut}}")?;
     writeln!(w, "}};")?;
     writeln!(w)?;
     writeln!(w)?;

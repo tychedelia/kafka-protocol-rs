@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -24,7 +24,7 @@ pub struct OffsetDeleteRequestPartition {
 }
 
 impl Encodable for OffsetDeleteRequestPartition {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.partition_index)?;
 
         Ok(())
@@ -38,7 +38,7 @@ impl Encodable for OffsetDeleteRequestPartition {
 }
 
 impl Decodable for OffsetDeleteRequestPartition {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let partition_index = types::Int32.decode(buf)?;
         Ok(Self {
             partition_index,
@@ -69,8 +69,8 @@ pub struct OffsetDeleteRequestTopic {
 }
 
 impl MapEncodable for OffsetDeleteRequestTopic {
-    type Key = String;
-    fn encode<B: BufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    type Key = StrBytes;
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::String.encode(buf, key)?;
         types::Array(types::Struct { version }).encode(buf, &self.partitions)?;
 
@@ -86,8 +86,8 @@ impl MapEncodable for OffsetDeleteRequestTopic {
 }
 
 impl MapDecodable for OffsetDeleteRequestTopic {
-    type Key = String;
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+    type Key = StrBytes;
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
         let key_field = types::String.decode(buf)?;
         let partitions = types::Array(types::Struct { version }).decode(buf)?;
         Ok((key_field, Self {
@@ -114,17 +114,17 @@ pub struct OffsetDeleteRequest {
     /// The unique group identifier.
     /// 
     /// Supported API versions: 0
-    pub group_id: String,
+    pub group_id: StrBytes,
 
     /// The topics to delete offsets for
     /// 
     /// Supported API versions: 0
-    pub topics: indexmap::IndexMap<String, OffsetDeleteRequestTopic>,
+    pub topics: indexmap::IndexMap<StrBytes, OffsetDeleteRequestTopic>,
 
 }
 
 impl Encodable for OffsetDeleteRequest {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::String.encode(buf, &self.group_id)?;
         types::Array(types::Struct { version }).encode(buf, &self.topics)?;
 
@@ -140,7 +140,7 @@ impl Encodable for OffsetDeleteRequest {
 }
 
 impl Decodable for OffsetDeleteRequest {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let group_id = types::String.decode(buf)?;
         let topics = types::Array(types::Struct { version }).decode(buf)?;
         Ok(Self {

@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -19,15 +19,15 @@ pub struct JoinGroupRequestProtocol {
     /// The protocol metadata.
     /// 
     /// Supported API versions: 0-7
-    pub metadata: Vec<u8>,
+    pub metadata: Bytes,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
 }
 
 impl MapEncodable for JoinGroupRequestProtocol {
-    type Key = String;
-    fn encode<B: BufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    type Key = StrBytes;
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version >= 6 {
             types::CompactString.encode(buf, key)?;
         } else {
@@ -77,8 +77,8 @@ impl MapEncodable for JoinGroupRequestProtocol {
 }
 
 impl MapDecodable for JoinGroupRequestProtocol {
-    type Key = String;
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+    type Key = StrBytes;
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
         let key_field = if version >= 6 {
             types::CompactString.decode(buf)?
         } else {
@@ -141,29 +141,29 @@ pub struct JoinGroupRequest {
     /// The member id assigned by the group coordinator.
     /// 
     /// Supported API versions: 0-7
-    pub member_id: String,
+    pub member_id: StrBytes,
 
     /// The unique identifier of the consumer instance provided by end user.
     /// 
     /// Supported API versions: 5-7
-    pub group_instance_id: Option<String>,
+    pub group_instance_id: Option<StrBytes>,
 
     /// The unique name the for class of protocols implemented by the group we want to join.
     /// 
     /// Supported API versions: 0-7
-    pub protocol_type: String,
+    pub protocol_type: StrBytes,
 
     /// The list of protocols that the member supports.
     /// 
     /// Supported API versions: 0-7
-    pub protocols: indexmap::IndexMap<String, JoinGroupRequestProtocol>,
+    pub protocols: indexmap::IndexMap<StrBytes, JoinGroupRequestProtocol>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
 }
 
 impl Encodable for JoinGroupRequest {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version >= 6 {
             types::CompactString.encode(buf, &self.group_id)?;
         } else {
@@ -263,7 +263,7 @@ impl Encodable for JoinGroupRequest {
 }
 
 impl Decodable for JoinGroupRequest {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let group_id = if version >= 6 {
             types::CompactString.decode(buf)?
         } else {

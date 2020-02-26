@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -25,7 +25,7 @@ pub struct AddPartitionsToTxnTopic {
 
 impl MapEncodable for AddPartitionsToTxnTopic {
     type Key = super::TopicName;
-    fn encode<B: BufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::String.encode(buf, key)?;
         types::Array(types::Int32).encode(buf, &self.partitions)?;
 
@@ -42,7 +42,7 @@ impl MapEncodable for AddPartitionsToTxnTopic {
 
 impl MapDecodable for AddPartitionsToTxnTopic {
     type Key = super::TopicName;
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
         let key_field = types::String.decode(buf)?;
         let partitions = types::Array(types::Int32).decode(buf)?;
         Ok((key_field, Self {
@@ -89,7 +89,7 @@ pub struct AddPartitionsToTxnRequest {
 }
 
 impl Encodable for AddPartitionsToTxnRequest {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::String.encode(buf, &self.transactional_id)?;
         types::Int64.encode(buf, &self.producer_id)?;
         types::Int16.encode(buf, &self.producer_epoch)?;
@@ -109,7 +109,7 @@ impl Encodable for AddPartitionsToTxnRequest {
 }
 
 impl Decodable for AddPartitionsToTxnRequest {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let transactional_id = types::String.decode(buf)?;
         let producer_id = types::Int64.decode(buf)?;
         let producer_epoch = types::Int16.decode(buf)?;

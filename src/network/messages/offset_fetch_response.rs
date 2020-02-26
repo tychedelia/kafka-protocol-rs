@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -34,7 +34,7 @@ pub struct OffsetFetchResponsePartition {
     /// The partition metadata.
     /// 
     /// Supported API versions: 0-7
-    pub metadata: Option<String>,
+    pub metadata: Option<StrBytes>,
 
     /// The error code, or 0 if there was no error.
     /// 
@@ -46,7 +46,7 @@ pub struct OffsetFetchResponsePartition {
 }
 
 impl Encodable for OffsetFetchResponsePartition {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.partition_index)?;
         types::Int64.encode(buf, &self.committed_offset)?;
         if version >= 5 {
@@ -98,7 +98,7 @@ impl Encodable for OffsetFetchResponsePartition {
 }
 
 impl Decodable for OffsetFetchResponsePartition {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let partition_index = types::Int32.decode(buf)?;
         let committed_offset = types::Int64.decode(buf)?;
         let committed_leader_epoch = if version >= 5 {
@@ -169,7 +169,7 @@ pub struct OffsetFetchResponseTopic {
 }
 
 impl Encodable for OffsetFetchResponseTopic {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version >= 6 {
             types::CompactString.encode(buf, &self.name)?;
         } else {
@@ -219,7 +219,7 @@ impl Encodable for OffsetFetchResponseTopic {
 }
 
 impl Decodable for OffsetFetchResponseTopic {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let name = if version >= 6 {
             types::CompactString.decode(buf)?
         } else {
@@ -286,7 +286,7 @@ pub struct OffsetFetchResponse {
 }
 
 impl Encodable for OffsetFetchResponse {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version >= 3 {
             types::Int32.encode(buf, &self.throttle_time_ms)?;
         }
@@ -338,7 +338,7 @@ impl Encodable for OffsetFetchResponse {
 }
 
 impl Decodable for OffsetFetchResponse {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let throttle_time_ms = if version >= 3 {
             types::Int32.decode(buf)?
         } else {

@@ -1,6 +1,6 @@
 //! THIS CODE IS AUTOMATICALLY GENERATED. DO NOT EDIT.
 
-use franz_protocol::{NewType, Request};
+use franz_protocol::{NewType, Request, StrBytes};
 
 pub mod add_offsets_to_txn_request;
 pub use add_offsets_to_txn_request::AddOffsetsToTxnRequest;
@@ -561,28 +561,28 @@ impl std::cmp::PartialEq<BrokerId> for i32 {
 impl NewType<i32> for BrokerId {}
 
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default)]
-pub struct GroupId(pub String);
+pub struct GroupId(pub StrBytes);
 
-impl From<String> for GroupId {
-    fn from(other: String) -> Self { Self(other) }
+impl From<StrBytes> for GroupId {
+    fn from(other: StrBytes) -> Self { Self(other) }
 }
-impl From<GroupId> for String {
+impl From<GroupId> for StrBytes {
     fn from(other: GroupId) -> Self { other.0 }
 }
-impl std::borrow::Borrow<String> for GroupId {
-    fn borrow(&self) -> &String { &self.0 }
+impl std::borrow::Borrow<StrBytes> for GroupId {
+    fn borrow(&self) -> &StrBytes { &self.0 }
 }
 impl std::ops::Deref for GroupId {
-    type Target = String;
+    type Target = StrBytes;
     fn deref(&self) -> &Self::Target { &self.0 }
 }
-impl std::cmp::PartialEq<String> for GroupId {
-    fn eq(&self, other: &String) -> bool { &self.0 == other }
+impl std::cmp::PartialEq<StrBytes> for GroupId {
+    fn eq(&self, other: &StrBytes) -> bool { &self.0 == other }
 }
-impl std::cmp::PartialEq<GroupId> for String {
+impl std::cmp::PartialEq<GroupId> for StrBytes {
     fn eq(&self, other: &GroupId) -> bool { self == &other.0 }
 }
-impl NewType<String> for GroupId {}
+impl NewType<StrBytes> for GroupId {}
 
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default, Copy)]
 pub struct ProducerId(pub i64);
@@ -609,50 +609,50 @@ impl std::cmp::PartialEq<ProducerId> for i64 {
 impl NewType<i64> for ProducerId {}
 
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default)]
-pub struct TopicName(pub String);
+pub struct TopicName(pub StrBytes);
 
-impl From<String> for TopicName {
-    fn from(other: String) -> Self { Self(other) }
+impl From<StrBytes> for TopicName {
+    fn from(other: StrBytes) -> Self { Self(other) }
 }
-impl From<TopicName> for String {
+impl From<TopicName> for StrBytes {
     fn from(other: TopicName) -> Self { other.0 }
 }
-impl std::borrow::Borrow<String> for TopicName {
-    fn borrow(&self) -> &String { &self.0 }
+impl std::borrow::Borrow<StrBytes> for TopicName {
+    fn borrow(&self) -> &StrBytes { &self.0 }
 }
 impl std::ops::Deref for TopicName {
-    type Target = String;
+    type Target = StrBytes;
     fn deref(&self) -> &Self::Target { &self.0 }
 }
-impl std::cmp::PartialEq<String> for TopicName {
-    fn eq(&self, other: &String) -> bool { &self.0 == other }
+impl std::cmp::PartialEq<StrBytes> for TopicName {
+    fn eq(&self, other: &StrBytes) -> bool { &self.0 == other }
 }
-impl std::cmp::PartialEq<TopicName> for String {
+impl std::cmp::PartialEq<TopicName> for StrBytes {
     fn eq(&self, other: &TopicName) -> bool { self == &other.0 }
 }
-impl NewType<String> for TopicName {}
+impl NewType<StrBytes> for TopicName {}
 
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default)]
-pub struct TransactionalId(pub String);
+pub struct TransactionalId(pub StrBytes);
 
-impl From<String> for TransactionalId {
-    fn from(other: String) -> Self { Self(other) }
+impl From<StrBytes> for TransactionalId {
+    fn from(other: StrBytes) -> Self { Self(other) }
 }
-impl From<TransactionalId> for String {
+impl From<TransactionalId> for StrBytes {
     fn from(other: TransactionalId) -> Self { other.0 }
 }
-impl std::borrow::Borrow<String> for TransactionalId {
-    fn borrow(&self) -> &String { &self.0 }
+impl std::borrow::Borrow<StrBytes> for TransactionalId {
+    fn borrow(&self) -> &StrBytes { &self.0 }
 }
 impl std::ops::Deref for TransactionalId {
-    type Target = String;
+    type Target = StrBytes;
     fn deref(&self) -> &Self::Target { &self.0 }
 }
-impl std::cmp::PartialEq<String> for TransactionalId {
-    fn eq(&self, other: &String) -> bool { &self.0 == other }
+impl std::cmp::PartialEq<StrBytes> for TransactionalId {
+    fn eq(&self, other: &StrBytes) -> bool { &self.0 == other }
 }
-impl std::cmp::PartialEq<TransactionalId> for String {
+impl std::cmp::PartialEq<TransactionalId> for StrBytes {
     fn eq(&self, other: &TransactionalId) -> bool { self == &other.0 }
 }
-impl NewType<String> for TransactionalId {}
+impl NewType<StrBytes> for TransactionalId {}
 

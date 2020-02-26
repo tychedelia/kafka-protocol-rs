@@ -7,9 +7,12 @@ use std::ops::RangeBounds;
 use std::collections::BTreeMap;
 use std::cmp;
 
-use bytes::{Buf, BufMut};
+use buf::{ByteBuf, ByteBufMut};
 
 pub mod types;
+pub mod buf;
+
+pub type StrBytes = string::String<bytes::Bytes>;
 
 #[derive(Debug)]
 pub struct DecodeError;
@@ -29,14 +32,14 @@ pub trait NewType<Inner>: From<Inner> + Into<Inner> + Borrow<Inner> {}
 impl<T> NewType<T> for T {}
 
 pub trait Encoder<Value> {
-    fn encode<B: BufMut>(&self, buf: &mut B, value: Value) -> Result<(), EncodeError>;
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, value: Value) -> Result<(), EncodeError>;
     fn compute_size(&self, value: Value) -> Result<usize, EncodeError>;
     fn fixed_size(&self) -> Option<usize> {
         None
     }
 }
 pub trait Decoder<Value> {
-    fn decode<B: Buf>(&self, buf: &mut B) -> Result<Value, DecodeError>;
+    fn decode<B: ByteBuf>(&self, buf: &mut B) -> Result<Value, DecodeError>;
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -62,23 +65,23 @@ pub trait Message: Sized {
 }
 
 pub trait Encodable: Sized {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError>;
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError>;
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError>;
 }
 
 pub trait Decodable: Sized {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError>;
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError>;
 }
 
 pub trait MapEncodable: Sized {
     type Key;
-    fn encode<B: BufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError>;
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError>;
     fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError>;
 }
 
 pub trait MapDecodable: Sized {
     type Key;
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError>;
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError>;
 }
 
 pub trait HeaderVersion {
@@ -90,7 +93,7 @@ pub trait Request: Message + Encodable + Decodable + HeaderVersion {
     type Response: Message + Encodable + Decodable + HeaderVersion;
 }
 
-pub fn write_unknown_tagged_fields<B: BufMut, R: RangeBounds<i32>>(
+pub fn write_unknown_tagged_fields<B: ByteBufMut, R: RangeBounds<i32>>(
     buf: &mut B,
     range: R,
     unknown_tagged_fields: &BTreeMap<i32, Vec<u8>>,

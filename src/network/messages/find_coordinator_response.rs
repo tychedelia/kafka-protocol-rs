@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -29,7 +29,7 @@ pub struct FindCoordinatorResponse {
     /// The error message, or null if there was no error.
     /// 
     /// Supported API versions: 1-3
-    pub error_message: Option<String>,
+    pub error_message: Option<StrBytes>,
 
     /// The node id.
     /// 
@@ -39,7 +39,7 @@ pub struct FindCoordinatorResponse {
     /// The host name.
     /// 
     /// Supported API versions: 0-3
-    pub host: String,
+    pub host: StrBytes,
 
     /// The port.
     /// 
@@ -51,7 +51,7 @@ pub struct FindCoordinatorResponse {
 }
 
 impl Encodable for FindCoordinatorResponse {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version >= 1 {
             types::Int32.encode(buf, &self.throttle_time_ms)?;
         }
@@ -117,7 +117,7 @@ impl Encodable for FindCoordinatorResponse {
 }
 
 impl Decodable for FindCoordinatorResponse {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let throttle_time_ms = if version >= 1 {
             types::Int32.decode(buf)?
         } else {

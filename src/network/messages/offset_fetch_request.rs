@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -31,7 +31,7 @@ pub struct OffsetFetchRequestTopic {
 }
 
 impl Encodable for OffsetFetchRequestTopic {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version >= 6 {
             types::CompactString.encode(buf, &self.name)?;
         } else {
@@ -81,7 +81,7 @@ impl Encodable for OffsetFetchRequestTopic {
 }
 
 impl Decodable for OffsetFetchRequestTopic {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let name = if version >= 6 {
             types::CompactString.decode(buf)?
         } else {
@@ -148,7 +148,7 @@ pub struct OffsetFetchRequest {
 }
 
 impl Encodable for OffsetFetchRequest {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version >= 6 {
             types::CompactString.encode(buf, &self.group_id)?;
         } else {
@@ -212,7 +212,7 @@ impl Encodable for OffsetFetchRequest {
 }
 
 impl Decodable for OffsetFetchRequest {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let group_id = if version >= 6 {
             types::CompactString.decode(buf)?
         } else {

@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -19,7 +19,7 @@ pub struct RenewDelegationTokenRequest {
     /// The HMAC of the delegation token to be renewed.
     /// 
     /// Supported API versions: 0-2
-    pub hmac: Vec<u8>,
+    pub hmac: Bytes,
 
     /// The renewal time period in milliseconds.
     /// 
@@ -31,7 +31,7 @@ pub struct RenewDelegationTokenRequest {
 }
 
 impl Encodable for RenewDelegationTokenRequest {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version == 2 {
             types::CompactBytes.encode(buf, &self.hmac)?;
         } else {
@@ -73,7 +73,7 @@ impl Encodable for RenewDelegationTokenRequest {
 }
 
 impl Decodable for RenewDelegationTokenRequest {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let hmac = if version == 2 {
             types::CompactBytes.decode(buf)?
         } else {

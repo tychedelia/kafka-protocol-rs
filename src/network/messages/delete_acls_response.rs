@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -24,7 +24,7 @@ pub struct DeleteAclsMatchingAcl {
     /// The deletion error message, or null if the deletion succeeded.
     /// 
     /// Supported API versions: 0-2
-    pub error_message: Option<String>,
+    pub error_message: Option<StrBytes>,
 
     /// The ACL resource type.
     /// 
@@ -34,7 +34,7 @@ pub struct DeleteAclsMatchingAcl {
     /// The ACL resource name.
     /// 
     /// Supported API versions: 0-2
-    pub resource_name: String,
+    pub resource_name: StrBytes,
 
     /// The ACL resource pattern type.
     /// 
@@ -44,12 +44,12 @@ pub struct DeleteAclsMatchingAcl {
     /// The ACL principal.
     /// 
     /// Supported API versions: 0-2
-    pub principal: String,
+    pub principal: StrBytes,
 
     /// The ACL host.
     /// 
     /// Supported API versions: 0-2
-    pub host: String,
+    pub host: StrBytes,
 
     /// The ACL operation.
     /// 
@@ -66,7 +66,7 @@ pub struct DeleteAclsMatchingAcl {
 }
 
 impl Encodable for DeleteAclsMatchingAcl {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int16.encode(buf, &self.error_code)?;
         if version == 2 {
             types::CompactString.encode(buf, &self.error_message)?;
@@ -158,7 +158,7 @@ impl Encodable for DeleteAclsMatchingAcl {
 }
 
 impl Decodable for DeleteAclsMatchingAcl {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let error_code = types::Int16.decode(buf)?;
         let error_message = if version == 2 {
             types::CompactString.decode(buf)?
@@ -246,7 +246,7 @@ pub struct DeleteAclsFilterResult {
     /// The error message, or null if the filter succeeded.
     /// 
     /// Supported API versions: 0-2
-    pub error_message: Option<String>,
+    pub error_message: Option<StrBytes>,
 
     /// The ACLs which matched this filter.
     /// 
@@ -258,7 +258,7 @@ pub struct DeleteAclsFilterResult {
 }
 
 impl Encodable for DeleteAclsFilterResult {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int16.encode(buf, &self.error_code)?;
         if version == 2 {
             types::CompactString.encode(buf, &self.error_message)?;
@@ -310,7 +310,7 @@ impl Encodable for DeleteAclsFilterResult {
 }
 
 impl Decodable for DeleteAclsFilterResult {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let error_code = types::Int16.decode(buf)?;
         let error_message = if version == 2 {
             types::CompactString.decode(buf)?
@@ -375,7 +375,7 @@ pub struct DeleteAclsResponse {
 }
 
 impl Encodable for DeleteAclsResponse {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         if version == 2 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.filter_results)?;
@@ -417,7 +417,7 @@ impl Encodable for DeleteAclsResponse {
 }
 
 impl Decodable for DeleteAclsResponse {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let throttle_time_ms = types::Int32.decode(buf)?;
         let filter_results = if version == 2 {
             types::CompactArray(types::Struct { version }).decode(buf)?

@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -26,7 +26,7 @@ pub struct CreatePartitionsAssignment {
 }
 
 impl Encodable for CreatePartitionsAssignment {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version == 2 {
             types::CompactArray(types::Int32).encode(buf, &self.broker_ids)?;
         } else {
@@ -66,7 +66,7 @@ impl Encodable for CreatePartitionsAssignment {
 }
 
 impl Decodable for CreatePartitionsAssignment {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let broker_ids = if version == 2 {
             types::CompactArray(types::Int32).decode(buf)?
         } else {
@@ -126,7 +126,7 @@ pub struct CreatePartitionsTopic {
 }
 
 impl Encodable for CreatePartitionsTopic {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version == 2 {
             types::CompactString.encode(buf, &self.name)?;
         } else {
@@ -178,7 +178,7 @@ impl Encodable for CreatePartitionsTopic {
 }
 
 impl Decodable for CreatePartitionsTopic {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let name = if version == 2 {
             types::CompactString.decode(buf)?
         } else {
@@ -248,7 +248,7 @@ pub struct CreatePartitionsRequest {
 }
 
 impl Encodable for CreatePartitionsRequest {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version == 2 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
         } else {
@@ -292,7 +292,7 @@ impl Encodable for CreatePartitionsRequest {
 }
 
 impl Decodable for CreatePartitionsRequest {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let topics = if version == 2 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {

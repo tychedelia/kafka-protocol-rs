@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -25,7 +25,7 @@ pub struct OffsetDeleteResponsePartition {
 
 impl MapEncodable for OffsetDeleteResponsePartition {
     type Key = i32;
-    fn encode<B: BufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, key)?;
         types::Int16.encode(buf, &self.error_code)?;
 
@@ -42,7 +42,7 @@ impl MapEncodable for OffsetDeleteResponsePartition {
 
 impl MapDecodable for OffsetDeleteResponsePartition {
     type Key = i32;
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
         let key_field = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
         Ok((key_field, Self {
@@ -74,8 +74,8 @@ pub struct OffsetDeleteResponseTopic {
 }
 
 impl MapEncodable for OffsetDeleteResponseTopic {
-    type Key = String;
-    fn encode<B: BufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    type Key = StrBytes;
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::String.encode(buf, key)?;
         types::Array(types::Struct { version }).encode(buf, &self.partitions)?;
 
@@ -91,8 +91,8 @@ impl MapEncodable for OffsetDeleteResponseTopic {
 }
 
 impl MapDecodable for OffsetDeleteResponseTopic {
-    type Key = String;
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+    type Key = StrBytes;
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
         let key_field = types::String.decode(buf)?;
         let partitions = types::Array(types::Struct { version }).decode(buf)?;
         Ok((key_field, Self {
@@ -129,12 +129,12 @@ pub struct OffsetDeleteResponse {
     /// The responses for each topic.
     /// 
     /// Supported API versions: 0
-    pub topics: indexmap::IndexMap<String, OffsetDeleteResponseTopic>,
+    pub topics: indexmap::IndexMap<StrBytes, OffsetDeleteResponseTopic>,
 
 }
 
 impl Encodable for OffsetDeleteResponse {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int16.encode(buf, &self.error_code)?;
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         types::Array(types::Struct { version }).encode(buf, &self.topics)?;
@@ -152,7 +152,7 @@ impl Encodable for OffsetDeleteResponse {
 }
 
 impl Decodable for OffsetDeleteResponse {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let error_code = types::Int16.decode(buf)?;
         let throttle_time_ms = types::Int32.decode(buf)?;
         let topics = types::Array(types::Struct { version }).decode(buf)?;

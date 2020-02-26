@@ -4,12 +4,12 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use bytes::{Buf, BufMut};
+use bytes::Bytes;
 use log::error;
 
 use franz_protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size,
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };
 
 
@@ -27,7 +27,7 @@ pub struct CreatableReplicaAssignment {
 
 impl MapEncodable for CreatableReplicaAssignment {
     type Key = i32;
-    fn encode<B: BufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, key)?;
         if version == 5 {
             types::CompactArray(types::Int32).encode(buf, &self.broker_ids)?;
@@ -70,7 +70,7 @@ impl MapEncodable for CreatableReplicaAssignment {
 
 impl MapDecodable for CreatableReplicaAssignment {
     type Key = i32;
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
         let key_field = types::Int32.decode(buf)?;
         let broker_ids = if version == 5 {
             types::CompactArray(types::Int32).decode(buf)?
@@ -114,15 +114,15 @@ pub struct CreateableTopicConfig {
     /// The configuration value.
     /// 
     /// Supported API versions: 0-5
-    pub value: Option<String>,
+    pub value: Option<StrBytes>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
 }
 
 impl MapEncodable for CreateableTopicConfig {
-    type Key = String;
-    fn encode<B: BufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    type Key = StrBytes;
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version == 5 {
             types::CompactString.encode(buf, key)?;
         } else {
@@ -172,8 +172,8 @@ impl MapEncodable for CreateableTopicConfig {
 }
 
 impl MapDecodable for CreateableTopicConfig {
-    type Key = String;
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+    type Key = StrBytes;
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
         let key_field = if version == 5 {
             types::CompactString.decode(buf)?
         } else {
@@ -236,7 +236,7 @@ pub struct CreatableTopic {
     /// The custom topic configurations to set.
     /// 
     /// Supported API versions: 0-5
-    pub configs: indexmap::IndexMap<String, CreateableTopicConfig>,
+    pub configs: indexmap::IndexMap<StrBytes, CreateableTopicConfig>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
@@ -244,7 +244,7 @@ pub struct CreatableTopic {
 
 impl MapEncodable for CreatableTopic {
     type Key = super::TopicName;
-    fn encode<B: BufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version == 5 {
             types::CompactString.encode(buf, key)?;
         } else {
@@ -309,7 +309,7 @@ impl MapEncodable for CreatableTopic {
 
 impl MapDecodable for CreatableTopic {
     type Key = super::TopicName;
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
         let key_field = if version == 5 {
             types::CompactString.decode(buf)?
         } else {
@@ -387,7 +387,7 @@ pub struct CreateTopicsRequest {
 }
 
 impl Encodable for CreateTopicsRequest {
-    fn encode<B: BufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version == 5 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
         } else {
@@ -443,7 +443,7 @@ impl Encodable for CreateTopicsRequest {
 }
 
 impl Decodable for CreateTopicsRequest {
-    fn decode<B: Buf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let topics = if version == 5 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
