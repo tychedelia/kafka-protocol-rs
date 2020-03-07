@@ -22,6 +22,10 @@ chashmap = "2.2.2"
 franz_protocol = { version = "0.1", path = "franz_protocol" }
 indexmap = "1.3.2"
 env_logger = "0.7.1"
+crc = "1.8.1"
+snap = "1.0"
+flate2 = "1.0"
+string = { version = "0.2.1", git = "https://github.com/carllerche/string.git" }
 
 [build-dependencies]
 async-trait = "0.1.24"
