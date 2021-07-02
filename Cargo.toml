@@ -29,6 +29,3 @@ string = { version = "0.2.1", git = "https://github.com/carllerche/string.git" }
 
 [build-dependencies]
 async-trait = "0.1.24"
-
-[patch.crates-io]
-bytes = { git = "https://github.com/Diggsey/bytes.git", branch = "try_get" }

@@ -1,23 +1,75 @@
 use std::io::Cursor;
+use std::mem::size_of;
 use std::ops::Range;
 
-use bytes::{Buf, BufMut, Bytes, BytesMut, TryGetError};
+use bytes::{Buf, BufMut, Bytes, BytesMut};
+
+use crate::error::ErrorKind;
 
 pub trait ByteBuf: Buf {
     fn peek_bytes(&mut self, r: Range<usize>) -> Bytes;
     fn get_bytes(&mut self, size: usize) -> Bytes;
-    fn try_peek_bytes(&mut self, r: Range<usize>) -> Result<Bytes, TryGetError> {
+    fn try_peek_bytes(&mut self, r: Range<usize>) -> Result<Bytes, ErrorKind> {
         if self.remaining() < r.end {
-            Err(TryGetError::NotEnoughBytes)
+            Err(ErrorKind::NotEnoughBytes)
         } else {
             Ok(self.peek_bytes(r))
         }
     }
-    fn try_get_bytes(&mut self, size: usize) -> Result<Bytes, TryGetError> {
+    fn try_get_bytes(&mut self, size: usize) -> Result<Bytes, ErrorKind> {
         if self.remaining() < size {
-            Err(TryGetError::NotEnoughBytes)
+            Err(ErrorKind::NotEnoughBytes)
         } else {
             Ok(self.get_bytes(size))
+        }
+    }
+    fn try_copy_to_slice(&mut self, dst: &mut [u8]) -> Result<(), ErrorKind> {
+        if self.remaining() < dst.len() {
+            Err(ErrorKind::NotEnoughBytes)
+        } else {
+            Ok(self.copy_to_slice(dst))
+        }
+    }
+    fn try_get_u8(&mut self) -> Result<u8, ErrorKind> {
+        if self.remaining() < size_of::<u8>() {
+            Err(ErrorKind::NotEnoughBytes)
+        } else {
+            Ok(self.get_u8())
+        }
+    }
+    fn try_get_u32(&mut self) -> Result<u32, ErrorKind> {
+        if self.remaining() < size_of::<u32>() {
+            Err(ErrorKind::NotEnoughBytes)
+        } else {
+            Ok(self.get_u32())
+        }
+    }
+    fn try_get_i8(&mut self) -> Result<i8, ErrorKind> {
+        if self.remaining() < size_of::<i8>() {
+            Err(ErrorKind::NotEnoughBytes)
+        } else {
+            Ok(self.get_i8())
+        }
+    }
+    fn try_get_i16(&mut self) -> Result<i16, ErrorKind> {
+        if self.remaining() < size_of::<i16>() {
+            Err(ErrorKind::NotEnoughBytes)
+        } else {
+            Ok(self.get_i16())
+        }
+    }
+    fn try_get_i32(&mut self) -> Result<i32, ErrorKind> {
+        if self.remaining() < size_of::<i32>() {
+            Err(ErrorKind::NotEnoughBytes)
+        } else {
+            Ok(self.get_i32())
+        }
+    }
+    fn try_get_i64(&mut self) -> Result<i64, ErrorKind> {
+        if self.remaining() < size_of::<i64>() {
+            Err(ErrorKind::NotEnoughBytes)
+        } else {
+            Ok(self.get_i64())
         }
     }
 }
@@ -47,10 +99,10 @@ impl<T: ByteBuf> ByteBuf for &mut T {
     fn get_bytes(&mut self, size: usize) -> Bytes {
         (**self).get_bytes(size)
     }
-    fn try_peek_bytes(&mut self, r: Range<usize>) -> Result<Bytes, TryGetError> {
+    fn try_peek_bytes(&mut self, r: Range<usize>) -> Result<Bytes, ErrorKind> {
         (**self).try_peek_bytes(r)
     }
-    fn try_get_bytes(&mut self, size: usize) -> Result<Bytes, TryGetError> {
+    fn try_get_bytes(&mut self, size: usize) -> Result<Bytes, ErrorKind> {
         (**self).try_get_bytes(size)
     }
 }

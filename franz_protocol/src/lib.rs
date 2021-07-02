@@ -11,6 +11,7 @@ use buf::{ByteBuf, ByteBufMut};
 
 pub mod types;
 pub mod buf;
+pub mod error;
 
 pub type StrBytes = string::String<bytes::Bytes>;
 
