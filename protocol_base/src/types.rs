@@ -28,7 +28,8 @@ pub struct Boolean;
 
 impl<T: NewType<bool>> Encoder<&T> for Boolean {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, value: &T) -> Result<(), EncodeError> {
-        Ok(buf.put_u8(if *value.borrow() { 1 } else { 0 }))
+        buf.put_u8(if *value.borrow() { 1 } else { 0 });
+        Ok(())
     }
     fn compute_size(&self, _value: &T) -> Result<usize, EncodeError> {
         Ok(1)
@@ -227,7 +228,8 @@ pub struct Uuid;
 
 impl<T: NewType<uuid::Uuid>> Encoder<&T> for Uuid {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, value: &T) -> Result<(), EncodeError> {
-        Ok(buf.put_slice(value.borrow().as_bytes()))
+        buf.put_slice(value.borrow().as_bytes());
+        Ok(())
     }
     fn compute_size(&self, _value: &T) -> Result<usize, EncodeError> {
         Ok(16)
@@ -507,7 +509,7 @@ impl Decoder<Option<StdString>> for CompactString {
             n => {
                 let mut strbuf = vec![0; (n-1) as usize];
                 buf.try_copy_to_slice(&mut strbuf)?;
-                Ok(Some(std::string::String::from_utf8(strbuf)?.into()))
+                Ok(Some(std::string::String::from_utf8(strbuf)?))
             },
         }
     }
@@ -557,7 +559,7 @@ pub struct Bytes;
 impl Encoder<Option<&[u8]>> for Bytes {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, value: Option<&[u8]>) -> Result<(), EncodeError> {
         if let Some(s) = value {
-            if s.len() > std::i32::MAX as usize {
+            if s.len() > i32::MAX as usize {
                 error!("Data is too long to encode ({} bytes)", s.len());
                 Err(EncodeError)
             } else {
@@ -572,7 +574,7 @@ impl Encoder<Option<&[u8]>> for Bytes {
     }
     fn compute_size(&self, value: Option<&[u8]>) -> Result<usize, EncodeError> {
         if let Some(s) = value {
-            if s.len() > std::i32::MAX as usize {
+            if s.len() > i32::MAX as usize {
                 error!("Data is too long to encode ({} bytes)", s.len());
                 Err(EncodeError)
             } else {
@@ -894,7 +896,7 @@ pub struct Array<E>(pub E);
 impl<T, E: for<'a> Encoder<&'a T>> Encoder<Option<&[T]>> for Array<E> {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, value: Option<&[T]>) -> Result<(), EncodeError> {
         if let Some(a) = value {
-            if a.len() > std::i32::MAX as usize {
+            if a.len() > i32::MAX as usize {
                 error!("Array is too long to encode ({} items)", a.len());
                 Err(EncodeError)
             } else {
@@ -911,7 +913,7 @@ impl<T, E: for<'a> Encoder<&'a T>> Encoder<Option<&[T]>> for Array<E> {
     }
     fn compute_size(&self, value: Option<&[T]>) -> Result<usize, EncodeError> {
         if let Some(a) = value {
-            if a.len() > std::i32::MAX as usize {
+            if a.len() > i32::MAX as usize {
                 error!("Array is too long to encode ({} items)", a.len());
                 Err(EncodeError)
             } else if let Some(fixed_size) = self.0.fixed_size() {
@@ -968,7 +970,7 @@ impl<T, E: for<'a> Encoder<&'a T>> Encoder<&Vec<T>> for Array<E> {
 impl<K: Eq + Hash, V, E: for<'a> Encoder<(&'a K, &'a V)>> Encoder<Option<&IndexMap<K, V>>> for Array<E> {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, value: Option<&IndexMap<K, V>>) -> Result<(), EncodeError> {
         if let Some(a) = value {
-            if a.len() > std::i32::MAX as usize {
+            if a.len() > i32::MAX as usize {
                 error!("Array is too long to encode ({} items)", a.len());
                 Err(EncodeError)
             } else {
@@ -985,7 +987,7 @@ impl<K: Eq + Hash, V, E: for<'a> Encoder<(&'a K, &'a V)>> Encoder<Option<&IndexM
     }
     fn compute_size(&self, value: Option<&IndexMap<K, V>>) -> Result<usize, EncodeError> {
         if let Some(a) = value {
-            if a.len() > std::i32::MAX as usize {
+            if a.len() > i32::MAX as usize {
                 error!("Array is too long to encode ({} items)", a.len());
                 Err(EncodeError)
             } else if let Some(fixed_size) = self.0.fixed_size() {
@@ -1302,8 +1304,8 @@ mod tests {
         test_encoder_decoder(VarInt, 1, &[2]);
         test_encoder_decoder(VarInt, -2, &[3]);
         test_encoder_decoder(VarInt, 300, &[216, 4]);
-        test_encoder_decoder(VarInt, std::i32::MAX, &[254, 255, 255, 255, 15]);
-        test_encoder_decoder(VarInt, std::i32::MIN, &[255, 255, 255, 255, 15]);
+        test_encoder_decoder(VarInt, i32::MAX, &[254, 255, 255, 255, 15]);
+        test_encoder_decoder(VarInt, i32::MIN, &[255, 255, 255, 255, 15]);
     }
 
     #[test]

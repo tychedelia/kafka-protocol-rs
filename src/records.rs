@@ -7,6 +7,7 @@ use string::TryFrom;
 use protocol_base::{Encoder, Decoder, EncodeError, DecodeError, StrBytes, types, buf::{ByteBuf, ByteBufMut, gap}};
 
 use super::compression::{self as cmpr, Compressor, Decompressor};
+use std::cmp::Ordering;
 
 pub const CASTAGNOLI: Crc<u32> = Crc::<u32>::new(&CRC_32_ISCSI);
 pub const IEEE: Crc<u32> = Crc::<u32>::new(&CRC_32_CKSUM);
@@ -148,7 +149,7 @@ impl RecordBatchEncoder {
 
                 let value_end = buf.offset();
                 let value_size = value_end - value_start;
-                if value_size > std::i32::MAX as usize {
+                if value_size > i32::MAX as usize {
                     error!("Record batch was too large to encode ({} bytes)", value_size);
                     return Err(EncodeError);
                 }
@@ -257,7 +258,7 @@ impl RecordBatchEncoder {
         types::Int32.encode(buf, base_sequence)?;
 
         // Record count
-        if num_records > std::i32::MAX as usize {
+        if num_records > i32::MAX as usize {
             error!("Too many records to encode in one batch ({} records)", num_records);
             return Err(EncodeError);
         }
@@ -276,7 +277,7 @@ impl RecordBatchEncoder {
 
         // Fill size gap
         let batch_size = batch_end - batch_start;
-        if batch_size > std::i32::MAX as usize {
+        if batch_size > i32::MAX as usize {
             error!("Record batch was too large to encode ({} bytes)", batch_size);
             return Err(EncodeError);
         }
@@ -468,7 +469,7 @@ impl Record {
         let message_end = buf.offset();
 
         let message_size = message_end - message_start;
-        if message_start > std::i32::MAX as usize {
+        if message_start > i32::MAX as usize {
             error!("Record was too large to encode ({} bytes)", message_size);
             return Err(EncodeError);
         }
@@ -503,7 +504,7 @@ impl Record {
     fn encode_new<B: ByteBufMut>(&self, buf: &mut B, min_offset: i64, min_timestamp: i64, options: &RecordEncodeOptions) -> Result<(), EncodeError> {
         // Size
         let size = self.compute_size_new(min_offset, min_timestamp, options)?;
-        if size > std::i32::MAX as usize {
+        if size > i32::MAX as usize {
             error!("Record was too large to encode ({} bytes)", size);
             return Err(EncodeError);
         }
@@ -514,7 +515,7 @@ impl Record {
 
         // Timestamp delta
         let timestamp_delta = self.timestamp - min_timestamp;
-        if timestamp_delta > std::i32::MAX as i64 || timestamp_delta < std::i32::MIN as i64 {
+        if timestamp_delta > i32::MAX as i64 || timestamp_delta < i32::MIN as i64 {
             error!("Timestamps within batch are too far apart ({}, {})", min_timestamp, self.timestamp);
             return Err(EncodeError);
         }
@@ -522,7 +523,7 @@ impl Record {
 
         // Offset delta
         let offset_delta = self.offset - min_offset;
-        if offset_delta > std::i32::MAX as i64 || offset_delta < std::i32::MIN as i64 {
+        if offset_delta > i32::MAX as i64 || offset_delta < i32::MIN as i64 {
             error!("Timestamps within batch are too far apart ({}, {})", min_offset, self.offset);
             return Err(EncodeError);
         }
@@ -530,7 +531,7 @@ impl Record {
 
         // Key
         if let Some(k) = self.key.as_ref() {
-            if k.len() > std::i32::MAX as usize {
+            if k.len() > i32::MAX as usize {
                 error!("Record key was too large to encode ({} bytes)", k.len());
                 return Err(EncodeError);
             }
@@ -542,7 +543,7 @@ impl Record {
 
         // Value
         if let Some(v) = self.value.as_ref() {
-            if v.len() > std::i32::MAX as usize {
+            if v.len() > i32::MAX as usize {
                 error!("Record value was too large to encode ({} bytes)", v.len());
                 return Err(EncodeError);
             }
@@ -553,14 +554,14 @@ impl Record {
         }
 
         // Headers
-        if self.headers.len() > std::i32::MAX as usize {
+        if self.headers.len() > i32::MAX as usize {
             error!("Too many record headers encode ({})", self.headers.len());
             return Err(EncodeError);
         }
         types::VarInt.encode(buf, self.headers.len() as i32)?;
         for (k, v) in &self.headers {
             // Key len
-            if k.len() > std::i32::MAX as usize {
+            if k.len() > i32::MAX as usize {
                 error!("Record header key was too large to encode ({} bytes)", k.len());
                 return Err(EncodeError);
             }
@@ -571,7 +572,7 @@ impl Record {
 
             // Value
             if let Some(v) = v.as_ref() {
-                if v.len() > std::i32::MAX as usize {
+                if v.len() > i32::MAX as usize {
                     error!("Record header value was too large to encode ({} bytes)", v.len());
                     return Err(EncodeError);
                 }
@@ -592,7 +593,7 @@ impl Record {
 
         // Timestamp delta
         let timestamp_delta = self.timestamp - min_timestamp;
-        if timestamp_delta > std::i32::MAX as i64 || timestamp_delta < std::i32::MIN as i64 {
+        if timestamp_delta > i32::MAX as i64 || timestamp_delta < i32::MIN as i64 {
             error!("Timestamps within batch are too far apart ({}, {})", min_timestamp, self.timestamp);
             return Err(EncodeError);
         }
@@ -600,7 +601,7 @@ impl Record {
 
         // Offset delta
         let offset_delta = self.offset - min_offset;
-        if offset_delta > std::i32::MAX as i64 || offset_delta < std::i32::MIN as i64 {
+        if offset_delta > i32::MAX as i64 || offset_delta < i32::MIN as i64 {
             error!("Timestamps within batch are too far apart ({}, {})", min_offset, self.offset);
             return Err(EncodeError);
         }
@@ -608,7 +609,7 @@ impl Record {
 
         // Key
         if let Some(k) = self.key.as_ref() {
-            if k.len() > std::i32::MAX as usize {
+            if k.len() > i32::MAX as usize {
                 error!("Record key was too large to encode ({} bytes)", k.len());
                 return Err(EncodeError);
             }
@@ -620,7 +621,7 @@ impl Record {
 
         // Value len
         if let Some(v) = self.value.as_ref() {
-            if v.len() > std::i32::MAX as usize {
+            if v.len() > i32::MAX as usize {
                 error!("Record value was too large to encode ({} bytes)", v.len());
                 return Err(EncodeError);
             }
@@ -631,14 +632,14 @@ impl Record {
         }
 
         // Headers
-        if self.headers.len() > std::i32::MAX as usize {
+        if self.headers.len() > i32::MAX as usize {
             error!("Too many record headers encode ({})", self.headers.len());
             return Err(EncodeError);
         }
         total_size += types::VarInt.compute_size(self.headers.len() as i32)?;
         for (k, v) in &self.headers {
             // Key len
-            if k.len() > std::i32::MAX as usize {
+            if k.len() > i32::MAX as usize {
                 error!("Record header key was too large to encode ({} bytes)", k.len());
                 return Err(EncodeError);
             }
@@ -649,7 +650,7 @@ impl Record {
 
             // Value
             if let Some(v) = v.as_ref() {
-                if v.len() > std::i32::MAX as usize {
+                if v.len() > i32::MAX as usize {
                     error!("Record header value was too large to encode ({} bytes)", v.len());
                     return Err(EncodeError);
                 }
@@ -771,24 +772,24 @@ impl Record {
 
         // Key
         let key_len: i32 = types::VarInt.decode(buf)?;
-        let key = if key_len < -1 {
-            error!("Unexpected negative record key length ({} bytes)", key_len);
-            return Err(DecodeError);
-        } else if key_len == -1 {
-            None
-        } else {
-            Some(buf.try_get_bytes(key_len as usize)?)
+        let key = match key_len.cmp(&-1) {
+            Ordering::Less => {
+                error!("Unexpected negative record key length ({} bytes)", key_len);
+                return Err(DecodeError);
+            },
+            Ordering::Equal => None,
+            Ordering::Greater => Some(buf.try_get_bytes(key_len as usize)?)
         };
 
         // Value
         let value_len: i32 = types::VarInt.decode(buf)?;
-        let value = if value_len < -1 {
-            error!("Unexpected negative record value length ({} bytes)", value_len);
-            return Err(DecodeError);
-        } else if value_len == -1 {
-            None
-        } else {
-            Some(buf.try_get_bytes(value_len as usize)?)
+        let value = match value_len.cmp(&-1) {
+            Ordering::Less => {
+                error!("Unexpected negative record value length ({} bytes)", value_len);
+                return Err(DecodeError);
+            },
+            Ordering::Equal => None,
+            Ordering::Greater => Some(buf.try_get_bytes(value_len as usize)?)
         };
 
         // Headers
@@ -815,13 +816,13 @@ impl Record {
             let value_len: i32 = types::VarInt.decode(buf)?;
 
             // Value
-            let value = if value_len < -1 {
-                error!("Unexpected negative record header value length ({} bytes)", value_len);
-                return Err(DecodeError);
-            } else if value_len == -1 {
-                None
-            } else {
-                Some(buf.try_get_bytes(value_len as usize)?)
+            let value = match value_len.cmp(&-2) {
+                Ordering::Less => {
+                        error!("Unexpected negative record header value length ({} bytes)", value_len);
+                        return Err(DecodeError);
+                },
+                Ordering::Equal => None,
+                Ordering::Greater => Some(buf.try_get_bytes(value_len as usize)?)
             };
 
             headers.insert(key, value);
