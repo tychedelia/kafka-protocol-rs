@@ -4,7 +4,7 @@ use log::{info, error};
 use crc::crc32;
 use string::TryFrom;
 
-use franz_protocol::{Encoder, Decoder, EncodeError, DecodeError, StrBytes, types, buf::{ByteBuf, ByteBufMut, gap}};
+use protocol_base::{Encoder, Decoder, EncodeError, DecodeError, StrBytes, types, buf::{ByteBuf, ByteBufMut, gap}};
 
 use super::compression::{self as cmpr, Compressor, Decompressor};
 

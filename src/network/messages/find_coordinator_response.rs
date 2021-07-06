@@ -7,7 +7,7 @@ use std::collections::BTreeMap;
 use bytes::Bytes;
 use log::error;
 
-use franz_protocol::{
+use protocol_base::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
     types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };

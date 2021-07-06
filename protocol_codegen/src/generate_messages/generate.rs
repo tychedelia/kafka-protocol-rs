@@ -839,7 +839,7 @@ fn write_file_header<W: Write>(
     writeln!(w, "use bytes::Bytes;")?;
     writeln!(w, "use log::error;")?;
     writeln!(w)?;
-    writeln!(w, "use franz_protocol::{{")?;
+    writeln!(w, "use protocol_base::{{")?;
     writeln!(w, "    Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,")?;
     writeln!(w, "    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{{ByteBuf, ByteBufMut}}")?;
     writeln!(w, "}};")?;

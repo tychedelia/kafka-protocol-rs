@@ -10,7 +10,7 @@ use futures::future::FutureExt;
 use async_trait::async_trait;
 use tokio::time::Elapsed;
 
-use franz_protocol::{VersionRange, Request, Encodable, Decodable, EncodeError, DecodeError, HeaderVersion};
+use protocol_base::{VersionRange, Request, Encodable, Decodable, EncodeError, DecodeError, HeaderVersion};
 
 use super::messages::{RequestHeader, ResponseHeader, ApiVersionsRequest};
 use super::service::{Service, ServiceBase, ServiceExt, BoxService, RecvFuture, Pipeline, Shutdown, EagerService};

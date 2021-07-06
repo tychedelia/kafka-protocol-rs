@@ -1,6 +1,6 @@
 //! THIS CODE IS AUTOMATICALLY GENERATED. DO NOT EDIT.
 
-use franz_protocol::{NewType, Request, StrBytes};
+use protocol_base::{NewType, Request, StrBytes};
 
 pub mod add_offsets_to_txn_request;
 pub use add_offsets_to_txn_request::AddOffsetsToTxnRequest;

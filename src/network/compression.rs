@@ -1,5 +1,5 @@
-use franz_protocol::buf::{ByteBuf, ByteBufMut};
-use franz_protocol::{EncodeError, DecodeError};
+use protocol_base::buf::{ByteBuf, ByteBufMut};
+use protocol_base::{EncodeError, DecodeError};
 
 mod none;
 mod snappy;

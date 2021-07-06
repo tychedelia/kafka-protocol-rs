@@ -1,6 +1,6 @@
 use std::net::SocketAddr;
 
-use franz_protocol::StrBytes;
+use protocol_base::StrBytes;
 
 use crate::network::broker;
 use crate::network::service_map::ServiceMap;
