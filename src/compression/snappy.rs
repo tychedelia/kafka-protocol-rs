@@ -39,7 +39,7 @@ impl<B: ByteBuf> Decompressor<B> for Snappy {
         F: FnOnce(&mut Self::Buf) -> Result<R, DecodeError>
     {
         // Allocate a temporary buffer to hold the uncompressed bytes
-        let buf = buf.to_bytes();
+        let buf = buf.copy_to_bytes(buf.remaining());
         let actual_len = decompress_len(&buf).map_err(|e| {
             error!("Failed to decompress buffer: {}", e);
             DecodeError

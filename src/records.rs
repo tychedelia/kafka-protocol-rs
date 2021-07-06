@@ -1,12 +1,16 @@
 use bytes::Bytes;
 use indexmap::IndexMap;
 use log::{info, error};
-use crc::crc32;
+use crc::{CRC_32_CKSUM, CRC_32_ISCSI, Crc};
 use string::TryFrom;
 
 use protocol_base::{Encoder, Decoder, EncodeError, DecodeError, StrBytes, types, buf::{ByteBuf, ByteBufMut, gap}};
 
 use super::compression::{self as cmpr, Compressor, Decompressor};
+
+pub const CASTAGNOLI: Crc<u32> = Crc::<u32>::new(&CRC_32_ISCSI);
+pub const IEEE: Crc<u32> = Crc::<u32>::new(&CRC_32_CKSUM);
+
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum Compression {
@@ -280,7 +284,7 @@ impl RecordBatchEncoder {
         buf.fill_typed_gap(size_gap, batch_size as i32);
 
         // Fill CRC gap
-        let crc = crc32::checksum_castagnoli(buf.range(content_start..batch_end));
+        let crc = CASTAGNOLI.checksum(buf.range(content_start..batch_end));
         buf.fill_typed_gap(crc_gap, crc);
 
         Ok(true)
@@ -358,7 +362,7 @@ impl RecordBatchDecoder {
 
         // CRC
         let supplied_crc: u32 = types::UInt32.decode(buf)?;
-        let actual_crc = crc32::checksum_castagnoli(&buf);
+        let actual_crc = CASTAGNOLI.checksum(&buf);
         
         if supplied_crc != actual_crc {
             error!("Cyclic redundancy check failed ({} != {})", supplied_crc, actual_crc);
@@ -470,7 +474,7 @@ impl Record {
         }
         buf.fill_typed_gap(size_gap, message_size as i32);
 
-        let crc = crc32::checksum_ieee(buf.range(content_start..message_end));
+        let crc = IEEE.checksum(buf.range(content_start..message_end));
         buf.fill_typed_gap(crc_gap, crc);
 
         Ok(())
@@ -671,7 +675,7 @@ impl Record {
 
         // CRC
         let supplied_crc: u32 = types::UInt32.decode(buf)?;
-        let actual_crc = crc32::checksum_ieee(&buf);
+        let actual_crc = IEEE.checksum(&buf);
         
         if supplied_crc != actual_crc {
             error!("Cyclic redundancy check failed ({} != {})", supplied_crc, actual_crc);

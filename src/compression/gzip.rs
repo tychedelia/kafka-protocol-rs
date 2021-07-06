@@ -1,7 +1,7 @@
 use std::io::Write;
 
 use bytes::{Bytes, BytesMut};
-use bytes::buf::BufMutExt;
+use bytes::buf::BufMut;
 use flate2::Compression;
 use flate2::write::{GzEncoder, GzDecoder};
 use log::error;
@@ -52,7 +52,7 @@ impl<B: ByteBuf> Decompressor<B> for Gzip {
 
         // Decompress directly from the input buffer
         let mut d = GzDecoder::new((&mut tmp).writer());
-        d.write_all(&buf.to_bytes()).map_err(decompression_err)?;
+        d.write_all(&buf.copy_to_bytes(buf.remaining())).map_err(decompression_err)?;
         d.finish().map_err(decompression_err)?;
 
         f(&mut tmp.into())
