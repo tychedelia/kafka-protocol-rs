@@ -1,9 +1,8 @@
 [workspace]
-members = ["franz_protocol", "xtask"]
-# exclude = ["xtask"]
+members = ["protocol_base", "protocol_codegen"]
 
 [package]
-name = "franz"
+name = "kafka_protocol"
 version = "0.1.0"
 authors = ["Diggory Blake <diggsey@googlemail.com>"]
 edition = "2018"
