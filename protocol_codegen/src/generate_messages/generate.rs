@@ -6,7 +6,7 @@ use std::fmt::Display;
 use failure::Error;
 use inflector::Inflector;
 
-use super::spec::{Spec, SpecType, TypeSpec, PrimitiveType, FieldSpec, VersionSpec};
+use super::spec::{FieldSpec, PrimitiveType, Spec, SpecType, TypeSpec, VersionSpec};
 use super::code_writer::CodeWriter;
 use super::expr::{Expr, CmpType};
 
@@ -26,9 +26,10 @@ fn primitive_default(prim: PrimitiveType) -> PreparedDefault {
     use PrimitiveType::*;
     match prim {
         Bool => PreparedDefault::Boolean(false),
-        Int8 | Int16 | Int32 | Int64 => PreparedDefault::Numeric("0".into()),
+        Int8 | Int16 | Uint16 | Int32 | Int64 => PreparedDefault::Numeric("0".into()),
         Float64 => PreparedDefault::Numeric("0.0".into()),
-        String | Bytes => PreparedDefault::Empty,
+        String | Bytes | Records => PreparedDefault::Empty,
+        Uuid => PreparedDefault::Uuid,
     }
 }
 
@@ -90,7 +91,7 @@ impl PreparedType {
         match self {
             Self::Primitive(prim) => primitive_default(*prim),
             Self::Entity(entity_type) => primitive_default(entity_type.inner),
-            Self::Struct(_) => panic!("Structs do not have a default value"),
+            Self::Struct(_) => PreparedDefault::EmptyStruct,
             Self::Array(_) | Self::Map(_, _) => PreparedDefault::Empty,
         }
     }
@@ -109,6 +110,8 @@ enum PreparedDefault {
     Boolean(bool),
     Numeric(String),
     String(String),
+    Uuid,
+    EmptyStruct,
 }
 
 impl PreparedDefault {
@@ -130,6 +133,9 @@ impl PreparedDefault {
                 Self::Boolean(false) => expr.deref().not(),
                 Self::Numeric(v) => expr.deref().compare(CmpType::Eq, &Expr::new_atom(v)),
                 Self::String(s) => expr.compare(CmpType::Eq, &Expr::new_str(s)),
+                Self::Uuid => expr.compare(CmpType::Eq, &Expr::new_atom("&Uuid::nil()")),
+                // TODO: store default as const so we don't need to allocate on every serialization
+                Self::EmptyStruct => expr.compare(CmpType::Eq, &Expr::new_atom("&Default::default()"))
             }
         }
     }
@@ -149,11 +155,13 @@ impl PreparedDefault {
         } else {
             match self {
                 Self::Null => unreachable!(),
-                Self::Empty => Expr::new_atom("Default::default()"),
+                // TODO: unclear if empty struct default value can be used as zero val for comparison
+                Self::Empty | Self::EmptyStruct => Expr::new_atom("Default::default()"),
                 Self::Boolean(true) => Expr::new_atom("true"),
                 Self::Boolean(false) => Expr::new_atom("false"),
                 Self::Numeric(v) => Expr::new_unary(v),
                 Self::String(s) => Expr::new_atom(&format!("StrBytes::from_str({:?})", s)),
+                Self::Uuid => Expr::new_atom(&format!("Uuid::nil()"))
             }
         }
     }
@@ -213,7 +221,7 @@ fn prepare_field_type<W: Write>(
                 PreparedType::Struct(WrittenStruct { name, map_key: Some(map_key) }) => PreparedType::Map(map_key, name),
                 other => PreparedType::Array(Box::new(other)),
             }
-        }
+        },
     })
 }
 
@@ -620,7 +628,14 @@ fn write_struct_def<W: Write>(
             map_key = Some(Box::new(type_.clone()))
         }
 
-        let name = field.name.to_snake_case();
+        let mut name = field.name.to_snake_case();
+        if name == "type" {
+            name = "_type".to_string();
+        }
+        if name == "match" {
+            name = "_match".to_string();
+        }
+
         let optional = !field.nullable_versions.is_none();
         let versions = field.versions.intersect(valid_versions);
         let flexible_versions = field.flexible_versions.unwrap_or(flexible_msg_versions);
@@ -656,7 +671,9 @@ fn write_struct_def<W: Write>(
         };
 
         prepared_fields.push(PreparedField {
-            name, optional, type_,
+            name, 
+            optional, 
+            type_,
             versions,
             tag: field.tag,
             tagged_versions,
@@ -671,7 +688,7 @@ fn write_struct_def<W: Write>(
     }
 
     writeln!(w, "/// Valid versions: {}", valid_versions)?;
-    writeln!(w, "#[derive(Debug, Clone)]")?;
+    writeln!(w, "#[derive(Debug, Clone, PartialEq)]")?;
     write!(w, "pub struct {} ", name)?;
     w.block(|w| {
         for prepared_field in &prepared_fields {
@@ -838,6 +855,7 @@ fn write_file_header<W: Write>(
     writeln!(w)?;
     writeln!(w, "use bytes::Bytes;")?;
     writeln!(w, "use log::error;")?;
+    writeln!(w, "use uuid::Uuid;")?;
     writeln!(w)?;
     writeln!(w, "use protocol_base::{{")?;
     writeln!(w, "    Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,")?;

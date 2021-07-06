@@ -6,6 +6,7 @@ use std::collections::BTreeMap;
 
 use bytes::Bytes;
 use log::error;
+use uuid::Uuid;
 
 use protocol_base::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
@@ -14,33 +15,29 @@ use protocol_base::{
 
 
 /// Valid versions: 0-2
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct TopicPartitions {
-    /// The name of a topic.
-    /// 
-    /// Supported API versions: 0-2
-    pub topic: super::TopicName,
-
     /// The partitions of this topic whose leader should be elected.
     /// 
     /// Supported API versions: 0-2
-    pub partition_id: Vec<i32>,
+    pub partitions: Vec<i32>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
 }
 
-impl Encodable for TopicPartitions {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+impl MapEncodable for TopicPartitions {
+    type Key = super::TopicName;
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version == 2 {
-            types::CompactString.encode(buf, &self.topic)?;
+            types::CompactString.encode(buf, key)?;
         } else {
-            types::String.encode(buf, &self.topic)?;
+            types::String.encode(buf, key)?;
         }
         if version == 2 {
-            types::CompactArray(types::Int32).encode(buf, &self.partition_id)?;
+            types::CompactArray(types::Int32).encode(buf, &self.partitions)?;
         } else {
-            types::Array(types::Int32).encode(buf, &self.partition_id)?;
+            types::Array(types::Int32).encode(buf, &self.partitions)?;
         }
         if version == 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -54,17 +51,17 @@ impl Encodable for TopicPartitions {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         if version == 2 {
-            total_size += types::CompactString.compute_size(&self.topic)?;
+            total_size += types::CompactString.compute_size(key)?;
         } else {
-            total_size += types::String.compute_size(&self.topic)?;
+            total_size += types::String.compute_size(key)?;
         }
         if version == 2 {
-            total_size += types::CompactArray(types::Int32).compute_size(&self.partition_id)?;
+            total_size += types::CompactArray(types::Int32).compute_size(&self.partitions)?;
         } else {
-            total_size += types::Array(types::Int32).compute_size(&self.partition_id)?;
+            total_size += types::Array(types::Int32).compute_size(&self.partitions)?;
         }
         if version == 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -80,14 +77,15 @@ impl Encodable for TopicPartitions {
     }
 }
 
-impl Decodable for TopicPartitions {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let topic = if version == 2 {
+impl MapDecodable for TopicPartitions {
+    type Key = super::TopicName;
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+        let key_field = if version == 2 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
         };
-        let partition_id = if version == 2 {
+        let partitions = if version == 2 {
             types::CompactArray(types::Int32).decode(buf)?
         } else {
             types::Array(types::Int32).decode(buf)?
@@ -103,19 +101,17 @@ impl Decodable for TopicPartitions {
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
-        Ok(Self {
-            topic,
-            partition_id,
+        Ok((key_field, Self {
+            partitions,
             unknown_tagged_fields,
-        })
+        }))
     }
 }
 
 impl Default for TopicPartitions {
     fn default() -> Self {
         Self {
-            topic: Default::default(),
-            partition_id: Default::default(),
+            partitions: Default::default(),
             unknown_tagged_fields: BTreeMap::new(),
         }
     }
@@ -126,7 +122,7 @@ impl Message for TopicPartitions {
 }
 
 /// Valid versions: 0-2
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ElectLeadersRequest {
     /// Type of elections to conduct for the partition. A value of '0' elects the preferred replica. A value of '1' elects the first live replica if there are no in-sync replica.
     /// 
@@ -136,7 +132,7 @@ pub struct ElectLeadersRequest {
     /// The topic partitions to elect leaders.
     /// 
     /// Supported API versions: 0-2
-    pub topic_partitions: Option<Vec<TopicPartitions>>,
+    pub topic_partitions: Option<indexmap::IndexMap<super::TopicName, TopicPartitions>>,
 
     /// The time in ms to wait for the election to complete.
     /// 

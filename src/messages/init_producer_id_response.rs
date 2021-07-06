@@ -6,6 +6,7 @@ use std::collections::BTreeMap;
 
 use bytes::Bytes;
 use log::error;
+use uuid::Uuid;
 
 use protocol_base::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
@@ -13,27 +14,27 @@ use protocol_base::{
 };
 
 
-/// Valid versions: 0-3
-#[derive(Debug, Clone)]
+/// Valid versions: 0-4
+#[derive(Debug, Clone, PartialEq)]
 pub struct InitProducerIdResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub throttle_time_ms: i32,
 
     /// The error code, or 0 if there was no error.
     /// 
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub error_code: i16,
 
     /// The current producer id.
     /// 
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub producer_id: super::ProducerId,
 
     /// The current epoch associated with the producer id.
     /// 
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub producer_epoch: i16,
 
     /// Other tagged fields
@@ -118,7 +119,7 @@ impl Default for InitProducerIdResponse {
 }
 
 impl Message for InitProducerIdResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
 }
 
 impl HeaderVersion for InitProducerIdResponse {

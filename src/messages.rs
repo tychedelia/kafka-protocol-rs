@@ -14,11 +14,29 @@ pub use add_partitions_to_txn_request::AddPartitionsToTxnRequest;
 pub mod add_partitions_to_txn_response;
 pub use add_partitions_to_txn_response::AddPartitionsToTxnResponse;
 
+pub mod allocate_producer_ids_request;
+pub use allocate_producer_ids_request::AllocateProducerIdsRequest;
+
+pub mod allocate_producer_ids_response;
+pub use allocate_producer_ids_response::AllocateProducerIdsResponse;
+
+pub mod alter_client_quotas_request;
+pub use alter_client_quotas_request::AlterClientQuotasRequest;
+
+pub mod alter_client_quotas_response;
+pub use alter_client_quotas_response::AlterClientQuotasResponse;
+
 pub mod alter_configs_request;
 pub use alter_configs_request::AlterConfigsRequest;
 
 pub mod alter_configs_response;
 pub use alter_configs_response::AlterConfigsResponse;
+
+pub mod alter_isr_request;
+pub use alter_isr_request::AlterIsrRequest;
+
+pub mod alter_isr_response;
+pub use alter_isr_response::AlterIsrResponse;
 
 pub mod alter_partition_reassignments_request;
 pub use alter_partition_reassignments_request::AlterPartitionReassignmentsRequest;
@@ -32,11 +50,41 @@ pub use alter_replica_log_dirs_request::AlterReplicaLogDirsRequest;
 pub mod alter_replica_log_dirs_response;
 pub use alter_replica_log_dirs_response::AlterReplicaLogDirsResponse;
 
+pub mod alter_user_scram_credentials_request;
+pub use alter_user_scram_credentials_request::AlterUserScramCredentialsRequest;
+
+pub mod alter_user_scram_credentials_response;
+pub use alter_user_scram_credentials_response::AlterUserScramCredentialsResponse;
+
 pub mod api_versions_request;
 pub use api_versions_request::ApiVersionsRequest;
 
 pub mod api_versions_response;
 pub use api_versions_response::ApiVersionsResponse;
+
+pub mod begin_quorum_epoch_request;
+pub use begin_quorum_epoch_request::BeginQuorumEpochRequest;
+
+pub mod begin_quorum_epoch_response;
+pub use begin_quorum_epoch_response::BeginQuorumEpochResponse;
+
+pub mod broker_heartbeat_request;
+pub use broker_heartbeat_request::BrokerHeartbeatRequest;
+
+pub mod broker_heartbeat_response;
+pub use broker_heartbeat_response::BrokerHeartbeatResponse;
+
+pub mod broker_registration_request;
+pub use broker_registration_request::BrokerRegistrationRequest;
+
+pub mod broker_registration_response;
+pub use broker_registration_response::BrokerRegistrationResponse;
+
+pub mod consumer_protocol_assignment;
+pub use consumer_protocol_assignment::ConsumerProtocolAssignment;
+
+pub mod consumer_protocol_subscription;
+pub use consumer_protocol_subscription::ConsumerProtocolSubscription;
 
 pub mod controlled_shutdown_request;
 pub use controlled_shutdown_request::ControlledShutdownRequest;
@@ -68,6 +116,9 @@ pub use create_topics_request::CreateTopicsRequest;
 pub mod create_topics_response;
 pub use create_topics_response::CreateTopicsResponse;
 
+pub mod default_principal_data;
+pub use default_principal_data::DefaultPrincipalData;
+
 pub mod delete_acls_request;
 pub use delete_acls_request::DeleteAclsRequest;
 
@@ -98,6 +149,18 @@ pub use describe_acls_request::DescribeAclsRequest;
 pub mod describe_acls_response;
 pub use describe_acls_response::DescribeAclsResponse;
 
+pub mod describe_client_quotas_request;
+pub use describe_client_quotas_request::DescribeClientQuotasRequest;
+
+pub mod describe_client_quotas_response;
+pub use describe_client_quotas_response::DescribeClientQuotasResponse;
+
+pub mod describe_cluster_request;
+pub use describe_cluster_request::DescribeClusterRequest;
+
+pub mod describe_cluster_response;
+pub use describe_cluster_response::DescribeClusterResponse;
+
 pub mod describe_configs_request;
 pub use describe_configs_request::DescribeConfigsRequest;
 
@@ -122,17 +185,53 @@ pub use describe_log_dirs_request::DescribeLogDirsRequest;
 pub mod describe_log_dirs_response;
 pub use describe_log_dirs_response::DescribeLogDirsResponse;
 
+pub mod describe_producers_request;
+pub use describe_producers_request::DescribeProducersRequest;
+
+pub mod describe_producers_response;
+pub use describe_producers_response::DescribeProducersResponse;
+
+pub mod describe_quorum_request;
+pub use describe_quorum_request::DescribeQuorumRequest;
+
+pub mod describe_quorum_response;
+pub use describe_quorum_response::DescribeQuorumResponse;
+
+pub mod describe_transactions_request;
+pub use describe_transactions_request::DescribeTransactionsRequest;
+
+pub mod describe_transactions_response;
+pub use describe_transactions_response::DescribeTransactionsResponse;
+
+pub mod describe_user_scram_credentials_request;
+pub use describe_user_scram_credentials_request::DescribeUserScramCredentialsRequest;
+
+pub mod describe_user_scram_credentials_response;
+pub use describe_user_scram_credentials_response::DescribeUserScramCredentialsResponse;
+
 pub mod elect_leaders_request;
 pub use elect_leaders_request::ElectLeadersRequest;
 
 pub mod elect_leaders_response;
 pub use elect_leaders_response::ElectLeadersResponse;
 
+pub mod end_quorum_epoch_request;
+pub use end_quorum_epoch_request::EndQuorumEpochRequest;
+
+pub mod end_quorum_epoch_response;
+pub use end_quorum_epoch_response::EndQuorumEpochResponse;
+
 pub mod end_txn_request;
 pub use end_txn_request::EndTxnRequest;
 
 pub mod end_txn_response;
 pub use end_txn_response::EndTxnResponse;
+
+pub mod envelope_request;
+pub use envelope_request::EnvelopeRequest;
+
+pub mod envelope_response;
+pub use envelope_response::EnvelopeResponse;
 
 pub mod expire_delegation_token_request;
 pub use expire_delegation_token_request::ExpireDelegationTokenRequest;
@@ -145,6 +244,12 @@ pub use fetch_request::FetchRequest;
 
 pub mod fetch_response;
 pub use fetch_response::FetchResponse;
+
+pub mod fetch_snapshot_request;
+pub use fetch_snapshot_request::FetchSnapshotRequest;
+
+pub mod fetch_snapshot_response;
+pub use fetch_snapshot_response::FetchSnapshotResponse;
 
 pub mod find_coordinator_request;
 pub use find_coordinator_request::FindCoordinatorRequest;
@@ -182,6 +287,9 @@ pub use leader_and_isr_request::LeaderAndIsrRequest;
 pub mod leader_and_isr_response;
 pub use leader_and_isr_response::LeaderAndIsrResponse;
 
+pub mod leader_change_message;
+pub use leader_change_message::LeaderChangeMessage;
+
 pub mod leave_group_request;
 pub use leave_group_request::LeaveGroupRequest;
 
@@ -194,17 +302,23 @@ pub use list_groups_request::ListGroupsRequest;
 pub mod list_groups_response;
 pub use list_groups_response::ListGroupsResponse;
 
-pub mod list_offset_request;
-pub use list_offset_request::ListOffsetRequest;
+pub mod list_offsets_request;
+pub use list_offsets_request::ListOffsetsRequest;
 
-pub mod list_offset_response;
-pub use list_offset_response::ListOffsetResponse;
+pub mod list_offsets_response;
+pub use list_offsets_response::ListOffsetsResponse;
 
 pub mod list_partition_reassignments_request;
 pub use list_partition_reassignments_request::ListPartitionReassignmentsRequest;
 
 pub mod list_partition_reassignments_response;
 pub use list_partition_reassignments_response::ListPartitionReassignmentsResponse;
+
+pub mod list_transactions_request;
+pub use list_transactions_request::ListTransactionsRequest;
+
+pub mod list_transactions_response;
+pub use list_transactions_response::ListTransactionsResponse;
 
 pub mod metadata_request;
 pub use metadata_request::MetadataRequest;
@@ -266,6 +380,12 @@ pub use sasl_handshake_request::SaslHandshakeRequest;
 pub mod sasl_handshake_response;
 pub use sasl_handshake_response::SaslHandshakeResponse;
 
+pub mod snapshot_footer_record;
+pub use snapshot_footer_record::SnapshotFooterRecord;
+
+pub mod snapshot_header_record;
+pub use snapshot_header_record::SnapshotHeaderRecord;
+
 pub mod stop_replica_request;
 pub use stop_replica_request::StopReplicaRequest;
 
@@ -284,11 +404,29 @@ pub use txn_offset_commit_request::TxnOffsetCommitRequest;
 pub mod txn_offset_commit_response;
 pub use txn_offset_commit_response::TxnOffsetCommitResponse;
 
+pub mod unregister_broker_request;
+pub use unregister_broker_request::UnregisterBrokerRequest;
+
+pub mod unregister_broker_response;
+pub use unregister_broker_response::UnregisterBrokerResponse;
+
+pub mod update_features_request;
+pub use update_features_request::UpdateFeaturesRequest;
+
+pub mod update_features_response;
+pub use update_features_response::UpdateFeaturesResponse;
+
 pub mod update_metadata_request;
 pub use update_metadata_request::UpdateMetadataRequest;
 
 pub mod update_metadata_response;
 pub use update_metadata_response::UpdateMetadataResponse;
+
+pub mod vote_request;
+pub use vote_request::VoteRequest;
+
+pub mod vote_response;
+pub use vote_response::VoteResponse;
 
 pub mod write_txn_markers_request;
 pub use write_txn_markers_request::WriteTxnMarkersRequest;
@@ -306,9 +444,9 @@ impl Request for FetchRequest {
     type Response = FetchResponse;
 }
 
-impl Request for ListOffsetRequest {
+impl Request for ListOffsetsRequest {
     const KEY: i16 = 2;
-    type Response = ListOffsetResponse;
+    type Response = ListOffsetsResponse;
 }
 
 impl Request for MetadataRequest {
@@ -534,6 +672,106 @@ impl Request for ListPartitionReassignmentsRequest {
 impl Request for OffsetDeleteRequest {
     const KEY: i16 = 47;
     type Response = OffsetDeleteResponse;
+}
+
+impl Request for DescribeClientQuotasRequest {
+    const KEY: i16 = 48;
+    type Response = DescribeClientQuotasResponse;
+}
+
+impl Request for AlterClientQuotasRequest {
+    const KEY: i16 = 49;
+    type Response = AlterClientQuotasResponse;
+}
+
+impl Request for DescribeUserScramCredentialsRequest {
+    const KEY: i16 = 50;
+    type Response = DescribeUserScramCredentialsResponse;
+}
+
+impl Request for AlterUserScramCredentialsRequest {
+    const KEY: i16 = 51;
+    type Response = AlterUserScramCredentialsResponse;
+}
+
+impl Request for VoteRequest {
+    const KEY: i16 = 52;
+    type Response = VoteResponse;
+}
+
+impl Request for BeginQuorumEpochRequest {
+    const KEY: i16 = 53;
+    type Response = BeginQuorumEpochResponse;
+}
+
+impl Request for EndQuorumEpochRequest {
+    const KEY: i16 = 54;
+    type Response = EndQuorumEpochResponse;
+}
+
+impl Request for DescribeQuorumRequest {
+    const KEY: i16 = 55;
+    type Response = DescribeQuorumResponse;
+}
+
+impl Request for AlterIsrRequest {
+    const KEY: i16 = 56;
+    type Response = AlterIsrResponse;
+}
+
+impl Request for UpdateFeaturesRequest {
+    const KEY: i16 = 57;
+    type Response = UpdateFeaturesResponse;
+}
+
+impl Request for EnvelopeRequest {
+    const KEY: i16 = 58;
+    type Response = EnvelopeResponse;
+}
+
+impl Request for FetchSnapshotRequest {
+    const KEY: i16 = 59;
+    type Response = FetchSnapshotResponse;
+}
+
+impl Request for DescribeClusterRequest {
+    const KEY: i16 = 60;
+    type Response = DescribeClusterResponse;
+}
+
+impl Request for DescribeProducersRequest {
+    const KEY: i16 = 61;
+    type Response = DescribeProducersResponse;
+}
+
+impl Request for BrokerRegistrationRequest {
+    const KEY: i16 = 62;
+    type Response = BrokerRegistrationResponse;
+}
+
+impl Request for BrokerHeartbeatRequest {
+    const KEY: i16 = 63;
+    type Response = BrokerHeartbeatResponse;
+}
+
+impl Request for UnregisterBrokerRequest {
+    const KEY: i16 = 64;
+    type Response = UnregisterBrokerResponse;
+}
+
+impl Request for DescribeTransactionsRequest {
+    const KEY: i16 = 65;
+    type Response = DescribeTransactionsResponse;
+}
+
+impl Request for ListTransactionsRequest {
+    const KEY: i16 = 66;
+    type Response = ListTransactionsResponse;
+}
+
+impl Request for AllocateProducerIdsRequest {
+    const KEY: i16 = 67;
+    type Response = AllocateProducerIdsResponse;
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default, Copy)]

@@ -6,6 +6,7 @@ use std::collections::BTreeMap;
 
 use bytes::Bytes;
 use log::error;
+use uuid::Uuid;
 
 use protocol_base::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
@@ -14,7 +15,7 @@ use protocol_base::{
 
 
 /// Valid versions: 0-2
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DescribedDelegationTokenRenewer {
     /// The renewer principal type
     /// 
@@ -126,7 +127,7 @@ impl Message for DescribedDelegationTokenRenewer {
 }
 
 /// Valid versions: 0-2
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DescribedDelegationToken {
     /// The token principal type.
     /// 
@@ -334,7 +335,7 @@ impl Message for DescribedDelegationToken {
 }
 
 /// Valid versions: 0-2
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DescribeDelegationTokenResponse {
     /// The error code, or 0 if there was no error.
     /// 

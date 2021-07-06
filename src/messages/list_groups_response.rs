@@ -6,6 +6,7 @@ use std::collections::BTreeMap;
 
 use bytes::Bytes;
 use log::error;
+use uuid::Uuid;
 
 use protocol_base::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
@@ -13,18 +14,23 @@ use protocol_base::{
 };
 
 
-/// Valid versions: 0-3
-#[derive(Debug, Clone)]
+/// Valid versions: 0-4
+#[derive(Debug, Clone, PartialEq)]
 pub struct ListedGroup {
     /// The group ID.
     /// 
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub group_id: super::GroupId,
 
     /// The group protocol type.
     /// 
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub protocol_type: StrBytes,
+
+    /// The group state name.
+    /// 
+    /// Supported API versions: 4
+    pub group_state: StrBytes,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
@@ -32,17 +38,20 @@ pub struct ListedGroup {
 
 impl Encodable for ListedGroup {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 3 {
+        if version >= 3 {
             types::CompactString.encode(buf, &self.group_id)?;
         } else {
             types::String.encode(buf, &self.group_id)?;
         }
-        if version == 3 {
+        if version >= 3 {
             types::CompactString.encode(buf, &self.protocol_type)?;
         } else {
             types::String.encode(buf, &self.protocol_type)?;
         }
-        if version == 3 {
+        if version == 4 {
+            types::CompactString.encode(buf, &self.group_state)?;
+        }
+        if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -56,17 +65,20 @@ impl Encodable for ListedGroup {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 3 {
+        if version >= 3 {
             total_size += types::CompactString.compute_size(&self.group_id)?;
         } else {
             total_size += types::String.compute_size(&self.group_id)?;
         }
-        if version == 3 {
+        if version >= 3 {
             total_size += types::CompactString.compute_size(&self.protocol_type)?;
         } else {
             total_size += types::String.compute_size(&self.protocol_type)?;
         }
-        if version == 3 {
+        if version == 4 {
+            total_size += types::CompactString.compute_size(&self.group_state)?;
+        }
+        if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -82,18 +94,23 @@ impl Encodable for ListedGroup {
 
 impl Decodable for ListedGroup {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let group_id = if version == 3 {
+        let group_id = if version >= 3 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
         };
-        let protocol_type = if version == 3 {
+        let protocol_type = if version >= 3 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
+        };
+        let group_state = if version == 4 {
+            types::CompactString.decode(buf)?
+        } else {
+            Default::default()
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 3 {
+        if version >= 3 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -106,6 +123,7 @@ impl Decodable for ListedGroup {
         Ok(Self {
             group_id,
             protocol_type,
+            group_state,
             unknown_tagged_fields,
         })
     }
@@ -116,31 +134,32 @@ impl Default for ListedGroup {
         Self {
             group_id: Default::default(),
             protocol_type: Default::default(),
+            group_state: Default::default(),
             unknown_tagged_fields: BTreeMap::new(),
         }
     }
 }
 
 impl Message for ListedGroup {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
 }
 
-/// Valid versions: 0-3
-#[derive(Debug, Clone)]
+/// Valid versions: 0-4
+#[derive(Debug, Clone, PartialEq)]
 pub struct ListGroupsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 
-    /// Supported API versions: 1-3
+    /// Supported API versions: 1-4
     pub throttle_time_ms: i32,
 
     /// The error code, or 0 if there was no error.
     /// 
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub error_code: i16,
 
     /// Each group in the response.
     /// 
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub groups: Vec<ListedGroup>,
 
     /// Other tagged fields
@@ -153,12 +172,12 @@ impl Encodable for ListGroupsResponse {
             types::Int32.encode(buf, &self.throttle_time_ms)?;
         }
         types::Int16.encode(buf, &self.error_code)?;
-        if version == 3 {
+        if version >= 3 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.groups)?;
         } else {
             types::Array(types::Struct { version }).encode(buf, &self.groups)?;
         }
-        if version == 3 {
+        if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -176,12 +195,12 @@ impl Encodable for ListGroupsResponse {
             total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
         }
         total_size += types::Int16.compute_size(&self.error_code)?;
-        if version == 3 {
+        if version >= 3 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.groups)?;
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.groups)?;
         }
-        if version == 3 {
+        if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -203,13 +222,13 @@ impl Decodable for ListGroupsResponse {
             0
         };
         let error_code = types::Int16.decode(buf)?;
-        let groups = if version == 3 {
+        let groups = if version >= 3 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
             types::Array(types::Struct { version }).decode(buf)?
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 3 {
+        if version >= 3 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -240,12 +259,12 @@ impl Default for ListGroupsResponse {
 }
 
 impl Message for ListGroupsResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
 }
 
 impl HeaderVersion for ListGroupsResponse {
     fn header_version(version: i16) -> i16 {
-        if version == 3 {
+        if version >= 3 {
             1
         } else {
             0

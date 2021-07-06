@@ -6,6 +6,7 @@ use std::collections::BTreeMap;
 
 use bytes::Bytes;
 use log::error;
+use uuid::Uuid;
 
 use protocol_base::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
@@ -14,7 +15,7 @@ use protocol_base::{
 
 
 /// Valid versions: 0-2
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct PartitionResult {
     /// The partition id
     /// 
@@ -124,7 +125,7 @@ impl Message for PartitionResult {
 }
 
 /// Valid versions: 0-2
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ReplicaElectionResult {
     /// The topic name
     /// 
@@ -236,7 +237,7 @@ impl Message for ReplicaElectionResult {
 }
 
 /// Valid versions: 0-2
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ElectLeadersResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 

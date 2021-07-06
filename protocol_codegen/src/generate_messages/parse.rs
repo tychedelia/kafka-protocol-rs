@@ -8,6 +8,7 @@ use assert_json_diff::assert_json_eq;
 use super::spec::Spec;
 
 pub fn parse(path: &Path) -> Result<Spec, Error> {
+    println!("{}", path.to_str().unwrap());
     let buf = fs::read(path)?;
     let stripped = StripComments::new(buf.as_slice());
     let original_json: serde_json::Value = serde_json::from_reader(stripped)?;

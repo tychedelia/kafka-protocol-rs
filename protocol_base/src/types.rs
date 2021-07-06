@@ -78,9 +78,11 @@ macro_rules! define_simple_ints {
 define_simple_ints!{
     Int8: i8 [put_i8, try_get_i8],
     Int16: i16 [put_i16, try_get_i16],
+    UInt16: u16 [put_u16, try_get_u16],
     Int32: i32 [put_i32, try_get_i32],
     Int64: i64 [put_i64, try_get_i64],
     UInt32: u32 [put_u32, try_get_u32],
+    Float64: f64 [put_f64, try_get_f64],
 }
 
 #[derive(Debug, Copy, Clone, Default)]

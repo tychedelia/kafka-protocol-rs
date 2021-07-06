@@ -6,6 +6,7 @@ use std::collections::BTreeMap;
 
 use bytes::Bytes;
 use log::error;
+use uuid::Uuid;
 
 use protocol_base::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
@@ -13,8 +14,8 @@ use protocol_base::{
 };
 
 
-/// Valid versions: 0-6
-#[derive(Debug, Clone)]
+/// Valid versions: 0-7
+#[derive(Debug, Clone, PartialEq)]
 pub struct UpdateMetadataPartitionState {
     /// In older versions of this RPC, the topic name.
     /// 
@@ -23,42 +24,42 @@ pub struct UpdateMetadataPartitionState {
 
     /// The partition index.
     /// 
-    /// Supported API versions: 0-6
+    /// Supported API versions: 0-7
     pub partition_index: i32,
 
     /// The controller epoch.
     /// 
-    /// Supported API versions: 0-6
+    /// Supported API versions: 0-7
     pub controller_epoch: i32,
 
     /// The ID of the broker which is the current partition leader.
     /// 
-    /// Supported API versions: 0-6
+    /// Supported API versions: 0-7
     pub leader: super::BrokerId,
 
     /// The leader epoch of this partition.
     /// 
-    /// Supported API versions: 0-6
+    /// Supported API versions: 0-7
     pub leader_epoch: i32,
 
     /// The brokers which are in the ISR for this partition.
     /// 
-    /// Supported API versions: 0-6
+    /// Supported API versions: 0-7
     pub isr: Vec<super::BrokerId>,
 
     /// The Zookeeper version.
     /// 
-    /// Supported API versions: 0-6
+    /// Supported API versions: 0-7
     pub zk_version: i32,
 
     /// All the replicas of this partition.
     /// 
-    /// Supported API versions: 0-6
+    /// Supported API versions: 0-7
     pub replicas: Vec<super::BrokerId>,
 
     /// The replicas of this partition which are offline.
     /// 
-    /// Supported API versions: 4-6
+    /// Supported API versions: 4-7
     pub offline_replicas: Vec<super::BrokerId>,
 
     /// Other tagged fields
@@ -74,25 +75,25 @@ impl Encodable for UpdateMetadataPartitionState {
         types::Int32.encode(buf, &self.controller_epoch)?;
         types::Int32.encode(buf, &self.leader)?;
         types::Int32.encode(buf, &self.leader_epoch)?;
-        if version == 6 {
+        if version >= 6 {
             types::CompactArray(types::Int32).encode(buf, &self.isr)?;
         } else {
             types::Array(types::Int32).encode(buf, &self.isr)?;
         }
         types::Int32.encode(buf, &self.zk_version)?;
-        if version == 6 {
+        if version >= 6 {
             types::CompactArray(types::Int32).encode(buf, &self.replicas)?;
         } else {
             types::Array(types::Int32).encode(buf, &self.replicas)?;
         }
         if version >= 4 {
-            if version == 6 {
+            if version >= 6 {
                 types::CompactArray(types::Int32).encode(buf, &self.offline_replicas)?;
             } else {
                 types::Array(types::Int32).encode(buf, &self.offline_replicas)?;
             }
         }
-        if version == 6 {
+        if version >= 6 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -113,25 +114,25 @@ impl Encodable for UpdateMetadataPartitionState {
         total_size += types::Int32.compute_size(&self.controller_epoch)?;
         total_size += types::Int32.compute_size(&self.leader)?;
         total_size += types::Int32.compute_size(&self.leader_epoch)?;
-        if version == 6 {
+        if version >= 6 {
             total_size += types::CompactArray(types::Int32).compute_size(&self.isr)?;
         } else {
             total_size += types::Array(types::Int32).compute_size(&self.isr)?;
         }
         total_size += types::Int32.compute_size(&self.zk_version)?;
-        if version == 6 {
+        if version >= 6 {
             total_size += types::CompactArray(types::Int32).compute_size(&self.replicas)?;
         } else {
             total_size += types::Array(types::Int32).compute_size(&self.replicas)?;
         }
         if version >= 4 {
-            if version == 6 {
+            if version >= 6 {
                 total_size += types::CompactArray(types::Int32).compute_size(&self.offline_replicas)?;
             } else {
                 total_size += types::Array(types::Int32).compute_size(&self.offline_replicas)?;
             }
         }
-        if version == 6 {
+        if version >= 6 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -156,19 +157,19 @@ impl Decodable for UpdateMetadataPartitionState {
         let controller_epoch = types::Int32.decode(buf)?;
         let leader = types::Int32.decode(buf)?;
         let leader_epoch = types::Int32.decode(buf)?;
-        let isr = if version == 6 {
+        let isr = if version >= 6 {
             types::CompactArray(types::Int32).decode(buf)?
         } else {
             types::Array(types::Int32).decode(buf)?
         };
         let zk_version = types::Int32.decode(buf)?;
-        let replicas = if version == 6 {
+        let replicas = if version >= 6 {
             types::CompactArray(types::Int32).decode(buf)?
         } else {
             types::Array(types::Int32).decode(buf)?
         };
         let offline_replicas = if version >= 4 {
-            if version == 6 {
+            if version >= 6 {
                 types::CompactArray(types::Int32).decode(buf)?
             } else {
                 types::Array(types::Int32).decode(buf)?
@@ -177,7 +178,7 @@ impl Decodable for UpdateMetadataPartitionState {
             Default::default()
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 6 {
+        if version >= 6 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -220,20 +221,25 @@ impl Default for UpdateMetadataPartitionState {
 }
 
 impl Message for UpdateMetadataPartitionState {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 6 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 7 };
 }
 
-/// Valid versions: 0-6
-#[derive(Debug, Clone)]
+/// Valid versions: 0-7
+#[derive(Debug, Clone, PartialEq)]
 pub struct UpdateMetadataTopicState {
     /// The topic name.
     /// 
-    /// Supported API versions: 5-6
+    /// Supported API versions: 5-7
     pub topic_name: super::TopicName,
+
+    /// The topic id.
+    /// 
+    /// Supported API versions: 7
+    pub topic_id: Uuid,
 
     /// The partition that we would like to update.
     /// 
-    /// Supported API versions: 5-6
+    /// Supported API versions: 5-7
     pub partition_states: Vec<UpdateMetadataPartitionState>,
 
     /// Other tagged fields
@@ -243,7 +249,7 @@ pub struct UpdateMetadataTopicState {
 impl Encodable for UpdateMetadataTopicState {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version >= 5 {
-            if version == 6 {
+            if version >= 6 {
                 types::CompactString.encode(buf, &self.topic_name)?;
             } else {
                 types::String.encode(buf, &self.topic_name)?;
@@ -253,8 +259,11 @@ impl Encodable for UpdateMetadataTopicState {
                 return Err(EncodeError)
             }
         }
+        if version == 7 {
+            types::Uuid.encode(buf, &self.topic_id)?;
+        }
         if version >= 5 {
-            if version == 6 {
+            if version >= 6 {
                 types::CompactArray(types::Struct { version }).encode(buf, &self.partition_states)?;
             } else {
                 types::Array(types::Struct { version }).encode(buf, &self.partition_states)?;
@@ -264,7 +273,7 @@ impl Encodable for UpdateMetadataTopicState {
                 return Err(EncodeError)
             }
         }
-        if version == 6 {
+        if version >= 6 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -279,7 +288,7 @@ impl Encodable for UpdateMetadataTopicState {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         if version >= 5 {
-            if version == 6 {
+            if version >= 6 {
                 total_size += types::CompactString.compute_size(&self.topic_name)?;
             } else {
                 total_size += types::String.compute_size(&self.topic_name)?;
@@ -289,8 +298,11 @@ impl Encodable for UpdateMetadataTopicState {
                 return Err(EncodeError)
             }
         }
+        if version == 7 {
+            total_size += types::Uuid.compute_size(&self.topic_id)?;
+        }
         if version >= 5 {
-            if version == 6 {
+            if version >= 6 {
                 total_size += types::CompactArray(types::Struct { version }).compute_size(&self.partition_states)?;
             } else {
                 total_size += types::Array(types::Struct { version }).compute_size(&self.partition_states)?;
@@ -300,7 +312,7 @@ impl Encodable for UpdateMetadataTopicState {
                 return Err(EncodeError)
             }
         }
-        if version == 6 {
+        if version >= 6 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -317,7 +329,7 @@ impl Encodable for UpdateMetadataTopicState {
 impl Decodable for UpdateMetadataTopicState {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let topic_name = if version >= 5 {
-            if version == 6 {
+            if version >= 6 {
                 types::CompactString.decode(buf)?
             } else {
                 types::String.decode(buf)?
@@ -325,8 +337,13 @@ impl Decodable for UpdateMetadataTopicState {
         } else {
             Default::default()
         };
+        let topic_id = if version == 7 {
+            types::Uuid.decode(buf)?
+        } else {
+            Uuid::nil()
+        };
         let partition_states = if version >= 5 {
-            if version == 6 {
+            if version >= 6 {
                 types::CompactArray(types::Struct { version }).decode(buf)?
             } else {
                 types::Array(types::Struct { version }).decode(buf)?
@@ -335,7 +352,7 @@ impl Decodable for UpdateMetadataTopicState {
             Default::default()
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 6 {
+        if version >= 6 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -347,6 +364,7 @@ impl Decodable for UpdateMetadataTopicState {
         }
         Ok(Self {
             topic_name,
+            topic_id,
             partition_states,
             unknown_tagged_fields,
         })
@@ -357,6 +375,7 @@ impl Default for UpdateMetadataTopicState {
     fn default() -> Self {
         Self {
             topic_name: Default::default(),
+            topic_id: Uuid::nil(),
             partition_states: Default::default(),
             unknown_tagged_fields: BTreeMap::new(),
         }
@@ -364,30 +383,30 @@ impl Default for UpdateMetadataTopicState {
 }
 
 impl Message for UpdateMetadataTopicState {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 6 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 7 };
 }
 
-/// Valid versions: 0-6
-#[derive(Debug, Clone)]
+/// Valid versions: 0-7
+#[derive(Debug, Clone, PartialEq)]
 pub struct UpdateMetadataEndpoint {
     /// The port of this endpoint
     /// 
-    /// Supported API versions: 1-6
+    /// Supported API versions: 1-7
     pub port: i32,
 
     /// The hostname of this endpoint
     /// 
-    /// Supported API versions: 1-6
+    /// Supported API versions: 1-7
     pub host: StrBytes,
 
     /// The listener name.
     /// 
-    /// Supported API versions: 3-6
+    /// Supported API versions: 3-7
     pub listener: StrBytes,
 
     /// The security protocol type.
     /// 
-    /// Supported API versions: 1-6
+    /// Supported API versions: 1-7
     pub security_protocol: i16,
 
     /// Other tagged fields
@@ -404,7 +423,7 @@ impl Encodable for UpdateMetadataEndpoint {
             }
         }
         if version >= 1 {
-            if version == 6 {
+            if version >= 6 {
                 types::CompactString.encode(buf, &self.host)?;
             } else {
                 types::String.encode(buf, &self.host)?;
@@ -415,7 +434,7 @@ impl Encodable for UpdateMetadataEndpoint {
             }
         }
         if version >= 3 {
-            if version == 6 {
+            if version >= 6 {
                 types::CompactString.encode(buf, &self.listener)?;
             } else {
                 types::String.encode(buf, &self.listener)?;
@@ -428,7 +447,7 @@ impl Encodable for UpdateMetadataEndpoint {
                 return Err(EncodeError)
             }
         }
-        if version == 6 {
+        if version >= 6 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -450,7 +469,7 @@ impl Encodable for UpdateMetadataEndpoint {
             }
         }
         if version >= 1 {
-            if version == 6 {
+            if version >= 6 {
                 total_size += types::CompactString.compute_size(&self.host)?;
             } else {
                 total_size += types::String.compute_size(&self.host)?;
@@ -461,7 +480,7 @@ impl Encodable for UpdateMetadataEndpoint {
             }
         }
         if version >= 3 {
-            if version == 6 {
+            if version >= 6 {
                 total_size += types::CompactString.compute_size(&self.listener)?;
             } else {
                 total_size += types::String.compute_size(&self.listener)?;
@@ -474,7 +493,7 @@ impl Encodable for UpdateMetadataEndpoint {
                 return Err(EncodeError)
             }
         }
-        if version == 6 {
+        if version >= 6 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -496,7 +515,7 @@ impl Decodable for UpdateMetadataEndpoint {
             0
         };
         let host = if version >= 1 {
-            if version == 6 {
+            if version >= 6 {
                 types::CompactString.decode(buf)?
             } else {
                 types::String.decode(buf)?
@@ -505,7 +524,7 @@ impl Decodable for UpdateMetadataEndpoint {
             Default::default()
         };
         let listener = if version >= 3 {
-            if version == 6 {
+            if version >= 6 {
                 types::CompactString.decode(buf)?
             } else {
                 types::String.decode(buf)?
@@ -519,7 +538,7 @@ impl Decodable for UpdateMetadataEndpoint {
             0
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 6 {
+        if version >= 6 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -552,15 +571,15 @@ impl Default for UpdateMetadataEndpoint {
 }
 
 impl Message for UpdateMetadataEndpoint {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 6 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 7 };
 }
 
-/// Valid versions: 0-6
-#[derive(Debug, Clone)]
+/// Valid versions: 0-7
+#[derive(Debug, Clone, PartialEq)]
 pub struct UpdateMetadataBroker {
     /// The broker id.
     /// 
-    /// Supported API versions: 0-6
+    /// Supported API versions: 0-7
     pub id: super::BrokerId,
 
     /// The broker hostname.
@@ -575,12 +594,12 @@ pub struct UpdateMetadataBroker {
 
     /// The broker endpoints.
     /// 
-    /// Supported API versions: 1-6
+    /// Supported API versions: 1-7
     pub endpoints: Vec<UpdateMetadataEndpoint>,
 
     /// The rack which this broker belongs to.
     /// 
-    /// Supported API versions: 2-6
+    /// Supported API versions: 2-7
     pub rack: Option<StrBytes>,
 
     /// Other tagged fields
@@ -597,20 +616,20 @@ impl Encodable for UpdateMetadataBroker {
             types::Int32.encode(buf, &self.v0_port)?;
         }
         if version >= 1 {
-            if version == 6 {
+            if version >= 6 {
                 types::CompactArray(types::Struct { version }).encode(buf, &self.endpoints)?;
             } else {
                 types::Array(types::Struct { version }).encode(buf, &self.endpoints)?;
             }
         }
         if version >= 2 {
-            if version == 6 {
+            if version >= 6 {
                 types::CompactString.encode(buf, &self.rack)?;
             } else {
                 types::String.encode(buf, &self.rack)?;
             }
         }
-        if version == 6 {
+        if version >= 6 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -632,20 +651,20 @@ impl Encodable for UpdateMetadataBroker {
             total_size += types::Int32.compute_size(&self.v0_port)?;
         }
         if version >= 1 {
-            if version == 6 {
+            if version >= 6 {
                 total_size += types::CompactArray(types::Struct { version }).compute_size(&self.endpoints)?;
             } else {
                 total_size += types::Array(types::Struct { version }).compute_size(&self.endpoints)?;
             }
         }
         if version >= 2 {
-            if version == 6 {
+            if version >= 6 {
                 total_size += types::CompactString.compute_size(&self.rack)?;
             } else {
                 total_size += types::String.compute_size(&self.rack)?;
             }
         }
-        if version == 6 {
+        if version >= 6 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -673,7 +692,7 @@ impl Decodable for UpdateMetadataBroker {
             0
         };
         let endpoints = if version >= 1 {
-            if version == 6 {
+            if version >= 6 {
                 types::CompactArray(types::Struct { version }).decode(buf)?
             } else {
                 types::Array(types::Struct { version }).decode(buf)?
@@ -682,7 +701,7 @@ impl Decodable for UpdateMetadataBroker {
             Default::default()
         };
         let rack = if version >= 2 {
-            if version == 6 {
+            if version >= 6 {
                 types::CompactString.decode(buf)?
             } else {
                 types::String.decode(buf)?
@@ -691,7 +710,7 @@ impl Decodable for UpdateMetadataBroker {
             Some(Default::default())
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 6 {
+        if version >= 6 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -726,25 +745,25 @@ impl Default for UpdateMetadataBroker {
 }
 
 impl Message for UpdateMetadataBroker {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 6 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 7 };
 }
 
-/// Valid versions: 0-6
-#[derive(Debug, Clone)]
+/// Valid versions: 0-7
+#[derive(Debug, Clone, PartialEq)]
 pub struct UpdateMetadataRequest {
     /// The controller id.
     /// 
-    /// Supported API versions: 0-6
+    /// Supported API versions: 0-7
     pub controller_id: super::BrokerId,
 
     /// The controller epoch.
     /// 
-    /// Supported API versions: 0-6
+    /// Supported API versions: 0-7
     pub controller_epoch: i32,
 
     /// The broker epoch.
     /// 
-    /// Supported API versions: 5-6
+    /// Supported API versions: 5-7
     pub broker_epoch: i64,
 
     /// In older versions of this RPC, each partition that we would like to update.
@@ -754,12 +773,12 @@ pub struct UpdateMetadataRequest {
 
     /// In newer versions of this RPC, each topic that we would like to update.
     /// 
-    /// Supported API versions: 5-6
+    /// Supported API versions: 5-7
     pub topic_states: Vec<UpdateMetadataTopicState>,
 
     /// 
     /// 
-    /// Supported API versions: 0-6
+    /// Supported API versions: 0-7
     pub live_brokers: Vec<UpdateMetadataBroker>,
 
     /// Other tagged fields
@@ -781,7 +800,7 @@ impl Encodable for UpdateMetadataRequest {
             }
         }
         if version >= 5 {
-            if version == 6 {
+            if version >= 6 {
                 types::CompactArray(types::Struct { version }).encode(buf, &self.topic_states)?;
             } else {
                 types::Array(types::Struct { version }).encode(buf, &self.topic_states)?;
@@ -791,12 +810,12 @@ impl Encodable for UpdateMetadataRequest {
                 return Err(EncodeError)
             }
         }
-        if version == 6 {
+        if version >= 6 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.live_brokers)?;
         } else {
             types::Array(types::Struct { version }).encode(buf, &self.live_brokers)?;
         }
-        if version == 6 {
+        if version >= 6 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -823,7 +842,7 @@ impl Encodable for UpdateMetadataRequest {
             }
         }
         if version >= 5 {
-            if version == 6 {
+            if version >= 6 {
                 total_size += types::CompactArray(types::Struct { version }).compute_size(&self.topic_states)?;
             } else {
                 total_size += types::Array(types::Struct { version }).compute_size(&self.topic_states)?;
@@ -833,12 +852,12 @@ impl Encodable for UpdateMetadataRequest {
                 return Err(EncodeError)
             }
         }
-        if version == 6 {
+        if version >= 6 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.live_brokers)?;
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.live_brokers)?;
         }
-        if version == 6 {
+        if version >= 6 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -867,7 +886,7 @@ impl Decodable for UpdateMetadataRequest {
             Default::default()
         };
         let topic_states = if version >= 5 {
-            if version == 6 {
+            if version >= 6 {
                 types::CompactArray(types::Struct { version }).decode(buf)?
             } else {
                 types::Array(types::Struct { version }).decode(buf)?
@@ -875,13 +894,13 @@ impl Decodable for UpdateMetadataRequest {
         } else {
             Default::default()
         };
-        let live_brokers = if version == 6 {
+        let live_brokers = if version >= 6 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
             types::Array(types::Struct { version }).decode(buf)?
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 6 {
+        if version >= 6 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -918,12 +937,12 @@ impl Default for UpdateMetadataRequest {
 }
 
 impl Message for UpdateMetadataRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 6 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 7 };
 }
 
 impl HeaderVersion for UpdateMetadataRequest {
     fn header_version(version: i16) -> i16 {
-        if version == 6 {
+        if version >= 6 {
             2
         } else {
             1

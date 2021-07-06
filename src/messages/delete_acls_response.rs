@@ -6,6 +6,7 @@ use std::collections::BTreeMap;
 
 use bytes::Bytes;
 use log::error;
+use uuid::Uuid;
 
 use protocol_base::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
@@ -14,7 +15,7 @@ use protocol_base::{
 
 
 /// Valid versions: 0-2
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DeleteAclsMatchingAcl {
     /// The deletion error code, or 0 if the deletion succeeded.
     /// 
@@ -236,7 +237,7 @@ impl Message for DeleteAclsMatchingAcl {
 }
 
 /// Valid versions: 0-2
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DeleteAclsFilterResult {
     /// The error code, or 0 if the filter succeeded.
     /// 
@@ -358,7 +359,7 @@ impl Message for DeleteAclsFilterResult {
 }
 
 /// Valid versions: 0-2
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DeleteAclsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 

@@ -6,6 +6,7 @@ use std::collections::BTreeMap;
 
 use bytes::Bytes;
 use log::error;
+use uuid::Uuid;
 
 use protocol_base::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
@@ -13,13 +14,18 @@ use protocol_base::{
 };
 
 
-/// Valid versions: 0-9
-#[derive(Debug, Clone)]
+/// Valid versions: 0-11
+#[derive(Debug, Clone, PartialEq)]
 pub struct MetadataRequestTopic {
+    /// The topic id.
+    /// 
+    /// Supported API versions: 10-11
+    pub topic_id: Uuid,
+
     /// The topic name.
     /// 
-    /// Supported API versions: 0-9
-    pub name: super::TopicName,
+    /// Supported API versions: 0-11
+    pub name: Option<super::TopicName>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
@@ -27,12 +33,15 @@ pub struct MetadataRequestTopic {
 
 impl Encodable for MetadataRequestTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 9 {
+        if version >= 10 {
+            types::Uuid.encode(buf, &self.topic_id)?;
+        }
+        if version >= 9 {
             types::CompactString.encode(buf, &self.name)?;
         } else {
             types::String.encode(buf, &self.name)?;
         }
-        if version == 9 {
+        if version >= 9 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -46,12 +55,15 @@ impl Encodable for MetadataRequestTopic {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 9 {
+        if version >= 10 {
+            total_size += types::Uuid.compute_size(&self.topic_id)?;
+        }
+        if version >= 9 {
             total_size += types::CompactString.compute_size(&self.name)?;
         } else {
             total_size += types::String.compute_size(&self.name)?;
         }
-        if version == 9 {
+        if version >= 9 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -67,13 +79,18 @@ impl Encodable for MetadataRequestTopic {
 
 impl Decodable for MetadataRequestTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let name = if version == 9 {
+        let topic_id = if version >= 10 {
+            types::Uuid.decode(buf)?
+        } else {
+            Uuid::nil()
+        };
+        let name = if version >= 9 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 9 {
+        if version >= 9 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -84,6 +101,7 @@ impl Decodable for MetadataRequestTopic {
             }
         }
         Ok(Self {
+            topic_id,
             name,
             unknown_tagged_fields,
         })
@@ -93,37 +111,38 @@ impl Decodable for MetadataRequestTopic {
 impl Default for MetadataRequestTopic {
     fn default() -> Self {
         Self {
-            name: Default::default(),
+            topic_id: Uuid::nil(),
+            name: Some(Default::default()),
             unknown_tagged_fields: BTreeMap::new(),
         }
     }
 }
 
 impl Message for MetadataRequestTopic {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 9 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 11 };
 }
 
-/// Valid versions: 0-9
-#[derive(Debug, Clone)]
+/// Valid versions: 0-11
+#[derive(Debug, Clone, PartialEq)]
 pub struct MetadataRequest {
     /// The topics to fetch metadata for.
     /// 
-    /// Supported API versions: 0-9
+    /// Supported API versions: 0-11
     pub topics: Option<Vec<MetadataRequestTopic>>,
 
     /// If this is true, the broker may auto-create topics that we requested which do not already exist, if it is configured to do so.
     /// 
-    /// Supported API versions: 4-9
+    /// Supported API versions: 4-11
     pub allow_auto_topic_creation: bool,
 
     /// Whether to include cluster authorized operations.
     /// 
-    /// Supported API versions: 8-9
+    /// Supported API versions: 8-10
     pub include_cluster_authorized_operations: bool,
 
     /// Whether to include topic authorized operations.
     /// 
-    /// Supported API versions: 8-9
+    /// Supported API versions: 8-11
     pub include_topic_authorized_operations: bool,
 
     /// Other tagged fields
@@ -132,7 +151,7 @@ pub struct MetadataRequest {
 
 impl Encodable for MetadataRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 9 {
+        if version >= 9 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
         } else {
             types::Array(types::Struct { version }).encode(buf, &self.topics)?;
@@ -144,7 +163,7 @@ impl Encodable for MetadataRequest {
                 return Err(EncodeError)
             }
         }
-        if version >= 8 {
+        if version >= 8 && version <= 10 {
             types::Boolean.encode(buf, &self.include_cluster_authorized_operations)?;
         } else {
             if self.include_cluster_authorized_operations {
@@ -158,7 +177,7 @@ impl Encodable for MetadataRequest {
                 return Err(EncodeError)
             }
         }
-        if version == 9 {
+        if version >= 9 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -172,7 +191,7 @@ impl Encodable for MetadataRequest {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 9 {
+        if version >= 9 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.topics)?;
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.topics)?;
@@ -184,7 +203,7 @@ impl Encodable for MetadataRequest {
                 return Err(EncodeError)
             }
         }
-        if version >= 8 {
+        if version >= 8 && version <= 10 {
             total_size += types::Boolean.compute_size(&self.include_cluster_authorized_operations)?;
         } else {
             if self.include_cluster_authorized_operations {
@@ -198,7 +217,7 @@ impl Encodable for MetadataRequest {
                 return Err(EncodeError)
             }
         }
-        if version == 9 {
+        if version >= 9 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -214,7 +233,7 @@ impl Encodable for MetadataRequest {
 
 impl Decodable for MetadataRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let topics = if version == 9 {
+        let topics = if version >= 9 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
             types::Array(types::Struct { version }).decode(buf)?
@@ -224,7 +243,7 @@ impl Decodable for MetadataRequest {
         } else {
             true
         };
-        let include_cluster_authorized_operations = if version >= 8 {
+        let include_cluster_authorized_operations = if version >= 8 && version <= 10 {
             types::Boolean.decode(buf)?
         } else {
             false
@@ -235,7 +254,7 @@ impl Decodable for MetadataRequest {
             false
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 9 {
+        if version >= 9 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -268,12 +287,12 @@ impl Default for MetadataRequest {
 }
 
 impl Message for MetadataRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 9 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 11 };
 }
 
 impl HeaderVersion for MetadataRequest {
     fn header_version(version: i16) -> i16 {
-        if version == 9 {
+        if version >= 9 {
             2
         } else {
             1

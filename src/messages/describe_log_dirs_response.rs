@@ -6,6 +6,7 @@ use std::collections::BTreeMap;
 
 use bytes::Bytes;
 use log::error;
+use uuid::Uuid;
 
 use protocol_base::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
@@ -13,29 +14,31 @@ use protocol_base::{
 };
 
 
-/// Valid versions: 0-1
-#[derive(Debug, Clone)]
+/// Valid versions: 0-2
+#[derive(Debug, Clone, PartialEq)]
 pub struct DescribeLogDirsPartition {
     /// The partition index.
     /// 
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub partition_index: i32,
 
     /// The size of the log segments in this partition in bytes.
     /// 
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub partition_size: i64,
 
     /// The lag of the log's LEO w.r.t. partition's HW (if it is the current log for the partition) or current replica's LEO (if it is the future log for the partition)
     /// 
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub offset_lag: i64,
 
     /// True if this log is created by AlterReplicaLogDirsRequest and will replace the current log of the replica in the future.
     /// 
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub is_future_key: bool,
 
+    /// Other tagged fields
+    pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
 }
 
 impl Encodable for DescribeLogDirsPartition {
@@ -44,7 +47,16 @@ impl Encodable for DescribeLogDirsPartition {
         types::Int64.encode(buf, &self.partition_size)?;
         types::Int64.encode(buf, &self.offset_lag)?;
         types::Boolean.encode(buf, &self.is_future_key)?;
+        if version == 2 {
+            let num_tagged_fields = self.unknown_tagged_fields.len();
+            if num_tagged_fields > std::u32::MAX as usize {
+                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                return Err(EncodeError);
+            }
+            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
+            write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
+        }
         Ok(())
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
@@ -53,7 +65,16 @@ impl Encodable for DescribeLogDirsPartition {
         total_size += types::Int64.compute_size(&self.partition_size)?;
         total_size += types::Int64.compute_size(&self.offset_lag)?;
         total_size += types::Boolean.compute_size(&self.is_future_key)?;
+        if version == 2 {
+            let num_tagged_fields = self.unknown_tagged_fields.len();
+            if num_tagged_fields > std::u32::MAX as usize {
+                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                return Err(EncodeError);
+            }
+            total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
+            total_size += compute_unknown_tagged_fields_size(&self.unknown_tagged_fields)?;
+        }
         Ok(total_size)
     }
 }
@@ -64,11 +85,23 @@ impl Decodable for DescribeLogDirsPartition {
         let partition_size = types::Int64.decode(buf)?;
         let offset_lag = types::Int64.decode(buf)?;
         let is_future_key = types::Boolean.decode(buf)?;
+        let mut unknown_tagged_fields = BTreeMap::new();
+        if version == 2 {
+            let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
+            for _ in 0..num_tagged_fields {
+                let tag: u32 = types::UnsignedVarInt.decode(buf)?;
+                let size: u32 = types::UnsignedVarInt.decode(buf)?;
+                let mut unknown_value = vec![0; size as usize];
+                buf.try_copy_to_slice(&mut unknown_value)?;
+                unknown_tagged_fields.insert(tag as i32, unknown_value);
+            }
+        }
         Ok(Self {
             partition_index,
             partition_size,
             offset_lag,
             is_future_key,
+            unknown_tagged_fields,
         })
     }
 }
@@ -80,52 +113,109 @@ impl Default for DescribeLogDirsPartition {
             partition_size: 0,
             offset_lag: 0,
             is_future_key: false,
+            unknown_tagged_fields: BTreeMap::new(),
         }
     }
 }
 
 impl Message for DescribeLogDirsPartition {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
 }
 
-/// Valid versions: 0-1
-#[derive(Debug, Clone)]
+/// Valid versions: 0-2
+#[derive(Debug, Clone, PartialEq)]
 pub struct DescribeLogDirsTopic {
     /// The topic name.
     /// 
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub name: super::TopicName,
 
     /// 
     /// 
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub partitions: Vec<DescribeLogDirsPartition>,
 
+    /// Other tagged fields
+    pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
 }
 
 impl Encodable for DescribeLogDirsTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::String.encode(buf, &self.name)?;
-        types::Array(types::Struct { version }).encode(buf, &self.partitions)?;
+        if version == 2 {
+            types::CompactString.encode(buf, &self.name)?;
+        } else {
+            types::String.encode(buf, &self.name)?;
+        }
+        if version == 2 {
+            types::CompactArray(types::Struct { version }).encode(buf, &self.partitions)?;
+        } else {
+            types::Array(types::Struct { version }).encode(buf, &self.partitions)?;
+        }
+        if version == 2 {
+            let num_tagged_fields = self.unknown_tagged_fields.len();
+            if num_tagged_fields > std::u32::MAX as usize {
+                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                return Err(EncodeError);
+            }
+            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
+            write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
+        }
         Ok(())
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::String.compute_size(&self.name)?;
-        total_size += types::Array(types::Struct { version }).compute_size(&self.partitions)?;
+        if version == 2 {
+            total_size += types::CompactString.compute_size(&self.name)?;
+        } else {
+            total_size += types::String.compute_size(&self.name)?;
+        }
+        if version == 2 {
+            total_size += types::CompactArray(types::Struct { version }).compute_size(&self.partitions)?;
+        } else {
+            total_size += types::Array(types::Struct { version }).compute_size(&self.partitions)?;
+        }
+        if version == 2 {
+            let num_tagged_fields = self.unknown_tagged_fields.len();
+            if num_tagged_fields > std::u32::MAX as usize {
+                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                return Err(EncodeError);
+            }
+            total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
+            total_size += compute_unknown_tagged_fields_size(&self.unknown_tagged_fields)?;
+        }
         Ok(total_size)
     }
 }
 
 impl Decodable for DescribeLogDirsTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let name = types::String.decode(buf)?;
-        let partitions = types::Array(types::Struct { version }).decode(buf)?;
+        let name = if version == 2 {
+            types::CompactString.decode(buf)?
+        } else {
+            types::String.decode(buf)?
+        };
+        let partitions = if version == 2 {
+            types::CompactArray(types::Struct { version }).decode(buf)?
+        } else {
+            types::Array(types::Struct { version }).decode(buf)?
+        };
+        let mut unknown_tagged_fields = BTreeMap::new();
+        if version == 2 {
+            let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
+            for _ in 0..num_tagged_fields {
+                let tag: u32 = types::UnsignedVarInt.decode(buf)?;
+                let size: u32 = types::UnsignedVarInt.decode(buf)?;
+                let mut unknown_value = vec![0; size as usize];
+                buf.try_copy_to_slice(&mut unknown_value)?;
+                unknown_tagged_fields.insert(tag as i32, unknown_value);
+            }
+        }
         Ok(Self {
             name,
             partitions,
+            unknown_tagged_fields,
         })
     }
 }
@@ -135,48 +225,85 @@ impl Default for DescribeLogDirsTopic {
         Self {
             name: Default::default(),
             partitions: Default::default(),
+            unknown_tagged_fields: BTreeMap::new(),
         }
     }
 }
 
 impl Message for DescribeLogDirsTopic {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
 }
 
-/// Valid versions: 0-1
-#[derive(Debug, Clone)]
+/// Valid versions: 0-2
+#[derive(Debug, Clone, PartialEq)]
 pub struct DescribeLogDirsResult {
     /// The error code, or 0 if there was no error.
     /// 
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub error_code: i16,
 
     /// The absolute log directory path.
     /// 
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub log_dir: StrBytes,
 
     /// Each topic.
     /// 
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub topics: Vec<DescribeLogDirsTopic>,
 
+    /// Other tagged fields
+    pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
 }
 
 impl Encodable for DescribeLogDirsResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int16.encode(buf, &self.error_code)?;
-        types::String.encode(buf, &self.log_dir)?;
-        types::Array(types::Struct { version }).encode(buf, &self.topics)?;
+        if version == 2 {
+            types::CompactString.encode(buf, &self.log_dir)?;
+        } else {
+            types::String.encode(buf, &self.log_dir)?;
+        }
+        if version == 2 {
+            types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
+        } else {
+            types::Array(types::Struct { version }).encode(buf, &self.topics)?;
+        }
+        if version == 2 {
+            let num_tagged_fields = self.unknown_tagged_fields.len();
+            if num_tagged_fields > std::u32::MAX as usize {
+                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                return Err(EncodeError);
+            }
+            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
+            write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
+        }
         Ok(())
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         total_size += types::Int16.compute_size(&self.error_code)?;
-        total_size += types::String.compute_size(&self.log_dir)?;
-        total_size += types::Array(types::Struct { version }).compute_size(&self.topics)?;
+        if version == 2 {
+            total_size += types::CompactString.compute_size(&self.log_dir)?;
+        } else {
+            total_size += types::String.compute_size(&self.log_dir)?;
+        }
+        if version == 2 {
+            total_size += types::CompactArray(types::Struct { version }).compute_size(&self.topics)?;
+        } else {
+            total_size += types::Array(types::Struct { version }).compute_size(&self.topics)?;
+        }
+        if version == 2 {
+            let num_tagged_fields = self.unknown_tagged_fields.len();
+            if num_tagged_fields > std::u32::MAX as usize {
+                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                return Err(EncodeError);
+            }
+            total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
+            total_size += compute_unknown_tagged_fields_size(&self.unknown_tagged_fields)?;
+        }
         Ok(total_size)
     }
 }
@@ -184,12 +311,32 @@ impl Encodable for DescribeLogDirsResult {
 impl Decodable for DescribeLogDirsResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let error_code = types::Int16.decode(buf)?;
-        let log_dir = types::String.decode(buf)?;
-        let topics = types::Array(types::Struct { version }).decode(buf)?;
+        let log_dir = if version == 2 {
+            types::CompactString.decode(buf)?
+        } else {
+            types::String.decode(buf)?
+        };
+        let topics = if version == 2 {
+            types::CompactArray(types::Struct { version }).decode(buf)?
+        } else {
+            types::Array(types::Struct { version }).decode(buf)?
+        };
+        let mut unknown_tagged_fields = BTreeMap::new();
+        if version == 2 {
+            let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
+            for _ in 0..num_tagged_fields {
+                let tag: u32 = types::UnsignedVarInt.decode(buf)?;
+                let size: u32 = types::UnsignedVarInt.decode(buf)?;
+                let mut unknown_value = vec![0; size as usize];
+                buf.try_copy_to_slice(&mut unknown_value)?;
+                unknown_tagged_fields.insert(tag as i32, unknown_value);
+            }
+        }
         Ok(Self {
             error_code,
             log_dir,
             topics,
+            unknown_tagged_fields,
         })
     }
 }
@@ -200,41 +347,70 @@ impl Default for DescribeLogDirsResult {
             error_code: 0,
             log_dir: Default::default(),
             topics: Default::default(),
+            unknown_tagged_fields: BTreeMap::new(),
         }
     }
 }
 
 impl Message for DescribeLogDirsResult {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
 }
 
-/// Valid versions: 0-1
-#[derive(Debug, Clone)]
+/// Valid versions: 0-2
+#[derive(Debug, Clone, PartialEq)]
 pub struct DescribeLogDirsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub throttle_time_ms: i32,
 
     /// The log directories.
     /// 
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub results: Vec<DescribeLogDirsResult>,
 
+    /// Other tagged fields
+    pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
 }
 
 impl Encodable for DescribeLogDirsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
-        types::Array(types::Struct { version }).encode(buf, &self.results)?;
+        if version == 2 {
+            types::CompactArray(types::Struct { version }).encode(buf, &self.results)?;
+        } else {
+            types::Array(types::Struct { version }).encode(buf, &self.results)?;
+        }
+        if version == 2 {
+            let num_tagged_fields = self.unknown_tagged_fields.len();
+            if num_tagged_fields > std::u32::MAX as usize {
+                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                return Err(EncodeError);
+            }
+            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
+            write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
+        }
         Ok(())
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
-        total_size += types::Array(types::Struct { version }).compute_size(&self.results)?;
+        if version == 2 {
+            total_size += types::CompactArray(types::Struct { version }).compute_size(&self.results)?;
+        } else {
+            total_size += types::Array(types::Struct { version }).compute_size(&self.results)?;
+        }
+        if version == 2 {
+            let num_tagged_fields = self.unknown_tagged_fields.len();
+            if num_tagged_fields > std::u32::MAX as usize {
+                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                return Err(EncodeError);
+            }
+            total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
+            total_size += compute_unknown_tagged_fields_size(&self.unknown_tagged_fields)?;
+        }
         Ok(total_size)
     }
 }
@@ -242,10 +418,26 @@ impl Encodable for DescribeLogDirsResponse {
 impl Decodable for DescribeLogDirsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let throttle_time_ms = types::Int32.decode(buf)?;
-        let results = types::Array(types::Struct { version }).decode(buf)?;
+        let results = if version == 2 {
+            types::CompactArray(types::Struct { version }).decode(buf)?
+        } else {
+            types::Array(types::Struct { version }).decode(buf)?
+        };
+        let mut unknown_tagged_fields = BTreeMap::new();
+        if version == 2 {
+            let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
+            for _ in 0..num_tagged_fields {
+                let tag: u32 = types::UnsignedVarInt.decode(buf)?;
+                let size: u32 = types::UnsignedVarInt.decode(buf)?;
+                let mut unknown_value = vec![0; size as usize];
+                buf.try_copy_to_slice(&mut unknown_value)?;
+                unknown_tagged_fields.insert(tag as i32, unknown_value);
+            }
+        }
         Ok(Self {
             throttle_time_ms,
             results,
+            unknown_tagged_fields,
         })
     }
 }
@@ -255,17 +447,22 @@ impl Default for DescribeLogDirsResponse {
         Self {
             throttle_time_ms: 0,
             results: Default::default(),
+            unknown_tagged_fields: BTreeMap::new(),
         }
     }
 }
 
 impl Message for DescribeLogDirsResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
 }
 
 impl HeaderVersion for DescribeLogDirsResponse {
     fn header_version(version: i16) -> i16 {
-        0
+        if version == 2 {
+            1
+        } else {
+            0
+        }
     }
 }
 

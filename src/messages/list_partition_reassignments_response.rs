@@ -6,6 +6,7 @@ use std::collections::BTreeMap;
 
 use bytes::Bytes;
 use log::error;
+use uuid::Uuid;
 
 use protocol_base::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
@@ -14,7 +15,7 @@ use protocol_base::{
 
 
 /// Valid versions: 0
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct OngoingPartitionReassignment {
     /// The index of the partition.
     /// 
@@ -24,17 +25,17 @@ pub struct OngoingPartitionReassignment {
     /// The current replica set.
     /// 
     /// Supported API versions: 0
-    pub replicas: Vec<i32>,
+    pub replicas: Vec<super::BrokerId>,
 
     /// The set of replicas we are currently adding.
     /// 
     /// Supported API versions: 0
-    pub adding_replicas: Vec<i32>,
+    pub adding_replicas: Vec<super::BrokerId>,
 
     /// The set of replicas we are currently removing.
     /// 
     /// Supported API versions: 0
-    pub removing_replicas: Vec<i32>,
+    pub removing_replicas: Vec<super::BrokerId>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
@@ -116,7 +117,7 @@ impl Message for OngoingPartitionReassignment {
 }
 
 /// Valid versions: 0
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct OngoingTopicReassignment {
     /// The topic name.
     /// 
@@ -198,7 +199,7 @@ impl Message for OngoingTopicReassignment {
 }
 
 /// Valid versions: 0
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ListPartitionReassignmentsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 

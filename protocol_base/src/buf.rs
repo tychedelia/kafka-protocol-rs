@@ -37,6 +37,13 @@ pub trait ByteBuf: Buf {
             Ok(self.get_u8())
         }
     }
+    fn try_get_u16(&mut self) -> Result<u16, ErrorKind> {
+        if self.remaining() < size_of::<u16>() {
+            Err(ErrorKind::NotEnoughBytes)
+        } else {
+            Ok(self.get_u16())
+        }
+    }
     fn try_get_u32(&mut self) -> Result<u32, ErrorKind> {
         if self.remaining() < size_of::<u32>() {
             Err(ErrorKind::NotEnoughBytes)
@@ -70,6 +77,13 @@ pub trait ByteBuf: Buf {
             Err(ErrorKind::NotEnoughBytes)
         } else {
             Ok(self.get_i64())
+        }
+    }
+    fn try_get_f64(&mut self) -> Result<f64, ErrorKind> {
+        if self.remaining() < size_of::<f64>() {
+            Err(ErrorKind::NotEnoughBytes)
+        } else {
+            Ok(self.get_f64())
         }
     }
 }

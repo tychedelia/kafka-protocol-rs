@@ -6,6 +6,7 @@ use std::collections::BTreeMap;
 
 use bytes::Bytes;
 use log::error;
+use uuid::Uuid;
 
 use protocol_base::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
@@ -14,7 +15,7 @@ use protocol_base::{
 
 
 /// Valid versions: 0-7
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct JoinGroupRequestProtocol {
     /// The protocol metadata.
     /// 
@@ -121,7 +122,7 @@ impl Message for JoinGroupRequestProtocol {
 }
 
 /// Valid versions: 0-7
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct JoinGroupRequest {
     /// The group identifier.
     /// 

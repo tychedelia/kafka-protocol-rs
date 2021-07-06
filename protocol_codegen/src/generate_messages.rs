@@ -11,10 +11,18 @@ mod parse;
 mod generate;
 
 use spec::SpecType;
+use tempfile::tempdir;
 
 pub fn run() -> Result<(), Error> {
-    const INPUT_PATH: &str = "messages";
-    const OUTPUT_PATH: &str = "src/network/messages";
+    let input_tmpdir = tempdir()?.into_path();
+    const OUTPUT_PATH: &str = "../src/messages";
+
+    // Download messages from head of Kafka repo
+    println!("Cloning kafka repo");
+    git2::build::RepoBuilder::new()
+        .fetch_options(git2::FetchOptions::new())
+        .with_checkout(git2::build::CheckoutBuilder::new())
+        .clone("https://github.com/apache/kafka.git", &input_tmpdir.as_path())?;
 
     // Clear output directory
     for file in fs::read_dir(OUTPUT_PATH)? {
@@ -29,7 +37,7 @@ pub fn run() -> Result<(), Error> {
 
     // Find input files
     let mut input_file_paths = Vec::new();
-    for file in fs::read_dir(INPUT_PATH)? {
+    for file in fs::read_dir(input_tmpdir.as_path().join("clients/src/main/resources/common/message"))? {
         let file = file?;
         if file.file_type()?.is_file() {
             let path = file.path();

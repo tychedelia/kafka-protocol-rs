@@ -6,6 +6,7 @@ use std::collections::BTreeMap;
 
 use bytes::Bytes;
 use log::error;
+use uuid::Uuid;
 
 use protocol_base::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
@@ -14,7 +15,7 @@ use protocol_base::{
 
 
 /// Valid versions: 0
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ReassignablePartition {
     /// The partition index.
     /// 
@@ -24,7 +25,7 @@ pub struct ReassignablePartition {
     /// The replicas to place the partitions on, or null to cancel a pending reassignment for this partition.
     /// 
     /// Supported API versions: 0
-    pub replicas: Option<Vec<i32>>,
+    pub replicas: Option<Vec<super::BrokerId>>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
@@ -96,7 +97,7 @@ impl Message for ReassignablePartition {
 }
 
 /// Valid versions: 0
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ReassignableTopic {
     /// The topic name.
     /// 
@@ -178,7 +179,7 @@ impl Message for ReassignableTopic {
 }
 
 /// Valid versions: 0
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct AlterPartitionReassignmentsRequest {
     /// The time in ms to wait for the request to complete.
     /// 

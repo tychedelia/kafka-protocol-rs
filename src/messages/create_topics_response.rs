@@ -6,6 +6,7 @@ use std::collections::BTreeMap;
 
 use bytes::Bytes;
 use log::error;
+use uuid::Uuid;
 
 use protocol_base::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
@@ -13,32 +14,32 @@ use protocol_base::{
 };
 
 
-/// Valid versions: 0-5
-#[derive(Debug, Clone)]
+/// Valid versions: 0-7
+#[derive(Debug, Clone, PartialEq)]
 pub struct CreatableTopicConfigs {
     /// The configuration name.
     /// 
-    /// Supported API versions: 5
+    /// Supported API versions: 5-7
     pub name: StrBytes,
 
     /// The configuration value.
     /// 
-    /// Supported API versions: 5
+    /// Supported API versions: 5-7
     pub value: Option<StrBytes>,
 
     /// True if the configuration is read-only.
     /// 
-    /// Supported API versions: 5
+    /// Supported API versions: 5-7
     pub read_only: bool,
 
     /// The configuration source.
     /// 
-    /// Supported API versions: 5
+    /// Supported API versions: 5-7
     pub config_source: i8,
 
     /// True if this configuration is sensitive.
     /// 
-    /// Supported API versions: 5
+    /// Supported API versions: 5-7
     pub is_sensitive: bool,
 
     /// Other tagged fields
@@ -47,38 +48,38 @@ pub struct CreatableTopicConfigs {
 
 impl Encodable for CreatableTopicConfigs {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 5 {
+        if version >= 5 {
             types::CompactString.encode(buf, &self.name)?;
         } else {
             if !self.name.is_empty() {
                 return Err(EncodeError)
             }
         }
-        if version == 5 {
+        if version >= 5 {
             types::CompactString.encode(buf, &self.value)?;
         } else {
             if !self.value.as_ref().map(|x| x.is_empty()).unwrap_or_default() {
                 return Err(EncodeError)
             }
         }
-        if version == 5 {
+        if version >= 5 {
             types::Boolean.encode(buf, &self.read_only)?;
         } else {
             if self.read_only {
                 return Err(EncodeError)
             }
         }
-        if version == 5 {
+        if version >= 5 {
             types::Int8.encode(buf, &self.config_source)?;
         }
-        if version == 5 {
+        if version >= 5 {
             types::Boolean.encode(buf, &self.is_sensitive)?;
         } else {
             if self.is_sensitive {
                 return Err(EncodeError)
             }
         }
-        if version == 5 {
+        if version >= 5 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -92,38 +93,38 @@ impl Encodable for CreatableTopicConfigs {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 5 {
+        if version >= 5 {
             total_size += types::CompactString.compute_size(&self.name)?;
         } else {
             if !self.name.is_empty() {
                 return Err(EncodeError)
             }
         }
-        if version == 5 {
+        if version >= 5 {
             total_size += types::CompactString.compute_size(&self.value)?;
         } else {
             if !self.value.as_ref().map(|x| x.is_empty()).unwrap_or_default() {
                 return Err(EncodeError)
             }
         }
-        if version == 5 {
+        if version >= 5 {
             total_size += types::Boolean.compute_size(&self.read_only)?;
         } else {
             if self.read_only {
                 return Err(EncodeError)
             }
         }
-        if version == 5 {
+        if version >= 5 {
             total_size += types::Int8.compute_size(&self.config_source)?;
         }
-        if version == 5 {
+        if version >= 5 {
             total_size += types::Boolean.compute_size(&self.is_sensitive)?;
         } else {
             if self.is_sensitive {
                 return Err(EncodeError)
             }
         }
-        if version == 5 {
+        if version >= 5 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -139,33 +140,33 @@ impl Encodable for CreatableTopicConfigs {
 
 impl Decodable for CreatableTopicConfigs {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let name = if version == 5 {
+        let name = if version >= 5 {
             types::CompactString.decode(buf)?
         } else {
             Default::default()
         };
-        let value = if version == 5 {
+        let value = if version >= 5 {
             types::CompactString.decode(buf)?
         } else {
             Some(Default::default())
         };
-        let read_only = if version == 5 {
+        let read_only = if version >= 5 {
             types::Boolean.decode(buf)?
         } else {
             false
         };
-        let config_source = if version == 5 {
+        let config_source = if version >= 5 {
             types::Int8.decode(buf)?
         } else {
             -1
         };
-        let is_sensitive = if version == 5 {
+        let is_sensitive = if version >= 5 {
             types::Boolean.decode(buf)?
         } else {
             false
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 5 {
+        if version >= 5 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -200,40 +201,45 @@ impl Default for CreatableTopicConfigs {
 }
 
 impl Message for CreatableTopicConfigs {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 5 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 7 };
 }
 
-/// Valid versions: 0-5
-#[derive(Debug, Clone)]
+/// Valid versions: 0-7
+#[derive(Debug, Clone, PartialEq)]
 pub struct CreatableTopicResult {
+    /// The unique topic ID
+    /// 
+    /// Supported API versions: 7
+    pub topic_id: Uuid,
+
     /// The error code, or 0 if there was no error.
     /// 
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-7
     pub error_code: i16,
 
     /// The error message, or null if there was no error.
     /// 
-    /// Supported API versions: 1-5
+    /// Supported API versions: 1-7
     pub error_message: Option<StrBytes>,
 
     /// Optional topic config error returned if configs are not returned in the response.
     /// 
-    /// Supported API versions: 5
+    /// Supported API versions: 5-7
     pub topic_config_error_code: i16,
 
     /// Number of partitions of the topic.
     /// 
-    /// Supported API versions: 5
+    /// Supported API versions: 5-7
     pub num_partitions: i32,
 
-    /// Replicator factor of the topic.
+    /// Replication factor of the topic.
     /// 
-    /// Supported API versions: 5
+    /// Supported API versions: 5-7
     pub replication_factor: i16,
 
     /// Configuration of the topic.
     /// 
-    /// Supported API versions: 5
+    /// Supported API versions: 5-7
     pub configs: Option<Vec<CreatableTopicConfigs>>,
 
     /// Other tagged fields
@@ -243,29 +249,32 @@ pub struct CreatableTopicResult {
 impl MapEncodable for CreatableTopicResult {
     type Key = super::TopicName;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 5 {
+        if version >= 5 {
             types::CompactString.encode(buf, key)?;
         } else {
             types::String.encode(buf, key)?;
         }
+        if version == 7 {
+            types::Uuid.encode(buf, &self.topic_id)?;
+        }
         types::Int16.encode(buf, &self.error_code)?;
         if version >= 1 {
-            if version == 5 {
+            if version >= 5 {
                 types::CompactString.encode(buf, &self.error_message)?;
             } else {
                 types::String.encode(buf, &self.error_message)?;
             }
         }
-        if version == 5 {
+        if version >= 5 {
             types::Int32.encode(buf, &self.num_partitions)?;
         }
-        if version == 5 {
+        if version >= 5 {
             types::Int16.encode(buf, &self.replication_factor)?;
         }
-        if version == 5 {
+        if version >= 5 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.configs)?;
         }
-        if version == 5 {
+        if version >= 5 {
             let mut num_tagged_fields = self.unknown_tagged_fields.len();
             if self.topic_config_error_code != 0 {
                 num_tagged_fields += 1;
@@ -292,29 +301,32 @@ impl MapEncodable for CreatableTopicResult {
     }
     fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 5 {
+        if version >= 5 {
             total_size += types::CompactString.compute_size(key)?;
         } else {
             total_size += types::String.compute_size(key)?;
         }
+        if version == 7 {
+            total_size += types::Uuid.compute_size(&self.topic_id)?;
+        }
         total_size += types::Int16.compute_size(&self.error_code)?;
         if version >= 1 {
-            if version == 5 {
+            if version >= 5 {
                 total_size += types::CompactString.compute_size(&self.error_message)?;
             } else {
                 total_size += types::String.compute_size(&self.error_message)?;
             }
         }
-        if version == 5 {
+        if version >= 5 {
             total_size += types::Int32.compute_size(&self.num_partitions)?;
         }
-        if version == 5 {
+        if version >= 5 {
             total_size += types::Int16.compute_size(&self.replication_factor)?;
         }
-        if version == 5 {
+        if version >= 5 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.configs)?;
         }
-        if version == 5 {
+        if version >= 5 {
             let mut num_tagged_fields = self.unknown_tagged_fields.len();
             if self.topic_config_error_code != 0 {
                 num_tagged_fields += 1;
@@ -344,14 +356,19 @@ impl MapEncodable for CreatableTopicResult {
 impl MapDecodable for CreatableTopicResult {
     type Key = super::TopicName;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
-        let key_field = if version == 5 {
+        let key_field = if version >= 5 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
         };
+        let topic_id = if version == 7 {
+            types::Uuid.decode(buf)?
+        } else {
+            Uuid::nil()
+        };
         let error_code = types::Int16.decode(buf)?;
         let error_message = if version >= 1 {
-            if version == 5 {
+            if version >= 5 {
                 types::CompactString.decode(buf)?
             } else {
                 types::String.decode(buf)?
@@ -360,23 +377,23 @@ impl MapDecodable for CreatableTopicResult {
             Some(Default::default())
         };
         let mut topic_config_error_code = 0;
-        let num_partitions = if version == 5 {
+        let num_partitions = if version >= 5 {
             types::Int32.decode(buf)?
         } else {
             -1
         };
-        let replication_factor = if version == 5 {
+        let replication_factor = if version >= 5 {
             types::Int16.decode(buf)?
         } else {
             -1
         };
-        let configs = if version == 5 {
+        let configs = if version >= 5 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
             Some(Default::default())
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 5 {
+        if version >= 5 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -394,6 +411,7 @@ impl MapDecodable for CreatableTopicResult {
             }
         }
         Ok((key_field, Self {
+            topic_id,
             error_code,
             error_message,
             topic_config_error_code,
@@ -408,6 +426,7 @@ impl MapDecodable for CreatableTopicResult {
 impl Default for CreatableTopicResult {
     fn default() -> Self {
         Self {
+            topic_id: Uuid::nil(),
             error_code: 0,
             error_message: Some(Default::default()),
             topic_config_error_code: 0,
@@ -420,20 +439,20 @@ impl Default for CreatableTopicResult {
 }
 
 impl Message for CreatableTopicResult {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 5 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 7 };
 }
 
-/// Valid versions: 0-5
-#[derive(Debug, Clone)]
+/// Valid versions: 0-7
+#[derive(Debug, Clone, PartialEq)]
 pub struct CreateTopicsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 
-    /// Supported API versions: 2-5
+    /// Supported API versions: 2-7
     pub throttle_time_ms: i32,
 
     /// Results for each topic we tried to create.
     /// 
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-7
     pub topics: indexmap::IndexMap<super::TopicName, CreatableTopicResult>,
 
     /// Other tagged fields
@@ -445,12 +464,12 @@ impl Encodable for CreateTopicsResponse {
         if version >= 2 {
             types::Int32.encode(buf, &self.throttle_time_ms)?;
         }
-        if version == 5 {
+        if version >= 5 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
         } else {
             types::Array(types::Struct { version }).encode(buf, &self.topics)?;
         }
-        if version == 5 {
+        if version >= 5 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -467,12 +486,12 @@ impl Encodable for CreateTopicsResponse {
         if version >= 2 {
             total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
         }
-        if version == 5 {
+        if version >= 5 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.topics)?;
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.topics)?;
         }
-        if version == 5 {
+        if version >= 5 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -493,13 +512,13 @@ impl Decodable for CreateTopicsResponse {
         } else {
             0
         };
-        let topics = if version == 5 {
+        let topics = if version >= 5 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
             types::Array(types::Struct { version }).decode(buf)?
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 5 {
+        if version >= 5 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -528,12 +547,12 @@ impl Default for CreateTopicsResponse {
 }
 
 impl Message for CreateTopicsResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 5 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 7 };
 }
 
 impl HeaderVersion for CreateTopicsResponse {
     fn header_version(version: i16) -> i16 {
-        if version == 5 {
+        if version >= 5 {
             1
         } else {
             0

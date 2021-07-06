@@ -14,6 +14,8 @@ pub struct Spec {
     pub api_key: Option<i16>,
     #[serde(rename = "type")]
     pub type_: SpecType,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub listeners: Option<Vec<ListenerSpec>>,
     pub name: String,
     pub valid_versions: VersionSpec,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -50,6 +52,8 @@ pub struct FieldSpec {
     pub fields: Option<Vec<FieldSpec>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub flexible_versions: Option<VersionSpec>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub zero_copy: Option<bool>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -62,10 +66,19 @@ pub struct StructSpec {
 
 #[derive(Debug, Copy, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
+pub enum  ListenerSpec {
+    ZkBroker,
+    Broker,
+    Controller,
+}
+
+#[derive(Debug, Copy, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
 pub enum SpecType {
     Header,
     Request,
     Response,
+    Data,
 }
 
 #[derive(Debug, Copy, Clone, Display, FromStr, Eq, PartialEq)]
@@ -121,11 +134,14 @@ pub enum PrimitiveType {
     Bool,
     Int8,
     Int16,
+    Uint16,
     Int32,
     Int64,
     Float64,
     String,
     Bytes,
+    Records,
+    Uuid,
 }
 forward_display_to_serde!(PrimitiveType);
 forward_from_str_to_serde!(PrimitiveType);
@@ -136,11 +152,13 @@ impl PrimitiveType {
             Self::Bool => "bool",
             Self::Int8 => "i8",
             Self::Int16 => "i16",
+            Self::Uint16 => "u16",
             Self::Int32 => "i32",
             Self::Int64 => "i64",
             Self::Float64 => "f64",
             Self::String => "StrBytes",
-            Self::Bytes => "Bytes",
+            Self::Bytes | Self::Records => "Bytes",
+            Self::Uuid => "Uuid",
         }
     }
     pub fn name(&self, flexible: bool) -> &str {
@@ -148,16 +166,18 @@ impl PrimitiveType {
             Self::Bool => "types::Boolean",
             Self::Int8 => "types::Int8",
             Self::Int16 => "types::Int16",
+            Self::Uint16 => "types::UInt16",
             Self::Int32 => "types::Int32",
             Self::Int64 => "types::Int64",
             Self::Float64 => "types::Float64",
             Self::String => if flexible { "types::CompactString" } else { "types::String" },
-            Self::Bytes => if flexible { "types::CompactBytes" } else { "types::Bytes" },
+            Self::Bytes | Self::Records => if flexible { "types::CompactBytes" } else { "types::Bytes" },
+            Self::Uuid => "types::Uuid",
         }
     }
     pub fn is_copy(&self) -> bool {
         match self {
-            Self::String | Self::Bytes => false,
+            Self::String | Self::Bytes | Self::Records => false,
             _ => true,
         }
     }

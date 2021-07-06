@@ -6,6 +6,7 @@ use std::collections::BTreeMap;
 
 use bytes::Bytes;
 use log::error;
+use uuid::Uuid;
 
 use protocol_base::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
@@ -14,7 +15,7 @@ use protocol_base::{
 
 
 /// Valid versions: 0-5
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DescribedGroupMember {
     /// The member ID assigned by the group coordinator.
     /// 
@@ -63,10 +64,6 @@ impl Encodable for DescribedGroupMember {
             } else {
                 types::String.encode(buf, &self.group_instance_id)?;
             }
-        } else {
-            if !self.group_instance_id.is_none() {
-                return Err(EncodeError)
-            }
         }
         if version == 5 {
             types::CompactString.encode(buf, &self.client_id)?;
@@ -112,10 +109,6 @@ impl Encodable for DescribedGroupMember {
                 total_size += types::CompactString.compute_size(&self.group_instance_id)?;
             } else {
                 total_size += types::String.compute_size(&self.group_instance_id)?;
-            }
-        } else {
-            if !self.group_instance_id.is_none() {
-                return Err(EncodeError)
             }
         }
         if version == 5 {
@@ -230,7 +223,7 @@ impl Message for DescribedGroupMember {
 }
 
 /// Valid versions: 0-5
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DescribedGroup {
     /// The describe error, or 0 if there was no error.
     /// 
@@ -444,7 +437,7 @@ impl Message for DescribedGroup {
 }
 
 /// Valid versions: 0-5
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DescribeGroupsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 

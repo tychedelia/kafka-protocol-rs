@@ -6,6 +6,7 @@ use std::collections::BTreeMap;
 
 use bytes::Bytes;
 use log::error;
+use uuid::Uuid;
 
 use protocol_base::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
@@ -14,7 +15,7 @@ use protocol_base::{
 
 
 /// Valid versions: 0-3
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct TxnOffsetCommitRequestPartition {
     /// The index of the partition within the topic.
     /// 
@@ -142,7 +143,7 @@ impl Message for TxnOffsetCommitRequestPartition {
 }
 
 /// Valid versions: 0-3
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct TxnOffsetCommitRequestTopic {
     /// The topic name.
     /// 
@@ -254,12 +255,12 @@ impl Message for TxnOffsetCommitRequestTopic {
 }
 
 /// Valid versions: 0-3
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct TxnOffsetCommitRequest {
     /// The ID of the transaction.
     /// 
     /// Supported API versions: 0-3
-    pub transactional_id: StrBytes,
+    pub transactional_id: super::TransactionalId,
 
     /// The ID of the group.
     /// 

@@ -6,6 +6,7 @@ use std::collections::BTreeMap;
 
 use bytes::Bytes;
 use log::error;
+use uuid::Uuid;
 
 use protocol_base::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
@@ -13,37 +14,47 @@ use protocol_base::{
 };
 
 
-/// Valid versions: 0-2
-#[derive(Debug, Clone)]
+/// Valid versions: 0-4
+#[derive(Debug, Clone, PartialEq)]
 pub struct DescribeConfigsSynonym {
     /// The synonym name.
     /// 
-    /// Supported API versions: 1-2
+    /// Supported API versions: 1-4
     pub name: StrBytes,
 
     /// The synonym value.
     /// 
-    /// Supported API versions: 1-2
+    /// Supported API versions: 1-4
     pub value: Option<StrBytes>,
 
     /// The synonym source.
     /// 
-    /// Supported API versions: 1-2
+    /// Supported API versions: 1-4
     pub source: i8,
 
+    /// Other tagged fields
+    pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
 }
 
 impl Encodable for DescribeConfigsSynonym {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version >= 1 {
-            types::String.encode(buf, &self.name)?;
+            if version == 4 {
+                types::CompactString.encode(buf, &self.name)?;
+            } else {
+                types::String.encode(buf, &self.name)?;
+            }
         } else {
             if !self.name.is_empty() {
                 return Err(EncodeError)
             }
         }
         if version >= 1 {
-            types::String.encode(buf, &self.value)?;
+            if version == 4 {
+                types::CompactString.encode(buf, &self.value)?;
+            } else {
+                types::String.encode(buf, &self.value)?;
+            }
         } else {
             if !self.value.as_ref().map(|x| x.is_empty()).unwrap_or_default() {
                 return Err(EncodeError)
@@ -56,20 +67,37 @@ impl Encodable for DescribeConfigsSynonym {
                 return Err(EncodeError)
             }
         }
+        if version == 4 {
+            let num_tagged_fields = self.unknown_tagged_fields.len();
+            if num_tagged_fields > std::u32::MAX as usize {
+                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                return Err(EncodeError);
+            }
+            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
+            write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
+        }
         Ok(())
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         if version >= 1 {
-            total_size += types::String.compute_size(&self.name)?;
+            if version == 4 {
+                total_size += types::CompactString.compute_size(&self.name)?;
+            } else {
+                total_size += types::String.compute_size(&self.name)?;
+            }
         } else {
             if !self.name.is_empty() {
                 return Err(EncodeError)
             }
         }
         if version >= 1 {
-            total_size += types::String.compute_size(&self.value)?;
+            if version == 4 {
+                total_size += types::CompactString.compute_size(&self.value)?;
+            } else {
+                total_size += types::String.compute_size(&self.value)?;
+            }
         } else {
             if !self.value.as_ref().map(|x| x.is_empty()).unwrap_or_default() {
                 return Err(EncodeError)
@@ -82,7 +110,16 @@ impl Encodable for DescribeConfigsSynonym {
                 return Err(EncodeError)
             }
         }
+        if version == 4 {
+            let num_tagged_fields = self.unknown_tagged_fields.len();
+            if num_tagged_fields > std::u32::MAX as usize {
+                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                return Err(EncodeError);
+            }
+            total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
+            total_size += compute_unknown_tagged_fields_size(&self.unknown_tagged_fields)?;
+        }
         Ok(total_size)
     }
 }
@@ -90,12 +127,20 @@ impl Encodable for DescribeConfigsSynonym {
 impl Decodable for DescribeConfigsSynonym {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let name = if version >= 1 {
-            types::String.decode(buf)?
+            if version == 4 {
+                types::CompactString.decode(buf)?
+            } else {
+                types::String.decode(buf)?
+            }
         } else {
             Default::default()
         };
         let value = if version >= 1 {
-            types::String.decode(buf)?
+            if version == 4 {
+                types::CompactString.decode(buf)?
+            } else {
+                types::String.decode(buf)?
+            }
         } else {
             Some(Default::default())
         };
@@ -104,10 +149,22 @@ impl Decodable for DescribeConfigsSynonym {
         } else {
             0
         };
+        let mut unknown_tagged_fields = BTreeMap::new();
+        if version == 4 {
+            let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
+            for _ in 0..num_tagged_fields {
+                let tag: u32 = types::UnsignedVarInt.decode(buf)?;
+                let size: u32 = types::UnsignedVarInt.decode(buf)?;
+                let mut unknown_value = vec![0; size as usize];
+                buf.try_copy_to_slice(&mut unknown_value)?;
+                unknown_tagged_fields.insert(tag as i32, unknown_value);
+            }
+        }
         Ok(Self {
             name,
             value,
             source,
+            unknown_tagged_fields,
         })
     }
 }
@@ -118,30 +175,31 @@ impl Default for DescribeConfigsSynonym {
             name: Default::default(),
             value: Some(Default::default()),
             source: 0,
+            unknown_tagged_fields: BTreeMap::new(),
         }
     }
 }
 
 impl Message for DescribeConfigsSynonym {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
 }
 
-/// Valid versions: 0-2
-#[derive(Debug, Clone)]
+/// Valid versions: 0-4
+#[derive(Debug, Clone, PartialEq)]
 pub struct DescribeConfigsResourceResult {
     /// The configuration name.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-4
     pub name: StrBytes,
 
     /// The configuration value.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-4
     pub value: Option<StrBytes>,
 
     /// True if the configuration is read-only.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-4
     pub read_only: bool,
 
     /// True if the configuration is not set.
@@ -151,25 +209,45 @@ pub struct DescribeConfigsResourceResult {
 
     /// The configuration source.
     /// 
-    /// Supported API versions: 1-2
+    /// Supported API versions: 1-4
     pub config_source: i8,
 
     /// True if this configuration is sensitive.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-4
     pub is_sensitive: bool,
 
     /// The synonyms for this configuration key.
     /// 
-    /// Supported API versions: 1-2
+    /// Supported API versions: 1-4
     pub synonyms: Vec<DescribeConfigsSynonym>,
 
+    /// The configuration data type. Type can be one of the following values - BOOLEAN, STRING, INT, SHORT, LONG, DOUBLE, LIST, CLASS, PASSWORD
+    /// 
+    /// Supported API versions: 3-4
+    pub config_type: i8,
+
+    /// The configuration documentation.
+    /// 
+    /// Supported API versions: 3-4
+    pub documentation: Option<StrBytes>,
+
+    /// Other tagged fields
+    pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
 }
 
 impl Encodable for DescribeConfigsResourceResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::String.encode(buf, &self.name)?;
-        types::String.encode(buf, &self.value)?;
+        if version == 4 {
+            types::CompactString.encode(buf, &self.name)?;
+        } else {
+            types::String.encode(buf, &self.name)?;
+        }
+        if version == 4 {
+            types::CompactString.encode(buf, &self.value)?;
+        } else {
+            types::String.encode(buf, &self.value)?;
+        }
         types::Boolean.encode(buf, &self.read_only)?;
         if version == 0 {
             types::Boolean.encode(buf, &self.is_default)?;
@@ -183,15 +261,46 @@ impl Encodable for DescribeConfigsResourceResult {
         }
         types::Boolean.encode(buf, &self.is_sensitive)?;
         if version >= 1 {
-            types::Array(types::Struct { version }).encode(buf, &self.synonyms)?;
+            if version == 4 {
+                types::CompactArray(types::Struct { version }).encode(buf, &self.synonyms)?;
+            } else {
+                types::Array(types::Struct { version }).encode(buf, &self.synonyms)?;
+            }
         }
+        if version >= 3 {
+            types::Int8.encode(buf, &self.config_type)?;
+        }
+        if version >= 3 {
+            if version == 4 {
+                types::CompactString.encode(buf, &self.documentation)?;
+            } else {
+                types::String.encode(buf, &self.documentation)?;
+            }
+        }
+        if version == 4 {
+            let num_tagged_fields = self.unknown_tagged_fields.len();
+            if num_tagged_fields > std::u32::MAX as usize {
+                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                return Err(EncodeError);
+            }
+            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
+            write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
+        }
         Ok(())
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::String.compute_size(&self.name)?;
-        total_size += types::String.compute_size(&self.value)?;
+        if version == 4 {
+            total_size += types::CompactString.compute_size(&self.name)?;
+        } else {
+            total_size += types::String.compute_size(&self.name)?;
+        }
+        if version == 4 {
+            total_size += types::CompactString.compute_size(&self.value)?;
+        } else {
+            total_size += types::String.compute_size(&self.value)?;
+        }
         total_size += types::Boolean.compute_size(&self.read_only)?;
         if version == 0 {
             total_size += types::Boolean.compute_size(&self.is_default)?;
@@ -205,17 +314,48 @@ impl Encodable for DescribeConfigsResourceResult {
         }
         total_size += types::Boolean.compute_size(&self.is_sensitive)?;
         if version >= 1 {
-            total_size += types::Array(types::Struct { version }).compute_size(&self.synonyms)?;
+            if version == 4 {
+                total_size += types::CompactArray(types::Struct { version }).compute_size(&self.synonyms)?;
+            } else {
+                total_size += types::Array(types::Struct { version }).compute_size(&self.synonyms)?;
+            }
         }
+        if version >= 3 {
+            total_size += types::Int8.compute_size(&self.config_type)?;
+        }
+        if version >= 3 {
+            if version == 4 {
+                total_size += types::CompactString.compute_size(&self.documentation)?;
+            } else {
+                total_size += types::String.compute_size(&self.documentation)?;
+            }
+        }
+        if version == 4 {
+            let num_tagged_fields = self.unknown_tagged_fields.len();
+            if num_tagged_fields > std::u32::MAX as usize {
+                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                return Err(EncodeError);
+            }
+            total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
+            total_size += compute_unknown_tagged_fields_size(&self.unknown_tagged_fields)?;
+        }
         Ok(total_size)
     }
 }
 
 impl Decodable for DescribeConfigsResourceResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let name = types::String.decode(buf)?;
-        let value = types::String.decode(buf)?;
+        let name = if version == 4 {
+            types::CompactString.decode(buf)?
+        } else {
+            types::String.decode(buf)?
+        };
+        let value = if version == 4 {
+            types::CompactString.decode(buf)?
+        } else {
+            types::String.decode(buf)?
+        };
         let read_only = types::Boolean.decode(buf)?;
         let is_default = if version == 0 {
             types::Boolean.decode(buf)?
@@ -229,10 +369,39 @@ impl Decodable for DescribeConfigsResourceResult {
         };
         let is_sensitive = types::Boolean.decode(buf)?;
         let synonyms = if version >= 1 {
-            types::Array(types::Struct { version }).decode(buf)?
+            if version == 4 {
+                types::CompactArray(types::Struct { version }).decode(buf)?
+            } else {
+                types::Array(types::Struct { version }).decode(buf)?
+            }
         } else {
             Default::default()
         };
+        let config_type = if version >= 3 {
+            types::Int8.decode(buf)?
+        } else {
+            0
+        };
+        let documentation = if version >= 3 {
+            if version == 4 {
+                types::CompactString.decode(buf)?
+            } else {
+                types::String.decode(buf)?
+            }
+        } else {
+            Some(Default::default())
+        };
+        let mut unknown_tagged_fields = BTreeMap::new();
+        if version == 4 {
+            let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
+            for _ in 0..num_tagged_fields {
+                let tag: u32 = types::UnsignedVarInt.decode(buf)?;
+                let size: u32 = types::UnsignedVarInt.decode(buf)?;
+                let mut unknown_value = vec![0; size as usize];
+                buf.try_copy_to_slice(&mut unknown_value)?;
+                unknown_tagged_fields.insert(tag as i32, unknown_value);
+            }
+        }
         Ok(Self {
             name,
             value,
@@ -241,6 +410,9 @@ impl Decodable for DescribeConfigsResourceResult {
             config_source,
             is_sensitive,
             synonyms,
+            config_type,
+            documentation,
+            unknown_tagged_fields,
         })
     }
 }
@@ -255,62 +427,109 @@ impl Default for DescribeConfigsResourceResult {
             config_source: -1,
             is_sensitive: false,
             synonyms: Default::default(),
+            config_type: 0,
+            documentation: Some(Default::default()),
+            unknown_tagged_fields: BTreeMap::new(),
         }
     }
 }
 
 impl Message for DescribeConfigsResourceResult {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
 }
 
-/// Valid versions: 0-2
-#[derive(Debug, Clone)]
+/// Valid versions: 0-4
+#[derive(Debug, Clone, PartialEq)]
 pub struct DescribeConfigsResult {
     /// The error code, or 0 if we were able to successfully describe the configurations.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-4
     pub error_code: i16,
 
     /// The error message, or null if we were able to successfully describe the configurations.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-4
     pub error_message: Option<StrBytes>,
 
     /// The resource type.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-4
     pub resource_type: i8,
 
     /// The resource name.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-4
     pub resource_name: StrBytes,
 
     /// Each listed configuration.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-4
     pub configs: Vec<DescribeConfigsResourceResult>,
 
+    /// Other tagged fields
+    pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
 }
 
 impl Encodable for DescribeConfigsResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int16.encode(buf, &self.error_code)?;
-        types::String.encode(buf, &self.error_message)?;
+        if version == 4 {
+            types::CompactString.encode(buf, &self.error_message)?;
+        } else {
+            types::String.encode(buf, &self.error_message)?;
+        }
         types::Int8.encode(buf, &self.resource_type)?;
-        types::String.encode(buf, &self.resource_name)?;
-        types::Array(types::Struct { version }).encode(buf, &self.configs)?;
+        if version == 4 {
+            types::CompactString.encode(buf, &self.resource_name)?;
+        } else {
+            types::String.encode(buf, &self.resource_name)?;
+        }
+        if version == 4 {
+            types::CompactArray(types::Struct { version }).encode(buf, &self.configs)?;
+        } else {
+            types::Array(types::Struct { version }).encode(buf, &self.configs)?;
+        }
+        if version == 4 {
+            let num_tagged_fields = self.unknown_tagged_fields.len();
+            if num_tagged_fields > std::u32::MAX as usize {
+                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                return Err(EncodeError);
+            }
+            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
+            write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
+        }
         Ok(())
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         total_size += types::Int16.compute_size(&self.error_code)?;
-        total_size += types::String.compute_size(&self.error_message)?;
+        if version == 4 {
+            total_size += types::CompactString.compute_size(&self.error_message)?;
+        } else {
+            total_size += types::String.compute_size(&self.error_message)?;
+        }
         total_size += types::Int8.compute_size(&self.resource_type)?;
-        total_size += types::String.compute_size(&self.resource_name)?;
-        total_size += types::Array(types::Struct { version }).compute_size(&self.configs)?;
+        if version == 4 {
+            total_size += types::CompactString.compute_size(&self.resource_name)?;
+        } else {
+            total_size += types::String.compute_size(&self.resource_name)?;
+        }
+        if version == 4 {
+            total_size += types::CompactArray(types::Struct { version }).compute_size(&self.configs)?;
+        } else {
+            total_size += types::Array(types::Struct { version }).compute_size(&self.configs)?;
+        }
+        if version == 4 {
+            let num_tagged_fields = self.unknown_tagged_fields.len();
+            if num_tagged_fields > std::u32::MAX as usize {
+                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                return Err(EncodeError);
+            }
+            total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
+            total_size += compute_unknown_tagged_fields_size(&self.unknown_tagged_fields)?;
+        }
         Ok(total_size)
     }
 }
@@ -318,16 +537,40 @@ impl Encodable for DescribeConfigsResult {
 impl Decodable for DescribeConfigsResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let error_code = types::Int16.decode(buf)?;
-        let error_message = types::String.decode(buf)?;
+        let error_message = if version == 4 {
+            types::CompactString.decode(buf)?
+        } else {
+            types::String.decode(buf)?
+        };
         let resource_type = types::Int8.decode(buf)?;
-        let resource_name = types::String.decode(buf)?;
-        let configs = types::Array(types::Struct { version }).decode(buf)?;
+        let resource_name = if version == 4 {
+            types::CompactString.decode(buf)?
+        } else {
+            types::String.decode(buf)?
+        };
+        let configs = if version == 4 {
+            types::CompactArray(types::Struct { version }).decode(buf)?
+        } else {
+            types::Array(types::Struct { version }).decode(buf)?
+        };
+        let mut unknown_tagged_fields = BTreeMap::new();
+        if version == 4 {
+            let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
+            for _ in 0..num_tagged_fields {
+                let tag: u32 = types::UnsignedVarInt.decode(buf)?;
+                let size: u32 = types::UnsignedVarInt.decode(buf)?;
+                let mut unknown_value = vec![0; size as usize];
+                buf.try_copy_to_slice(&mut unknown_value)?;
+                unknown_tagged_fields.insert(tag as i32, unknown_value);
+            }
+        }
         Ok(Self {
             error_code,
             error_message,
             resource_type,
             resource_name,
             configs,
+            unknown_tagged_fields,
         })
     }
 }
@@ -340,41 +583,70 @@ impl Default for DescribeConfigsResult {
             resource_type: 0,
             resource_name: Default::default(),
             configs: Default::default(),
+            unknown_tagged_fields: BTreeMap::new(),
         }
     }
 }
 
 impl Message for DescribeConfigsResult {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
 }
 
-/// Valid versions: 0-2
-#[derive(Debug, Clone)]
+/// Valid versions: 0-4
+#[derive(Debug, Clone, PartialEq)]
 pub struct DescribeConfigsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-4
     pub throttle_time_ms: i32,
 
     /// The results for each resource.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-4
     pub results: Vec<DescribeConfigsResult>,
 
+    /// Other tagged fields
+    pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
 }
 
 impl Encodable for DescribeConfigsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
-        types::Array(types::Struct { version }).encode(buf, &self.results)?;
+        if version == 4 {
+            types::CompactArray(types::Struct { version }).encode(buf, &self.results)?;
+        } else {
+            types::Array(types::Struct { version }).encode(buf, &self.results)?;
+        }
+        if version == 4 {
+            let num_tagged_fields = self.unknown_tagged_fields.len();
+            if num_tagged_fields > std::u32::MAX as usize {
+                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                return Err(EncodeError);
+            }
+            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
+            write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
+        }
         Ok(())
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
-        total_size += types::Array(types::Struct { version }).compute_size(&self.results)?;
+        if version == 4 {
+            total_size += types::CompactArray(types::Struct { version }).compute_size(&self.results)?;
+        } else {
+            total_size += types::Array(types::Struct { version }).compute_size(&self.results)?;
+        }
+        if version == 4 {
+            let num_tagged_fields = self.unknown_tagged_fields.len();
+            if num_tagged_fields > std::u32::MAX as usize {
+                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                return Err(EncodeError);
+            }
+            total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
+            total_size += compute_unknown_tagged_fields_size(&self.unknown_tagged_fields)?;
+        }
         Ok(total_size)
     }
 }
@@ -382,10 +654,26 @@ impl Encodable for DescribeConfigsResponse {
 impl Decodable for DescribeConfigsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let throttle_time_ms = types::Int32.decode(buf)?;
-        let results = types::Array(types::Struct { version }).decode(buf)?;
+        let results = if version == 4 {
+            types::CompactArray(types::Struct { version }).decode(buf)?
+        } else {
+            types::Array(types::Struct { version }).decode(buf)?
+        };
+        let mut unknown_tagged_fields = BTreeMap::new();
+        if version == 4 {
+            let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
+            for _ in 0..num_tagged_fields {
+                let tag: u32 = types::UnsignedVarInt.decode(buf)?;
+                let size: u32 = types::UnsignedVarInt.decode(buf)?;
+                let mut unknown_value = vec![0; size as usize];
+                buf.try_copy_to_slice(&mut unknown_value)?;
+                unknown_tagged_fields.insert(tag as i32, unknown_value);
+            }
+        }
         Ok(Self {
             throttle_time_ms,
             results,
+            unknown_tagged_fields,
         })
     }
 }
@@ -395,17 +683,22 @@ impl Default for DescribeConfigsResponse {
         Self {
             throttle_time_ms: 0,
             results: Default::default(),
+            unknown_tagged_fields: BTreeMap::new(),
         }
     }
 }
 
 impl Message for DescribeConfigsResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
 }
 
 impl HeaderVersion for DescribeConfigsResponse {
     fn header_version(version: i16) -> i16 {
-        0
+        if version == 4 {
+            1
+        } else {
+            0
+        }
     }
 }
 

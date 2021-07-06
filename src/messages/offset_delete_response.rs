@@ -6,6 +6,7 @@ use std::collections::BTreeMap;
 
 use bytes::Bytes;
 use log::error;
+use uuid::Uuid;
 
 use protocol_base::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
@@ -14,7 +15,7 @@ use protocol_base::{
 
 
 /// Valid versions: 0
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct OffsetDeleteResponsePartition {
     /// The error code, or 0 if there was no error.
     /// 
@@ -64,7 +65,7 @@ impl Message for OffsetDeleteResponsePartition {
 }
 
 /// Valid versions: 0
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct OffsetDeleteResponseTopic {
     /// The responses for each partition in the topic.
     /// 
@@ -74,7 +75,7 @@ pub struct OffsetDeleteResponseTopic {
 }
 
 impl MapEncodable for OffsetDeleteResponseTopic {
-    type Key = StrBytes;
+    type Key = super::TopicName;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::String.encode(buf, key)?;
         types::Array(types::Struct { version }).encode(buf, &self.partitions)?;
@@ -91,7 +92,7 @@ impl MapEncodable for OffsetDeleteResponseTopic {
 }
 
 impl MapDecodable for OffsetDeleteResponseTopic {
-    type Key = StrBytes;
+    type Key = super::TopicName;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
         let key_field = types::String.decode(buf)?;
         let partitions = types::Array(types::Struct { version }).decode(buf)?;
@@ -114,7 +115,7 @@ impl Message for OffsetDeleteResponseTopic {
 }
 
 /// Valid versions: 0
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct OffsetDeleteResponse {
     /// The top-level error code, or 0 if there was no error.
     /// 
@@ -129,7 +130,7 @@ pub struct OffsetDeleteResponse {
     /// The responses for each topic.
     /// 
     /// Supported API versions: 0
-    pub topics: indexmap::IndexMap<StrBytes, OffsetDeleteResponseTopic>,
+    pub topics: indexmap::IndexMap<super::TopicName, OffsetDeleteResponseTopic>,
 
 }
 

@@ -6,6 +6,7 @@ use std::collections::BTreeMap;
 
 use bytes::Bytes;
 use log::error;
+use uuid::Uuid;
 
 use protocol_base::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
@@ -14,7 +15,7 @@ use protocol_base::{
 
 
 /// Valid versions: 0
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct OffsetDeleteRequestPartition {
     /// The partition index.
     /// 
@@ -59,7 +60,7 @@ impl Message for OffsetDeleteRequestPartition {
 }
 
 /// Valid versions: 0
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct OffsetDeleteRequestTopic {
     /// Each partition to delete offsets for.
     /// 
@@ -69,7 +70,7 @@ pub struct OffsetDeleteRequestTopic {
 }
 
 impl MapEncodable for OffsetDeleteRequestTopic {
-    type Key = StrBytes;
+    type Key = super::TopicName;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::String.encode(buf, key)?;
         types::Array(types::Struct { version }).encode(buf, &self.partitions)?;
@@ -86,7 +87,7 @@ impl MapEncodable for OffsetDeleteRequestTopic {
 }
 
 impl MapDecodable for OffsetDeleteRequestTopic {
-    type Key = StrBytes;
+    type Key = super::TopicName;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
         let key_field = types::String.decode(buf)?;
         let partitions = types::Array(types::Struct { version }).decode(buf)?;
@@ -109,17 +110,17 @@ impl Message for OffsetDeleteRequestTopic {
 }
 
 /// Valid versions: 0
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct OffsetDeleteRequest {
     /// The unique group identifier.
     /// 
     /// Supported API versions: 0
-    pub group_id: StrBytes,
+    pub group_id: super::GroupId,
 
     /// The topics to delete offsets for
     /// 
     /// Supported API versions: 0
-    pub topics: indexmap::IndexMap<StrBytes, OffsetDeleteRequestTopic>,
+    pub topics: indexmap::IndexMap<super::TopicName, OffsetDeleteRequestTopic>,
 
 }
 

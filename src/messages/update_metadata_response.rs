@@ -6,6 +6,7 @@ use std::collections::BTreeMap;
 
 use bytes::Bytes;
 use log::error;
+use uuid::Uuid;
 
 use protocol_base::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
@@ -13,12 +14,12 @@ use protocol_base::{
 };
 
 
-/// Valid versions: 0-6
-#[derive(Debug, Clone)]
+/// Valid versions: 0-7
+#[derive(Debug, Clone, PartialEq)]
 pub struct UpdateMetadataResponse {
     /// The error code, or 0 if there was no error.
     /// 
-    /// Supported API versions: 0-6
+    /// Supported API versions: 0-7
     pub error_code: i16,
 
     /// Other tagged fields
@@ -28,7 +29,7 @@ pub struct UpdateMetadataResponse {
 impl Encodable for UpdateMetadataResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int16.encode(buf, &self.error_code)?;
-        if version == 6 {
+        if version >= 6 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -43,7 +44,7 @@ impl Encodable for UpdateMetadataResponse {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         total_size += types::Int16.compute_size(&self.error_code)?;
-        if version == 6 {
+        if version >= 6 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -61,7 +62,7 @@ impl Decodable for UpdateMetadataResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let error_code = types::Int16.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 6 {
+        if version >= 6 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -88,12 +89,12 @@ impl Default for UpdateMetadataResponse {
 }
 
 impl Message for UpdateMetadataResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 6 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 7 };
 }
 
 impl HeaderVersion for UpdateMetadataResponse {
     fn header_version(version: i16) -> i16 {
-        if version == 6 {
+        if version >= 6 {
             1
         } else {
             0

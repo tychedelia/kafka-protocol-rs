@@ -6,6 +6,7 @@ use std::collections::BTreeMap;
 
 use bytes::Bytes;
 use log::error;
+use uuid::Uuid;
 
 use protocol_base::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
@@ -13,8 +14,8 @@ use protocol_base::{
 };
 
 
-/// Valid versions: 0-4
-#[derive(Debug, Clone)]
+/// Valid versions: 0-5
+#[derive(Debug, Clone, PartialEq)]
 pub struct LeaderAndIsrPartitionState {
     /// The topic name.  This is only present in v0 or v1.
     /// 
@@ -23,52 +24,52 @@ pub struct LeaderAndIsrPartitionState {
 
     /// The partition index.
     /// 
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub partition_index: i32,
 
     /// The controller epoch.
     /// 
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub controller_epoch: i32,
 
     /// The broker ID of the leader.
     /// 
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub leader: super::BrokerId,
 
     /// The leader epoch.
     /// 
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub leader_epoch: i32,
 
     /// The in-sync replica IDs.
     /// 
-    /// Supported API versions: 0-4
-    pub isr: Vec<i32>,
+    /// Supported API versions: 0-5
+    pub isr: Vec<super::BrokerId>,
 
     /// The ZooKeeper version.
     /// 
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub zk_version: i32,
 
     /// The replica IDs.
     /// 
-    /// Supported API versions: 0-4
-    pub replicas: Vec<i32>,
+    /// Supported API versions: 0-5
+    pub replicas: Vec<super::BrokerId>,
 
     /// The replica IDs that we are adding this partition to, or null if no replicas are being added.
     /// 
-    /// Supported API versions: 3-4
-    pub adding_replicas: Vec<i32>,
+    /// Supported API versions: 3-5
+    pub adding_replicas: Vec<super::BrokerId>,
 
     /// The replica IDs that we are removing this partition from, or null if no replicas are being removed.
     /// 
-    /// Supported API versions: 3-4
-    pub removing_replicas: Vec<i32>,
+    /// Supported API versions: 3-5
+    pub removing_replicas: Vec<super::BrokerId>,
 
     /// Whether the replica should have existed on the broker or not.
     /// 
-    /// Supported API versions: 1-4
+    /// Supported API versions: 1-5
     pub is_new: bool,
 
     /// Other tagged fields
@@ -84,26 +85,26 @@ impl Encodable for LeaderAndIsrPartitionState {
         types::Int32.encode(buf, &self.controller_epoch)?;
         types::Int32.encode(buf, &self.leader)?;
         types::Int32.encode(buf, &self.leader_epoch)?;
-        if version == 4 {
+        if version >= 4 {
             types::CompactArray(types::Int32).encode(buf, &self.isr)?;
         } else {
             types::Array(types::Int32).encode(buf, &self.isr)?;
         }
         types::Int32.encode(buf, &self.zk_version)?;
-        if version == 4 {
+        if version >= 4 {
             types::CompactArray(types::Int32).encode(buf, &self.replicas)?;
         } else {
             types::Array(types::Int32).encode(buf, &self.replicas)?;
         }
         if version >= 3 {
-            if version == 4 {
+            if version >= 4 {
                 types::CompactArray(types::Int32).encode(buf, &self.adding_replicas)?;
             } else {
                 types::Array(types::Int32).encode(buf, &self.adding_replicas)?;
             }
         }
         if version >= 3 {
-            if version == 4 {
+            if version >= 4 {
                 types::CompactArray(types::Int32).encode(buf, &self.removing_replicas)?;
             } else {
                 types::Array(types::Int32).encode(buf, &self.removing_replicas)?;
@@ -112,7 +113,7 @@ impl Encodable for LeaderAndIsrPartitionState {
         if version >= 1 {
             types::Boolean.encode(buf, &self.is_new)?;
         }
-        if version == 4 {
+        if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -133,26 +134,26 @@ impl Encodable for LeaderAndIsrPartitionState {
         total_size += types::Int32.compute_size(&self.controller_epoch)?;
         total_size += types::Int32.compute_size(&self.leader)?;
         total_size += types::Int32.compute_size(&self.leader_epoch)?;
-        if version == 4 {
+        if version >= 4 {
             total_size += types::CompactArray(types::Int32).compute_size(&self.isr)?;
         } else {
             total_size += types::Array(types::Int32).compute_size(&self.isr)?;
         }
         total_size += types::Int32.compute_size(&self.zk_version)?;
-        if version == 4 {
+        if version >= 4 {
             total_size += types::CompactArray(types::Int32).compute_size(&self.replicas)?;
         } else {
             total_size += types::Array(types::Int32).compute_size(&self.replicas)?;
         }
         if version >= 3 {
-            if version == 4 {
+            if version >= 4 {
                 total_size += types::CompactArray(types::Int32).compute_size(&self.adding_replicas)?;
             } else {
                 total_size += types::Array(types::Int32).compute_size(&self.adding_replicas)?;
             }
         }
         if version >= 3 {
-            if version == 4 {
+            if version >= 4 {
                 total_size += types::CompactArray(types::Int32).compute_size(&self.removing_replicas)?;
             } else {
                 total_size += types::Array(types::Int32).compute_size(&self.removing_replicas)?;
@@ -161,7 +162,7 @@ impl Encodable for LeaderAndIsrPartitionState {
         if version >= 1 {
             total_size += types::Boolean.compute_size(&self.is_new)?;
         }
-        if version == 4 {
+        if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -186,19 +187,19 @@ impl Decodable for LeaderAndIsrPartitionState {
         let controller_epoch = types::Int32.decode(buf)?;
         let leader = types::Int32.decode(buf)?;
         let leader_epoch = types::Int32.decode(buf)?;
-        let isr = if version == 4 {
+        let isr = if version >= 4 {
             types::CompactArray(types::Int32).decode(buf)?
         } else {
             types::Array(types::Int32).decode(buf)?
         };
         let zk_version = types::Int32.decode(buf)?;
-        let replicas = if version == 4 {
+        let replicas = if version >= 4 {
             types::CompactArray(types::Int32).decode(buf)?
         } else {
             types::Array(types::Int32).decode(buf)?
         };
         let adding_replicas = if version >= 3 {
-            if version == 4 {
+            if version >= 4 {
                 types::CompactArray(types::Int32).decode(buf)?
             } else {
                 types::Array(types::Int32).decode(buf)?
@@ -207,7 +208,7 @@ impl Decodable for LeaderAndIsrPartitionState {
             Default::default()
         };
         let removing_replicas = if version >= 3 {
-            if version == 4 {
+            if version >= 4 {
                 types::CompactArray(types::Int32).decode(buf)?
             } else {
                 types::Array(types::Int32).decode(buf)?
@@ -221,7 +222,7 @@ impl Decodable for LeaderAndIsrPartitionState {
             false
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 4 {
+        if version >= 4 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -268,20 +269,25 @@ impl Default for LeaderAndIsrPartitionState {
 }
 
 impl Message for LeaderAndIsrPartitionState {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 5 };
 }
 
-/// Valid versions: 0-4
-#[derive(Debug, Clone)]
+/// Valid versions: 0-5
+#[derive(Debug, Clone, PartialEq)]
 pub struct LeaderAndIsrTopicState {
     /// The topic name.
     /// 
-    /// Supported API versions: 2-4
+    /// Supported API versions: 2-5
     pub topic_name: super::TopicName,
+
+    /// The unique topic ID.
+    /// 
+    /// Supported API versions: 5
+    pub topic_id: Uuid,
 
     /// The state of each partition
     /// 
-    /// Supported API versions: 2-4
+    /// Supported API versions: 2-5
     pub partition_states: Vec<LeaderAndIsrPartitionState>,
 
     /// Other tagged fields
@@ -291,7 +297,7 @@ pub struct LeaderAndIsrTopicState {
 impl Encodable for LeaderAndIsrTopicState {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version >= 2 {
-            if version == 4 {
+            if version >= 4 {
                 types::CompactString.encode(buf, &self.topic_name)?;
             } else {
                 types::String.encode(buf, &self.topic_name)?;
@@ -301,8 +307,11 @@ impl Encodable for LeaderAndIsrTopicState {
                 return Err(EncodeError)
             }
         }
+        if version == 5 {
+            types::Uuid.encode(buf, &self.topic_id)?;
+        }
         if version >= 2 {
-            if version == 4 {
+            if version >= 4 {
                 types::CompactArray(types::Struct { version }).encode(buf, &self.partition_states)?;
             } else {
                 types::Array(types::Struct { version }).encode(buf, &self.partition_states)?;
@@ -312,7 +321,7 @@ impl Encodable for LeaderAndIsrTopicState {
                 return Err(EncodeError)
             }
         }
-        if version == 4 {
+        if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -327,7 +336,7 @@ impl Encodable for LeaderAndIsrTopicState {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         if version >= 2 {
-            if version == 4 {
+            if version >= 4 {
                 total_size += types::CompactString.compute_size(&self.topic_name)?;
             } else {
                 total_size += types::String.compute_size(&self.topic_name)?;
@@ -337,8 +346,11 @@ impl Encodable for LeaderAndIsrTopicState {
                 return Err(EncodeError)
             }
         }
+        if version == 5 {
+            total_size += types::Uuid.compute_size(&self.topic_id)?;
+        }
         if version >= 2 {
-            if version == 4 {
+            if version >= 4 {
                 total_size += types::CompactArray(types::Struct { version }).compute_size(&self.partition_states)?;
             } else {
                 total_size += types::Array(types::Struct { version }).compute_size(&self.partition_states)?;
@@ -348,7 +360,7 @@ impl Encodable for LeaderAndIsrTopicState {
                 return Err(EncodeError)
             }
         }
-        if version == 4 {
+        if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -365,7 +377,7 @@ impl Encodable for LeaderAndIsrTopicState {
 impl Decodable for LeaderAndIsrTopicState {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let topic_name = if version >= 2 {
-            if version == 4 {
+            if version >= 4 {
                 types::CompactString.decode(buf)?
             } else {
                 types::String.decode(buf)?
@@ -373,8 +385,13 @@ impl Decodable for LeaderAndIsrTopicState {
         } else {
             Default::default()
         };
+        let topic_id = if version == 5 {
+            types::Uuid.decode(buf)?
+        } else {
+            Uuid::nil()
+        };
         let partition_states = if version >= 2 {
-            if version == 4 {
+            if version >= 4 {
                 types::CompactArray(types::Struct { version }).decode(buf)?
             } else {
                 types::Array(types::Struct { version }).decode(buf)?
@@ -383,7 +400,7 @@ impl Decodable for LeaderAndIsrTopicState {
             Default::default()
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 4 {
+        if version >= 4 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -395,6 +412,7 @@ impl Decodable for LeaderAndIsrTopicState {
         }
         Ok(Self {
             topic_name,
+            topic_id,
             partition_states,
             unknown_tagged_fields,
         })
@@ -405,6 +423,7 @@ impl Default for LeaderAndIsrTopicState {
     fn default() -> Self {
         Self {
             topic_name: Default::default(),
+            topic_id: Uuid::nil(),
             partition_states: Default::default(),
             unknown_tagged_fields: BTreeMap::new(),
         }
@@ -412,25 +431,25 @@ impl Default for LeaderAndIsrTopicState {
 }
 
 impl Message for LeaderAndIsrTopicState {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 5 };
 }
 
-/// Valid versions: 0-4
-#[derive(Debug, Clone)]
+/// Valid versions: 0-5
+#[derive(Debug, Clone, PartialEq)]
 pub struct LeaderAndIsrLiveLeader {
     /// The leader's broker ID.
     /// 
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub broker_id: super::BrokerId,
 
     /// The leader's hostname.
     /// 
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub host_name: StrBytes,
 
     /// The leader's port.
     /// 
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub port: i32,
 
     /// Other tagged fields
@@ -440,13 +459,13 @@ pub struct LeaderAndIsrLiveLeader {
 impl Encodable for LeaderAndIsrLiveLeader {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.broker_id)?;
-        if version == 4 {
+        if version >= 4 {
             types::CompactString.encode(buf, &self.host_name)?;
         } else {
             types::String.encode(buf, &self.host_name)?;
         }
         types::Int32.encode(buf, &self.port)?;
-        if version == 4 {
+        if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -461,13 +480,13 @@ impl Encodable for LeaderAndIsrLiveLeader {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.broker_id)?;
-        if version == 4 {
+        if version >= 4 {
             total_size += types::CompactString.compute_size(&self.host_name)?;
         } else {
             total_size += types::String.compute_size(&self.host_name)?;
         }
         total_size += types::Int32.compute_size(&self.port)?;
-        if version == 4 {
+        if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -484,14 +503,14 @@ impl Encodable for LeaderAndIsrLiveLeader {
 impl Decodable for LeaderAndIsrLiveLeader {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let broker_id = types::Int32.decode(buf)?;
-        let host_name = if version == 4 {
+        let host_name = if version >= 4 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
         };
         let port = types::Int32.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 4 {
+        if version >= 4 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -522,26 +541,31 @@ impl Default for LeaderAndIsrLiveLeader {
 }
 
 impl Message for LeaderAndIsrLiveLeader {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 5 };
 }
 
-/// Valid versions: 0-4
-#[derive(Debug, Clone)]
+/// Valid versions: 0-5
+#[derive(Debug, Clone, PartialEq)]
 pub struct LeaderAndIsrRequest {
     /// The current controller ID.
     /// 
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub controller_id: super::BrokerId,
 
     /// The current controller epoch.
     /// 
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub controller_epoch: i32,
 
     /// The current broker epoch.
     /// 
-    /// Supported API versions: 2-4
+    /// Supported API versions: 2-5
     pub broker_epoch: i64,
+
+    /// The type that indicates whether all topics are included in the request
+    /// 
+    /// Supported API versions: 5
+    pub _type: i8,
 
     /// The state of each partition, in a v0 or v1 message.
     /// 
@@ -550,12 +574,12 @@ pub struct LeaderAndIsrRequest {
 
     /// Each topic.
     /// 
-    /// Supported API versions: 2-4
+    /// Supported API versions: 2-5
     pub topic_states: Vec<LeaderAndIsrTopicState>,
 
     /// The current live leaders.
     /// 
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub live_leaders: Vec<LeaderAndIsrLiveLeader>,
 
     /// Other tagged fields
@@ -569,6 +593,13 @@ impl Encodable for LeaderAndIsrRequest {
         if version >= 2 {
             types::Int64.encode(buf, &self.broker_epoch)?;
         }
+        if version == 5 {
+            types::Int8.encode(buf, &self._type)?;
+        } else {
+            if self._type != 0 {
+                return Err(EncodeError)
+            }
+        }
         if version <= 1 {
             types::Array(types::Struct { version }).encode(buf, &self.ungrouped_partition_states)?;
         } else {
@@ -577,7 +608,7 @@ impl Encodable for LeaderAndIsrRequest {
             }
         }
         if version >= 2 {
-            if version == 4 {
+            if version >= 4 {
                 types::CompactArray(types::Struct { version }).encode(buf, &self.topic_states)?;
             } else {
                 types::Array(types::Struct { version }).encode(buf, &self.topic_states)?;
@@ -587,12 +618,12 @@ impl Encodable for LeaderAndIsrRequest {
                 return Err(EncodeError)
             }
         }
-        if version == 4 {
+        if version >= 4 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.live_leaders)?;
         } else {
             types::Array(types::Struct { version }).encode(buf, &self.live_leaders)?;
         }
-        if version == 4 {
+        if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -611,6 +642,13 @@ impl Encodable for LeaderAndIsrRequest {
         if version >= 2 {
             total_size += types::Int64.compute_size(&self.broker_epoch)?;
         }
+        if version == 5 {
+            total_size += types::Int8.compute_size(&self._type)?;
+        } else {
+            if self._type != 0 {
+                return Err(EncodeError)
+            }
+        }
         if version <= 1 {
             total_size += types::Array(types::Struct { version }).compute_size(&self.ungrouped_partition_states)?;
         } else {
@@ -619,7 +657,7 @@ impl Encodable for LeaderAndIsrRequest {
             }
         }
         if version >= 2 {
-            if version == 4 {
+            if version >= 4 {
                 total_size += types::CompactArray(types::Struct { version }).compute_size(&self.topic_states)?;
             } else {
                 total_size += types::Array(types::Struct { version }).compute_size(&self.topic_states)?;
@@ -629,12 +667,12 @@ impl Encodable for LeaderAndIsrRequest {
                 return Err(EncodeError)
             }
         }
-        if version == 4 {
+        if version >= 4 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.live_leaders)?;
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.live_leaders)?;
         }
-        if version == 4 {
+        if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -657,13 +695,18 @@ impl Decodable for LeaderAndIsrRequest {
         } else {
             -1
         };
+        let _type = if version == 5 {
+            types::Int8.decode(buf)?
+        } else {
+            0
+        };
         let ungrouped_partition_states = if version <= 1 {
             types::Array(types::Struct { version }).decode(buf)?
         } else {
             Default::default()
         };
         let topic_states = if version >= 2 {
-            if version == 4 {
+            if version >= 4 {
                 types::CompactArray(types::Struct { version }).decode(buf)?
             } else {
                 types::Array(types::Struct { version }).decode(buf)?
@@ -671,13 +714,13 @@ impl Decodable for LeaderAndIsrRequest {
         } else {
             Default::default()
         };
-        let live_leaders = if version == 4 {
+        let live_leaders = if version >= 4 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
             types::Array(types::Struct { version }).decode(buf)?
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 4 {
+        if version >= 4 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -691,6 +734,7 @@ impl Decodable for LeaderAndIsrRequest {
             controller_id,
             controller_epoch,
             broker_epoch,
+            _type,
             ungrouped_partition_states,
             topic_states,
             live_leaders,
@@ -705,6 +749,7 @@ impl Default for LeaderAndIsrRequest {
             controller_id: (0).into(),
             controller_epoch: 0,
             broker_epoch: -1,
+            _type: 0,
             ungrouped_partition_states: Default::default(),
             topic_states: Default::default(),
             live_leaders: Default::default(),
@@ -714,12 +759,12 @@ impl Default for LeaderAndIsrRequest {
 }
 
 impl Message for LeaderAndIsrRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 5 };
 }
 
 impl HeaderVersion for LeaderAndIsrRequest {
     fn header_version(version: i16) -> i16 {
-        if version == 4 {
+        if version >= 4 {
             2
         } else {
             1

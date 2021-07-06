@@ -6,6 +6,7 @@ use std::collections::BTreeMap;
 
 use bytes::Bytes;
 use log::error;
+use uuid::Uuid;
 
 use protocol_base::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
@@ -13,27 +14,27 @@ use protocol_base::{
 };
 
 
-/// Valid versions: 0-3
-#[derive(Debug, Clone)]
+/// Valid versions: 0-4
+#[derive(Debug, Clone, PartialEq)]
 pub struct InitProducerIdRequest {
     /// The transactional id, or null if the producer is not transactional.
     /// 
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub transactional_id: Option<super::TransactionalId>,
 
     /// The time in ms to wait before aborting idle transactions sent by this producer. This is only relevant if a TransactionalId has been defined.
     /// 
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub transaction_timeout_ms: i32,
 
     /// The producer id. This is used to disambiguate requests if a transactional id is reused following its expiration.
     /// 
-    /// Supported API versions: 3
-    pub producer_id: i64,
+    /// Supported API versions: 3-4
+    pub producer_id: super::ProducerId,
 
     /// The producer's current epoch. This will be checked against the producer epoch on the broker, and the request will return an error if they do not match.
     /// 
-    /// Supported API versions: 3
+    /// Supported API versions: 3-4
     pub producer_epoch: i16,
 
     /// Other tagged fields
@@ -48,14 +49,14 @@ impl Encodable for InitProducerIdRequest {
             types::String.encode(buf, &self.transactional_id)?;
         }
         types::Int32.encode(buf, &self.transaction_timeout_ms)?;
-        if version == 3 {
+        if version >= 3 {
             types::Int64.encode(buf, &self.producer_id)?;
         } else {
             if self.producer_id != -1 {
                 return Err(EncodeError)
             }
         }
-        if version == 3 {
+        if version >= 3 {
             types::Int16.encode(buf, &self.producer_epoch)?;
         } else {
             if self.producer_epoch != -1 {
@@ -82,14 +83,14 @@ impl Encodable for InitProducerIdRequest {
             total_size += types::String.compute_size(&self.transactional_id)?;
         }
         total_size += types::Int32.compute_size(&self.transaction_timeout_ms)?;
-        if version == 3 {
+        if version >= 3 {
             total_size += types::Int64.compute_size(&self.producer_id)?;
         } else {
             if self.producer_id != -1 {
                 return Err(EncodeError)
             }
         }
-        if version == 3 {
+        if version >= 3 {
             total_size += types::Int16.compute_size(&self.producer_epoch)?;
         } else {
             if self.producer_epoch != -1 {
@@ -118,12 +119,12 @@ impl Decodable for InitProducerIdRequest {
             types::String.decode(buf)?
         };
         let transaction_timeout_ms = types::Int32.decode(buf)?;
-        let producer_id = if version == 3 {
+        let producer_id = if version >= 3 {
             types::Int64.decode(buf)?
         } else {
-            -1
+            (-1).into()
         };
-        let producer_epoch = if version == 3 {
+        let producer_epoch = if version >= 3 {
             types::Int16.decode(buf)?
         } else {
             -1
@@ -154,7 +155,7 @@ impl Default for InitProducerIdRequest {
         Self {
             transactional_id: Some(Default::default()),
             transaction_timeout_ms: 0,
-            producer_id: -1,
+            producer_id: (-1).into(),
             producer_epoch: -1,
             unknown_tagged_fields: BTreeMap::new(),
         }
@@ -162,7 +163,7 @@ impl Default for InitProducerIdRequest {
 }
 
 impl Message for InitProducerIdRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
 }
 
 impl HeaderVersion for InitProducerIdRequest {
