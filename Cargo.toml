@@ -4,7 +4,10 @@ members = ["protocol_base", "protocol_codegen"]
 [package]
 name = "kafka_protocol"
 version = "0.1.0"
-authors = ["Diggory Blake <diggsey@googlemail.com>"]
+authors = [
+    "Diggory Blake <diggsey@googlemail.com>",
+    "Jem McElwain <jem.xyz@pm.me>",
+]
 edition = "2018"
 
 [dependencies]
@@ -26,3 +29,5 @@ string = { version = "0.3.0", git = "https://github.com/0x1991babe/string.git" }
 
 [build-dependencies]
 async-trait = "0.1.50"
+
+license = "MIT/Apache-2.0"
