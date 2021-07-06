@@ -9,6 +9,7 @@ authors = [
     "Jem McElwain <jem.xyz@pm.me>",
 ]
 edition = "2018"
+license = "MIT/Apache-2.0"
 
 [dependencies]
 tokio = "1.8.0"
@@ -29,5 +30,3 @@ string = { version = "0.3.0", git = "https://github.com/0x1991babe/string.git" }
 
 [build-dependencies]
 async-trait = "0.1.50"
-
-license = "MIT/Apache-2.0"
