@@ -362,7 +362,7 @@ impl RecordBatchDecoder {
 
         // CRC
         let supplied_crc: u32 = types::UInt32.decode(buf)?;
-        let actual_crc = CASTAGNOLI.checksum(&buf);
+        let actual_crc = CASTAGNOLI.checksum(buf);
         
         if supplied_crc != actual_crc {
             error!("Cyclic redundancy check failed ({} != {})", supplied_crc, actual_crc);
@@ -675,7 +675,7 @@ impl Record {
 
         // CRC
         let supplied_crc: u32 = types::UInt32.decode(buf)?;
-        let actual_crc = IEEE.checksum(&buf);
+        let actual_crc = IEEE.checksum(buf);
         
         if supplied_crc != actual_crc {
             error!("Cyclic redundancy check failed ({} != {})", supplied_crc, actual_crc);
