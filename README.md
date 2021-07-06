@@ -1,4 +1,4 @@
-# Kafka-Protocol
+# Kafka-Protocol [![Build](https://github.com/0x1991babe/kafka-protocol-rs/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/0x1991babe/kafka-protocol-rs/actions/workflows/build-and-test.yml)
 
 Rust implementation of the [Kafka wire protocol](https://kafka.apache.org/protocol.html), originally implemented by [Diggsey](https://github.com/Diggsey) in a minimal Kafka client implementation [Franz](https://github.com/Diggsey/franz).
 
