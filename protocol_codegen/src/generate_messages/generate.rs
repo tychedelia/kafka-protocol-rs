@@ -134,7 +134,6 @@ impl PreparedDefault {
                 Self::Numeric(v) => expr.deref().compare(CmpType::Eq, &Expr::new_atom(v)),
                 Self::String(s) => expr.compare(CmpType::Eq, &Expr::new_str(s)),
                 Self::Uuid => expr.compare(CmpType::Eq, &Expr::new_atom("&Uuid::nil()")),
-                // TODO: store default as const so we don't need to allocate on every serialization
                 Self::EmptyStruct => expr.compare(CmpType::Eq, &Expr::new_atom("&Default::default()"))
             }
         }
