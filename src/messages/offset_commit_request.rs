@@ -60,12 +60,12 @@ impl Encodable for OffsetCommitRequestPartition {
                 return Err(EncodeError)
             }
         }
-        if version == 8 {
+        if version >= 8 {
             types::CompactString.encode(buf, &self.committed_metadata)?;
         } else {
             types::String.encode(buf, &self.committed_metadata)?;
         }
-        if version == 8 {
+        if version >= 8 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -91,12 +91,12 @@ impl Encodable for OffsetCommitRequestPartition {
                 return Err(EncodeError)
             }
         }
-        if version == 8 {
+        if version >= 8 {
             total_size += types::CompactString.compute_size(&self.committed_metadata)?;
         } else {
             total_size += types::String.compute_size(&self.committed_metadata)?;
         }
-        if version == 8 {
+        if version >= 8 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -124,13 +124,13 @@ impl Decodable for OffsetCommitRequestPartition {
         } else {
             -1
         };
-        let committed_metadata = if version == 8 {
+        let committed_metadata = if version >= 8 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 8 {
+        if version >= 8 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -187,17 +187,17 @@ pub struct OffsetCommitRequestTopic {
 
 impl Encodable for OffsetCommitRequestTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 8 {
+        if version >= 8 {
             types::CompactString.encode(buf, &self.name)?;
         } else {
             types::String.encode(buf, &self.name)?;
         }
-        if version == 8 {
+        if version >= 8 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.partitions)?;
         } else {
             types::Array(types::Struct { version }).encode(buf, &self.partitions)?;
         }
-        if version == 8 {
+        if version >= 8 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -211,17 +211,17 @@ impl Encodable for OffsetCommitRequestTopic {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 8 {
+        if version >= 8 {
             total_size += types::CompactString.compute_size(&self.name)?;
         } else {
             total_size += types::String.compute_size(&self.name)?;
         }
-        if version == 8 {
+        if version >= 8 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.partitions)?;
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.partitions)?;
         }
-        if version == 8 {
+        if version >= 8 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -237,18 +237,18 @@ impl Encodable for OffsetCommitRequestTopic {
 
 impl Decodable for OffsetCommitRequestTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let name = if version == 8 {
+        let name = if version >= 8 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
         };
-        let partitions = if version == 8 {
+        let partitions = if version >= 8 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
             types::Array(types::Struct { version }).decode(buf)?
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 8 {
+        if version >= 8 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -319,7 +319,7 @@ pub struct OffsetCommitRequest {
 
 impl Encodable for OffsetCommitRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 8 {
+        if version >= 8 {
             types::CompactString.encode(buf, &self.group_id)?;
         } else {
             types::String.encode(buf, &self.group_id)?;
@@ -328,14 +328,14 @@ impl Encodable for OffsetCommitRequest {
             types::Int32.encode(buf, &self.generation_id)?;
         }
         if version >= 1 {
-            if version == 8 {
+            if version >= 8 {
                 types::CompactString.encode(buf, &self.member_id)?;
             } else {
                 types::String.encode(buf, &self.member_id)?;
             }
         }
         if version >= 7 {
-            if version == 8 {
+            if version >= 8 {
                 types::CompactString.encode(buf, &self.group_instance_id)?;
             } else {
                 types::String.encode(buf, &self.group_instance_id)?;
@@ -348,12 +348,12 @@ impl Encodable for OffsetCommitRequest {
         if version >= 2 && version <= 4 {
             types::Int64.encode(buf, &self.retention_time_ms)?;
         }
-        if version == 8 {
+        if version >= 8 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
         } else {
             types::Array(types::Struct { version }).encode(buf, &self.topics)?;
         }
-        if version == 8 {
+        if version >= 8 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -367,7 +367,7 @@ impl Encodable for OffsetCommitRequest {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 8 {
+        if version >= 8 {
             total_size += types::CompactString.compute_size(&self.group_id)?;
         } else {
             total_size += types::String.compute_size(&self.group_id)?;
@@ -376,14 +376,14 @@ impl Encodable for OffsetCommitRequest {
             total_size += types::Int32.compute_size(&self.generation_id)?;
         }
         if version >= 1 {
-            if version == 8 {
+            if version >= 8 {
                 total_size += types::CompactString.compute_size(&self.member_id)?;
             } else {
                 total_size += types::String.compute_size(&self.member_id)?;
             }
         }
         if version >= 7 {
-            if version == 8 {
+            if version >= 8 {
                 total_size += types::CompactString.compute_size(&self.group_instance_id)?;
             } else {
                 total_size += types::String.compute_size(&self.group_instance_id)?;
@@ -396,12 +396,12 @@ impl Encodable for OffsetCommitRequest {
         if version >= 2 && version <= 4 {
             total_size += types::Int64.compute_size(&self.retention_time_ms)?;
         }
-        if version == 8 {
+        if version >= 8 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.topics)?;
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.topics)?;
         }
-        if version == 8 {
+        if version >= 8 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -417,7 +417,7 @@ impl Encodable for OffsetCommitRequest {
 
 impl Decodable for OffsetCommitRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let group_id = if version == 8 {
+        let group_id = if version >= 8 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
@@ -428,7 +428,7 @@ impl Decodable for OffsetCommitRequest {
             -1
         };
         let member_id = if version >= 1 {
-            if version == 8 {
+            if version >= 8 {
                 types::CompactString.decode(buf)?
             } else {
                 types::String.decode(buf)?
@@ -437,7 +437,7 @@ impl Decodable for OffsetCommitRequest {
             Default::default()
         };
         let group_instance_id = if version >= 7 {
-            if version == 8 {
+            if version >= 8 {
                 types::CompactString.decode(buf)?
             } else {
                 types::String.decode(buf)?
@@ -450,13 +450,13 @@ impl Decodable for OffsetCommitRequest {
         } else {
             -1
         };
-        let topics = if version == 8 {
+        let topics = if version >= 8 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
             types::Array(types::Struct { version }).decode(buf)?
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 8 {
+        if version >= 8 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -498,7 +498,7 @@ impl Message for OffsetCommitRequest {
 
 impl HeaderVersion for OffsetCommitRequest {
     fn header_version(version: i16) -> i16 {
-        if version == 8 {
+        if version >= 8 {
             2
         } else {
             1

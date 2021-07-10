@@ -19,7 +19,7 @@ use protocol_base::{
 pub struct DeletableTopicResult {
     /// the unique topic ID
     /// 
-    /// Supported API versions: 6
+    /// Supported API versions: 6-6
     pub topic_id: Uuid,
 
     /// The deletion error, or 0 if the deletion succeeded.

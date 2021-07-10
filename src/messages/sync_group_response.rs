@@ -29,12 +29,12 @@ pub struct SyncGroupResponse {
 
     /// The group protocol type.
     /// 
-    /// Supported API versions: 5
+    /// Supported API versions: 5-5
     pub protocol_type: Option<StrBytes>,
 
     /// The group protocol name.
     /// 
-    /// Supported API versions: 5
+    /// Supported API versions: 5-5
     pub protocol_name: Option<StrBytes>,
 
     /// The member assignment.

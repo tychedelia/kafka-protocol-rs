@@ -33,13 +33,13 @@ pub struct RemainingPartition {
 
 impl Encodable for RemainingPartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 3 {
+        if version >= 3 {
             types::CompactString.encode(buf, &self.topic_name)?;
         } else {
             types::String.encode(buf, &self.topic_name)?;
         }
         types::Int32.encode(buf, &self.partition_index)?;
-        if version == 3 {
+        if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -53,13 +53,13 @@ impl Encodable for RemainingPartition {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 3 {
+        if version >= 3 {
             total_size += types::CompactString.compute_size(&self.topic_name)?;
         } else {
             total_size += types::String.compute_size(&self.topic_name)?;
         }
         total_size += types::Int32.compute_size(&self.partition_index)?;
-        if version == 3 {
+        if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -75,14 +75,14 @@ impl Encodable for RemainingPartition {
 
 impl Decodable for RemainingPartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let topic_name = if version == 3 {
+        let topic_name = if version >= 3 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
         };
         let partition_index = types::Int32.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 3 {
+        if version >= 3 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -134,12 +134,12 @@ pub struct ControlledShutdownResponse {
 impl Encodable for ControlledShutdownResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int16.encode(buf, &self.error_code)?;
-        if version == 3 {
+        if version >= 3 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.remaining_partitions)?;
         } else {
             types::Array(types::Struct { version }).encode(buf, &self.remaining_partitions)?;
         }
-        if version == 3 {
+        if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -154,12 +154,12 @@ impl Encodable for ControlledShutdownResponse {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         total_size += types::Int16.compute_size(&self.error_code)?;
-        if version == 3 {
+        if version >= 3 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.remaining_partitions)?;
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.remaining_partitions)?;
         }
-        if version == 3 {
+        if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -176,13 +176,13 @@ impl Encodable for ControlledShutdownResponse {
 impl Decodable for ControlledShutdownResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let error_code = types::Int16.decode(buf)?;
-        let remaining_partitions = if version == 3 {
+        let remaining_partitions = if version >= 3 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
             types::Array(types::Struct { version }).decode(buf)?
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 3 {
+        if version >= 3 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -216,7 +216,7 @@ impl Message for ControlledShutdownResponse {
 
 impl HeaderVersion for ControlledShutdownResponse {
     fn header_version(version: i16) -> i16 {
-        if version == 3 {
+        if version >= 3 {
             1
         } else {
             0

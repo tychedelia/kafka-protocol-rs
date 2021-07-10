@@ -39,7 +39,7 @@ pub struct LeaderAndIsrPartitionError {
 impl Encodable for LeaderAndIsrPartitionError {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version <= 4 {
-            if version == 4 {
+            if version >= 4 {
                 types::CompactString.encode(buf, &self.topic_name)?;
             } else {
                 types::String.encode(buf, &self.topic_name)?;
@@ -62,7 +62,7 @@ impl Encodable for LeaderAndIsrPartitionError {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         if version <= 4 {
-            if version == 4 {
+            if version >= 4 {
                 total_size += types::CompactString.compute_size(&self.topic_name)?;
             } else {
                 total_size += types::String.compute_size(&self.topic_name)?;
@@ -87,7 +87,7 @@ impl Encodable for LeaderAndIsrPartitionError {
 impl Decodable for LeaderAndIsrPartitionError {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let topic_name = if version <= 4 {
-            if version == 4 {
+            if version >= 4 {
                 types::CompactString.decode(buf)?
             } else {
                 types::String.decode(buf)?
@@ -137,7 +137,7 @@ impl Message for LeaderAndIsrPartitionError {
 pub struct LeaderAndIsrTopicError {
     /// Each partition.
     /// 
-    /// Supported API versions: 5
+    /// Supported API versions: 5-5
     pub partition_errors: Vec<LeaderAndIsrPartitionError>,
 
     /// Other tagged fields
@@ -262,7 +262,7 @@ pub struct LeaderAndIsrResponse {
 
     /// Each topic
     /// 
-    /// Supported API versions: 5
+    /// Supported API versions: 5-5
     pub topics: indexmap::IndexMap<Uuid, LeaderAndIsrTopicError>,
 
     /// Other tagged fields
@@ -273,7 +273,7 @@ impl Encodable for LeaderAndIsrResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int16.encode(buf, &self.error_code)?;
         if version <= 4 {
-            if version == 4 {
+            if version >= 4 {
                 types::CompactArray(types::Struct { version }).encode(buf, &self.partition_errors)?;
             } else {
                 types::Array(types::Struct { version }).encode(buf, &self.partition_errors)?;
@@ -306,7 +306,7 @@ impl Encodable for LeaderAndIsrResponse {
         let mut total_size = 0;
         total_size += types::Int16.compute_size(&self.error_code)?;
         if version <= 4 {
-            if version == 4 {
+            if version >= 4 {
                 total_size += types::CompactArray(types::Struct { version }).compute_size(&self.partition_errors)?;
             } else {
                 total_size += types::Array(types::Struct { version }).compute_size(&self.partition_errors)?;
@@ -341,7 +341,7 @@ impl Decodable for LeaderAndIsrResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let error_code = types::Int16.decode(buf)?;
         let partition_errors = if version <= 4 {
-            if version == 4 {
+            if version >= 4 {
                 types::CompactArray(types::Struct { version }).decode(buf)?
             } else {
                 types::Array(types::Struct { version }).decode(buf)?

@@ -44,12 +44,12 @@ pub struct SaslAuthenticateResponse {
 impl Encodable for SaslAuthenticateResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int16.encode(buf, &self.error_code)?;
-        if version == 2 {
+        if version >= 2 {
             types::CompactString.encode(buf, &self.error_message)?;
         } else {
             types::String.encode(buf, &self.error_message)?;
         }
-        if version == 2 {
+        if version >= 2 {
             types::CompactBytes.encode(buf, &self.auth_bytes)?;
         } else {
             types::Bytes.encode(buf, &self.auth_bytes)?;
@@ -57,7 +57,7 @@ impl Encodable for SaslAuthenticateResponse {
         if version >= 1 {
             types::Int64.encode(buf, &self.session_lifetime_ms)?;
         }
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -72,12 +72,12 @@ impl Encodable for SaslAuthenticateResponse {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         total_size += types::Int16.compute_size(&self.error_code)?;
-        if version == 2 {
+        if version >= 2 {
             total_size += types::CompactString.compute_size(&self.error_message)?;
         } else {
             total_size += types::String.compute_size(&self.error_message)?;
         }
-        if version == 2 {
+        if version >= 2 {
             total_size += types::CompactBytes.compute_size(&self.auth_bytes)?;
         } else {
             total_size += types::Bytes.compute_size(&self.auth_bytes)?;
@@ -85,7 +85,7 @@ impl Encodable for SaslAuthenticateResponse {
         if version >= 1 {
             total_size += types::Int64.compute_size(&self.session_lifetime_ms)?;
         }
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -102,12 +102,12 @@ impl Encodable for SaslAuthenticateResponse {
 impl Decodable for SaslAuthenticateResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let error_code = types::Int16.decode(buf)?;
-        let error_message = if version == 2 {
+        let error_message = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
         };
-        let auth_bytes = if version == 2 {
+        let auth_bytes = if version >= 2 {
             types::CompactBytes.decode(buf)?
         } else {
             types::Bytes.decode(buf)?
@@ -118,7 +118,7 @@ impl Decodable for SaslAuthenticateResponse {
             0
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -156,7 +156,7 @@ impl Message for SaslAuthenticateResponse {
 
 impl HeaderVersion for SaslAuthenticateResponse {
     fn header_version(version: i16) -> i16 {
-        if version == 2 {
+        if version >= 2 {
             1
         } else {
             0

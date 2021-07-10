@@ -31,6 +31,9 @@ impl<W: Write> CodeWriter<W> {
         write!(self, "}}")?;
         res
     }
+    pub fn into_inner(self) -> W {
+        self.inner
+    }
 }
 
 impl<W: Write> Write for CodeWriter<W> {

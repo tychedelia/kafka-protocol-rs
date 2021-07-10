@@ -33,7 +33,7 @@ pub struct DescribeGroupsRequest {
 
 impl Encodable for DescribeGroupsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 5 {
+        if version >= 5 {
             types::CompactArray(types::CompactString).encode(buf, &self.groups)?;
         } else {
             types::Array(types::String).encode(buf, &self.groups)?;
@@ -45,7 +45,7 @@ impl Encodable for DescribeGroupsRequest {
                 return Err(EncodeError)
             }
         }
-        if version == 5 {
+        if version >= 5 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -59,7 +59,7 @@ impl Encodable for DescribeGroupsRequest {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 5 {
+        if version >= 5 {
             total_size += types::CompactArray(types::CompactString).compute_size(&self.groups)?;
         } else {
             total_size += types::Array(types::String).compute_size(&self.groups)?;
@@ -71,7 +71,7 @@ impl Encodable for DescribeGroupsRequest {
                 return Err(EncodeError)
             }
         }
-        if version == 5 {
+        if version >= 5 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -87,7 +87,7 @@ impl Encodable for DescribeGroupsRequest {
 
 impl Decodable for DescribeGroupsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let groups = if version == 5 {
+        let groups = if version >= 5 {
             types::CompactArray(types::CompactString).decode(buf)?
         } else {
             types::Array(types::String).decode(buf)?
@@ -98,7 +98,7 @@ impl Decodable for DescribeGroupsRequest {
             false
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 5 {
+        if version >= 5 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -132,7 +132,7 @@ impl Message for DescribeGroupsRequest {
 
 impl HeaderVersion for DescribeGroupsRequest {
     fn header_version(version: i16) -> i16 {
-        if version == 5 {
+        if version >= 5 {
             2
         } else {
             1

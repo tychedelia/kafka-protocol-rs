@@ -29,7 +29,7 @@ pub struct FindCoordinatorRequest {
 
     /// The coordinator keys.
     /// 
-    /// Supported API versions: 4
+    /// Supported API versions: 4-4
     pub coordinator_keys: Vec<StrBytes>,
 
     /// Other tagged fields
@@ -39,7 +39,7 @@ pub struct FindCoordinatorRequest {
 impl Encodable for FindCoordinatorRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version <= 3 {
-            if version == 3 {
+            if version >= 3 {
                 types::CompactString.encode(buf, &self.key)?;
             } else {
                 types::String.encode(buf, &self.key)?;
@@ -78,7 +78,7 @@ impl Encodable for FindCoordinatorRequest {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         if version <= 3 {
-            if version == 3 {
+            if version >= 3 {
                 total_size += types::CompactString.compute_size(&self.key)?;
             } else {
                 total_size += types::String.compute_size(&self.key)?;
@@ -119,7 +119,7 @@ impl Encodable for FindCoordinatorRequest {
 impl Decodable for FindCoordinatorRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let key = if version <= 3 {
-            if version == 3 {
+            if version >= 3 {
                 types::CompactString.decode(buf)?
             } else {
                 types::String.decode(buf)?

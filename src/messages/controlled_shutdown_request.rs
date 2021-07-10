@@ -37,7 +37,7 @@ impl Encodable for ControlledShutdownRequest {
         if version >= 2 {
             types::Int64.encode(buf, &self.broker_epoch)?;
         }
-        if version == 3 {
+        if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -55,7 +55,7 @@ impl Encodable for ControlledShutdownRequest {
         if version >= 2 {
             total_size += types::Int64.compute_size(&self.broker_epoch)?;
         }
-        if version == 3 {
+        if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -78,7 +78,7 @@ impl Decodable for ControlledShutdownRequest {
             -1
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 3 {
+        if version >= 3 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -112,7 +112,7 @@ impl Message for ControlledShutdownRequest {
 
 impl HeaderVersion for ControlledShutdownRequest {
     fn header_version(version: i16) -> i16 {
-        if version == 3 {
+        if version >= 3 {
             2
         } else {
             if version == 0 { 0 } else { 1 }

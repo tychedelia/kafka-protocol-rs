@@ -49,7 +49,7 @@ impl Encodable for RequestHeader {
         if version >= 1 {
             types::String.encode(buf, &self.client_id)?;
         }
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -69,7 +69,7 @@ impl Encodable for RequestHeader {
         if version >= 1 {
             total_size += types::String.compute_size(&self.client_id)?;
         }
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -94,7 +94,7 @@ impl Decodable for RequestHeader {
             Some(Default::default())
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;

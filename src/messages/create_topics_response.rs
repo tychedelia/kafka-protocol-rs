@@ -209,7 +209,7 @@ impl Message for CreatableTopicConfigs {
 pub struct CreatableTopicResult {
     /// The unique topic ID
     /// 
-    /// Supported API versions: 7
+    /// Supported API versions: 7-7
     pub topic_id: Uuid,
 
     /// The error code, or 0 if there was no error.

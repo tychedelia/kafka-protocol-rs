@@ -29,7 +29,7 @@ pub struct ListedGroup {
 
     /// The group state name.
     /// 
-    /// Supported API versions: 4
+    /// Supported API versions: 4-4
     pub group_state: StrBytes,
 
     /// Other tagged fields

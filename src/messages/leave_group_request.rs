@@ -34,7 +34,7 @@ pub struct MemberIdentity {
 impl Encodable for MemberIdentity {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version >= 3 {
-            if version == 4 {
+            if version >= 4 {
                 types::CompactString.encode(buf, &self.member_id)?;
             } else {
                 types::String.encode(buf, &self.member_id)?;
@@ -45,7 +45,7 @@ impl Encodable for MemberIdentity {
             }
         }
         if version >= 3 {
-            if version == 4 {
+            if version >= 4 {
                 types::CompactString.encode(buf, &self.group_instance_id)?;
             } else {
                 types::String.encode(buf, &self.group_instance_id)?;
@@ -55,7 +55,7 @@ impl Encodable for MemberIdentity {
                 return Err(EncodeError)
             }
         }
-        if version == 4 {
+        if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -70,7 +70,7 @@ impl Encodable for MemberIdentity {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         if version >= 3 {
-            if version == 4 {
+            if version >= 4 {
                 total_size += types::CompactString.compute_size(&self.member_id)?;
             } else {
                 total_size += types::String.compute_size(&self.member_id)?;
@@ -81,7 +81,7 @@ impl Encodable for MemberIdentity {
             }
         }
         if version >= 3 {
-            if version == 4 {
+            if version >= 4 {
                 total_size += types::CompactString.compute_size(&self.group_instance_id)?;
             } else {
                 total_size += types::String.compute_size(&self.group_instance_id)?;
@@ -91,7 +91,7 @@ impl Encodable for MemberIdentity {
                 return Err(EncodeError)
             }
         }
-        if version == 4 {
+        if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -108,7 +108,7 @@ impl Encodable for MemberIdentity {
 impl Decodable for MemberIdentity {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let member_id = if version >= 3 {
-            if version == 4 {
+            if version >= 4 {
                 types::CompactString.decode(buf)?
             } else {
                 types::String.decode(buf)?
@@ -117,7 +117,7 @@ impl Decodable for MemberIdentity {
             Default::default()
         };
         let group_instance_id = if version >= 3 {
-            if version == 4 {
+            if version >= 4 {
                 types::CompactString.decode(buf)?
             } else {
                 types::String.decode(buf)?
@@ -126,7 +126,7 @@ impl Decodable for MemberIdentity {
             None
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 4 {
+        if version >= 4 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -182,7 +182,7 @@ pub struct LeaveGroupRequest {
 
 impl Encodable for LeaveGroupRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 4 {
+        if version >= 4 {
             types::CompactString.encode(buf, &self.group_id)?;
         } else {
             types::String.encode(buf, &self.group_id)?;
@@ -195,7 +195,7 @@ impl Encodable for LeaveGroupRequest {
             }
         }
         if version >= 3 {
-            if version == 4 {
+            if version >= 4 {
                 types::CompactArray(types::Struct { version }).encode(buf, &self.members)?;
             } else {
                 types::Array(types::Struct { version }).encode(buf, &self.members)?;
@@ -205,7 +205,7 @@ impl Encodable for LeaveGroupRequest {
                 return Err(EncodeError)
             }
         }
-        if version == 4 {
+        if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -219,7 +219,7 @@ impl Encodable for LeaveGroupRequest {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 4 {
+        if version >= 4 {
             total_size += types::CompactString.compute_size(&self.group_id)?;
         } else {
             total_size += types::String.compute_size(&self.group_id)?;
@@ -232,7 +232,7 @@ impl Encodable for LeaveGroupRequest {
             }
         }
         if version >= 3 {
-            if version == 4 {
+            if version >= 4 {
                 total_size += types::CompactArray(types::Struct { version }).compute_size(&self.members)?;
             } else {
                 total_size += types::Array(types::Struct { version }).compute_size(&self.members)?;
@@ -242,7 +242,7 @@ impl Encodable for LeaveGroupRequest {
                 return Err(EncodeError)
             }
         }
-        if version == 4 {
+        if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -258,7 +258,7 @@ impl Encodable for LeaveGroupRequest {
 
 impl Decodable for LeaveGroupRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let group_id = if version == 4 {
+        let group_id = if version >= 4 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
@@ -269,7 +269,7 @@ impl Decodable for LeaveGroupRequest {
             Default::default()
         };
         let members = if version >= 3 {
-            if version == 4 {
+            if version >= 4 {
                 types::CompactArray(types::Struct { version }).decode(buf)?
             } else {
                 types::Array(types::Struct { version }).decode(buf)?
@@ -278,7 +278,7 @@ impl Decodable for LeaveGroupRequest {
             Default::default()
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 4 {
+        if version >= 4 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -314,7 +314,7 @@ impl Message for LeaveGroupRequest {
 
 impl HeaderVersion for LeaveGroupRequest {
     fn header_version(version: i16) -> i16 {
-        if version == 4 {
+        if version >= 4 {
             2
         } else {
             1

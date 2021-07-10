@@ -41,7 +41,7 @@ impl Encodable for ExpireDelegationTokenResponse {
         types::Int16.encode(buf, &self.error_code)?;
         types::Int64.encode(buf, &self.expiry_timestamp_ms)?;
         types::Int32.encode(buf, &self.throttle_time_ms)?;
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -58,7 +58,7 @@ impl Encodable for ExpireDelegationTokenResponse {
         total_size += types::Int16.compute_size(&self.error_code)?;
         total_size += types::Int64.compute_size(&self.expiry_timestamp_ms)?;
         total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -78,7 +78,7 @@ impl Decodable for ExpireDelegationTokenResponse {
         let expiry_timestamp_ms = types::Int64.decode(buf)?;
         let throttle_time_ms = types::Int32.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -114,7 +114,7 @@ impl Message for ExpireDelegationTokenResponse {
 
 impl HeaderVersion for ExpireDelegationTokenResponse {
     fn header_version(version: i16) -> i16 {
-        if version == 2 {
+        if version >= 2 {
             1
         } else {
             0

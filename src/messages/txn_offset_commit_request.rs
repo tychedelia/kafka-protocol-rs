@@ -48,12 +48,12 @@ impl Encodable for TxnOffsetCommitRequestPartition {
         if version >= 2 {
             types::Int32.encode(buf, &self.committed_leader_epoch)?;
         }
-        if version == 3 {
+        if version >= 3 {
             types::CompactString.encode(buf, &self.committed_metadata)?;
         } else {
             types::String.encode(buf, &self.committed_metadata)?;
         }
-        if version == 3 {
+        if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -72,12 +72,12 @@ impl Encodable for TxnOffsetCommitRequestPartition {
         if version >= 2 {
             total_size += types::Int32.compute_size(&self.committed_leader_epoch)?;
         }
-        if version == 3 {
+        if version >= 3 {
             total_size += types::CompactString.compute_size(&self.committed_metadata)?;
         } else {
             total_size += types::String.compute_size(&self.committed_metadata)?;
         }
-        if version == 3 {
+        if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -100,13 +100,13 @@ impl Decodable for TxnOffsetCommitRequestPartition {
         } else {
             -1
         };
-        let committed_metadata = if version == 3 {
+        let committed_metadata = if version >= 3 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 3 {
+        if version >= 3 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -161,17 +161,17 @@ pub struct TxnOffsetCommitRequestTopic {
 
 impl Encodable for TxnOffsetCommitRequestTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 3 {
+        if version >= 3 {
             types::CompactString.encode(buf, &self.name)?;
         } else {
             types::String.encode(buf, &self.name)?;
         }
-        if version == 3 {
+        if version >= 3 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.partitions)?;
         } else {
             types::Array(types::Struct { version }).encode(buf, &self.partitions)?;
         }
-        if version == 3 {
+        if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -185,17 +185,17 @@ impl Encodable for TxnOffsetCommitRequestTopic {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 3 {
+        if version >= 3 {
             total_size += types::CompactString.compute_size(&self.name)?;
         } else {
             total_size += types::String.compute_size(&self.name)?;
         }
-        if version == 3 {
+        if version >= 3 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.partitions)?;
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.partitions)?;
         }
-        if version == 3 {
+        if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -211,18 +211,18 @@ impl Encodable for TxnOffsetCommitRequestTopic {
 
 impl Decodable for TxnOffsetCommitRequestTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let name = if version == 3 {
+        let name = if version >= 3 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
         };
-        let partitions = if version == 3 {
+        let partitions = if version >= 3 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
             types::Array(types::Struct { version }).decode(buf)?
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 3 {
+        if version >= 3 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -279,17 +279,17 @@ pub struct TxnOffsetCommitRequest {
 
     /// The generation of the consumer.
     /// 
-    /// Supported API versions: 3
+    /// Supported API versions: 3-3
     pub generation_id: i32,
 
     /// The member ID assigned by the group coordinator.
     /// 
-    /// Supported API versions: 3
+    /// Supported API versions: 3-3
     pub member_id: StrBytes,
 
     /// The unique identifier of the consumer instance provided by end user.
     /// 
-    /// Supported API versions: 3
+    /// Supported API versions: 3-3
     pub group_instance_id: Option<StrBytes>,
 
     /// Each topic that we want to commit offsets for.
@@ -303,12 +303,12 @@ pub struct TxnOffsetCommitRequest {
 
 impl Encodable for TxnOffsetCommitRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 3 {
+        if version >= 3 {
             types::CompactString.encode(buf, &self.transactional_id)?;
         } else {
             types::String.encode(buf, &self.transactional_id)?;
         }
-        if version == 3 {
+        if version >= 3 {
             types::CompactString.encode(buf, &self.group_id)?;
         } else {
             types::String.encode(buf, &self.group_id)?;
@@ -336,12 +336,12 @@ impl Encodable for TxnOffsetCommitRequest {
                 return Err(EncodeError)
             }
         }
-        if version == 3 {
+        if version >= 3 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
         } else {
             types::Array(types::Struct { version }).encode(buf, &self.topics)?;
         }
-        if version == 3 {
+        if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -355,12 +355,12 @@ impl Encodable for TxnOffsetCommitRequest {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 3 {
+        if version >= 3 {
             total_size += types::CompactString.compute_size(&self.transactional_id)?;
         } else {
             total_size += types::String.compute_size(&self.transactional_id)?;
         }
-        if version == 3 {
+        if version >= 3 {
             total_size += types::CompactString.compute_size(&self.group_id)?;
         } else {
             total_size += types::String.compute_size(&self.group_id)?;
@@ -388,12 +388,12 @@ impl Encodable for TxnOffsetCommitRequest {
                 return Err(EncodeError)
             }
         }
-        if version == 3 {
+        if version >= 3 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.topics)?;
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.topics)?;
         }
-        if version == 3 {
+        if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -409,12 +409,12 @@ impl Encodable for TxnOffsetCommitRequest {
 
 impl Decodable for TxnOffsetCommitRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let transactional_id = if version == 3 {
+        let transactional_id = if version >= 3 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
         };
-        let group_id = if version == 3 {
+        let group_id = if version >= 3 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
@@ -436,13 +436,13 @@ impl Decodable for TxnOffsetCommitRequest {
         } else {
             None
         };
-        let topics = if version == 3 {
+        let topics = if version >= 3 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
             types::Array(types::Struct { version }).decode(buf)?
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 3 {
+        if version >= 3 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -488,7 +488,7 @@ impl Message for TxnOffsetCommitRequest {
 
 impl HeaderVersion for TxnOffsetCommitRequest {
     fn header_version(version: i16) -> i16 {
-        if version == 3 {
+        if version >= 3 {
             2
         } else {
             1

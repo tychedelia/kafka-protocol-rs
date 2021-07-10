@@ -43,19 +43,19 @@ pub struct AclDescription {
 
 impl Encodable for AclDescription {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 2 {
+        if version >= 2 {
             types::CompactString.encode(buf, &self.principal)?;
         } else {
             types::String.encode(buf, &self.principal)?;
         }
-        if version == 2 {
+        if version >= 2 {
             types::CompactString.encode(buf, &self.host)?;
         } else {
             types::String.encode(buf, &self.host)?;
         }
         types::Int8.encode(buf, &self.operation)?;
         types::Int8.encode(buf, &self.permission_type)?;
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -69,19 +69,19 @@ impl Encodable for AclDescription {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 2 {
+        if version >= 2 {
             total_size += types::CompactString.compute_size(&self.principal)?;
         } else {
             total_size += types::String.compute_size(&self.principal)?;
         }
-        if version == 2 {
+        if version >= 2 {
             total_size += types::CompactString.compute_size(&self.host)?;
         } else {
             total_size += types::String.compute_size(&self.host)?;
         }
         total_size += types::Int8.compute_size(&self.operation)?;
         total_size += types::Int8.compute_size(&self.permission_type)?;
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -97,12 +97,12 @@ impl Encodable for AclDescription {
 
 impl Decodable for AclDescription {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let principal = if version == 2 {
+        let principal = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
         };
-        let host = if version == 2 {
+        let host = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
@@ -110,7 +110,7 @@ impl Decodable for AclDescription {
         let operation = types::Int8.decode(buf)?;
         let permission_type = types::Int8.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -176,7 +176,7 @@ pub struct DescribeAclsResource {
 impl Encodable for DescribeAclsResource {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int8.encode(buf, &self.resource_type)?;
-        if version == 2 {
+        if version >= 2 {
             types::CompactString.encode(buf, &self.resource_name)?;
         } else {
             types::String.encode(buf, &self.resource_name)?;
@@ -188,12 +188,12 @@ impl Encodable for DescribeAclsResource {
                 return Err(EncodeError)
             }
         }
-        if version == 2 {
+        if version >= 2 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.acls)?;
         } else {
             types::Array(types::Struct { version }).encode(buf, &self.acls)?;
         }
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -208,7 +208,7 @@ impl Encodable for DescribeAclsResource {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         total_size += types::Int8.compute_size(&self.resource_type)?;
-        if version == 2 {
+        if version >= 2 {
             total_size += types::CompactString.compute_size(&self.resource_name)?;
         } else {
             total_size += types::String.compute_size(&self.resource_name)?;
@@ -220,12 +220,12 @@ impl Encodable for DescribeAclsResource {
                 return Err(EncodeError)
             }
         }
-        if version == 2 {
+        if version >= 2 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.acls)?;
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.acls)?;
         }
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -242,7 +242,7 @@ impl Encodable for DescribeAclsResource {
 impl Decodable for DescribeAclsResource {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let resource_type = types::Int8.decode(buf)?;
-        let resource_name = if version == 2 {
+        let resource_name = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
@@ -252,13 +252,13 @@ impl Decodable for DescribeAclsResource {
         } else {
             3
         };
-        let acls = if version == 2 {
+        let acls = if version >= 2 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
             types::Array(types::Struct { version }).decode(buf)?
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -325,17 +325,17 @@ impl Encodable for DescribeAclsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         types::Int16.encode(buf, &self.error_code)?;
-        if version == 2 {
+        if version >= 2 {
             types::CompactString.encode(buf, &self.error_message)?;
         } else {
             types::String.encode(buf, &self.error_message)?;
         }
-        if version == 2 {
+        if version >= 2 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.resources)?;
         } else {
             types::Array(types::Struct { version }).encode(buf, &self.resources)?;
         }
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -351,17 +351,17 @@ impl Encodable for DescribeAclsResponse {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
         total_size += types::Int16.compute_size(&self.error_code)?;
-        if version == 2 {
+        if version >= 2 {
             total_size += types::CompactString.compute_size(&self.error_message)?;
         } else {
             total_size += types::String.compute_size(&self.error_message)?;
         }
-        if version == 2 {
+        if version >= 2 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.resources)?;
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.resources)?;
         }
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -379,18 +379,18 @@ impl Decodable for DescribeAclsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let throttle_time_ms = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
-        let error_message = if version == 2 {
+        let error_message = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
         };
-        let resources = if version == 2 {
+        let resources = if version >= 2 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
             types::Array(types::Struct { version }).decode(buf)?
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -428,7 +428,7 @@ impl Message for DescribeAclsResponse {
 
 impl HeaderVersion for DescribeAclsResponse {
     fn header_version(version: i16) -> i16 {
-        if version == 2 {
+        if version >= 2 {
             1
         } else {
             0

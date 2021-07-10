@@ -29,17 +29,17 @@ pub struct AddPartitionsToTxnTopic {
 impl MapEncodable for AddPartitionsToTxnTopic {
     type Key = super::TopicName;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 3 {
+        if version >= 3 {
             types::CompactString.encode(buf, key)?;
         } else {
             types::String.encode(buf, key)?;
         }
-        if version == 3 {
+        if version >= 3 {
             types::CompactArray(types::Int32).encode(buf, &self.partitions)?;
         } else {
             types::Array(types::Int32).encode(buf, &self.partitions)?;
         }
-        if version == 3 {
+        if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -53,17 +53,17 @@ impl MapEncodable for AddPartitionsToTxnTopic {
     }
     fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 3 {
+        if version >= 3 {
             total_size += types::CompactString.compute_size(key)?;
         } else {
             total_size += types::String.compute_size(key)?;
         }
-        if version == 3 {
+        if version >= 3 {
             total_size += types::CompactArray(types::Int32).compute_size(&self.partitions)?;
         } else {
             total_size += types::Array(types::Int32).compute_size(&self.partitions)?;
         }
-        if version == 3 {
+        if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -80,18 +80,18 @@ impl MapEncodable for AddPartitionsToTxnTopic {
 impl MapDecodable for AddPartitionsToTxnTopic {
     type Key = super::TopicName;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
-        let key_field = if version == 3 {
+        let key_field = if version >= 3 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
         };
-        let partitions = if version == 3 {
+        let partitions = if version >= 3 {
             types::CompactArray(types::Int32).decode(buf)?
         } else {
             types::Array(types::Int32).decode(buf)?
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 3 {
+        if version >= 3 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -150,19 +150,19 @@ pub struct AddPartitionsToTxnRequest {
 
 impl Encodable for AddPartitionsToTxnRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 3 {
+        if version >= 3 {
             types::CompactString.encode(buf, &self.transactional_id)?;
         } else {
             types::String.encode(buf, &self.transactional_id)?;
         }
         types::Int64.encode(buf, &self.producer_id)?;
         types::Int16.encode(buf, &self.producer_epoch)?;
-        if version == 3 {
+        if version >= 3 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
         } else {
             types::Array(types::Struct { version }).encode(buf, &self.topics)?;
         }
-        if version == 3 {
+        if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -176,19 +176,19 @@ impl Encodable for AddPartitionsToTxnRequest {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 3 {
+        if version >= 3 {
             total_size += types::CompactString.compute_size(&self.transactional_id)?;
         } else {
             total_size += types::String.compute_size(&self.transactional_id)?;
         }
         total_size += types::Int64.compute_size(&self.producer_id)?;
         total_size += types::Int16.compute_size(&self.producer_epoch)?;
-        if version == 3 {
+        if version >= 3 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.topics)?;
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.topics)?;
         }
-        if version == 3 {
+        if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -204,20 +204,20 @@ impl Encodable for AddPartitionsToTxnRequest {
 
 impl Decodable for AddPartitionsToTxnRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let transactional_id = if version == 3 {
+        let transactional_id = if version >= 3 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
         };
         let producer_id = types::Int64.decode(buf)?;
         let producer_epoch = types::Int16.decode(buf)?;
-        let topics = if version == 3 {
+        let topics = if version >= 3 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
             types::Array(types::Struct { version }).decode(buf)?
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 3 {
+        if version >= 3 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -255,7 +255,7 @@ impl Message for AddPartitionsToTxnRequest {
 
 impl HeaderVersion for AddPartitionsToTxnRequest {
     fn header_version(version: i16) -> i16 {
-        if version == 3 {
+        if version >= 3 {
             2
         } else {
             1

@@ -154,7 +154,7 @@ pub struct StopReplicaTopicV1 {
 impl Encodable for StopReplicaTopicV1 {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version >= 1 && version <= 2 {
-            if version == 2 {
+            if version >= 2 {
                 types::CompactString.encode(buf, &self.name)?;
             } else {
                 types::String.encode(buf, &self.name)?;
@@ -165,7 +165,7 @@ impl Encodable for StopReplicaTopicV1 {
             }
         }
         if version >= 1 && version <= 2 {
-            if version == 2 {
+            if version >= 2 {
                 types::CompactArray(types::Int32).encode(buf, &self.partition_indexes)?;
             } else {
                 types::Array(types::Int32).encode(buf, &self.partition_indexes)?;
@@ -190,7 +190,7 @@ impl Encodable for StopReplicaTopicV1 {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         if version >= 1 && version <= 2 {
-            if version == 2 {
+            if version >= 2 {
                 total_size += types::CompactString.compute_size(&self.name)?;
             } else {
                 total_size += types::String.compute_size(&self.name)?;
@@ -201,7 +201,7 @@ impl Encodable for StopReplicaTopicV1 {
             }
         }
         if version >= 1 && version <= 2 {
-            if version == 2 {
+            if version >= 2 {
                 total_size += types::CompactArray(types::Int32).compute_size(&self.partition_indexes)?;
             } else {
                 total_size += types::Array(types::Int32).compute_size(&self.partition_indexes)?;
@@ -228,7 +228,7 @@ impl Encodable for StopReplicaTopicV1 {
 impl Decodable for StopReplicaTopicV1 {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let name = if version >= 1 && version <= 2 {
-            if version == 2 {
+            if version >= 2 {
                 types::CompactString.decode(buf)?
             } else {
                 types::String.decode(buf)?
@@ -237,7 +237,7 @@ impl Decodable for StopReplicaTopicV1 {
             Default::default()
         };
         let partition_indexes = if version >= 1 && version <= 2 {
-            if version == 2 {
+            if version >= 2 {
                 types::CompactArray(types::Int32).decode(buf)?
             } else {
                 types::Array(types::Int32).decode(buf)?
@@ -283,17 +283,17 @@ impl Message for StopReplicaTopicV1 {
 pub struct StopReplicaPartitionState {
     /// The partition index.
     /// 
-    /// Supported API versions: 3
+    /// Supported API versions: 3-3
     pub partition_index: i32,
 
     /// The leader epoch.
     /// 
-    /// Supported API versions: 3
+    /// Supported API versions: 3-3
     pub leader_epoch: i32,
 
     /// Whether this partition should be deleted.
     /// 
-    /// Supported API versions: 3
+    /// Supported API versions: 3-3
     pub delete_partition: bool,
 
     /// Other tagged fields
@@ -429,12 +429,12 @@ impl Message for StopReplicaPartitionState {
 pub struct StopReplicaTopicState {
     /// The topic name.
     /// 
-    /// Supported API versions: 3
+    /// Supported API versions: 3-3
     pub topic_name: super::TopicName,
 
     /// The state of each partition
     /// 
-    /// Supported API versions: 3
+    /// Supported API versions: 3-3
     pub partition_states: Vec<StopReplicaPartitionState>,
 
     /// Other tagged fields
@@ -579,7 +579,7 @@ pub struct StopReplicaRequest {
 
     /// Each topic.
     /// 
-    /// Supported API versions: 3
+    /// Supported API versions: 3-3
     pub topic_states: Vec<StopReplicaTopicState>,
 
     /// Other tagged fields
@@ -608,7 +608,7 @@ impl Encodable for StopReplicaRequest {
             }
         }
         if version >= 1 && version <= 2 {
-            if version == 2 {
+            if version >= 2 {
                 types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
             } else {
                 types::Array(types::Struct { version }).encode(buf, &self.topics)?;
@@ -659,7 +659,7 @@ impl Encodable for StopReplicaRequest {
             }
         }
         if version >= 1 && version <= 2 {
-            if version == 2 {
+            if version >= 2 {
                 total_size += types::CompactArray(types::Struct { version }).compute_size(&self.topics)?;
             } else {
                 total_size += types::Array(types::Struct { version }).compute_size(&self.topics)?;
@@ -710,7 +710,7 @@ impl Decodable for StopReplicaRequest {
             Default::default()
         };
         let topics = if version >= 1 && version <= 2 {
-            if version == 2 {
+            if version >= 2 {
                 types::CompactArray(types::Struct { version }).decode(buf)?
             } else {
                 types::Array(types::Struct { version }).decode(buf)?

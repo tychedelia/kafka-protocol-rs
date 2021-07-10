@@ -69,12 +69,12 @@ pub struct CreateDelegationTokenResponse {
 impl Encodable for CreateDelegationTokenResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int16.encode(buf, &self.error_code)?;
-        if version == 2 {
+        if version >= 2 {
             types::CompactString.encode(buf, &self.principal_type)?;
         } else {
             types::String.encode(buf, &self.principal_type)?;
         }
-        if version == 2 {
+        if version >= 2 {
             types::CompactString.encode(buf, &self.principal_name)?;
         } else {
             types::String.encode(buf, &self.principal_name)?;
@@ -82,18 +82,18 @@ impl Encodable for CreateDelegationTokenResponse {
         types::Int64.encode(buf, &self.issue_timestamp_ms)?;
         types::Int64.encode(buf, &self.expiry_timestamp_ms)?;
         types::Int64.encode(buf, &self.max_timestamp_ms)?;
-        if version == 2 {
+        if version >= 2 {
             types::CompactString.encode(buf, &self.token_id)?;
         } else {
             types::String.encode(buf, &self.token_id)?;
         }
-        if version == 2 {
+        if version >= 2 {
             types::CompactBytes.encode(buf, &self.hmac)?;
         } else {
             types::Bytes.encode(buf, &self.hmac)?;
         }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -108,12 +108,12 @@ impl Encodable for CreateDelegationTokenResponse {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         total_size += types::Int16.compute_size(&self.error_code)?;
-        if version == 2 {
+        if version >= 2 {
             total_size += types::CompactString.compute_size(&self.principal_type)?;
         } else {
             total_size += types::String.compute_size(&self.principal_type)?;
         }
-        if version == 2 {
+        if version >= 2 {
             total_size += types::CompactString.compute_size(&self.principal_name)?;
         } else {
             total_size += types::String.compute_size(&self.principal_name)?;
@@ -121,18 +121,18 @@ impl Encodable for CreateDelegationTokenResponse {
         total_size += types::Int64.compute_size(&self.issue_timestamp_ms)?;
         total_size += types::Int64.compute_size(&self.expiry_timestamp_ms)?;
         total_size += types::Int64.compute_size(&self.max_timestamp_ms)?;
-        if version == 2 {
+        if version >= 2 {
             total_size += types::CompactString.compute_size(&self.token_id)?;
         } else {
             total_size += types::String.compute_size(&self.token_id)?;
         }
-        if version == 2 {
+        if version >= 2 {
             total_size += types::CompactBytes.compute_size(&self.hmac)?;
         } else {
             total_size += types::Bytes.compute_size(&self.hmac)?;
         }
         total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -149,12 +149,12 @@ impl Encodable for CreateDelegationTokenResponse {
 impl Decodable for CreateDelegationTokenResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let error_code = types::Int16.decode(buf)?;
-        let principal_type = if version == 2 {
+        let principal_type = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
         };
-        let principal_name = if version == 2 {
+        let principal_name = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
@@ -162,19 +162,19 @@ impl Decodable for CreateDelegationTokenResponse {
         let issue_timestamp_ms = types::Int64.decode(buf)?;
         let expiry_timestamp_ms = types::Int64.decode(buf)?;
         let max_timestamp_ms = types::Int64.decode(buf)?;
-        let token_id = if version == 2 {
+        let token_id = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
         };
-        let hmac = if version == 2 {
+        let hmac = if version >= 2 {
             types::CompactBytes.decode(buf)?
         } else {
             types::Bytes.decode(buf)?
         };
         let throttle_time_ms = types::Int32.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -222,7 +222,7 @@ impl Message for CreateDelegationTokenResponse {
 
 impl HeaderVersion for CreateDelegationTokenResponse {
     fn header_version(version: i16) -> i16 {
-        if version == 2 {
+        if version >= 2 {
             1
         } else {
             0

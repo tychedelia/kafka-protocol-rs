@@ -19,7 +19,7 @@ use protocol_base::{
 pub struct ListGroupsRequest {
     /// The states of the groups we want to list. If empty all groups are returned with their state.
     /// 
-    /// Supported API versions: 4
+    /// Supported API versions: 4-4
     pub states_filter: Vec<StrBytes>,
 
     /// Other tagged fields

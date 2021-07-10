@@ -932,3 +932,22 @@ pub fn generate(
 
     Ok((module_name, struct_name))
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::generate_messages::spec::VersionSpec;
+    use super::*;
+
+    #[test]
+    fn write_version_cond_unknown_tagged() {
+        let mut cw = CodeWriter::new(Vec::new());
+
+        // ex. request header
+        let v1 = VersionSpec::Range(0, 2);
+        let v2 = VersionSpec::Since(2);
+
+        write_version_cond(&mut cw, v1, v2, |w| { write!(w, "true"); Ok(()) }, |_| { Ok(())}, false, true);
+
+        assert_eq!(String::from_utf8(cw.into_inner()).unwrap(), "if version >= 2 {\n    true\n}".to_string());
+    }
+}

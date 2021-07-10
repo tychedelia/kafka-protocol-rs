@@ -19,12 +19,12 @@ use protocol_base::{
 pub struct DeleteTopicState {
     /// The topic name
     /// 
-    /// Supported API versions: 6
+    /// Supported API versions: 6-6
     pub name: Option<super::TopicName>,
 
     /// The unique topic ID
     /// 
-    /// Supported API versions: 6
+    /// Supported API versions: 6-6
     pub topic_id: Uuid,
 
     /// Other tagged fields
@@ -139,7 +139,7 @@ impl Message for DeleteTopicState {
 pub struct DeleteTopicsRequest {
     /// The name or topic ID of the topic
     /// 
-    /// Supported API versions: 6
+    /// Supported API versions: 6-6
     pub topics: Vec<DeleteTopicState>,
 
     /// The names of the topics to delete

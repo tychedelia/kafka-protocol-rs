@@ -234,7 +234,7 @@ pub struct UpdateMetadataTopicState {
 
     /// The topic id.
     /// 
-    /// Supported API versions: 7
+    /// Supported API versions: 7-7
     pub topic_id: Uuid,
 
     /// The partition that we would like to update.

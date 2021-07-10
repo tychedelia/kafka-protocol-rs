@@ -365,27 +365,27 @@ impl Message for OffsetFetchResponseTopic {
 pub struct OffsetFetchResponsePartitions {
     /// The partition index.
     /// 
-    /// Supported API versions: 8
+    /// Supported API versions: 8-8
     pub partition_index: i32,
 
     /// The committed message offset.
     /// 
-    /// Supported API versions: 8
+    /// Supported API versions: 8-8
     pub committed_offset: i64,
 
     /// The leader epoch.
     /// 
-    /// Supported API versions: 8
+    /// Supported API versions: 8-8
     pub committed_leader_epoch: i32,
 
     /// The partition metadata.
     /// 
-    /// Supported API versions: 8
+    /// Supported API versions: 8-8
     pub metadata: Option<StrBytes>,
 
     /// The partition-level error code, or 0 if there was no error.
     /// 
-    /// Supported API versions: 8
+    /// Supported API versions: 8-8
     pub error_code: i16,
 
     /// Other tagged fields
@@ -555,12 +555,12 @@ impl Message for OffsetFetchResponsePartitions {
 pub struct OffsetFetchResponseTopics {
     /// The topic name.
     /// 
-    /// Supported API versions: 8
+    /// Supported API versions: 8-8
     pub name: super::TopicName,
 
     /// The responses per partition
     /// 
-    /// Supported API versions: 8
+    /// Supported API versions: 8-8
     pub partitions: Vec<OffsetFetchResponsePartitions>,
 
     /// Other tagged fields
@@ -675,17 +675,17 @@ impl Message for OffsetFetchResponseTopics {
 pub struct OffsetFetchResponseGroup {
     /// The group ID.
     /// 
-    /// Supported API versions: 8
+    /// Supported API versions: 8-8
     pub group_id: super::GroupId,
 
     /// The responses per topic.
     /// 
-    /// Supported API versions: 8
+    /// Supported API versions: 8-8
     pub topics: Vec<OffsetFetchResponseTopics>,
 
     /// The group-level error code, or 0 if there was no error.
     /// 
-    /// Supported API versions: 8
+    /// Supported API versions: 8-8
     pub error_code: i16,
 
     /// Other tagged fields
@@ -836,7 +836,7 @@ pub struct OffsetFetchResponse {
 
     /// The responses per group id.
     /// 
-    /// Supported API versions: 8
+    /// Supported API versions: 8-8
     pub groups: Vec<OffsetFetchResponseGroup>,
 
     /// Other tagged fields

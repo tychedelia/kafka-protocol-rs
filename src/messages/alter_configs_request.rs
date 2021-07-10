@@ -29,17 +29,17 @@ pub struct AlterableConfig {
 impl MapEncodable for AlterableConfig {
     type Key = StrBytes;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 2 {
+        if version >= 2 {
             types::CompactString.encode(buf, key)?;
         } else {
             types::String.encode(buf, key)?;
         }
-        if version == 2 {
+        if version >= 2 {
             types::CompactString.encode(buf, &self.value)?;
         } else {
             types::String.encode(buf, &self.value)?;
         }
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -53,17 +53,17 @@ impl MapEncodable for AlterableConfig {
     }
     fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 2 {
+        if version >= 2 {
             total_size += types::CompactString.compute_size(key)?;
         } else {
             total_size += types::String.compute_size(key)?;
         }
-        if version == 2 {
+        if version >= 2 {
             total_size += types::CompactString.compute_size(&self.value)?;
         } else {
             total_size += types::String.compute_size(&self.value)?;
         }
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -80,18 +80,18 @@ impl MapEncodable for AlterableConfig {
 impl MapDecodable for AlterableConfig {
     type Key = StrBytes;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
-        let key_field = if version == 2 {
+        let key_field = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
         };
-        let value = if version == 2 {
+        let value = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -146,17 +146,17 @@ pub struct AlterConfigsResource {
 impl Encodable for AlterConfigsResource {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int8.encode(buf, &self.resource_type)?;
-        if version == 2 {
+        if version >= 2 {
             types::CompactString.encode(buf, &self.resource_name)?;
         } else {
             types::String.encode(buf, &self.resource_name)?;
         }
-        if version == 2 {
+        if version >= 2 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.configs)?;
         } else {
             types::Array(types::Struct { version }).encode(buf, &self.configs)?;
         }
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -171,17 +171,17 @@ impl Encodable for AlterConfigsResource {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         total_size += types::Int8.compute_size(&self.resource_type)?;
-        if version == 2 {
+        if version >= 2 {
             total_size += types::CompactString.compute_size(&self.resource_name)?;
         } else {
             total_size += types::String.compute_size(&self.resource_name)?;
         }
-        if version == 2 {
+        if version >= 2 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.configs)?;
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.configs)?;
         }
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -198,18 +198,18 @@ impl Encodable for AlterConfigsResource {
 impl Decodable for AlterConfigsResource {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let resource_type = types::Int8.decode(buf)?;
-        let resource_name = if version == 2 {
+        let resource_name = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
         };
-        let configs = if version == 2 {
+        let configs = if version >= 2 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
             types::Array(types::Struct { version }).decode(buf)?
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -262,13 +262,13 @@ pub struct AlterConfigsRequest {
 
 impl Encodable for AlterConfigsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 2 {
+        if version >= 2 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.resources)?;
         } else {
             types::Array(types::Struct { version }).encode(buf, &self.resources)?;
         }
         types::Boolean.encode(buf, &self.validate_only)?;
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -282,13 +282,13 @@ impl Encodable for AlterConfigsRequest {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 2 {
+        if version >= 2 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.resources)?;
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.resources)?;
         }
         total_size += types::Boolean.compute_size(&self.validate_only)?;
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -304,14 +304,14 @@ impl Encodable for AlterConfigsRequest {
 
 impl Decodable for AlterConfigsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let resources = if version == 2 {
+        let resources = if version >= 2 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
             types::Array(types::Struct { version }).decode(buf)?
         };
         let validate_only = types::Boolean.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -345,7 +345,7 @@ impl Message for AlterConfigsRequest {
 
 impl HeaderVersion for AlterConfigsRequest {
     fn header_version(version: i16) -> i16 {
-        if version == 2 {
+        if version >= 2 {
             2
         } else {
             1

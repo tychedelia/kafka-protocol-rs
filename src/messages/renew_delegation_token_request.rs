@@ -33,13 +33,13 @@ pub struct RenewDelegationTokenRequest {
 
 impl Encodable for RenewDelegationTokenRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 2 {
+        if version >= 2 {
             types::CompactBytes.encode(buf, &self.hmac)?;
         } else {
             types::Bytes.encode(buf, &self.hmac)?;
         }
         types::Int64.encode(buf, &self.renew_period_ms)?;
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -53,13 +53,13 @@ impl Encodable for RenewDelegationTokenRequest {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 2 {
+        if version >= 2 {
             total_size += types::CompactBytes.compute_size(&self.hmac)?;
         } else {
             total_size += types::Bytes.compute_size(&self.hmac)?;
         }
         total_size += types::Int64.compute_size(&self.renew_period_ms)?;
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -75,14 +75,14 @@ impl Encodable for RenewDelegationTokenRequest {
 
 impl Decodable for RenewDelegationTokenRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let hmac = if version == 2 {
+        let hmac = if version >= 2 {
             types::CompactBytes.decode(buf)?
         } else {
             types::Bytes.decode(buf)?
         };
         let renew_period_ms = types::Int64.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -116,7 +116,7 @@ impl Message for RenewDelegationTokenRequest {
 
 impl HeaderVersion for RenewDelegationTokenRequest {
     fn header_version(version: i16) -> i16 {
-        if version == 2 {
+        if version >= 2 {
             2
         } else {
             1

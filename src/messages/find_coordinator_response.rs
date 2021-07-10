@@ -19,32 +19,32 @@ use protocol_base::{
 pub struct Coordinator {
     /// The coordinator key.
     /// 
-    /// Supported API versions: 4
+    /// Supported API versions: 4-4
     pub key: StrBytes,
 
     /// The node id.
     /// 
-    /// Supported API versions: 4
+    /// Supported API versions: 4-4
     pub node_id: super::BrokerId,
 
     /// The host name.
     /// 
-    /// Supported API versions: 4
+    /// Supported API versions: 4-4
     pub host: StrBytes,
 
     /// The port.
     /// 
-    /// Supported API versions: 4
+    /// Supported API versions: 4-4
     pub port: i32,
 
     /// The error code, or 0 if there was no error.
     /// 
-    /// Supported API versions: 4
+    /// Supported API versions: 4-4
     pub error_code: i16,
 
     /// The error message, or null if there was no error.
     /// 
-    /// Supported API versions: 4
+    /// Supported API versions: 4-4
     pub error_message: Option<StrBytes>,
 
     /// Other tagged fields
@@ -265,7 +265,7 @@ pub struct FindCoordinatorResponse {
 
     /// Each coordinator result in the response
     /// 
-    /// Supported API versions: 4
+    /// Supported API versions: 4-4
     pub coordinators: Vec<Coordinator>,
 
     /// Other tagged fields
@@ -285,7 +285,7 @@ impl Encodable for FindCoordinatorResponse {
             }
         }
         if version >= 1 && version <= 3 {
-            if version == 3 {
+            if version >= 3 {
                 types::CompactString.encode(buf, &self.error_message)?;
             } else {
                 types::String.encode(buf, &self.error_message)?;
@@ -299,7 +299,7 @@ impl Encodable for FindCoordinatorResponse {
             }
         }
         if version <= 3 {
-            if version == 3 {
+            if version >= 3 {
                 types::CompactString.encode(buf, &self.host)?;
             } else {
                 types::String.encode(buf, &self.host)?;
@@ -348,7 +348,7 @@ impl Encodable for FindCoordinatorResponse {
             }
         }
         if version >= 1 && version <= 3 {
-            if version == 3 {
+            if version >= 3 {
                 total_size += types::CompactString.compute_size(&self.error_message)?;
             } else {
                 total_size += types::String.compute_size(&self.error_message)?;
@@ -362,7 +362,7 @@ impl Encodable for FindCoordinatorResponse {
             }
         }
         if version <= 3 {
-            if version == 3 {
+            if version >= 3 {
                 total_size += types::CompactString.compute_size(&self.host)?;
             } else {
                 total_size += types::String.compute_size(&self.host)?;
@@ -413,7 +413,7 @@ impl Decodable for FindCoordinatorResponse {
             0
         };
         let error_message = if version >= 1 && version <= 3 {
-            if version == 3 {
+            if version >= 3 {
                 types::CompactString.decode(buf)?
             } else {
                 types::String.decode(buf)?
@@ -427,7 +427,7 @@ impl Decodable for FindCoordinatorResponse {
             (0).into()
         };
         let host = if version <= 3 {
-            if version == 3 {
+            if version >= 3 {
                 types::CompactString.decode(buf)?
             } else {
                 types::String.decode(buf)?

@@ -37,7 +37,7 @@ impl Encodable for HeartbeatResponse {
             types::Int32.encode(buf, &self.throttle_time_ms)?;
         }
         types::Int16.encode(buf, &self.error_code)?;
-        if version == 4 {
+        if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -55,7 +55,7 @@ impl Encodable for HeartbeatResponse {
             total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
         }
         total_size += types::Int16.compute_size(&self.error_code)?;
-        if version == 4 {
+        if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -78,7 +78,7 @@ impl Decodable for HeartbeatResponse {
         };
         let error_code = types::Int16.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 4 {
+        if version >= 4 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -112,7 +112,7 @@ impl Message for HeartbeatResponse {
 
 impl HeaderVersion for HeartbeatResponse {
     fn header_version(version: i16) -> i16 {
-        if version == 4 {
+        if version >= 4 {
             1
         } else {
             0

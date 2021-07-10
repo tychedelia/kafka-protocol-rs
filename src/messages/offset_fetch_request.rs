@@ -163,12 +163,12 @@ impl Message for OffsetFetchRequestTopic {
 pub struct OffsetFetchRequestTopics {
     /// The topic name.
     /// 
-    /// Supported API versions: 8
+    /// Supported API versions: 8-8
     pub name: super::TopicName,
 
     /// The partition indexes we would like to fetch offsets for.
     /// 
-    /// Supported API versions: 8
+    /// Supported API versions: 8-8
     pub partition_indexes: Vec<i32>,
 
     /// Other tagged fields
@@ -283,12 +283,12 @@ impl Message for OffsetFetchRequestTopics {
 pub struct OffsetFetchRequestGroup {
     /// The group ID.
     /// 
-    /// Supported API versions: 8
+    /// Supported API versions: 8-8
     pub group_id: super::GroupId,
 
     /// Each topic we would like to fetch offsets for, or null to fetch offsets for all topics.
     /// 
-    /// Supported API versions: 8
+    /// Supported API versions: 8-8
     pub topics: Option<Vec<OffsetFetchRequestTopics>>,
 
     /// Other tagged fields
@@ -413,7 +413,7 @@ pub struct OffsetFetchRequest {
 
     /// Each group we would like to fetch offsets for
     /// 
-    /// Supported API versions: 8
+    /// Supported API versions: 8-8
     pub groups: Vec<OffsetFetchRequestGroup>,
 
     /// Whether broker should hold on returning unstable offsets but set a retriable error code for the partitions.

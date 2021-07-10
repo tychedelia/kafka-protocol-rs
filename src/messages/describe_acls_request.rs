@@ -59,7 +59,7 @@ pub struct DescribeAclsRequest {
 impl Encodable for DescribeAclsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int8.encode(buf, &self.resource_type_filter)?;
-        if version == 2 {
+        if version >= 2 {
             types::CompactString.encode(buf, &self.resource_name_filter)?;
         } else {
             types::String.encode(buf, &self.resource_name_filter)?;
@@ -71,19 +71,19 @@ impl Encodable for DescribeAclsRequest {
                 return Err(EncodeError)
             }
         }
-        if version == 2 {
+        if version >= 2 {
             types::CompactString.encode(buf, &self.principal_filter)?;
         } else {
             types::String.encode(buf, &self.principal_filter)?;
         }
-        if version == 2 {
+        if version >= 2 {
             types::CompactString.encode(buf, &self.host_filter)?;
         } else {
             types::String.encode(buf, &self.host_filter)?;
         }
         types::Int8.encode(buf, &self.operation)?;
         types::Int8.encode(buf, &self.permission_type)?;
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -98,7 +98,7 @@ impl Encodable for DescribeAclsRequest {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         total_size += types::Int8.compute_size(&self.resource_type_filter)?;
-        if version == 2 {
+        if version >= 2 {
             total_size += types::CompactString.compute_size(&self.resource_name_filter)?;
         } else {
             total_size += types::String.compute_size(&self.resource_name_filter)?;
@@ -110,19 +110,19 @@ impl Encodable for DescribeAclsRequest {
                 return Err(EncodeError)
             }
         }
-        if version == 2 {
+        if version >= 2 {
             total_size += types::CompactString.compute_size(&self.principal_filter)?;
         } else {
             total_size += types::String.compute_size(&self.principal_filter)?;
         }
-        if version == 2 {
+        if version >= 2 {
             total_size += types::CompactString.compute_size(&self.host_filter)?;
         } else {
             total_size += types::String.compute_size(&self.host_filter)?;
         }
         total_size += types::Int8.compute_size(&self.operation)?;
         total_size += types::Int8.compute_size(&self.permission_type)?;
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -139,7 +139,7 @@ impl Encodable for DescribeAclsRequest {
 impl Decodable for DescribeAclsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let resource_type_filter = types::Int8.decode(buf)?;
-        let resource_name_filter = if version == 2 {
+        let resource_name_filter = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
@@ -149,12 +149,12 @@ impl Decodable for DescribeAclsRequest {
         } else {
             3
         };
-        let principal_filter = if version == 2 {
+        let principal_filter = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
         };
-        let host_filter = if version == 2 {
+        let host_filter = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
@@ -162,7 +162,7 @@ impl Decodable for DescribeAclsRequest {
         let operation = types::Int8.decode(buf)?;
         let permission_type = types::Int8.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -206,7 +206,7 @@ impl Message for DescribeAclsRequest {
 
 impl HeaderVersion for DescribeAclsRequest {
     fn header_version(version: i16) -> i16 {
-        if version == 2 {
+        if version >= 2 {
             2
         } else {
             1

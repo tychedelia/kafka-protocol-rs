@@ -184,7 +184,7 @@ pub struct FetchTopic {
 
     /// The unique topic ID
     /// 
-    /// Supported API versions: 13
+    /// Supported API versions: 13-13
     pub topic_id: Uuid,
 
     /// The partitions to fetch.
@@ -199,7 +199,7 @@ pub struct FetchTopic {
 impl Encodable for FetchTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version <= 12 {
-            if version == 12 {
+            if version >= 12 {
                 types::CompactString.encode(buf, &self.topic)?;
             } else {
                 types::String.encode(buf, &self.topic)?;
@@ -228,7 +228,7 @@ impl Encodable for FetchTopic {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         if version <= 12 {
-            if version == 12 {
+            if version >= 12 {
                 total_size += types::CompactString.compute_size(&self.topic)?;
             } else {
                 total_size += types::String.compute_size(&self.topic)?;
@@ -259,7 +259,7 @@ impl Encodable for FetchTopic {
 impl Decodable for FetchTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let topic = if version <= 12 {
-            if version == 12 {
+            if version >= 12 {
                 types::CompactString.decode(buf)?
             } else {
                 types::String.decode(buf)?
@@ -322,7 +322,7 @@ pub struct ForgottenTopic {
 
     /// The unique topic ID
     /// 
-    /// Supported API versions: 13
+    /// Supported API versions: 13-13
     pub topic_id: Uuid,
 
     /// The partitions indexes to forget.
@@ -337,7 +337,7 @@ pub struct ForgottenTopic {
 impl Encodable for ForgottenTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version >= 7 && version <= 12 {
-            if version == 12 {
+            if version >= 12 {
                 types::CompactString.encode(buf, &self.topic)?;
             } else {
                 types::String.encode(buf, &self.topic)?;
@@ -372,7 +372,7 @@ impl Encodable for ForgottenTopic {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         if version >= 7 && version <= 12 {
-            if version == 12 {
+            if version >= 12 {
                 total_size += types::CompactString.compute_size(&self.topic)?;
             } else {
                 total_size += types::String.compute_size(&self.topic)?;
@@ -409,7 +409,7 @@ impl Encodable for ForgottenTopic {
 impl Decodable for ForgottenTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let topic = if version >= 7 && version <= 12 {
-            if version == 12 {
+            if version >= 12 {
                 types::CompactString.decode(buf)?
             } else {
                 types::String.decode(buf)?

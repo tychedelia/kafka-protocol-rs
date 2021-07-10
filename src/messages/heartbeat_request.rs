@@ -43,19 +43,19 @@ pub struct HeartbeatRequest {
 
 impl Encodable for HeartbeatRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 4 {
+        if version >= 4 {
             types::CompactString.encode(buf, &self.group_id)?;
         } else {
             types::String.encode(buf, &self.group_id)?;
         }
         types::Int32.encode(buf, &self.generation_id)?;
-        if version == 4 {
+        if version >= 4 {
             types::CompactString.encode(buf, &self.member_id)?;
         } else {
             types::String.encode(buf, &self.member_id)?;
         }
         if version >= 3 {
-            if version == 4 {
+            if version >= 4 {
                 types::CompactString.encode(buf, &self.group_instance_id)?;
             } else {
                 types::String.encode(buf, &self.group_instance_id)?;
@@ -65,7 +65,7 @@ impl Encodable for HeartbeatRequest {
                 return Err(EncodeError)
             }
         }
-        if version == 4 {
+        if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -79,19 +79,19 @@ impl Encodable for HeartbeatRequest {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 4 {
+        if version >= 4 {
             total_size += types::CompactString.compute_size(&self.group_id)?;
         } else {
             total_size += types::String.compute_size(&self.group_id)?;
         }
         total_size += types::Int32.compute_size(&self.generation_id)?;
-        if version == 4 {
+        if version >= 4 {
             total_size += types::CompactString.compute_size(&self.member_id)?;
         } else {
             total_size += types::String.compute_size(&self.member_id)?;
         }
         if version >= 3 {
-            if version == 4 {
+            if version >= 4 {
                 total_size += types::CompactString.compute_size(&self.group_instance_id)?;
             } else {
                 total_size += types::String.compute_size(&self.group_instance_id)?;
@@ -101,7 +101,7 @@ impl Encodable for HeartbeatRequest {
                 return Err(EncodeError)
             }
         }
-        if version == 4 {
+        if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -117,19 +117,19 @@ impl Encodable for HeartbeatRequest {
 
 impl Decodable for HeartbeatRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let group_id = if version == 4 {
+        let group_id = if version >= 4 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
         };
         let generation_id = types::Int32.decode(buf)?;
-        let member_id = if version == 4 {
+        let member_id = if version >= 4 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
         };
         let group_instance_id = if version >= 3 {
-            if version == 4 {
+            if version >= 4 {
                 types::CompactString.decode(buf)?
             } else {
                 types::String.decode(buf)?
@@ -138,7 +138,7 @@ impl Decodable for HeartbeatRequest {
             None
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 4 {
+        if version >= 4 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -176,7 +176,7 @@ impl Message for HeartbeatRequest {
 
 impl HeaderVersion for HeartbeatRequest {
     fn header_version(version: i16) -> i16 {
-        if version == 4 {
+        if version >= 4 {
             2
         } else {
             1

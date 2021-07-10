@@ -33,17 +33,17 @@ pub struct CreatableRenewers {
 
 impl Encodable for CreatableRenewers {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 2 {
+        if version >= 2 {
             types::CompactString.encode(buf, &self.principal_type)?;
         } else {
             types::String.encode(buf, &self.principal_type)?;
         }
-        if version == 2 {
+        if version >= 2 {
             types::CompactString.encode(buf, &self.principal_name)?;
         } else {
             types::String.encode(buf, &self.principal_name)?;
         }
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -57,17 +57,17 @@ impl Encodable for CreatableRenewers {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 2 {
+        if version >= 2 {
             total_size += types::CompactString.compute_size(&self.principal_type)?;
         } else {
             total_size += types::String.compute_size(&self.principal_type)?;
         }
-        if version == 2 {
+        if version >= 2 {
             total_size += types::CompactString.compute_size(&self.principal_name)?;
         } else {
             total_size += types::String.compute_size(&self.principal_name)?;
         }
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -83,18 +83,18 @@ impl Encodable for CreatableRenewers {
 
 impl Decodable for CreatableRenewers {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let principal_type = if version == 2 {
+        let principal_type = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
         };
-        let principal_name = if version == 2 {
+        let principal_name = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -145,13 +145,13 @@ pub struct CreateDelegationTokenRequest {
 
 impl Encodable for CreateDelegationTokenRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 2 {
+        if version >= 2 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.renewers)?;
         } else {
             types::Array(types::Struct { version }).encode(buf, &self.renewers)?;
         }
         types::Int64.encode(buf, &self.max_lifetime_ms)?;
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -165,13 +165,13 @@ impl Encodable for CreateDelegationTokenRequest {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 2 {
+        if version >= 2 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.renewers)?;
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.renewers)?;
         }
         total_size += types::Int64.compute_size(&self.max_lifetime_ms)?;
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -187,14 +187,14 @@ impl Encodable for CreateDelegationTokenRequest {
 
 impl Decodable for CreateDelegationTokenRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let renewers = if version == 2 {
+        let renewers = if version >= 2 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
             types::Array(types::Struct { version }).decode(buf)?
         };
         let max_lifetime_ms = types::Int64.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -228,7 +228,7 @@ impl Message for CreateDelegationTokenRequest {
 
 impl HeaderVersion for CreateDelegationTokenRequest {
     fn header_version(version: i16) -> i16 {
-        if version == 2 {
+        if version >= 2 {
             2
         } else {
             1

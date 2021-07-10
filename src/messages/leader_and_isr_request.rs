@@ -282,7 +282,7 @@ pub struct LeaderAndIsrTopicState {
 
     /// The unique topic ID.
     /// 
-    /// Supported API versions: 5
+    /// Supported API versions: 5-5
     pub topic_id: Uuid,
 
     /// The state of each partition
@@ -564,7 +564,7 @@ pub struct LeaderAndIsrRequest {
 
     /// The type that indicates whether all topics are included in the request
     /// 
-    /// Supported API versions: 5
+    /// Supported API versions: 5-5
     pub _type: i8,
 
     /// The state of each partition, in a v0 or v1 message.

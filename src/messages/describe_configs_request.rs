@@ -39,17 +39,17 @@ pub struct DescribeConfigsResource {
 impl Encodable for DescribeConfigsResource {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int8.encode(buf, &self.resource_type)?;
-        if version == 4 {
+        if version >= 4 {
             types::CompactString.encode(buf, &self.resource_name)?;
         } else {
             types::String.encode(buf, &self.resource_name)?;
         }
-        if version == 4 {
+        if version >= 4 {
             types::CompactArray(types::CompactString).encode(buf, &self.configuration_keys)?;
         } else {
             types::Array(types::String).encode(buf, &self.configuration_keys)?;
         }
-        if version == 4 {
+        if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -64,17 +64,17 @@ impl Encodable for DescribeConfigsResource {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         total_size += types::Int8.compute_size(&self.resource_type)?;
-        if version == 4 {
+        if version >= 4 {
             total_size += types::CompactString.compute_size(&self.resource_name)?;
         } else {
             total_size += types::String.compute_size(&self.resource_name)?;
         }
-        if version == 4 {
+        if version >= 4 {
             total_size += types::CompactArray(types::CompactString).compute_size(&self.configuration_keys)?;
         } else {
             total_size += types::Array(types::String).compute_size(&self.configuration_keys)?;
         }
-        if version == 4 {
+        if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -91,18 +91,18 @@ impl Encodable for DescribeConfigsResource {
 impl Decodable for DescribeConfigsResource {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let resource_type = types::Int8.decode(buf)?;
-        let resource_name = if version == 4 {
+        let resource_name = if version >= 4 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
         };
-        let configuration_keys = if version == 4 {
+        let configuration_keys = if version >= 4 {
             types::CompactArray(types::CompactString).decode(buf)?
         } else {
             types::Array(types::String).decode(buf)?
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 4 {
+        if version >= 4 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -160,7 +160,7 @@ pub struct DescribeConfigsRequest {
 
 impl Encodable for DescribeConfigsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 4 {
+        if version >= 4 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.resources)?;
         } else {
             types::Array(types::Struct { version }).encode(buf, &self.resources)?;
@@ -179,7 +179,7 @@ impl Encodable for DescribeConfigsRequest {
                 return Err(EncodeError)
             }
         }
-        if version == 4 {
+        if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -193,7 +193,7 @@ impl Encodable for DescribeConfigsRequest {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 4 {
+        if version >= 4 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.resources)?;
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.resources)?;
@@ -212,7 +212,7 @@ impl Encodable for DescribeConfigsRequest {
                 return Err(EncodeError)
             }
         }
-        if version == 4 {
+        if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -228,7 +228,7 @@ impl Encodable for DescribeConfigsRequest {
 
 impl Decodable for DescribeConfigsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let resources = if version == 4 {
+        let resources = if version >= 4 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
             types::Array(types::Struct { version }).decode(buf)?
@@ -244,7 +244,7 @@ impl Decodable for DescribeConfigsRequest {
             false
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 4 {
+        if version >= 4 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -280,7 +280,7 @@ impl Message for DescribeConfigsRequest {
 
 impl HeaderVersion for DescribeConfigsRequest {
     fn header_version(version: i16) -> i16 {
-        if version == 4 {
+        if version >= 4 {
             2
         } else {
             1

@@ -35,7 +35,7 @@ impl Encodable for WritableTxnMarkerPartitionResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.partition_index)?;
         types::Int16.encode(buf, &self.error_code)?;
-        if version == 1 {
+        if version >= 1 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -51,7 +51,7 @@ impl Encodable for WritableTxnMarkerPartitionResult {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.partition_index)?;
         total_size += types::Int16.compute_size(&self.error_code)?;
-        if version == 1 {
+        if version >= 1 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -70,7 +70,7 @@ impl Decodable for WritableTxnMarkerPartitionResult {
         let partition_index = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 1 {
+        if version >= 1 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -121,17 +121,17 @@ pub struct WritableTxnMarkerTopicResult {
 
 impl Encodable for WritableTxnMarkerTopicResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 1 {
+        if version >= 1 {
             types::CompactString.encode(buf, &self.name)?;
         } else {
             types::String.encode(buf, &self.name)?;
         }
-        if version == 1 {
+        if version >= 1 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.partitions)?;
         } else {
             types::Array(types::Struct { version }).encode(buf, &self.partitions)?;
         }
-        if version == 1 {
+        if version >= 1 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -145,17 +145,17 @@ impl Encodable for WritableTxnMarkerTopicResult {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 1 {
+        if version >= 1 {
             total_size += types::CompactString.compute_size(&self.name)?;
         } else {
             total_size += types::String.compute_size(&self.name)?;
         }
-        if version == 1 {
+        if version >= 1 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.partitions)?;
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.partitions)?;
         }
-        if version == 1 {
+        if version >= 1 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -171,18 +171,18 @@ impl Encodable for WritableTxnMarkerTopicResult {
 
 impl Decodable for WritableTxnMarkerTopicResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let name = if version == 1 {
+        let name = if version >= 1 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
         };
-        let partitions = if version == 1 {
+        let partitions = if version >= 1 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
             types::Array(types::Struct { version }).decode(buf)?
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 1 {
+        if version >= 1 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -234,12 +234,12 @@ pub struct WritableTxnMarkerResult {
 impl Encodable for WritableTxnMarkerResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int64.encode(buf, &self.producer_id)?;
-        if version == 1 {
+        if version >= 1 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
         } else {
             types::Array(types::Struct { version }).encode(buf, &self.topics)?;
         }
-        if version == 1 {
+        if version >= 1 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -254,12 +254,12 @@ impl Encodable for WritableTxnMarkerResult {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         total_size += types::Int64.compute_size(&self.producer_id)?;
-        if version == 1 {
+        if version >= 1 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.topics)?;
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.topics)?;
         }
-        if version == 1 {
+        if version >= 1 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -276,13 +276,13 @@ impl Encodable for WritableTxnMarkerResult {
 impl Decodable for WritableTxnMarkerResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let producer_id = types::Int64.decode(buf)?;
-        let topics = if version == 1 {
+        let topics = if version >= 1 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
             types::Array(types::Struct { version }).decode(buf)?
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 1 {
+        if version >= 1 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -328,12 +328,12 @@ pub struct WriteTxnMarkersResponse {
 
 impl Encodable for WriteTxnMarkersResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 1 {
+        if version >= 1 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.markers)?;
         } else {
             types::Array(types::Struct { version }).encode(buf, &self.markers)?;
         }
-        if version == 1 {
+        if version >= 1 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -347,12 +347,12 @@ impl Encodable for WriteTxnMarkersResponse {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 1 {
+        if version >= 1 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.markers)?;
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.markers)?;
         }
-        if version == 1 {
+        if version >= 1 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -368,13 +368,13 @@ impl Encodable for WriteTxnMarkersResponse {
 
 impl Decodable for WriteTxnMarkersResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let markers = if version == 1 {
+        let markers = if version >= 1 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
             types::Array(types::Struct { version }).decode(buf)?
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 1 {
+        if version >= 1 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -406,7 +406,7 @@ impl Message for WriteTxnMarkersResponse {
 
 impl HeaderVersion for WriteTxnMarkersResponse {
     fn header_version(version: i16) -> i16 {
-        if version == 1 {
+        if version >= 1 {
             1
         } else {
             0

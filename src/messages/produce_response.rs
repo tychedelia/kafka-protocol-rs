@@ -41,7 +41,7 @@ impl Encodable for BatchIndexAndErrorMessage {
             }
         }
         if version >= 8 {
-            if version == 9 {
+            if version >= 9 {
                 types::CompactString.encode(buf, &self.batch_index_error_message)?;
             } else {
                 types::String.encode(buf, &self.batch_index_error_message)?;
@@ -51,7 +51,7 @@ impl Encodable for BatchIndexAndErrorMessage {
                 return Err(EncodeError)
             }
         }
-        if version == 9 {
+        if version >= 9 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -73,7 +73,7 @@ impl Encodable for BatchIndexAndErrorMessage {
             }
         }
         if version >= 8 {
-            if version == 9 {
+            if version >= 9 {
                 total_size += types::CompactString.compute_size(&self.batch_index_error_message)?;
             } else {
                 total_size += types::String.compute_size(&self.batch_index_error_message)?;
@@ -83,7 +83,7 @@ impl Encodable for BatchIndexAndErrorMessage {
                 return Err(EncodeError)
             }
         }
-        if version == 9 {
+        if version >= 9 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -105,7 +105,7 @@ impl Decodable for BatchIndexAndErrorMessage {
             0
         };
         let batch_index_error_message = if version >= 8 {
-            if version == 9 {
+            if version >= 9 {
                 types::CompactString.decode(buf)?
             } else {
                 types::String.decode(buf)?
@@ -114,7 +114,7 @@ impl Decodable for BatchIndexAndErrorMessage {
             None
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 9 {
+        if version >= 9 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -200,20 +200,20 @@ impl Encodable for PartitionProduceResponse {
             types::Int64.encode(buf, &self.log_start_offset)?;
         }
         if version >= 8 {
-            if version == 9 {
+            if version >= 9 {
                 types::CompactArray(types::Struct { version }).encode(buf, &self.record_errors)?;
             } else {
                 types::Array(types::Struct { version }).encode(buf, &self.record_errors)?;
             }
         }
         if version >= 8 {
-            if version == 9 {
+            if version >= 9 {
                 types::CompactString.encode(buf, &self.error_message)?;
             } else {
                 types::String.encode(buf, &self.error_message)?;
             }
         }
-        if version == 9 {
+        if version >= 9 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -237,20 +237,20 @@ impl Encodable for PartitionProduceResponse {
             total_size += types::Int64.compute_size(&self.log_start_offset)?;
         }
         if version >= 8 {
-            if version == 9 {
+            if version >= 9 {
                 total_size += types::CompactArray(types::Struct { version }).compute_size(&self.record_errors)?;
             } else {
                 total_size += types::Array(types::Struct { version }).compute_size(&self.record_errors)?;
             }
         }
         if version >= 8 {
-            if version == 9 {
+            if version >= 9 {
                 total_size += types::CompactString.compute_size(&self.error_message)?;
             } else {
                 total_size += types::String.compute_size(&self.error_message)?;
             }
         }
-        if version == 9 {
+        if version >= 9 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -280,7 +280,7 @@ impl Decodable for PartitionProduceResponse {
             -1
         };
         let record_errors = if version >= 8 {
-            if version == 9 {
+            if version >= 9 {
                 types::CompactArray(types::Struct { version }).decode(buf)?
             } else {
                 types::Array(types::Struct { version }).decode(buf)?
@@ -289,7 +289,7 @@ impl Decodable for PartitionProduceResponse {
             Default::default()
         };
         let error_message = if version >= 8 {
-            if version == 9 {
+            if version >= 9 {
                 types::CompactString.decode(buf)?
             } else {
                 types::String.decode(buf)?
@@ -298,7 +298,7 @@ impl Decodable for PartitionProduceResponse {
             None
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 9 {
+        if version >= 9 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -355,17 +355,17 @@ pub struct TopicProduceResponse {
 impl MapEncodable for TopicProduceResponse {
     type Key = super::TopicName;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 9 {
+        if version >= 9 {
             types::CompactString.encode(buf, key)?;
         } else {
             types::String.encode(buf, key)?;
         }
-        if version == 9 {
+        if version >= 9 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.partition_responses)?;
         } else {
             types::Array(types::Struct { version }).encode(buf, &self.partition_responses)?;
         }
-        if version == 9 {
+        if version >= 9 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -379,17 +379,17 @@ impl MapEncodable for TopicProduceResponse {
     }
     fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 9 {
+        if version >= 9 {
             total_size += types::CompactString.compute_size(key)?;
         } else {
             total_size += types::String.compute_size(key)?;
         }
-        if version == 9 {
+        if version >= 9 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.partition_responses)?;
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.partition_responses)?;
         }
-        if version == 9 {
+        if version >= 9 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -406,18 +406,18 @@ impl MapEncodable for TopicProduceResponse {
 impl MapDecodable for TopicProduceResponse {
     type Key = super::TopicName;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
-        let key_field = if version == 9 {
+        let key_field = if version >= 9 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
         };
-        let partition_responses = if version == 9 {
+        let partition_responses = if version >= 9 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
             types::Array(types::Struct { version }).decode(buf)?
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 9 {
+        if version >= 9 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -466,7 +466,7 @@ pub struct ProduceResponse {
 
 impl Encodable for ProduceResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 9 {
+        if version >= 9 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.responses)?;
         } else {
             types::Array(types::Struct { version }).encode(buf, &self.responses)?;
@@ -474,7 +474,7 @@ impl Encodable for ProduceResponse {
         if version >= 1 {
             types::Int32.encode(buf, &self.throttle_time_ms)?;
         }
-        if version == 9 {
+        if version >= 9 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -488,7 +488,7 @@ impl Encodable for ProduceResponse {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 9 {
+        if version >= 9 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.responses)?;
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.responses)?;
@@ -496,7 +496,7 @@ impl Encodable for ProduceResponse {
         if version >= 1 {
             total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
         }
-        if version == 9 {
+        if version >= 9 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -512,7 +512,7 @@ impl Encodable for ProduceResponse {
 
 impl Decodable for ProduceResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let responses = if version == 9 {
+        let responses = if version >= 9 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
             types::Array(types::Struct { version }).decode(buf)?
@@ -523,7 +523,7 @@ impl Decodable for ProduceResponse {
             0
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 9 {
+        if version >= 9 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -557,7 +557,7 @@ impl Message for ProduceResponse {
 
 impl HeaderVersion for ProduceResponse {
     fn header_version(version: i16) -> i16 {
-        if version == 9 {
+        if version >= 9 {
             1
         } else {
             0

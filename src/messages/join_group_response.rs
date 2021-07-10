@@ -184,7 +184,7 @@ pub struct JoinGroupResponse {
 
     /// The group protocol name.
     /// 
-    /// Supported API versions: 7
+    /// Supported API versions: 7-7
     pub protocol_type: Option<StrBytes>,
 
     /// The group protocol selected by the coordinator.

@@ -19,12 +19,12 @@ use protocol_base::{
 pub struct ApiVersionsRequest {
     /// The name of the client.
     /// 
-    /// Supported API versions: 3
+    /// Supported API versions: 3-3
     pub client_software_name: StrBytes,
 
     /// The version of the client.
     /// 
-    /// Supported API versions: 3
+    /// Supported API versions: 3-3
     pub client_software_version: StrBytes,
 
     /// Other tagged fields
@@ -39,7 +39,7 @@ impl Encodable for ApiVersionsRequest {
         if version == 3 {
             types::CompactString.encode(buf, &self.client_software_version)?;
         }
-        if version == 3 {
+        if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -59,7 +59,7 @@ impl Encodable for ApiVersionsRequest {
         if version == 3 {
             total_size += types::CompactString.compute_size(&self.client_software_version)?;
         }
-        if version == 3 {
+        if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -86,7 +86,7 @@ impl Decodable for ApiVersionsRequest {
             Default::default()
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 3 {
+        if version >= 3 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -120,7 +120,7 @@ impl Message for ApiVersionsRequest {
 
 impl HeaderVersion for ApiVersionsRequest {
     fn header_version(version: i16) -> i16 {
-        if version == 3 {
+        if version >= 3 {
             2
         } else {
             1

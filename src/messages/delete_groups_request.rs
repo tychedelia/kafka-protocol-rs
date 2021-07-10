@@ -28,12 +28,12 @@ pub struct DeleteGroupsRequest {
 
 impl Encodable for DeleteGroupsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 2 {
+        if version >= 2 {
             types::CompactArray(types::CompactString).encode(buf, &self.groups_names)?;
         } else {
             types::Array(types::String).encode(buf, &self.groups_names)?;
         }
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -47,12 +47,12 @@ impl Encodable for DeleteGroupsRequest {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 2 {
+        if version >= 2 {
             total_size += types::CompactArray(types::CompactString).compute_size(&self.groups_names)?;
         } else {
             total_size += types::Array(types::String).compute_size(&self.groups_names)?;
         }
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -68,13 +68,13 @@ impl Encodable for DeleteGroupsRequest {
 
 impl Decodable for DeleteGroupsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let groups_names = if version == 2 {
+        let groups_names = if version >= 2 {
             types::CompactArray(types::CompactString).decode(buf)?
         } else {
             types::Array(types::String).decode(buf)?
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 2 {
+        if version >= 2 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -106,7 +106,7 @@ impl Message for DeleteGroupsRequest {
 
 impl HeaderVersion for DeleteGroupsRequest {
     fn header_version(version: i16) -> i16 {
-        if version == 2 {
+        if version >= 2 {
             2
         } else {
             1

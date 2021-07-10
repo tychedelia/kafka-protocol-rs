@@ -19,7 +19,7 @@ use protocol_base::{
 pub struct TopicPartition {
     /// 
     /// 
-    /// Supported API versions: 1
+    /// Supported API versions: 1-1
     pub partitions: Vec<i32>,
 
 }
@@ -111,7 +111,7 @@ pub struct ConsumerProtocolSubscription {
 
     /// 
     /// 
-    /// Supported API versions: 1
+    /// Supported API versions: 1-1
     pub owned_partitions: indexmap::IndexMap<super::TopicName, TopicPartition>,
 
 }

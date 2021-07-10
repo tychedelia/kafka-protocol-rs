@@ -43,19 +43,19 @@ pub struct AddOffsetsToTxnRequest {
 
 impl Encodable for AddOffsetsToTxnRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 3 {
+        if version >= 3 {
             types::CompactString.encode(buf, &self.transactional_id)?;
         } else {
             types::String.encode(buf, &self.transactional_id)?;
         }
         types::Int64.encode(buf, &self.producer_id)?;
         types::Int16.encode(buf, &self.producer_epoch)?;
-        if version == 3 {
+        if version >= 3 {
             types::CompactString.encode(buf, &self.group_id)?;
         } else {
             types::String.encode(buf, &self.group_id)?;
         }
-        if version == 3 {
+        if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -69,19 +69,19 @@ impl Encodable for AddOffsetsToTxnRequest {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 3 {
+        if version >= 3 {
             total_size += types::CompactString.compute_size(&self.transactional_id)?;
         } else {
             total_size += types::String.compute_size(&self.transactional_id)?;
         }
         total_size += types::Int64.compute_size(&self.producer_id)?;
         total_size += types::Int16.compute_size(&self.producer_epoch)?;
-        if version == 3 {
+        if version >= 3 {
             total_size += types::CompactString.compute_size(&self.group_id)?;
         } else {
             total_size += types::String.compute_size(&self.group_id)?;
         }
-        if version == 3 {
+        if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -97,20 +97,20 @@ impl Encodable for AddOffsetsToTxnRequest {
 
 impl Decodable for AddOffsetsToTxnRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let transactional_id = if version == 3 {
+        let transactional_id = if version >= 3 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
         };
         let producer_id = types::Int64.decode(buf)?;
         let producer_epoch = types::Int16.decode(buf)?;
-        let group_id = if version == 3 {
+        let group_id = if version >= 3 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 3 {
+        if version >= 3 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -148,7 +148,7 @@ impl Message for AddOffsetsToTxnRequest {
 
 impl HeaderVersion for AddOffsetsToTxnRequest {
     fn header_version(version: i16) -> i16 {
-        if version == 3 {
+        if version >= 3 {
             2
         } else {
             1
