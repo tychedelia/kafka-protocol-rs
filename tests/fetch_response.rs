@@ -153,7 +153,7 @@ fn multiple_records() {
         for partition in topic.partitions {
             assert_eq!(partition.partition_index, 0);
             assert_eq!(partition.error_code, 0);
-            assert_eq!(partition.aborted_transactions.as_ref().unwrap().len(), 1);
+            assert_eq!(partition.aborted_transactions.as_ref().unwrap().len(), 0);
 
             let mut records = partition.records.unwrap();
             let records = RecordBatchDecoder::decode(&mut records).unwrap();
