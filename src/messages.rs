@@ -924,6 +924,7 @@ impl TryFrom<i16> for ApiKey {
     }
 }
 
+#[derive(Debug)]
 pub enum RequestKind {
     ProduceRequest(ProduceRequest),
     FetchRequest(FetchRequest),
@@ -995,6 +996,7 @@ pub enum RequestKind {
     AllocateProducerIdsRequest(AllocateProducerIdsRequest),
 }
 
+#[derive(Debug)]
 pub enum ResponseKind {
     ProduceResponse(ProduceResponse),
     FetchResponse(FetchResponse),

@@ -120,6 +120,7 @@ pub fn run() -> Result<(), Error> {
     writeln!(module_file, "}}")?;
     writeln!(module_file)?;
 
+    writeln!(module_file, "#[derive(Debug)]")?;
     writeln!(module_file, "pub enum RequestKind {{")?;
     for (_, request_type) in request_types.iter() {
         writeln!(module_file, "    {}({}),", request_type, request_type)?;
@@ -127,6 +128,7 @@ pub fn run() -> Result<(), Error> {
     writeln!(module_file, "}}")?;
     writeln!(module_file)?;
 
+    writeln!(module_file, "#[derive(Debug)]")?;
     writeln!(module_file, "pub enum ResponseKind {{")?;
     for (_, response_type) in response_types.iter() {
         writeln!(module_file, "    {}({}),", response_type, response_type)?;
