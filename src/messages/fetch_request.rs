@@ -14,37 +14,37 @@ use protocol_base::{
 };
 
 
-/// Valid versions: 0-12
+/// Valid versions: 0-13
 #[derive(Debug, Clone, PartialEq)]
 pub struct FetchPartition {
     /// The partition index.
     /// 
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub partition: i32,
 
     /// The current leader epoch of the partition.
     /// 
-    /// Supported API versions: 9-12
+    /// Supported API versions: 9-13
     pub current_leader_epoch: i32,
 
     /// The message offset.
     /// 
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub fetch_offset: i64,
 
     /// The epoch of the last fetched record or -1 if there is none
     /// 
-    /// Supported API versions: 12
+    /// Supported API versions: 12-13
     pub last_fetched_epoch: i32,
 
     /// The earliest available offset of the follower replica.  The field is only used when the request is sent by the follower.
     /// 
-    /// Supported API versions: 5-12
+    /// Supported API versions: 5-13
     pub log_start_offset: i64,
 
     /// The maximum bytes to fetch from this partition.  See KIP-74 for cases where this limit may not be honored.
     /// 
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub partition_max_bytes: i32,
 
     /// Other tagged fields
@@ -58,7 +58,7 @@ impl Encodable for FetchPartition {
             types::Int32.encode(buf, &self.current_leader_epoch)?;
         }
         types::Int64.encode(buf, &self.fetch_offset)?;
-        if version == 12 {
+        if version >= 12 {
             types::Int32.encode(buf, &self.last_fetched_epoch)?;
         } else {
             if self.last_fetched_epoch != -1 {
@@ -69,7 +69,7 @@ impl Encodable for FetchPartition {
             types::Int64.encode(buf, &self.log_start_offset)?;
         }
         types::Int32.encode(buf, &self.partition_max_bytes)?;
-        if version == 12 {
+        if version >= 12 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -88,7 +88,7 @@ impl Encodable for FetchPartition {
             total_size += types::Int32.compute_size(&self.current_leader_epoch)?;
         }
         total_size += types::Int64.compute_size(&self.fetch_offset)?;
-        if version == 12 {
+        if version >= 12 {
             total_size += types::Int32.compute_size(&self.last_fetched_epoch)?;
         } else {
             if self.last_fetched_epoch != -1 {
@@ -99,7 +99,7 @@ impl Encodable for FetchPartition {
             total_size += types::Int64.compute_size(&self.log_start_offset)?;
         }
         total_size += types::Int32.compute_size(&self.partition_max_bytes)?;
-        if version == 12 {
+        if version >= 12 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -122,7 +122,7 @@ impl Decodable for FetchPartition {
             -1
         };
         let fetch_offset = types::Int64.decode(buf)?;
-        let last_fetched_epoch = if version == 12 {
+        let last_fetched_epoch = if version >= 12 {
             types::Int32.decode(buf)?
         } else {
             -1
@@ -134,7 +134,7 @@ impl Decodable for FetchPartition {
         };
         let partition_max_bytes = types::Int32.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 12 {
+        if version >= 12 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -171,10 +171,10 @@ impl Default for FetchPartition {
 }
 
 impl Message for FetchPartition {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 12 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 13 };
 }
 
-/// Valid versions: 0-12
+/// Valid versions: 0-13
 #[derive(Debug, Clone, PartialEq)]
 pub struct FetchTopic {
     /// The name of the topic to fetch.
@@ -182,9 +182,14 @@ pub struct FetchTopic {
     /// Supported API versions: 0-12
     pub topic: super::TopicName,
 
+    /// The unique topic ID
+    /// 
+    /// Supported API versions: 13
+    pub topic_id: Uuid,
+
     /// The partitions to fetch.
     /// 
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub partitions: Vec<FetchPartition>,
 
     /// Other tagged fields
@@ -193,17 +198,22 @@ pub struct FetchTopic {
 
 impl Encodable for FetchTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 12 {
-            types::CompactString.encode(buf, &self.topic)?;
-        } else {
-            types::String.encode(buf, &self.topic)?;
+        if version <= 12 {
+            if version == 12 {
+                types::CompactString.encode(buf, &self.topic)?;
+            } else {
+                types::String.encode(buf, &self.topic)?;
+            }
         }
-        if version == 12 {
+        if version == 13 {
+            types::Uuid.encode(buf, &self.topic_id)?;
+        }
+        if version >= 12 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.partitions)?;
         } else {
             types::Array(types::Struct { version }).encode(buf, &self.partitions)?;
         }
-        if version == 12 {
+        if version >= 12 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -217,17 +227,22 @@ impl Encodable for FetchTopic {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 12 {
-            total_size += types::CompactString.compute_size(&self.topic)?;
-        } else {
-            total_size += types::String.compute_size(&self.topic)?;
+        if version <= 12 {
+            if version == 12 {
+                total_size += types::CompactString.compute_size(&self.topic)?;
+            } else {
+                total_size += types::String.compute_size(&self.topic)?;
+            }
         }
-        if version == 12 {
+        if version == 13 {
+            total_size += types::Uuid.compute_size(&self.topic_id)?;
+        }
+        if version >= 12 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.partitions)?;
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.partitions)?;
         }
-        if version == 12 {
+        if version >= 12 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -243,18 +258,27 @@ impl Encodable for FetchTopic {
 
 impl Decodable for FetchTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let topic = if version == 12 {
-            types::CompactString.decode(buf)?
+        let topic = if version <= 12 {
+            if version == 12 {
+                types::CompactString.decode(buf)?
+            } else {
+                types::String.decode(buf)?
+            }
         } else {
-            types::String.decode(buf)?
+            Default::default()
         };
-        let partitions = if version == 12 {
+        let topic_id = if version == 13 {
+            types::Uuid.decode(buf)?
+        } else {
+            Uuid::nil()
+        };
+        let partitions = if version >= 12 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
             types::Array(types::Struct { version }).decode(buf)?
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 12 {
+        if version >= 12 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -266,6 +290,7 @@ impl Decodable for FetchTopic {
         }
         Ok(Self {
             topic,
+            topic_id,
             partitions,
             unknown_tagged_fields,
         })
@@ -276,6 +301,7 @@ impl Default for FetchTopic {
     fn default() -> Self {
         Self {
             topic: Default::default(),
+            topic_id: Uuid::nil(),
             partitions: Default::default(),
             unknown_tagged_fields: BTreeMap::new(),
         }
@@ -283,10 +309,10 @@ impl Default for FetchTopic {
 }
 
 impl Message for FetchTopic {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 12 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 13 };
 }
 
-/// Valid versions: 0-12
+/// Valid versions: 0-13
 #[derive(Debug, Clone, PartialEq)]
 pub struct ForgottenTopic {
     /// The partition name.
@@ -294,9 +320,14 @@ pub struct ForgottenTopic {
     /// Supported API versions: 7-12
     pub topic: super::TopicName,
 
+    /// The unique topic ID
+    /// 
+    /// Supported API versions: 13
+    pub topic_id: Uuid,
+
     /// The partitions indexes to forget.
     /// 
-    /// Supported API versions: 7-12
+    /// Supported API versions: 7-13
     pub partitions: Vec<i32>,
 
     /// Other tagged fields
@@ -305,19 +336,18 @@ pub struct ForgottenTopic {
 
 impl Encodable for ForgottenTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version >= 7 {
+        if version >= 7 && version <= 12 {
             if version == 12 {
                 types::CompactString.encode(buf, &self.topic)?;
             } else {
                 types::String.encode(buf, &self.topic)?;
             }
-        } else {
-            if !self.topic.is_empty() {
-                return Err(EncodeError)
-            }
+        }
+        if version == 13 {
+            types::Uuid.encode(buf, &self.topic_id)?;
         }
         if version >= 7 {
-            if version == 12 {
+            if version >= 12 {
                 types::CompactArray(types::Int32).encode(buf, &self.partitions)?;
             } else {
                 types::Array(types::Int32).encode(buf, &self.partitions)?;
@@ -327,7 +357,7 @@ impl Encodable for ForgottenTopic {
                 return Err(EncodeError)
             }
         }
-        if version == 12 {
+        if version >= 12 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -341,19 +371,18 @@ impl Encodable for ForgottenTopic {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version >= 7 {
+        if version >= 7 && version <= 12 {
             if version == 12 {
                 total_size += types::CompactString.compute_size(&self.topic)?;
             } else {
                 total_size += types::String.compute_size(&self.topic)?;
             }
-        } else {
-            if !self.topic.is_empty() {
-                return Err(EncodeError)
-            }
+        }
+        if version == 13 {
+            total_size += types::Uuid.compute_size(&self.topic_id)?;
         }
         if version >= 7 {
-            if version == 12 {
+            if version >= 12 {
                 total_size += types::CompactArray(types::Int32).compute_size(&self.partitions)?;
             } else {
                 total_size += types::Array(types::Int32).compute_size(&self.partitions)?;
@@ -363,7 +392,7 @@ impl Encodable for ForgottenTopic {
                 return Err(EncodeError)
             }
         }
-        if version == 12 {
+        if version >= 12 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -379,7 +408,7 @@ impl Encodable for ForgottenTopic {
 
 impl Decodable for ForgottenTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let topic = if version >= 7 {
+        let topic = if version >= 7 && version <= 12 {
             if version == 12 {
                 types::CompactString.decode(buf)?
             } else {
@@ -388,8 +417,13 @@ impl Decodable for ForgottenTopic {
         } else {
             Default::default()
         };
+        let topic_id = if version == 13 {
+            types::Uuid.decode(buf)?
+        } else {
+            Uuid::nil()
+        };
         let partitions = if version >= 7 {
-            if version == 12 {
+            if version >= 12 {
                 types::CompactArray(types::Int32).decode(buf)?
             } else {
                 types::Array(types::Int32).decode(buf)?
@@ -398,7 +432,7 @@ impl Decodable for ForgottenTopic {
             Default::default()
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 12 {
+        if version >= 12 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -410,6 +444,7 @@ impl Decodable for ForgottenTopic {
         }
         Ok(Self {
             topic,
+            topic_id,
             partitions,
             unknown_tagged_fields,
         })
@@ -420,6 +455,7 @@ impl Default for ForgottenTopic {
     fn default() -> Self {
         Self {
             topic: Default::default(),
+            topic_id: Uuid::nil(),
             partitions: Default::default(),
             unknown_tagged_fields: BTreeMap::new(),
         }
@@ -427,65 +463,65 @@ impl Default for ForgottenTopic {
 }
 
 impl Message for ForgottenTopic {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 12 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 13 };
 }
 
-/// Valid versions: 0-12
+/// Valid versions: 0-13
 #[derive(Debug, Clone, PartialEq)]
 pub struct FetchRequest {
     /// The clusterId if known. This is used to validate metadata fetches prior to broker registration.
     /// 
-    /// Supported API versions: 12
+    /// Supported API versions: 12-13
     pub cluster_id: Option<StrBytes>,
 
     /// The broker ID of the follower, of -1 if this request is from a consumer.
     /// 
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub replica_id: super::BrokerId,
 
     /// The maximum time in milliseconds to wait for the response.
     /// 
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub max_wait_ms: i32,
 
     /// The minimum bytes to accumulate in the response.
     /// 
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub min_bytes: i32,
 
     /// The maximum bytes to fetch.  See KIP-74 for cases where this limit may not be honored.
     /// 
-    /// Supported API versions: 3-12
+    /// Supported API versions: 3-13
     pub max_bytes: i32,
 
     /// This setting controls the visibility of transactional records. Using READ_UNCOMMITTED (isolation_level = 0) makes all records visible. With READ_COMMITTED (isolation_level = 1), non-transactional and COMMITTED transactional records are visible. To be more concrete, READ_COMMITTED returns all data from offsets smaller than the current LSO (last stable offset), and enables the inclusion of the list of aborted transactions in the result, which allows consumers to discard ABORTED transactional records
     /// 
-    /// Supported API versions: 4-12
+    /// Supported API versions: 4-13
     pub isolation_level: i8,
 
     /// The fetch session ID.
     /// 
-    /// Supported API versions: 7-12
+    /// Supported API versions: 7-13
     pub session_id: i32,
 
     /// The fetch session epoch, which is used for ordering requests in a session.
     /// 
-    /// Supported API versions: 7-12
+    /// Supported API versions: 7-13
     pub session_epoch: i32,
 
     /// The topics to fetch.
     /// 
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub topics: Vec<FetchTopic>,
 
     /// In an incremental fetch request, the partitions to remove.
     /// 
-    /// Supported API versions: 7-12
+    /// Supported API versions: 7-13
     pub forgotten_topics_data: Vec<ForgottenTopic>,
 
     /// Rack ID of the consumer making this request
     /// 
-    /// Supported API versions: 11-12
+    /// Supported API versions: 11-13
     pub rack_id: StrBytes,
 
     /// Other tagged fields
@@ -509,13 +545,13 @@ impl Encodable for FetchRequest {
         if version >= 7 {
             types::Int32.encode(buf, &self.session_epoch)?;
         }
-        if version == 12 {
+        if version >= 12 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
         } else {
             types::Array(types::Struct { version }).encode(buf, &self.topics)?;
         }
         if version >= 7 {
-            if version == 12 {
+            if version >= 12 {
                 types::CompactArray(types::Struct { version }).encode(buf, &self.forgotten_topics_data)?;
             } else {
                 types::Array(types::Struct { version }).encode(buf, &self.forgotten_topics_data)?;
@@ -526,13 +562,13 @@ impl Encodable for FetchRequest {
             }
         }
         if version >= 11 {
-            if version == 12 {
+            if version >= 12 {
                 types::CompactString.encode(buf, &self.rack_id)?;
             } else {
                 types::String.encode(buf, &self.rack_id)?;
             }
         }
-        if version == 12 {
+        if version >= 12 {
             let mut num_tagged_fields = self.unknown_tagged_fields.len();
             if !self.cluster_id.is_none() {
                 num_tagged_fields += 1;
@@ -574,13 +610,13 @@ impl Encodable for FetchRequest {
         if version >= 7 {
             total_size += types::Int32.compute_size(&self.session_epoch)?;
         }
-        if version == 12 {
+        if version >= 12 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.topics)?;
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.topics)?;
         }
         if version >= 7 {
-            if version == 12 {
+            if version >= 12 {
                 total_size += types::CompactArray(types::Struct { version }).compute_size(&self.forgotten_topics_data)?;
             } else {
                 total_size += types::Array(types::Struct { version }).compute_size(&self.forgotten_topics_data)?;
@@ -591,13 +627,13 @@ impl Encodable for FetchRequest {
             }
         }
         if version >= 11 {
-            if version == 12 {
+            if version >= 12 {
                 total_size += types::CompactString.compute_size(&self.rack_id)?;
             } else {
                 total_size += types::String.compute_size(&self.rack_id)?;
             }
         }
-        if version == 12 {
+        if version >= 12 {
             let mut num_tagged_fields = self.unknown_tagged_fields.len();
             if !self.cluster_id.is_none() {
                 num_tagged_fields += 1;
@@ -650,13 +686,13 @@ impl Decodable for FetchRequest {
         } else {
             -1
         };
-        let topics = if version == 12 {
+        let topics = if version >= 12 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
             types::Array(types::Struct { version }).decode(buf)?
         };
         let forgotten_topics_data = if version >= 7 {
-            if version == 12 {
+            if version >= 12 {
                 types::CompactArray(types::Struct { version }).decode(buf)?
             } else {
                 types::Array(types::Struct { version }).decode(buf)?
@@ -665,7 +701,7 @@ impl Decodable for FetchRequest {
             Default::default()
         };
         let rack_id = if version >= 11 {
-            if version == 12 {
+            if version >= 12 {
                 types::CompactString.decode(buf)?
             } else {
                 types::String.decode(buf)?
@@ -674,7 +710,7 @@ impl Decodable for FetchRequest {
             StrBytes::from_str("")
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 12 {
+        if version >= 12 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -728,12 +764,12 @@ impl Default for FetchRequest {
 }
 
 impl Message for FetchRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 12 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 13 };
 }
 
 impl HeaderVersion for FetchRequest {
     fn header_version(version: i16) -> i16 {
-        if version == 12 {
+        if version >= 12 {
             2
         } else {
             1

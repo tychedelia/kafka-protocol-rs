@@ -57,6 +57,7 @@ pub fn run() -> Result<(), Error> {
     writeln!(module_file, "//! THIS CODE IS AUTOMATICALLY GENERATED. DO NOT EDIT.")?;
     writeln!(module_file)?;
     writeln!(module_file, "use protocol_base::{{NewType, Request, StrBytes}};")?;
+    writeln!(module_file, "use std::convert::TryFrom;")?;
     writeln!(module_file)?;
 
     for input_file_path in &input_file_paths {
@@ -81,14 +82,57 @@ pub fn run() -> Result<(), Error> {
         writeln!(module_file)?;
     }
 
-    for (api_key, request_type) in request_types {
-        let response_type = response_types.remove(&api_key).expect("Every request type has a response type");
+    for (api_key, request_type) in request_types.iter() {
+        let response_type = response_types.get(&api_key).expect("Every request type has a response type");
         writeln!(module_file, "impl Request for {} {{", request_type)?;
         writeln!(module_file, "    const KEY: i16 = {};", api_key)?;
         writeln!(module_file, "    type Response = {};", response_type)?;
         writeln!(module_file, "}}")?;
         writeln!(module_file)?;
     }
+
+
+    writeln!(module_file, "pub enum ApiKey {{")?;
+    for (api_key, request_type) in request_types.iter() {
+        writeln!(module_file, "    {} = {},", request_type, api_key)?;
+    }
+    writeln!(module_file, "}}")?;
+    writeln!(module_file)?;
+
+    writeln!(module_file, "impl TryFrom<i16> for ApiKey {{")?;
+    writeln!(module_file, "    type Error = ();")?;
+    writeln!(module_file)?;
+    writeln!(
+        module_file,
+        "    fn try_from(v: i16) -> Result<Self, Self::Error> {{"
+    )?;
+    writeln!(module_file, "        match v {{")?;
+    for (_, request_type) in request_types.iter() {
+        writeln!(
+            module_file,
+            "            x if x == ApiKey::{} as i16 => Ok(ApiKey::{}),",
+            request_type, request_type
+        )?;
+    }
+    writeln!(module_file, "            _ => Err(()),")?;
+    writeln!(module_file, "        }}")?;
+    writeln!(module_file, "    }}")?;
+    writeln!(module_file, "}}")?;
+    writeln!(module_file)?;
+
+    writeln!(module_file, "pub enum RequestKind {{")?;
+    for (_, request_type) in request_types.iter() {
+        writeln!(module_file, "    {}({}),", request_type, request_type)?;
+    }
+    writeln!(module_file, "}}")?;
+    writeln!(module_file)?;
+
+    writeln!(module_file, "pub enum ResponseKind {{")?;
+    for (_, response_type) in response_types.iter() {
+        writeln!(module_file, "    {}({}),", response_type, response_type)?;
+    }
+    writeln!(module_file, "}}")?;
+    writeln!(module_file)?;
 
     for entity_type in entity_types {
         let mut derives = vec!["Debug", "Clone", "Eq", "PartialEq", "Ord", "PartialOrd", "Hash", "Default"];

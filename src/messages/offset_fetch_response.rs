@@ -14,7 +14,7 @@ use protocol_base::{
 };
 
 
-/// Valid versions: 0-7
+/// Valid versions: 0-8
 #[derive(Debug, Clone, PartialEq)]
 pub struct OffsetFetchResponsePartition {
     /// The partition index.
@@ -48,17 +48,41 @@ pub struct OffsetFetchResponsePartition {
 
 impl Encodable for OffsetFetchResponsePartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int32.encode(buf, &self.partition_index)?;
-        types::Int64.encode(buf, &self.committed_offset)?;
-        if version >= 5 {
+        if version <= 7 {
+            types::Int32.encode(buf, &self.partition_index)?;
+        } else {
+            if self.partition_index != 0 {
+                return Err(EncodeError)
+            }
+        }
+        if version <= 7 {
+            types::Int64.encode(buf, &self.committed_offset)?;
+        } else {
+            if self.committed_offset != 0 {
+                return Err(EncodeError)
+            }
+        }
+        if version >= 5 && version <= 7 {
             types::Int32.encode(buf, &self.committed_leader_epoch)?;
         }
-        if version >= 6 {
-            types::CompactString.encode(buf, &self.metadata)?;
+        if version <= 7 {
+            if version >= 6 {
+                types::CompactString.encode(buf, &self.metadata)?;
+            } else {
+                types::String.encode(buf, &self.metadata)?;
+            }
         } else {
-            types::String.encode(buf, &self.metadata)?;
+            if !self.metadata.as_ref().map(|x| x.is_empty()).unwrap_or_default() {
+                return Err(EncodeError)
+            }
         }
-        types::Int16.encode(buf, &self.error_code)?;
+        if version <= 7 {
+            types::Int16.encode(buf, &self.error_code)?;
+        } else {
+            if self.error_code != 0 {
+                return Err(EncodeError)
+            }
+        }
         if version >= 6 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
@@ -73,17 +97,41 @@ impl Encodable for OffsetFetchResponsePartition {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int32.compute_size(&self.partition_index)?;
-        total_size += types::Int64.compute_size(&self.committed_offset)?;
-        if version >= 5 {
+        if version <= 7 {
+            total_size += types::Int32.compute_size(&self.partition_index)?;
+        } else {
+            if self.partition_index != 0 {
+                return Err(EncodeError)
+            }
+        }
+        if version <= 7 {
+            total_size += types::Int64.compute_size(&self.committed_offset)?;
+        } else {
+            if self.committed_offset != 0 {
+                return Err(EncodeError)
+            }
+        }
+        if version >= 5 && version <= 7 {
             total_size += types::Int32.compute_size(&self.committed_leader_epoch)?;
         }
-        if version >= 6 {
-            total_size += types::CompactString.compute_size(&self.metadata)?;
+        if version <= 7 {
+            if version >= 6 {
+                total_size += types::CompactString.compute_size(&self.metadata)?;
+            } else {
+                total_size += types::String.compute_size(&self.metadata)?;
+            }
         } else {
-            total_size += types::String.compute_size(&self.metadata)?;
+            if !self.metadata.as_ref().map(|x| x.is_empty()).unwrap_or_default() {
+                return Err(EncodeError)
+            }
         }
-        total_size += types::Int16.compute_size(&self.error_code)?;
+        if version <= 7 {
+            total_size += types::Int16.compute_size(&self.error_code)?;
+        } else {
+            if self.error_code != 0 {
+                return Err(EncodeError)
+            }
+        }
         if version >= 6 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
@@ -100,19 +148,35 @@ impl Encodable for OffsetFetchResponsePartition {
 
 impl Decodable for OffsetFetchResponsePartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let partition_index = types::Int32.decode(buf)?;
-        let committed_offset = types::Int64.decode(buf)?;
-        let committed_leader_epoch = if version >= 5 {
+        let partition_index = if version <= 7 {
+            types::Int32.decode(buf)?
+        } else {
+            0
+        };
+        let committed_offset = if version <= 7 {
+            types::Int64.decode(buf)?
+        } else {
+            0
+        };
+        let committed_leader_epoch = if version >= 5 && version <= 7 {
             types::Int32.decode(buf)?
         } else {
             -1
         };
-        let metadata = if version >= 6 {
-            types::CompactString.decode(buf)?
+        let metadata = if version <= 7 {
+            if version >= 6 {
+                types::CompactString.decode(buf)?
+            } else {
+                types::String.decode(buf)?
+            }
         } else {
-            types::String.decode(buf)?
+            Some(Default::default())
         };
-        let error_code = types::Int16.decode(buf)?;
+        let error_code = if version <= 7 {
+            types::Int16.decode(buf)?
+        } else {
+            0
+        };
         let mut unknown_tagged_fields = BTreeMap::new();
         if version >= 6 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
@@ -149,10 +213,10 @@ impl Default for OffsetFetchResponsePartition {
 }
 
 impl Message for OffsetFetchResponsePartition {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 7 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 8 };
 }
 
-/// Valid versions: 0-7
+/// Valid versions: 0-8
 #[derive(Debug, Clone, PartialEq)]
 pub struct OffsetFetchResponseTopic {
     /// The topic name.
@@ -171,15 +235,27 @@ pub struct OffsetFetchResponseTopic {
 
 impl Encodable for OffsetFetchResponseTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version >= 6 {
-            types::CompactString.encode(buf, &self.name)?;
+        if version <= 7 {
+            if version >= 6 {
+                types::CompactString.encode(buf, &self.name)?;
+            } else {
+                types::String.encode(buf, &self.name)?;
+            }
         } else {
-            types::String.encode(buf, &self.name)?;
+            if !self.name.is_empty() {
+                return Err(EncodeError)
+            }
         }
-        if version >= 6 {
-            types::CompactArray(types::Struct { version }).encode(buf, &self.partitions)?;
+        if version <= 7 {
+            if version >= 6 {
+                types::CompactArray(types::Struct { version }).encode(buf, &self.partitions)?;
+            } else {
+                types::Array(types::Struct { version }).encode(buf, &self.partitions)?;
+            }
         } else {
-            types::Array(types::Struct { version }).encode(buf, &self.partitions)?;
+            if !self.partitions.is_empty() {
+                return Err(EncodeError)
+            }
         }
         if version >= 6 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -195,15 +271,27 @@ impl Encodable for OffsetFetchResponseTopic {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version >= 6 {
-            total_size += types::CompactString.compute_size(&self.name)?;
+        if version <= 7 {
+            if version >= 6 {
+                total_size += types::CompactString.compute_size(&self.name)?;
+            } else {
+                total_size += types::String.compute_size(&self.name)?;
+            }
         } else {
-            total_size += types::String.compute_size(&self.name)?;
+            if !self.name.is_empty() {
+                return Err(EncodeError)
+            }
         }
-        if version >= 6 {
-            total_size += types::CompactArray(types::Struct { version }).compute_size(&self.partitions)?;
+        if version <= 7 {
+            if version >= 6 {
+                total_size += types::CompactArray(types::Struct { version }).compute_size(&self.partitions)?;
+            } else {
+                total_size += types::Array(types::Struct { version }).compute_size(&self.partitions)?;
+            }
         } else {
-            total_size += types::Array(types::Struct { version }).compute_size(&self.partitions)?;
+            if !self.partitions.is_empty() {
+                return Err(EncodeError)
+            }
         }
         if version >= 6 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -221,15 +309,23 @@ impl Encodable for OffsetFetchResponseTopic {
 
 impl Decodable for OffsetFetchResponseTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let name = if version >= 6 {
-            types::CompactString.decode(buf)?
+        let name = if version <= 7 {
+            if version >= 6 {
+                types::CompactString.decode(buf)?
+            } else {
+                types::String.decode(buf)?
+            }
         } else {
-            types::String.decode(buf)?
+            Default::default()
         };
-        let partitions = if version >= 6 {
-            types::CompactArray(types::Struct { version }).decode(buf)?
+        let partitions = if version <= 7 {
+            if version >= 6 {
+                types::CompactArray(types::Struct { version }).decode(buf)?
+            } else {
+                types::Array(types::Struct { version }).decode(buf)?
+            }
         } else {
-            types::Array(types::Struct { version }).decode(buf)?
+            Default::default()
         };
         let mut unknown_tagged_fields = BTreeMap::new();
         if version >= 6 {
@@ -261,15 +357,471 @@ impl Default for OffsetFetchResponseTopic {
 }
 
 impl Message for OffsetFetchResponseTopic {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 7 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 8 };
 }
 
-/// Valid versions: 0-7
+/// Valid versions: 0-8
+#[derive(Debug, Clone, PartialEq)]
+pub struct OffsetFetchResponsePartitions {
+    /// The partition index.
+    /// 
+    /// Supported API versions: 8
+    pub partition_index: i32,
+
+    /// The committed message offset.
+    /// 
+    /// Supported API versions: 8
+    pub committed_offset: i64,
+
+    /// The leader epoch.
+    /// 
+    /// Supported API versions: 8
+    pub committed_leader_epoch: i32,
+
+    /// The partition metadata.
+    /// 
+    /// Supported API versions: 8
+    pub metadata: Option<StrBytes>,
+
+    /// The partition-level error code, or 0 if there was no error.
+    /// 
+    /// Supported API versions: 8
+    pub error_code: i16,
+
+    /// Other tagged fields
+    pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Encodable for OffsetFetchResponsePartitions {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+        if version == 8 {
+            types::Int32.encode(buf, &self.partition_index)?;
+        } else {
+            if self.partition_index != 0 {
+                return Err(EncodeError)
+            }
+        }
+        if version == 8 {
+            types::Int64.encode(buf, &self.committed_offset)?;
+        } else {
+            if self.committed_offset != 0 {
+                return Err(EncodeError)
+            }
+        }
+        if version == 8 {
+            types::Int32.encode(buf, &self.committed_leader_epoch)?;
+        }
+        if version == 8 {
+            types::CompactString.encode(buf, &self.metadata)?;
+        } else {
+            if !self.metadata.as_ref().map(|x| x.is_empty()).unwrap_or_default() {
+                return Err(EncodeError)
+            }
+        }
+        if version == 8 {
+            types::Int16.encode(buf, &self.error_code)?;
+        } else {
+            if self.error_code != 0 {
+                return Err(EncodeError)
+            }
+        }
+        if version >= 6 {
+            let num_tagged_fields = self.unknown_tagged_fields.len();
+            if num_tagged_fields > std::u32::MAX as usize {
+                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                return Err(EncodeError);
+            }
+            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+
+            write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
+        }
+        Ok(())
+    }
+    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+        let mut total_size = 0;
+        if version == 8 {
+            total_size += types::Int32.compute_size(&self.partition_index)?;
+        } else {
+            if self.partition_index != 0 {
+                return Err(EncodeError)
+            }
+        }
+        if version == 8 {
+            total_size += types::Int64.compute_size(&self.committed_offset)?;
+        } else {
+            if self.committed_offset != 0 {
+                return Err(EncodeError)
+            }
+        }
+        if version == 8 {
+            total_size += types::Int32.compute_size(&self.committed_leader_epoch)?;
+        }
+        if version == 8 {
+            total_size += types::CompactString.compute_size(&self.metadata)?;
+        } else {
+            if !self.metadata.as_ref().map(|x| x.is_empty()).unwrap_or_default() {
+                return Err(EncodeError)
+            }
+        }
+        if version == 8 {
+            total_size += types::Int16.compute_size(&self.error_code)?;
+        } else {
+            if self.error_code != 0 {
+                return Err(EncodeError)
+            }
+        }
+        if version >= 6 {
+            let num_tagged_fields = self.unknown_tagged_fields.len();
+            if num_tagged_fields > std::u32::MAX as usize {
+                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                return Err(EncodeError);
+            }
+            total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
+
+            total_size += compute_unknown_tagged_fields_size(&self.unknown_tagged_fields)?;
+        }
+        Ok(total_size)
+    }
+}
+
+impl Decodable for OffsetFetchResponsePartitions {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+        let partition_index = if version == 8 {
+            types::Int32.decode(buf)?
+        } else {
+            0
+        };
+        let committed_offset = if version == 8 {
+            types::Int64.decode(buf)?
+        } else {
+            0
+        };
+        let committed_leader_epoch = if version == 8 {
+            types::Int32.decode(buf)?
+        } else {
+            -1
+        };
+        let metadata = if version == 8 {
+            types::CompactString.decode(buf)?
+        } else {
+            Some(Default::default())
+        };
+        let error_code = if version == 8 {
+            types::Int16.decode(buf)?
+        } else {
+            0
+        };
+        let mut unknown_tagged_fields = BTreeMap::new();
+        if version >= 6 {
+            let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
+            for _ in 0..num_tagged_fields {
+                let tag: u32 = types::UnsignedVarInt.decode(buf)?;
+                let size: u32 = types::UnsignedVarInt.decode(buf)?;
+                let mut unknown_value = vec![0; size as usize];
+                buf.try_copy_to_slice(&mut unknown_value)?;
+                unknown_tagged_fields.insert(tag as i32, unknown_value);
+            }
+        }
+        Ok(Self {
+            partition_index,
+            committed_offset,
+            committed_leader_epoch,
+            metadata,
+            error_code,
+            unknown_tagged_fields,
+        })
+    }
+}
+
+impl Default for OffsetFetchResponsePartitions {
+    fn default() -> Self {
+        Self {
+            partition_index: 0,
+            committed_offset: 0,
+            committed_leader_epoch: -1,
+            metadata: Some(Default::default()),
+            error_code: 0,
+            unknown_tagged_fields: BTreeMap::new(),
+        }
+    }
+}
+
+impl Message for OffsetFetchResponsePartitions {
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 8 };
+}
+
+/// Valid versions: 0-8
+#[derive(Debug, Clone, PartialEq)]
+pub struct OffsetFetchResponseTopics {
+    /// The topic name.
+    /// 
+    /// Supported API versions: 8
+    pub name: super::TopicName,
+
+    /// The responses per partition
+    /// 
+    /// Supported API versions: 8
+    pub partitions: Vec<OffsetFetchResponsePartitions>,
+
+    /// Other tagged fields
+    pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Encodable for OffsetFetchResponseTopics {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+        if version == 8 {
+            types::CompactString.encode(buf, &self.name)?;
+        } else {
+            if !self.name.is_empty() {
+                return Err(EncodeError)
+            }
+        }
+        if version == 8 {
+            types::CompactArray(types::Struct { version }).encode(buf, &self.partitions)?;
+        } else {
+            if !self.partitions.is_empty() {
+                return Err(EncodeError)
+            }
+        }
+        if version >= 6 {
+            let num_tagged_fields = self.unknown_tagged_fields.len();
+            if num_tagged_fields > std::u32::MAX as usize {
+                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                return Err(EncodeError);
+            }
+            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+
+            write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
+        }
+        Ok(())
+    }
+    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+        let mut total_size = 0;
+        if version == 8 {
+            total_size += types::CompactString.compute_size(&self.name)?;
+        } else {
+            if !self.name.is_empty() {
+                return Err(EncodeError)
+            }
+        }
+        if version == 8 {
+            total_size += types::CompactArray(types::Struct { version }).compute_size(&self.partitions)?;
+        } else {
+            if !self.partitions.is_empty() {
+                return Err(EncodeError)
+            }
+        }
+        if version >= 6 {
+            let num_tagged_fields = self.unknown_tagged_fields.len();
+            if num_tagged_fields > std::u32::MAX as usize {
+                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                return Err(EncodeError);
+            }
+            total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
+
+            total_size += compute_unknown_tagged_fields_size(&self.unknown_tagged_fields)?;
+        }
+        Ok(total_size)
+    }
+}
+
+impl Decodable for OffsetFetchResponseTopics {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+        let name = if version == 8 {
+            types::CompactString.decode(buf)?
+        } else {
+            Default::default()
+        };
+        let partitions = if version == 8 {
+            types::CompactArray(types::Struct { version }).decode(buf)?
+        } else {
+            Default::default()
+        };
+        let mut unknown_tagged_fields = BTreeMap::new();
+        if version >= 6 {
+            let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
+            for _ in 0..num_tagged_fields {
+                let tag: u32 = types::UnsignedVarInt.decode(buf)?;
+                let size: u32 = types::UnsignedVarInt.decode(buf)?;
+                let mut unknown_value = vec![0; size as usize];
+                buf.try_copy_to_slice(&mut unknown_value)?;
+                unknown_tagged_fields.insert(tag as i32, unknown_value);
+            }
+        }
+        Ok(Self {
+            name,
+            partitions,
+            unknown_tagged_fields,
+        })
+    }
+}
+
+impl Default for OffsetFetchResponseTopics {
+    fn default() -> Self {
+        Self {
+            name: Default::default(),
+            partitions: Default::default(),
+            unknown_tagged_fields: BTreeMap::new(),
+        }
+    }
+}
+
+impl Message for OffsetFetchResponseTopics {
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 8 };
+}
+
+/// Valid versions: 0-8
+#[derive(Debug, Clone, PartialEq)]
+pub struct OffsetFetchResponseGroup {
+    /// The group ID.
+    /// 
+    /// Supported API versions: 8
+    pub group_id: super::GroupId,
+
+    /// The responses per topic.
+    /// 
+    /// Supported API versions: 8
+    pub topics: Vec<OffsetFetchResponseTopics>,
+
+    /// The group-level error code, or 0 if there was no error.
+    /// 
+    /// Supported API versions: 8
+    pub error_code: i16,
+
+    /// Other tagged fields
+    pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Encodable for OffsetFetchResponseGroup {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+        if version == 8 {
+            types::CompactString.encode(buf, &self.group_id)?;
+        } else {
+            if !self.group_id.is_empty() {
+                return Err(EncodeError)
+            }
+        }
+        if version == 8 {
+            types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
+        } else {
+            if !self.topics.is_empty() {
+                return Err(EncodeError)
+            }
+        }
+        if version == 8 {
+            types::Int16.encode(buf, &self.error_code)?;
+        } else {
+            if self.error_code != 0 {
+                return Err(EncodeError)
+            }
+        }
+        if version >= 6 {
+            let num_tagged_fields = self.unknown_tagged_fields.len();
+            if num_tagged_fields > std::u32::MAX as usize {
+                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                return Err(EncodeError);
+            }
+            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+
+            write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
+        }
+        Ok(())
+    }
+    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+        let mut total_size = 0;
+        if version == 8 {
+            total_size += types::CompactString.compute_size(&self.group_id)?;
+        } else {
+            if !self.group_id.is_empty() {
+                return Err(EncodeError)
+            }
+        }
+        if version == 8 {
+            total_size += types::CompactArray(types::Struct { version }).compute_size(&self.topics)?;
+        } else {
+            if !self.topics.is_empty() {
+                return Err(EncodeError)
+            }
+        }
+        if version == 8 {
+            total_size += types::Int16.compute_size(&self.error_code)?;
+        } else {
+            if self.error_code != 0 {
+                return Err(EncodeError)
+            }
+        }
+        if version >= 6 {
+            let num_tagged_fields = self.unknown_tagged_fields.len();
+            if num_tagged_fields > std::u32::MAX as usize {
+                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                return Err(EncodeError);
+            }
+            total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
+
+            total_size += compute_unknown_tagged_fields_size(&self.unknown_tagged_fields)?;
+        }
+        Ok(total_size)
+    }
+}
+
+impl Decodable for OffsetFetchResponseGroup {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+        let group_id = if version == 8 {
+            types::CompactString.decode(buf)?
+        } else {
+            Default::default()
+        };
+        let topics = if version == 8 {
+            types::CompactArray(types::Struct { version }).decode(buf)?
+        } else {
+            Default::default()
+        };
+        let error_code = if version == 8 {
+            types::Int16.decode(buf)?
+        } else {
+            0
+        };
+        let mut unknown_tagged_fields = BTreeMap::new();
+        if version >= 6 {
+            let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
+            for _ in 0..num_tagged_fields {
+                let tag: u32 = types::UnsignedVarInt.decode(buf)?;
+                let size: u32 = types::UnsignedVarInt.decode(buf)?;
+                let mut unknown_value = vec![0; size as usize];
+                buf.try_copy_to_slice(&mut unknown_value)?;
+                unknown_tagged_fields.insert(tag as i32, unknown_value);
+            }
+        }
+        Ok(Self {
+            group_id,
+            topics,
+            error_code,
+            unknown_tagged_fields,
+        })
+    }
+}
+
+impl Default for OffsetFetchResponseGroup {
+    fn default() -> Self {
+        Self {
+            group_id: Default::default(),
+            topics: Default::default(),
+            error_code: 0,
+            unknown_tagged_fields: BTreeMap::new(),
+        }
+    }
+}
+
+impl Message for OffsetFetchResponseGroup {
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 8 };
+}
+
+/// Valid versions: 0-8
 #[derive(Debug, Clone, PartialEq)]
 pub struct OffsetFetchResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 
-    /// Supported API versions: 3-7
+    /// Supported API versions: 3-8
     pub throttle_time_ms: i32,
 
     /// The responses per topic.
@@ -282,6 +834,11 @@ pub struct OffsetFetchResponse {
     /// Supported API versions: 2-7
     pub error_code: i16,
 
+    /// The responses per group id.
+    /// 
+    /// Supported API versions: 8
+    pub groups: Vec<OffsetFetchResponseGroup>,
+
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
 }
@@ -291,13 +848,26 @@ impl Encodable for OffsetFetchResponse {
         if version >= 3 {
             types::Int32.encode(buf, &self.throttle_time_ms)?;
         }
-        if version >= 6 {
-            types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
+        if version <= 7 {
+            if version >= 6 {
+                types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
+            } else {
+                types::Array(types::Struct { version }).encode(buf, &self.topics)?;
+            }
         } else {
-            types::Array(types::Struct { version }).encode(buf, &self.topics)?;
+            if !self.topics.is_empty() {
+                return Err(EncodeError)
+            }
         }
-        if version >= 2 {
+        if version >= 2 && version <= 7 {
             types::Int16.encode(buf, &self.error_code)?;
+        }
+        if version == 8 {
+            types::CompactArray(types::Struct { version }).encode(buf, &self.groups)?;
+        } else {
+            if !self.groups.is_empty() {
+                return Err(EncodeError)
+            }
         }
         if version >= 6 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -316,13 +886,26 @@ impl Encodable for OffsetFetchResponse {
         if version >= 3 {
             total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
         }
-        if version >= 6 {
-            total_size += types::CompactArray(types::Struct { version }).compute_size(&self.topics)?;
+        if version <= 7 {
+            if version >= 6 {
+                total_size += types::CompactArray(types::Struct { version }).compute_size(&self.topics)?;
+            } else {
+                total_size += types::Array(types::Struct { version }).compute_size(&self.topics)?;
+            }
         } else {
-            total_size += types::Array(types::Struct { version }).compute_size(&self.topics)?;
+            if !self.topics.is_empty() {
+                return Err(EncodeError)
+            }
         }
-        if version >= 2 {
+        if version >= 2 && version <= 7 {
             total_size += types::Int16.compute_size(&self.error_code)?;
+        }
+        if version == 8 {
+            total_size += types::CompactArray(types::Struct { version }).compute_size(&self.groups)?;
+        } else {
+            if !self.groups.is_empty() {
+                return Err(EncodeError)
+            }
         }
         if version >= 6 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -345,15 +928,24 @@ impl Decodable for OffsetFetchResponse {
         } else {
             0
         };
-        let topics = if version >= 6 {
-            types::CompactArray(types::Struct { version }).decode(buf)?
+        let topics = if version <= 7 {
+            if version >= 6 {
+                types::CompactArray(types::Struct { version }).decode(buf)?
+            } else {
+                types::Array(types::Struct { version }).decode(buf)?
+            }
         } else {
-            types::Array(types::Struct { version }).decode(buf)?
+            Default::default()
         };
-        let error_code = if version >= 2 {
+        let error_code = if version >= 2 && version <= 7 {
             types::Int16.decode(buf)?
         } else {
             0
+        };
+        let groups = if version == 8 {
+            types::CompactArray(types::Struct { version }).decode(buf)?
+        } else {
+            Default::default()
         };
         let mut unknown_tagged_fields = BTreeMap::new();
         if version >= 6 {
@@ -370,6 +962,7 @@ impl Decodable for OffsetFetchResponse {
             throttle_time_ms,
             topics,
             error_code,
+            groups,
             unknown_tagged_fields,
         })
     }
@@ -381,13 +974,14 @@ impl Default for OffsetFetchResponse {
             throttle_time_ms: 0,
             topics: Default::default(),
             error_code: 0,
+            groups: Default::default(),
             unknown_tagged_fields: BTreeMap::new(),
         }
     }
 }
 
 impl Message for OffsetFetchResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 7 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 8 };
 }
 
 impl HeaderVersion for OffsetFetchResponse {

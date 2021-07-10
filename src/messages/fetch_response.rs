@@ -14,17 +14,17 @@ use protocol_base::{
 };
 
 
-/// Valid versions: 0-12
+/// Valid versions: 0-13
 #[derive(Debug, Clone, PartialEq)]
 pub struct EpochEndOffset {
     /// 
     /// 
-    /// Supported API versions: 12
+    /// Supported API versions: 12-13
     pub epoch: i32,
 
     /// 
     /// 
-    /// Supported API versions: 12
+    /// Supported API versions: 12-13
     pub end_offset: i64,
 
     /// Other tagged fields
@@ -33,21 +33,21 @@ pub struct EpochEndOffset {
 
 impl Encodable for EpochEndOffset {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 12 {
+        if version >= 12 {
             types::Int32.encode(buf, &self.epoch)?;
         } else {
             if self.epoch != -1 {
                 return Err(EncodeError)
             }
         }
-        if version == 12 {
+        if version >= 12 {
             types::Int64.encode(buf, &self.end_offset)?;
         } else {
             if self.end_offset != -1 {
                 return Err(EncodeError)
             }
         }
-        if version == 12 {
+        if version >= 12 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -61,21 +61,21 @@ impl Encodable for EpochEndOffset {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 12 {
+        if version >= 12 {
             total_size += types::Int32.compute_size(&self.epoch)?;
         } else {
             if self.epoch != -1 {
                 return Err(EncodeError)
             }
         }
-        if version == 12 {
+        if version >= 12 {
             total_size += types::Int64.compute_size(&self.end_offset)?;
         } else {
             if self.end_offset != -1 {
                 return Err(EncodeError)
             }
         }
-        if version == 12 {
+        if version >= 12 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -91,18 +91,18 @@ impl Encodable for EpochEndOffset {
 
 impl Decodable for EpochEndOffset {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let epoch = if version == 12 {
+        let epoch = if version >= 12 {
             types::Int32.decode(buf)?
         } else {
             -1
         };
-        let end_offset = if version == 12 {
+        let end_offset = if version >= 12 {
             types::Int64.decode(buf)?
         } else {
             -1
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 12 {
+        if version >= 12 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -131,20 +131,20 @@ impl Default for EpochEndOffset {
 }
 
 impl Message for EpochEndOffset {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 12 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 13 };
 }
 
-/// Valid versions: 0-12
+/// Valid versions: 0-13
 #[derive(Debug, Clone, PartialEq)]
 pub struct LeaderIdAndEpoch {
     /// The ID of the current leader or -1 if the leader is unknown.
     /// 
-    /// Supported API versions: 12
+    /// Supported API versions: 12-13
     pub leader_id: super::BrokerId,
 
     /// The latest known leader epoch
     /// 
-    /// Supported API versions: 12
+    /// Supported API versions: 12-13
     pub leader_epoch: i32,
 
     /// Other tagged fields
@@ -153,21 +153,21 @@ pub struct LeaderIdAndEpoch {
 
 impl Encodable for LeaderIdAndEpoch {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 12 {
+        if version >= 12 {
             types::Int32.encode(buf, &self.leader_id)?;
         } else {
             if self.leader_id != -1 {
                 return Err(EncodeError)
             }
         }
-        if version == 12 {
+        if version >= 12 {
             types::Int32.encode(buf, &self.leader_epoch)?;
         } else {
             if self.leader_epoch != -1 {
                 return Err(EncodeError)
             }
         }
-        if version == 12 {
+        if version >= 12 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -181,21 +181,21 @@ impl Encodable for LeaderIdAndEpoch {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 12 {
+        if version >= 12 {
             total_size += types::Int32.compute_size(&self.leader_id)?;
         } else {
             if self.leader_id != -1 {
                 return Err(EncodeError)
             }
         }
-        if version == 12 {
+        if version >= 12 {
             total_size += types::Int32.compute_size(&self.leader_epoch)?;
         } else {
             if self.leader_epoch != -1 {
                 return Err(EncodeError)
             }
         }
-        if version == 12 {
+        if version >= 12 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -211,18 +211,18 @@ impl Encodable for LeaderIdAndEpoch {
 
 impl Decodable for LeaderIdAndEpoch {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let leader_id = if version == 12 {
+        let leader_id = if version >= 12 {
             types::Int32.decode(buf)?
         } else {
             (-1).into()
         };
-        let leader_epoch = if version == 12 {
+        let leader_epoch = if version >= 12 {
             types::Int32.decode(buf)?
         } else {
             -1
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 12 {
+        if version >= 12 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -251,20 +251,20 @@ impl Default for LeaderIdAndEpoch {
 }
 
 impl Message for LeaderIdAndEpoch {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 12 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 13 };
 }
 
-/// Valid versions: 0-12
+/// Valid versions: 0-13
 #[derive(Debug, Clone, PartialEq)]
 pub struct SnapshotId {
     /// 
     /// 
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub end_offset: i64,
 
     /// 
     /// 
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub epoch: i32,
 
     /// Other tagged fields
@@ -275,7 +275,7 @@ impl Encodable for SnapshotId {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int64.encode(buf, &self.end_offset)?;
         types::Int32.encode(buf, &self.epoch)?;
-        if version == 12 {
+        if version >= 12 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -291,7 +291,7 @@ impl Encodable for SnapshotId {
         let mut total_size = 0;
         total_size += types::Int64.compute_size(&self.end_offset)?;
         total_size += types::Int32.compute_size(&self.epoch)?;
-        if version == 12 {
+        if version >= 12 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -310,7 +310,7 @@ impl Decodable for SnapshotId {
         let end_offset = types::Int64.decode(buf)?;
         let epoch = types::Int32.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 12 {
+        if version >= 12 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -339,20 +339,20 @@ impl Default for SnapshotId {
 }
 
 impl Message for SnapshotId {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 12 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 13 };
 }
 
-/// Valid versions: 0-12
+/// Valid versions: 0-13
 #[derive(Debug, Clone, PartialEq)]
 pub struct AbortedTransaction {
     /// The producer id associated with the aborted transaction.
     /// 
-    /// Supported API versions: 4-12
+    /// Supported API versions: 4-13
     pub producer_id: super::ProducerId,
 
     /// The first offset in the aborted transaction.
     /// 
-    /// Supported API versions: 4-12
+    /// Supported API versions: 4-13
     pub first_offset: i64,
 
     /// Other tagged fields
@@ -375,7 +375,7 @@ impl Encodable for AbortedTransaction {
                 return Err(EncodeError)
             }
         }
-        if version == 12 {
+        if version >= 12 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -403,7 +403,7 @@ impl Encodable for AbortedTransaction {
                 return Err(EncodeError)
             }
         }
-        if version == 12 {
+        if version >= 12 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -430,7 +430,7 @@ impl Decodable for AbortedTransaction {
             0
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 12 {
+        if version >= 12 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -459,65 +459,65 @@ impl Default for AbortedTransaction {
 }
 
 impl Message for AbortedTransaction {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 12 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 13 };
 }
 
-/// Valid versions: 0-12
+/// Valid versions: 0-13
 #[derive(Debug, Clone, PartialEq)]
 pub struct PartitionData {
     /// The partition index.
     /// 
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub partition_index: i32,
 
     /// The error code, or 0 if there was no fetch error.
     /// 
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub error_code: i16,
 
     /// The current high water mark.
     /// 
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub high_watermark: i64,
 
     /// The last stable offset (or LSO) of the partition. This is the last offset such that the state of all transactional records prior to this offset have been decided (ABORTED or COMMITTED)
     /// 
-    /// Supported API versions: 4-12
+    /// Supported API versions: 4-13
     pub last_stable_offset: i64,
 
     /// The current log start offset.
     /// 
-    /// Supported API versions: 5-12
+    /// Supported API versions: 5-13
     pub log_start_offset: i64,
 
     /// In case divergence is detected based on the `LastFetchedEpoch` and `FetchOffset` in the request, this field indicates the largest epoch and its end offset such that subsequent records are known to diverge
     /// 
-    /// Supported API versions: 12
+    /// Supported API versions: 12-13
     pub diverging_epoch: EpochEndOffset,
 
     /// 
     /// 
-    /// Supported API versions: 12
+    /// Supported API versions: 12-13
     pub current_leader: LeaderIdAndEpoch,
 
     /// In the case of fetching an offset less than the LogStartOffset, this is the end offset and epoch that should be used in the FetchSnapshot request.
     /// 
-    /// Supported API versions: 12
+    /// Supported API versions: 12-13
     pub snapshot_id: SnapshotId,
 
     /// The aborted transactions.
     /// 
-    /// Supported API versions: 4-12
+    /// Supported API versions: 4-13
     pub aborted_transactions: Option<Vec<AbortedTransaction>>,
 
     /// The preferred read replica for the consumer to use on its next fetch request
     /// 
-    /// Supported API versions: 11-12
+    /// Supported API versions: 11-13
     pub preferred_read_replica: super::BrokerId,
 
     /// The record data.
     /// 
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub records: Option<Bytes>,
 
     /// Other tagged fields
@@ -536,7 +536,7 @@ impl Encodable for PartitionData {
             types::Int64.encode(buf, &self.log_start_offset)?;
         }
         if version >= 4 {
-            if version == 12 {
+            if version >= 12 {
                 types::CompactArray(types::Struct { version }).encode(buf, &self.aborted_transactions)?;
             } else {
                 types::Array(types::Struct { version }).encode(buf, &self.aborted_transactions)?;
@@ -549,12 +549,12 @@ impl Encodable for PartitionData {
                 return Err(EncodeError)
             }
         }
-        if version == 12 {
+        if version >= 12 {
             types::CompactBytes.encode(buf, &self.records)?;
         } else {
             types::Bytes.encode(buf, &self.records)?;
         }
-        if version == 12 {
+        if version >= 12 {
             let mut num_tagged_fields = self.unknown_tagged_fields.len();
             if &self.diverging_epoch != &Default::default() {
                 num_tagged_fields += 1;
@@ -617,7 +617,7 @@ impl Encodable for PartitionData {
             total_size += types::Int64.compute_size(&self.log_start_offset)?;
         }
         if version >= 4 {
-            if version == 12 {
+            if version >= 12 {
                 total_size += types::CompactArray(types::Struct { version }).compute_size(&self.aborted_transactions)?;
             } else {
                 total_size += types::Array(types::Struct { version }).compute_size(&self.aborted_transactions)?;
@@ -630,12 +630,12 @@ impl Encodable for PartitionData {
                 return Err(EncodeError)
             }
         }
-        if version == 12 {
+        if version >= 12 {
             total_size += types::CompactBytes.compute_size(&self.records)?;
         } else {
             total_size += types::Bytes.compute_size(&self.records)?;
         }
-        if version == 12 {
+        if version >= 12 {
             let mut num_tagged_fields = self.unknown_tagged_fields.len();
             if &self.diverging_epoch != &Default::default() {
                 num_tagged_fields += 1;
@@ -707,7 +707,7 @@ impl Decodable for PartitionData {
         let mut current_leader = Default::default();
         let mut snapshot_id = Default::default();
         let aborted_transactions = if version >= 4 {
-            if version == 12 {
+            if version >= 12 {
                 types::CompactArray(types::Struct { version }).decode(buf)?
             } else {
                 types::Array(types::Struct { version }).decode(buf)?
@@ -720,13 +720,13 @@ impl Decodable for PartitionData {
         } else {
             (-1).into()
         };
-        let records = if version == 12 {
+        let records = if version >= 12 {
             types::CompactBytes.decode(buf)?
         } else {
             types::Bytes.decode(buf)?
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 12 {
+        if version >= 12 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -786,10 +786,10 @@ impl Default for PartitionData {
 }
 
 impl Message for PartitionData {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 12 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 13 };
 }
 
-/// Valid versions: 0-12
+/// Valid versions: 0-13
 #[derive(Debug, Clone, PartialEq)]
 pub struct FetchableTopicResponse {
     /// The topic name.
@@ -797,9 +797,14 @@ pub struct FetchableTopicResponse {
     /// Supported API versions: 0-12
     pub topic: super::TopicName,
 
+    /// The unique topic ID
+    /// 
+    /// Supported API versions: 13
+    pub topic_id: Uuid,
+
     /// The topic partitions.
     /// 
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub partitions: Vec<PartitionData>,
 
     /// Other tagged fields
@@ -808,17 +813,22 @@ pub struct FetchableTopicResponse {
 
 impl Encodable for FetchableTopicResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 12 {
-            types::CompactString.encode(buf, &self.topic)?;
-        } else {
-            types::String.encode(buf, &self.topic)?;
+        if version <= 12 {
+            if version == 12 {
+                types::CompactString.encode(buf, &self.topic)?;
+            } else {
+                types::String.encode(buf, &self.topic)?;
+            }
         }
-        if version == 12 {
+        if version == 13 {
+            types::Uuid.encode(buf, &self.topic_id)?;
+        }
+        if version >= 12 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.partitions)?;
         } else {
             types::Array(types::Struct { version }).encode(buf, &self.partitions)?;
         }
-        if version == 12 {
+        if version >= 12 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -832,17 +842,22 @@ impl Encodable for FetchableTopicResponse {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 12 {
-            total_size += types::CompactString.compute_size(&self.topic)?;
-        } else {
-            total_size += types::String.compute_size(&self.topic)?;
+        if version <= 12 {
+            if version == 12 {
+                total_size += types::CompactString.compute_size(&self.topic)?;
+            } else {
+                total_size += types::String.compute_size(&self.topic)?;
+            }
         }
-        if version == 12 {
+        if version == 13 {
+            total_size += types::Uuid.compute_size(&self.topic_id)?;
+        }
+        if version >= 12 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.partitions)?;
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.partitions)?;
         }
-        if version == 12 {
+        if version >= 12 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -858,18 +873,27 @@ impl Encodable for FetchableTopicResponse {
 
 impl Decodable for FetchableTopicResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let topic = if version == 12 {
-            types::CompactString.decode(buf)?
+        let topic = if version <= 12 {
+            if version == 12 {
+                types::CompactString.decode(buf)?
+            } else {
+                types::String.decode(buf)?
+            }
         } else {
-            types::String.decode(buf)?
+            Default::default()
         };
-        let partitions = if version == 12 {
+        let topic_id = if version == 13 {
+            types::Uuid.decode(buf)?
+        } else {
+            Uuid::nil()
+        };
+        let partitions = if version >= 12 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
             types::Array(types::Struct { version }).decode(buf)?
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 12 {
+        if version >= 12 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -881,6 +905,7 @@ impl Decodable for FetchableTopicResponse {
         }
         Ok(Self {
             topic,
+            topic_id,
             partitions,
             unknown_tagged_fields,
         })
@@ -891,6 +916,7 @@ impl Default for FetchableTopicResponse {
     fn default() -> Self {
         Self {
             topic: Default::default(),
+            topic_id: Uuid::nil(),
             partitions: Default::default(),
             unknown_tagged_fields: BTreeMap::new(),
         }
@@ -898,30 +924,30 @@ impl Default for FetchableTopicResponse {
 }
 
 impl Message for FetchableTopicResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 12 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 13 };
 }
 
-/// Valid versions: 0-12
+/// Valid versions: 0-13
 #[derive(Debug, Clone, PartialEq)]
 pub struct FetchResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 
-    /// Supported API versions: 1-12
+    /// Supported API versions: 1-13
     pub throttle_time_ms: i32,
 
     /// The top level response error code.
     /// 
-    /// Supported API versions: 7-12
+    /// Supported API versions: 7-13
     pub error_code: i16,
 
     /// The fetch session ID, or 0 if this is not part of a fetch session.
     /// 
-    /// Supported API versions: 7-12
+    /// Supported API versions: 7-13
     pub session_id: i32,
 
     /// The response topics.
     /// 
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub responses: Vec<FetchableTopicResponse>,
 
     /// Other tagged fields
@@ -943,12 +969,12 @@ impl Encodable for FetchResponse {
                 return Err(EncodeError)
             }
         }
-        if version == 12 {
+        if version >= 12 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.responses)?;
         } else {
             types::Array(types::Struct { version }).encode(buf, &self.responses)?;
         }
-        if version == 12 {
+        if version >= 12 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -975,12 +1001,12 @@ impl Encodable for FetchResponse {
                 return Err(EncodeError)
             }
         }
-        if version == 12 {
+        if version >= 12 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.responses)?;
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.responses)?;
         }
-        if version == 12 {
+        if version >= 12 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -1011,13 +1037,13 @@ impl Decodable for FetchResponse {
         } else {
             0
         };
-        let responses = if version == 12 {
+        let responses = if version >= 12 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
             types::Array(types::Struct { version }).decode(buf)?
         };
         let mut unknown_tagged_fields = BTreeMap::new();
-        if version == 12 {
+        if version >= 12 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
@@ -1050,12 +1076,12 @@ impl Default for FetchResponse {
 }
 
 impl Message for FetchResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 12 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 13 };
 }
 
 impl HeaderVersion for FetchResponse {
     fn header_version(version: i16) -> i16 {
-        if version == 12 {
+        if version >= 12 {
             1
         } else {
             0
