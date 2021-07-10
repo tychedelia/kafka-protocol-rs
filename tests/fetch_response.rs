@@ -1,9 +1,9 @@
 use bytes::{Bytes, BytesMut};
 use kafka_protocol::{
+    Decodable,
     messages::{fetch_response, FetchResponse},
     records::RecordBatchDecoder,
 };
-use protocol_base::Decodable;
 
 const HEADERS: [u8; 45] = [
     // Throttle time
