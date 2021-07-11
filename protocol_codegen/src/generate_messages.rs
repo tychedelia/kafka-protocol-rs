@@ -108,10 +108,11 @@ pub fn run() -> Result<(), Error> {
     )?;
     writeln!(module_file, "        match v {{")?;
     for (_, request_type) in request_types.iter() {
+        let key = request_type.replace("Request", "Key");
         writeln!(
             module_file,
             "            x if x == ApiKey::{} as i16 => Ok(ApiKey::{}),",
-            request_type, request_type
+            key, key
         )?;
     }
     writeln!(module_file, "            _ => Err(()),")?;
