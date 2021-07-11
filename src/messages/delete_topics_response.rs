@@ -19,7 +19,7 @@ use protocol_base::{
 pub struct DeletableTopicResult {
     /// the unique topic ID
     /// 
-    /// Supported API versions: 6-6
+    /// Supported API versions: 6
     pub topic_id: Uuid,
 
     /// The deletion error, or 0 if the deletion succeeded.
@@ -44,7 +44,7 @@ impl MapEncodable for DeletableTopicResult {
         } else {
             types::String.encode(buf, key)?;
         }
-        if version == 6 {
+        if version >= 6 {
             types::Uuid.encode(buf, &self.topic_id)?;
         }
         types::Int16.encode(buf, &self.error_code)?;
@@ -70,7 +70,7 @@ impl MapEncodable for DeletableTopicResult {
         } else {
             total_size += types::String.compute_size(key)?;
         }
-        if version == 6 {
+        if version >= 6 {
             total_size += types::Uuid.compute_size(&self.topic_id)?;
         }
         total_size += types::Int16.compute_size(&self.error_code)?;
@@ -99,7 +99,7 @@ impl MapDecodable for DeletableTopicResult {
         } else {
             types::String.decode(buf)?
         };
-        let topic_id = if version == 6 {
+        let topic_id = if version >= 6 {
             types::Uuid.decode(buf)?
         } else {
             Uuid::nil()

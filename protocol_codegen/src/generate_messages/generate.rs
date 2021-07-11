@@ -246,6 +246,7 @@ fn write_version_cond<W: Write, FT: FnOnce(&mut CodeWriter<W>) -> Result<(), Err
         if !always_true {
             match condition {
                 VersionSpec::None => return if_false(w),
+                VersionSpec::Exact(version) if version == max => write!(w, "if version < {} ", version)?,
                 VersionSpec::Exact(version) => write!(w, "if version != {} ", version)?,
                 VersionSpec::Since(version) => write!(w, "if version < {} ", version)?,
                 VersionSpec::Range(a, b) if a == min => write!(w, "if version > {} ", b)?,
@@ -260,6 +261,7 @@ fn write_version_cond<W: Write, FT: FnOnce(&mut CodeWriter<W>) -> Result<(), Err
         } else {
             match condition {
                 VersionSpec::None => return if_false(w),
+                VersionSpec::Exact(version) if version == max => write!(w, "if version >= {} ", version)?,
                 VersionSpec::Exact(version) => write!(w, "if version == {} ", version)?,
                 VersionSpec::Since(version) => write!(w, "if version >= {} ", version)?,
                 VersionSpec::Range(a, b) if a == min => write!(w, "if version <= {} ", b)?,
@@ -939,15 +941,16 @@ mod tests {
     use super::*;
 
     #[test]
-    fn write_version_cond_unknown_tagged() {
+    fn write_version_cond_unknown_tagged() -> Result<(), Box<dyn std::error::Error>> {
         let mut cw = CodeWriter::new(Vec::new());
 
         // ex. request header
         let v1 = VersionSpec::Range(0, 2);
         let v2 = VersionSpec::Since(2);
 
-        write_version_cond(&mut cw, v1, v2, |w| { write!(w, "true"); Ok(()) }, |_| { Ok(())}, false, true);
+        write_version_cond(&mut cw, v1, v2, |w| { write!(w, "true")?; Ok(()) }, |_| { Ok(())}, false, true)?;
 
         assert_eq!(String::from_utf8(cw.into_inner()).unwrap(), "if version >= 2 {\n    true\n}".to_string());
+        Ok(())
     }
 }

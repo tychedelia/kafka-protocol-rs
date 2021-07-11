@@ -137,7 +137,7 @@ impl Message for LeaderAndIsrPartitionError {
 pub struct LeaderAndIsrTopicError {
     /// Each partition.
     /// 
-    /// Supported API versions: 5-5
+    /// Supported API versions: 5
     pub partition_errors: Vec<LeaderAndIsrPartitionError>,
 
     /// Other tagged fields
@@ -147,14 +147,14 @@ pub struct LeaderAndIsrTopicError {
 impl MapEncodable for LeaderAndIsrTopicError {
     type Key = Uuid;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 5 {
+        if version >= 5 {
             types::Uuid.encode(buf, key)?;
         } else {
             if key != &Uuid::nil() {
                 return Err(EncodeError)
             }
         }
-        if version == 5 {
+        if version >= 5 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.partition_errors)?;
         } else {
             if !self.partition_errors.is_empty() {
@@ -175,14 +175,14 @@ impl MapEncodable for LeaderAndIsrTopicError {
     }
     fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 5 {
+        if version >= 5 {
             total_size += types::Uuid.compute_size(key)?;
         } else {
             if key != &Uuid::nil() {
                 return Err(EncodeError)
             }
         }
-        if version == 5 {
+        if version >= 5 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.partition_errors)?;
         } else {
             if !self.partition_errors.is_empty() {
@@ -206,12 +206,12 @@ impl MapEncodable for LeaderAndIsrTopicError {
 impl MapDecodable for LeaderAndIsrTopicError {
     type Key = Uuid;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
-        let key_field = if version == 5 {
+        let key_field = if version >= 5 {
             types::Uuid.decode(buf)?
         } else {
             Uuid::nil()
         };
-        let partition_errors = if version == 5 {
+        let partition_errors = if version >= 5 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
             Default::default()
@@ -262,7 +262,7 @@ pub struct LeaderAndIsrResponse {
 
     /// Each topic
     /// 
-    /// Supported API versions: 5-5
+    /// Supported API versions: 5
     pub topics: indexmap::IndexMap<Uuid, LeaderAndIsrTopicError>,
 
     /// Other tagged fields
@@ -283,7 +283,7 @@ impl Encodable for LeaderAndIsrResponse {
                 return Err(EncodeError)
             }
         }
-        if version == 5 {
+        if version >= 5 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
         } else {
             if !self.topics.is_empty() {
@@ -316,7 +316,7 @@ impl Encodable for LeaderAndIsrResponse {
                 return Err(EncodeError)
             }
         }
-        if version == 5 {
+        if version >= 5 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.topics)?;
         } else {
             if !self.topics.is_empty() {
@@ -349,7 +349,7 @@ impl Decodable for LeaderAndIsrResponse {
         } else {
             Default::default()
         };
-        let topics = if version == 5 {
+        let topics = if version >= 5 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
             Default::default()

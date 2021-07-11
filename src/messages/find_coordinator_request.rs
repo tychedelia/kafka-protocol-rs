@@ -29,7 +29,7 @@ pub struct FindCoordinatorRequest {
 
     /// The coordinator keys.
     /// 
-    /// Supported API versions: 4-4
+    /// Supported API versions: 4
     pub coordinator_keys: Vec<StrBytes>,
 
     /// Other tagged fields
@@ -56,7 +56,7 @@ impl Encodable for FindCoordinatorRequest {
                 return Err(EncodeError)
             }
         }
-        if version == 4 {
+        if version >= 4 {
             types::CompactArray(types::CompactString).encode(buf, &self.coordinator_keys)?;
         } else {
             if !self.coordinator_keys.is_empty() {
@@ -95,7 +95,7 @@ impl Encodable for FindCoordinatorRequest {
                 return Err(EncodeError)
             }
         }
-        if version == 4 {
+        if version >= 4 {
             total_size += types::CompactArray(types::CompactString).compute_size(&self.coordinator_keys)?;
         } else {
             if !self.coordinator_keys.is_empty() {
@@ -132,7 +132,7 @@ impl Decodable for FindCoordinatorRequest {
         } else {
             0
         };
-        let coordinator_keys = if version == 4 {
+        let coordinator_keys = if version >= 4 {
             types::CompactArray(types::CompactString).decode(buf)?
         } else {
             Default::default()

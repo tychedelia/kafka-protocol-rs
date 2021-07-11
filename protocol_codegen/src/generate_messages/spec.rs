@@ -107,7 +107,7 @@ impl VersionSpec {
             (Exact(a), Since(b)) | (Since(b), Exact(a)) if a >= b => Exact(a),
             (Exact(v), Range(a, b)) | (Range(a, b), Exact(v)) if v >= a && v <= b => Exact(v),
             (Since(a), Since(b)) => Since(cmp::max(a, b)),
-            (Since(v), Range(_, b)) | (Range(_, b), Since(v)) if b == v => Range(b, b),
+            (Since(v), Range(_, b)) | (Range(_, b), Since(v)) if b == v => Exact(v),
             (Since(v), Range(a, b)) | (Range(a, b), Since(v)) if b > v => Range(cmp::max(a, v), b),
             (Range(_, b), Range(a, _)) if a == b => Exact(b),
             (Range(a, _), Range(_, b)) if a == b => Exact(a),

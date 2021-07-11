@@ -282,7 +282,7 @@ pub struct LeaderAndIsrTopicState {
 
     /// The unique topic ID.
     /// 
-    /// Supported API versions: 5-5
+    /// Supported API versions: 5
     pub topic_id: Uuid,
 
     /// The state of each partition
@@ -307,7 +307,7 @@ impl Encodable for LeaderAndIsrTopicState {
                 return Err(EncodeError)
             }
         }
-        if version == 5 {
+        if version >= 5 {
             types::Uuid.encode(buf, &self.topic_id)?;
         }
         if version >= 2 {
@@ -346,7 +346,7 @@ impl Encodable for LeaderAndIsrTopicState {
                 return Err(EncodeError)
             }
         }
-        if version == 5 {
+        if version >= 5 {
             total_size += types::Uuid.compute_size(&self.topic_id)?;
         }
         if version >= 2 {
@@ -385,7 +385,7 @@ impl Decodable for LeaderAndIsrTopicState {
         } else {
             Default::default()
         };
-        let topic_id = if version == 5 {
+        let topic_id = if version >= 5 {
             types::Uuid.decode(buf)?
         } else {
             Uuid::nil()
@@ -564,7 +564,7 @@ pub struct LeaderAndIsrRequest {
 
     /// The type that indicates whether all topics are included in the request
     /// 
-    /// Supported API versions: 5-5
+    /// Supported API versions: 5
     pub _type: i8,
 
     /// The state of each partition, in a v0 or v1 message.
@@ -593,7 +593,7 @@ impl Encodable for LeaderAndIsrRequest {
         if version >= 2 {
             types::Int64.encode(buf, &self.broker_epoch)?;
         }
-        if version == 5 {
+        if version >= 5 {
             types::Int8.encode(buf, &self._type)?;
         } else {
             if self._type != 0 {
@@ -642,7 +642,7 @@ impl Encodable for LeaderAndIsrRequest {
         if version >= 2 {
             total_size += types::Int64.compute_size(&self.broker_epoch)?;
         }
-        if version == 5 {
+        if version >= 5 {
             total_size += types::Int8.compute_size(&self._type)?;
         } else {
             if self._type != 0 {
@@ -695,7 +695,7 @@ impl Decodable for LeaderAndIsrRequest {
         } else {
             -1
         };
-        let _type = if version == 5 {
+        let _type = if version >= 5 {
             types::Int8.decode(buf)?
         } else {
             0

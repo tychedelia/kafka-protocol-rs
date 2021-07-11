@@ -29,7 +29,7 @@ pub struct ListedGroup {
 
     /// The group state name.
     /// 
-    /// Supported API versions: 4-4
+    /// Supported API versions: 4
     pub group_state: StrBytes,
 
     /// Other tagged fields
@@ -48,7 +48,7 @@ impl Encodable for ListedGroup {
         } else {
             types::String.encode(buf, &self.protocol_type)?;
         }
-        if version == 4 {
+        if version >= 4 {
             types::CompactString.encode(buf, &self.group_state)?;
         }
         if version >= 3 {
@@ -75,7 +75,7 @@ impl Encodable for ListedGroup {
         } else {
             total_size += types::String.compute_size(&self.protocol_type)?;
         }
-        if version == 4 {
+        if version >= 4 {
             total_size += types::CompactString.compute_size(&self.group_state)?;
         }
         if version >= 3 {
@@ -104,7 +104,7 @@ impl Decodable for ListedGroup {
         } else {
             types::String.decode(buf)?
         };
-        let group_state = if version == 4 {
+        let group_state = if version >= 4 {
             types::CompactString.decode(buf)?
         } else {
             Default::default()

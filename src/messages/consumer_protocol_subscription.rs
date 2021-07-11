@@ -19,7 +19,7 @@ use protocol_base::{
 pub struct TopicPartition {
     /// 
     /// 
-    /// Supported API versions: 1-1
+    /// Supported API versions: 1
     pub partitions: Vec<i32>,
 
 }
@@ -27,14 +27,14 @@ pub struct TopicPartition {
 impl MapEncodable for TopicPartition {
     type Key = super::TopicName;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 1 {
+        if version >= 1 {
             types::String.encode(buf, key)?;
         } else {
             if !key.is_empty() {
                 return Err(EncodeError)
             }
         }
-        if version == 1 {
+        if version >= 1 {
             types::Array(types::Int32).encode(buf, &self.partitions)?;
         } else {
             if !self.partitions.is_empty() {
@@ -46,14 +46,14 @@ impl MapEncodable for TopicPartition {
     }
     fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 1 {
+        if version >= 1 {
             total_size += types::String.compute_size(key)?;
         } else {
             if !key.is_empty() {
                 return Err(EncodeError)
             }
         }
-        if version == 1 {
+        if version >= 1 {
             total_size += types::Array(types::Int32).compute_size(&self.partitions)?;
         } else {
             if !self.partitions.is_empty() {
@@ -68,12 +68,12 @@ impl MapEncodable for TopicPartition {
 impl MapDecodable for TopicPartition {
     type Key = super::TopicName;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
-        let key_field = if version == 1 {
+        let key_field = if version >= 1 {
             types::String.decode(buf)?
         } else {
             Default::default()
         };
-        let partitions = if version == 1 {
+        let partitions = if version >= 1 {
             types::Array(types::Int32).decode(buf)?
         } else {
             Default::default()
@@ -111,7 +111,7 @@ pub struct ConsumerProtocolSubscription {
 
     /// 
     /// 
-    /// Supported API versions: 1-1
+    /// Supported API versions: 1
     pub owned_partitions: indexmap::IndexMap<super::TopicName, TopicPartition>,
 
 }
@@ -120,7 +120,7 @@ impl Encodable for ConsumerProtocolSubscription {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Array(types::String).encode(buf, &self.topics)?;
         types::Bytes.encode(buf, &self.user_data)?;
-        if version == 1 {
+        if version >= 1 {
             types::Array(types::Struct { version }).encode(buf, &self.owned_partitions)?;
         }
 
@@ -130,7 +130,7 @@ impl Encodable for ConsumerProtocolSubscription {
         let mut total_size = 0;
         total_size += types::Array(types::String).compute_size(&self.topics)?;
         total_size += types::Bytes.compute_size(&self.user_data)?;
-        if version == 1 {
+        if version >= 1 {
             total_size += types::Array(types::Struct { version }).compute_size(&self.owned_partitions)?;
         }
 
@@ -142,7 +142,7 @@ impl Decodable for ConsumerProtocolSubscription {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let topics = types::Array(types::String).decode(buf)?;
         let user_data = types::Bytes.decode(buf)?;
-        let owned_partitions = if version == 1 {
+        let owned_partitions = if version >= 1 {
             types::Array(types::Struct { version }).decode(buf)?
         } else {
             Default::default()

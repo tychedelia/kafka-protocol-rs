@@ -283,17 +283,17 @@ impl Message for StopReplicaTopicV1 {
 pub struct StopReplicaPartitionState {
     /// The partition index.
     /// 
-    /// Supported API versions: 3-3
+    /// Supported API versions: 3
     pub partition_index: i32,
 
     /// The leader epoch.
     /// 
-    /// Supported API versions: 3-3
+    /// Supported API versions: 3
     pub leader_epoch: i32,
 
     /// Whether this partition should be deleted.
     /// 
-    /// Supported API versions: 3-3
+    /// Supported API versions: 3
     pub delete_partition: bool,
 
     /// Other tagged fields
@@ -302,21 +302,21 @@ pub struct StopReplicaPartitionState {
 
 impl Encodable for StopReplicaPartitionState {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 3 {
+        if version >= 3 {
             types::Int32.encode(buf, &self.partition_index)?;
         } else {
             if self.partition_index != 0 {
                 return Err(EncodeError)
             }
         }
-        if version == 3 {
+        if version >= 3 {
             types::Int32.encode(buf, &self.leader_epoch)?;
         } else {
             if self.leader_epoch != -1 {
                 return Err(EncodeError)
             }
         }
-        if version == 3 {
+        if version >= 3 {
             types::Boolean.encode(buf, &self.delete_partition)?;
         } else {
             if self.delete_partition {
@@ -337,21 +337,21 @@ impl Encodable for StopReplicaPartitionState {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 3 {
+        if version >= 3 {
             total_size += types::Int32.compute_size(&self.partition_index)?;
         } else {
             if self.partition_index != 0 {
                 return Err(EncodeError)
             }
         }
-        if version == 3 {
+        if version >= 3 {
             total_size += types::Int32.compute_size(&self.leader_epoch)?;
         } else {
             if self.leader_epoch != -1 {
                 return Err(EncodeError)
             }
         }
-        if version == 3 {
+        if version >= 3 {
             total_size += types::Boolean.compute_size(&self.delete_partition)?;
         } else {
             if self.delete_partition {
@@ -374,17 +374,17 @@ impl Encodable for StopReplicaPartitionState {
 
 impl Decodable for StopReplicaPartitionState {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let partition_index = if version == 3 {
+        let partition_index = if version >= 3 {
             types::Int32.decode(buf)?
         } else {
             0
         };
-        let leader_epoch = if version == 3 {
+        let leader_epoch = if version >= 3 {
             types::Int32.decode(buf)?
         } else {
             -1
         };
-        let delete_partition = if version == 3 {
+        let delete_partition = if version >= 3 {
             types::Boolean.decode(buf)?
         } else {
             false
@@ -429,12 +429,12 @@ impl Message for StopReplicaPartitionState {
 pub struct StopReplicaTopicState {
     /// The topic name.
     /// 
-    /// Supported API versions: 3-3
+    /// Supported API versions: 3
     pub topic_name: super::TopicName,
 
     /// The state of each partition
     /// 
-    /// Supported API versions: 3-3
+    /// Supported API versions: 3
     pub partition_states: Vec<StopReplicaPartitionState>,
 
     /// Other tagged fields
@@ -443,14 +443,14 @@ pub struct StopReplicaTopicState {
 
 impl Encodable for StopReplicaTopicState {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 3 {
+        if version >= 3 {
             types::CompactString.encode(buf, &self.topic_name)?;
         } else {
             if !self.topic_name.is_empty() {
                 return Err(EncodeError)
             }
         }
-        if version == 3 {
+        if version >= 3 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.partition_states)?;
         } else {
             if !self.partition_states.is_empty() {
@@ -471,14 +471,14 @@ impl Encodable for StopReplicaTopicState {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 3 {
+        if version >= 3 {
             total_size += types::CompactString.compute_size(&self.topic_name)?;
         } else {
             if !self.topic_name.is_empty() {
                 return Err(EncodeError)
             }
         }
-        if version == 3 {
+        if version >= 3 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.partition_states)?;
         } else {
             if !self.partition_states.is_empty() {
@@ -501,12 +501,12 @@ impl Encodable for StopReplicaTopicState {
 
 impl Decodable for StopReplicaTopicState {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let topic_name = if version == 3 {
+        let topic_name = if version >= 3 {
             types::CompactString.decode(buf)?
         } else {
             Default::default()
         };
-        let partition_states = if version == 3 {
+        let partition_states = if version >= 3 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
             Default::default()
@@ -579,7 +579,7 @@ pub struct StopReplicaRequest {
 
     /// Each topic.
     /// 
-    /// Supported API versions: 3-3
+    /// Supported API versions: 3
     pub topic_states: Vec<StopReplicaTopicState>,
 
     /// Other tagged fields
@@ -618,7 +618,7 @@ impl Encodable for StopReplicaRequest {
                 return Err(EncodeError)
             }
         }
-        if version == 3 {
+        if version >= 3 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.topic_states)?;
         } else {
             if !self.topic_states.is_empty() {
@@ -669,7 +669,7 @@ impl Encodable for StopReplicaRequest {
                 return Err(EncodeError)
             }
         }
-        if version == 3 {
+        if version >= 3 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.topic_states)?;
         } else {
             if !self.topic_states.is_empty() {
@@ -718,7 +718,7 @@ impl Decodable for StopReplicaRequest {
         } else {
             Default::default()
         };
-        let topic_states = if version == 3 {
+        let topic_states = if version >= 3 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
             Default::default()

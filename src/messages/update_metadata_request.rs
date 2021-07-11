@@ -234,7 +234,7 @@ pub struct UpdateMetadataTopicState {
 
     /// The topic id.
     /// 
-    /// Supported API versions: 7-7
+    /// Supported API versions: 7
     pub topic_id: Uuid,
 
     /// The partition that we would like to update.
@@ -259,7 +259,7 @@ impl Encodable for UpdateMetadataTopicState {
                 return Err(EncodeError)
             }
         }
-        if version == 7 {
+        if version >= 7 {
             types::Uuid.encode(buf, &self.topic_id)?;
         }
         if version >= 5 {
@@ -298,7 +298,7 @@ impl Encodable for UpdateMetadataTopicState {
                 return Err(EncodeError)
             }
         }
-        if version == 7 {
+        if version >= 7 {
             total_size += types::Uuid.compute_size(&self.topic_id)?;
         }
         if version >= 5 {
@@ -337,7 +337,7 @@ impl Decodable for UpdateMetadataTopicState {
         } else {
             Default::default()
         };
-        let topic_id = if version == 7 {
+        let topic_id = if version >= 7 {
             types::Uuid.decode(buf)?
         } else {
             Uuid::nil()
