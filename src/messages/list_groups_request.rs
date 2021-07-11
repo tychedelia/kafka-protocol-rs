@@ -19,7 +19,7 @@ use protocol_base::{
 pub struct ListGroupsRequest {
     /// The states of the groups we want to list. If empty all groups are returned with their state.
     /// 
-    /// Supported API versions: 4-4
+    /// Supported API versions: 4
     pub states_filter: Vec<StrBytes>,
 
     /// Other tagged fields
@@ -28,7 +28,7 @@ pub struct ListGroupsRequest {
 
 impl Encodable for ListGroupsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 4 {
+        if version >= 4 {
             types::CompactArray(types::CompactString).encode(buf, &self.states_filter)?;
         } else {
             if !self.states_filter.is_empty() {
@@ -49,7 +49,7 @@ impl Encodable for ListGroupsRequest {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 4 {
+        if version >= 4 {
             total_size += types::CompactArray(types::CompactString).compute_size(&self.states_filter)?;
         } else {
             if !self.states_filter.is_empty() {
@@ -72,7 +72,7 @@ impl Encodable for ListGroupsRequest {
 
 impl Decodable for ListGroupsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let states_filter = if version == 4 {
+        let states_filter = if version >= 4 {
             types::CompactArray(types::CompactString).decode(buf)?
         } else {
             Default::default()

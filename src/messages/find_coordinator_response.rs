@@ -19,32 +19,32 @@ use protocol_base::{
 pub struct Coordinator {
     /// The coordinator key.
     /// 
-    /// Supported API versions: 4-4
+    /// Supported API versions: 4
     pub key: StrBytes,
 
     /// The node id.
     /// 
-    /// Supported API versions: 4-4
+    /// Supported API versions: 4
     pub node_id: super::BrokerId,
 
     /// The host name.
     /// 
-    /// Supported API versions: 4-4
+    /// Supported API versions: 4
     pub host: StrBytes,
 
     /// The port.
     /// 
-    /// Supported API versions: 4-4
+    /// Supported API versions: 4
     pub port: i32,
 
     /// The error code, or 0 if there was no error.
     /// 
-    /// Supported API versions: 4-4
+    /// Supported API versions: 4
     pub error_code: i16,
 
     /// The error message, or null if there was no error.
     /// 
-    /// Supported API versions: 4-4
+    /// Supported API versions: 4
     pub error_message: Option<StrBytes>,
 
     /// Other tagged fields
@@ -53,42 +53,42 @@ pub struct Coordinator {
 
 impl Encodable for Coordinator {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 4 {
+        if version >= 4 {
             types::CompactString.encode(buf, &self.key)?;
         } else {
             if !self.key.is_empty() {
                 return Err(EncodeError)
             }
         }
-        if version == 4 {
+        if version >= 4 {
             types::Int32.encode(buf, &self.node_id)?;
         } else {
             if self.node_id != 0 {
                 return Err(EncodeError)
             }
         }
-        if version == 4 {
+        if version >= 4 {
             types::CompactString.encode(buf, &self.host)?;
         } else {
             if !self.host.is_empty() {
                 return Err(EncodeError)
             }
         }
-        if version == 4 {
+        if version >= 4 {
             types::Int32.encode(buf, &self.port)?;
         } else {
             if self.port != 0 {
                 return Err(EncodeError)
             }
         }
-        if version == 4 {
+        if version >= 4 {
             types::Int16.encode(buf, &self.error_code)?;
         } else {
             if self.error_code != 0 {
                 return Err(EncodeError)
             }
         }
-        if version == 4 {
+        if version >= 4 {
             types::CompactString.encode(buf, &self.error_message)?;
         }
         if version >= 3 {
@@ -105,42 +105,42 @@ impl Encodable for Coordinator {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 4 {
+        if version >= 4 {
             total_size += types::CompactString.compute_size(&self.key)?;
         } else {
             if !self.key.is_empty() {
                 return Err(EncodeError)
             }
         }
-        if version == 4 {
+        if version >= 4 {
             total_size += types::Int32.compute_size(&self.node_id)?;
         } else {
             if self.node_id != 0 {
                 return Err(EncodeError)
             }
         }
-        if version == 4 {
+        if version >= 4 {
             total_size += types::CompactString.compute_size(&self.host)?;
         } else {
             if !self.host.is_empty() {
                 return Err(EncodeError)
             }
         }
-        if version == 4 {
+        if version >= 4 {
             total_size += types::Int32.compute_size(&self.port)?;
         } else {
             if self.port != 0 {
                 return Err(EncodeError)
             }
         }
-        if version == 4 {
+        if version >= 4 {
             total_size += types::Int16.compute_size(&self.error_code)?;
         } else {
             if self.error_code != 0 {
                 return Err(EncodeError)
             }
         }
-        if version == 4 {
+        if version >= 4 {
             total_size += types::CompactString.compute_size(&self.error_message)?;
         }
         if version >= 3 {
@@ -159,32 +159,32 @@ impl Encodable for Coordinator {
 
 impl Decodable for Coordinator {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let key = if version == 4 {
+        let key = if version >= 4 {
             types::CompactString.decode(buf)?
         } else {
             Default::default()
         };
-        let node_id = if version == 4 {
+        let node_id = if version >= 4 {
             types::Int32.decode(buf)?
         } else {
             (0).into()
         };
-        let host = if version == 4 {
+        let host = if version >= 4 {
             types::CompactString.decode(buf)?
         } else {
             Default::default()
         };
-        let port = if version == 4 {
+        let port = if version >= 4 {
             types::Int32.decode(buf)?
         } else {
             0
         };
-        let error_code = if version == 4 {
+        let error_code = if version >= 4 {
             types::Int16.decode(buf)?
         } else {
             0
         };
-        let error_message = if version == 4 {
+        let error_message = if version >= 4 {
             types::CompactString.decode(buf)?
         } else {
             Some(Default::default())
@@ -265,7 +265,7 @@ pub struct FindCoordinatorResponse {
 
     /// Each coordinator result in the response
     /// 
-    /// Supported API versions: 4-4
+    /// Supported API versions: 4
     pub coordinators: Vec<Coordinator>,
 
     /// Other tagged fields
@@ -316,7 +316,7 @@ impl Encodable for FindCoordinatorResponse {
                 return Err(EncodeError)
             }
         }
-        if version == 4 {
+        if version >= 4 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.coordinators)?;
         } else {
             if !self.coordinators.is_empty() {
@@ -379,7 +379,7 @@ impl Encodable for FindCoordinatorResponse {
                 return Err(EncodeError)
             }
         }
-        if version == 4 {
+        if version >= 4 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.coordinators)?;
         } else {
             if !self.coordinators.is_empty() {
@@ -440,7 +440,7 @@ impl Decodable for FindCoordinatorResponse {
         } else {
             0
         };
-        let coordinators = if version == 4 {
+        let coordinators = if version >= 4 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
             Default::default()

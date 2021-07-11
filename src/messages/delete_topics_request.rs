@@ -19,12 +19,12 @@ use protocol_base::{
 pub struct DeleteTopicState {
     /// The topic name
     /// 
-    /// Supported API versions: 6-6
+    /// Supported API versions: 6
     pub name: Option<super::TopicName>,
 
     /// The unique topic ID
     /// 
-    /// Supported API versions: 6-6
+    /// Supported API versions: 6
     pub topic_id: Uuid,
 
     /// Other tagged fields
@@ -33,14 +33,14 @@ pub struct DeleteTopicState {
 
 impl Encodable for DeleteTopicState {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 6 {
+        if version >= 6 {
             types::CompactString.encode(buf, &self.name)?;
         } else {
             if !self.name.is_none() {
                 return Err(EncodeError)
             }
         }
-        if version == 6 {
+        if version >= 6 {
             types::Uuid.encode(buf, &self.topic_id)?;
         } else {
             if &self.topic_id != &Uuid::nil() {
@@ -61,14 +61,14 @@ impl Encodable for DeleteTopicState {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 6 {
+        if version >= 6 {
             total_size += types::CompactString.compute_size(&self.name)?;
         } else {
             if !self.name.is_none() {
                 return Err(EncodeError)
             }
         }
-        if version == 6 {
+        if version >= 6 {
             total_size += types::Uuid.compute_size(&self.topic_id)?;
         } else {
             if &self.topic_id != &Uuid::nil() {
@@ -91,12 +91,12 @@ impl Encodable for DeleteTopicState {
 
 impl Decodable for DeleteTopicState {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let name = if version == 6 {
+        let name = if version >= 6 {
             types::CompactString.decode(buf)?
         } else {
             None
         };
-        let topic_id = if version == 6 {
+        let topic_id = if version >= 6 {
             types::Uuid.decode(buf)?
         } else {
             Uuid::nil()
@@ -139,7 +139,7 @@ impl Message for DeleteTopicState {
 pub struct DeleteTopicsRequest {
     /// The name or topic ID of the topic
     /// 
-    /// Supported API versions: 6-6
+    /// Supported API versions: 6
     pub topics: Vec<DeleteTopicState>,
 
     /// The names of the topics to delete
@@ -158,7 +158,7 @@ pub struct DeleteTopicsRequest {
 
 impl Encodable for DeleteTopicsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 6 {
+        if version >= 6 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
         } else {
             if !self.topics.is_empty() {
@@ -187,7 +187,7 @@ impl Encodable for DeleteTopicsRequest {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 6 {
+        if version >= 6 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.topics)?;
         } else {
             if !self.topics.is_empty() {
@@ -218,7 +218,7 @@ impl Encodable for DeleteTopicsRequest {
 
 impl Decodable for DeleteTopicsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let topics = if version == 6 {
+        let topics = if version >= 6 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
             Default::default()

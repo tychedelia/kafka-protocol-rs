@@ -799,7 +799,7 @@ pub struct FetchableTopicResponse {
 
     /// The unique topic ID
     /// 
-    /// Supported API versions: 13-13
+    /// Supported API versions: 13
     pub topic_id: Uuid,
 
     /// The topic partitions.
@@ -820,7 +820,7 @@ impl Encodable for FetchableTopicResponse {
                 types::String.encode(buf, &self.topic)?;
             }
         }
-        if version == 13 {
+        if version >= 13 {
             types::Uuid.encode(buf, &self.topic_id)?;
         }
         if version >= 12 {
@@ -849,7 +849,7 @@ impl Encodable for FetchableTopicResponse {
                 total_size += types::String.compute_size(&self.topic)?;
             }
         }
-        if version == 13 {
+        if version >= 13 {
             total_size += types::Uuid.compute_size(&self.topic_id)?;
         }
         if version >= 12 {
@@ -882,7 +882,7 @@ impl Decodable for FetchableTopicResponse {
         } else {
             Default::default()
         };
-        let topic_id = if version == 13 {
+        let topic_id = if version >= 13 {
             types::Uuid.decode(buf)?
         } else {
             Uuid::nil()

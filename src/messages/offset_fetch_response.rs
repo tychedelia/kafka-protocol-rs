@@ -365,27 +365,27 @@ impl Message for OffsetFetchResponseTopic {
 pub struct OffsetFetchResponsePartitions {
     /// The partition index.
     /// 
-    /// Supported API versions: 8-8
+    /// Supported API versions: 8
     pub partition_index: i32,
 
     /// The committed message offset.
     /// 
-    /// Supported API versions: 8-8
+    /// Supported API versions: 8
     pub committed_offset: i64,
 
     /// The leader epoch.
     /// 
-    /// Supported API versions: 8-8
+    /// Supported API versions: 8
     pub committed_leader_epoch: i32,
 
     /// The partition metadata.
     /// 
-    /// Supported API versions: 8-8
+    /// Supported API versions: 8
     pub metadata: Option<StrBytes>,
 
     /// The partition-level error code, or 0 if there was no error.
     /// 
-    /// Supported API versions: 8-8
+    /// Supported API versions: 8
     pub error_code: i16,
 
     /// Other tagged fields
@@ -394,31 +394,31 @@ pub struct OffsetFetchResponsePartitions {
 
 impl Encodable for OffsetFetchResponsePartitions {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 8 {
+        if version >= 8 {
             types::Int32.encode(buf, &self.partition_index)?;
         } else {
             if self.partition_index != 0 {
                 return Err(EncodeError)
             }
         }
-        if version == 8 {
+        if version >= 8 {
             types::Int64.encode(buf, &self.committed_offset)?;
         } else {
             if self.committed_offset != 0 {
                 return Err(EncodeError)
             }
         }
-        if version == 8 {
+        if version >= 8 {
             types::Int32.encode(buf, &self.committed_leader_epoch)?;
         }
-        if version == 8 {
+        if version >= 8 {
             types::CompactString.encode(buf, &self.metadata)?;
         } else {
             if !self.metadata.as_ref().map(|x| x.is_empty()).unwrap_or_default() {
                 return Err(EncodeError)
             }
         }
-        if version == 8 {
+        if version >= 8 {
             types::Int16.encode(buf, &self.error_code)?;
         } else {
             if self.error_code != 0 {
@@ -439,31 +439,31 @@ impl Encodable for OffsetFetchResponsePartitions {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 8 {
+        if version >= 8 {
             total_size += types::Int32.compute_size(&self.partition_index)?;
         } else {
             if self.partition_index != 0 {
                 return Err(EncodeError)
             }
         }
-        if version == 8 {
+        if version >= 8 {
             total_size += types::Int64.compute_size(&self.committed_offset)?;
         } else {
             if self.committed_offset != 0 {
                 return Err(EncodeError)
             }
         }
-        if version == 8 {
+        if version >= 8 {
             total_size += types::Int32.compute_size(&self.committed_leader_epoch)?;
         }
-        if version == 8 {
+        if version >= 8 {
             total_size += types::CompactString.compute_size(&self.metadata)?;
         } else {
             if !self.metadata.as_ref().map(|x| x.is_empty()).unwrap_or_default() {
                 return Err(EncodeError)
             }
         }
-        if version == 8 {
+        if version >= 8 {
             total_size += types::Int16.compute_size(&self.error_code)?;
         } else {
             if self.error_code != 0 {
@@ -486,27 +486,27 @@ impl Encodable for OffsetFetchResponsePartitions {
 
 impl Decodable for OffsetFetchResponsePartitions {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let partition_index = if version == 8 {
+        let partition_index = if version >= 8 {
             types::Int32.decode(buf)?
         } else {
             0
         };
-        let committed_offset = if version == 8 {
+        let committed_offset = if version >= 8 {
             types::Int64.decode(buf)?
         } else {
             0
         };
-        let committed_leader_epoch = if version == 8 {
+        let committed_leader_epoch = if version >= 8 {
             types::Int32.decode(buf)?
         } else {
             -1
         };
-        let metadata = if version == 8 {
+        let metadata = if version >= 8 {
             types::CompactString.decode(buf)?
         } else {
             Some(Default::default())
         };
-        let error_code = if version == 8 {
+        let error_code = if version >= 8 {
             types::Int16.decode(buf)?
         } else {
             0
@@ -555,12 +555,12 @@ impl Message for OffsetFetchResponsePartitions {
 pub struct OffsetFetchResponseTopics {
     /// The topic name.
     /// 
-    /// Supported API versions: 8-8
+    /// Supported API versions: 8
     pub name: super::TopicName,
 
     /// The responses per partition
     /// 
-    /// Supported API versions: 8-8
+    /// Supported API versions: 8
     pub partitions: Vec<OffsetFetchResponsePartitions>,
 
     /// Other tagged fields
@@ -569,14 +569,14 @@ pub struct OffsetFetchResponseTopics {
 
 impl Encodable for OffsetFetchResponseTopics {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 8 {
+        if version >= 8 {
             types::CompactString.encode(buf, &self.name)?;
         } else {
             if !self.name.is_empty() {
                 return Err(EncodeError)
             }
         }
-        if version == 8 {
+        if version >= 8 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.partitions)?;
         } else {
             if !self.partitions.is_empty() {
@@ -597,14 +597,14 @@ impl Encodable for OffsetFetchResponseTopics {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 8 {
+        if version >= 8 {
             total_size += types::CompactString.compute_size(&self.name)?;
         } else {
             if !self.name.is_empty() {
                 return Err(EncodeError)
             }
         }
-        if version == 8 {
+        if version >= 8 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.partitions)?;
         } else {
             if !self.partitions.is_empty() {
@@ -627,12 +627,12 @@ impl Encodable for OffsetFetchResponseTopics {
 
 impl Decodable for OffsetFetchResponseTopics {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let name = if version == 8 {
+        let name = if version >= 8 {
             types::CompactString.decode(buf)?
         } else {
             Default::default()
         };
-        let partitions = if version == 8 {
+        let partitions = if version >= 8 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
             Default::default()
@@ -675,17 +675,17 @@ impl Message for OffsetFetchResponseTopics {
 pub struct OffsetFetchResponseGroup {
     /// The group ID.
     /// 
-    /// Supported API versions: 8-8
+    /// Supported API versions: 8
     pub group_id: super::GroupId,
 
     /// The responses per topic.
     /// 
-    /// Supported API versions: 8-8
+    /// Supported API versions: 8
     pub topics: Vec<OffsetFetchResponseTopics>,
 
     /// The group-level error code, or 0 if there was no error.
     /// 
-    /// Supported API versions: 8-8
+    /// Supported API versions: 8
     pub error_code: i16,
 
     /// Other tagged fields
@@ -694,21 +694,21 @@ pub struct OffsetFetchResponseGroup {
 
 impl Encodable for OffsetFetchResponseGroup {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 8 {
+        if version >= 8 {
             types::CompactString.encode(buf, &self.group_id)?;
         } else {
             if !self.group_id.is_empty() {
                 return Err(EncodeError)
             }
         }
-        if version == 8 {
+        if version >= 8 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
         } else {
             if !self.topics.is_empty() {
                 return Err(EncodeError)
             }
         }
-        if version == 8 {
+        if version >= 8 {
             types::Int16.encode(buf, &self.error_code)?;
         } else {
             if self.error_code != 0 {
@@ -729,21 +729,21 @@ impl Encodable for OffsetFetchResponseGroup {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 8 {
+        if version >= 8 {
             total_size += types::CompactString.compute_size(&self.group_id)?;
         } else {
             if !self.group_id.is_empty() {
                 return Err(EncodeError)
             }
         }
-        if version == 8 {
+        if version >= 8 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.topics)?;
         } else {
             if !self.topics.is_empty() {
                 return Err(EncodeError)
             }
         }
-        if version == 8 {
+        if version >= 8 {
             total_size += types::Int16.compute_size(&self.error_code)?;
         } else {
             if self.error_code != 0 {
@@ -766,17 +766,17 @@ impl Encodable for OffsetFetchResponseGroup {
 
 impl Decodable for OffsetFetchResponseGroup {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let group_id = if version == 8 {
+        let group_id = if version >= 8 {
             types::CompactString.decode(buf)?
         } else {
             Default::default()
         };
-        let topics = if version == 8 {
+        let topics = if version >= 8 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
             Default::default()
         };
-        let error_code = if version == 8 {
+        let error_code = if version >= 8 {
             types::Int16.decode(buf)?
         } else {
             0
@@ -836,7 +836,7 @@ pub struct OffsetFetchResponse {
 
     /// The responses per group id.
     /// 
-    /// Supported API versions: 8-8
+    /// Supported API versions: 8
     pub groups: Vec<OffsetFetchResponseGroup>,
 
     /// Other tagged fields
@@ -862,7 +862,7 @@ impl Encodable for OffsetFetchResponse {
         if version >= 2 && version <= 7 {
             types::Int16.encode(buf, &self.error_code)?;
         }
-        if version == 8 {
+        if version >= 8 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.groups)?;
         } else {
             if !self.groups.is_empty() {
@@ -900,7 +900,7 @@ impl Encodable for OffsetFetchResponse {
         if version >= 2 && version <= 7 {
             total_size += types::Int16.compute_size(&self.error_code)?;
         }
-        if version == 8 {
+        if version >= 8 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.groups)?;
         } else {
             if !self.groups.is_empty() {
@@ -942,7 +942,7 @@ impl Decodable for OffsetFetchResponse {
         } else {
             0
         };
-        let groups = if version == 8 {
+        let groups = if version >= 8 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
             Default::default()

@@ -209,7 +209,7 @@ impl Message for CreatableTopicConfigs {
 pub struct CreatableTopicResult {
     /// The unique topic ID
     /// 
-    /// Supported API versions: 7-7
+    /// Supported API versions: 7
     pub topic_id: Uuid,
 
     /// The error code, or 0 if there was no error.
@@ -254,7 +254,7 @@ impl MapEncodable for CreatableTopicResult {
         } else {
             types::String.encode(buf, key)?;
         }
-        if version == 7 {
+        if version >= 7 {
             types::Uuid.encode(buf, &self.topic_id)?;
         }
         types::Int16.encode(buf, &self.error_code)?;
@@ -306,7 +306,7 @@ impl MapEncodable for CreatableTopicResult {
         } else {
             total_size += types::String.compute_size(key)?;
         }
-        if version == 7 {
+        if version >= 7 {
             total_size += types::Uuid.compute_size(&self.topic_id)?;
         }
         total_size += types::Int16.compute_size(&self.error_code)?;
@@ -361,7 +361,7 @@ impl MapDecodable for CreatableTopicResult {
         } else {
             types::String.decode(buf)?
         };
-        let topic_id = if version == 7 {
+        let topic_id = if version >= 7 {
             types::Uuid.decode(buf)?
         } else {
             Uuid::nil()

@@ -29,12 +29,12 @@ pub struct SyncGroupResponse {
 
     /// The group protocol type.
     /// 
-    /// Supported API versions: 5-5
+    /// Supported API versions: 5
     pub protocol_type: Option<StrBytes>,
 
     /// The group protocol name.
     /// 
-    /// Supported API versions: 5-5
+    /// Supported API versions: 5
     pub protocol_name: Option<StrBytes>,
 
     /// The member assignment.
@@ -52,10 +52,10 @@ impl Encodable for SyncGroupResponse {
             types::Int32.encode(buf, &self.throttle_time_ms)?;
         }
         types::Int16.encode(buf, &self.error_code)?;
-        if version == 5 {
+        if version >= 5 {
             types::CompactString.encode(buf, &self.protocol_type)?;
         }
-        if version == 5 {
+        if version >= 5 {
             types::CompactString.encode(buf, &self.protocol_name)?;
         }
         if version >= 4 {
@@ -81,10 +81,10 @@ impl Encodable for SyncGroupResponse {
             total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
         }
         total_size += types::Int16.compute_size(&self.error_code)?;
-        if version == 5 {
+        if version >= 5 {
             total_size += types::CompactString.compute_size(&self.protocol_type)?;
         }
-        if version == 5 {
+        if version >= 5 {
             total_size += types::CompactString.compute_size(&self.protocol_name)?;
         }
         if version >= 4 {
@@ -114,12 +114,12 @@ impl Decodable for SyncGroupResponse {
             0
         };
         let error_code = types::Int16.decode(buf)?;
-        let protocol_type = if version == 5 {
+        let protocol_type = if version >= 5 {
             types::CompactString.decode(buf)?
         } else {
             None
         };
-        let protocol_name = if version == 5 {
+        let protocol_name = if version >= 5 {
             types::CompactString.decode(buf)?
         } else {
             None

@@ -151,12 +151,12 @@ pub struct SyncGroupRequest {
 
     /// The group protocol type.
     /// 
-    /// Supported API versions: 5-5
+    /// Supported API versions: 5
     pub protocol_type: Option<StrBytes>,
 
     /// The group protocol name.
     /// 
-    /// Supported API versions: 5-5
+    /// Supported API versions: 5
     pub protocol_name: Option<StrBytes>,
 
     /// Each assignment.
@@ -192,10 +192,10 @@ impl Encodable for SyncGroupRequest {
                 return Err(EncodeError)
             }
         }
-        if version == 5 {
+        if version >= 5 {
             types::CompactString.encode(buf, &self.protocol_type)?;
         }
-        if version == 5 {
+        if version >= 5 {
             types::CompactString.encode(buf, &self.protocol_name)?;
         }
         if version >= 4 {
@@ -239,10 +239,10 @@ impl Encodable for SyncGroupRequest {
                 return Err(EncodeError)
             }
         }
-        if version == 5 {
+        if version >= 5 {
             total_size += types::CompactString.compute_size(&self.protocol_type)?;
         }
-        if version == 5 {
+        if version >= 5 {
             total_size += types::CompactString.compute_size(&self.protocol_name)?;
         }
         if version >= 4 {
@@ -286,12 +286,12 @@ impl Decodable for SyncGroupRequest {
         } else {
             None
         };
-        let protocol_type = if version == 5 {
+        let protocol_type = if version >= 5 {
             types::CompactString.decode(buf)?
         } else {
             None
         };
-        let protocol_name = if version == 5 {
+        let protocol_name = if version >= 5 {
             types::CompactString.decode(buf)?
         } else {
             None

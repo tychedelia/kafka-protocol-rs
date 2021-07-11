@@ -279,17 +279,17 @@ pub struct TxnOffsetCommitRequest {
 
     /// The generation of the consumer.
     /// 
-    /// Supported API versions: 3-3
+    /// Supported API versions: 3
     pub generation_id: i32,
 
     /// The member ID assigned by the group coordinator.
     /// 
-    /// Supported API versions: 3-3
+    /// Supported API versions: 3
     pub member_id: StrBytes,
 
     /// The unique identifier of the consumer instance provided by end user.
     /// 
-    /// Supported API versions: 3-3
+    /// Supported API versions: 3
     pub group_instance_id: Option<StrBytes>,
 
     /// Each topic that we want to commit offsets for.
@@ -315,21 +315,21 @@ impl Encodable for TxnOffsetCommitRequest {
         }
         types::Int64.encode(buf, &self.producer_id)?;
         types::Int16.encode(buf, &self.producer_epoch)?;
-        if version == 3 {
+        if version >= 3 {
             types::Int32.encode(buf, &self.generation_id)?;
         } else {
             if self.generation_id != -1 {
                 return Err(EncodeError)
             }
         }
-        if version == 3 {
+        if version >= 3 {
             types::CompactString.encode(buf, &self.member_id)?;
         } else {
             if &self.member_id != "" {
                 return Err(EncodeError)
             }
         }
-        if version == 3 {
+        if version >= 3 {
             types::CompactString.encode(buf, &self.group_instance_id)?;
         } else {
             if !self.group_instance_id.is_none() {
@@ -367,21 +367,21 @@ impl Encodable for TxnOffsetCommitRequest {
         }
         total_size += types::Int64.compute_size(&self.producer_id)?;
         total_size += types::Int16.compute_size(&self.producer_epoch)?;
-        if version == 3 {
+        if version >= 3 {
             total_size += types::Int32.compute_size(&self.generation_id)?;
         } else {
             if self.generation_id != -1 {
                 return Err(EncodeError)
             }
         }
-        if version == 3 {
+        if version >= 3 {
             total_size += types::CompactString.compute_size(&self.member_id)?;
         } else {
             if &self.member_id != "" {
                 return Err(EncodeError)
             }
         }
-        if version == 3 {
+        if version >= 3 {
             total_size += types::CompactString.compute_size(&self.group_instance_id)?;
         } else {
             if !self.group_instance_id.is_none() {
@@ -421,17 +421,17 @@ impl Decodable for TxnOffsetCommitRequest {
         };
         let producer_id = types::Int64.decode(buf)?;
         let producer_epoch = types::Int16.decode(buf)?;
-        let generation_id = if version == 3 {
+        let generation_id = if version >= 3 {
             types::Int32.decode(buf)?
         } else {
             -1
         };
-        let member_id = if version == 3 {
+        let member_id = if version >= 3 {
             types::CompactString.decode(buf)?
         } else {
             StrBytes::from_str("")
         };
-        let group_instance_id = if version == 3 {
+        let group_instance_id = if version >= 3 {
             types::CompactString.decode(buf)?
         } else {
             None

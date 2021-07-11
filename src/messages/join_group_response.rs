@@ -184,7 +184,7 @@ pub struct JoinGroupResponse {
 
     /// The group protocol name.
     /// 
-    /// Supported API versions: 7-7
+    /// Supported API versions: 7
     pub protocol_type: Option<StrBytes>,
 
     /// The group protocol selected by the coordinator.
@@ -218,7 +218,7 @@ impl Encodable for JoinGroupResponse {
         }
         types::Int16.encode(buf, &self.error_code)?;
         types::Int32.encode(buf, &self.generation_id)?;
-        if version == 7 {
+        if version >= 7 {
             types::CompactString.encode(buf, &self.protocol_type)?;
         }
         if version >= 6 {
@@ -260,7 +260,7 @@ impl Encodable for JoinGroupResponse {
         }
         total_size += types::Int16.compute_size(&self.error_code)?;
         total_size += types::Int32.compute_size(&self.generation_id)?;
-        if version == 7 {
+        if version >= 7 {
             total_size += types::CompactString.compute_size(&self.protocol_type)?;
         }
         if version >= 6 {
@@ -306,7 +306,7 @@ impl Decodable for JoinGroupResponse {
         };
         let error_code = types::Int16.decode(buf)?;
         let generation_id = types::Int32.decode(buf)?;
-        let protocol_type = if version == 7 {
+        let protocol_type = if version >= 7 {
             types::CompactString.decode(buf)?
         } else {
             None

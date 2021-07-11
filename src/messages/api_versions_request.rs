@@ -19,12 +19,12 @@ use protocol_base::{
 pub struct ApiVersionsRequest {
     /// The name of the client.
     /// 
-    /// Supported API versions: 3-3
+    /// Supported API versions: 3
     pub client_software_name: StrBytes,
 
     /// The version of the client.
     /// 
-    /// Supported API versions: 3-3
+    /// Supported API versions: 3
     pub client_software_version: StrBytes,
 
     /// Other tagged fields
@@ -33,10 +33,10 @@ pub struct ApiVersionsRequest {
 
 impl Encodable for ApiVersionsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version == 3 {
+        if version >= 3 {
             types::CompactString.encode(buf, &self.client_software_name)?;
         }
-        if version == 3 {
+        if version >= 3 {
             types::CompactString.encode(buf, &self.client_software_version)?;
         }
         if version >= 3 {
@@ -53,10 +53,10 @@ impl Encodable for ApiVersionsRequest {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        if version == 3 {
+        if version >= 3 {
             total_size += types::CompactString.compute_size(&self.client_software_name)?;
         }
-        if version == 3 {
+        if version >= 3 {
             total_size += types::CompactString.compute_size(&self.client_software_version)?;
         }
         if version >= 3 {
@@ -75,12 +75,12 @@ impl Encodable for ApiVersionsRequest {
 
 impl Decodable for ApiVersionsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let client_software_name = if version == 3 {
+        let client_software_name = if version >= 3 {
             types::CompactString.decode(buf)?
         } else {
             Default::default()
         };
-        let client_software_version = if version == 3 {
+        let client_software_version = if version >= 3 {
             types::CompactString.decode(buf)?
         } else {
             Default::default()

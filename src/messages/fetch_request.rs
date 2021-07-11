@@ -184,7 +184,7 @@ pub struct FetchTopic {
 
     /// The unique topic ID
     /// 
-    /// Supported API versions: 13-13
+    /// Supported API versions: 13
     pub topic_id: Uuid,
 
     /// The partitions to fetch.
@@ -205,7 +205,7 @@ impl Encodable for FetchTopic {
                 types::String.encode(buf, &self.topic)?;
             }
         }
-        if version == 13 {
+        if version >= 13 {
             types::Uuid.encode(buf, &self.topic_id)?;
         }
         if version >= 12 {
@@ -234,7 +234,7 @@ impl Encodable for FetchTopic {
                 total_size += types::String.compute_size(&self.topic)?;
             }
         }
-        if version == 13 {
+        if version >= 13 {
             total_size += types::Uuid.compute_size(&self.topic_id)?;
         }
         if version >= 12 {
@@ -267,7 +267,7 @@ impl Decodable for FetchTopic {
         } else {
             Default::default()
         };
-        let topic_id = if version == 13 {
+        let topic_id = if version >= 13 {
             types::Uuid.decode(buf)?
         } else {
             Uuid::nil()
@@ -322,7 +322,7 @@ pub struct ForgottenTopic {
 
     /// The unique topic ID
     /// 
-    /// Supported API versions: 13-13
+    /// Supported API versions: 13
     pub topic_id: Uuid,
 
     /// The partitions indexes to forget.
@@ -343,7 +343,7 @@ impl Encodable for ForgottenTopic {
                 types::String.encode(buf, &self.topic)?;
             }
         }
-        if version == 13 {
+        if version >= 13 {
             types::Uuid.encode(buf, &self.topic_id)?;
         }
         if version >= 7 {
@@ -378,7 +378,7 @@ impl Encodable for ForgottenTopic {
                 total_size += types::String.compute_size(&self.topic)?;
             }
         }
-        if version == 13 {
+        if version >= 13 {
             total_size += types::Uuid.compute_size(&self.topic_id)?;
         }
         if version >= 7 {
@@ -417,7 +417,7 @@ impl Decodable for ForgottenTopic {
         } else {
             Default::default()
         };
-        let topic_id = if version == 13 {
+        let topic_id = if version >= 13 {
             types::Uuid.decode(buf)?
         } else {
             Uuid::nil()
