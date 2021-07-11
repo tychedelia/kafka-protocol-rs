@@ -94,7 +94,7 @@ pub fn run() -> Result<(), Error> {
 
     writeln!(module_file, "pub enum ApiKey {{")?;
     for (api_key, request_type) in request_types.iter() {
-        writeln!(module_file, "    {} = {},", request_type, api_key)?;
+        writeln!(module_file, "    {} = {},", request_type.replace("Request", "Key"), api_key)?;
     }
     writeln!(module_file, "}}")?;
     writeln!(module_file)?;

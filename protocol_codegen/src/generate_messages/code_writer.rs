@@ -31,6 +31,7 @@ impl<W: Write> CodeWriter<W> {
         write!(self, "}}")?;
         res
     }
+    #[allow(dead_code)]
     pub fn into_inner(self) -> W {
         self.inner
     }
