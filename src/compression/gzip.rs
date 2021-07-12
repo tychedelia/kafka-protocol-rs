@@ -6,11 +6,13 @@ use flate2::Compression;
 use flate2::write::{GzEncoder, GzDecoder};
 use log::error;
 
-use protocol_base::buf::{ByteBuf, ByteBufMut};
-use protocol_base::{EncodeError, DecodeError};
+use crate::protocol::buf::{ByteBuf, ByteBufMut};
+use crate::protocol::{EncodeError, DecodeError};
 
 use super::{Compressor, Decompressor};
 
+/// Gzip compression algorithm. See [Kafka's broker configuration](https://kafka.apache.org/documentation/#brokerconfigs_compression.type)
+/// for more information.
 pub struct Gzip;
 
 fn compression_err(e: std::io::Error) -> EncodeError {

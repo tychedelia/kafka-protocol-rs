@@ -1,5 +1,5 @@
 [workspace]
-members = ["protocol_base", "protocol_codegen"]
+members = ["protocol_codegen"]
 
 [package]
 name = "kafka_protocol"
@@ -12,21 +12,12 @@ edition = "2018"
 license = "MIT/Apache-2.0"
 
 [dependencies]
-tokio = "1.8.0"
-tokio-util = { version = "0.6.7", features = ["codec"] }
 bytes = "1.0.1"
 uuid = "0.8.2"
 log = "0.4.14"
-futures = "0.3.15"
-async-trait = "0.1.50"
-chashmap = "2.2.2"
-protocol_base = { version = "0.1", path = "protocol_base" }
 indexmap = "1.7.0"
 env_logger = "0.8.4"
 crc = "2.0.0"
 snap = "1.0.5"
 flate2 = "1.0.20"
 string = { version = "0.3.0", git = "https://github.com/0x1991babe/string.git" }
-
-[build-dependencies]
-async-trait = "0.1.50"

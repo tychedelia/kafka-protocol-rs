@@ -1,3 +1,9 @@
+//! Raw types of the Kafka protocol, as defined by the protocol specification.
+//!
+//! In general, most types map closely to a corresponding rust type, with the exception of a number
+//! types that use zigzag encoded to represent length as a "compact" representation.
+//!
+//! It is unnecessary to interact directly with these types for most use cases.
 use std::string::String as StdString;
 use std::hash::Hash;
 
@@ -5,7 +11,7 @@ use indexmap::IndexMap;
 use string::TryFrom;
 
 use super::{DecodeError, EncodeError, Encoder, Decoder, Encodable, Decodable, MapEncodable, MapDecodable, NewType, StrBytes};
-use crate::buf::{ByteBuf, ByteBufMut};
+use crate::protocol::buf::{ByteBuf, ByteBufMut};
 
 macro_rules! define_copy_impl {
     ($e:ident, $t:ty) => (
@@ -23,6 +29,7 @@ macro_rules! define_copy_impl {
     )
 }
 
+/// A boolean value.
 #[derive(Debug, Copy, Clone, Default)]
 pub struct Boolean;
 
@@ -50,6 +57,7 @@ define_copy_impl!(Boolean, bool);
 macro_rules! define_simple_ints {
     ($($name:ident: $t:ty [$put:ident, $get:ident],)*) => (
         $(
+            /// A struct representing [`$ty`]
             #[derive(Debug, Copy, Clone)]
             pub struct $name;
 
@@ -86,6 +94,7 @@ define_simple_ints!{
     Float64: f64 [put_f64, try_get_f64],
 }
 
+/// An unsigned zigzag encoded int.
 #[derive(Debug, Copy, Clone, Default)]
 pub struct UnsignedVarInt;
 
@@ -127,6 +136,7 @@ impl<T: NewType<u32>> Decoder<T> for UnsignedVarInt {
 
 define_copy_impl!(UnsignedVarInt, u32);
 
+/// An unsigned zigzag encoded long.
 #[derive(Debug, Copy, Clone, Default)]
 pub struct UnsignedVarLong;
 
@@ -173,6 +183,7 @@ impl<T: NewType<u64>> Decoder<T> for UnsignedVarLong {
 
 define_copy_impl!(UnsignedVarLong, u64);
 
+/// A zizag encoded int.
 #[derive(Debug, Copy, Clone, Default)]
 pub struct VarInt;
 
@@ -198,6 +209,7 @@ impl<T: NewType<i32>> Decoder<T> for VarInt {
 
 define_copy_impl!(VarInt, i32);
 
+/// A zizag encoded long.
 #[derive(Debug, Copy, Clone, Default)]
 pub struct VarLong;
 
@@ -223,6 +235,7 @@ impl<T: NewType<i64>> Decoder<T> for VarLong {
 
 define_copy_impl!(VarLong, i64);
 
+/// A v4 UUID.
 #[derive(Debug, Copy, Clone, Default)]
 pub struct Uuid;
 
@@ -249,6 +262,7 @@ impl<T: NewType<uuid::Uuid>> Decoder<T> for Uuid {
 
 define_copy_impl!(Uuid, uuid::Uuid);
 
+/// A string of length up to [`i16::MAX`].
 #[derive(Debug, Copy, Clone, Default)]
 pub struct String;
 
@@ -404,6 +418,7 @@ impl<T: NewType<StrBytes>> Decoder<T> for String {
     }
 }
 
+/// A string whose length is encoded with a `u32` or varint.
 #[derive(Debug, Copy, Clone, Default)]
 pub struct CompactString;
 
@@ -553,6 +568,7 @@ impl<T: NewType<StrBytes>> Decoder<T> for CompactString {
     }
 }
 
+/// A sequence of bytes, up to [`i32::MAX`] long.
 #[derive(Debug, Copy, Clone, Default)]
 pub struct Bytes;
 
@@ -707,6 +723,7 @@ impl Decoder<bytes::Bytes> for Bytes {
     }
 }
 
+/// A sequence of bytes that is encoded with a `u32` or a varint, depending on size.
 #[derive(Debug, Copy, Clone, Default)]
 pub struct CompactBytes;
 
@@ -855,8 +872,10 @@ impl Decoder<bytes::Bytes> for CompactBytes {
     }
 }
 
+/// A struct, which is encoded according to the type it represents.
 #[derive(Debug, Copy, Clone, Default)]
 pub struct Struct {
+    /// The version of the struct.
     pub version: i16
 }
 
@@ -890,6 +909,7 @@ impl<T: MapDecodable> Decoder<(T::Key, T)> for Struct {
     }
 }
 
+/// An array whose length is encoded with an `i32`.
 #[derive(Debug, Copy, Clone)]
 pub struct Array<E>(pub E);
 
@@ -1088,6 +1108,7 @@ impl<K: Eq + Hash, V, E: Decoder<(K, V)>> Decoder<IndexMap<K, V>> for Array<E> {
     }
 }
 
+/// An array whose length is encoded with a varint.
 #[derive(Debug, Copy, Clone)]
 pub struct CompactArray<E>(pub E);
 

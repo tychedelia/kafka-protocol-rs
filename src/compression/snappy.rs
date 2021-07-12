@@ -2,11 +2,13 @@ use bytes::{Bytes, BytesMut};
 use snap::raw::*;
 use log::error;
 
-use protocol_base::buf::{ByteBuf, ByteBufMut};
-use protocol_base::{EncodeError, DecodeError};
+use crate::protocol::buf::{ByteBuf, ByteBufMut};
+use crate::protocol::{EncodeError, DecodeError};
 
 use super::{Compressor, Decompressor};
 
+/// Snappy compression algorithm. See [Kafka's broker configuration](https://kafka.apache.org/documentation/#brokerconfigs_compression.type)
+/// for more information.
 pub struct Snappy;
 
 impl<B: ByteBufMut> Compressor<B> for Snappy {

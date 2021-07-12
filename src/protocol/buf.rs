@@ -1,88 +1,118 @@
+//! Utilities for working with the [`bytes`] crate.
 use std::io::Cursor;
 use std::mem::size_of;
 use std::ops::Range;
 
 use bytes::{Buf, BufMut, Bytes, BytesMut};
+use std::error::Error;
+use std::fmt::{Display, Formatter};
 
-use crate::error::ErrorKind;
+/// Error indicating there are not enough remaining bytes in a buffer to perform a read.
+#[derive(Debug)]
+pub struct NotEnoughBytesError;
 
+impl Display for NotEnoughBytesError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "Not enough bytes remaining in buffer!")
+    }
+}
+
+impl Error for NotEnoughBytesError {}
+
+/// Extension for working with [`bytes::Buf`].
 pub trait ByteBuf: Buf {
+    /// Peek ahead in the buffer by the provided range.
     fn peek_bytes(&mut self, r: Range<usize>) -> Bytes;
+    /// Get `size` bytes from the underlying buffer.
     fn get_bytes(&mut self, size: usize) -> Bytes;
-    fn try_peek_bytes(&mut self, r: Range<usize>) -> Result<Bytes, ErrorKind> {
+    /// Try to peek ahead in the buffer bu the provided range, returning an error if there are less
+    /// bytes than the requested range.
+    fn try_peek_bytes(&mut self, r: Range<usize>) -> Result<Bytes, NotEnoughBytesError> {
         if self.remaining() < r.end {
-            Err(ErrorKind::NotEnoughBytes)
+            Err(NotEnoughBytesError)
         } else {
             Ok(self.peek_bytes(r))
         }
     }
-    fn try_get_bytes(&mut self, size: usize) -> Result<Bytes, ErrorKind> {
+    /// Try to get `size` bytes from the buffer, returning an error if there are less bytes than the
+    /// requested number.
+    fn try_get_bytes(&mut self, size: usize) -> Result<Bytes, NotEnoughBytesError> {
         if self.remaining() < size {
-            Err(ErrorKind::NotEnoughBytes)
+            Err(NotEnoughBytesError)
         } else {
             Ok(self.get_bytes(size))
         }
     }
-    fn try_copy_to_slice(&mut self, dst: &mut [u8]) -> Result<(), ErrorKind> {
+    /// Attempt to copy from buffer into destination slice, returning an error if not enough space
+    /// remains.
+    fn try_copy_to_slice(&mut self, dst: &mut [u8]) -> Result<(), NotEnoughBytesError> {
         if self.remaining() < dst.len() {
-            Err(ErrorKind::NotEnoughBytes)
+            Err(NotEnoughBytesError)
         } else {
             self.copy_to_slice(dst);
             Ok(())
         }
     }
-    fn try_get_u8(&mut self) -> Result<u8, ErrorKind> {
+    /// Attempt to read a `u8` from the buffer, returning an error if not enough space remains.
+    fn try_get_u8(&mut self) -> Result<u8, NotEnoughBytesError> {
         if self.remaining() < size_of::<u8>() {
-            Err(ErrorKind::NotEnoughBytes)
+            Err(NotEnoughBytesError)
         } else {
             Ok(self.get_u8())
         }
     }
-    fn try_get_u16(&mut self) -> Result<u16, ErrorKind> {
+    /// Attempt to read a `u16` from the buffer, returning an error if not enough space remains.
+    fn try_get_u16(&mut self) -> Result<u16, NotEnoughBytesError> {
         if self.remaining() < size_of::<u16>() {
-            Err(ErrorKind::NotEnoughBytes)
+            Err(NotEnoughBytesError)
         } else {
             Ok(self.get_u16())
         }
     }
-    fn try_get_u32(&mut self) -> Result<u32, ErrorKind> {
+    /// Attempt to read a `u32` from the buffer, returning an error if not enough space remains.
+    fn try_get_u32(&mut self) -> Result<u32, NotEnoughBytesError> {
         if self.remaining() < size_of::<u32>() {
-            Err(ErrorKind::NotEnoughBytes)
+            Err(NotEnoughBytesError)
         } else {
             Ok(self.get_u32())
         }
     }
-    fn try_get_i8(&mut self) -> Result<i8, ErrorKind> {
+    /// Attempt to read a `i8` from the buffer, returning an error if not enough space remains.
+    fn try_get_i8(&mut self) -> Result<i8, NotEnoughBytesError> {
         if self.remaining() < size_of::<i8>() {
-            Err(ErrorKind::NotEnoughBytes)
+            Err(NotEnoughBytesError)
         } else {
             Ok(self.get_i8())
         }
     }
-    fn try_get_i16(&mut self) -> Result<i16, ErrorKind> {
+    /// Attempt to read a `i16` from the buffer, returning an error if not enough space remains.
+    fn try_get_i16(&mut self) -> Result<i16, NotEnoughBytesError> {
         if self.remaining() < size_of::<i16>() {
-            Err(ErrorKind::NotEnoughBytes)
+            Err(NotEnoughBytesError)
         } else {
             Ok(self.get_i16())
         }
     }
-    fn try_get_i32(&mut self) -> Result<i32, ErrorKind> {
+    /// Attempt to read a `i32` from the buffer, returning an error if not enough space remains.
+    fn try_get_i32(&mut self) -> Result<i32, NotEnoughBytesError> {
         if self.remaining() < size_of::<i32>() {
-            Err(ErrorKind::NotEnoughBytes)
+            Err(NotEnoughBytesError)
         } else {
             Ok(self.get_i32())
         }
     }
-    fn try_get_i64(&mut self) -> Result<i64, ErrorKind> {
+    /// Attempt to read a `i64` from the buffer, returning an error if not enough space remains.
+    fn try_get_i64(&mut self) -> Result<i64, NotEnoughBytesError> {
         if self.remaining() < size_of::<i64>() {
-            Err(ErrorKind::NotEnoughBytes)
+            Err(NotEnoughBytesError)
         } else {
             Ok(self.get_i64())
         }
     }
-    fn try_get_f64(&mut self) -> Result<f64, ErrorKind> {
+    /// Attempt to read a `f32` from the buffer, returning an error if not enough space remains.
+    fn try_get_f64(&mut self) -> Result<f64, NotEnoughBytesError> {
         if self.remaining() < size_of::<f64>() {
-            Err(ErrorKind::NotEnoughBytes)
+            Err(NotEnoughBytesError)
         } else {
             Ok(self.get_f64())
         }
@@ -114,10 +144,10 @@ impl<T: ByteBuf> ByteBuf for &mut T {
     fn get_bytes(&mut self, size: usize) -> Bytes {
         (**self).get_bytes(size)
     }
-    fn try_peek_bytes(&mut self, r: Range<usize>) -> Result<Bytes, ErrorKind> {
+    fn try_peek_bytes(&mut self, r: Range<usize>) -> Result<Bytes, NotEnoughBytesError> {
         (**self).try_peek_bytes(r)
     }
-    fn try_get_bytes(&mut self, size: usize) -> Result<Bytes, ErrorKind> {
+    fn try_get_bytes(&mut self, size: usize) -> Result<Bytes, NotEnoughBytesError> {
         (**self).try_get_bytes(size)
     }
 }
@@ -144,19 +174,24 @@ impl<T: AsRef<[u8]>> ByteBuf for Cursor<T> {
     }
 }
 
-
+/// A gap of specified length at the specified offset.
 #[derive(Debug, Copy, Clone)]
 pub struct Gap {
     offset: usize,
     len: usize,
 }
 
+/// A type capable of being represented as a gap in a buffer.
 pub trait GapType {
+    /// The type of the gap.
     type Value;
+    /// The size of the gap.
     fn size(&self) -> usize;
+    /// Insert a value into the provided buffer.
     fn put(&self, buf: &mut [u8], value: Self::Value);
 }
 
+/// A gap of type `T`.
 pub struct TypedGap<T> {
     gap: Gap,
     type_: T,
@@ -164,11 +199,11 @@ pub struct TypedGap<T> {
 
 macro_rules! define_gap_types {
     {$($n:ident => $f:ident($t:ty)),*$(,)*} => {
-        pub mod gap {
+        pub(crate) mod gap {
             use super::*;
             $(
                 #[derive(Copy, Clone, Debug)]
-                pub struct $n;
+                pub(crate) struct $n;
 
                 impl GapType for $n {
                     type Value = $t;
@@ -209,25 +244,38 @@ define_gap_types! {
     F64Le => put_f64_le(f64),
 }
 
+/// Extension for working with [`bytes::buf::BufMut`].
 pub trait ByteBufMut: BufMut {
+    /// Get the current offset of the buffer.
     fn offset(&self) -> usize;
+
+    /// Seek to the provided offset in the buffer.
     fn seek(&mut self, offset: usize);
+
+    /// Read a range from the buffer.
     fn range(&mut self, r: Range<usize>) -> &mut [u8];
 
+    /// Put a gap of `len` at the current buffer offset.
     fn put_gap(&mut self, len: usize) -> Gap {
         let res = Gap { offset: self.offset(), len };
         self.seek(res.offset + len);
         res
     }
+
+    /// Read a gap from the buffer.
     fn gap_buf(&mut self, gap: Gap) -> &mut [u8] {
         self.range(gap.offset..(gap.offset + gap.len))
     }
+
+    /// Put a typed gap of type `T` at the current buffer offset.
     fn put_typed_gap<T: GapType>(&mut self, type_: T) -> TypedGap<T> {
         TypedGap {
             gap: self.put_gap(type_.size()),
             type_,
         }
     }
+
+    /// Insert a value of the [`TypedGap`] type at the current buffer offset.
     fn fill_typed_gap<T: GapType>(&mut self, gap: TypedGap<T>, value: T::Value) {
         gap.type_.put(self.gap_buf(gap.gap), value);
     }

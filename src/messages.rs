@@ -1,6 +1,9 @@
-//! THIS CODE IS AUTOMATICALLY GENERATED. DO NOT EDIT.
+//! Messages used by the Kafka protocol.
+//!
+//! These messages are generated programmatically. See the [Kafka's protocol documentation](https://kafka.apache.org/protocol.html) for more information about a given message type.
+// WARNING: the items of this module are generated and should not be edited directly.
 
-use protocol_base::{NewType, Request, StrBytes};
+use crate::protocol::{NewType, Request, StrBytes};
 use std::convert::TryFrom;
 
 pub mod add_offsets_to_txn_request;
@@ -775,74 +778,143 @@ impl Request for AllocateProducerIdsRequest {
     type Response = AllocateProducerIdsResponse;
 }
 
+/// Valid API keys in the Kafka protocol.
 pub enum ApiKey {
+    /// API key for request ProduceRequest
     ProduceKey = 0,
+    /// API key for request FetchRequest
     FetchKey = 1,
+    /// API key for request ListOffsetsRequest
     ListOffsetsKey = 2,
+    /// API key for request MetadataRequest
     MetadataKey = 3,
+    /// API key for request LeaderAndIsrRequest
     LeaderAndIsrKey = 4,
+    /// API key for request StopReplicaRequest
     StopReplicaKey = 5,
+    /// API key for request UpdateMetadataRequest
     UpdateMetadataKey = 6,
+    /// API key for request ControlledShutdownRequest
     ControlledShutdownKey = 7,
+    /// API key for request OffsetCommitRequest
     OffsetCommitKey = 8,
+    /// API key for request OffsetFetchRequest
     OffsetFetchKey = 9,
+    /// API key for request FindCoordinatorRequest
     FindCoordinatorKey = 10,
+    /// API key for request JoinGroupRequest
     JoinGroupKey = 11,
+    /// API key for request HeartbeatRequest
     HeartbeatKey = 12,
+    /// API key for request LeaveGroupRequest
     LeaveGroupKey = 13,
+    /// API key for request SyncGroupRequest
     SyncGroupKey = 14,
+    /// API key for request DescribeGroupsRequest
     DescribeGroupsKey = 15,
+    /// API key for request ListGroupsRequest
     ListGroupsKey = 16,
+    /// API key for request SaslHandshakeRequest
     SaslHandshakeKey = 17,
+    /// API key for request ApiVersionsRequest
     ApiVersionsKey = 18,
+    /// API key for request CreateTopicsRequest
     CreateTopicsKey = 19,
+    /// API key for request DeleteTopicsRequest
     DeleteTopicsKey = 20,
+    /// API key for request DeleteRecordsRequest
     DeleteRecordsKey = 21,
+    /// API key for request InitProducerIdRequest
     InitProducerIdKey = 22,
+    /// API key for request OffsetForLeaderEpochRequest
     OffsetForLeaderEpochKey = 23,
+    /// API key for request AddPartitionsToTxnRequest
     AddPartitionsToTxnKey = 24,
+    /// API key for request AddOffsetsToTxnRequest
     AddOffsetsToTxnKey = 25,
+    /// API key for request EndTxnRequest
     EndTxnKey = 26,
+    /// API key for request WriteTxnMarkersRequest
     WriteTxnMarkersKey = 27,
+    /// API key for request TxnOffsetCommitRequest
     TxnOffsetCommitKey = 28,
+    /// API key for request DescribeAclsRequest
     DescribeAclsKey = 29,
+    /// API key for request CreateAclsRequest
     CreateAclsKey = 30,
+    /// API key for request DeleteAclsRequest
     DeleteAclsKey = 31,
+    /// API key for request DescribeConfigsRequest
     DescribeConfigsKey = 32,
+    /// API key for request AlterConfigsRequest
     AlterConfigsKey = 33,
+    /// API key for request AlterReplicaLogDirsRequest
     AlterReplicaLogDirsKey = 34,
+    /// API key for request DescribeLogDirsRequest
     DescribeLogDirsKey = 35,
+    /// API key for request SaslAuthenticateRequest
     SaslAuthenticateKey = 36,
+    /// API key for request CreatePartitionsRequest
     CreatePartitionsKey = 37,
+    /// API key for request CreateDelegationTokenRequest
     CreateDelegationTokenKey = 38,
+    /// API key for request RenewDelegationTokenRequest
     RenewDelegationTokenKey = 39,
+    /// API key for request ExpireDelegationTokenRequest
     ExpireDelegationTokenKey = 40,
+    /// API key for request DescribeDelegationTokenRequest
     DescribeDelegationTokenKey = 41,
+    /// API key for request DeleteGroupsRequest
     DeleteGroupsKey = 42,
+    /// API key for request ElectLeadersRequest
     ElectLeadersKey = 43,
+    /// API key for request IncrementalAlterConfigsRequest
     IncrementalAlterConfigsKey = 44,
+    /// API key for request AlterPartitionReassignmentsRequest
     AlterPartitionReassignmentsKey = 45,
+    /// API key for request ListPartitionReassignmentsRequest
     ListPartitionReassignmentsKey = 46,
+    /// API key for request OffsetDeleteRequest
     OffsetDeleteKey = 47,
+    /// API key for request DescribeClientQuotasRequest
     DescribeClientQuotasKey = 48,
+    /// API key for request AlterClientQuotasRequest
     AlterClientQuotasKey = 49,
+    /// API key for request DescribeUserScramCredentialsRequest
     DescribeUserScramCredentialsKey = 50,
+    /// API key for request AlterUserScramCredentialsRequest
     AlterUserScramCredentialsKey = 51,
+    /// API key for request VoteRequest
     VoteKey = 52,
+    /// API key for request BeginQuorumEpochRequest
     BeginQuorumEpochKey = 53,
+    /// API key for request EndQuorumEpochRequest
     EndQuorumEpochKey = 54,
+    /// API key for request DescribeQuorumRequest
     DescribeQuorumKey = 55,
+    /// API key for request AlterIsrRequest
     AlterIsrKey = 56,
+    /// API key for request UpdateFeaturesRequest
     UpdateFeaturesKey = 57,
+    /// API key for request EnvelopeRequest
     EnvelopeKey = 58,
+    /// API key for request FetchSnapshotRequest
     FetchSnapshotKey = 59,
+    /// API key for request DescribeClusterRequest
     DescribeClusterKey = 60,
+    /// API key for request DescribeProducersRequest
     DescribeProducersKey = 61,
+    /// API key for request BrokerRegistrationRequest
     BrokerRegistrationKey = 62,
+    /// API key for request BrokerHeartbeatRequest
     BrokerHeartbeatKey = 63,
+    /// API key for request UnregisterBrokerRequest
     UnregisterBrokerKey = 64,
+    /// API key for request DescribeTransactionsRequest
     DescribeTransactionsKey = 65,
+    /// API key for request ListTransactionsRequest
     ListTransactionsKey = 66,
+    /// API key for request AllocateProducerIdsRequest
     AllocateProducerIdsKey = 67,
 }
 
@@ -924,150 +996,289 @@ impl TryFrom<i16> for ApiKey {
     }
 }
 
+/// Wrapping enum for all requests in the Kafka protocol.
 #[derive(Debug)]
 pub enum RequestKind {
+    /// ProduceRequest,
     ProduceRequest(ProduceRequest),
+    /// FetchRequest,
     FetchRequest(FetchRequest),
+    /// ListOffsetsRequest,
     ListOffsetsRequest(ListOffsetsRequest),
+    /// MetadataRequest,
     MetadataRequest(MetadataRequest),
+    /// LeaderAndIsrRequest,
     LeaderAndIsrRequest(LeaderAndIsrRequest),
+    /// StopReplicaRequest,
     StopReplicaRequest(StopReplicaRequest),
+    /// UpdateMetadataRequest,
     UpdateMetadataRequest(UpdateMetadataRequest),
+    /// ControlledShutdownRequest,
     ControlledShutdownRequest(ControlledShutdownRequest),
+    /// OffsetCommitRequest,
     OffsetCommitRequest(OffsetCommitRequest),
+    /// OffsetFetchRequest,
     OffsetFetchRequest(OffsetFetchRequest),
+    /// FindCoordinatorRequest,
     FindCoordinatorRequest(FindCoordinatorRequest),
+    /// JoinGroupRequest,
     JoinGroupRequest(JoinGroupRequest),
+    /// HeartbeatRequest,
     HeartbeatRequest(HeartbeatRequest),
+    /// LeaveGroupRequest,
     LeaveGroupRequest(LeaveGroupRequest),
+    /// SyncGroupRequest,
     SyncGroupRequest(SyncGroupRequest),
+    /// DescribeGroupsRequest,
     DescribeGroupsRequest(DescribeGroupsRequest),
+    /// ListGroupsRequest,
     ListGroupsRequest(ListGroupsRequest),
+    /// SaslHandshakeRequest,
     SaslHandshakeRequest(SaslHandshakeRequest),
+    /// ApiVersionsRequest,
     ApiVersionsRequest(ApiVersionsRequest),
+    /// CreateTopicsRequest,
     CreateTopicsRequest(CreateTopicsRequest),
+    /// DeleteTopicsRequest,
     DeleteTopicsRequest(DeleteTopicsRequest),
+    /// DeleteRecordsRequest,
     DeleteRecordsRequest(DeleteRecordsRequest),
+    /// InitProducerIdRequest,
     InitProducerIdRequest(InitProducerIdRequest),
+    /// OffsetForLeaderEpochRequest,
     OffsetForLeaderEpochRequest(OffsetForLeaderEpochRequest),
+    /// AddPartitionsToTxnRequest,
     AddPartitionsToTxnRequest(AddPartitionsToTxnRequest),
+    /// AddOffsetsToTxnRequest,
     AddOffsetsToTxnRequest(AddOffsetsToTxnRequest),
+    /// EndTxnRequest,
     EndTxnRequest(EndTxnRequest),
+    /// WriteTxnMarkersRequest,
     WriteTxnMarkersRequest(WriteTxnMarkersRequest),
+    /// TxnOffsetCommitRequest,
     TxnOffsetCommitRequest(TxnOffsetCommitRequest),
+    /// DescribeAclsRequest,
     DescribeAclsRequest(DescribeAclsRequest),
+    /// CreateAclsRequest,
     CreateAclsRequest(CreateAclsRequest),
+    /// DeleteAclsRequest,
     DeleteAclsRequest(DeleteAclsRequest),
+    /// DescribeConfigsRequest,
     DescribeConfigsRequest(DescribeConfigsRequest),
+    /// AlterConfigsRequest,
     AlterConfigsRequest(AlterConfigsRequest),
+    /// AlterReplicaLogDirsRequest,
     AlterReplicaLogDirsRequest(AlterReplicaLogDirsRequest),
+    /// DescribeLogDirsRequest,
     DescribeLogDirsRequest(DescribeLogDirsRequest),
+    /// SaslAuthenticateRequest,
     SaslAuthenticateRequest(SaslAuthenticateRequest),
+    /// CreatePartitionsRequest,
     CreatePartitionsRequest(CreatePartitionsRequest),
+    /// CreateDelegationTokenRequest,
     CreateDelegationTokenRequest(CreateDelegationTokenRequest),
+    /// RenewDelegationTokenRequest,
     RenewDelegationTokenRequest(RenewDelegationTokenRequest),
+    /// ExpireDelegationTokenRequest,
     ExpireDelegationTokenRequest(ExpireDelegationTokenRequest),
+    /// DescribeDelegationTokenRequest,
     DescribeDelegationTokenRequest(DescribeDelegationTokenRequest),
+    /// DeleteGroupsRequest,
     DeleteGroupsRequest(DeleteGroupsRequest),
+    /// ElectLeadersRequest,
     ElectLeadersRequest(ElectLeadersRequest),
+    /// IncrementalAlterConfigsRequest,
     IncrementalAlterConfigsRequest(IncrementalAlterConfigsRequest),
+    /// AlterPartitionReassignmentsRequest,
     AlterPartitionReassignmentsRequest(AlterPartitionReassignmentsRequest),
+    /// ListPartitionReassignmentsRequest,
     ListPartitionReassignmentsRequest(ListPartitionReassignmentsRequest),
+    /// OffsetDeleteRequest,
     OffsetDeleteRequest(OffsetDeleteRequest),
+    /// DescribeClientQuotasRequest,
     DescribeClientQuotasRequest(DescribeClientQuotasRequest),
+    /// AlterClientQuotasRequest,
     AlterClientQuotasRequest(AlterClientQuotasRequest),
+    /// DescribeUserScramCredentialsRequest,
     DescribeUserScramCredentialsRequest(DescribeUserScramCredentialsRequest),
+    /// AlterUserScramCredentialsRequest,
     AlterUserScramCredentialsRequest(AlterUserScramCredentialsRequest),
+    /// VoteRequest,
     VoteRequest(VoteRequest),
+    /// BeginQuorumEpochRequest,
     BeginQuorumEpochRequest(BeginQuorumEpochRequest),
+    /// EndQuorumEpochRequest,
     EndQuorumEpochRequest(EndQuorumEpochRequest),
+    /// DescribeQuorumRequest,
     DescribeQuorumRequest(DescribeQuorumRequest),
+    /// AlterIsrRequest,
     AlterIsrRequest(AlterIsrRequest),
+    /// UpdateFeaturesRequest,
     UpdateFeaturesRequest(UpdateFeaturesRequest),
+    /// EnvelopeRequest,
     EnvelopeRequest(EnvelopeRequest),
+    /// FetchSnapshotRequest,
     FetchSnapshotRequest(FetchSnapshotRequest),
+    /// DescribeClusterRequest,
     DescribeClusterRequest(DescribeClusterRequest),
+    /// DescribeProducersRequest,
     DescribeProducersRequest(DescribeProducersRequest),
+    /// BrokerRegistrationRequest,
     BrokerRegistrationRequest(BrokerRegistrationRequest),
+    /// BrokerHeartbeatRequest,
     BrokerHeartbeatRequest(BrokerHeartbeatRequest),
+    /// UnregisterBrokerRequest,
     UnregisterBrokerRequest(UnregisterBrokerRequest),
+    /// DescribeTransactionsRequest,
     DescribeTransactionsRequest(DescribeTransactionsRequest),
+    /// ListTransactionsRequest,
     ListTransactionsRequest(ListTransactionsRequest),
+    /// AllocateProducerIdsRequest,
     AllocateProducerIdsRequest(AllocateProducerIdsRequest),
 }
 
+/// Wrapping enum for all responses in the Kafka protocol.
 #[derive(Debug)]
 pub enum ResponseKind {
+    /// ProduceResponse,
     ProduceResponse(ProduceResponse),
+    /// FetchResponse,
     FetchResponse(FetchResponse),
+    /// ListOffsetsResponse,
     ListOffsetsResponse(ListOffsetsResponse),
+    /// MetadataResponse,
     MetadataResponse(MetadataResponse),
+    /// LeaderAndIsrResponse,
     LeaderAndIsrResponse(LeaderAndIsrResponse),
+    /// StopReplicaResponse,
     StopReplicaResponse(StopReplicaResponse),
+    /// UpdateMetadataResponse,
     UpdateMetadataResponse(UpdateMetadataResponse),
+    /// ControlledShutdownResponse,
     ControlledShutdownResponse(ControlledShutdownResponse),
+    /// OffsetCommitResponse,
     OffsetCommitResponse(OffsetCommitResponse),
+    /// OffsetFetchResponse,
     OffsetFetchResponse(OffsetFetchResponse),
+    /// FindCoordinatorResponse,
     FindCoordinatorResponse(FindCoordinatorResponse),
+    /// JoinGroupResponse,
     JoinGroupResponse(JoinGroupResponse),
+    /// HeartbeatResponse,
     HeartbeatResponse(HeartbeatResponse),
+    /// LeaveGroupResponse,
     LeaveGroupResponse(LeaveGroupResponse),
+    /// SyncGroupResponse,
     SyncGroupResponse(SyncGroupResponse),
+    /// DescribeGroupsResponse,
     DescribeGroupsResponse(DescribeGroupsResponse),
+    /// ListGroupsResponse,
     ListGroupsResponse(ListGroupsResponse),
+    /// SaslHandshakeResponse,
     SaslHandshakeResponse(SaslHandshakeResponse),
+    /// ApiVersionsResponse,
     ApiVersionsResponse(ApiVersionsResponse),
+    /// CreateTopicsResponse,
     CreateTopicsResponse(CreateTopicsResponse),
+    /// DeleteTopicsResponse,
     DeleteTopicsResponse(DeleteTopicsResponse),
+    /// DeleteRecordsResponse,
     DeleteRecordsResponse(DeleteRecordsResponse),
+    /// InitProducerIdResponse,
     InitProducerIdResponse(InitProducerIdResponse),
+    /// OffsetForLeaderEpochResponse,
     OffsetForLeaderEpochResponse(OffsetForLeaderEpochResponse),
+    /// AddPartitionsToTxnResponse,
     AddPartitionsToTxnResponse(AddPartitionsToTxnResponse),
+    /// AddOffsetsToTxnResponse,
     AddOffsetsToTxnResponse(AddOffsetsToTxnResponse),
+    /// EndTxnResponse,
     EndTxnResponse(EndTxnResponse),
+    /// WriteTxnMarkersResponse,
     WriteTxnMarkersResponse(WriteTxnMarkersResponse),
+    /// TxnOffsetCommitResponse,
     TxnOffsetCommitResponse(TxnOffsetCommitResponse),
+    /// DescribeAclsResponse,
     DescribeAclsResponse(DescribeAclsResponse),
+    /// CreateAclsResponse,
     CreateAclsResponse(CreateAclsResponse),
+    /// DeleteAclsResponse,
     DeleteAclsResponse(DeleteAclsResponse),
+    /// DescribeConfigsResponse,
     DescribeConfigsResponse(DescribeConfigsResponse),
+    /// AlterConfigsResponse,
     AlterConfigsResponse(AlterConfigsResponse),
+    /// AlterReplicaLogDirsResponse,
     AlterReplicaLogDirsResponse(AlterReplicaLogDirsResponse),
+    /// DescribeLogDirsResponse,
     DescribeLogDirsResponse(DescribeLogDirsResponse),
+    /// SaslAuthenticateResponse,
     SaslAuthenticateResponse(SaslAuthenticateResponse),
+    /// CreatePartitionsResponse,
     CreatePartitionsResponse(CreatePartitionsResponse),
+    /// CreateDelegationTokenResponse,
     CreateDelegationTokenResponse(CreateDelegationTokenResponse),
+    /// RenewDelegationTokenResponse,
     RenewDelegationTokenResponse(RenewDelegationTokenResponse),
+    /// ExpireDelegationTokenResponse,
     ExpireDelegationTokenResponse(ExpireDelegationTokenResponse),
+    /// DescribeDelegationTokenResponse,
     DescribeDelegationTokenResponse(DescribeDelegationTokenResponse),
+    /// DeleteGroupsResponse,
     DeleteGroupsResponse(DeleteGroupsResponse),
+    /// ElectLeadersResponse,
     ElectLeadersResponse(ElectLeadersResponse),
+    /// IncrementalAlterConfigsResponse,
     IncrementalAlterConfigsResponse(IncrementalAlterConfigsResponse),
+    /// AlterPartitionReassignmentsResponse,
     AlterPartitionReassignmentsResponse(AlterPartitionReassignmentsResponse),
+    /// ListPartitionReassignmentsResponse,
     ListPartitionReassignmentsResponse(ListPartitionReassignmentsResponse),
+    /// OffsetDeleteResponse,
     OffsetDeleteResponse(OffsetDeleteResponse),
+    /// DescribeClientQuotasResponse,
     DescribeClientQuotasResponse(DescribeClientQuotasResponse),
+    /// AlterClientQuotasResponse,
     AlterClientQuotasResponse(AlterClientQuotasResponse),
+    /// DescribeUserScramCredentialsResponse,
     DescribeUserScramCredentialsResponse(DescribeUserScramCredentialsResponse),
+    /// AlterUserScramCredentialsResponse,
     AlterUserScramCredentialsResponse(AlterUserScramCredentialsResponse),
+    /// VoteResponse,
     VoteResponse(VoteResponse),
+    /// BeginQuorumEpochResponse,
     BeginQuorumEpochResponse(BeginQuorumEpochResponse),
+    /// EndQuorumEpochResponse,
     EndQuorumEpochResponse(EndQuorumEpochResponse),
+    /// DescribeQuorumResponse,
     DescribeQuorumResponse(DescribeQuorumResponse),
+    /// AlterIsrResponse,
     AlterIsrResponse(AlterIsrResponse),
+    /// UpdateFeaturesResponse,
     UpdateFeaturesResponse(UpdateFeaturesResponse),
+    /// EnvelopeResponse,
     EnvelopeResponse(EnvelopeResponse),
+    /// FetchSnapshotResponse,
     FetchSnapshotResponse(FetchSnapshotResponse),
+    /// DescribeClusterResponse,
     DescribeClusterResponse(DescribeClusterResponse),
+    /// DescribeProducersResponse,
     DescribeProducersResponse(DescribeProducersResponse),
+    /// BrokerRegistrationResponse,
     BrokerRegistrationResponse(BrokerRegistrationResponse),
+    /// BrokerHeartbeatResponse,
     BrokerHeartbeatResponse(BrokerHeartbeatResponse),
+    /// UnregisterBrokerResponse,
     UnregisterBrokerResponse(UnregisterBrokerResponse),
+    /// DescribeTransactionsResponse,
     DescribeTransactionsResponse(DescribeTransactionsResponse),
+    /// ListTransactionsResponse,
     ListTransactionsResponse(ListTransactionsResponse),
+    /// AllocateProducerIdsResponse,
     AllocateProducerIdsResponse(AllocateProducerIdsResponse),
 }
 
+/// The ID of the requesting broker
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default, Copy)]
 pub struct BrokerId(pub i32);
 
@@ -1092,6 +1303,7 @@ impl std::cmp::PartialEq<BrokerId> for i32 {
 }
 impl NewType<i32> for BrokerId {}
 
+/// The unique group identifier.
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default)]
 pub struct GroupId(pub StrBytes);
 
@@ -1116,6 +1328,7 @@ impl std::cmp::PartialEq<GroupId> for StrBytes {
 }
 impl NewType<StrBytes> for GroupId {}
 
+/// Current producer id in use by the transactional id.
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default, Copy)]
 pub struct ProducerId(pub i64);
 
@@ -1140,6 +1353,7 @@ impl std::cmp::PartialEq<ProducerId> for i64 {
 }
 impl NewType<i64> for ProducerId {}
 
+/// The name of the topic.
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default)]
 pub struct TopicName(pub StrBytes);
 
@@ -1164,6 +1378,7 @@ impl std::cmp::PartialEq<TopicName> for StrBytes {
 }
 impl NewType<StrBytes> for TopicName {}
 
+/// The transactional id corresponding to the transaction.
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default)]
 pub struct TransactionalId(pub StrBytes);
 

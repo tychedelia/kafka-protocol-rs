@@ -1,48 +1,99 @@
+//! Provides utilities for working with records (Kafka messages).
+//!
+//! [`FetchResponse`](crate::messages::fetch_response::FetchResponse) and associated APIs for interacting with reading and writing
+//! contain records in a raw format, allowing the user to implement their own logic for interacting
+//! with those values.
+//!
+//! # Example
+//!
+//! Decoding a set of records from a [`FetchResponse`](crate::messages::fetch_response::FetchResponse):
+//! ```rust
+//! use kafka_protocol::messages::FetchResponse;
+//! use kafka_protocol::Decodable;
+//! use kafka_protocol::records::RecordBatchDecoder;
+//! use bytes::Bytes;
+//!
+//! # const HEADER: [u8; 45] = [ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x05, 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,];
+//! # const RECORD: [u8; 79] = [ 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x43, 0x0, 0x0, 0x0, 0x0, 0x2, 0x73, 0x6d, 0x29, 0x7b, 0x0, 0b00000000, 0x0, 0x0, 0x0, 0x3, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x1, 0x22, 0x1, 0xd0, 0xf, 0x2, 0xa, 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0xa, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x0,];
+//! # let mut res = vec![];
+//! # res.extend_from_slice(&HEADER[..]);
+//! # res.extend_from_slice(&[0x00, 0x00, 0x00, 0x4f]);
+//! # res.extend_from_slice(&RECORD[..]);
+//! # let mut buf = Bytes::from(res);
+//!
+//! let res = FetchResponse::decode(&mut buf, 4).unwrap();
+//!
+//! for topic in res.responses {
+//!     for partition in topic.partitions {
+//!          let mut records = partition.records.unwrap();
+//!          let records = RecordBatchDecoder::decode(&mut records).unwrap();
+//!     }
+//! }
+//! ```
 use bytes::Bytes;
 use indexmap::IndexMap;
 use log::{info, error};
 use crc::{CRC_32_CKSUM, CRC_32_ISCSI, Crc};
 use string::TryFrom;
 
-use protocol_base::{Encoder, Decoder, EncodeError, DecodeError, StrBytes, types, buf::{ByteBuf, ByteBufMut, gap}};
+use crate::protocol::{Encoder, Decoder, EncodeError, DecodeError, StrBytes, types, buf::{ByteBuf, ByteBufMut, gap}};
 
 use super::compression::{self as cmpr, Compressor, Decompressor};
 use std::cmp::Ordering;
 
+/// CRC-32C (Castagnoli) cyclic redundancy check
 pub const CASTAGNOLI: Crc<u32> = Crc::<u32>::new(&CRC_32_ISCSI);
+/// IEEE (checksum) cyclic redundancy check.
 pub const IEEE: Crc<u32> = Crc::<u32>::new(&CRC_32_CKSUM);
 
-
+/// The different types of compression supported by Kafka.
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum Compression {
+    /// No compression.
     None = 0,
+    /// gzip compression library.
     Gzip = 1,
+    /// Google's Snappy compression library.
     Snappy = 2,
+    /// The LZ4 compression library.
     Lz4 = 3,
+    /// Facebook's ZStandard compression library.
     Zstd = 4,
 }
 
+/// Indicates the meaning of the timestamp field on a record.
 #[derive(Debug, Copy, Clone)]
 pub enum TimestampType {
+    /// The timestamp represents when the record was created by the client.
     Creation = 0,
+    /// The timestamp represents when the record was appended to the log.
     LogAppend = 1,
 }
 
+/// Options for encoding and compressing a batch of records. Note, not all compression algorithms
+/// are currently implemented by this library.
 pub struct RecordEncodeOptions {
     version: i8,
     compression: Compression,
 }
 
+/// Value to indicate missing producer id.
 pub const NO_PRODUCER_ID: i64 = -1;
+/// Value to indicate missing producer epoch.
 pub const NO_PRODUCER_EPOCH: i16 = -1;
+/// Value to indicated missing leader epoch.
 pub const NO_PARTITION_LEADER_EPOCH: i32 = -1;
+/// Value to indicate missing sequence id.
 pub const NO_SEQUENCE: i32 = -1;
+/// Value to indicate missing timestamp.
 pub const NO_TIMESTAMP: i64 = -1;
 
 #[derive(Debug, Clone)]
+/// Batch encoder for Kafka records.
 pub struct RecordBatchEncoder;
 
 #[derive(Debug, Clone)]
+/// Batch decoder for Kafka records.
 pub struct RecordBatchDecoder;
 
 struct BatchDecodeInfo {
@@ -58,28 +109,43 @@ struct BatchDecodeInfo {
     producer_epoch: i16,
 }
 
+/// A Kafka message containing key, payload value, and all associated metadata.
 #[derive(Debug, Clone)]
 pub struct Record {
     // Batch properties
+    /// Whether this record is transactional.
     pub transactional: bool,
+    /// Whether this record is a control message, which should not be exposed to the client.
     pub control: bool,
+    /// Epoch of the leader for this record 's partition.
     pub partition_leader_epoch: i32,
+    /// The identifier of the producer.
     pub producer_id: i64,
+    /// Producer metadata used to implement transactional writes.
     pub producer_epoch: i16,
 
     // Record properties
+    /// Indicates whether timestamp represents record creation or appending to the log.
     pub timestamp_type: TimestampType,
+    /// Message offset within a partition.
     pub offset: i64,
+    /// Sequence identifier used for idempotent delivery.
     pub sequence: i32,
+    /// Timestamp the record. See also `timestamp_type`.
     pub timestamp: i64,
+    /// The key of the record.
     pub key: Option<Bytes>,
+    /// The payload of the record.
     pub value: Option<Bytes>,
+    /// Headers associated with the record's payload.
     pub headers: IndexMap<StrBytes, Option<Bytes>>,
 }
 
 const MAGIC_BYTE_OFFSET: usize = 16;
 
 impl RecordBatchEncoder {
+    /// Encode records into given buffer, using provided encoding options that select the encoding
+    /// strategy based on version.
     pub fn encode<'a, B, I>(
         buf: &mut B,
         records: I,
@@ -306,6 +372,7 @@ impl RecordBatchEncoder {
 }
 
 impl RecordBatchDecoder {
+    /// Decode the provided buffer into a vec of records.
     pub fn decode<B: ByteBuf>(buf: &mut B) -> Result<Vec<Record>, DecodeError> {
         let mut records = Vec::new();
         while buf.has_remaining() {

@@ -1,8 +1,9 @@
-use protocol_base::buf::{ByteBuf, ByteBufMut};
-use protocol_base::{EncodeError, DecodeError};
+use crate::protocol::buf::{ByteBuf, ByteBufMut};
+use crate::protocol::{EncodeError, DecodeError};
 
 use super::{Compressor, Decompressor};
 
+/// Noop compression implementation.
 pub struct None;
 
 impl<B: ByteBufMut> Compressor<B> for None {

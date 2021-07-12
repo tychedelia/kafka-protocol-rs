@@ -1,4 +1,7 @@
-//! THIS CODE IS AUTOMATICALLY GENERATED. DO NOT EDIT.
+//! AddOffsetsToTxnRequest
+//!
+//! See the schema for this message [here](https://github.com/apache/kafka/blob/trunk/clients/src/main/resources/common/message/AddOffsetsToTxnRequest.json).
+// WARNING: the items of this module are generated and should not be edited directly
 #![allow(unused)]
 
 use std::borrow::Borrow;
@@ -8,7 +11,7 @@ use bytes::Bytes;
 use log::error;
 use uuid::Uuid;
 
-use protocol_base::{
+use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
     types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
 };

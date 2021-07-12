@@ -9,6 +9,7 @@ use inflector::Inflector;
 use super::spec::{FieldSpec, PrimitiveType, Spec, SpecType, TypeSpec, VersionSpec};
 use super::code_writer::CodeWriter;
 use super::expr::{Expr, CmpType};
+use std::cmp::Ordering;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 struct WrittenStruct {
@@ -16,11 +17,32 @@ struct WrittenStruct {
     map_key: Option<Box<PreparedType>>,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Debug, Clone)]
 pub struct EntityType {
     pub name: String,
+    pub doc: String,
     pub inner: PrimitiveType,
 }
+
+impl PartialOrd for EntityType {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.name.cmp(&other.name))
+    }
+}
+
+impl Ord for EntityType {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.name.cmp(&other.name)
+    }
+}
+
+impl PartialEq for EntityType {
+    fn eq(&self, other: &Self) -> bool {
+        self.name == other.name
+    }
+}
+
+impl Eq for EntityType {}
 
 fn primitive_default(prim: PrimitiveType) -> PreparedDefault {
     use PrimitiveType::*;
@@ -196,6 +218,7 @@ fn prepare_field_type<W: Write>(
                 let entity_type = EntityType {
                     inner: *prim,
                     name: entity_type.to_pascal_case(),
+                    doc: field.about.clone(),
                 };
                 entity_types.insert(entity_type.clone());
                 PreparedType::Entity(entity_type)
@@ -847,8 +870,12 @@ fn write_struct_def<W: Write>(
 
 fn write_file_header<W: Write>(
     w: &mut CodeWriter<W>,
+    name: &str,
 ) -> Result<(), Error> {
-    writeln!(w, "//! THIS CODE IS AUTOMATICALLY GENERATED. DO NOT EDIT.")?;
+    writeln!(w, "//! {}", name)?;
+    writeln!(w, "//!")?;
+    writeln!(w, "//! See the schema for this message [here](https://github.com/apache/kafka/blob/trunk/clients/src/main/resources/common/message/{}.json).", name)?;
+    writeln!(w, "// WARNING: the items of this module are generated and should not be edited directly")?;
     writeln!(w, "#![allow(unused)]")?;
     writeln!(w)?;
     writeln!(w, "use std::borrow::Borrow;")?;
@@ -858,7 +885,7 @@ fn write_file_header<W: Write>(
     writeln!(w, "use log::error;")?;
     writeln!(w, "use uuid::Uuid;")?;
     writeln!(w)?;
-    writeln!(w, "use protocol_base::{{")?;
+    writeln!(w, "use crate::protocol::{{")?;
     writeln!(w, "    Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,")?;
     writeln!(w, "    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{{ByteBuf, ByteBufMut}}")?;
     writeln!(w, "}};")?;
@@ -881,7 +908,7 @@ pub fn generate(
     let valid_versions = spec.valid_versions;
     let flexible_msg_versions = spec.flexible_versions.unwrap_or_default();
 
-    write_file_header(&mut file)?;
+    write_file_header(&mut file, &struct_name)?;
     for common_struct in &spec.common_structs {
         write_struct_def(&mut file, &common_struct.name, &common_struct.fields, entity_types, valid_versions, flexible_msg_versions)?;
     }

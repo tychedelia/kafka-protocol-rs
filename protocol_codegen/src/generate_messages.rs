@@ -54,9 +54,12 @@ pub fn run() -> Result<(), Error> {
     let module_path = format!("{}.rs", OUTPUT_PATH);
     let mut module_file = File::create(&module_path)?;
 
-    writeln!(module_file, "//! THIS CODE IS AUTOMATICALLY GENERATED. DO NOT EDIT.")?;
+    writeln!(module_file, "//! Messages used by the Kafka protocol.")?;
+    writeln!(module_file, "//!")?;
+    writeln!(module_file, "//! These messages are generated programmatically. See the [Kafka's protocol documentation](https://kafka.apache.org/protocol.html) for more information about a given message type.")?;
+    writeln!(module_file, "// WARNING: the items of this module are generated and should not be edited directly.")?;
     writeln!(module_file)?;
-    writeln!(module_file, "use protocol_base::{{NewType, Request, StrBytes}};")?;
+    writeln!(module_file, "use crate::protocol::{{NewType, Request, StrBytes}};")?;
     writeln!(module_file, "use std::convert::TryFrom;")?;
     writeln!(module_file)?;
 
@@ -91,9 +94,10 @@ pub fn run() -> Result<(), Error> {
         writeln!(module_file)?;
     }
 
-
+    writeln!(module_file, "/// Valid API keys in the Kafka protocol.")?;
     writeln!(module_file, "pub enum ApiKey {{")?;
     for (api_key, request_type) in request_types.iter() {
+        writeln!(module_file, "    /// API key for request {}", request_type)?;
         writeln!(module_file, "    {} = {},", request_type.replace("Request", "Key"), api_key)?;
     }
     writeln!(module_file, "}}")?;
@@ -121,17 +125,21 @@ pub fn run() -> Result<(), Error> {
     writeln!(module_file, "}}")?;
     writeln!(module_file)?;
 
+    writeln!(module_file, "/// Wrapping enum for all requests in the Kafka protocol.")?;
     writeln!(module_file, "#[derive(Debug)]")?;
     writeln!(module_file, "pub enum RequestKind {{")?;
     for (_, request_type) in request_types.iter() {
+        writeln!(module_file, "    /// {},", request_type)?;
         writeln!(module_file, "    {}({}),", request_type, request_type)?;
     }
     writeln!(module_file, "}}")?;
     writeln!(module_file)?;
 
+    writeln!(module_file, "/// Wrapping enum for all responses in the Kafka protocol.")?;
     writeln!(module_file, "#[derive(Debug)]")?;
     writeln!(module_file, "pub enum ResponseKind {{")?;
     for (_, response_type) in response_types.iter() {
+        writeln!(module_file, "    /// {},", response_type)?;
         writeln!(module_file, "    {}({}),", response_type, response_type)?;
     }
     writeln!(module_file, "}}")?;
@@ -145,6 +153,7 @@ pub fn run() -> Result<(), Error> {
 
         let rust_name = entity_type.inner.rust_name();
 
+        writeln!(module_file, "/// {}", entity_type.doc)?;
         writeln!(module_file, "#[derive({})]", derives.join(", "))?;
         writeln!(module_file, "pub struct {}(pub {});\n", entity_type.name, rust_name)?;
         writeln!(module_file, "impl From<{}> for {} {{", rust_name, entity_type.name)?;
