@@ -9,7 +9,7 @@
 //! Decoding a set of records from a [`FetchResponse`](crate::messages::fetch_response::FetchResponse):
 //! ```rust
 //! use kafka_protocol::messages::FetchResponse;
-//! use kafka_protocol::Decodable;
+//! use kafka_protocol::protocol::Decodable;
 //! use kafka_protocol::records::RecordBatchDecoder;
 //! use bytes::Bytes;
 //!

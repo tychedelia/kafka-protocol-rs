@@ -1,7 +1,7 @@
-use bytes::{Bytes, BytesMut};
+use bytes::Bytes;
 use kafka_protocol::{
-    Decodable,
-    messages::{fetch_response, FetchResponse},
+    protocol::Decodable,
+    messages::FetchResponse,
     records::RecordBatchDecoder,
 };
 

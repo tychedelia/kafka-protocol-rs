@@ -69,10 +69,9 @@
 //! A simple example for decoding an unknown message encoded in `buf`:
 //! ```rust
 //! use kafka_protocol::messages::{RequestHeader, ApiVersionsRequest, ApiKey, RequestKind};
-//! use kafka_protocol::protocol::{Encodable, Decodable};
+//! use kafka_protocol::protocol::{Encodable, Decodable, StrBytes};
 //! use bytes::{BytesMut, Buf};
 //! use std::convert::TryFrom;
-//! # use kafka_protocol::protocol::types::StrBytes;
 //! use kafka_protocol::protocol::buf::ByteBuf;
 //! # let mut buf = BytesMut::new();
 //! # let mut req_header = RequestHeader::default();

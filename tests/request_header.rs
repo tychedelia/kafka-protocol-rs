@@ -1,5 +1,5 @@
 use kafka_protocol::messages::RequestHeader;
-use kafka_protocol::Decodable;
+use kafka_protocol::protocol::Decodable;
 use bytes::Bytes;
 
 #[test]
