@@ -17,22 +17,22 @@ use crate::protocol::{
 };
 
 
-/// Valid versions: 0-11
+/// Valid versions: 0-12
 #[derive(Debug, Clone, PartialEq)]
 pub struct MetadataResponseBroker {
     /// The broker hostname.
     /// 
-    /// Supported API versions: 0-11
+    /// Supported API versions: 0-12
     pub host: StrBytes,
 
     /// The broker port.
     /// 
-    /// Supported API versions: 0-11
+    /// Supported API versions: 0-12
     pub port: i32,
 
     /// The rack of the broker, or null if it has not been assigned to a rack.
     /// 
-    /// Supported API versions: 1-11
+    /// Supported API versions: 1-12
     pub rack: Option<StrBytes>,
 
     /// Other tagged fields
@@ -149,45 +149,45 @@ impl Default for MetadataResponseBroker {
 }
 
 impl Message for MetadataResponseBroker {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 11 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 12 };
 }
 
-/// Valid versions: 0-11
+/// Valid versions: 0-12
 #[derive(Debug, Clone, PartialEq)]
 pub struct MetadataResponsePartition {
     /// The partition error, or 0 if there was no error.
     /// 
-    /// Supported API versions: 0-11
+    /// Supported API versions: 0-12
     pub error_code: i16,
 
     /// The partition index.
     /// 
-    /// Supported API versions: 0-11
+    /// Supported API versions: 0-12
     pub partition_index: i32,
 
     /// The ID of the leader broker.
     /// 
-    /// Supported API versions: 0-11
+    /// Supported API versions: 0-12
     pub leader_id: super::BrokerId,
 
     /// The leader epoch of this partition.
     /// 
-    /// Supported API versions: 7-11
+    /// Supported API versions: 7-12
     pub leader_epoch: i32,
 
     /// The set of all nodes that host this partition.
     /// 
-    /// Supported API versions: 0-11
+    /// Supported API versions: 0-12
     pub replica_nodes: Vec<super::BrokerId>,
 
     /// The set of nodes that are in sync with the leader for this partition.
     /// 
-    /// Supported API versions: 0-11
+    /// Supported API versions: 0-12
     pub isr_nodes: Vec<super::BrokerId>,
 
     /// The set of offline replicas of this partition.
     /// 
-    /// Supported API versions: 5-11
+    /// Supported API versions: 5-12
     pub offline_replicas: Vec<super::BrokerId>,
 
     /// Other tagged fields
@@ -339,35 +339,35 @@ impl Default for MetadataResponsePartition {
 }
 
 impl Message for MetadataResponsePartition {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 11 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 12 };
 }
 
-/// Valid versions: 0-11
+/// Valid versions: 0-12
 #[derive(Debug, Clone, PartialEq)]
 pub struct MetadataResponseTopic {
     /// The topic error, or 0 if there was no error.
     /// 
-    /// Supported API versions: 0-11
+    /// Supported API versions: 0-12
     pub error_code: i16,
 
     /// The topic id.
     /// 
-    /// Supported API versions: 10-11
+    /// Supported API versions: 10-12
     pub topic_id: Uuid,
 
     /// True if the topic is internal.
     /// 
-    /// Supported API versions: 1-11
+    /// Supported API versions: 1-12
     pub is_internal: bool,
 
     /// Each partition in the topic.
     /// 
-    /// Supported API versions: 0-11
+    /// Supported API versions: 0-12
     pub partitions: Vec<MetadataResponsePartition>,
 
     /// 32-bit bitfield to represent authorized operations for this topic.
     /// 
-    /// Supported API versions: 8-11
+    /// Supported API versions: 8-12
     pub topic_authorized_operations: i32,
 
     /// Other tagged fields
@@ -518,35 +518,35 @@ impl Default for MetadataResponseTopic {
 }
 
 impl Message for MetadataResponseTopic {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 11 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 12 };
 }
 
-/// Valid versions: 0-11
+/// Valid versions: 0-12
 #[derive(Debug, Clone, PartialEq)]
 pub struct MetadataResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 
-    /// Supported API versions: 3-11
+    /// Supported API versions: 3-12
     pub throttle_time_ms: i32,
 
     /// Each broker in the response.
     /// 
-    /// Supported API versions: 0-11
+    /// Supported API versions: 0-12
     pub brokers: indexmap::IndexMap<super::BrokerId, MetadataResponseBroker>,
 
     /// The cluster ID that responding broker belongs to.
     /// 
-    /// Supported API versions: 2-11
+    /// Supported API versions: 2-12
     pub cluster_id: Option<StrBytes>,
 
     /// The ID of the controller broker.
     /// 
-    /// Supported API versions: 1-11
+    /// Supported API versions: 1-12
     pub controller_id: super::BrokerId,
 
     /// Each topic in the response.
     /// 
-    /// Supported API versions: 0-11
+    /// Supported API versions: 0-12
     pub topics: indexmap::IndexMap<super::TopicName, MetadataResponseTopic>,
 
     /// 32-bit bitfield to represent authorized operations for this cluster.
@@ -722,7 +722,7 @@ impl Default for MetadataResponse {
 }
 
 impl Message for MetadataResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 11 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 12 };
 }
 
 impl HeaderVersion for MetadataResponse {

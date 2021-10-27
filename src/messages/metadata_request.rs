@@ -17,17 +17,17 @@ use crate::protocol::{
 };
 
 
-/// Valid versions: 0-11
+/// Valid versions: 0-12
 #[derive(Debug, Clone, PartialEq)]
 pub struct MetadataRequestTopic {
     /// The topic id.
     /// 
-    /// Supported API versions: 10-11
+    /// Supported API versions: 10-12
     pub topic_id: Uuid,
 
     /// The topic name.
     /// 
-    /// Supported API versions: 0-11
+    /// Supported API versions: 0-12
     pub name: Option<super::TopicName>,
 
     /// Other tagged fields
@@ -122,20 +122,20 @@ impl Default for MetadataRequestTopic {
 }
 
 impl Message for MetadataRequestTopic {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 11 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 12 };
 }
 
-/// Valid versions: 0-11
+/// Valid versions: 0-12
 #[derive(Debug, Clone, PartialEq)]
 pub struct MetadataRequest {
     /// The topics to fetch metadata for.
     /// 
-    /// Supported API versions: 0-11
+    /// Supported API versions: 0-12
     pub topics: Option<Vec<MetadataRequestTopic>>,
 
     /// If this is true, the broker may auto-create topics that we requested which do not already exist, if it is configured to do so.
     /// 
-    /// Supported API versions: 4-11
+    /// Supported API versions: 4-12
     pub allow_auto_topic_creation: bool,
 
     /// Whether to include cluster authorized operations.
@@ -145,7 +145,7 @@ pub struct MetadataRequest {
 
     /// Whether to include topic authorized operations.
     /// 
-    /// Supported API versions: 8-11
+    /// Supported API versions: 8-12
     pub include_topic_authorized_operations: bool,
 
     /// Other tagged fields
@@ -290,7 +290,7 @@ impl Default for MetadataRequest {
 }
 
 impl Message for MetadataRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 11 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 12 };
 }
 
 impl HeaderVersion for MetadataRequest {
