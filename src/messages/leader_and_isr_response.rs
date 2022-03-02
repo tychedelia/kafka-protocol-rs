@@ -18,7 +18,7 @@ use crate::protocol::{
 
 
 /// Valid versions: 0-5
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct LeaderAndIsrPartitionError {
     /// The topic name.
     /// 
@@ -136,7 +136,7 @@ impl Message for LeaderAndIsrPartitionError {
 }
 
 /// Valid versions: 0-5
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct LeaderAndIsrTopicError {
     /// Each partition.
     /// 
@@ -251,7 +251,7 @@ impl Message for LeaderAndIsrTopicError {
 }
 
 /// Valid versions: 0-5
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct LeaderAndIsrResponse {
     /// The error code, or 0 if there was no error.
     /// 

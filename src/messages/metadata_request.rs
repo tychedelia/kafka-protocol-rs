@@ -18,7 +18,7 @@ use crate::protocol::{
 
 
 /// Valid versions: 0-12
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct MetadataRequestTopic {
     /// The topic id.
     /// 
@@ -126,7 +126,7 @@ impl Message for MetadataRequestTopic {
 }
 
 /// Valid versions: 0-12
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct MetadataRequest {
     /// The topics to fetch metadata for.
     /// 

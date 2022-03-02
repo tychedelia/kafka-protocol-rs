@@ -18,7 +18,7 @@ use crate::protocol::{
 
 
 /// Valid versions: 0-9
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct BatchIndexAndErrorMessage {
     /// The batch index of the record that cause the batch to be dropped
     /// 
@@ -150,7 +150,7 @@ impl Message for BatchIndexAndErrorMessage {
 }
 
 /// Valid versions: 0-9
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct PartitionProduceResponse {
     /// The partition index.
     /// 
@@ -344,7 +344,7 @@ impl Message for PartitionProduceResponse {
 }
 
 /// Valid versions: 0-9
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct TopicProduceResponse {
     /// Each partition that we produced to within the topic.
     /// 
@@ -451,7 +451,7 @@ impl Message for TopicProduceResponse {
 }
 
 /// Valid versions: 0-9
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ProduceResponse {
     /// Each produce response
     /// 

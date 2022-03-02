@@ -17,18 +17,23 @@ use crate::protocol::{
 };
 
 
-/// Valid versions: 0-4
-#[derive(Debug, Clone, PartialEq)]
+/// Valid versions: 0-5
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct MemberIdentity {
     /// The member ID to remove from the group.
     /// 
-    /// Supported API versions: 3-4
+    /// Supported API versions: 3-5
     pub member_id: StrBytes,
 
     /// The group instance ID to remove from the group.
     /// 
-    /// Supported API versions: 3-4
+    /// Supported API versions: 3-5
     pub group_instance_id: Option<StrBytes>,
+
+    /// The reason why the member left the group.
+    /// 
+    /// Supported API versions: 5
+    pub reason: Option<StrBytes>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
@@ -57,6 +62,9 @@ impl Encodable for MemberIdentity {
             if !self.group_instance_id.is_none() {
                 return Err(EncodeError)
             }
+        }
+        if version >= 5 {
+            types::CompactString.encode(buf, &self.reason)?;
         }
         if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -94,6 +102,9 @@ impl Encodable for MemberIdentity {
                 return Err(EncodeError)
             }
         }
+        if version >= 5 {
+            total_size += types::CompactString.compute_size(&self.reason)?;
+        }
         if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
@@ -128,6 +139,11 @@ impl Decodable for MemberIdentity {
         } else {
             None
         };
+        let reason = if version >= 5 {
+            types::CompactString.decode(buf)?
+        } else {
+            None
+        };
         let mut unknown_tagged_fields = BTreeMap::new();
         if version >= 4 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
@@ -142,6 +158,7 @@ impl Decodable for MemberIdentity {
         Ok(Self {
             member_id,
             group_instance_id,
+            reason,
             unknown_tagged_fields,
         })
     }
@@ -152,21 +169,22 @@ impl Default for MemberIdentity {
         Self {
             member_id: Default::default(),
             group_instance_id: None,
+            reason: None,
             unknown_tagged_fields: BTreeMap::new(),
         }
     }
 }
 
 impl Message for MemberIdentity {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 5 };
 }
 
-/// Valid versions: 0-4
-#[derive(Debug, Clone, PartialEq)]
+/// Valid versions: 0-5
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct LeaveGroupRequest {
     /// The ID of the group to leave.
     /// 
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub group_id: super::GroupId,
 
     /// The member ID to remove from the group.
@@ -176,7 +194,7 @@ pub struct LeaveGroupRequest {
 
     /// List of leaving member identities.
     /// 
-    /// Supported API versions: 3-4
+    /// Supported API versions: 3-5
     pub members: Vec<MemberIdentity>,
 
     /// Other tagged fields
@@ -312,7 +330,7 @@ impl Default for LeaveGroupRequest {
 }
 
 impl Message for LeaveGroupRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 5 };
 }
 
 impl HeaderVersion for LeaveGroupRequest {

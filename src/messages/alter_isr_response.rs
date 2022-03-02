@@ -18,7 +18,7 @@ use crate::protocol::{
 
 
 /// Valid versions: 0
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct PartitionData {
     /// The partition index
     /// 
@@ -140,7 +140,7 @@ impl Message for PartitionData {
 }
 
 /// Valid versions: 0
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct TopicData {
     /// The name of the topic
     /// 
@@ -222,7 +222,7 @@ impl Message for TopicData {
 }
 
 /// Valid versions: 0
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct AlterIsrResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 

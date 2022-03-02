@@ -18,7 +18,7 @@ use crate::protocol::{
 
 
 /// Valid versions: 0-6
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DeleteTopicState {
     /// The topic name
     /// 
@@ -138,7 +138,7 @@ impl Message for DeleteTopicState {
 }
 
 /// Valid versions: 0-6
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DeleteTopicsRequest {
     /// The name or topic ID of the topic
     /// 

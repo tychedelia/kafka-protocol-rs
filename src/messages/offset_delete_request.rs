@@ -18,7 +18,7 @@ use crate::protocol::{
 
 
 /// Valid versions: 0
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetDeleteRequestPartition {
     /// The partition index.
     /// 
@@ -63,7 +63,7 @@ impl Message for OffsetDeleteRequestPartition {
 }
 
 /// Valid versions: 0
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetDeleteRequestTopic {
     /// Each partition to delete offsets for.
     /// 
@@ -113,7 +113,7 @@ impl Message for OffsetDeleteRequestTopic {
 }
 
 /// Valid versions: 0
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetDeleteRequest {
     /// The unique group identifier.
     /// 

@@ -18,7 +18,7 @@ use crate::protocol::{
 
 
 /// Valid versions: 0-5
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct LeaderAndIsrPartitionState {
     /// The topic name.  This is only present in v0 or v1.
     /// 
@@ -276,7 +276,7 @@ impl Message for LeaderAndIsrPartitionState {
 }
 
 /// Valid versions: 0-5
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct LeaderAndIsrTopicState {
     /// The topic name.
     /// 
@@ -438,7 +438,7 @@ impl Message for LeaderAndIsrTopicState {
 }
 
 /// Valid versions: 0-5
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct LeaderAndIsrLiveLeader {
     /// The leader's broker ID.
     /// 
@@ -548,7 +548,7 @@ impl Message for LeaderAndIsrLiveLeader {
 }
 
 /// Valid versions: 0-5
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct LeaderAndIsrRequest {
     /// The current controller ID.
     /// 

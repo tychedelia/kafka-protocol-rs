@@ -18,7 +18,7 @@ use crate::protocol::{
 
 
 /// Valid versions: 0-2
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DeleteRecordsPartitionResult {
     /// The partition low water mark.
     /// 
@@ -111,7 +111,7 @@ impl Message for DeleteRecordsPartitionResult {
 }
 
 /// Valid versions: 0-2
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DeleteRecordsTopicResult {
     /// Each partition that we wanted to delete records from.
     /// 
@@ -218,7 +218,7 @@ impl Message for DeleteRecordsTopicResult {
 }
 
 /// Valid versions: 0-2
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DeleteRecordsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 

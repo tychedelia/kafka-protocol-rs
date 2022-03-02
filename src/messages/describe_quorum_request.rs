@@ -18,7 +18,7 @@ use crate::protocol::{
 
 
 /// Valid versions: 0
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct PartitionData {
     /// The partition index.
     /// 
@@ -90,7 +90,7 @@ impl Message for PartitionData {
 }
 
 /// Valid versions: 0
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct TopicData {
     /// The topic name.
     /// 
@@ -172,7 +172,7 @@ impl Message for TopicData {
 }
 
 /// Valid versions: 0
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DescribeQuorumRequest {
     /// 
     /// 

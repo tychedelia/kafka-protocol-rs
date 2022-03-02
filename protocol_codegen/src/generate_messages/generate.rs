@@ -712,7 +712,7 @@ fn write_struct_def<W: Write>(
     }
 
     writeln!(w, "/// Valid versions: {}", valid_versions)?;
-    writeln!(w, "#[derive(Debug, Clone, PartialEq)]")?;
+    writeln!(w, "#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]")?;
     write!(w, "pub struct {} ", name)?;
     w.block(|w| {
         for prepared_field in &prepared_fields {

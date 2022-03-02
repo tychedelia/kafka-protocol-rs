@@ -18,7 +18,7 @@ use crate::protocol::{
 
 
 /// Valid versions: 0-5
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DescribeGroupsRequest {
     /// The names of the groups to describe
     /// 

@@ -18,7 +18,7 @@ use crate::protocol::{
 
 
 /// Valid versions: 0
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct TopicData {
     /// 
     /// 
@@ -95,7 +95,7 @@ impl Message for TopicData {
 }
 
 /// Valid versions: 0
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct TransactionState {
     /// 
     /// 
@@ -237,7 +237,7 @@ impl Message for TransactionState {
 }
 
 /// Valid versions: 0
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DescribeTransactionsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 

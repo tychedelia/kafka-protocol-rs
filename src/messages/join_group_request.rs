@@ -17,12 +17,12 @@ use crate::protocol::{
 };
 
 
-/// Valid versions: 0-7
-#[derive(Debug, Clone, PartialEq)]
+/// Valid versions: 0-9
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct JoinGroupRequestProtocol {
     /// The protocol metadata.
     /// 
-    /// Supported API versions: 0-7
+    /// Supported API versions: 0-9
     pub metadata: Bytes,
 
     /// Other tagged fields
@@ -121,46 +121,51 @@ impl Default for JoinGroupRequestProtocol {
 }
 
 impl Message for JoinGroupRequestProtocol {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 7 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 9 };
 }
 
-/// Valid versions: 0-7
-#[derive(Debug, Clone, PartialEq)]
+/// Valid versions: 0-9
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct JoinGroupRequest {
     /// The group identifier.
     /// 
-    /// Supported API versions: 0-7
+    /// Supported API versions: 0-9
     pub group_id: super::GroupId,
 
     /// The coordinator considers the consumer dead if it receives no heartbeat after this timeout in milliseconds.
     /// 
-    /// Supported API versions: 0-7
+    /// Supported API versions: 0-9
     pub session_timeout_ms: i32,
 
     /// The maximum time in milliseconds that the coordinator will wait for each member to rejoin when rebalancing the group.
     /// 
-    /// Supported API versions: 1-7
+    /// Supported API versions: 1-9
     pub rebalance_timeout_ms: i32,
 
     /// The member id assigned by the group coordinator.
     /// 
-    /// Supported API versions: 0-7
+    /// Supported API versions: 0-9
     pub member_id: StrBytes,
 
     /// The unique identifier of the consumer instance provided by end user.
     /// 
-    /// Supported API versions: 5-7
+    /// Supported API versions: 5-9
     pub group_instance_id: Option<StrBytes>,
 
     /// The unique name the for class of protocols implemented by the group we want to join.
     /// 
-    /// Supported API versions: 0-7
+    /// Supported API versions: 0-9
     pub protocol_type: StrBytes,
 
     /// The list of protocols that the member supports.
     /// 
-    /// Supported API versions: 0-7
+    /// Supported API versions: 0-9
     pub protocols: indexmap::IndexMap<StrBytes, JoinGroupRequestProtocol>,
+
+    /// The reason why the member (re-)joins the group.
+    /// 
+    /// Supported API versions: 8-9
+    pub reason: Option<StrBytes>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
@@ -202,6 +207,9 @@ impl Encodable for JoinGroupRequest {
             types::CompactArray(types::Struct { version }).encode(buf, &self.protocols)?;
         } else {
             types::Array(types::Struct { version }).encode(buf, &self.protocols)?;
+        }
+        if version >= 8 {
+            types::CompactString.encode(buf, &self.reason)?;
         }
         if version >= 6 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -251,6 +259,9 @@ impl Encodable for JoinGroupRequest {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.protocols)?;
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.protocols)?;
+        }
+        if version >= 8 {
+            total_size += types::CompactString.compute_size(&self.reason)?;
         }
         if version >= 6 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -303,6 +314,11 @@ impl Decodable for JoinGroupRequest {
         } else {
             types::Array(types::Struct { version }).decode(buf)?
         };
+        let reason = if version >= 8 {
+            types::CompactString.decode(buf)?
+        } else {
+            None
+        };
         let mut unknown_tagged_fields = BTreeMap::new();
         if version >= 6 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
@@ -322,6 +338,7 @@ impl Decodable for JoinGroupRequest {
             group_instance_id,
             protocol_type,
             protocols,
+            reason,
             unknown_tagged_fields,
         })
     }
@@ -337,13 +354,14 @@ impl Default for JoinGroupRequest {
             group_instance_id: None,
             protocol_type: Default::default(),
             protocols: Default::default(),
+            reason: None,
             unknown_tagged_fields: BTreeMap::new(),
         }
     }
 }
 
 impl Message for JoinGroupRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 7 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 9 };
 }
 
 impl HeaderVersion for JoinGroupRequest {

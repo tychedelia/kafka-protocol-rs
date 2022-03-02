@@ -18,7 +18,7 @@ use crate::protocol::{
 
 
 /// Valid versions: 0-3
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct AddOffsetsToTxnResponse {
     /// Duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 

@@ -18,7 +18,7 @@ use crate::protocol::{
 
 
 /// Valid versions: 0-2
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct AclCreation {
     /// The type of the resource.
     /// 
@@ -208,7 +208,7 @@ impl Message for AclCreation {
 }
 
 /// Valid versions: 0-2
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct CreateAclsRequest {
     /// The ACLs that we want to create.
     /// 

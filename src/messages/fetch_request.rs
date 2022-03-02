@@ -18,7 +18,7 @@ use crate::protocol::{
 
 
 /// Valid versions: 0-13
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct FetchPartition {
     /// The partition index.
     /// 
@@ -178,7 +178,7 @@ impl Message for FetchPartition {
 }
 
 /// Valid versions: 0-13
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct FetchTopic {
     /// The name of the topic to fetch.
     /// 
@@ -316,7 +316,7 @@ impl Message for FetchTopic {
 }
 
 /// Valid versions: 0-13
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ForgottenTopic {
     /// The partition name.
     /// 
@@ -470,7 +470,7 @@ impl Message for ForgottenTopic {
 }
 
 /// Valid versions: 0-13
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct FetchRequest {
     /// The clusterId if known. This is used to validate metadata fetches prior to broker registration.
     /// 

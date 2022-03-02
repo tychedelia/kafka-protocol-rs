@@ -18,7 +18,7 @@ use crate::protocol::{
 
 
 /// Valid versions: 0-7
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct CreatableReplicaAssignment {
     /// The brokers to place the partition on.
     /// 
@@ -113,7 +113,7 @@ impl Message for CreatableReplicaAssignment {
 }
 
 /// Valid versions: 0-7
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct CreateableTopicConfig {
     /// The configuration value.
     /// 
@@ -220,7 +220,7 @@ impl Message for CreateableTopicConfig {
 }
 
 /// Valid versions: 0-7
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct CreatableTopic {
     /// The number of partitions to create in the topic, or -1 if we are either specifying a manual partition assignment or using the default partitions.
     /// 
@@ -369,7 +369,7 @@ impl Message for CreatableTopic {
 }
 
 /// Valid versions: 0-7
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct CreateTopicsRequest {
     /// The topics to create.
     /// 

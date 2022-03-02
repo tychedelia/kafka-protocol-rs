@@ -146,7 +146,7 @@ pub fn run() -> Result<(), Error> {
     writeln!(module_file)?;
 
     for entity_type in entity_types {
-        let mut derives = vec!["Debug", "Clone", "Eq", "PartialEq", "Ord", "PartialOrd", "Hash", "Default"];
+        let mut derives = vec!["Debug", "Clone", "Eq", "PartialEq", "Ord", "PartialOrd", "Hash", "Default", "derive_builder::Builder"];
         if entity_type.inner.is_copy() {
             derives.push("Copy");
         }

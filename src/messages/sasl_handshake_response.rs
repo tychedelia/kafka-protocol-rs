@@ -18,7 +18,7 @@ use crate::protocol::{
 
 
 /// Valid versions: 0-1
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct SaslHandshakeResponse {
     /// The error code, or 0 if there was no error.
     /// 

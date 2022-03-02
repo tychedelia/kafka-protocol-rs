@@ -17,22 +17,22 @@ use crate::protocol::{
 };
 
 
-/// Valid versions: 0-4
-#[derive(Debug, Clone, PartialEq)]
+/// Valid versions: 0-5
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct MemberResponse {
     /// The member ID to remove from the group.
     /// 
-    /// Supported API versions: 3-4
+    /// Supported API versions: 3-5
     pub member_id: StrBytes,
 
     /// The group instance ID to remove from the group.
     /// 
-    /// Supported API versions: 3-4
+    /// Supported API versions: 3-5
     pub group_instance_id: Option<StrBytes>,
 
     /// The error code, or 0 if there was no error.
     /// 
-    /// Supported API versions: 3-4
+    /// Supported API versions: 3-5
     pub error_code: i16,
 
     /// Other tagged fields
@@ -184,25 +184,25 @@ impl Default for MemberResponse {
 }
 
 impl Message for MemberResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 5 };
 }
 
-/// Valid versions: 0-4
-#[derive(Debug, Clone, PartialEq)]
+/// Valid versions: 0-5
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct LeaveGroupResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 
-    /// Supported API versions: 1-4
+    /// Supported API versions: 1-5
     pub throttle_time_ms: i32,
 
     /// The error code, or 0 if there was no error.
     /// 
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub error_code: i16,
 
     /// List of leaving member responses.
     /// 
-    /// Supported API versions: 3-4
+    /// Supported API versions: 3-5
     pub members: Vec<MemberResponse>,
 
     /// Other tagged fields
@@ -318,7 +318,7 @@ impl Default for LeaveGroupResponse {
 }
 
 impl Message for LeaveGroupResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 5 };
 }
 
 impl HeaderVersion for LeaveGroupResponse {

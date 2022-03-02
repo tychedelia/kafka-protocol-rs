@@ -18,7 +18,7 @@ use crate::protocol::{
 
 
 /// Valid versions: 0-6
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DeletableTopicResult {
     /// the unique topic ID
     /// 
@@ -149,7 +149,7 @@ impl Message for DeletableTopicResult {
 }
 
 /// Valid versions: 0-6
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DeleteTopicsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 

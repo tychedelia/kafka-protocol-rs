@@ -18,7 +18,7 @@ use crate::protocol::{
 
 
 /// Valid versions: 0-2
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct TopicPartitions {
     /// The partitions of this topic whose leader should be elected.
     /// 
@@ -125,7 +125,7 @@ impl Message for TopicPartitions {
 }
 
 /// Valid versions: 0-2
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ElectLeadersRequest {
     /// Type of elections to conduct for the partition. A value of '0' elects the preferred replica. A value of '1' elects the first live replica if there are no in-sync replica.
     /// 

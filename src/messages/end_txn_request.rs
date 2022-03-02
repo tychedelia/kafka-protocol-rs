@@ -18,7 +18,7 @@ use crate::protocol::{
 
 
 /// Valid versions: 0-3
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct EndTxnRequest {
     /// The ID of the transaction to end.
     /// 

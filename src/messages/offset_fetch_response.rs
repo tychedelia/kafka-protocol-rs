@@ -18,7 +18,7 @@ use crate::protocol::{
 
 
 /// Valid versions: 0-8
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetFetchResponsePartition {
     /// The partition index.
     /// 
@@ -220,7 +220,7 @@ impl Message for OffsetFetchResponsePartition {
 }
 
 /// Valid versions: 0-8
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetFetchResponseTopic {
     /// The topic name.
     /// 
@@ -364,7 +364,7 @@ impl Message for OffsetFetchResponseTopic {
 }
 
 /// Valid versions: 0-8
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetFetchResponsePartitions {
     /// The partition index.
     /// 
@@ -554,7 +554,7 @@ impl Message for OffsetFetchResponsePartitions {
 }
 
 /// Valid versions: 0-8
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetFetchResponseTopics {
     /// The topic name.
     /// 
@@ -674,7 +674,7 @@ impl Message for OffsetFetchResponseTopics {
 }
 
 /// Valid versions: 0-8
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetFetchResponseGroup {
     /// The group ID.
     /// 
@@ -820,7 +820,7 @@ impl Message for OffsetFetchResponseGroup {
 }
 
 /// Valid versions: 0-8
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetFetchResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 

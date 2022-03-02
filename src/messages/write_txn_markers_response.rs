@@ -18,7 +18,7 @@ use crate::protocol::{
 
 
 /// Valid versions: 0-1
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct WritableTxnMarkerPartitionResult {
     /// The partition index.
     /// 
@@ -106,7 +106,7 @@ impl Message for WritableTxnMarkerPartitionResult {
 }
 
 /// Valid versions: 0-1
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct WritableTxnMarkerTopicResult {
     /// The topic name.
     /// 
@@ -218,7 +218,7 @@ impl Message for WritableTxnMarkerTopicResult {
 }
 
 /// Valid versions: 0-1
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct WritableTxnMarkerResult {
     /// The current producer ID in use by the transactional ID.
     /// 
@@ -318,7 +318,7 @@ impl Message for WritableTxnMarkerResult {
 }
 
 /// Valid versions: 0-1
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct WriteTxnMarkersResponse {
     /// The results for writing makers.
     /// 

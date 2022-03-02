@@ -18,7 +18,7 @@ use crate::protocol::{
 
 
 /// Valid versions: 0-2
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct CreatableRenewers {
     /// The type of the Kafka principal.
     /// 
@@ -130,7 +130,7 @@ impl Message for CreatableRenewers {
 }
 
 /// Valid versions: 0-2
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct CreateDelegationTokenRequest {
     /// A list of those who are allowed to renew this token before it expires.
     /// 

@@ -18,7 +18,7 @@ use crate::protocol::{
 
 
 /// Valid versions: 0-9
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct PartitionProduceData {
     /// The partition index.
     /// 
@@ -118,7 +118,7 @@ impl Message for PartitionProduceData {
 }
 
 /// Valid versions: 0-9
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct TopicProduceData {
     /// Each partition to produce to.
     /// 
@@ -225,7 +225,7 @@ impl Message for TopicProduceData {
 }
 
 /// Valid versions: 0-9
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ProduceRequest {
     /// The transactional ID, or null if the producer is not transactional.
     /// 

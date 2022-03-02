@@ -18,7 +18,7 @@ use crate::protocol::{
 
 
 /// Valid versions: 0-2
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct AlterReplicaLogDirPartitionResult {
     /// The partition index.
     /// 
@@ -106,7 +106,7 @@ impl Message for AlterReplicaLogDirPartitionResult {
 }
 
 /// Valid versions: 0-2
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct AlterReplicaLogDirTopicResult {
     /// The name of the topic.
     /// 
@@ -218,7 +218,7 @@ impl Message for AlterReplicaLogDirTopicResult {
 }
 
 /// Valid versions: 0-2
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct AlterReplicaLogDirsResponse {
     /// Duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 

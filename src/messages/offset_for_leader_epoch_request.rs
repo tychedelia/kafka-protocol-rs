@@ -18,7 +18,7 @@ use crate::protocol::{
 
 
 /// Valid versions: 0-4
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetForLeaderPartition {
     /// The partition index.
     /// 
@@ -124,7 +124,7 @@ impl Message for OffsetForLeaderPartition {
 }
 
 /// Valid versions: 0-4
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetForLeaderTopic {
     /// Each partition to get offsets for.
     /// 
@@ -231,7 +231,7 @@ impl Message for OffsetForLeaderTopic {
 }
 
 /// Valid versions: 0-4
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetForLeaderEpochRequest {
     /// The broker ID of the follower, of -1 if this request is from a consumer.
     /// 

@@ -18,7 +18,7 @@ use crate::protocol::{
 
 
 /// Valid versions: 0-3
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct CreatePartitionsAssignment {
     /// The assigned broker IDs.
     /// 
@@ -108,7 +108,7 @@ impl Message for CreatePartitionsAssignment {
 }
 
 /// Valid versions: 0-3
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct CreatePartitionsTopic {
     /// The new partition count.
     /// 
@@ -225,7 +225,7 @@ impl Message for CreatePartitionsTopic {
 }
 
 /// Valid versions: 0-3
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct CreatePartitionsRequest {
     /// Each topic that we want to create new partitions inside.
     /// 

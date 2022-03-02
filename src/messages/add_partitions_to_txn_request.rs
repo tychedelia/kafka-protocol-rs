@@ -18,7 +18,7 @@ use crate::protocol::{
 
 
 /// Valid versions: 0-3
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct AddPartitionsToTxnTopic {
     /// The partition indexes to add to the transaction
     /// 
@@ -125,7 +125,7 @@ impl Message for AddPartitionsToTxnTopic {
 }
 
 /// Valid versions: 0-3
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct AddPartitionsToTxnRequest {
     /// The transactional id corresponding to the transaction.
     /// 

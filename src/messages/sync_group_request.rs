@@ -18,7 +18,7 @@ use crate::protocol::{
 
 
 /// Valid versions: 0-5
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct SyncGroupRequestAssignment {
     /// The ID of the member to assign.
     /// 
@@ -130,7 +130,7 @@ impl Message for SyncGroupRequestAssignment {
 }
 
 /// Valid versions: 0-5
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct SyncGroupRequest {
     /// The unique group identifier.
     /// 

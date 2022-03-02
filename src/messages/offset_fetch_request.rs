@@ -18,7 +18,7 @@ use crate::protocol::{
 
 
 /// Valid versions: 0-8
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetFetchRequestTopic {
     /// The topic name.
     /// 
@@ -162,7 +162,7 @@ impl Message for OffsetFetchRequestTopic {
 }
 
 /// Valid versions: 0-8
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetFetchRequestTopics {
     /// The topic name.
     /// 
@@ -282,7 +282,7 @@ impl Message for OffsetFetchRequestTopics {
 }
 
 /// Valid versions: 0-8
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetFetchRequestGroup {
     /// The group ID.
     /// 
@@ -402,7 +402,7 @@ impl Message for OffsetFetchRequestGroup {
 }
 
 /// Valid versions: 0-8
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetFetchRequest {
     /// The group to fetch offsets for.
     /// 

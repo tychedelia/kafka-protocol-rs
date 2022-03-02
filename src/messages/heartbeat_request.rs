@@ -18,7 +18,7 @@ use crate::protocol::{
 
 
 /// Valid versions: 0-4
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct HeartbeatRequest {
     /// The group id.
     /// 

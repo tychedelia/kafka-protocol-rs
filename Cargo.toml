@@ -3,7 +3,7 @@ members = ["protocol_codegen"]
 
 [package]
 name = "kafka-protocol"
-version = "0.1.0"
+version = "0.2.0"
 authors = [
     "Diggory Blake <diggsey@googlemail.com>",
     "Jem McElwain <jmcelwain@gmail.com>",
@@ -28,3 +28,4 @@ crc = "2.0.0"
 snap = "1.0.5"
 flate2 = "1.0.20"
 string = "0.3.0"
+derive_builder = "0.10.2"

@@ -18,7 +18,7 @@ use crate::protocol::{
 
 
 /// Valid versions: 0-3
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct TxnOffsetCommitRequestPartition {
     /// The index of the partition within the topic.
     /// 
@@ -146,7 +146,7 @@ impl Message for TxnOffsetCommitRequestPartition {
 }
 
 /// Valid versions: 0-3
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct TxnOffsetCommitRequestTopic {
     /// The topic name.
     /// 
@@ -258,7 +258,7 @@ impl Message for TxnOffsetCommitRequestTopic {
 }
 
 /// Valid versions: 0-3
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct TxnOffsetCommitRequest {
     /// The ID of the transaction.
     /// 

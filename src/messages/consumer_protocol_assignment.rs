@@ -18,7 +18,7 @@ use crate::protocol::{
 
 
 /// Valid versions: 0-1
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct TopicPartition {
     /// 
     /// 
@@ -68,7 +68,7 @@ impl Message for TopicPartition {
 }
 
 /// Valid versions: 0-1
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ConsumerProtocolAssignment {
     /// 
     /// 

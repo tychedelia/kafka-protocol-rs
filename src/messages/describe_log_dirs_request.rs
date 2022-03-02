@@ -17,12 +17,12 @@ use crate::protocol::{
 };
 
 
-/// Valid versions: 0-2
-#[derive(Debug, Clone, PartialEq)]
+/// Valid versions: 0-3
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DescribableLogDirTopic {
-    /// The partition indxes.
+    /// The partition indexes.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub partitions: Vec<i32>,
 
     /// Other tagged fields
@@ -121,15 +121,15 @@ impl Default for DescribableLogDirTopic {
 }
 
 impl Message for DescribableLogDirTopic {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
 }
 
-/// Valid versions: 0-2
-#[derive(Debug, Clone, PartialEq)]
+/// Valid versions: 0-3
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DescribeLogDirsRequest {
     /// Each topic that we want to describe log directories for, or null for all topics.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub topics: Option<indexmap::IndexMap<super::TopicName, DescribableLogDirTopic>>,
 
     /// Other tagged fields
@@ -211,7 +211,7 @@ impl Default for DescribeLogDirsRequest {
 }
 
 impl Message for DescribeLogDirsRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
 }
 
 impl HeaderVersion for DescribeLogDirsRequest {

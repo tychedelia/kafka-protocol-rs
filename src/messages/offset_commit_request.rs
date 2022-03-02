@@ -18,7 +18,7 @@ use crate::protocol::{
 
 
 /// Valid versions: 0-8
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetCommitRequestPartition {
     /// The partition index.
     /// 
@@ -172,7 +172,7 @@ impl Message for OffsetCommitRequestPartition {
 }
 
 /// Valid versions: 0-8
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetCommitRequestTopic {
     /// The topic name.
     /// 
@@ -284,7 +284,7 @@ impl Message for OffsetCommitRequestTopic {
 }
 
 /// Valid versions: 0-8
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetCommitRequest {
     /// The unique group identifier.
     /// 

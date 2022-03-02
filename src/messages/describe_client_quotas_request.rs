@@ -18,7 +18,7 @@ use crate::protocol::{
 
 
 /// Valid versions: 0-1
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ComponentData {
     /// The entity type that the filter component applies to.
     /// 
@@ -140,7 +140,7 @@ impl Message for ComponentData {
 }
 
 /// Valid versions: 0-1
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DescribeClientQuotasRequest {
     /// Filter components to apply to quota entities.
     /// 

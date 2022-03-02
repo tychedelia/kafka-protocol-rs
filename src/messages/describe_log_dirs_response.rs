@@ -17,27 +17,27 @@ use crate::protocol::{
 };
 
 
-/// Valid versions: 0-2
-#[derive(Debug, Clone, PartialEq)]
+/// Valid versions: 0-3
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DescribeLogDirsPartition {
     /// The partition index.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub partition_index: i32,
 
     /// The size of the log segments in this partition in bytes.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub partition_size: i64,
 
     /// The lag of the log's LEO w.r.t. partition's HW (if it is the current log for the partition) or current replica's LEO (if it is the future log for the partition)
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub offset_lag: i64,
 
     /// True if this log is created by AlterReplicaLogDirsRequest and will replace the current log of the replica in the future.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub is_future_key: bool,
 
     /// Other tagged fields
@@ -122,20 +122,20 @@ impl Default for DescribeLogDirsPartition {
 }
 
 impl Message for DescribeLogDirsPartition {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
 }
 
-/// Valid versions: 0-2
-#[derive(Debug, Clone, PartialEq)]
+/// Valid versions: 0-3
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DescribeLogDirsTopic {
     /// The topic name.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub name: super::TopicName,
 
     /// 
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub partitions: Vec<DescribeLogDirsPartition>,
 
     /// Other tagged fields
@@ -234,25 +234,25 @@ impl Default for DescribeLogDirsTopic {
 }
 
 impl Message for DescribeLogDirsTopic {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
 }
 
-/// Valid versions: 0-2
-#[derive(Debug, Clone, PartialEq)]
+/// Valid versions: 0-3
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DescribeLogDirsResult {
     /// The error code, or 0 if there was no error.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub error_code: i16,
 
     /// The absolute log directory path.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub log_dir: StrBytes,
 
     /// Each topic.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub topics: Vec<DescribeLogDirsTopic>,
 
     /// Other tagged fields
@@ -356,20 +356,25 @@ impl Default for DescribeLogDirsResult {
 }
 
 impl Message for DescribeLogDirsResult {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
 }
 
-/// Valid versions: 0-2
-#[derive(Debug, Clone, PartialEq)]
+/// Valid versions: 0-3
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DescribeLogDirsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub throttle_time_ms: i32,
+
+    /// The error code, or 0 if there was no error.
+    /// 
+    /// Supported API versions: 3
+    pub error_code: i16,
 
     /// The log directories.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub results: Vec<DescribeLogDirsResult>,
 
     /// Other tagged fields
@@ -379,6 +384,13 @@ pub struct DescribeLogDirsResponse {
 impl Encodable for DescribeLogDirsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
+        if version >= 3 {
+            types::Int16.encode(buf, &self.error_code)?;
+        } else {
+            if self.error_code != 0 {
+                return Err(EncodeError)
+            }
+        }
         if version >= 2 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.results)?;
         } else {
@@ -399,6 +411,13 @@ impl Encodable for DescribeLogDirsResponse {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
+        if version >= 3 {
+            total_size += types::Int16.compute_size(&self.error_code)?;
+        } else {
+            if self.error_code != 0 {
+                return Err(EncodeError)
+            }
+        }
         if version >= 2 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.results)?;
         } else {
@@ -421,6 +440,11 @@ impl Encodable for DescribeLogDirsResponse {
 impl Decodable for DescribeLogDirsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let throttle_time_ms = types::Int32.decode(buf)?;
+        let error_code = if version >= 3 {
+            types::Int16.decode(buf)?
+        } else {
+            0
+        };
         let results = if version >= 2 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
@@ -439,6 +463,7 @@ impl Decodable for DescribeLogDirsResponse {
         }
         Ok(Self {
             throttle_time_ms,
+            error_code,
             results,
             unknown_tagged_fields,
         })
@@ -449,6 +474,7 @@ impl Default for DescribeLogDirsResponse {
     fn default() -> Self {
         Self {
             throttle_time_ms: 0,
+            error_code: 0,
             results: Default::default(),
             unknown_tagged_fields: BTreeMap::new(),
         }
@@ -456,7 +482,7 @@ impl Default for DescribeLogDirsResponse {
 }
 
 impl Message for DescribeLogDirsResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
 }
 
 impl HeaderVersion for DescribeLogDirsResponse {

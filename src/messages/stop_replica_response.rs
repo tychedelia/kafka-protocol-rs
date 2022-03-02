@@ -18,7 +18,7 @@ use crate::protocol::{
 
 
 /// Valid versions: 0-3
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct StopReplicaPartitionError {
     /// The topic name.
     /// 
@@ -128,7 +128,7 @@ impl Message for StopReplicaPartitionError {
 }
 
 /// Valid versions: 0-3
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct StopReplicaResponse {
     /// The top-level error code, or 0 if there was no top-level error.
     /// 

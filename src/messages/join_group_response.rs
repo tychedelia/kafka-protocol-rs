@@ -17,22 +17,22 @@ use crate::protocol::{
 };
 
 
-/// Valid versions: 0-7
-#[derive(Debug, Clone, PartialEq)]
+/// Valid versions: 0-9
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct JoinGroupResponseMember {
     /// The group member ID.
     /// 
-    /// Supported API versions: 0-7
+    /// Supported API versions: 0-9
     pub member_id: StrBytes,
 
     /// The unique identifier of the consumer instance provided by end user.
     /// 
-    /// Supported API versions: 5-7
+    /// Supported API versions: 5-9
     pub group_instance_id: Option<StrBytes>,
 
     /// The group member metadata.
     /// 
-    /// Supported API versions: 0-7
+    /// Supported API versions: 0-9
     pub metadata: Bytes,
 
     /// Other tagged fields
@@ -164,50 +164,55 @@ impl Default for JoinGroupResponseMember {
 }
 
 impl Message for JoinGroupResponseMember {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 7 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 9 };
 }
 
-/// Valid versions: 0-7
-#[derive(Debug, Clone, PartialEq)]
+/// Valid versions: 0-9
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct JoinGroupResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 
-    /// Supported API versions: 2-7
+    /// Supported API versions: 2-9
     pub throttle_time_ms: i32,
 
     /// The error code, or 0 if there was no error.
     /// 
-    /// Supported API versions: 0-7
+    /// Supported API versions: 0-9
     pub error_code: i16,
 
     /// The generation ID of the group.
     /// 
-    /// Supported API versions: 0-7
+    /// Supported API versions: 0-9
     pub generation_id: i32,
 
     /// The group protocol name.
     /// 
-    /// Supported API versions: 7
+    /// Supported API versions: 7-9
     pub protocol_type: Option<StrBytes>,
 
     /// The group protocol selected by the coordinator.
     /// 
-    /// Supported API versions: 0-7
+    /// Supported API versions: 0-9
     pub protocol_name: Option<StrBytes>,
 
     /// The leader of the group.
     /// 
-    /// Supported API versions: 0-7
+    /// Supported API versions: 0-9
     pub leader: StrBytes,
+
+    /// True if the leader must skip running the assignment.
+    /// 
+    /// Supported API versions: 9
+    pub skip_assignment: bool,
 
     /// The member ID assigned by the group coordinator.
     /// 
-    /// Supported API versions: 0-7
+    /// Supported API versions: 0-9
     pub member_id: StrBytes,
 
     /// 
     /// 
-    /// Supported API versions: 0-7
+    /// Supported API versions: 0-9
     pub members: Vec<JoinGroupResponseMember>,
 
     /// Other tagged fields
@@ -233,6 +238,13 @@ impl Encodable for JoinGroupResponse {
             types::CompactString.encode(buf, &self.leader)?;
         } else {
             types::String.encode(buf, &self.leader)?;
+        }
+        if version >= 9 {
+            types::Boolean.encode(buf, &self.skip_assignment)?;
+        } else {
+            if self.skip_assignment {
+                return Err(EncodeError)
+            }
         }
         if version >= 6 {
             types::CompactString.encode(buf, &self.member_id)?;
@@ -275,6 +287,13 @@ impl Encodable for JoinGroupResponse {
             total_size += types::CompactString.compute_size(&self.leader)?;
         } else {
             total_size += types::String.compute_size(&self.leader)?;
+        }
+        if version >= 9 {
+            total_size += types::Boolean.compute_size(&self.skip_assignment)?;
+        } else {
+            if self.skip_assignment {
+                return Err(EncodeError)
+            }
         }
         if version >= 6 {
             total_size += types::CompactString.compute_size(&self.member_id)?;
@@ -324,6 +343,11 @@ impl Decodable for JoinGroupResponse {
         } else {
             types::String.decode(buf)?
         };
+        let skip_assignment = if version >= 9 {
+            types::Boolean.decode(buf)?
+        } else {
+            false
+        };
         let member_id = if version >= 6 {
             types::CompactString.decode(buf)?
         } else {
@@ -352,6 +376,7 @@ impl Decodable for JoinGroupResponse {
             protocol_type,
             protocol_name,
             leader,
+            skip_assignment,
             member_id,
             members,
             unknown_tagged_fields,
@@ -368,6 +393,7 @@ impl Default for JoinGroupResponse {
             protocol_type: None,
             protocol_name: Some(Default::default()),
             leader: Default::default(),
+            skip_assignment: false,
             member_id: Default::default(),
             members: Default::default(),
             unknown_tagged_fields: BTreeMap::new(),
@@ -376,7 +402,7 @@ impl Default for JoinGroupResponse {
 }
 
 impl Message for JoinGroupResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 7 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 9 };
 }
 
 impl HeaderVersion for JoinGroupResponse {

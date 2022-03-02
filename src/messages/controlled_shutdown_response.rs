@@ -18,7 +18,7 @@ use crate::protocol::{
 
 
 /// Valid versions: 0-3
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct RemainingPartition {
     /// The name of the topic.
     /// 
@@ -118,7 +118,7 @@ impl Message for RemainingPartition {
 }
 
 /// Valid versions: 0-3
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ControlledShutdownResponse {
     /// The top-level error code.
     /// 

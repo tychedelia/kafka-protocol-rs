@@ -18,7 +18,7 @@ use crate::protocol::{
 
 
 /// Valid versions: 0-13
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct EpochEndOffset {
     /// 
     /// 
@@ -138,7 +138,7 @@ impl Message for EpochEndOffset {
 }
 
 /// Valid versions: 0-13
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct LeaderIdAndEpoch {
     /// The ID of the current leader or -1 if the leader is unknown.
     /// 
@@ -258,7 +258,7 @@ impl Message for LeaderIdAndEpoch {
 }
 
 /// Valid versions: 0-13
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct SnapshotId {
     /// 
     /// 
@@ -346,7 +346,7 @@ impl Message for SnapshotId {
 }
 
 /// Valid versions: 0-13
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct AbortedTransaction {
     /// The producer id associated with the aborted transaction.
     /// 
@@ -466,7 +466,7 @@ impl Message for AbortedTransaction {
 }
 
 /// Valid versions: 0-13
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct PartitionData {
     /// The partition index.
     /// 
@@ -793,7 +793,7 @@ impl Message for PartitionData {
 }
 
 /// Valid versions: 0-13
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct FetchableTopicResponse {
     /// The topic name.
     /// 
@@ -931,7 +931,7 @@ impl Message for FetchableTopicResponse {
 }
 
 /// Valid versions: 0-13
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct FetchResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 

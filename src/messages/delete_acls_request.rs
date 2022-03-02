@@ -18,7 +18,7 @@ use crate::protocol::{
 
 
 /// Valid versions: 0-2
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DeleteAclsFilter {
     /// The resource type.
     /// 
@@ -208,7 +208,7 @@ impl Message for DeleteAclsFilter {
 }
 
 /// Valid versions: 0-2
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DeleteAclsRequest {
     /// The filters to use when deleting ACLs.
     /// 

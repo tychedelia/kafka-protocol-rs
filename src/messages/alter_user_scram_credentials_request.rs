@@ -18,7 +18,7 @@ use crate::protocol::{
 
 
 /// Valid versions: 0
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ScramCredentialDeletion {
     /// The user name.
     /// 
@@ -100,7 +100,7 @@ impl Message for ScramCredentialDeletion {
 }
 
 /// Valid versions: 0
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ScramCredentialUpsertion {
     /// The user name.
     /// 
@@ -212,7 +212,7 @@ impl Message for ScramCredentialUpsertion {
 }
 
 /// Valid versions: 0
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct AlterUserScramCredentialsRequest {
     /// The SCRAM credentials to remove.
     /// 

@@ -18,7 +18,7 @@ use crate::protocol::{
 
 
 /// Valid versions: 0-2
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct AlterReplicaLogDirTopic {
     /// The partition indexes.
     /// 
@@ -125,7 +125,7 @@ impl Message for AlterReplicaLogDirTopic {
 }
 
 /// Valid versions: 0-2
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct AlterReplicaLogDir {
     /// The topics to add to the directory.
     /// 
@@ -232,7 +232,7 @@ impl Message for AlterReplicaLogDir {
 }
 
 /// Valid versions: 0-2
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct AlterReplicaLogDirsRequest {
     /// The alterations to make for each directory.
     /// 

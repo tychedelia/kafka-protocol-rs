@@ -18,7 +18,7 @@ use crate::protocol::{
 
 
 /// Valid versions: 0-2
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DeleteRecordsPartition {
     /// The partition index.
     /// 
@@ -106,7 +106,7 @@ impl Message for DeleteRecordsPartition {
 }
 
 /// Valid versions: 0-2
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DeleteRecordsTopic {
     /// The topic name.
     /// 
@@ -218,7 +218,7 @@ impl Message for DeleteRecordsTopic {
 }
 
 /// Valid versions: 0-2
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DeleteRecordsRequest {
     /// Each topic that we want to delete records from.
     /// 

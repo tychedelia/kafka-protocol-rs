@@ -18,7 +18,7 @@ use crate::protocol::{
 
 
 /// Valid versions: 0-3
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct AddPartitionsToTxnPartitionResult {
     /// The response error code.
     /// 
@@ -101,7 +101,7 @@ impl Message for AddPartitionsToTxnPartitionResult {
 }
 
 /// Valid versions: 0-3
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct AddPartitionsToTxnTopicResult {
     /// The results for each partition
     /// 
@@ -208,7 +208,7 @@ impl Message for AddPartitionsToTxnTopicResult {
 }
 
 /// Valid versions: 0-3
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct AddPartitionsToTxnResponse {
     /// Duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 
