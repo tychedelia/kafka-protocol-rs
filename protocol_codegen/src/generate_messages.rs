@@ -15,7 +15,11 @@ use tempfile::tempdir;
 
 pub fn run() -> Result<(), Error> {
     let input_tmpdir = tempdir()?.into_path();
-    const OUTPUT_PATH: &str = "../src/messages";
+
+    let mut dir = std::fs::canonicalize(std::file!())?;
+    dir.push("../../../src/messages");
+    let output_path = std::fs::canonicalize(dir)?;
+    let output_path = output_path.to_str().unwrap();
 
     // Download messages from head of Kafka repo
     println!("Cloning kafka repo");
@@ -25,7 +29,7 @@ pub fn run() -> Result<(), Error> {
         .clone("https://github.com/apache/kafka.git", &input_tmpdir.as_path())?;
 
     // Clear output directory
-    for file in fs::read_dir(OUTPUT_PATH)? {
+    for file in fs::read_dir(output_path)? {
         let file = file?;
         if file.file_type()?.is_file() {
             let path = file.path();
@@ -51,7 +55,7 @@ pub fn run() -> Result<(), Error> {
     let mut request_types = BTreeMap::new();
     let mut response_types = BTreeMap::new();
 
-    let module_path = format!("{}.rs", OUTPUT_PATH);
+    let module_path = format!("{}.rs", output_path);
     let mut module_file = File::create(&module_path)?;
 
     writeln!(module_file, "//! Messages used by the Kafka protocol.")?;
@@ -68,7 +72,7 @@ pub fn run() -> Result<(), Error> {
         let spec = parse::parse(&input_file_path)?;
         let spec_meta = (spec.type_, spec.api_key);
 
-        let (module_name, struct_name) = generate::generate(OUTPUT_PATH, spec, &mut entity_types)?;
+        let (module_name, struct_name) = generate::generate(output_path, spec, &mut entity_types)?;
 
         match spec_meta {
             (SpecType::Request, Some(k)) => {
