@@ -99,6 +99,7 @@ pub fn run() -> Result<(), Error> {
     }
 
     writeln!(module_file, "/// Valid API keys in the Kafka protocol.")?;
+    writeln!(module_file, "#[derive(Debug, Clone, Copy, PartialEq, Eq)]")?;
     writeln!(module_file, "pub enum ApiKey {{")?;
     for (api_key, request_type) in request_types.iter() {
         writeln!(module_file, "    /// API key for request {}", request_type)?;
@@ -130,7 +131,7 @@ pub fn run() -> Result<(), Error> {
     writeln!(module_file)?;
 
     writeln!(module_file, "/// Wrapping enum for all requests in the Kafka protocol.")?;
-    writeln!(module_file, "#[derive(Debug)]")?;
+    writeln!(module_file, "#[derive(Debug, Clone, PartialEq)]")?;
     writeln!(module_file, "pub enum RequestKind {{")?;
     for (_, request_type) in request_types.iter() {
         writeln!(module_file, "    /// {},", request_type)?;
@@ -140,7 +141,7 @@ pub fn run() -> Result<(), Error> {
     writeln!(module_file)?;
 
     writeln!(module_file, "/// Wrapping enum for all responses in the Kafka protocol.")?;
-    writeln!(module_file, "#[derive(Debug)]")?;
+    writeln!(module_file, "#[derive(Debug, Clone, PartialEq)]")?;
     writeln!(module_file, "pub enum ResponseKind {{")?;
     for (_, response_type) in response_types.iter() {
         writeln!(module_file, "    /// {},", response_type)?;
@@ -150,7 +151,7 @@ pub fn run() -> Result<(), Error> {
     writeln!(module_file)?;
 
     for entity_type in entity_types {
-        let mut derives = vec!["Debug", "Clone", "Eq", "PartialEq", "Ord", "PartialOrd", "Hash", "Default", "derive_builder::Builder"];
+        let mut derives = vec!["Debug", "Clone", "Eq", "PartialEq", "Ord", "PartialOrd", "Hash", "Default"];
         if entity_type.inner.is_copy() {
             derives.push("Copy");
         }
