@@ -73,8 +73,11 @@ pub enum TimestampType {
 /// Options for encoding and compressing a batch of records. Note, not all compression algorithms
 /// are currently implemented by this library.
 pub struct RecordEncodeOptions {
-    version: i8,
-    compression: Compression,
+    /// Record version, 0, 1, or 2.
+    pub version: i8,
+
+    /// The compression algorithm to use.
+    pub compression: Compression,
 }
 
 /// Value to indicate missing producer id.

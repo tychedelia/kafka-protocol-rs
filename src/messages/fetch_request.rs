@@ -318,7 +318,7 @@ impl Message for FetchTopic {
 /// Valid versions: 0-13
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ForgottenTopic {
-    /// The partition name.
+    /// The topic name.
     /// 
     /// Supported API versions: 7-12
     pub topic: super::TopicName,

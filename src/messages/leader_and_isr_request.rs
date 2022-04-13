@@ -17,7 +17,7 @@ use crate::protocol::{
 };
 
 
-/// Valid versions: 0-5
+/// Valid versions: 0-6
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct LeaderAndIsrPartitionState {
     /// The topic name.  This is only present in v0 or v1.
@@ -27,53 +27,58 @@ pub struct LeaderAndIsrPartitionState {
 
     /// The partition index.
     /// 
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub partition_index: i32,
 
     /// The controller epoch.
     /// 
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub controller_epoch: i32,
 
     /// The broker ID of the leader.
     /// 
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub leader: super::BrokerId,
 
     /// The leader epoch.
     /// 
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub leader_epoch: i32,
 
     /// The in-sync replica IDs.
     /// 
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub isr: Vec<super::BrokerId>,
 
     /// The ZooKeeper version.
     /// 
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub zk_version: i32,
 
     /// The replica IDs.
     /// 
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub replicas: Vec<super::BrokerId>,
 
     /// The replica IDs that we are adding this partition to, or null if no replicas are being added.
     /// 
-    /// Supported API versions: 3-5
+    /// Supported API versions: 3-6
     pub adding_replicas: Vec<super::BrokerId>,
 
     /// The replica IDs that we are removing this partition from, or null if no replicas are being removed.
     /// 
-    /// Supported API versions: 3-5
+    /// Supported API versions: 3-6
     pub removing_replicas: Vec<super::BrokerId>,
 
     /// Whether the replica should have existed on the broker or not.
     /// 
-    /// Supported API versions: 1-5
+    /// Supported API versions: 1-6
     pub is_new: bool,
+
+    /// 1 if the partition is recovering from an unclean leader election; 0 otherwise.
+    /// 
+    /// Supported API versions: 6
+    pub leader_recovery_state: i8,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
@@ -115,6 +120,13 @@ impl Encodable for LeaderAndIsrPartitionState {
         }
         if version >= 1 {
             types::Boolean.encode(buf, &self.is_new)?;
+        }
+        if version >= 6 {
+            types::Int8.encode(buf, &self.leader_recovery_state)?;
+        } else {
+            if self.leader_recovery_state != 0 {
+                return Err(EncodeError)
+            }
         }
         if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -164,6 +176,13 @@ impl Encodable for LeaderAndIsrPartitionState {
         }
         if version >= 1 {
             total_size += types::Boolean.compute_size(&self.is_new)?;
+        }
+        if version >= 6 {
+            total_size += types::Int8.compute_size(&self.leader_recovery_state)?;
+        } else {
+            if self.leader_recovery_state != 0 {
+                return Err(EncodeError)
+            }
         }
         if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -224,6 +243,11 @@ impl Decodable for LeaderAndIsrPartitionState {
         } else {
             false
         };
+        let leader_recovery_state = if version >= 6 {
+            types::Int8.decode(buf)?
+        } else {
+            0
+        };
         let mut unknown_tagged_fields = BTreeMap::new();
         if version >= 4 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
@@ -247,6 +271,7 @@ impl Decodable for LeaderAndIsrPartitionState {
             adding_replicas,
             removing_replicas,
             is_new,
+            leader_recovery_state,
             unknown_tagged_fields,
         })
     }
@@ -266,31 +291,32 @@ impl Default for LeaderAndIsrPartitionState {
             adding_replicas: Default::default(),
             removing_replicas: Default::default(),
             is_new: false,
+            leader_recovery_state: 0,
             unknown_tagged_fields: BTreeMap::new(),
         }
     }
 }
 
 impl Message for LeaderAndIsrPartitionState {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 5 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 6 };
 }
 
-/// Valid versions: 0-5
+/// Valid versions: 0-6
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct LeaderAndIsrTopicState {
     /// The topic name.
     /// 
-    /// Supported API versions: 2-5
+    /// Supported API versions: 2-6
     pub topic_name: super::TopicName,
 
     /// The unique topic ID.
     /// 
-    /// Supported API versions: 5
+    /// Supported API versions: 5-6
     pub topic_id: Uuid,
 
     /// The state of each partition
     /// 
-    /// Supported API versions: 2-5
+    /// Supported API versions: 2-6
     pub partition_states: Vec<LeaderAndIsrPartitionState>,
 
     /// Other tagged fields
@@ -434,25 +460,25 @@ impl Default for LeaderAndIsrTopicState {
 }
 
 impl Message for LeaderAndIsrTopicState {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 5 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 6 };
 }
 
-/// Valid versions: 0-5
+/// Valid versions: 0-6
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct LeaderAndIsrLiveLeader {
     /// The leader's broker ID.
     /// 
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub broker_id: super::BrokerId,
 
     /// The leader's hostname.
     /// 
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub host_name: StrBytes,
 
     /// The leader's port.
     /// 
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub port: i32,
 
     /// Other tagged fields
@@ -544,30 +570,30 @@ impl Default for LeaderAndIsrLiveLeader {
 }
 
 impl Message for LeaderAndIsrLiveLeader {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 5 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 6 };
 }
 
-/// Valid versions: 0-5
+/// Valid versions: 0-6
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct LeaderAndIsrRequest {
     /// The current controller ID.
     /// 
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub controller_id: super::BrokerId,
 
     /// The current controller epoch.
     /// 
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub controller_epoch: i32,
 
     /// The current broker epoch.
     /// 
-    /// Supported API versions: 2-5
+    /// Supported API versions: 2-6
     pub broker_epoch: i64,
 
     /// The type that indicates whether all topics are included in the request
     /// 
-    /// Supported API versions: 5
+    /// Supported API versions: 5-6
     pub _type: i8,
 
     /// The state of each partition, in a v0 or v1 message.
@@ -577,12 +603,12 @@ pub struct LeaderAndIsrRequest {
 
     /// Each topic.
     /// 
-    /// Supported API versions: 2-5
+    /// Supported API versions: 2-6
     pub topic_states: Vec<LeaderAndIsrTopicState>,
 
     /// The current live leaders.
     /// 
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub live_leaders: Vec<LeaderAndIsrLiveLeader>,
 
     /// Other tagged fields
@@ -762,7 +788,7 @@ impl Default for LeaderAndIsrRequest {
 }
 
 impl Message for LeaderAndIsrRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 5 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 6 };
 }
 
 impl HeaderVersion for LeaderAndIsrRequest {
