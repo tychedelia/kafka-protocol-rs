@@ -386,10 +386,6 @@ impl Encodable for DescribeLogDirsResponse {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         if version >= 3 {
             types::Int16.encode(buf, &self.error_code)?;
-        } else {
-            if self.error_code != 0 {
-                return Err(EncodeError)
-            }
         }
         if version >= 2 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.results)?;
@@ -413,10 +409,6 @@ impl Encodable for DescribeLogDirsResponse {
         total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
         if version >= 3 {
             total_size += types::Int16.compute_size(&self.error_code)?;
-        } else {
-            if self.error_code != 0 {
-                return Err(EncodeError)
-            }
         }
         if version >= 2 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.results)?;

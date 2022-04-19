@@ -15,7 +15,11 @@ use tempfile::tempdir;
 
 pub fn run() -> Result<(), Error> {
     let input_tmpdir = tempdir()?.into_path();
-    const OUTPUT_PATH: &str = "../src/messages";
+
+    let mut dir = std::fs::canonicalize(std::file!())?;
+    dir.push("../../../src/messages");
+    let output_path = std::fs::canonicalize(dir)?;
+    let output_path = output_path.to_str().unwrap();
 
     // Download messages from head of Kafka repo
     println!("Cloning kafka repo");
@@ -25,7 +29,7 @@ pub fn run() -> Result<(), Error> {
         .clone("https://github.com/apache/kafka.git", &input_tmpdir.as_path())?;
 
     // Clear output directory
-    for file in fs::read_dir(OUTPUT_PATH)? {
+    for file in fs::read_dir(output_path)? {
         let file = file?;
         if file.file_type()?.is_file() {
             let path = file.path();
@@ -51,7 +55,7 @@ pub fn run() -> Result<(), Error> {
     let mut request_types = BTreeMap::new();
     let mut response_types = BTreeMap::new();
 
-    let module_path = format!("{}.rs", OUTPUT_PATH);
+    let module_path = format!("{}.rs", output_path);
     let mut module_file = File::create(&module_path)?;
 
     writeln!(module_file, "//! Messages used by the Kafka protocol.")?;
@@ -68,7 +72,7 @@ pub fn run() -> Result<(), Error> {
         let spec = parse::parse(&input_file_path)?;
         let spec_meta = (spec.type_, spec.api_key);
 
-        let (module_name, struct_name) = generate::generate(OUTPUT_PATH, spec, &mut entity_types)?;
+        let (module_name, struct_name) = generate::generate(output_path, spec, &mut entity_types)?;
 
         match spec_meta {
             (SpecType::Request, Some(k)) => {
@@ -95,6 +99,7 @@ pub fn run() -> Result<(), Error> {
     }
 
     writeln!(module_file, "/// Valid API keys in the Kafka protocol.")?;
+    writeln!(module_file, "#[derive(Debug, Clone, Copy, PartialEq, Eq)]")?;
     writeln!(module_file, "pub enum ApiKey {{")?;
     for (api_key, request_type) in request_types.iter() {
         writeln!(module_file, "    /// API key for request {}", request_type)?;
@@ -126,7 +131,7 @@ pub fn run() -> Result<(), Error> {
     writeln!(module_file)?;
 
     writeln!(module_file, "/// Wrapping enum for all requests in the Kafka protocol.")?;
-    writeln!(module_file, "#[derive(Debug)]")?;
+    writeln!(module_file, "#[derive(Debug, Clone, PartialEq)]")?;
     writeln!(module_file, "pub enum RequestKind {{")?;
     for (_, request_type) in request_types.iter() {
         writeln!(module_file, "    /// {},", request_type)?;
@@ -136,7 +141,7 @@ pub fn run() -> Result<(), Error> {
     writeln!(module_file)?;
 
     writeln!(module_file, "/// Wrapping enum for all responses in the Kafka protocol.")?;
-    writeln!(module_file, "#[derive(Debug)]")?;
+    writeln!(module_file, "#[derive(Debug, Clone, PartialEq)]")?;
     writeln!(module_file, "pub enum ResponseKind {{")?;
     for (_, response_type) in response_types.iter() {
         writeln!(module_file, "    /// {},", response_type)?;
@@ -146,7 +151,7 @@ pub fn run() -> Result<(), Error> {
     writeln!(module_file)?;
 
     for entity_type in entity_types {
-        let mut derives = vec!["Debug", "Clone", "Eq", "PartialEq", "Ord", "PartialOrd", "Hash", "Default", "derive_builder::Builder"];
+        let mut derives = vec!["Debug", "Clone", "Eq", "PartialEq", "Ord", "PartialOrd", "Hash", "Default"];
         if entity_type.inner.is_copy() {
             derives.push("Copy");
         }

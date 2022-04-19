@@ -1,6 +1,6 @@
-//! AlterIsrResponse
+//! AlterPartitionResponse
 //!
-//! See the schema for this message [here](https://github.com/apache/kafka/blob/trunk/clients/src/main/resources/common/message/AlterIsrResponse.json).
+//! See the schema for this message [here](https://github.com/apache/kafka/blob/trunk/clients/src/main/resources/common/message/AlterPartitionResponse.json).
 // WARNING: the items of this module are generated and should not be edited directly
 #![allow(unused)]
 
@@ -17,38 +17,43 @@ use crate::protocol::{
 };
 
 
-/// Valid versions: 0
+/// Valid versions: 0-1
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct PartitionData {
     /// The partition index
     /// 
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub partition_index: i32,
 
     /// The partition level error code
     /// 
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub error_code: i16,
 
     /// The broker ID of the leader.
     /// 
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub leader_id: super::BrokerId,
 
     /// The leader epoch.
     /// 
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub leader_epoch: i32,
 
     /// The in-sync replica IDs.
     /// 
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub isr: Vec<super::BrokerId>,
 
-    /// The current ISR version.
+    /// 1 if the partition is recovering from an unclean leader election; 0 otherwise.
     /// 
-    /// Supported API versions: 0
-    pub current_isr_version: i32,
+    /// Supported API versions: 1
+    pub leader_recovery_state: i8,
+
+    /// The current epoch for the partition for KRaft controllers. The current ZK version for the legacy controllers.
+    /// 
+    /// Supported API versions: 0-1
+    pub partition_epoch: i32,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
@@ -61,7 +66,10 @@ impl Encodable for PartitionData {
         types::Int32.encode(buf, &self.leader_id)?;
         types::Int32.encode(buf, &self.leader_epoch)?;
         types::CompactArray(types::Int32).encode(buf, &self.isr)?;
-        types::Int32.encode(buf, &self.current_isr_version)?;
+        if version >= 1 {
+            types::Int8.encode(buf, &self.leader_recovery_state)?;
+        }
+        types::Int32.encode(buf, &self.partition_epoch)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -79,7 +87,10 @@ impl Encodable for PartitionData {
         total_size += types::Int32.compute_size(&self.leader_id)?;
         total_size += types::Int32.compute_size(&self.leader_epoch)?;
         total_size += types::CompactArray(types::Int32).compute_size(&self.isr)?;
-        total_size += types::Int32.compute_size(&self.current_isr_version)?;
+        if version >= 1 {
+            total_size += types::Int8.compute_size(&self.leader_recovery_state)?;
+        }
+        total_size += types::Int32.compute_size(&self.partition_epoch)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -99,7 +110,12 @@ impl Decodable for PartitionData {
         let leader_id = types::Int32.decode(buf)?;
         let leader_epoch = types::Int32.decode(buf)?;
         let isr = types::CompactArray(types::Int32).decode(buf)?;
-        let current_isr_version = types::Int32.decode(buf)?;
+        let leader_recovery_state = if version >= 1 {
+            types::Int8.decode(buf)?
+        } else {
+            0
+        };
+        let partition_epoch = types::Int32.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
         let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
         for _ in 0..num_tagged_fields {
@@ -115,7 +131,8 @@ impl Decodable for PartitionData {
             leader_id,
             leader_epoch,
             isr,
-            current_isr_version,
+            leader_recovery_state,
+            partition_epoch,
             unknown_tagged_fields,
         })
     }
@@ -129,27 +146,28 @@ impl Default for PartitionData {
             leader_id: (0).into(),
             leader_epoch: 0,
             isr: Default::default(),
-            current_isr_version: 0,
+            leader_recovery_state: 0,
+            partition_epoch: 0,
             unknown_tagged_fields: BTreeMap::new(),
         }
     }
 }
 
 impl Message for PartitionData {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 0 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
 }
 
-/// Valid versions: 0
+/// Valid versions: 0-1
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct TopicData {
     /// The name of the topic
     /// 
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub name: super::TopicName,
 
     /// 
     /// 
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub partitions: Vec<PartitionData>,
 
     /// Other tagged fields
@@ -218,32 +236,32 @@ impl Default for TopicData {
 }
 
 impl Message for TopicData {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 0 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
 }
 
-/// Valid versions: 0
+/// Valid versions: 0-1
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-pub struct AlterIsrResponse {
+pub struct AlterPartitionResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub throttle_time_ms: i32,
 
     /// The top level response error code
     /// 
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub error_code: i16,
 
     /// 
     /// 
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub topics: Vec<TopicData>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
 }
 
-impl Encodable for AlterIsrResponse {
+impl Encodable for AlterPartitionResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         types::Int16.encode(buf, &self.error_code)?;
@@ -275,7 +293,7 @@ impl Encodable for AlterIsrResponse {
     }
 }
 
-impl Decodable for AlterIsrResponse {
+impl Decodable for AlterPartitionResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let throttle_time_ms = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
@@ -298,7 +316,7 @@ impl Decodable for AlterIsrResponse {
     }
 }
 
-impl Default for AlterIsrResponse {
+impl Default for AlterPartitionResponse {
     fn default() -> Self {
         Self {
             throttle_time_ms: 0,
@@ -309,11 +327,11 @@ impl Default for AlterIsrResponse {
     }
 }
 
-impl Message for AlterIsrResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 0 };
+impl Message for AlterPartitionResponse {
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
 }
 
-impl HeaderVersion for AlterIsrResponse {
+impl HeaderVersion for AlterPartitionResponse {
     fn header_version(version: i16) -> i16 {
         1
     }

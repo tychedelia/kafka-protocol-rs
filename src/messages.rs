@@ -36,17 +36,17 @@ pub use alter_configs_request::AlterConfigsRequest;
 pub mod alter_configs_response;
 pub use alter_configs_response::AlterConfigsResponse;
 
-pub mod alter_isr_request;
-pub use alter_isr_request::AlterIsrRequest;
-
-pub mod alter_isr_response;
-pub use alter_isr_response::AlterIsrResponse;
-
 pub mod alter_partition_reassignments_request;
 pub use alter_partition_reassignments_request::AlterPartitionReassignmentsRequest;
 
 pub mod alter_partition_reassignments_response;
 pub use alter_partition_reassignments_response::AlterPartitionReassignmentsResponse;
+
+pub mod alter_partition_request;
+pub use alter_partition_request::AlterPartitionRequest;
+
+pub mod alter_partition_response;
+pub use alter_partition_response::AlterPartitionResponse;
 
 pub mod alter_replica_log_dirs_request;
 pub use alter_replica_log_dirs_request::AlterReplicaLogDirsRequest;
@@ -718,9 +718,9 @@ impl Request for DescribeQuorumRequest {
     type Response = DescribeQuorumResponse;
 }
 
-impl Request for AlterIsrRequest {
+impl Request for AlterPartitionRequest {
     const KEY: i16 = 56;
-    type Response = AlterIsrResponse;
+    type Response = AlterPartitionResponse;
 }
 
 impl Request for UpdateFeaturesRequest {
@@ -779,6 +779,7 @@ impl Request for AllocateProducerIdsRequest {
 }
 
 /// Valid API keys in the Kafka protocol.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ApiKey {
     /// API key for request ProduceRequest
     ProduceKey = 0,
@@ -892,8 +893,8 @@ pub enum ApiKey {
     EndQuorumEpochKey = 54,
     /// API key for request DescribeQuorumRequest
     DescribeQuorumKey = 55,
-    /// API key for request AlterIsrRequest
-    AlterIsrKey = 56,
+    /// API key for request AlterPartitionRequest
+    AlterPartitionKey = 56,
     /// API key for request UpdateFeaturesRequest
     UpdateFeaturesKey = 57,
     /// API key for request EnvelopeRequest
@@ -979,7 +980,7 @@ impl TryFrom<i16> for ApiKey {
             x if x == ApiKey::BeginQuorumEpochKey as i16 => Ok(ApiKey::BeginQuorumEpochKey),
             x if x == ApiKey::EndQuorumEpochKey as i16 => Ok(ApiKey::EndQuorumEpochKey),
             x if x == ApiKey::DescribeQuorumKey as i16 => Ok(ApiKey::DescribeQuorumKey),
-            x if x == ApiKey::AlterIsrKey as i16 => Ok(ApiKey::AlterIsrKey),
+            x if x == ApiKey::AlterPartitionKey as i16 => Ok(ApiKey::AlterPartitionKey),
             x if x == ApiKey::UpdateFeaturesKey as i16 => Ok(ApiKey::UpdateFeaturesKey),
             x if x == ApiKey::EnvelopeKey as i16 => Ok(ApiKey::EnvelopeKey),
             x if x == ApiKey::FetchSnapshotKey as i16 => Ok(ApiKey::FetchSnapshotKey),
@@ -997,7 +998,7 @@ impl TryFrom<i16> for ApiKey {
 }
 
 /// Wrapping enum for all requests in the Kafka protocol.
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum RequestKind {
     /// ProduceRequest,
     ProduceRequest(ProduceRequest),
@@ -1111,8 +1112,8 @@ pub enum RequestKind {
     EndQuorumEpochRequest(EndQuorumEpochRequest),
     /// DescribeQuorumRequest,
     DescribeQuorumRequest(DescribeQuorumRequest),
-    /// AlterIsrRequest,
-    AlterIsrRequest(AlterIsrRequest),
+    /// AlterPartitionRequest,
+    AlterPartitionRequest(AlterPartitionRequest),
     /// UpdateFeaturesRequest,
     UpdateFeaturesRequest(UpdateFeaturesRequest),
     /// EnvelopeRequest,
@@ -1138,7 +1139,7 @@ pub enum RequestKind {
 }
 
 /// Wrapping enum for all responses in the Kafka protocol.
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum ResponseKind {
     /// ProduceResponse,
     ProduceResponse(ProduceResponse),
@@ -1252,8 +1253,8 @@ pub enum ResponseKind {
     EndQuorumEpochResponse(EndQuorumEpochResponse),
     /// DescribeQuorumResponse,
     DescribeQuorumResponse(DescribeQuorumResponse),
-    /// AlterIsrResponse,
-    AlterIsrResponse(AlterIsrResponse),
+    /// AlterPartitionResponse,
+    AlterPartitionResponse(AlterPartitionResponse),
     /// UpdateFeaturesResponse,
     UpdateFeaturesResponse(UpdateFeaturesResponse),
     /// EnvelopeResponse,
