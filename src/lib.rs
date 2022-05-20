@@ -110,3 +110,6 @@ pub mod messages;
 pub mod records;
 pub mod compression;
 pub mod protocol;
+pub mod error;
+
+pub use error::ResponseError;
