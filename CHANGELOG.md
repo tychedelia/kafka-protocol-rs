@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.4.0
+
+- Add utilities for dealing with response error codes.
+
 ## v0.3.0 
 
 #### Enhancements:
