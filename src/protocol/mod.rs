@@ -3,13 +3,16 @@
 //! Most types are used internally in encoding/decoding, and are not required by typical use cases
 //! for interacting with the protocol. However, types can be used for decoding partial messages,
 //! or rewriting parts of an encoded message.
-use std::error::Error;
+use std::string::FromUtf8Error;
+use std::{error::Error, str::Utf8Error};
 use std::borrow::Borrow;
 use std::ops::RangeBounds;
 use std::collections::BTreeMap;
 use std::cmp;
 
 use buf::{ByteBuf, ByteBufMut};
+
+use self::buf::NotEnoughBytesError;
 
 pub mod types;
 pub mod buf;
@@ -22,15 +25,51 @@ pub type StrBytes = string::String<bytes::Bytes>;
 #[derive(Debug)]
 pub struct DecodeError;
 
+impl std::fmt::Display for DecodeError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "DecodeErrror")
+    }
+}
+
+impl Error for DecodeError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        None
+    }
+}
+
+impl From<NotEnoughBytesError> for DecodeError {
+    fn from(_: NotEnoughBytesError) -> Self {
+        DecodeError
+    }
+}
+
+impl From<Utf8Error> for DecodeError {
+    fn from(_: Utf8Error) -> Self {
+        DecodeError
+    }
+}
+
+impl From<FromUtf8Error> for DecodeError {
+    fn from(_: FromUtf8Error) -> Self {
+        DecodeError
+    }
+}
+
 /// An error representing any fault while encoding a message, usually when a message in an invalid
 /// state is attempted to be encoded.
 #[derive(Debug)]
 pub struct EncodeError;
 
-impl<E: Error> From<E> for DecodeError {
-    fn from(other: E) -> Self {
-        error!("{}", other);
-        DecodeError
+
+impl std::fmt::Display for EncodeError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "EncodeError")
+    }
+}
+
+impl Error for EncodeError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        None
     }
 }
 
