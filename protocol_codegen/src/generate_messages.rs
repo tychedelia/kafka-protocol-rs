@@ -16,8 +16,8 @@ use tempfile::tempdir;
 pub fn run() -> Result<(), Error> {
     let input_tmpdir = tempdir()?.into_path();
 
-    let mut dir = std::fs::canonicalize(std::file!())?;
-    dir.push("../../../src/messages");
+    let mut dir = std::fs::canonicalize(std::file!().rsplit_once("/").unwrap().0)?;
+    dir.push("../../src/messages");
     let output_path = std::fs::canonicalize(dir)?;
     let output_path = output_path.to_str().unwrap();
 
