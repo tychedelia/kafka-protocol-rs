@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-2
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct AlterReplicaLogDirTopic {
     /// The partition indexes.
@@ -27,6 +28,14 @@ pub struct AlterReplicaLogDirTopic {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for AlterReplicaLogDirTopic {
+    type Builder = AlterReplicaLogDirTopicBuilder;
+
+    fn builder() -> Self::Builder{
+        AlterReplicaLogDirTopicBuilder::default()
+    }
 }
 
 impl MapEncodable for AlterReplicaLogDirTopic {
@@ -125,6 +134,7 @@ impl Message for AlterReplicaLogDirTopic {
 }
 
 /// Valid versions: 0-2
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct AlterReplicaLogDir {
     /// The topics to add to the directory.
@@ -134,6 +144,14 @@ pub struct AlterReplicaLogDir {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for AlterReplicaLogDir {
+    type Builder = AlterReplicaLogDirBuilder;
+
+    fn builder() -> Self::Builder{
+        AlterReplicaLogDirBuilder::default()
+    }
 }
 
 impl MapEncodable for AlterReplicaLogDir {
@@ -232,6 +250,7 @@ impl Message for AlterReplicaLogDir {
 }
 
 /// Valid versions: 0-2
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct AlterReplicaLogDirsRequest {
     /// The alterations to make for each directory.
@@ -241,6 +260,14 @@ pub struct AlterReplicaLogDirsRequest {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for AlterReplicaLogDirsRequest {
+    type Builder = AlterReplicaLogDirsRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        AlterReplicaLogDirsRequestBuilder::default()
+    }
 }
 
 impl Encodable for AlterReplicaLogDirsRequest {

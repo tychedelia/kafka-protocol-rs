@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct AddPartitionsToTxnTopic {
     /// The partition indexes to add to the transaction
@@ -27,6 +28,14 @@ pub struct AddPartitionsToTxnTopic {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for AddPartitionsToTxnTopic {
+    type Builder = AddPartitionsToTxnTopicBuilder;
+
+    fn builder() -> Self::Builder{
+        AddPartitionsToTxnTopicBuilder::default()
+    }
 }
 
 impl MapEncodable for AddPartitionsToTxnTopic {
@@ -125,6 +134,7 @@ impl Message for AddPartitionsToTxnTopic {
 }
 
 /// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct AddPartitionsToTxnRequest {
     /// The transactional id corresponding to the transaction.
@@ -149,6 +159,14 @@ pub struct AddPartitionsToTxnRequest {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for AddPartitionsToTxnRequest {
+    type Builder = AddPartitionsToTxnRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        AddPartitionsToTxnRequestBuilder::default()
+    }
 }
 
 impl Encodable for AddPartitionsToTxnRequest {

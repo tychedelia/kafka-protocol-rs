@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-4
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct EpochEndOffset {
     /// The error code 0, or if there was no error.
@@ -42,6 +43,14 @@ pub struct EpochEndOffset {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for EpochEndOffset {
+    type Builder = EpochEndOffsetBuilder;
+
+    fn builder() -> Self::Builder{
+        EpochEndOffsetBuilder::default()
+    }
 }
 
 impl Encodable for EpochEndOffset {
@@ -134,6 +143,7 @@ impl Message for EpochEndOffset {
 }
 
 /// Valid versions: 0-4
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetForLeaderTopicResult {
     /// Each partition in the topic we fetched offsets for.
@@ -143,6 +153,14 @@ pub struct OffsetForLeaderTopicResult {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for OffsetForLeaderTopicResult {
+    type Builder = OffsetForLeaderTopicResultBuilder;
+
+    fn builder() -> Self::Builder{
+        OffsetForLeaderTopicResultBuilder::default()
+    }
 }
 
 impl MapEncodable for OffsetForLeaderTopicResult {
@@ -241,6 +259,7 @@ impl Message for OffsetForLeaderTopicResult {
 }
 
 /// Valid versions: 0-4
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetForLeaderEpochResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
@@ -255,6 +274,14 @@ pub struct OffsetForLeaderEpochResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for OffsetForLeaderEpochResponse {
+    type Builder = OffsetForLeaderEpochResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        OffsetForLeaderEpochResponseBuilder::default()
+    }
 }
 
 impl Encodable for OffsetForLeaderEpochResponse {

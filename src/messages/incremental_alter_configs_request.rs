@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-1
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct AlterableConfig {
     /// The configuration key name.
@@ -37,6 +38,14 @@ pub struct AlterableConfig {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for AlterableConfig {
+    type Builder = AlterableConfigBuilder;
+
+    fn builder() -> Self::Builder{
+        AlterableConfigBuilder::default()
+    }
 }
 
 impl Encodable for AlterableConfig {
@@ -140,6 +149,7 @@ impl Message for AlterableConfig {
 }
 
 /// Valid versions: 0-1
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct AlterConfigsResource {
     /// The resource type.
@@ -159,6 +169,14 @@ pub struct AlterConfigsResource {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for AlterConfigsResource {
+    type Builder = AlterConfigsResourceBuilder;
+
+    fn builder() -> Self::Builder{
+        AlterConfigsResourceBuilder::default()
+    }
 }
 
 impl Encodable for AlterConfigsResource {
@@ -262,6 +280,7 @@ impl Message for AlterConfigsResource {
 }
 
 /// Valid versions: 0-1
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct IncrementalAlterConfigsRequest {
     /// The incremental updates for each resource.
@@ -276,6 +295,14 @@ pub struct IncrementalAlterConfigsRequest {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for IncrementalAlterConfigsRequest {
+    type Builder = IncrementalAlterConfigsRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        IncrementalAlterConfigsRequestBuilder::default()
+    }
 }
 
 impl Encodable for IncrementalAlterConfigsRequest {

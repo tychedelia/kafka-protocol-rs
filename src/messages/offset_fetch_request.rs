@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-8
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetFetchRequestTopic {
     /// The topic name.
@@ -32,6 +33,14 @@ pub struct OffsetFetchRequestTopic {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for OffsetFetchRequestTopic {
+    type Builder = OffsetFetchRequestTopicBuilder;
+
+    fn builder() -> Self::Builder{
+        OffsetFetchRequestTopicBuilder::default()
+    }
 }
 
 impl Encodable for OffsetFetchRequestTopic {
@@ -162,6 +171,7 @@ impl Message for OffsetFetchRequestTopic {
 }
 
 /// Valid versions: 0-8
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetFetchRequestTopics {
     /// The topic name.
@@ -176,6 +186,14 @@ pub struct OffsetFetchRequestTopics {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for OffsetFetchRequestTopics {
+    type Builder = OffsetFetchRequestTopicsBuilder;
+
+    fn builder() -> Self::Builder{
+        OffsetFetchRequestTopicsBuilder::default()
+    }
 }
 
 impl Encodable for OffsetFetchRequestTopics {
@@ -282,6 +300,7 @@ impl Message for OffsetFetchRequestTopics {
 }
 
 /// Valid versions: 0-8
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetFetchRequestGroup {
     /// The group ID.
@@ -296,6 +315,14 @@ pub struct OffsetFetchRequestGroup {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for OffsetFetchRequestGroup {
+    type Builder = OffsetFetchRequestGroupBuilder;
+
+    fn builder() -> Self::Builder{
+        OffsetFetchRequestGroupBuilder::default()
+    }
 }
 
 impl Encodable for OffsetFetchRequestGroup {
@@ -402,6 +429,7 @@ impl Message for OffsetFetchRequestGroup {
 }
 
 /// Valid versions: 0-8
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetFetchRequest {
     /// The group to fetch offsets for.
@@ -426,6 +454,14 @@ pub struct OffsetFetchRequest {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for OffsetFetchRequest {
+    type Builder = OffsetFetchRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        OffsetFetchRequestBuilder::default()
+    }
 }
 
 impl Encodable for OffsetFetchRequest {

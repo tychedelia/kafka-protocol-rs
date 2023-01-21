@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct TopicData {
     /// 
@@ -27,6 +28,14 @@ pub struct TopicData {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for TopicData {
+    type Builder = TopicDataBuilder;
+
+    fn builder() -> Self::Builder{
+        TopicDataBuilder::default()
+    }
 }
 
 impl MapEncodable for TopicData {
@@ -95,6 +104,7 @@ impl Message for TopicData {
 }
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct TransactionState {
     /// 
@@ -139,6 +149,14 @@ pub struct TransactionState {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for TransactionState {
+    type Builder = TransactionStateBuilder;
+
+    fn builder() -> Self::Builder{
+        TransactionStateBuilder::default()
+    }
 }
 
 impl Encodable for TransactionState {
@@ -237,6 +255,7 @@ impl Message for TransactionState {
 }
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DescribeTransactionsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
@@ -251,6 +270,14 @@ pub struct DescribeTransactionsResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DescribeTransactionsResponse {
+    type Builder = DescribeTransactionsResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        DescribeTransactionsResponseBuilder::default()
+    }
 }
 
 impl Encodable for DescribeTransactionsResponse {

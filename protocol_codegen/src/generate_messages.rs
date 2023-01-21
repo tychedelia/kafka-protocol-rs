@@ -3,6 +3,7 @@ use std::io::Write;
 use std::collections::{BTreeSet, BTreeMap};
 
 use failure::Error;
+use git2::Oid;
 
 mod code_writer;
 pub mod expr;
@@ -16,6 +17,11 @@ use tempfile::tempdir;
 pub fn run() -> Result<(), Error> {
     let input_tmpdir = tempdir()?.into_path();
 
+    // https://github.com/apache/kafka/releases/tag/3.3.2
+    // checking out a tag with git2 is annoying -- we pin to the tag's commit sha instead
+    let release_commit = "b66af662e61082cb8def576ded1fe5cee37e155f";
+    let oid = Oid::from_str(release_commit).unwrap();
+
     let mut dir = std::fs::canonicalize(std::file!().rsplit_once("/").unwrap().0)?;
     dir.push("../../src/messages");
     let output_path = std::fs::canonicalize(dir)?;
@@ -23,10 +29,13 @@ pub fn run() -> Result<(), Error> {
 
     // Download messages from head of Kafka repo
     println!("Cloning kafka repo");
-    git2::build::RepoBuilder::new()
+    let repo = git2::build::RepoBuilder::new()
         .fetch_options(git2::FetchOptions::new())
         .with_checkout(git2::build::CheckoutBuilder::new())
         .clone("https://github.com/apache/kafka.git", &input_tmpdir.as_path())?;
+
+    // Checkout the release commit
+    repo.find_commit(oid).expect("Could not find release commit!");
 
     // Clear output directory
     for file in fs::read_dir(output_path)? {
@@ -131,6 +140,7 @@ pub fn run() -> Result<(), Error> {
     writeln!(module_file)?;
 
     writeln!(module_file, "/// Wrapping enum for all requests in the Kafka protocol.")?;
+    writeln!(module_file, "#[non_exhaustive]")?;
     writeln!(module_file, "#[derive(Debug, Clone, PartialEq)]")?;
     writeln!(module_file, "pub enum RequestKind {{")?;
     for (_, request_type) in request_types.iter() {
@@ -141,6 +151,7 @@ pub fn run() -> Result<(), Error> {
     writeln!(module_file)?;
 
     writeln!(module_file, "/// Wrapping enum for all responses in the Kafka protocol.")?;
+    writeln!(module_file, "#[non_exhaustive]")?;
     writeln!(module_file, "#[derive(Debug, Clone, PartialEq)]")?;
     writeln!(module_file, "pub enum ResponseKind {{")?;
     for (_, response_type) in response_types.iter() {

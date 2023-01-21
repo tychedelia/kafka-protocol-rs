@@ -13,30 +13,39 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
-/// Valid versions: 0
+/// Valid versions: 0-1
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct BrokerRegistrationResponse {
     /// Duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub throttle_time_ms: i32,
 
     /// The error code, or 0 if there was no error.
     /// 
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub error_code: i16,
 
     /// The broker's assigned epoch, or -1 if none was assigned.
     /// 
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub broker_epoch: i64,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for BrokerRegistrationResponse {
+    type Builder = BrokerRegistrationResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        BrokerRegistrationResponseBuilder::default()
+    }
 }
 
 impl Encodable for BrokerRegistrationResponse {
@@ -106,7 +115,7 @@ impl Default for BrokerRegistrationResponse {
 }
 
 impl Message for BrokerRegistrationResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 0 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
 }
 
 impl HeaderVersion for BrokerRegistrationResponse {

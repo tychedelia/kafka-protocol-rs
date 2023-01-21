@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-9
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct BatchIndexAndErrorMessage {
     /// The batch index of the record that cause the batch to be dropped
@@ -32,6 +33,14 @@ pub struct BatchIndexAndErrorMessage {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for BatchIndexAndErrorMessage {
+    type Builder = BatchIndexAndErrorMessageBuilder;
+
+    fn builder() -> Self::Builder{
+        BatchIndexAndErrorMessageBuilder::default()
+    }
 }
 
 impl Encodable for BatchIndexAndErrorMessage {
@@ -150,6 +159,7 @@ impl Message for BatchIndexAndErrorMessage {
 }
 
 /// Valid versions: 0-9
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct PartitionProduceResponse {
     /// The partition index.
@@ -189,6 +199,14 @@ pub struct PartitionProduceResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for PartitionProduceResponse {
+    type Builder = PartitionProduceResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        PartitionProduceResponseBuilder::default()
+    }
 }
 
 impl Encodable for PartitionProduceResponse {
@@ -344,6 +362,7 @@ impl Message for PartitionProduceResponse {
 }
 
 /// Valid versions: 0-9
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct TopicProduceResponse {
     /// Each partition that we produced to within the topic.
@@ -353,6 +372,14 @@ pub struct TopicProduceResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for TopicProduceResponse {
+    type Builder = TopicProduceResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        TopicProduceResponseBuilder::default()
+    }
 }
 
 impl MapEncodable for TopicProduceResponse {
@@ -451,6 +478,7 @@ impl Message for TopicProduceResponse {
 }
 
 /// Valid versions: 0-9
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ProduceResponse {
     /// Each produce response
@@ -465,6 +493,14 @@ pub struct ProduceResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for ProduceResponse {
+    type Builder = ProduceResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        ProduceResponseBuilder::default()
+    }
 }
 
 impl Encodable for ProduceResponse {

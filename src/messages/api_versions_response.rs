@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ApiVersion {
     /// The minimum supported version, inclusive.
@@ -32,6 +33,14 @@ pub struct ApiVersion {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for ApiVersion {
+    type Builder = ApiVersionBuilder;
+
+    fn builder() -> Self::Builder{
+        ApiVersionBuilder::default()
+    }
 }
 
 impl MapEncodable for ApiVersion {
@@ -111,6 +120,7 @@ impl Message for ApiVersion {
 }
 
 /// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct SupportedFeatureKey {
     /// The minimum supported version for the feature.
@@ -125,6 +135,14 @@ pub struct SupportedFeatureKey {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for SupportedFeatureKey {
+    type Builder = SupportedFeatureKeyBuilder;
+
+    fn builder() -> Self::Builder{
+        SupportedFeatureKeyBuilder::default()
+    }
 }
 
 impl MapEncodable for SupportedFeatureKey {
@@ -252,6 +270,7 @@ impl Message for SupportedFeatureKey {
 }
 
 /// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct FinalizedFeatureKey {
     /// The cluster-wide finalized max version level for the feature.
@@ -266,6 +285,14 @@ pub struct FinalizedFeatureKey {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for FinalizedFeatureKey {
+    type Builder = FinalizedFeatureKeyBuilder;
+
+    fn builder() -> Self::Builder{
+        FinalizedFeatureKeyBuilder::default()
+    }
 }
 
 impl MapEncodable for FinalizedFeatureKey {
@@ -393,6 +420,7 @@ impl Message for FinalizedFeatureKey {
 }
 
 /// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ApiVersionsResponse {
     /// The top-level error code.
@@ -425,8 +453,21 @@ pub struct ApiVersionsResponse {
     /// Supported API versions: 3
     pub finalized_features: indexmap::IndexMap<StrBytes, FinalizedFeatureKey>,
 
+    /// Set by a KRaft controller if the required configurations for ZK migration are present
+    /// 
+    /// Supported API versions: 3
+    pub zk_migration_ready: bool,
+
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for ApiVersionsResponse {
+    type Builder = ApiVersionsResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        ApiVersionsResponseBuilder::default()
+    }
 }
 
 impl Encodable for ApiVersionsResponse {
@@ -449,6 +490,9 @@ impl Encodable for ApiVersionsResponse {
                 num_tagged_fields += 1;
             }
             if !self.finalized_features.is_empty() {
+                num_tagged_fields += 1;
+            }
+            if self.zk_migration_ready {
                 num_tagged_fields += 1;
             }
             if num_tagged_fields > std::u32::MAX as usize {
@@ -486,8 +530,18 @@ impl Encodable for ApiVersionsResponse {
                 types::UnsignedVarInt.encode(buf, computed_size as u32)?;
                 types::CompactArray(types::Struct { version }).encode(buf, &self.finalized_features)?;
             }
+            if self.zk_migration_ready {
+                let computed_size = types::Boolean.compute_size(&self.zk_migration_ready)?;
+                if computed_size > std::u32::MAX as usize {
+                    error!("Tagged field is too large to encode ({} bytes)", computed_size);
+                    return Err(EncodeError);
+                }
+                types::UnsignedVarInt.encode(buf, 3)?;
+                types::UnsignedVarInt.encode(buf, computed_size as u32)?;
+                types::Boolean.encode(buf, &self.zk_migration_ready)?;
+            }
 
-            write_unknown_tagged_fields(buf, 3.., &self.unknown_tagged_fields)?;
+            write_unknown_tagged_fields(buf, 4.., &self.unknown_tagged_fields)?;
         }
         Ok(())
     }
@@ -511,6 +565,9 @@ impl Encodable for ApiVersionsResponse {
                 num_tagged_fields += 1;
             }
             if !self.finalized_features.is_empty() {
+                num_tagged_fields += 1;
+            }
+            if self.zk_migration_ready {
                 num_tagged_fields += 1;
             }
             if num_tagged_fields > std::u32::MAX as usize {
@@ -548,6 +605,16 @@ impl Encodable for ApiVersionsResponse {
                 total_size += types::UnsignedVarInt.compute_size(computed_size as u32)?;
                 total_size += computed_size;
             }
+            if self.zk_migration_ready {
+                let computed_size = types::Boolean.compute_size(&self.zk_migration_ready)?;
+                if computed_size > std::u32::MAX as usize {
+                    error!("Tagged field is too large to encode ({} bytes)", computed_size);
+                    return Err(EncodeError);
+                }
+                total_size += types::UnsignedVarInt.compute_size(3)?;
+                total_size += types::UnsignedVarInt.compute_size(computed_size as u32)?;
+                total_size += computed_size;
+            }
 
             total_size += compute_unknown_tagged_fields_size(&self.unknown_tagged_fields)?;
         }
@@ -571,6 +638,7 @@ impl Decodable for ApiVersionsResponse {
         let mut supported_features = Default::default();
         let mut finalized_features_epoch = -1;
         let mut finalized_features = Default::default();
+        let mut zk_migration_ready = false;
         let mut unknown_tagged_fields = BTreeMap::new();
         if version >= 3 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
@@ -587,6 +655,9 @@ impl Decodable for ApiVersionsResponse {
                     2 => {
                         finalized_features = types::CompactArray(types::Struct { version }).decode(buf)?;
                     },
+                    3 => {
+                        zk_migration_ready = types::Boolean.decode(buf)?;
+                    },
                     _ => {
                         let mut unknown_value = vec![0; size as usize];
                         buf.try_copy_to_slice(&mut unknown_value)?;
@@ -602,6 +673,7 @@ impl Decodable for ApiVersionsResponse {
             supported_features,
             finalized_features_epoch,
             finalized_features,
+            zk_migration_ready,
             unknown_tagged_fields,
         })
     }
@@ -616,6 +688,7 @@ impl Default for ApiVersionsResponse {
             supported_features: Default::default(),
             finalized_features_epoch: -1,
             finalized_features: Default::default(),
+            zk_migration_ready: false,
             unknown_tagged_fields: BTreeMap::new(),
         }
     }

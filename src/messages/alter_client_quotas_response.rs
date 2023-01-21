@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-1
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct EntityData {
     /// The entity type.
@@ -32,6 +33,14 @@ pub struct EntityData {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for EntityData {
+    type Builder = EntityDataBuilder;
+
+    fn builder() -> Self::Builder{
+        EntityDataBuilder::default()
+    }
 }
 
 impl Encodable for EntityData {
@@ -130,6 +139,7 @@ impl Message for EntityData {
 }
 
 /// Valid versions: 0-1
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct EntryData {
     /// The error code, or `0` if the quota alteration succeeded.
@@ -149,6 +159,14 @@ pub struct EntryData {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for EntryData {
+    type Builder = EntryDataBuilder;
+
+    fn builder() -> Self::Builder{
+        EntryDataBuilder::default()
+    }
 }
 
 impl Encodable for EntryData {
@@ -252,6 +270,7 @@ impl Message for EntryData {
 }
 
 /// Valid versions: 0-1
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct AlterClientQuotasResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
@@ -266,6 +285,14 @@ pub struct AlterClientQuotasResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for AlterClientQuotasResponse {
+    type Builder = AlterClientQuotasResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        AlterClientQuotasResponseBuilder::default()
+    }
 }
 
 impl Encodable for AlterClientQuotasResponse {

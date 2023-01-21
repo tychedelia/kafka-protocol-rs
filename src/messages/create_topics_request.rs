@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-7
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct CreatableReplicaAssignment {
     /// The brokers to place the partition on.
@@ -27,6 +28,14 @@ pub struct CreatableReplicaAssignment {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for CreatableReplicaAssignment {
+    type Builder = CreatableReplicaAssignmentBuilder;
+
+    fn builder() -> Self::Builder{
+        CreatableReplicaAssignmentBuilder::default()
+    }
 }
 
 impl MapEncodable for CreatableReplicaAssignment {
@@ -113,6 +122,7 @@ impl Message for CreatableReplicaAssignment {
 }
 
 /// Valid versions: 0-7
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct CreateableTopicConfig {
     /// The configuration value.
@@ -122,6 +132,14 @@ pub struct CreateableTopicConfig {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for CreateableTopicConfig {
+    type Builder = CreateableTopicConfigBuilder;
+
+    fn builder() -> Self::Builder{
+        CreateableTopicConfigBuilder::default()
+    }
 }
 
 impl MapEncodable for CreateableTopicConfig {
@@ -220,6 +238,7 @@ impl Message for CreateableTopicConfig {
 }
 
 /// Valid versions: 0-7
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct CreatableTopic {
     /// The number of partitions to create in the topic, or -1 if we are either specifying a manual partition assignment or using the default partitions.
@@ -244,6 +263,14 @@ pub struct CreatableTopic {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for CreatableTopic {
+    type Builder = CreatableTopicBuilder;
+
+    fn builder() -> Self::Builder{
+        CreatableTopicBuilder::default()
+    }
 }
 
 impl MapEncodable for CreatableTopic {
@@ -369,6 +396,7 @@ impl Message for CreatableTopic {
 }
 
 /// Valid versions: 0-7
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct CreateTopicsRequest {
     /// The topics to create.
@@ -388,6 +416,14 @@ pub struct CreateTopicsRequest {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for CreateTopicsRequest {
+    type Builder = CreateTopicsRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        CreateTopicsRequestBuilder::default()
+    }
 }
 
 impl Encodable for CreateTopicsRequest {

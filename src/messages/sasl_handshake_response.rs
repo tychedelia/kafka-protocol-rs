@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-1
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct SaslHandshakeResponse {
     /// The error code, or 0 if there was no error.
@@ -30,6 +31,14 @@ pub struct SaslHandshakeResponse {
     /// Supported API versions: 0-1
     pub mechanisms: Vec<StrBytes>,
 
+}
+
+impl Builder for SaslHandshakeResponse {
+    type Builder = SaslHandshakeResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        SaslHandshakeResponseBuilder::default()
+    }
 }
 
 impl Encodable for SaslHandshakeResponse {

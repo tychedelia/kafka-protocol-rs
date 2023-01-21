@@ -13,20 +13,29 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
-/// Valid versions: 0-3
+/// Valid versions: 0-4
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DescribableLogDirTopic {
     /// The partition indexes.
     /// 
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub partitions: Vec<i32>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DescribableLogDirTopic {
+    type Builder = DescribableLogDirTopicBuilder;
+
+    fn builder() -> Self::Builder{
+        DescribableLogDirTopicBuilder::default()
+    }
 }
 
 impl MapEncodable for DescribableLogDirTopic {
@@ -121,19 +130,28 @@ impl Default for DescribableLogDirTopic {
 }
 
 impl Message for DescribableLogDirTopic {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
 }
 
-/// Valid versions: 0-3
+/// Valid versions: 0-4
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DescribeLogDirsRequest {
     /// Each topic that we want to describe log directories for, or null for all topics.
     /// 
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub topics: Option<indexmap::IndexMap<super::TopicName, DescribableLogDirTopic>>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DescribeLogDirsRequest {
+    type Builder = DescribeLogDirsRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        DescribeLogDirsRequestBuilder::default()
+    }
 }
 
 impl Encodable for DescribeLogDirsRequest {
@@ -211,7 +229,7 @@ impl Default for DescribeLogDirsRequest {
 }
 
 impl Message for DescribeLogDirsRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
 }
 
 impl HeaderVersion for DescribeLogDirsRequest {

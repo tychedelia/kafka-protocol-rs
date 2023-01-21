@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-4
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetForLeaderPartition {
     /// The partition index.
@@ -37,6 +38,14 @@ pub struct OffsetForLeaderPartition {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for OffsetForLeaderPartition {
+    type Builder = OffsetForLeaderPartitionBuilder;
+
+    fn builder() -> Self::Builder{
+        OffsetForLeaderPartitionBuilder::default()
+    }
 }
 
 impl Encodable for OffsetForLeaderPartition {
@@ -124,6 +133,7 @@ impl Message for OffsetForLeaderPartition {
 }
 
 /// Valid versions: 0-4
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetForLeaderTopic {
     /// Each partition to get offsets for.
@@ -133,6 +143,14 @@ pub struct OffsetForLeaderTopic {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for OffsetForLeaderTopic {
+    type Builder = OffsetForLeaderTopicBuilder;
+
+    fn builder() -> Self::Builder{
+        OffsetForLeaderTopicBuilder::default()
+    }
 }
 
 impl MapEncodable for OffsetForLeaderTopic {
@@ -231,6 +249,7 @@ impl Message for OffsetForLeaderTopic {
 }
 
 /// Valid versions: 0-4
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetForLeaderEpochRequest {
     /// The broker ID of the follower, of -1 if this request is from a consumer.
@@ -245,6 +264,14 @@ pub struct OffsetForLeaderEpochRequest {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for OffsetForLeaderEpochRequest {
+    type Builder = OffsetForLeaderEpochRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        OffsetForLeaderEpochRequestBuilder::default()
+    }
 }
 
 impl Encodable for OffsetForLeaderEpochRequest {

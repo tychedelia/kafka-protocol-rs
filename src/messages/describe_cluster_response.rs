@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DescribeClusterBroker {
     /// The broker hostname.
@@ -37,6 +38,14 @@ pub struct DescribeClusterBroker {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DescribeClusterBroker {
+    type Builder = DescribeClusterBrokerBuilder;
+
+    fn builder() -> Self::Builder{
+        DescribeClusterBrokerBuilder::default()
+    }
 }
 
 impl MapEncodable for DescribeClusterBroker {
@@ -115,6 +124,7 @@ impl Message for DescribeClusterBroker {
 }
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DescribeClusterResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
@@ -154,6 +164,14 @@ pub struct DescribeClusterResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DescribeClusterResponse {
+    type Builder = DescribeClusterResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        DescribeClusterResponseBuilder::default()
+    }
 }
 
 impl Encodable for DescribeClusterResponse {

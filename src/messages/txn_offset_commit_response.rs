@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct TxnOffsetCommitResponsePartition {
     /// The partition index.
@@ -32,6 +33,14 @@ pub struct TxnOffsetCommitResponsePartition {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for TxnOffsetCommitResponsePartition {
+    type Builder = TxnOffsetCommitResponsePartitionBuilder;
+
+    fn builder() -> Self::Builder{
+        TxnOffsetCommitResponsePartitionBuilder::default()
+    }
 }
 
 impl Encodable for TxnOffsetCommitResponsePartition {
@@ -106,6 +115,7 @@ impl Message for TxnOffsetCommitResponsePartition {
 }
 
 /// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct TxnOffsetCommitResponseTopic {
     /// The topic name.
@@ -120,6 +130,14 @@ pub struct TxnOffsetCommitResponseTopic {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for TxnOffsetCommitResponseTopic {
+    type Builder = TxnOffsetCommitResponseTopicBuilder;
+
+    fn builder() -> Self::Builder{
+        TxnOffsetCommitResponseTopicBuilder::default()
+    }
 }
 
 impl Encodable for TxnOffsetCommitResponseTopic {
@@ -218,6 +236,7 @@ impl Message for TxnOffsetCommitResponseTopic {
 }
 
 /// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct TxnOffsetCommitResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
@@ -232,6 +251,14 @@ pub struct TxnOffsetCommitResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for TxnOffsetCommitResponse {
+    type Builder = TxnOffsetCommitResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        TxnOffsetCommitResponseBuilder::default()
+    }
 }
 
 impl Encodable for TxnOffsetCommitResponse {

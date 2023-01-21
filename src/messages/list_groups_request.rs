@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-4
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ListGroupsRequest {
     /// The states of the groups we want to list. If empty all groups are returned with their state.
@@ -27,6 +28,14 @@ pub struct ListGroupsRequest {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for ListGroupsRequest {
+    type Builder = ListGroupsRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        ListGroupsRequestBuilder::default()
+    }
 }
 
 impl Encodable for ListGroupsRequest {

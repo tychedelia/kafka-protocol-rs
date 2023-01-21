@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct CreatePartitionsAssignment {
     /// The assigned broker IDs.
@@ -27,6 +28,14 @@ pub struct CreatePartitionsAssignment {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for CreatePartitionsAssignment {
+    type Builder = CreatePartitionsAssignmentBuilder;
+
+    fn builder() -> Self::Builder{
+        CreatePartitionsAssignmentBuilder::default()
+    }
 }
 
 impl Encodable for CreatePartitionsAssignment {
@@ -108,6 +117,7 @@ impl Message for CreatePartitionsAssignment {
 }
 
 /// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct CreatePartitionsTopic {
     /// The new partition count.
@@ -122,6 +132,14 @@ pub struct CreatePartitionsTopic {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for CreatePartitionsTopic {
+    type Builder = CreatePartitionsTopicBuilder;
+
+    fn builder() -> Self::Builder{
+        CreatePartitionsTopicBuilder::default()
+    }
 }
 
 impl MapEncodable for CreatePartitionsTopic {
@@ -225,6 +243,7 @@ impl Message for CreatePartitionsTopic {
 }
 
 /// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct CreatePartitionsRequest {
     /// Each topic that we want to create new partitions inside.
@@ -244,6 +263,14 @@ pub struct CreatePartitionsRequest {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for CreatePartitionsRequest {
+    type Builder = CreatePartitionsRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        CreatePartitionsRequestBuilder::default()
+    }
 }
 
 impl Encodable for CreatePartitionsRequest {

@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-1
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ComponentData {
     /// The entity type that the filter component applies to.
@@ -37,6 +38,14 @@ pub struct ComponentData {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for ComponentData {
+    type Builder = ComponentDataBuilder;
+
+    fn builder() -> Self::Builder{
+        ComponentDataBuilder::default()
+    }
 }
 
 impl Encodable for ComponentData {
@@ -140,6 +149,7 @@ impl Message for ComponentData {
 }
 
 /// Valid versions: 0-1
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DescribeClientQuotasRequest {
     /// Filter components to apply to quota entities.
@@ -154,6 +164,14 @@ pub struct DescribeClientQuotasRequest {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DescribeClientQuotasRequest {
+    type Builder = DescribeClientQuotasRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        DescribeClientQuotasRequestBuilder::default()
+    }
 }
 
 impl Encodable for DescribeClientQuotasRequest {

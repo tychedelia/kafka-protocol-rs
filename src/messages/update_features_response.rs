@@ -13,25 +13,34 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
-/// Valid versions: 0
+/// Valid versions: 0-1
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct UpdatableFeatureResult {
     /// The feature update error code or `0` if the feature update succeeded.
     /// 
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub error_code: i16,
 
     /// The feature update error, or `null` if the feature update succeeded.
     /// 
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub error_message: Option<StrBytes>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for UpdatableFeatureResult {
+    type Builder = UpdatableFeatureResultBuilder;
+
+    fn builder() -> Self::Builder{
+        UpdatableFeatureResultBuilder::default()
+    }
 }
 
 impl MapEncodable for UpdatableFeatureResult {
@@ -101,34 +110,43 @@ impl Default for UpdatableFeatureResult {
 }
 
 impl Message for UpdatableFeatureResult {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 0 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
 }
 
-/// Valid versions: 0
+/// Valid versions: 0-1
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct UpdateFeaturesResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub throttle_time_ms: i32,
 
     /// The top-level error code, or `0` if there was no top-level error.
     /// 
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub error_code: i16,
 
     /// The top-level error message, or `null` if there was no top-level error.
     /// 
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub error_message: Option<StrBytes>,
 
     /// Results for each feature update.
     /// 
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub results: indexmap::IndexMap<StrBytes, UpdatableFeatureResult>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for UpdateFeaturesResponse {
+    type Builder = UpdateFeaturesResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        UpdateFeaturesResponseBuilder::default()
+    }
 }
 
 impl Encodable for UpdateFeaturesResponse {
@@ -203,7 +221,7 @@ impl Default for UpdateFeaturesResponse {
 }
 
 impl Message for UpdateFeaturesResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 0 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
 }
 
 impl HeaderVersion for UpdateFeaturesResponse {

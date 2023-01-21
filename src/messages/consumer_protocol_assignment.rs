@@ -13,18 +13,27 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
-/// Valid versions: 0-1
+/// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct TopicPartition {
     /// 
     /// 
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-3
     pub partitions: Vec<i32>,
 
+}
+
+impl Builder for TopicPartition {
+    type Builder = TopicPartitionBuilder;
+
+    fn builder() -> Self::Builder{
+        TopicPartitionBuilder::default()
+    }
 }
 
 impl MapEncodable for TopicPartition {
@@ -64,22 +73,31 @@ impl Default for TopicPartition {
 }
 
 impl Message for TopicPartition {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
 }
 
-/// Valid versions: 0-1
+/// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ConsumerProtocolAssignment {
     /// 
     /// 
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-3
     pub assigned_partitions: indexmap::IndexMap<super::TopicName, TopicPartition>,
 
     /// 
     /// 
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-3
     pub user_data: Option<Bytes>,
 
+}
+
+impl Builder for ConsumerProtocolAssignment {
+    type Builder = ConsumerProtocolAssignmentBuilder;
+
+    fn builder() -> Self::Builder{
+        ConsumerProtocolAssignmentBuilder::default()
+    }
 }
 
 impl Encodable for ConsumerProtocolAssignment {
@@ -119,6 +137,6 @@ impl Default for ConsumerProtocolAssignment {
 }
 
 impl Message for ConsumerProtocolAssignment {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
 }
 

@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct SnapshotFooterRecord {
     /// The version of the snapshot footer record
@@ -27,6 +28,14 @@ pub struct SnapshotFooterRecord {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for SnapshotFooterRecord {
+    type Builder = SnapshotFooterRecordBuilder;
+
+    fn builder() -> Self::Builder{
+        SnapshotFooterRecordBuilder::default()
+    }
 }
 
 impl Encodable for SnapshotFooterRecord {

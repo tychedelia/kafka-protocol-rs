@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-2
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct AlterReplicaLogDirPartitionResult {
     /// The partition index.
@@ -32,6 +33,14 @@ pub struct AlterReplicaLogDirPartitionResult {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for AlterReplicaLogDirPartitionResult {
+    type Builder = AlterReplicaLogDirPartitionResultBuilder;
+
+    fn builder() -> Self::Builder{
+        AlterReplicaLogDirPartitionResultBuilder::default()
+    }
 }
 
 impl Encodable for AlterReplicaLogDirPartitionResult {
@@ -106,6 +115,7 @@ impl Message for AlterReplicaLogDirPartitionResult {
 }
 
 /// Valid versions: 0-2
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct AlterReplicaLogDirTopicResult {
     /// The name of the topic.
@@ -120,6 +130,14 @@ pub struct AlterReplicaLogDirTopicResult {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for AlterReplicaLogDirTopicResult {
+    type Builder = AlterReplicaLogDirTopicResultBuilder;
+
+    fn builder() -> Self::Builder{
+        AlterReplicaLogDirTopicResultBuilder::default()
+    }
 }
 
 impl Encodable for AlterReplicaLogDirTopicResult {
@@ -218,6 +236,7 @@ impl Message for AlterReplicaLogDirTopicResult {
 }
 
 /// Valid versions: 0-2
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct AlterReplicaLogDirsResponse {
     /// Duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
@@ -232,6 +251,14 @@ pub struct AlterReplicaLogDirsResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for AlterReplicaLogDirsResponse {
+    type Builder = AlterReplicaLogDirsResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        AlterReplicaLogDirsResponseBuilder::default()
+    }
 }
 
 impl Encodable for AlterReplicaLogDirsResponse {

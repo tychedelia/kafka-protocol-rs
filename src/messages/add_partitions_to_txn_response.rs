@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct AddPartitionsToTxnPartitionResult {
     /// The response error code.
@@ -27,6 +28,14 @@ pub struct AddPartitionsToTxnPartitionResult {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for AddPartitionsToTxnPartitionResult {
+    type Builder = AddPartitionsToTxnPartitionResultBuilder;
+
+    fn builder() -> Self::Builder{
+        AddPartitionsToTxnPartitionResultBuilder::default()
+    }
 }
 
 impl MapEncodable for AddPartitionsToTxnPartitionResult {
@@ -101,6 +110,7 @@ impl Message for AddPartitionsToTxnPartitionResult {
 }
 
 /// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct AddPartitionsToTxnTopicResult {
     /// The results for each partition
@@ -110,6 +120,14 @@ pub struct AddPartitionsToTxnTopicResult {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for AddPartitionsToTxnTopicResult {
+    type Builder = AddPartitionsToTxnTopicResultBuilder;
+
+    fn builder() -> Self::Builder{
+        AddPartitionsToTxnTopicResultBuilder::default()
+    }
 }
 
 impl MapEncodable for AddPartitionsToTxnTopicResult {
@@ -208,6 +226,7 @@ impl Message for AddPartitionsToTxnTopicResult {
 }
 
 /// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct AddPartitionsToTxnResponse {
     /// Duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
@@ -222,6 +241,14 @@ pub struct AddPartitionsToTxnResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for AddPartitionsToTxnResponse {
+    type Builder = AddPartitionsToTxnResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        AddPartitionsToTxnResponseBuilder::default()
+    }
 }
 
 impl Encodable for AddPartitionsToTxnResponse {

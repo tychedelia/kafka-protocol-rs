@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ProducerState {
     /// 
@@ -52,6 +53,14 @@ pub struct ProducerState {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for ProducerState {
+    type Builder = ProducerStateBuilder;
+
+    fn builder() -> Self::Builder{
+        ProducerStateBuilder::default()
+    }
 }
 
 impl Encodable for ProducerState {
@@ -140,6 +149,7 @@ impl Message for ProducerState {
 }
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct PartitionResponse {
     /// The partition index.
@@ -164,6 +174,14 @@ pub struct PartitionResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for PartitionResponse {
+    type Builder = PartitionResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        PartitionResponseBuilder::default()
+    }
 }
 
 impl Encodable for PartitionResponse {
@@ -242,6 +260,7 @@ impl Message for PartitionResponse {
 }
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct TopicResponse {
     /// The topic name
@@ -256,6 +275,14 @@ pub struct TopicResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for TopicResponse {
+    type Builder = TopicResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        TopicResponseBuilder::default()
+    }
 }
 
 impl Encodable for TopicResponse {
@@ -324,6 +351,7 @@ impl Message for TopicResponse {
 }
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DescribeProducersResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
@@ -338,6 +366,14 @@ pub struct DescribeProducersResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DescribeProducersResponse {
+    type Builder = DescribeProducersResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        DescribeProducersResponseBuilder::default()
+    }
 }
 
 impl Encodable for DescribeProducersResponse {

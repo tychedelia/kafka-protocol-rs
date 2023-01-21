@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-8
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetCommitResponsePartition {
     /// The partition index.
@@ -32,6 +33,14 @@ pub struct OffsetCommitResponsePartition {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for OffsetCommitResponsePartition {
+    type Builder = OffsetCommitResponsePartitionBuilder;
+
+    fn builder() -> Self::Builder{
+        OffsetCommitResponsePartitionBuilder::default()
+    }
 }
 
 impl Encodable for OffsetCommitResponsePartition {
@@ -106,6 +115,7 @@ impl Message for OffsetCommitResponsePartition {
 }
 
 /// Valid versions: 0-8
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetCommitResponseTopic {
     /// The topic name.
@@ -120,6 +130,14 @@ pub struct OffsetCommitResponseTopic {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for OffsetCommitResponseTopic {
+    type Builder = OffsetCommitResponseTopicBuilder;
+
+    fn builder() -> Self::Builder{
+        OffsetCommitResponseTopicBuilder::default()
+    }
 }
 
 impl Encodable for OffsetCommitResponseTopic {
@@ -218,6 +236,7 @@ impl Message for OffsetCommitResponseTopic {
 }
 
 /// Valid versions: 0-8
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetCommitResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
@@ -232,6 +251,14 @@ pub struct OffsetCommitResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for OffsetCommitResponse {
+    type Builder = OffsetCommitResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        OffsetCommitResponseBuilder::default()
+    }
 }
 
 impl Encodable for OffsetCommitResponse {

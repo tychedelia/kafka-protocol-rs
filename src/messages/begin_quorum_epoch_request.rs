@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct PartitionData {
     /// The partition index.
@@ -35,6 +36,14 @@ pub struct PartitionData {
     /// Supported API versions: 0
     pub leader_epoch: i32,
 
+}
+
+impl Builder for PartitionData {
+    type Builder = PartitionDataBuilder;
+
+    fn builder() -> Self::Builder{
+        PartitionDataBuilder::default()
+    }
 }
 
 impl Encodable for PartitionData {
@@ -83,6 +92,7 @@ impl Message for PartitionData {
 }
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct TopicData {
     /// The topic name.
@@ -95,6 +105,14 @@ pub struct TopicData {
     /// Supported API versions: 0
     pub partitions: Vec<PartitionData>,
 
+}
+
+impl Builder for TopicData {
+    type Builder = TopicDataBuilder;
+
+    fn builder() -> Self::Builder{
+        TopicDataBuilder::default()
+    }
 }
 
 impl Encodable for TopicData {
@@ -138,6 +156,7 @@ impl Message for TopicData {
 }
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct BeginQuorumEpochRequest {
     /// 
@@ -150,6 +169,14 @@ pub struct BeginQuorumEpochRequest {
     /// Supported API versions: 0
     pub topics: Vec<TopicData>,
 
+}
+
+impl Builder for BeginQuorumEpochRequest {
+    type Builder = BeginQuorumEpochRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        BeginQuorumEpochRequestBuilder::default()
+    }
 }
 
 impl Encodable for BeginQuorumEpochRequest {

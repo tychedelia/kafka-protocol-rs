@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-1
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct EntityData {
     /// The entity type.
@@ -32,6 +33,14 @@ pub struct EntityData {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for EntityData {
+    type Builder = EntityDataBuilder;
+
+    fn builder() -> Self::Builder{
+        EntityDataBuilder::default()
+    }
 }
 
 impl Encodable for EntityData {
@@ -130,6 +139,7 @@ impl Message for EntityData {
 }
 
 /// Valid versions: 0-1
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OpData {
     /// The quota configuration key.
@@ -149,6 +159,14 @@ pub struct OpData {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for OpData {
+    type Builder = OpDataBuilder;
+
+    fn builder() -> Self::Builder{
+        OpDataBuilder::default()
+    }
 }
 
 impl Encodable for OpData {
@@ -240,6 +258,7 @@ impl Message for OpData {
 }
 
 /// Valid versions: 0-1
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct EntryData {
     /// The quota entity to alter.
@@ -254,6 +273,14 @@ pub struct EntryData {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for EntryData {
+    type Builder = EntryDataBuilder;
+
+    fn builder() -> Self::Builder{
+        EntryDataBuilder::default()
+    }
 }
 
 impl Encodable for EntryData {
@@ -352,6 +379,7 @@ impl Message for EntryData {
 }
 
 /// Valid versions: 0-1
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct AlterClientQuotasRequest {
     /// The quota configuration entries to alter.
@@ -366,6 +394,14 @@ pub struct AlterClientQuotasRequest {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for AlterClientQuotasRequest {
+    type Builder = AlterClientQuotasRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        AlterClientQuotasRequestBuilder::default()
+    }
 }
 
 impl Encodable for AlterClientQuotasRequest {

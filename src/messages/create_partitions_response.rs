@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct CreatePartitionsTopicResult {
     /// The topic name.
@@ -37,6 +38,14 @@ pub struct CreatePartitionsTopicResult {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for CreatePartitionsTopicResult {
+    type Builder = CreatePartitionsTopicResultBuilder;
+
+    fn builder() -> Self::Builder{
+        CreatePartitionsTopicResultBuilder::default()
+    }
 }
 
 impl Encodable for CreatePartitionsTopicResult {
@@ -140,6 +149,7 @@ impl Message for CreatePartitionsTopicResult {
 }
 
 /// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct CreatePartitionsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
@@ -154,6 +164,14 @@ pub struct CreatePartitionsResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for CreatePartitionsResponse {
+    type Builder = CreatePartitionsResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        CreatePartitionsResponseBuilder::default()
+    }
 }
 
 impl Encodable for CreatePartitionsResponse {

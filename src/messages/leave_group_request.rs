@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-5
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct MemberIdentity {
     /// The member ID to remove from the group.
@@ -37,6 +38,14 @@ pub struct MemberIdentity {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for MemberIdentity {
+    type Builder = MemberIdentityBuilder;
+
+    fn builder() -> Self::Builder{
+        MemberIdentityBuilder::default()
+    }
 }
 
 impl Encodable for MemberIdentity {
@@ -180,6 +189,7 @@ impl Message for MemberIdentity {
 }
 
 /// Valid versions: 0-5
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct LeaveGroupRequest {
     /// The ID of the group to leave.
@@ -199,6 +209,14 @@ pub struct LeaveGroupRequest {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for LeaveGroupRequest {
+    type Builder = LeaveGroupRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        LeaveGroupRequestBuilder::default()
+    }
 }
 
 impl Encodable for LeaveGroupRequest {

@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-4
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DescribeConfigsSynonym {
     /// The synonym name.
@@ -37,6 +38,14 @@ pub struct DescribeConfigsSynonym {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DescribeConfigsSynonym {
+    type Builder = DescribeConfigsSynonymBuilder;
+
+    fn builder() -> Self::Builder{
+        DescribeConfigsSynonymBuilder::default()
+    }
 }
 
 impl Encodable for DescribeConfigsSynonym {
@@ -188,6 +197,7 @@ impl Message for DescribeConfigsSynonym {
 }
 
 /// Valid versions: 0-4
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DescribeConfigsResourceResult {
     /// The configuration name.
@@ -237,6 +247,14 @@ pub struct DescribeConfigsResourceResult {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DescribeConfigsResourceResult {
+    type Builder = DescribeConfigsResourceResultBuilder;
+
+    fn builder() -> Self::Builder{
+        DescribeConfigsResourceResultBuilder::default()
+    }
 }
 
 impl Encodable for DescribeConfigsResourceResult {
@@ -442,6 +460,7 @@ impl Message for DescribeConfigsResourceResult {
 }
 
 /// Valid versions: 0-4
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DescribeConfigsResult {
     /// The error code, or 0 if we were able to successfully describe the configurations.
@@ -471,6 +490,14 @@ pub struct DescribeConfigsResult {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DescribeConfigsResult {
+    type Builder = DescribeConfigsResultBuilder;
+
+    fn builder() -> Self::Builder{
+        DescribeConfigsResultBuilder::default()
+    }
 }
 
 impl Encodable for DescribeConfigsResult {
@@ -596,6 +623,7 @@ impl Message for DescribeConfigsResult {
 }
 
 /// Valid versions: 0-4
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DescribeConfigsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
@@ -610,6 +638,14 @@ pub struct DescribeConfigsResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DescribeConfigsResponse {
+    type Builder = DescribeConfigsResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        DescribeConfigsResponseBuilder::default()
+    }
 }
 
 impl Encodable for DescribeConfigsResponse {

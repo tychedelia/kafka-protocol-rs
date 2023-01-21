@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ScramCredentialDeletion {
     /// The user name.
@@ -32,6 +33,14 @@ pub struct ScramCredentialDeletion {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for ScramCredentialDeletion {
+    type Builder = ScramCredentialDeletionBuilder;
+
+    fn builder() -> Self::Builder{
+        ScramCredentialDeletionBuilder::default()
+    }
 }
 
 impl Encodable for ScramCredentialDeletion {
@@ -100,6 +109,7 @@ impl Message for ScramCredentialDeletion {
 }
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ScramCredentialUpsertion {
     /// The user name.
@@ -129,6 +139,14 @@ pub struct ScramCredentialUpsertion {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for ScramCredentialUpsertion {
+    type Builder = ScramCredentialUpsertionBuilder;
+
+    fn builder() -> Self::Builder{
+        ScramCredentialUpsertionBuilder::default()
+    }
 }
 
 impl Encodable for ScramCredentialUpsertion {
@@ -212,6 +230,7 @@ impl Message for ScramCredentialUpsertion {
 }
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct AlterUserScramCredentialsRequest {
     /// The SCRAM credentials to remove.
@@ -226,6 +245,14 @@ pub struct AlterUserScramCredentialsRequest {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for AlterUserScramCredentialsRequest {
+    type Builder = AlterUserScramCredentialsRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        AlterUserScramCredentialsRequestBuilder::default()
+    }
 }
 
 impl Encodable for AlterUserScramCredentialsRequest {

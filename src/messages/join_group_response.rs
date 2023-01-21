@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-9
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct JoinGroupResponseMember {
     /// The group member ID.
@@ -39,6 +40,14 @@ pub struct JoinGroupResponseMember {
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
 }
 
+impl Builder for JoinGroupResponseMember {
+    type Builder = JoinGroupResponseMemberBuilder;
+
+    fn builder() -> Self::Builder{
+        JoinGroupResponseMemberBuilder::default()
+    }
+}
+
 impl Encodable for JoinGroupResponseMember {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version >= 6 {
@@ -51,10 +60,6 @@ impl Encodable for JoinGroupResponseMember {
                 types::CompactString.encode(buf, &self.group_instance_id)?;
             } else {
                 types::String.encode(buf, &self.group_instance_id)?;
-            }
-        } else {
-            if !self.group_instance_id.is_none() {
-                return Err(EncodeError)
             }
         }
         if version >= 6 {
@@ -86,10 +91,6 @@ impl Encodable for JoinGroupResponseMember {
                 total_size += types::CompactString.compute_size(&self.group_instance_id)?;
             } else {
                 total_size += types::String.compute_size(&self.group_instance_id)?;
-            }
-        } else {
-            if !self.group_instance_id.is_none() {
-                return Err(EncodeError)
             }
         }
         if version >= 6 {
@@ -168,6 +169,7 @@ impl Message for JoinGroupResponseMember {
 }
 
 /// Valid versions: 0-9
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct JoinGroupResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
@@ -217,6 +219,14 @@ pub struct JoinGroupResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for JoinGroupResponse {
+    type Builder = JoinGroupResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        JoinGroupResponseBuilder::default()
+    }
 }
 
 impl Encodable for JoinGroupResponse {

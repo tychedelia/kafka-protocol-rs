@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-2
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct SaslAuthenticateRequest {
     /// The SASL authentication bytes from the client, as defined by the SASL mechanism.
@@ -27,6 +28,14 @@ pub struct SaslAuthenticateRequest {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for SaslAuthenticateRequest {
+    type Builder = SaslAuthenticateRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        SaslAuthenticateRequestBuilder::default()
+    }
 }
 
 impl Encodable for SaslAuthenticateRequest {

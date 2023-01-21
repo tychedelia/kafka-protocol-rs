@@ -15,6 +15,6 @@ serde_plain = "0.3.0"
 parse-display = "0.1.1"
 json_comments = "0.2.0"
 assert-json-diff = "1.0.1"
-git2 = "0.13"
+git2 = "0.16"
 tempfile = "3.2.0"
 uuid = { version = "0.8.2", features = ["v4", "serde" ] }

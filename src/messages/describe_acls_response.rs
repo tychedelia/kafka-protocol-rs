@@ -13,35 +13,44 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
-/// Valid versions: 0-2
+/// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct AclDescription {
     /// The ACL principal.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub principal: StrBytes,
 
     /// The ACL host.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub host: StrBytes,
 
     /// The ACL operation.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub operation: i8,
 
     /// The ACL permission type.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub permission_type: i8,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for AclDescription {
+    type Builder = AclDescriptionBuilder;
+
+    fn builder() -> Self::Builder{
+        AclDescriptionBuilder::default()
+    }
 }
 
 impl Encodable for AclDescription {
@@ -146,34 +155,43 @@ impl Default for AclDescription {
 }
 
 impl Message for AclDescription {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
 }
 
-/// Valid versions: 0-2
+/// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DescribeAclsResource {
     /// The resource type.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub resource_type: i8,
 
     /// The resource name.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub resource_name: StrBytes,
 
     /// The resource pattern type.
     /// 
-    /// Supported API versions: 1-2
+    /// Supported API versions: 1-3
     pub pattern_type: i8,
 
     /// The ACLs.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub acls: Vec<AclDescription>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DescribeAclsResource {
+    type Builder = DescribeAclsResourceBuilder;
+
+    fn builder() -> Self::Builder{
+        DescribeAclsResourceBuilder::default()
+    }
 }
 
 impl Encodable for DescribeAclsResource {
@@ -294,34 +312,43 @@ impl Default for DescribeAclsResource {
 }
 
 impl Message for DescribeAclsResource {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
 }
 
-/// Valid versions: 0-2
+/// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DescribeAclsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub throttle_time_ms: i32,
 
     /// The error code, or 0 if there was no error.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub error_code: i16,
 
     /// The error message, or null if there was no error.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub error_message: Option<StrBytes>,
 
     /// Each Resource that is referenced in an ACL.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub resources: Vec<DescribeAclsResource>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DescribeAclsResponse {
+    type Builder = DescribeAclsResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        DescribeAclsResponseBuilder::default()
+    }
 }
 
 impl Encodable for DescribeAclsResponse {
@@ -426,7 +453,7 @@ impl Default for DescribeAclsResponse {
 }
 
 impl Message for DescribeAclsResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
 }
 
 impl HeaderVersion for DescribeAclsResponse {

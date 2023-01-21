@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-2
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct TopicPartitions {
     /// The partitions of this topic whose leader should be elected.
@@ -27,6 +28,14 @@ pub struct TopicPartitions {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for TopicPartitions {
+    type Builder = TopicPartitionsBuilder;
+
+    fn builder() -> Self::Builder{
+        TopicPartitionsBuilder::default()
+    }
 }
 
 impl MapEncodable for TopicPartitions {
@@ -125,6 +134,7 @@ impl Message for TopicPartitions {
 }
 
 /// Valid versions: 0-2
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ElectLeadersRequest {
     /// Type of elections to conduct for the partition. A value of '0' elects the preferred replica. A value of '1' elects the first live replica if there are no in-sync replica.
@@ -144,6 +154,14 @@ pub struct ElectLeadersRequest {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for ElectLeadersRequest {
+    type Builder = ElectLeadersRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        ElectLeadersRequestBuilder::default()
+    }
 }
 
 impl Encodable for ElectLeadersRequest {

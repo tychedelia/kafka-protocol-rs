@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ReassignablePartition {
     /// The partition index.
@@ -32,6 +33,14 @@ pub struct ReassignablePartition {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for ReassignablePartition {
+    type Builder = ReassignablePartitionBuilder;
+
+    fn builder() -> Self::Builder{
+        ReassignablePartitionBuilder::default()
+    }
 }
 
 impl Encodable for ReassignablePartition {
@@ -100,6 +109,7 @@ impl Message for ReassignablePartition {
 }
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ReassignableTopic {
     /// The topic name.
@@ -114,6 +124,14 @@ pub struct ReassignableTopic {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for ReassignableTopic {
+    type Builder = ReassignableTopicBuilder;
+
+    fn builder() -> Self::Builder{
+        ReassignableTopicBuilder::default()
+    }
 }
 
 impl Encodable for ReassignableTopic {
@@ -182,6 +200,7 @@ impl Message for ReassignableTopic {
 }
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct AlterPartitionReassignmentsRequest {
     /// The time in ms to wait for the request to complete.
@@ -196,6 +215,14 @@ pub struct AlterPartitionReassignmentsRequest {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for AlterPartitionReassignmentsRequest {
+    type Builder = AlterPartitionReassignmentsRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        AlterPartitionReassignmentsRequestBuilder::default()
+    }
 }
 
 impl Encodable for AlterPartitionReassignmentsRequest {

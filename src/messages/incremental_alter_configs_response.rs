@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-1
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct AlterConfigsResourceResponse {
     /// The resource error code.
@@ -42,6 +43,14 @@ pub struct AlterConfigsResourceResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for AlterConfigsResourceResponse {
+    type Builder = AlterConfigsResourceResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        AlterConfigsResourceResponseBuilder::default()
+    }
 }
 
 impl Encodable for AlterConfigsResourceResponse {
@@ -150,6 +159,7 @@ impl Message for AlterConfigsResourceResponse {
 }
 
 /// Valid versions: 0-1
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct IncrementalAlterConfigsResponse {
     /// Duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
@@ -164,6 +174,14 @@ pub struct IncrementalAlterConfigsResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for IncrementalAlterConfigsResponse {
+    type Builder = IncrementalAlterConfigsResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        IncrementalAlterConfigsResponseBuilder::default()
+    }
 }
 
 impl Encodable for IncrementalAlterConfigsResponse {

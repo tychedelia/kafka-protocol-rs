@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-8
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetCommitRequestPartition {
     /// The partition index.
@@ -47,6 +48,14 @@ pub struct OffsetCommitRequestPartition {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for OffsetCommitRequestPartition {
+    type Builder = OffsetCommitRequestPartitionBuilder;
+
+    fn builder() -> Self::Builder{
+        OffsetCommitRequestPartitionBuilder::default()
+    }
 }
 
 impl Encodable for OffsetCommitRequestPartition {
@@ -172,6 +181,7 @@ impl Message for OffsetCommitRequestPartition {
 }
 
 /// Valid versions: 0-8
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetCommitRequestTopic {
     /// The topic name.
@@ -186,6 +196,14 @@ pub struct OffsetCommitRequestTopic {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for OffsetCommitRequestTopic {
+    type Builder = OffsetCommitRequestTopicBuilder;
+
+    fn builder() -> Self::Builder{
+        OffsetCommitRequestTopicBuilder::default()
+    }
 }
 
 impl Encodable for OffsetCommitRequestTopic {
@@ -284,6 +302,7 @@ impl Message for OffsetCommitRequestTopic {
 }
 
 /// Valid versions: 0-8
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetCommitRequest {
     /// The unique group identifier.
@@ -318,6 +337,14 @@ pub struct OffsetCommitRequest {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for OffsetCommitRequest {
+    type Builder = OffsetCommitRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        OffsetCommitRequestBuilder::default()
+    }
 }
 
 impl Encodable for OffsetCommitRequest {

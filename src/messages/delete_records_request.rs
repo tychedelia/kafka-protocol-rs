@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-2
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DeleteRecordsPartition {
     /// The partition index.
@@ -32,6 +33,14 @@ pub struct DeleteRecordsPartition {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DeleteRecordsPartition {
+    type Builder = DeleteRecordsPartitionBuilder;
+
+    fn builder() -> Self::Builder{
+        DeleteRecordsPartitionBuilder::default()
+    }
 }
 
 impl Encodable for DeleteRecordsPartition {
@@ -106,6 +115,7 @@ impl Message for DeleteRecordsPartition {
 }
 
 /// Valid versions: 0-2
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DeleteRecordsTopic {
     /// The topic name.
@@ -120,6 +130,14 @@ pub struct DeleteRecordsTopic {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DeleteRecordsTopic {
+    type Builder = DeleteRecordsTopicBuilder;
+
+    fn builder() -> Self::Builder{
+        DeleteRecordsTopicBuilder::default()
+    }
 }
 
 impl Encodable for DeleteRecordsTopic {
@@ -218,6 +236,7 @@ impl Message for DeleteRecordsTopic {
 }
 
 /// Valid versions: 0-2
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DeleteRecordsRequest {
     /// Each topic that we want to delete records from.
@@ -232,6 +251,14 @@ pub struct DeleteRecordsRequest {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DeleteRecordsRequest {
+    type Builder = DeleteRecordsRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        DeleteRecordsRequestBuilder::default()
+    }
 }
 
 impl Encodable for DeleteRecordsRequest {

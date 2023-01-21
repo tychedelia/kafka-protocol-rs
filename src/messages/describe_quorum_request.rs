@@ -13,20 +13,29 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
-/// Valid versions: 0
+/// Valid versions: 0-1
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct PartitionData {
     /// The partition index.
     /// 
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub partition_index: i32,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for PartitionData {
+    type Builder = PartitionDataBuilder;
+
+    fn builder() -> Self::Builder{
+        PartitionDataBuilder::default()
+    }
 }
 
 impl Encodable for PartitionData {
@@ -86,24 +95,33 @@ impl Default for PartitionData {
 }
 
 impl Message for PartitionData {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 0 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
 }
 
-/// Valid versions: 0
+/// Valid versions: 0-1
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct TopicData {
     /// The topic name.
     /// 
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub topic_name: super::TopicName,
 
     /// 
     /// 
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub partitions: Vec<PartitionData>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for TopicData {
+    type Builder = TopicDataBuilder;
+
+    fn builder() -> Self::Builder{
+        TopicDataBuilder::default()
+    }
 }
 
 impl Encodable for TopicData {
@@ -168,19 +186,28 @@ impl Default for TopicData {
 }
 
 impl Message for TopicData {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 0 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
 }
 
-/// Valid versions: 0
+/// Valid versions: 0-1
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DescribeQuorumRequest {
     /// 
     /// 
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub topics: Vec<TopicData>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DescribeQuorumRequest {
+    type Builder = DescribeQuorumRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        DescribeQuorumRequestBuilder::default()
+    }
 }
 
 impl Encodable for DescribeQuorumRequest {
@@ -240,7 +267,7 @@ impl Default for DescribeQuorumRequest {
 }
 
 impl Message for DescribeQuorumRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 0 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
 }
 
 impl HeaderVersion for DescribeQuorumRequest {

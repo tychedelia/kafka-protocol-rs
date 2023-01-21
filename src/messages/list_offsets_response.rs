@@ -13,21 +13,22 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
-/// Valid versions: 0-7
+/// Valid versions: 0-8
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ListOffsetsPartitionResponse {
     /// The partition index.
     /// 
-    /// Supported API versions: 0-7
+    /// Supported API versions: 0-8
     pub partition_index: i32,
 
     /// The partition error code, or 0 if there was no error.
     /// 
-    /// Supported API versions: 0-7
+    /// Supported API versions: 0-8
     pub error_code: i16,
 
     /// The result offsets.
@@ -37,21 +38,29 @@ pub struct ListOffsetsPartitionResponse {
 
     /// The timestamp associated with the returned offset.
     /// 
-    /// Supported API versions: 1-7
+    /// Supported API versions: 1-8
     pub timestamp: i64,
 
     /// The returned offset.
     /// 
-    /// Supported API versions: 1-7
+    /// Supported API versions: 1-8
     pub offset: i64,
 
     /// 
     /// 
-    /// Supported API versions: 4-7
+    /// Supported API versions: 4-8
     pub leader_epoch: i32,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for ListOffsetsPartitionResponse {
+    type Builder = ListOffsetsPartitionResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        ListOffsetsPartitionResponseBuilder::default()
+    }
 }
 
 impl Encodable for ListOffsetsPartitionResponse {
@@ -206,24 +215,33 @@ impl Default for ListOffsetsPartitionResponse {
 }
 
 impl Message for ListOffsetsPartitionResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 7 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 8 };
 }
 
-/// Valid versions: 0-7
+/// Valid versions: 0-8
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ListOffsetsTopicResponse {
     /// The topic name
     /// 
-    /// Supported API versions: 0-7
+    /// Supported API versions: 0-8
     pub name: super::TopicName,
 
     /// Each partition in the response.
     /// 
-    /// Supported API versions: 0-7
+    /// Supported API versions: 0-8
     pub partitions: Vec<ListOffsetsPartitionResponse>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for ListOffsetsTopicResponse {
+    type Builder = ListOffsetsTopicResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        ListOffsetsTopicResponseBuilder::default()
+    }
 }
 
 impl Encodable for ListOffsetsTopicResponse {
@@ -318,24 +336,33 @@ impl Default for ListOffsetsTopicResponse {
 }
 
 impl Message for ListOffsetsTopicResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 7 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 8 };
 }
 
-/// Valid versions: 0-7
+/// Valid versions: 0-8
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ListOffsetsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 
-    /// Supported API versions: 2-7
+    /// Supported API versions: 2-8
     pub throttle_time_ms: i32,
 
     /// Each topic in the response.
     /// 
-    /// Supported API versions: 0-7
+    /// Supported API versions: 0-8
     pub topics: Vec<ListOffsetsTopicResponse>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for ListOffsetsResponse {
+    type Builder = ListOffsetsResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        ListOffsetsResponseBuilder::default()
+    }
 }
 
 impl Encodable for ListOffsetsResponse {
@@ -426,7 +453,7 @@ impl Default for ListOffsetsResponse {
 }
 
 impl Message for ListOffsetsResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 7 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 8 };
 }
 
 impl HeaderVersion for ListOffsetsResponse {

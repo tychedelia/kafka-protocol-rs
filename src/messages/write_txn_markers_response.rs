@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-1
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct WritableTxnMarkerPartitionResult {
     /// The partition index.
@@ -32,6 +33,14 @@ pub struct WritableTxnMarkerPartitionResult {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for WritableTxnMarkerPartitionResult {
+    type Builder = WritableTxnMarkerPartitionResultBuilder;
+
+    fn builder() -> Self::Builder{
+        WritableTxnMarkerPartitionResultBuilder::default()
+    }
 }
 
 impl Encodable for WritableTxnMarkerPartitionResult {
@@ -106,6 +115,7 @@ impl Message for WritableTxnMarkerPartitionResult {
 }
 
 /// Valid versions: 0-1
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct WritableTxnMarkerTopicResult {
     /// The topic name.
@@ -120,6 +130,14 @@ pub struct WritableTxnMarkerTopicResult {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for WritableTxnMarkerTopicResult {
+    type Builder = WritableTxnMarkerTopicResultBuilder;
+
+    fn builder() -> Self::Builder{
+        WritableTxnMarkerTopicResultBuilder::default()
+    }
 }
 
 impl Encodable for WritableTxnMarkerTopicResult {
@@ -218,6 +236,7 @@ impl Message for WritableTxnMarkerTopicResult {
 }
 
 /// Valid versions: 0-1
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct WritableTxnMarkerResult {
     /// The current producer ID in use by the transactional ID.
@@ -232,6 +251,14 @@ pub struct WritableTxnMarkerResult {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for WritableTxnMarkerResult {
+    type Builder = WritableTxnMarkerResultBuilder;
+
+    fn builder() -> Self::Builder{
+        WritableTxnMarkerResultBuilder::default()
+    }
 }
 
 impl Encodable for WritableTxnMarkerResult {
@@ -318,6 +345,7 @@ impl Message for WritableTxnMarkerResult {
 }
 
 /// Valid versions: 0-1
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct WriteTxnMarkersResponse {
     /// The results for writing makers.
@@ -327,6 +355,14 @@ pub struct WriteTxnMarkersResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for WriteTxnMarkersResponse {
+    type Builder = WriteTxnMarkersResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        WriteTxnMarkersResponseBuilder::default()
+    }
 }
 
 impl Encodable for WriteTxnMarkersResponse {

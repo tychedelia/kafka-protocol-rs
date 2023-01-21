@@ -1,5 +1,3 @@
-//! Raw types and utilities for use with the Kafka protocol.
-//!
 //! Most types are used internally in encoding/decoding, and are not required by typical use cases
 //! for interacting with the protocol. However, types can be used for decoding partial messages,
 //! or rewriting parts of an encoded message.
@@ -31,11 +29,7 @@ impl std::fmt::Display for DecodeError {
     }
 }
 
-impl Error for DecodeError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        None
-    }
-}
+impl Error for DecodeError {}
 
 impl From<NotEnoughBytesError> for DecodeError {
     fn from(_: NotEnoughBytesError) -> Self {
@@ -195,4 +189,14 @@ pub(crate) fn compute_unknown_tagged_fields_size(
         total_size += v.len();
     }
     Ok(total_size)
+}
+
+/// Every protocol item implements [`derive_builder::Builder`], which can be
+/// created using [`Default::default`] or retrieved via this trait.
+pub trait Builder {
+    /// The [`derive_builder::Builder`] type for this protocol item.
+    type Builder: Default;
+
+    /// Retrieve the builder for this protocol item.
+    fn builder() -> Self::Builder;
 }

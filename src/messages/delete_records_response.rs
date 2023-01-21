@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-2
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DeleteRecordsPartitionResult {
     /// The partition low water mark.
@@ -32,6 +33,14 @@ pub struct DeleteRecordsPartitionResult {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DeleteRecordsPartitionResult {
+    type Builder = DeleteRecordsPartitionResultBuilder;
+
+    fn builder() -> Self::Builder{
+        DeleteRecordsPartitionResultBuilder::default()
+    }
 }
 
 impl MapEncodable for DeleteRecordsPartitionResult {
@@ -111,6 +120,7 @@ impl Message for DeleteRecordsPartitionResult {
 }
 
 /// Valid versions: 0-2
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DeleteRecordsTopicResult {
     /// Each partition that we wanted to delete records from.
@@ -120,6 +130,14 @@ pub struct DeleteRecordsTopicResult {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DeleteRecordsTopicResult {
+    type Builder = DeleteRecordsTopicResultBuilder;
+
+    fn builder() -> Self::Builder{
+        DeleteRecordsTopicResultBuilder::default()
+    }
 }
 
 impl MapEncodable for DeleteRecordsTopicResult {
@@ -218,6 +236,7 @@ impl Message for DeleteRecordsTopicResult {
 }
 
 /// Valid versions: 0-2
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DeleteRecordsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
@@ -232,6 +251,14 @@ pub struct DeleteRecordsResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DeleteRecordsResponse {
+    type Builder = DeleteRecordsResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        DeleteRecordsResponseBuilder::default()
+    }
 }
 
 impl Encodable for DeleteRecordsResponse {

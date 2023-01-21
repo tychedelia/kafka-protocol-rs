@@ -13,26 +13,27 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
-/// Valid versions: 0-7
+/// Valid versions: 0-8
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ListOffsetsPartition {
     /// The partition index.
     /// 
-    /// Supported API versions: 0-7
+    /// Supported API versions: 0-8
     pub partition_index: i32,
 
     /// The current leader epoch.
     /// 
-    /// Supported API versions: 4-7
+    /// Supported API versions: 4-8
     pub current_leader_epoch: i32,
 
     /// The current timestamp.
     /// 
-    /// Supported API versions: 0-7
+    /// Supported API versions: 0-8
     pub timestamp: i64,
 
     /// The maximum number of offsets to report.
@@ -42,6 +43,14 @@ pub struct ListOffsetsPartition {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for ListOffsetsPartition {
+    type Builder = ListOffsetsPartitionBuilder;
+
+    fn builder() -> Self::Builder{
+        ListOffsetsPartitionBuilder::default()
+    }
 }
 
 impl Encodable for ListOffsetsPartition {
@@ -146,24 +155,33 @@ impl Default for ListOffsetsPartition {
 }
 
 impl Message for ListOffsetsPartition {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 7 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 8 };
 }
 
-/// Valid versions: 0-7
+/// Valid versions: 0-8
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ListOffsetsTopic {
     /// The topic name.
     /// 
-    /// Supported API versions: 0-7
+    /// Supported API versions: 0-8
     pub name: super::TopicName,
 
     /// Each partition in the request.
     /// 
-    /// Supported API versions: 0-7
+    /// Supported API versions: 0-8
     pub partitions: Vec<ListOffsetsPartition>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for ListOffsetsTopic {
+    type Builder = ListOffsetsTopicBuilder;
+
+    fn builder() -> Self::Builder{
+        ListOffsetsTopicBuilder::default()
+    }
 }
 
 impl Encodable for ListOffsetsTopic {
@@ -258,29 +276,38 @@ impl Default for ListOffsetsTopic {
 }
 
 impl Message for ListOffsetsTopic {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 7 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 8 };
 }
 
-/// Valid versions: 0-7
+/// Valid versions: 0-8
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ListOffsetsRequest {
     /// The broker ID of the requestor, or -1 if this request is being made by a normal consumer.
     /// 
-    /// Supported API versions: 0-7
+    /// Supported API versions: 0-8
     pub replica_id: super::BrokerId,
 
     /// This setting controls the visibility of transactional records. Using READ_UNCOMMITTED (isolation_level = 0) makes all records visible. With READ_COMMITTED (isolation_level = 1), non-transactional and COMMITTED transactional records are visible. To be more concrete, READ_COMMITTED returns all data from offsets smaller than the current LSO (last stable offset), and enables the inclusion of the list of aborted transactions in the result, which allows consumers to discard ABORTED transactional records
     /// 
-    /// Supported API versions: 2-7
+    /// Supported API versions: 2-8
     pub isolation_level: i8,
 
     /// Each topic in the request.
     /// 
-    /// Supported API versions: 0-7
+    /// Supported API versions: 0-8
     pub topics: Vec<ListOffsetsTopic>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for ListOffsetsRequest {
+    type Builder = ListOffsetsRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        ListOffsetsRequestBuilder::default()
+    }
 }
 
 impl Encodable for ListOffsetsRequest {
@@ -384,7 +411,7 @@ impl Default for ListOffsetsRequest {
 }
 
 impl Message for ListOffsetsRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 7 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 8 };
 }
 
 impl HeaderVersion for ListOffsetsRequest {

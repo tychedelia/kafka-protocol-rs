@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-5
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DescribedGroupMember {
     /// The member ID assigned by the group coordinator.
@@ -52,6 +53,14 @@ pub struct DescribedGroupMember {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DescribedGroupMember {
+    type Builder = DescribedGroupMemberBuilder;
+
+    fn builder() -> Self::Builder{
+        DescribedGroupMemberBuilder::default()
+    }
 }
 
 impl Encodable for DescribedGroupMember {
@@ -226,6 +235,7 @@ impl Message for DescribedGroupMember {
 }
 
 /// Valid versions: 0-5
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DescribedGroup {
     /// The describe error, or 0 if there was no error.
@@ -265,6 +275,14 @@ pub struct DescribedGroup {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DescribedGroup {
+    type Builder = DescribedGroupBuilder;
+
+    fn builder() -> Self::Builder{
+        DescribedGroupBuilder::default()
+    }
 }
 
 impl Encodable for DescribedGroup {
@@ -440,6 +458,7 @@ impl Message for DescribedGroup {
 }
 
 /// Valid versions: 0-5
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DescribeGroupsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
@@ -454,6 +473,14 @@ pub struct DescribeGroupsResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DescribeGroupsResponse {
+    type Builder = DescribeGroupsResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        DescribeGroupsResponseBuilder::default()
+    }
 }
 
 impl Encodable for DescribeGroupsResponse {

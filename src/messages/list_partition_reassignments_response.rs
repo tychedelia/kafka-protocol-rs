@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OngoingPartitionReassignment {
     /// The index of the partition.
@@ -42,6 +43,14 @@ pub struct OngoingPartitionReassignment {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for OngoingPartitionReassignment {
+    type Builder = OngoingPartitionReassignmentBuilder;
+
+    fn builder() -> Self::Builder{
+        OngoingPartitionReassignmentBuilder::default()
+    }
 }
 
 impl Encodable for OngoingPartitionReassignment {
@@ -120,6 +129,7 @@ impl Message for OngoingPartitionReassignment {
 }
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OngoingTopicReassignment {
     /// The topic name.
@@ -134,6 +144,14 @@ pub struct OngoingTopicReassignment {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for OngoingTopicReassignment {
+    type Builder = OngoingTopicReassignmentBuilder;
+
+    fn builder() -> Self::Builder{
+        OngoingTopicReassignmentBuilder::default()
+    }
 }
 
 impl Encodable for OngoingTopicReassignment {
@@ -202,6 +220,7 @@ impl Message for OngoingTopicReassignment {
 }
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ListPartitionReassignmentsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
@@ -226,6 +245,14 @@ pub struct ListPartitionReassignmentsResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for ListPartitionReassignmentsResponse {
+    type Builder = ListPartitionReassignmentsResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        ListPartitionReassignmentsResponseBuilder::default()
+    }
 }
 
 impl Encodable for ListPartitionReassignmentsResponse {

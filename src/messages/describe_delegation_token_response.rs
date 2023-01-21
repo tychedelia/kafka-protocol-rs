@@ -13,25 +13,34 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
-/// Valid versions: 0-2
+/// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DescribedDelegationTokenRenewer {
     /// The renewer principal type
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub principal_type: StrBytes,
 
     /// The renewer principal name
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub principal_name: StrBytes,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DescribedDelegationTokenRenewer {
+    type Builder = DescribedDelegationTokenRenewerBuilder;
+
+    fn builder() -> Self::Builder{
+        DescribedDelegationTokenRenewerBuilder::default()
+    }
 }
 
 impl Encodable for DescribedDelegationTokenRenewer {
@@ -126,54 +135,73 @@ impl Default for DescribedDelegationTokenRenewer {
 }
 
 impl Message for DescribedDelegationTokenRenewer {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
 }
 
-/// Valid versions: 0-2
+/// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DescribedDelegationToken {
     /// The token principal type.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub principal_type: StrBytes,
 
     /// The token principal name.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub principal_name: StrBytes,
+
+    /// The principal type of the requester of the token.
+    /// 
+    /// Supported API versions: 3
+    pub token_requester_principal_type: StrBytes,
+
+    /// The principal type of the requester of the token.
+    /// 
+    /// Supported API versions: 3
+    pub token_requester_principal_name: StrBytes,
 
     /// The token issue timestamp in milliseconds.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub issue_timestamp: i64,
 
     /// The token expiry timestamp in milliseconds.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub expiry_timestamp: i64,
 
     /// The token maximum timestamp length in milliseconds.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub max_timestamp: i64,
 
     /// The token ID.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub token_id: StrBytes,
 
     /// The token HMAC.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub hmac: Bytes,
 
     /// Those who are able to renew this token before it expires.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub renewers: Vec<DescribedDelegationTokenRenewer>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DescribedDelegationToken {
+    type Builder = DescribedDelegationTokenBuilder;
+
+    fn builder() -> Self::Builder{
+        DescribedDelegationTokenBuilder::default()
+    }
 }
 
 impl Encodable for DescribedDelegationToken {
@@ -187,6 +215,20 @@ impl Encodable for DescribedDelegationToken {
             types::CompactString.encode(buf, &self.principal_name)?;
         } else {
             types::String.encode(buf, &self.principal_name)?;
+        }
+        if version >= 3 {
+            types::CompactString.encode(buf, &self.token_requester_principal_type)?;
+        } else {
+            if !self.token_requester_principal_type.is_empty() {
+                return Err(EncodeError)
+            }
+        }
+        if version >= 3 {
+            types::CompactString.encode(buf, &self.token_requester_principal_name)?;
+        } else {
+            if !self.token_requester_principal_name.is_empty() {
+                return Err(EncodeError)
+            }
         }
         types::Int64.encode(buf, &self.issue_timestamp)?;
         types::Int64.encode(buf, &self.expiry_timestamp)?;
@@ -229,6 +271,20 @@ impl Encodable for DescribedDelegationToken {
             total_size += types::CompactString.compute_size(&self.principal_name)?;
         } else {
             total_size += types::String.compute_size(&self.principal_name)?;
+        }
+        if version >= 3 {
+            total_size += types::CompactString.compute_size(&self.token_requester_principal_type)?;
+        } else {
+            if !self.token_requester_principal_type.is_empty() {
+                return Err(EncodeError)
+            }
+        }
+        if version >= 3 {
+            total_size += types::CompactString.compute_size(&self.token_requester_principal_name)?;
+        } else {
+            if !self.token_requester_principal_name.is_empty() {
+                return Err(EncodeError)
+            }
         }
         total_size += types::Int64.compute_size(&self.issue_timestamp)?;
         total_size += types::Int64.compute_size(&self.expiry_timestamp)?;
@@ -274,6 +330,16 @@ impl Decodable for DescribedDelegationToken {
         } else {
             types::String.decode(buf)?
         };
+        let token_requester_principal_type = if version >= 3 {
+            types::CompactString.decode(buf)?
+        } else {
+            Default::default()
+        };
+        let token_requester_principal_name = if version >= 3 {
+            types::CompactString.decode(buf)?
+        } else {
+            Default::default()
+        };
         let issue_timestamp = types::Int64.decode(buf)?;
         let expiry_timestamp = types::Int64.decode(buf)?;
         let max_timestamp = types::Int64.decode(buf)?;
@@ -306,6 +372,8 @@ impl Decodable for DescribedDelegationToken {
         Ok(Self {
             principal_type,
             principal_name,
+            token_requester_principal_type,
+            token_requester_principal_name,
             issue_timestamp,
             expiry_timestamp,
             max_timestamp,
@@ -322,6 +390,8 @@ impl Default for DescribedDelegationToken {
         Self {
             principal_type: Default::default(),
             principal_name: Default::default(),
+            token_requester_principal_type: Default::default(),
+            token_requester_principal_name: Default::default(),
             issue_timestamp: 0,
             expiry_timestamp: 0,
             max_timestamp: 0,
@@ -334,29 +404,38 @@ impl Default for DescribedDelegationToken {
 }
 
 impl Message for DescribedDelegationToken {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
 }
 
-/// Valid versions: 0-2
+/// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DescribeDelegationTokenResponse {
     /// The error code, or 0 if there was no error.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub error_code: i16,
 
     /// The tokens.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub tokens: Vec<DescribedDelegationToken>,
 
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub throttle_time_ms: i32,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DescribeDelegationTokenResponse {
+    type Builder = DescribeDelegationTokenResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        DescribeDelegationTokenResponseBuilder::default()
+    }
 }
 
 impl Encodable for DescribeDelegationTokenResponse {
@@ -444,7 +523,7 @@ impl Default for DescribeDelegationTokenResponse {
 }
 
 impl Message for DescribeDelegationTokenResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
 }
 
 impl HeaderVersion for DescribeDelegationTokenResponse {

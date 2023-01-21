@@ -998,6 +998,7 @@ impl TryFrom<i16> for ApiKey {
 }
 
 /// Wrapping enum for all requests in the Kafka protocol.
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub enum RequestKind {
     /// ProduceRequest,
@@ -1139,6 +1140,7 @@ pub enum RequestKind {
 }
 
 /// Wrapping enum for all responses in the Kafka protocol.
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub enum ResponseKind {
     /// ProduceResponse,

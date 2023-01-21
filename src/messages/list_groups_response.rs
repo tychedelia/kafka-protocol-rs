@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-4
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ListedGroup {
     /// The group ID.
@@ -37,6 +38,14 @@ pub struct ListedGroup {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for ListedGroup {
+    type Builder = ListedGroupBuilder;
+
+    fn builder() -> Self::Builder{
+        ListedGroupBuilder::default()
+    }
 }
 
 impl Encodable for ListedGroup {
@@ -148,6 +157,7 @@ impl Message for ListedGroup {
 }
 
 /// Valid versions: 0-4
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ListGroupsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
@@ -167,6 +177,14 @@ pub struct ListGroupsResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for ListGroupsResponse {
+    type Builder = ListGroupsResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        ListGroupsResponseBuilder::default()
+    }
 }
 
 impl Encodable for ListGroupsResponse {

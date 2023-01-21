@@ -712,6 +712,7 @@ fn write_struct_def<W: Write>(
     }
 
     writeln!(w, "/// Valid versions: {}", valid_versions)?;
+    writeln!(w, "#[non_exhaustive]")?;
     writeln!(w, "#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]")?;
     write!(w, "pub struct {} ", name)?;
     w.block(|w| {
@@ -733,6 +734,21 @@ fn write_struct_def<W: Write>(
             writeln!(w, "pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,")?;
         }
 
+        Ok(())
+    })?;
+    writeln!(w)?;
+    writeln!(w)?;
+
+    write!(w, "impl Builder for {} ", name)?;
+    w.block(|w| {
+        writeln!(w, "type Builder = {}Builder;", name)?;
+        writeln!(w)?;
+        write!(w, "fn builder() -> Self::Builder")?;
+        w.block(|w| {
+            writeln!(w, "{}Builder::default()", name)?;
+            Ok(())
+        })?;
+        writeln!(w)?;
         Ok(())
     })?;
     writeln!(w)?;
@@ -887,7 +903,7 @@ fn write_file_header<W: Write>(
     writeln!(w)?;
     writeln!(w, "use crate::protocol::{{")?;
     writeln!(w, "    Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,")?;
-    writeln!(w, "    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{{ByteBuf, ByteBufMut}}")?;
+    writeln!(w, "    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{{ByteBuf, ByteBufMut}}, Builder")?;
     writeln!(w, "}};")?;
     writeln!(w)?;
     writeln!(w)?;

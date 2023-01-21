@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct PartitionData {
     /// The partition index.
@@ -47,6 +48,14 @@ pub struct PartitionData {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for PartitionData {
+    type Builder = PartitionDataBuilder;
+
+    fn builder() -> Self::Builder{
+        PartitionDataBuilder::default()
+    }
 }
 
 impl Encodable for PartitionData {
@@ -130,6 +139,7 @@ impl Message for PartitionData {
 }
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct TopicData {
     /// The topic name.
@@ -144,6 +154,14 @@ pub struct TopicData {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for TopicData {
+    type Builder = TopicDataBuilder;
+
+    fn builder() -> Self::Builder{
+        TopicDataBuilder::default()
+    }
 }
 
 impl Encodable for TopicData {
@@ -212,6 +230,7 @@ impl Message for TopicData {
 }
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct VoteResponse {
     /// The top level error code.
@@ -226,6 +245,14 @@ pub struct VoteResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for VoteResponse {
+    type Builder = VoteResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        VoteResponseBuilder::default()
+    }
 }
 
 impl Encodable for VoteResponse {

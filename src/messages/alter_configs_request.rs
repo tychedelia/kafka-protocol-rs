@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-2
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct AlterableConfig {
     /// The value to set for the configuration key.
@@ -27,6 +28,14 @@ pub struct AlterableConfig {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for AlterableConfig {
+    type Builder = AlterableConfigBuilder;
+
+    fn builder() -> Self::Builder{
+        AlterableConfigBuilder::default()
+    }
 }
 
 impl MapEncodable for AlterableConfig {
@@ -125,6 +134,7 @@ impl Message for AlterableConfig {
 }
 
 /// Valid versions: 0-2
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct AlterConfigsResource {
     /// The resource type.
@@ -144,6 +154,14 @@ pub struct AlterConfigsResource {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for AlterConfigsResource {
+    type Builder = AlterConfigsResourceBuilder;
+
+    fn builder() -> Self::Builder{
+        AlterConfigsResourceBuilder::default()
+    }
 }
 
 impl Encodable for AlterConfigsResource {
@@ -247,6 +265,7 @@ impl Message for AlterConfigsResource {
 }
 
 /// Valid versions: 0-2
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct AlterConfigsRequest {
     /// The updates for each resource.
@@ -261,6 +280,14 @@ pub struct AlterConfigsRequest {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for AlterConfigsRequest {
+    type Builder = AlterConfigsRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        AlterConfigsRequestBuilder::default()
+    }
 }
 
 impl Encodable for AlterConfigsRequest {

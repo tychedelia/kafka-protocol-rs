@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-9
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct JoinGroupRequestProtocol {
     /// The protocol metadata.
@@ -27,6 +28,14 @@ pub struct JoinGroupRequestProtocol {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for JoinGroupRequestProtocol {
+    type Builder = JoinGroupRequestProtocolBuilder;
+
+    fn builder() -> Self::Builder{
+        JoinGroupRequestProtocolBuilder::default()
+    }
 }
 
 impl MapEncodable for JoinGroupRequestProtocol {
@@ -125,6 +134,7 @@ impl Message for JoinGroupRequestProtocol {
 }
 
 /// Valid versions: 0-9
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct JoinGroupRequest {
     /// The group identifier.
@@ -169,6 +179,14 @@ pub struct JoinGroupRequest {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for JoinGroupRequest {
+    type Builder = JoinGroupRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        JoinGroupRequestBuilder::default()
+    }
 }
 
 impl Encodable for JoinGroupRequest {
