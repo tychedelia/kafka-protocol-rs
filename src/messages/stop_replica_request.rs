@@ -17,7 +17,7 @@ use crate::protocol::{
 };
 
 
-/// Valid versions: 0-4
+/// Valid versions: 0-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct StopReplicaPartitionV0 {
@@ -143,10 +143,10 @@ impl Default for StopReplicaPartitionV0 {
 }
 
 impl Message for StopReplicaPartitionV0 {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
 }
 
-/// Valid versions: 0-4
+/// Valid versions: 0-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct StopReplicaTopicV1 {
@@ -296,26 +296,26 @@ impl Default for StopReplicaTopicV1 {
 }
 
 impl Message for StopReplicaTopicV1 {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
 }
 
-/// Valid versions: 0-4
+/// Valid versions: 0-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct StopReplicaPartitionState {
     /// The partition index.
     /// 
-    /// Supported API versions: 3-4
+    /// Supported API versions: 3
     pub partition_index: i32,
 
     /// The leader epoch.
     /// 
-    /// Supported API versions: 3-4
+    /// Supported API versions: 3
     pub leader_epoch: i32,
 
     /// Whether this partition should be deleted.
     /// 
-    /// Supported API versions: 3-4
+    /// Supported API versions: 3
     pub delete_partition: bool,
 
     /// Other tagged fields
@@ -451,21 +451,21 @@ impl Default for StopReplicaPartitionState {
 }
 
 impl Message for StopReplicaPartitionState {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
 }
 
-/// Valid versions: 0-4
+/// Valid versions: 0-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct StopReplicaTopicState {
     /// The topic name.
     /// 
-    /// Supported API versions: 3-4
+    /// Supported API versions: 3
     pub topic_name: super::TopicName,
 
     /// The state of each partition
     /// 
-    /// Supported API versions: 3-4
+    /// Supported API versions: 3
     pub partition_states: Vec<StopReplicaPartitionState>,
 
     /// Other tagged fields
@@ -580,31 +580,26 @@ impl Default for StopReplicaTopicState {
 }
 
 impl Message for StopReplicaTopicState {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
 }
 
-/// Valid versions: 0-4
+/// Valid versions: 0-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct StopReplicaRequest {
     /// The controller id.
     /// 
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-3
     pub controller_id: super::BrokerId,
-
-    /// If KRaft controller id is used during migration. See KIP-866
-    /// 
-    /// Supported API versions: 4
-    pub is_k_raft_controller: bool,
 
     /// The controller epoch.
     /// 
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-3
     pub controller_epoch: i32,
 
     /// The broker epoch.
     /// 
-    /// Supported API versions: 1-4
+    /// Supported API versions: 1-3
     pub broker_epoch: i64,
 
     /// Whether these partitions should be deleted.
@@ -624,7 +619,7 @@ pub struct StopReplicaRequest {
 
     /// Each topic.
     /// 
-    /// Supported API versions: 3-4
+    /// Supported API versions: 3
     pub topic_states: Vec<StopReplicaTopicState>,
 
     /// Other tagged fields
@@ -642,13 +637,6 @@ impl Builder for StopReplicaRequest {
 impl Encodable for StopReplicaRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.controller_id)?;
-        if version >= 4 {
-            types::Boolean.encode(buf, &self.is_k_raft_controller)?;
-        } else {
-            if self.is_k_raft_controller {
-                return Err(EncodeError)
-            }
-        }
         types::Int32.encode(buf, &self.controller_epoch)?;
         if version >= 1 {
             types::Int64.encode(buf, &self.broker_epoch)?;
@@ -700,13 +688,6 @@ impl Encodable for StopReplicaRequest {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.controller_id)?;
-        if version >= 4 {
-            total_size += types::Boolean.compute_size(&self.is_k_raft_controller)?;
-        } else {
-            if self.is_k_raft_controller {
-                return Err(EncodeError)
-            }
-        }
         total_size += types::Int32.compute_size(&self.controller_epoch)?;
         if version >= 1 {
             total_size += types::Int64.compute_size(&self.broker_epoch)?;
@@ -760,11 +741,6 @@ impl Encodable for StopReplicaRequest {
 impl Decodable for StopReplicaRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let controller_id = types::Int32.decode(buf)?;
-        let is_k_raft_controller = if version >= 4 {
-            types::Boolean.decode(buf)?
-        } else {
-            false
-        };
         let controller_epoch = types::Int32.decode(buf)?;
         let broker_epoch = if version >= 1 {
             types::Int64.decode(buf)?
@@ -808,7 +784,6 @@ impl Decodable for StopReplicaRequest {
         }
         Ok(Self {
             controller_id,
-            is_k_raft_controller,
             controller_epoch,
             broker_epoch,
             delete_partitions,
@@ -824,7 +799,6 @@ impl Default for StopReplicaRequest {
     fn default() -> Self {
         Self {
             controller_id: (0).into(),
-            is_k_raft_controller: false,
             controller_epoch: 0,
             broker_epoch: -1,
             delete_partitions: false,
@@ -837,7 +811,7 @@ impl Default for StopReplicaRequest {
 }
 
 impl Message for StopReplicaRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
 }
 
 impl HeaderVersion for StopReplicaRequest {

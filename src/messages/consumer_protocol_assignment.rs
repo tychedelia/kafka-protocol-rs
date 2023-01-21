@@ -17,13 +17,13 @@ use crate::protocol::{
 };
 
 
-/// Valid versions: 0-3
+/// Valid versions: 0-1
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct TopicPartition {
     /// 
     /// 
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-1
     pub partitions: Vec<i32>,
 
 }
@@ -73,21 +73,21 @@ impl Default for TopicPartition {
 }
 
 impl Message for TopicPartition {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
 }
 
-/// Valid versions: 0-3
+/// Valid versions: 0-1
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ConsumerProtocolAssignment {
     /// 
     /// 
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-1
     pub assigned_partitions: indexmap::IndexMap<super::TopicName, TopicPartition>,
 
     /// 
     /// 
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-1
     pub user_data: Option<Bytes>,
 
 }
@@ -137,6 +137,6 @@ impl Default for ConsumerProtocolAssignment {
 }
 
 impl Message for ConsumerProtocolAssignment {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
 }
 

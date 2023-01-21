@@ -17,11 +17,6 @@ use tempfile::tempdir;
 pub fn run() -> Result<(), Error> {
     let input_tmpdir = tempdir()?.into_path();
 
-    // https://github.com/apache/kafka/releases/tag/3.3.2
-    // checking out a tag with git2 is annoying -- we pin to the tag's commit sha instead
-    let release_commit = "b66af662e61082cb8def576ded1fe5cee37e155f";
-    let oid = Oid::from_str(release_commit).unwrap();
-
     let mut dir = std::fs::canonicalize(std::file!().rsplit_once("/").unwrap().0)?;
     dir.push("../../src/messages");
     let output_path = std::fs::canonicalize(dir)?;
@@ -35,7 +30,14 @@ pub fn run() -> Result<(), Error> {
         .clone("https://github.com/apache/kafka.git", &input_tmpdir.as_path())?;
 
     // Checkout the release commit
-    repo.find_commit(oid).expect("Could not find release commit!");
+    // https://github.com/apache/kafka/releases/tag/3.3.2
+    // checking out a tag with git2 is annoying -- we pin to the tag's commit sha instead
+    let release_commit = "b66af662e61082cb8def576ded1fe5cee37e155f";
+    println!("Checking out release {}", release_commit);
+    let oid = Oid::from_str(release_commit).unwrap();
+    let commit = repo.find_commit(oid).expect("Could not find release commit!").into_object();
+    repo.checkout_tree(&commit, None).unwrap();
+    repo.set_head_detached(commit.id()).unwrap();
 
     // Clear output directory
     for file in fs::read_dir(output_path)? {

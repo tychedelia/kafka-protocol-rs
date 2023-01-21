@@ -17,18 +17,18 @@ use crate::protocol::{
 };
 
 
-/// Valid versions: 0-14
+/// Valid versions: 0-13
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct EpochEndOffset {
     /// 
     /// 
-    /// Supported API versions: 12-14
+    /// Supported API versions: 12-13
     pub epoch: i32,
 
     /// 
     /// 
-    /// Supported API versions: 12-14
+    /// Supported API versions: 12-13
     pub end_offset: i64,
 
     /// Other tagged fields
@@ -143,21 +143,21 @@ impl Default for EpochEndOffset {
 }
 
 impl Message for EpochEndOffset {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 14 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 13 };
 }
 
-/// Valid versions: 0-14
+/// Valid versions: 0-13
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct LeaderIdAndEpoch {
     /// The ID of the current leader or -1 if the leader is unknown.
     /// 
-    /// Supported API versions: 12-14
+    /// Supported API versions: 12-13
     pub leader_id: super::BrokerId,
 
     /// The latest known leader epoch
     /// 
-    /// Supported API versions: 12-14
+    /// Supported API versions: 12-13
     pub leader_epoch: i32,
 
     /// Other tagged fields
@@ -272,21 +272,21 @@ impl Default for LeaderIdAndEpoch {
 }
 
 impl Message for LeaderIdAndEpoch {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 14 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 13 };
 }
 
-/// Valid versions: 0-14
+/// Valid versions: 0-13
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct SnapshotId {
     /// 
     /// 
-    /// Supported API versions: 0-14
+    /// Supported API versions: 0-13
     pub end_offset: i64,
 
     /// 
     /// 
-    /// Supported API versions: 0-14
+    /// Supported API versions: 0-13
     pub epoch: i32,
 
     /// Other tagged fields
@@ -369,21 +369,21 @@ impl Default for SnapshotId {
 }
 
 impl Message for SnapshotId {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 14 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 13 };
 }
 
-/// Valid versions: 0-14
+/// Valid versions: 0-13
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct AbortedTransaction {
     /// The producer id associated with the aborted transaction.
     /// 
-    /// Supported API versions: 4-14
+    /// Supported API versions: 4-13
     pub producer_id: super::ProducerId,
 
     /// The first offset in the aborted transaction.
     /// 
-    /// Supported API versions: 4-14
+    /// Supported API versions: 4-13
     pub first_offset: i64,
 
     /// Other tagged fields
@@ -498,66 +498,66 @@ impl Default for AbortedTransaction {
 }
 
 impl Message for AbortedTransaction {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 14 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 13 };
 }
 
-/// Valid versions: 0-14
+/// Valid versions: 0-13
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct PartitionData {
     /// The partition index.
     /// 
-    /// Supported API versions: 0-14
+    /// Supported API versions: 0-13
     pub partition_index: i32,
 
     /// The error code, or 0 if there was no fetch error.
     /// 
-    /// Supported API versions: 0-14
+    /// Supported API versions: 0-13
     pub error_code: i16,
 
     /// The current high water mark.
     /// 
-    /// Supported API versions: 0-14
+    /// Supported API versions: 0-13
     pub high_watermark: i64,
 
     /// The last stable offset (or LSO) of the partition. This is the last offset such that the state of all transactional records prior to this offset have been decided (ABORTED or COMMITTED)
     /// 
-    /// Supported API versions: 4-14
+    /// Supported API versions: 4-13
     pub last_stable_offset: i64,
 
     /// The current log start offset.
     /// 
-    /// Supported API versions: 5-14
+    /// Supported API versions: 5-13
     pub log_start_offset: i64,
 
     /// In case divergence is detected based on the `LastFetchedEpoch` and `FetchOffset` in the request, this field indicates the largest epoch and its end offset such that subsequent records are known to diverge
     /// 
-    /// Supported API versions: 12-14
+    /// Supported API versions: 12-13
     pub diverging_epoch: EpochEndOffset,
 
     /// 
     /// 
-    /// Supported API versions: 12-14
+    /// Supported API versions: 12-13
     pub current_leader: LeaderIdAndEpoch,
 
     /// In the case of fetching an offset less than the LogStartOffset, this is the end offset and epoch that should be used in the FetchSnapshot request.
     /// 
-    /// Supported API versions: 12-14
+    /// Supported API versions: 12-13
     pub snapshot_id: SnapshotId,
 
     /// The aborted transactions.
     /// 
-    /// Supported API versions: 4-14
+    /// Supported API versions: 4-13
     pub aborted_transactions: Option<Vec<AbortedTransaction>>,
 
     /// The preferred read replica for the consumer to use on its next fetch request
     /// 
-    /// Supported API versions: 11-14
+    /// Supported API versions: 11-13
     pub preferred_read_replica: super::BrokerId,
 
     /// The record data.
     /// 
-    /// Supported API versions: 0-14
+    /// Supported API versions: 0-13
     pub records: Option<Bytes>,
 
     /// Other tagged fields
@@ -834,10 +834,10 @@ impl Default for PartitionData {
 }
 
 impl Message for PartitionData {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 14 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 13 };
 }
 
-/// Valid versions: 0-14
+/// Valid versions: 0-13
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct FetchableTopicResponse {
@@ -848,12 +848,12 @@ pub struct FetchableTopicResponse {
 
     /// The unique topic ID
     /// 
-    /// Supported API versions: 13-14
+    /// Supported API versions: 13
     pub topic_id: Uuid,
 
     /// The topic partitions.
     /// 
-    /// Supported API versions: 0-14
+    /// Supported API versions: 0-13
     pub partitions: Vec<PartitionData>,
 
     /// Other tagged fields
@@ -981,31 +981,31 @@ impl Default for FetchableTopicResponse {
 }
 
 impl Message for FetchableTopicResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 14 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 13 };
 }
 
-/// Valid versions: 0-14
+/// Valid versions: 0-13
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct FetchResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 
-    /// Supported API versions: 1-14
+    /// Supported API versions: 1-13
     pub throttle_time_ms: i32,
 
     /// The top level response error code.
     /// 
-    /// Supported API versions: 7-14
+    /// Supported API versions: 7-13
     pub error_code: i16,
 
     /// The fetch session ID, or 0 if this is not part of a fetch session.
     /// 
-    /// Supported API versions: 7-14
+    /// Supported API versions: 7-13
     pub session_id: i32,
 
     /// The response topics.
     /// 
-    /// Supported API versions: 0-14
+    /// Supported API versions: 0-13
     pub responses: Vec<FetchableTopicResponse>,
 
     /// Other tagged fields
@@ -1142,7 +1142,7 @@ impl Default for FetchResponse {
 }
 
 impl Message for FetchResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 14 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 13 };
 }
 
 impl HeaderVersion for FetchResponse {

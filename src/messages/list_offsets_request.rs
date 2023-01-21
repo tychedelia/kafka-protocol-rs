@@ -17,23 +17,23 @@ use crate::protocol::{
 };
 
 
-/// Valid versions: 0-8
+/// Valid versions: 0-7
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ListOffsetsPartition {
     /// The partition index.
     /// 
-    /// Supported API versions: 0-8
+    /// Supported API versions: 0-7
     pub partition_index: i32,
 
     /// The current leader epoch.
     /// 
-    /// Supported API versions: 4-8
+    /// Supported API versions: 4-7
     pub current_leader_epoch: i32,
 
     /// The current timestamp.
     /// 
-    /// Supported API versions: 0-8
+    /// Supported API versions: 0-7
     pub timestamp: i64,
 
     /// The maximum number of offsets to report.
@@ -155,21 +155,21 @@ impl Default for ListOffsetsPartition {
 }
 
 impl Message for ListOffsetsPartition {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 8 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 7 };
 }
 
-/// Valid versions: 0-8
+/// Valid versions: 0-7
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ListOffsetsTopic {
     /// The topic name.
     /// 
-    /// Supported API versions: 0-8
+    /// Supported API versions: 0-7
     pub name: super::TopicName,
 
     /// Each partition in the request.
     /// 
-    /// Supported API versions: 0-8
+    /// Supported API versions: 0-7
     pub partitions: Vec<ListOffsetsPartition>,
 
     /// Other tagged fields
@@ -276,26 +276,26 @@ impl Default for ListOffsetsTopic {
 }
 
 impl Message for ListOffsetsTopic {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 8 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 7 };
 }
 
-/// Valid versions: 0-8
+/// Valid versions: 0-7
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ListOffsetsRequest {
     /// The broker ID of the requestor, or -1 if this request is being made by a normal consumer.
     /// 
-    /// Supported API versions: 0-8
+    /// Supported API versions: 0-7
     pub replica_id: super::BrokerId,
 
     /// This setting controls the visibility of transactional records. Using READ_UNCOMMITTED (isolation_level = 0) makes all records visible. With READ_COMMITTED (isolation_level = 1), non-transactional and COMMITTED transactional records are visible. To be more concrete, READ_COMMITTED returns all data from offsets smaller than the current LSO (last stable offset), and enables the inclusion of the list of aborted transactions in the result, which allows consumers to discard ABORTED transactional records
     /// 
-    /// Supported API versions: 2-8
+    /// Supported API versions: 2-7
     pub isolation_level: i8,
 
     /// Each topic in the request.
     /// 
-    /// Supported API versions: 0-8
+    /// Supported API versions: 0-7
     pub topics: Vec<ListOffsetsTopic>,
 
     /// Other tagged fields
@@ -411,7 +411,7 @@ impl Default for ListOffsetsRequest {
 }
 
 impl Message for ListOffsetsRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 8 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 7 };
 }
 
 impl HeaderVersion for ListOffsetsRequest {

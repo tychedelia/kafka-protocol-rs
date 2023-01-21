@@ -17,13 +17,13 @@ use crate::protocol::{
 };
 
 
-/// Valid versions: 0-3
+/// Valid versions: 0-1
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct TopicPartition {
     /// 
     /// 
-    /// Supported API versions: 1-3
+    /// Supported API versions: 1
     pub partitions: Vec<i32>,
 
 }
@@ -105,37 +105,27 @@ impl Default for TopicPartition {
 }
 
 impl Message for TopicPartition {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
 }
 
-/// Valid versions: 0-3
+/// Valid versions: 0-1
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ConsumerProtocolSubscription {
     /// 
     /// 
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-1
     pub topics: Vec<StrBytes>,
 
     /// 
     /// 
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-1
     pub user_data: Option<Bytes>,
 
     /// 
     /// 
-    /// Supported API versions: 1-3
+    /// Supported API versions: 1
     pub owned_partitions: indexmap::IndexMap<super::TopicName, TopicPartition>,
-
-    /// 
-    /// 
-    /// Supported API versions: 2-3
-    pub generation_id: i32,
-
-    /// 
-    /// 
-    /// Supported API versions: 3
-    pub rack_id: Option<StrBytes>,
 
 }
 
@@ -154,12 +144,6 @@ impl Encodable for ConsumerProtocolSubscription {
         if version >= 1 {
             types::Array(types::Struct { version }).encode(buf, &self.owned_partitions)?;
         }
-        if version >= 2 {
-            types::Int32.encode(buf, &self.generation_id)?;
-        }
-        if version >= 3 {
-            types::String.encode(buf, &self.rack_id)?;
-        }
 
         Ok(())
     }
@@ -169,12 +153,6 @@ impl Encodable for ConsumerProtocolSubscription {
         total_size += types::Bytes.compute_size(&self.user_data)?;
         if version >= 1 {
             total_size += types::Array(types::Struct { version }).compute_size(&self.owned_partitions)?;
-        }
-        if version >= 2 {
-            total_size += types::Int32.compute_size(&self.generation_id)?;
-        }
-        if version >= 3 {
-            total_size += types::String.compute_size(&self.rack_id)?;
         }
 
         Ok(total_size)
@@ -190,22 +168,10 @@ impl Decodable for ConsumerProtocolSubscription {
         } else {
             Default::default()
         };
-        let generation_id = if version >= 2 {
-            types::Int32.decode(buf)?
-        } else {
-            -1
-        };
-        let rack_id = if version >= 3 {
-            types::String.decode(buf)?
-        } else {
-            None
-        };
         Ok(Self {
             topics,
             user_data,
             owned_partitions,
-            generation_id,
-            rack_id,
         })
     }
 }
@@ -216,13 +182,11 @@ impl Default for ConsumerProtocolSubscription {
             topics: Default::default(),
             user_data: None,
             owned_partitions: Default::default(),
-            generation_id: -1,
-            rack_id: None,
         }
     }
 }
 
 impl Message for ConsumerProtocolSubscription {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
 }
 

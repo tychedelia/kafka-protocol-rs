@@ -17,7 +17,7 @@ use crate::protocol::{
 };
 
 
-/// Valid versions: 0-7
+/// Valid versions: 0-6
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct LeaderAndIsrPartitionState {
@@ -28,57 +28,57 @@ pub struct LeaderAndIsrPartitionState {
 
     /// The partition index.
     /// 
-    /// Supported API versions: 0-7
+    /// Supported API versions: 0-6
     pub partition_index: i32,
 
     /// The controller epoch.
     /// 
-    /// Supported API versions: 0-7
+    /// Supported API versions: 0-6
     pub controller_epoch: i32,
 
     /// The broker ID of the leader.
     /// 
-    /// Supported API versions: 0-7
+    /// Supported API versions: 0-6
     pub leader: super::BrokerId,
 
     /// The leader epoch.
     /// 
-    /// Supported API versions: 0-7
+    /// Supported API versions: 0-6
     pub leader_epoch: i32,
 
     /// The in-sync replica IDs.
     /// 
-    /// Supported API versions: 0-7
+    /// Supported API versions: 0-6
     pub isr: Vec<super::BrokerId>,
 
     /// The current epoch for the partition. The epoch is a monotonically increasing value which is incremented after every partition change. (Since the LeaderAndIsr request is only used by the legacy controller, this corresponds to the zkVersion)
     /// 
-    /// Supported API versions: 0-7
+    /// Supported API versions: 0-6
     pub partition_epoch: i32,
 
     /// The replica IDs.
     /// 
-    /// Supported API versions: 0-7
+    /// Supported API versions: 0-6
     pub replicas: Vec<super::BrokerId>,
 
     /// The replica IDs that we are adding this partition to, or null if no replicas are being added.
     /// 
-    /// Supported API versions: 3-7
+    /// Supported API versions: 3-6
     pub adding_replicas: Vec<super::BrokerId>,
 
     /// The replica IDs that we are removing this partition from, or null if no replicas are being removed.
     /// 
-    /// Supported API versions: 3-7
+    /// Supported API versions: 3-6
     pub removing_replicas: Vec<super::BrokerId>,
 
     /// Whether the replica should have existed on the broker or not.
     /// 
-    /// Supported API versions: 1-7
+    /// Supported API versions: 1-6
     pub is_new: bool,
 
     /// 1 if the partition is recovering from an unclean leader election; 0 otherwise.
     /// 
-    /// Supported API versions: 6-7
+    /// Supported API versions: 6
     pub leader_recovery_state: i8,
 
     /// Other tagged fields
@@ -307,26 +307,26 @@ impl Default for LeaderAndIsrPartitionState {
 }
 
 impl Message for LeaderAndIsrPartitionState {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 7 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 6 };
 }
 
-/// Valid versions: 0-7
+/// Valid versions: 0-6
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct LeaderAndIsrTopicState {
     /// The topic name.
     /// 
-    /// Supported API versions: 2-7
+    /// Supported API versions: 2-6
     pub topic_name: super::TopicName,
 
     /// The unique topic ID.
     /// 
-    /// Supported API versions: 5-7
+    /// Supported API versions: 5-6
     pub topic_id: Uuid,
 
     /// The state of each partition
     /// 
-    /// Supported API versions: 2-7
+    /// Supported API versions: 2-6
     pub partition_states: Vec<LeaderAndIsrPartitionState>,
 
     /// Other tagged fields
@@ -478,26 +478,26 @@ impl Default for LeaderAndIsrTopicState {
 }
 
 impl Message for LeaderAndIsrTopicState {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 7 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 6 };
 }
 
-/// Valid versions: 0-7
+/// Valid versions: 0-6
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct LeaderAndIsrLiveLeader {
     /// The leader's broker ID.
     /// 
-    /// Supported API versions: 0-7
+    /// Supported API versions: 0-6
     pub broker_id: super::BrokerId,
 
     /// The leader's hostname.
     /// 
-    /// Supported API versions: 0-7
+    /// Supported API versions: 0-6
     pub host_name: StrBytes,
 
     /// The leader's port.
     /// 
-    /// Supported API versions: 0-7
+    /// Supported API versions: 0-6
     pub port: i32,
 
     /// Other tagged fields
@@ -597,36 +597,31 @@ impl Default for LeaderAndIsrLiveLeader {
 }
 
 impl Message for LeaderAndIsrLiveLeader {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 7 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 6 };
 }
 
-/// Valid versions: 0-7
+/// Valid versions: 0-6
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct LeaderAndIsrRequest {
     /// The current controller ID.
     /// 
-    /// Supported API versions: 0-7
+    /// Supported API versions: 0-6
     pub controller_id: super::BrokerId,
-
-    /// If KRaft controller id is used during migration. See KIP-866
-    /// 
-    /// Supported API versions: 7
-    pub is_k_raft_controller: bool,
 
     /// The current controller epoch.
     /// 
-    /// Supported API versions: 0-7
+    /// Supported API versions: 0-6
     pub controller_epoch: i32,
 
     /// The current broker epoch.
     /// 
-    /// Supported API versions: 2-7
+    /// Supported API versions: 2-6
     pub broker_epoch: i64,
 
     /// The type that indicates whether all topics are included in the request
     /// 
-    /// Supported API versions: 5-7
+    /// Supported API versions: 5-6
     pub _type: i8,
 
     /// The state of each partition, in a v0 or v1 message.
@@ -636,12 +631,12 @@ pub struct LeaderAndIsrRequest {
 
     /// Each topic.
     /// 
-    /// Supported API versions: 2-7
+    /// Supported API versions: 2-6
     pub topic_states: Vec<LeaderAndIsrTopicState>,
 
     /// The current live leaders.
     /// 
-    /// Supported API versions: 0-7
+    /// Supported API versions: 0-6
     pub live_leaders: Vec<LeaderAndIsrLiveLeader>,
 
     /// Other tagged fields
@@ -659,13 +654,6 @@ impl Builder for LeaderAndIsrRequest {
 impl Encodable for LeaderAndIsrRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.controller_id)?;
-        if version >= 7 {
-            types::Boolean.encode(buf, &self.is_k_raft_controller)?;
-        } else {
-            if self.is_k_raft_controller {
-                return Err(EncodeError)
-            }
-        }
         types::Int32.encode(buf, &self.controller_epoch)?;
         if version >= 2 {
             types::Int64.encode(buf, &self.broker_epoch)?;
@@ -715,13 +703,6 @@ impl Encodable for LeaderAndIsrRequest {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.controller_id)?;
-        if version >= 7 {
-            total_size += types::Boolean.compute_size(&self.is_k_raft_controller)?;
-        } else {
-            if self.is_k_raft_controller {
-                return Err(EncodeError)
-            }
-        }
         total_size += types::Int32.compute_size(&self.controller_epoch)?;
         if version >= 2 {
             total_size += types::Int64.compute_size(&self.broker_epoch)?;
@@ -773,11 +754,6 @@ impl Encodable for LeaderAndIsrRequest {
 impl Decodable for LeaderAndIsrRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let controller_id = types::Int32.decode(buf)?;
-        let is_k_raft_controller = if version >= 7 {
-            types::Boolean.decode(buf)?
-        } else {
-            false
-        };
         let controller_epoch = types::Int32.decode(buf)?;
         let broker_epoch = if version >= 2 {
             types::Int64.decode(buf)?
@@ -821,7 +797,6 @@ impl Decodable for LeaderAndIsrRequest {
         }
         Ok(Self {
             controller_id,
-            is_k_raft_controller,
             controller_epoch,
             broker_epoch,
             _type,
@@ -837,7 +812,6 @@ impl Default for LeaderAndIsrRequest {
     fn default() -> Self {
         Self {
             controller_id: (0).into(),
-            is_k_raft_controller: false,
             controller_epoch: 0,
             broker_epoch: -1,
             _type: 0,
@@ -850,7 +824,7 @@ impl Default for LeaderAndIsrRequest {
 }
 
 impl Message for LeaderAndIsrRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 7 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 6 };
 }
 
 impl HeaderVersion for LeaderAndIsrRequest {
