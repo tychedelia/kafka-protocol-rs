@@ -385,7 +385,7 @@ impl RecordBatchDecoder {
     }
     fn decode_batch<B: ByteBuf>(buf: &mut B, records: &mut Vec<Record>) -> Result<(), DecodeError> {
         let version = buf.try_peek_bytes(MAGIC_BYTE_OFFSET..(MAGIC_BYTE_OFFSET+1))?[0] as i8;
-        info!("Decoding record batch (version: {})", version);
+        debug!("Decoding record batch (version: {})", version);
         match version {
             0..=1 => Record::decode_legacy(buf, version, records),
             2 => Self::decode_new_batch(buf, version, records),
@@ -427,7 +427,7 @@ impl RecordBatchDecoder {
         // Magic byte
         let magic: i8 = types::Int8.decode(buf)?;
         if magic != version {
-            error!("Version mismtach ({} != {})", magic, version);
+            error!("Version mismatch ({} != {})", magic, version);
             return Err(DecodeError);
         }
 
@@ -756,7 +756,7 @@ impl Record {
         // Magic
         let magic: i8 = types::Int8.decode(buf)?;
         if magic != version {
-            error!("Version mismtach ({} != {})", magic, version);
+            error!("Version mismatch ({} != {})", magic, version);
             return Err(DecodeError);
         }
 
