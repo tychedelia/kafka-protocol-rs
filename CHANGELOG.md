@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.50
+
+Clarify versioning support for upstream Kafka, tracking the latest Kafka
+stable release. Improve docs.
+
+#### Enhancements
+
+- `Builder::builder` trait for retrieving builder instances from messages
+without requiring extra builder imports.
+- `#[non_exhaustive]` added to all items to ensure forward compatability
+with protocol upgrades.
+
 ## v0.4.0
 
 - Add utilities for dealing with response error codes.
