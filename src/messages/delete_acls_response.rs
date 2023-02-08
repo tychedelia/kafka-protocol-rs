@@ -13,60 +13,69 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
-/// Valid versions: 0-2
+/// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DeleteAclsMatchingAcl {
     /// The deletion error code, or 0 if the deletion succeeded.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub error_code: i16,
 
     /// The deletion error message, or null if the deletion succeeded.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub error_message: Option<StrBytes>,
 
     /// The ACL resource type.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub resource_type: i8,
 
     /// The ACL resource name.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub resource_name: StrBytes,
 
     /// The ACL resource pattern type.
     /// 
-    /// Supported API versions: 1-2
+    /// Supported API versions: 1-3
     pub pattern_type: i8,
 
     /// The ACL principal.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub principal: StrBytes,
 
     /// The ACL host.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub host: StrBytes,
 
     /// The ACL operation.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub operation: i8,
 
     /// The ACL permission type.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub permission_type: i8,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DeleteAclsMatchingAcl {
+    type Builder = DeleteAclsMatchingAclBuilder;
+
+    fn builder() -> Self::Builder{
+        DeleteAclsMatchingAclBuilder::default()
+    }
 }
 
 impl Encodable for DeleteAclsMatchingAcl {
@@ -236,29 +245,38 @@ impl Default for DeleteAclsMatchingAcl {
 }
 
 impl Message for DeleteAclsMatchingAcl {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
 }
 
-/// Valid versions: 0-2
+/// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DeleteAclsFilterResult {
     /// The error code, or 0 if the filter succeeded.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub error_code: i16,
 
     /// The error message, or null if the filter succeeded.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub error_message: Option<StrBytes>,
 
     /// The ACLs which matched this filter.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub matching_acls: Vec<DeleteAclsMatchingAcl>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DeleteAclsFilterResult {
+    type Builder = DeleteAclsFilterResultBuilder;
+
+    fn builder() -> Self::Builder{
+        DeleteAclsFilterResultBuilder::default()
+    }
 }
 
 impl Encodable for DeleteAclsFilterResult {
@@ -358,24 +376,33 @@ impl Default for DeleteAclsFilterResult {
 }
 
 impl Message for DeleteAclsFilterResult {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
 }
 
-/// Valid versions: 0-2
+/// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DeleteAclsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub throttle_time_ms: i32,
 
     /// The results for each filter.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub filter_results: Vec<DeleteAclsFilterResult>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DeleteAclsResponse {
+    type Builder = DeleteAclsResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        DeleteAclsResponseBuilder::default()
+    }
 }
 
 impl Encodable for DeleteAclsResponse {
@@ -458,7 +485,7 @@ impl Default for DeleteAclsResponse {
 }
 
 impl Message for DeleteAclsResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
 }
 
 impl HeaderVersion for DeleteAclsResponse {

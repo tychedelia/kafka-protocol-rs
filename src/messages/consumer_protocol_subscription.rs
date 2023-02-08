@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-1
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct TopicPartition {
     /// 
@@ -25,6 +26,14 @@ pub struct TopicPartition {
     /// Supported API versions: 1
     pub partitions: Vec<i32>,
 
+}
+
+impl Builder for TopicPartition {
+    type Builder = TopicPartitionBuilder;
+
+    fn builder() -> Self::Builder{
+        TopicPartitionBuilder::default()
+    }
 }
 
 impl MapEncodable for TopicPartition {
@@ -100,6 +109,7 @@ impl Message for TopicPartition {
 }
 
 /// Valid versions: 0-1
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ConsumerProtocolSubscription {
     /// 
@@ -117,6 +127,14 @@ pub struct ConsumerProtocolSubscription {
     /// Supported API versions: 1
     pub owned_partitions: indexmap::IndexMap<super::TopicName, TopicPartition>,
 
+}
+
+impl Builder for ConsumerProtocolSubscription {
+    type Builder = ConsumerProtocolSubscriptionBuilder;
+
+    fn builder() -> Self::Builder{
+        ConsumerProtocolSubscriptionBuilder::default()
+    }
 }
 
 impl Encodable for ConsumerProtocolSubscription {

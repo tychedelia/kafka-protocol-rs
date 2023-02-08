@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-7
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct CreatableTopicConfigs {
     /// The configuration name.
@@ -47,6 +48,14 @@ pub struct CreatableTopicConfigs {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for CreatableTopicConfigs {
+    type Builder = CreatableTopicConfigsBuilder;
+
+    fn builder() -> Self::Builder{
+        CreatableTopicConfigsBuilder::default()
+    }
 }
 
 impl Encodable for CreatableTopicConfigs {
@@ -208,6 +217,7 @@ impl Message for CreatableTopicConfigs {
 }
 
 /// Valid versions: 0-7
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct CreatableTopicResult {
     /// The unique topic ID
@@ -247,6 +257,14 @@ pub struct CreatableTopicResult {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for CreatableTopicResult {
+    type Builder = CreatableTopicResultBuilder;
+
+    fn builder() -> Self::Builder{
+        CreatableTopicResultBuilder::default()
+    }
 }
 
 impl MapEncodable for CreatableTopicResult {
@@ -446,6 +464,7 @@ impl Message for CreatableTopicResult {
 }
 
 /// Valid versions: 0-7
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct CreateTopicsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
@@ -460,6 +479,14 @@ pub struct CreateTopicsResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for CreateTopicsResponse {
+    type Builder = CreateTopicsResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        CreateTopicsResponseBuilder::default()
+    }
 }
 
 impl Encodable for CreateTopicsResponse {

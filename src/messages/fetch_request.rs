@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-13
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct FetchPartition {
     /// The partition index.
@@ -52,6 +53,14 @@ pub struct FetchPartition {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for FetchPartition {
+    type Builder = FetchPartitionBuilder;
+
+    fn builder() -> Self::Builder{
+        FetchPartitionBuilder::default()
+    }
 }
 
 impl Encodable for FetchPartition {
@@ -178,6 +187,7 @@ impl Message for FetchPartition {
 }
 
 /// Valid versions: 0-13
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct FetchTopic {
     /// The name of the topic to fetch.
@@ -197,6 +207,14 @@ pub struct FetchTopic {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for FetchTopic {
+    type Builder = FetchTopicBuilder;
+
+    fn builder() -> Self::Builder{
+        FetchTopicBuilder::default()
+    }
 }
 
 impl Encodable for FetchTopic {
@@ -316,6 +334,7 @@ impl Message for FetchTopic {
 }
 
 /// Valid versions: 0-13
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ForgottenTopic {
     /// The topic name.
@@ -335,6 +354,14 @@ pub struct ForgottenTopic {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for ForgottenTopic {
+    type Builder = ForgottenTopicBuilder;
+
+    fn builder() -> Self::Builder{
+        ForgottenTopicBuilder::default()
+    }
 }
 
 impl Encodable for ForgottenTopic {
@@ -470,6 +497,7 @@ impl Message for ForgottenTopic {
 }
 
 /// Valid versions: 0-13
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct FetchRequest {
     /// The clusterId if known. This is used to validate metadata fetches prior to broker registration.
@@ -529,6 +557,14 @@ pub struct FetchRequest {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for FetchRequest {
+    type Builder = FetchRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        FetchRequestBuilder::default()
+    }
 }
 
 impl Encodable for FetchRequest {

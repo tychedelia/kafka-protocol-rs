@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct Voter {
     /// 
@@ -27,6 +28,14 @@ pub struct Voter {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for Voter {
+    type Builder = VoterBuilder;
+
+    fn builder() -> Self::Builder{
+        VoterBuilder::default()
+    }
 }
 
 impl Encodable for Voter {
@@ -90,6 +99,7 @@ impl Message for Voter {
 }
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct LeaderChangeMessage {
     /// The version of the leader change message
@@ -114,6 +124,14 @@ pub struct LeaderChangeMessage {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for LeaderChangeMessage {
+    type Builder = LeaderChangeMessageBuilder;
+
+    fn builder() -> Self::Builder{
+        LeaderChangeMessageBuilder::default()
+    }
 }
 
 impl Encodable for LeaderChangeMessage {

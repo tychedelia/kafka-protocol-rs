@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-7
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ListOffsetsPartition {
     /// The partition index.
@@ -42,6 +43,14 @@ pub struct ListOffsetsPartition {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for ListOffsetsPartition {
+    type Builder = ListOffsetsPartitionBuilder;
+
+    fn builder() -> Self::Builder{
+        ListOffsetsPartitionBuilder::default()
+    }
 }
 
 impl Encodable for ListOffsetsPartition {
@@ -150,6 +159,7 @@ impl Message for ListOffsetsPartition {
 }
 
 /// Valid versions: 0-7
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ListOffsetsTopic {
     /// The topic name.
@@ -164,6 +174,14 @@ pub struct ListOffsetsTopic {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for ListOffsetsTopic {
+    type Builder = ListOffsetsTopicBuilder;
+
+    fn builder() -> Self::Builder{
+        ListOffsetsTopicBuilder::default()
+    }
 }
 
 impl Encodable for ListOffsetsTopic {
@@ -262,6 +280,7 @@ impl Message for ListOffsetsTopic {
 }
 
 /// Valid versions: 0-7
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ListOffsetsRequest {
     /// The broker ID of the requestor, or -1 if this request is being made by a normal consumer.
@@ -281,6 +300,14 @@ pub struct ListOffsetsRequest {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for ListOffsetsRequest {
+    type Builder = ListOffsetsRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        ListOffsetsRequestBuilder::default()
+    }
 }
 
 impl Encodable for ListOffsetsRequest {

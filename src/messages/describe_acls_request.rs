@@ -13,50 +13,59 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
-/// Valid versions: 0-2
+/// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DescribeAclsRequest {
     /// The resource type.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub resource_type_filter: i8,
 
     /// The resource name, or null to match any resource name.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub resource_name_filter: Option<StrBytes>,
 
     /// The resource pattern to match.
     /// 
-    /// Supported API versions: 1-2
+    /// Supported API versions: 1-3
     pub pattern_type_filter: i8,
 
     /// The principal to match, or null to match any principal.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub principal_filter: Option<StrBytes>,
 
     /// The host to match, or null to match any host.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub host_filter: Option<StrBytes>,
 
     /// The operation to match.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub operation: i8,
 
     /// The permission type to match.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub permission_type: i8,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DescribeAclsRequest {
+    type Builder = DescribeAclsRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        DescribeAclsRequestBuilder::default()
+    }
 }
 
 impl Encodable for DescribeAclsRequest {
@@ -204,7 +213,7 @@ impl Default for DescribeAclsRequest {
 }
 
 impl Message for DescribeAclsRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
 }
 
 impl HeaderVersion for DescribeAclsRequest {

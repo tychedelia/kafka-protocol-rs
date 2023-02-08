@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-4
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct InitProducerIdRequest {
     /// The transactional id, or null if the producer is not transactional.
@@ -42,6 +43,14 @@ pub struct InitProducerIdRequest {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for InitProducerIdRequest {
+    type Builder = InitProducerIdRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        InitProducerIdRequestBuilder::default()
+    }
 }
 
 impl Encodable for InitProducerIdRequest {

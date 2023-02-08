@@ -13,50 +13,59 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
-/// Valid versions: 0-2
+/// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DeleteAclsFilter {
     /// The resource type.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub resource_type_filter: i8,
 
     /// The resource name.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub resource_name_filter: Option<StrBytes>,
 
     /// The pattern type.
     /// 
-    /// Supported API versions: 1-2
+    /// Supported API versions: 1-3
     pub pattern_type_filter: i8,
 
     /// The principal filter, or null to accept all principals.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub principal_filter: Option<StrBytes>,
 
     /// The host filter, or null to accept all hosts.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub host_filter: Option<StrBytes>,
 
     /// The ACL operation.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub operation: i8,
 
     /// The permission type.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub permission_type: i8,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DeleteAclsFilter {
+    type Builder = DeleteAclsFilterBuilder;
+
+    fn builder() -> Self::Builder{
+        DeleteAclsFilterBuilder::default()
+    }
 }
 
 impl Encodable for DeleteAclsFilter {
@@ -204,19 +213,28 @@ impl Default for DeleteAclsFilter {
 }
 
 impl Message for DeleteAclsFilter {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
 }
 
-/// Valid versions: 0-2
+/// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DeleteAclsRequest {
     /// The filters to use when deleting ACLs.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub filters: Vec<DeleteAclsFilter>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DeleteAclsRequest {
+    type Builder = DeleteAclsRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        DeleteAclsRequestBuilder::default()
+    }
 }
 
 impl Encodable for DeleteAclsRequest {
@@ -294,7 +312,7 @@ impl Default for DeleteAclsRequest {
 }
 
 impl Message for DeleteAclsRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
 }
 
 impl HeaderVersion for DeleteAclsRequest {

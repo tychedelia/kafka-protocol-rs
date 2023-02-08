@@ -13,25 +13,34 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
-/// Valid versions: 0-2
+/// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DescribeDelegationTokenOwner {
     /// The owner principal type.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub principal_type: StrBytes,
 
     /// The owner principal name.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub principal_name: StrBytes,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DescribeDelegationTokenOwner {
+    type Builder = DescribeDelegationTokenOwnerBuilder;
+
+    fn builder() -> Self::Builder{
+        DescribeDelegationTokenOwnerBuilder::default()
+    }
 }
 
 impl Encodable for DescribeDelegationTokenOwner {
@@ -126,19 +135,28 @@ impl Default for DescribeDelegationTokenOwner {
 }
 
 impl Message for DescribeDelegationTokenOwner {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
 }
 
-/// Valid versions: 0-2
+/// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DescribeDelegationTokenRequest {
     /// Each owner that we want to describe delegation tokens for, or null to describe all tokens.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub owners: Option<Vec<DescribeDelegationTokenOwner>>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DescribeDelegationTokenRequest {
+    type Builder = DescribeDelegationTokenRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        DescribeDelegationTokenRequestBuilder::default()
+    }
 }
 
 impl Encodable for DescribeDelegationTokenRequest {
@@ -216,7 +234,7 @@ impl Default for DescribeDelegationTokenRequest {
 }
 
 impl Message for DescribeDelegationTokenRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
 }
 
 impl HeaderVersion for DescribeDelegationTokenRequest {

@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-7
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ListOffsetsPartitionResponse {
     /// The partition index.
@@ -52,6 +53,14 @@ pub struct ListOffsetsPartitionResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for ListOffsetsPartitionResponse {
+    type Builder = ListOffsetsPartitionResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        ListOffsetsPartitionResponseBuilder::default()
+    }
 }
 
 impl Encodable for ListOffsetsPartitionResponse {
@@ -210,6 +219,7 @@ impl Message for ListOffsetsPartitionResponse {
 }
 
 /// Valid versions: 0-7
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ListOffsetsTopicResponse {
     /// The topic name
@@ -224,6 +234,14 @@ pub struct ListOffsetsTopicResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for ListOffsetsTopicResponse {
+    type Builder = ListOffsetsTopicResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        ListOffsetsTopicResponseBuilder::default()
+    }
 }
 
 impl Encodable for ListOffsetsTopicResponse {
@@ -322,6 +340,7 @@ impl Message for ListOffsetsTopicResponse {
 }
 
 /// Valid versions: 0-7
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ListOffsetsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
@@ -336,6 +355,14 @@ pub struct ListOffsetsResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for ListOffsetsResponse {
+    type Builder = ListOffsetsResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        ListOffsetsResponseBuilder::default()
+    }
 }
 
 impl Encodable for ListOffsetsResponse {

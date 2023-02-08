@@ -16,7 +16,7 @@
 
 #### Enhancements:
 
-- Add derrive builder for all messages.
+- Add derive builder for all messages.
 
 ## v0.1.0
 

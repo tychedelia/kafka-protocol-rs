@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct UserName {
     /// The user name.
@@ -27,6 +28,14 @@ pub struct UserName {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for UserName {
+    type Builder = UserNameBuilder;
+
+    fn builder() -> Self::Builder{
+        UserNameBuilder::default()
+    }
 }
 
 impl Encodable for UserName {
@@ -90,6 +99,7 @@ impl Message for UserName {
 }
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DescribeUserScramCredentialsRequest {
     /// The users to describe, or null/empty to describe all users.
@@ -99,6 +109,14 @@ pub struct DescribeUserScramCredentialsRequest {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DescribeUserScramCredentialsRequest {
+    type Builder = DescribeUserScramCredentialsRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        DescribeUserScramCredentialsRequestBuilder::default()
+    }
 }
 
 impl Encodable for DescribeUserScramCredentialsRequest {

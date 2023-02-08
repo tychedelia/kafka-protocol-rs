@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-7
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct UpdateMetadataPartitionState {
     /// In older versions of this RPC, the topic name.
@@ -67,6 +68,14 @@ pub struct UpdateMetadataPartitionState {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for UpdateMetadataPartitionState {
+    type Builder = UpdateMetadataPartitionStateBuilder;
+
+    fn builder() -> Self::Builder{
+        UpdateMetadataPartitionStateBuilder::default()
+    }
 }
 
 impl Encodable for UpdateMetadataPartitionState {
@@ -228,6 +237,7 @@ impl Message for UpdateMetadataPartitionState {
 }
 
 /// Valid versions: 0-7
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct UpdateMetadataTopicState {
     /// The topic name.
@@ -247,6 +257,14 @@ pub struct UpdateMetadataTopicState {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for UpdateMetadataTopicState {
+    type Builder = UpdateMetadataTopicStateBuilder;
+
+    fn builder() -> Self::Builder{
+        UpdateMetadataTopicStateBuilder::default()
+    }
 }
 
 impl Encodable for UpdateMetadataTopicState {
@@ -390,6 +408,7 @@ impl Message for UpdateMetadataTopicState {
 }
 
 /// Valid versions: 0-7
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct UpdateMetadataEndpoint {
     /// The port of this endpoint
@@ -414,6 +433,14 @@ pub struct UpdateMetadataEndpoint {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for UpdateMetadataEndpoint {
+    type Builder = UpdateMetadataEndpointBuilder;
+
+    fn builder() -> Self::Builder{
+        UpdateMetadataEndpointBuilder::default()
+    }
 }
 
 impl Encodable for UpdateMetadataEndpoint {
@@ -578,6 +605,7 @@ impl Message for UpdateMetadataEndpoint {
 }
 
 /// Valid versions: 0-7
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct UpdateMetadataBroker {
     /// The broker id.
@@ -607,6 +635,14 @@ pub struct UpdateMetadataBroker {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for UpdateMetadataBroker {
+    type Builder = UpdateMetadataBrokerBuilder;
+
+    fn builder() -> Self::Builder{
+        UpdateMetadataBrokerBuilder::default()
+    }
 }
 
 impl Encodable for UpdateMetadataBroker {
@@ -752,6 +788,7 @@ impl Message for UpdateMetadataBroker {
 }
 
 /// Valid versions: 0-7
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct UpdateMetadataRequest {
     /// The controller id.
@@ -786,6 +823,14 @@ pub struct UpdateMetadataRequest {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for UpdateMetadataRequest {
+    type Builder = UpdateMetadataRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        UpdateMetadataRequestBuilder::default()
+    }
 }
 
 impl Encodable for UpdateMetadataRequest {

@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-6
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct LeaderAndIsrPartitionError {
     /// The topic name.
@@ -37,6 +38,14 @@ pub struct LeaderAndIsrPartitionError {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for LeaderAndIsrPartitionError {
+    type Builder = LeaderAndIsrPartitionErrorBuilder;
+
+    fn builder() -> Self::Builder{
+        LeaderAndIsrPartitionErrorBuilder::default()
+    }
 }
 
 impl Encodable for LeaderAndIsrPartitionError {
@@ -136,6 +145,7 @@ impl Message for LeaderAndIsrPartitionError {
 }
 
 /// Valid versions: 0-6
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct LeaderAndIsrTopicError {
     /// Each partition.
@@ -145,6 +155,14 @@ pub struct LeaderAndIsrTopicError {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for LeaderAndIsrTopicError {
+    type Builder = LeaderAndIsrTopicErrorBuilder;
+
+    fn builder() -> Self::Builder{
+        LeaderAndIsrTopicErrorBuilder::default()
+    }
 }
 
 impl MapEncodable for LeaderAndIsrTopicError {
@@ -251,6 +269,7 @@ impl Message for LeaderAndIsrTopicError {
 }
 
 /// Valid versions: 0-6
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct LeaderAndIsrResponse {
     /// The error code, or 0 if there was no error.
@@ -270,6 +289,14 @@ pub struct LeaderAndIsrResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for LeaderAndIsrResponse {
+    type Builder = LeaderAndIsrResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        LeaderAndIsrResponseBuilder::default()
+    }
 }
 
 impl Encodable for LeaderAndIsrResponse {

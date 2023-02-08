@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-5
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct MemberResponse {
     /// The member ID to remove from the group.
@@ -37,6 +38,14 @@ pub struct MemberResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for MemberResponse {
+    type Builder = MemberResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        MemberResponseBuilder::default()
+    }
 }
 
 impl Encodable for MemberResponse {
@@ -188,6 +197,7 @@ impl Message for MemberResponse {
 }
 
 /// Valid versions: 0-5
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct LeaveGroupResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
@@ -207,6 +217,14 @@ pub struct LeaveGroupResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for LeaveGroupResponse {
+    type Builder = LeaveGroupResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        LeaveGroupResponseBuilder::default()
+    }
 }
 
 impl Encodable for LeaveGroupResponse {

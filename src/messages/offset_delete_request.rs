@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetDeleteRequestPartition {
     /// The partition index.
@@ -25,6 +26,14 @@ pub struct OffsetDeleteRequestPartition {
     /// Supported API versions: 0
     pub partition_index: i32,
 
+}
+
+impl Builder for OffsetDeleteRequestPartition {
+    type Builder = OffsetDeleteRequestPartitionBuilder;
+
+    fn builder() -> Self::Builder{
+        OffsetDeleteRequestPartitionBuilder::default()
+    }
 }
 
 impl Encodable for OffsetDeleteRequestPartition {
@@ -63,6 +72,7 @@ impl Message for OffsetDeleteRequestPartition {
 }
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetDeleteRequestTopic {
     /// Each partition to delete offsets for.
@@ -70,6 +80,14 @@ pub struct OffsetDeleteRequestTopic {
     /// Supported API versions: 0
     pub partitions: Vec<OffsetDeleteRequestPartition>,
 
+}
+
+impl Builder for OffsetDeleteRequestTopic {
+    type Builder = OffsetDeleteRequestTopicBuilder;
+
+    fn builder() -> Self::Builder{
+        OffsetDeleteRequestTopicBuilder::default()
+    }
 }
 
 impl MapEncodable for OffsetDeleteRequestTopic {
@@ -113,6 +131,7 @@ impl Message for OffsetDeleteRequestTopic {
 }
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetDeleteRequest {
     /// The unique group identifier.
@@ -125,6 +144,14 @@ pub struct OffsetDeleteRequest {
     /// Supported API versions: 0
     pub topics: indexmap::IndexMap<super::TopicName, OffsetDeleteRequestTopic>,
 
+}
+
+impl Builder for OffsetDeleteRequest {
+    type Builder = OffsetDeleteRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        OffsetDeleteRequestBuilder::default()
+    }
 }
 
 impl Encodable for OffsetDeleteRequest {

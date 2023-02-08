@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-6
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DeleteTopicState {
     /// The topic name
@@ -32,6 +33,14 @@ pub struct DeleteTopicState {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DeleteTopicState {
+    type Builder = DeleteTopicStateBuilder;
+
+    fn builder() -> Self::Builder{
+        DeleteTopicStateBuilder::default()
+    }
 }
 
 impl Encodable for DeleteTopicState {
@@ -138,6 +147,7 @@ impl Message for DeleteTopicState {
 }
 
 /// Valid versions: 0-6
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DeleteTopicsRequest {
     /// The name or topic ID of the topic
@@ -157,6 +167,14 @@ pub struct DeleteTopicsRequest {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DeleteTopicsRequest {
+    type Builder = DeleteTopicsRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        DeleteTopicsRequestBuilder::default()
+    }
 }
 
 impl Encodable for DeleteTopicsRequest {

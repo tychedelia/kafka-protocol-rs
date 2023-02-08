@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-12
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct MetadataRequestTopic {
     /// The topic id.
@@ -32,6 +33,14 @@ pub struct MetadataRequestTopic {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for MetadataRequestTopic {
+    type Builder = MetadataRequestTopicBuilder;
+
+    fn builder() -> Self::Builder{
+        MetadataRequestTopicBuilder::default()
+    }
 }
 
 impl Encodable for MetadataRequestTopic {
@@ -126,6 +135,7 @@ impl Message for MetadataRequestTopic {
 }
 
 /// Valid versions: 0-12
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct MetadataRequest {
     /// The topics to fetch metadata for.
@@ -150,6 +160,14 @@ pub struct MetadataRequest {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for MetadataRequest {
+    type Builder = MetadataRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        MetadataRequestBuilder::default()
+    }
 }
 
 impl Encodable for MetadataRequest {

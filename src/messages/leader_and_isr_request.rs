@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-6
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct LeaderAndIsrPartitionState {
     /// The topic name.  This is only present in v0 or v1.
@@ -50,10 +51,10 @@ pub struct LeaderAndIsrPartitionState {
     /// Supported API versions: 0-6
     pub isr: Vec<super::BrokerId>,
 
-    /// The ZooKeeper version.
+    /// The current epoch for the partition. The epoch is a monotonically increasing value which is incremented after every partition change. (Since the LeaderAndIsr request is only used by the legacy controller, this corresponds to the zkVersion)
     /// 
     /// Supported API versions: 0-6
-    pub zk_version: i32,
+    pub partition_epoch: i32,
 
     /// The replica IDs.
     /// 
@@ -84,6 +85,14 @@ pub struct LeaderAndIsrPartitionState {
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
 }
 
+impl Builder for LeaderAndIsrPartitionState {
+    type Builder = LeaderAndIsrPartitionStateBuilder;
+
+    fn builder() -> Self::Builder{
+        LeaderAndIsrPartitionStateBuilder::default()
+    }
+}
+
 impl Encodable for LeaderAndIsrPartitionState {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version <= 1 {
@@ -98,7 +107,7 @@ impl Encodable for LeaderAndIsrPartitionState {
         } else {
             types::Array(types::Int32).encode(buf, &self.isr)?;
         }
-        types::Int32.encode(buf, &self.zk_version)?;
+        types::Int32.encode(buf, &self.partition_epoch)?;
         if version >= 4 {
             types::CompactArray(types::Int32).encode(buf, &self.replicas)?;
         } else {
@@ -154,7 +163,7 @@ impl Encodable for LeaderAndIsrPartitionState {
         } else {
             total_size += types::Array(types::Int32).compute_size(&self.isr)?;
         }
-        total_size += types::Int32.compute_size(&self.zk_version)?;
+        total_size += types::Int32.compute_size(&self.partition_epoch)?;
         if version >= 4 {
             total_size += types::CompactArray(types::Int32).compute_size(&self.replicas)?;
         } else {
@@ -214,7 +223,7 @@ impl Decodable for LeaderAndIsrPartitionState {
         } else {
             types::Array(types::Int32).decode(buf)?
         };
-        let zk_version = types::Int32.decode(buf)?;
+        let partition_epoch = types::Int32.decode(buf)?;
         let replicas = if version >= 4 {
             types::CompactArray(types::Int32).decode(buf)?
         } else {
@@ -266,7 +275,7 @@ impl Decodable for LeaderAndIsrPartitionState {
             leader,
             leader_epoch,
             isr,
-            zk_version,
+            partition_epoch,
             replicas,
             adding_replicas,
             removing_replicas,
@@ -286,7 +295,7 @@ impl Default for LeaderAndIsrPartitionState {
             leader: (0).into(),
             leader_epoch: 0,
             isr: Default::default(),
-            zk_version: 0,
+            partition_epoch: 0,
             replicas: Default::default(),
             adding_replicas: Default::default(),
             removing_replicas: Default::default(),
@@ -302,6 +311,7 @@ impl Message for LeaderAndIsrPartitionState {
 }
 
 /// Valid versions: 0-6
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct LeaderAndIsrTopicState {
     /// The topic name.
@@ -321,6 +331,14 @@ pub struct LeaderAndIsrTopicState {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for LeaderAndIsrTopicState {
+    type Builder = LeaderAndIsrTopicStateBuilder;
+
+    fn builder() -> Self::Builder{
+        LeaderAndIsrTopicStateBuilder::default()
+    }
 }
 
 impl Encodable for LeaderAndIsrTopicState {
@@ -464,6 +482,7 @@ impl Message for LeaderAndIsrTopicState {
 }
 
 /// Valid versions: 0-6
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct LeaderAndIsrLiveLeader {
     /// The leader's broker ID.
@@ -483,6 +502,14 @@ pub struct LeaderAndIsrLiveLeader {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for LeaderAndIsrLiveLeader {
+    type Builder = LeaderAndIsrLiveLeaderBuilder;
+
+    fn builder() -> Self::Builder{
+        LeaderAndIsrLiveLeaderBuilder::default()
+    }
 }
 
 impl Encodable for LeaderAndIsrLiveLeader {
@@ -574,6 +601,7 @@ impl Message for LeaderAndIsrLiveLeader {
 }
 
 /// Valid versions: 0-6
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct LeaderAndIsrRequest {
     /// The current controller ID.
@@ -613,6 +641,14 @@ pub struct LeaderAndIsrRequest {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for LeaderAndIsrRequest {
+    type Builder = LeaderAndIsrRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        LeaderAndIsrRequestBuilder::default()
+    }
 }
 
 impl Encodable for LeaderAndIsrRequest {

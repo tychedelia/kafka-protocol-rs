@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-2
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct PartitionResult {
     /// The partition id
@@ -37,6 +38,14 @@ pub struct PartitionResult {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for PartitionResult {
+    type Builder = PartitionResultBuilder;
+
+    fn builder() -> Self::Builder{
+        PartitionResultBuilder::default()
+    }
 }
 
 impl Encodable for PartitionResult {
@@ -128,6 +137,7 @@ impl Message for PartitionResult {
 }
 
 /// Valid versions: 0-2
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ReplicaElectionResult {
     /// The topic name
@@ -142,6 +152,14 @@ pub struct ReplicaElectionResult {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for ReplicaElectionResult {
+    type Builder = ReplicaElectionResultBuilder;
+
+    fn builder() -> Self::Builder{
+        ReplicaElectionResultBuilder::default()
+    }
 }
 
 impl Encodable for ReplicaElectionResult {
@@ -240,6 +258,7 @@ impl Message for ReplicaElectionResult {
 }
 
 /// Valid versions: 0-2
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ElectLeadersResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
@@ -259,6 +278,14 @@ pub struct ElectLeadersResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for ElectLeadersResponse {
+    type Builder = ElectLeadersResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        ElectLeadersResponseBuilder::default()
+    }
 }
 
 impl Encodable for ElectLeadersResponse {

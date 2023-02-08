@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-13
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct EpochEndOffset {
     /// 
@@ -32,6 +33,14 @@ pub struct EpochEndOffset {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for EpochEndOffset {
+    type Builder = EpochEndOffsetBuilder;
+
+    fn builder() -> Self::Builder{
+        EpochEndOffsetBuilder::default()
+    }
 }
 
 impl Encodable for EpochEndOffset {
@@ -138,6 +147,7 @@ impl Message for EpochEndOffset {
 }
 
 /// Valid versions: 0-13
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct LeaderIdAndEpoch {
     /// The ID of the current leader or -1 if the leader is unknown.
@@ -152,6 +162,14 @@ pub struct LeaderIdAndEpoch {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for LeaderIdAndEpoch {
+    type Builder = LeaderIdAndEpochBuilder;
+
+    fn builder() -> Self::Builder{
+        LeaderIdAndEpochBuilder::default()
+    }
 }
 
 impl Encodable for LeaderIdAndEpoch {
@@ -258,6 +276,7 @@ impl Message for LeaderIdAndEpoch {
 }
 
 /// Valid versions: 0-13
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct SnapshotId {
     /// 
@@ -272,6 +291,14 @@ pub struct SnapshotId {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for SnapshotId {
+    type Builder = SnapshotIdBuilder;
+
+    fn builder() -> Self::Builder{
+        SnapshotIdBuilder::default()
+    }
 }
 
 impl Encodable for SnapshotId {
@@ -346,6 +373,7 @@ impl Message for SnapshotId {
 }
 
 /// Valid versions: 0-13
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct AbortedTransaction {
     /// The producer id associated with the aborted transaction.
@@ -360,6 +388,14 @@ pub struct AbortedTransaction {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for AbortedTransaction {
+    type Builder = AbortedTransactionBuilder;
+
+    fn builder() -> Self::Builder{
+        AbortedTransactionBuilder::default()
+    }
 }
 
 impl Encodable for AbortedTransaction {
@@ -466,6 +502,7 @@ impl Message for AbortedTransaction {
 }
 
 /// Valid versions: 0-13
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct PartitionData {
     /// The partition index.
@@ -525,6 +562,14 @@ pub struct PartitionData {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for PartitionData {
+    type Builder = PartitionDataBuilder;
+
+    fn builder() -> Self::Builder{
+        PartitionDataBuilder::default()
+    }
 }
 
 impl Encodable for PartitionData {
@@ -793,6 +838,7 @@ impl Message for PartitionData {
 }
 
 /// Valid versions: 0-13
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct FetchableTopicResponse {
     /// The topic name.
@@ -812,6 +858,14 @@ pub struct FetchableTopicResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for FetchableTopicResponse {
+    type Builder = FetchableTopicResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        FetchableTopicResponseBuilder::default()
+    }
 }
 
 impl Encodable for FetchableTopicResponse {
@@ -931,6 +985,7 @@ impl Message for FetchableTopicResponse {
 }
 
 /// Valid versions: 0-13
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct FetchResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
@@ -955,6 +1010,14 @@ pub struct FetchResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for FetchResponse {
+    type Builder = FetchResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        FetchResponseBuilder::default()
+    }
 }
 
 impl Encodable for FetchResponse {

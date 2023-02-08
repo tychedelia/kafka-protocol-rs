@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ApiVersion {
     /// The minimum supported version, inclusive.
@@ -32,6 +33,14 @@ pub struct ApiVersion {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for ApiVersion {
+    type Builder = ApiVersionBuilder;
+
+    fn builder() -> Self::Builder{
+        ApiVersionBuilder::default()
+    }
 }
 
 impl MapEncodable for ApiVersion {
@@ -111,6 +120,7 @@ impl Message for ApiVersion {
 }
 
 /// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct SupportedFeatureKey {
     /// The minimum supported version for the feature.
@@ -125,6 +135,14 @@ pub struct SupportedFeatureKey {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for SupportedFeatureKey {
+    type Builder = SupportedFeatureKeyBuilder;
+
+    fn builder() -> Self::Builder{
+        SupportedFeatureKeyBuilder::default()
+    }
 }
 
 impl MapEncodable for SupportedFeatureKey {
@@ -252,6 +270,7 @@ impl Message for SupportedFeatureKey {
 }
 
 /// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct FinalizedFeatureKey {
     /// The cluster-wide finalized max version level for the feature.
@@ -266,6 +285,14 @@ pub struct FinalizedFeatureKey {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for FinalizedFeatureKey {
+    type Builder = FinalizedFeatureKeyBuilder;
+
+    fn builder() -> Self::Builder{
+        FinalizedFeatureKeyBuilder::default()
+    }
 }
 
 impl MapEncodable for FinalizedFeatureKey {
@@ -393,6 +420,7 @@ impl Message for FinalizedFeatureKey {
 }
 
 /// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ApiVersionsResponse {
     /// The top-level error code.
@@ -427,6 +455,14 @@ pub struct ApiVersionsResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for ApiVersionsResponse {
+    type Builder = ApiVersionsResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        ApiVersionsResponseBuilder::default()
+    }
 }
 
 impl Encodable for ApiVersionsResponse {

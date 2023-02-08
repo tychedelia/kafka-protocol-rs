@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct CredentialInfo {
     /// The SCRAM mechanism.
@@ -32,6 +33,14 @@ pub struct CredentialInfo {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for CredentialInfo {
+    type Builder = CredentialInfoBuilder;
+
+    fn builder() -> Self::Builder{
+        CredentialInfoBuilder::default()
+    }
 }
 
 impl Encodable for CredentialInfo {
@@ -100,6 +109,7 @@ impl Message for CredentialInfo {
 }
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DescribeUserScramCredentialsResult {
     /// The user name.
@@ -124,6 +134,14 @@ pub struct DescribeUserScramCredentialsResult {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DescribeUserScramCredentialsResult {
+    type Builder = DescribeUserScramCredentialsResultBuilder;
+
+    fn builder() -> Self::Builder{
+        DescribeUserScramCredentialsResultBuilder::default()
+    }
 }
 
 impl Encodable for DescribeUserScramCredentialsResult {
@@ -202,6 +220,7 @@ impl Message for DescribeUserScramCredentialsResult {
 }
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DescribeUserScramCredentialsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
@@ -226,6 +245,14 @@ pub struct DescribeUserScramCredentialsResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DescribeUserScramCredentialsResponse {
+    type Builder = DescribeUserScramCredentialsResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        DescribeUserScramCredentialsResponseBuilder::default()
+    }
 }
 
 impl Encodable for DescribeUserScramCredentialsResponse {

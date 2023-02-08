@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct TopicRequest {
     /// The topic name.
@@ -32,6 +33,14 @@ pub struct TopicRequest {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for TopicRequest {
+    type Builder = TopicRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        TopicRequestBuilder::default()
+    }
 }
 
 impl Encodable for TopicRequest {
@@ -100,6 +109,7 @@ impl Message for TopicRequest {
 }
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DescribeProducersRequest {
     /// 
@@ -109,6 +119,14 @@ pub struct DescribeProducersRequest {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DescribeProducersRequest {
+    type Builder = DescribeProducersRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        DescribeProducersRequestBuilder::default()
+    }
 }
 
 impl Encodable for DescribeProducersRequest {

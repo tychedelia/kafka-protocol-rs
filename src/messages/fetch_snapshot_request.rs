@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct SnapshotId {
     /// 
@@ -32,6 +33,14 @@ pub struct SnapshotId {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for SnapshotId {
+    type Builder = SnapshotIdBuilder;
+
+    fn builder() -> Self::Builder{
+        SnapshotIdBuilder::default()
+    }
 }
 
 impl Encodable for SnapshotId {
@@ -100,6 +109,7 @@ impl Message for SnapshotId {
 }
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct PartitionSnapshot {
     /// The partition index
@@ -124,6 +134,14 @@ pub struct PartitionSnapshot {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for PartitionSnapshot {
+    type Builder = PartitionSnapshotBuilder;
+
+    fn builder() -> Self::Builder{
+        PartitionSnapshotBuilder::default()
+    }
 }
 
 impl Encodable for PartitionSnapshot {
@@ -202,6 +220,7 @@ impl Message for PartitionSnapshot {
 }
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct TopicSnapshot {
     /// The name of the topic to fetch
@@ -216,6 +235,14 @@ pub struct TopicSnapshot {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for TopicSnapshot {
+    type Builder = TopicSnapshotBuilder;
+
+    fn builder() -> Self::Builder{
+        TopicSnapshotBuilder::default()
+    }
 }
 
 impl Encodable for TopicSnapshot {
@@ -284,6 +311,7 @@ impl Message for TopicSnapshot {
 }
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct FetchSnapshotRequest {
     /// The clusterId if known, this is used to validate metadata fetches prior to broker registration
@@ -308,6 +336,14 @@ pub struct FetchSnapshotRequest {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for FetchSnapshotRequest {
+    type Builder = FetchSnapshotRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        FetchSnapshotRequestBuilder::default()
+    }
 }
 
 impl Encodable for FetchSnapshotRequest {

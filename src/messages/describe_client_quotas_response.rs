@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-1
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct EntityData {
     /// The entity type.
@@ -32,6 +33,14 @@ pub struct EntityData {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for EntityData {
+    type Builder = EntityDataBuilder;
+
+    fn builder() -> Self::Builder{
+        EntityDataBuilder::default()
+    }
 }
 
 impl Encodable for EntityData {
@@ -130,6 +139,7 @@ impl Message for EntityData {
 }
 
 /// Valid versions: 0-1
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ValueData {
     /// The quota configuration key.
@@ -144,6 +154,14 @@ pub struct ValueData {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for ValueData {
+    type Builder = ValueDataBuilder;
+
+    fn builder() -> Self::Builder{
+        ValueDataBuilder::default()
+    }
 }
 
 impl Encodable for ValueData {
@@ -230,6 +248,7 @@ impl Message for ValueData {
 }
 
 /// Valid versions: 0-1
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct EntryData {
     /// The quota entity description.
@@ -244,6 +263,14 @@ pub struct EntryData {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for EntryData {
+    type Builder = EntryDataBuilder;
+
+    fn builder() -> Self::Builder{
+        EntryDataBuilder::default()
+    }
 }
 
 impl Encodable for EntryData {
@@ -342,6 +369,7 @@ impl Message for EntryData {
 }
 
 /// Valid versions: 0-1
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DescribeClientQuotasResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
@@ -366,6 +394,14 @@ pub struct DescribeClientQuotasResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DescribeClientQuotasResponse {
+    type Builder = DescribeClientQuotasResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        DescribeClientQuotasResponseBuilder::default()
+    }
 }
 
 impl Encodable for DescribeClientQuotasResponse {

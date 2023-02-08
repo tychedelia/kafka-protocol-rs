@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-5
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct SyncGroupRequestAssignment {
     /// The ID of the member to assign.
@@ -32,6 +33,14 @@ pub struct SyncGroupRequestAssignment {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for SyncGroupRequestAssignment {
+    type Builder = SyncGroupRequestAssignmentBuilder;
+
+    fn builder() -> Self::Builder{
+        SyncGroupRequestAssignmentBuilder::default()
+    }
 }
 
 impl Encodable for SyncGroupRequestAssignment {
@@ -130,6 +139,7 @@ impl Message for SyncGroupRequestAssignment {
 }
 
 /// Valid versions: 0-5
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct SyncGroupRequest {
     /// The unique group identifier.
@@ -169,6 +179,14 @@ pub struct SyncGroupRequest {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for SyncGroupRequest {
+    type Builder = SyncGroupRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        SyncGroupRequestBuilder::default()
+    }
 }
 
 impl Encodable for SyncGroupRequest {

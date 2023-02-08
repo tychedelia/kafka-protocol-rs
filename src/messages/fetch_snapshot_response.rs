@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct SnapshotId {
     /// 
@@ -32,6 +33,14 @@ pub struct SnapshotId {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for SnapshotId {
+    type Builder = SnapshotIdBuilder;
+
+    fn builder() -> Self::Builder{
+        SnapshotIdBuilder::default()
+    }
 }
 
 impl Encodable for SnapshotId {
@@ -100,6 +109,7 @@ impl Message for SnapshotId {
 }
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct LeaderIdAndEpoch {
     /// The ID of the current leader or -1 if the leader is unknown.
@@ -114,6 +124,14 @@ pub struct LeaderIdAndEpoch {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for LeaderIdAndEpoch {
+    type Builder = LeaderIdAndEpochBuilder;
+
+    fn builder() -> Self::Builder{
+        LeaderIdAndEpochBuilder::default()
+    }
 }
 
 impl Encodable for LeaderIdAndEpoch {
@@ -182,6 +200,7 @@ impl Message for LeaderIdAndEpoch {
 }
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct PartitionSnapshot {
     /// The partition index.
@@ -221,6 +240,14 @@ pub struct PartitionSnapshot {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for PartitionSnapshot {
+    type Builder = PartitionSnapshotBuilder;
+
+    fn builder() -> Self::Builder{
+        PartitionSnapshotBuilder::default()
+    }
 }
 
 impl Encodable for PartitionSnapshot {
@@ -345,6 +372,7 @@ impl Message for PartitionSnapshot {
 }
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct TopicSnapshot {
     /// The name of the topic to fetch.
@@ -359,6 +387,14 @@ pub struct TopicSnapshot {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for TopicSnapshot {
+    type Builder = TopicSnapshotBuilder;
+
+    fn builder() -> Self::Builder{
+        TopicSnapshotBuilder::default()
+    }
 }
 
 impl Encodable for TopicSnapshot {
@@ -427,6 +463,7 @@ impl Message for TopicSnapshot {
 }
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct FetchSnapshotResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
@@ -446,6 +483,14 @@ pub struct FetchSnapshotResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for FetchSnapshotResponse {
+    type Builder = FetchSnapshotResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        FetchSnapshotResponseBuilder::default()
+    }
 }
 
 impl Encodable for FetchSnapshotResponse {

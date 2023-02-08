@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-1
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct WritableTxnMarkerTopic {
     /// The topic name.
@@ -32,6 +33,14 @@ pub struct WritableTxnMarkerTopic {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for WritableTxnMarkerTopic {
+    type Builder = WritableTxnMarkerTopicBuilder;
+
+    fn builder() -> Self::Builder{
+        WritableTxnMarkerTopicBuilder::default()
+    }
 }
 
 impl Encodable for WritableTxnMarkerTopic {
@@ -130,6 +139,7 @@ impl Message for WritableTxnMarkerTopic {
 }
 
 /// Valid versions: 0-1
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct WritableTxnMarker {
     /// The current producer ID.
@@ -159,6 +169,14 @@ pub struct WritableTxnMarker {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for WritableTxnMarker {
+    type Builder = WritableTxnMarkerBuilder;
+
+    fn builder() -> Self::Builder{
+        WritableTxnMarkerBuilder::default()
+    }
 }
 
 impl Encodable for WritableTxnMarker {
@@ -260,6 +278,7 @@ impl Message for WritableTxnMarker {
 }
 
 /// Valid versions: 0-1
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct WriteTxnMarkersRequest {
     /// The transaction markers to be written.
@@ -269,6 +288,14 @@ pub struct WriteTxnMarkersRequest {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for WriteTxnMarkersRequest {
+    type Builder = WriteTxnMarkersRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        WriteTxnMarkersRequestBuilder::default()
+    }
 }
 
 impl Encodable for WriteTxnMarkersRequest {

@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-9
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct PartitionProduceData {
     /// The partition index.
@@ -32,6 +33,14 @@ pub struct PartitionProduceData {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for PartitionProduceData {
+    type Builder = PartitionProduceDataBuilder;
+
+    fn builder() -> Self::Builder{
+        PartitionProduceDataBuilder::default()
+    }
 }
 
 impl Encodable for PartitionProduceData {
@@ -118,6 +127,7 @@ impl Message for PartitionProduceData {
 }
 
 /// Valid versions: 0-9
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct TopicProduceData {
     /// Each partition to produce to.
@@ -127,6 +137,14 @@ pub struct TopicProduceData {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for TopicProduceData {
+    type Builder = TopicProduceDataBuilder;
+
+    fn builder() -> Self::Builder{
+        TopicProduceDataBuilder::default()
+    }
 }
 
 impl MapEncodable for TopicProduceData {
@@ -225,6 +243,7 @@ impl Message for TopicProduceData {
 }
 
 /// Valid versions: 0-9
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ProduceRequest {
     /// The transactional ID, or null if the producer is not transactional.
@@ -249,6 +268,14 @@ pub struct ProduceRequest {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for ProduceRequest {
+    type Builder = ProduceRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        ProduceRequestBuilder::default()
+    }
 }
 
 impl Encodable for ProduceRequest {

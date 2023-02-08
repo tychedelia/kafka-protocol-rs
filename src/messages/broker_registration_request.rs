@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct Listener {
     /// The hostname.
@@ -37,6 +38,14 @@ pub struct Listener {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for Listener {
+    type Builder = ListenerBuilder;
+
+    fn builder() -> Self::Builder{
+        ListenerBuilder::default()
+    }
 }
 
 impl MapEncodable for Listener {
@@ -115,6 +124,7 @@ impl Message for Listener {
 }
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct Feature {
     /// The minimum supported feature level.
@@ -129,6 +139,14 @@ pub struct Feature {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for Feature {
+    type Builder = FeatureBuilder;
+
+    fn builder() -> Self::Builder{
+        FeatureBuilder::default()
+    }
 }
 
 impl MapEncodable for Feature {
@@ -202,6 +220,7 @@ impl Message for Feature {
 }
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct BrokerRegistrationRequest {
     /// The broker ID.
@@ -236,6 +255,14 @@ pub struct BrokerRegistrationRequest {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for BrokerRegistrationRequest {
+    type Builder = BrokerRegistrationRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        BrokerRegistrationRequestBuilder::default()
+    }
 }
 
 impl Encodable for BrokerRegistrationRequest {

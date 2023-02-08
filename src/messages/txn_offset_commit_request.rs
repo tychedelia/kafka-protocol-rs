@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct TxnOffsetCommitRequestPartition {
     /// The index of the partition within the topic.
@@ -42,6 +43,14 @@ pub struct TxnOffsetCommitRequestPartition {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for TxnOffsetCommitRequestPartition {
+    type Builder = TxnOffsetCommitRequestPartitionBuilder;
+
+    fn builder() -> Self::Builder{
+        TxnOffsetCommitRequestPartitionBuilder::default()
+    }
 }
 
 impl Encodable for TxnOffsetCommitRequestPartition {
@@ -146,6 +155,7 @@ impl Message for TxnOffsetCommitRequestPartition {
 }
 
 /// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct TxnOffsetCommitRequestTopic {
     /// The topic name.
@@ -160,6 +170,14 @@ pub struct TxnOffsetCommitRequestTopic {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for TxnOffsetCommitRequestTopic {
+    type Builder = TxnOffsetCommitRequestTopicBuilder;
+
+    fn builder() -> Self::Builder{
+        TxnOffsetCommitRequestTopicBuilder::default()
+    }
 }
 
 impl Encodable for TxnOffsetCommitRequestTopic {
@@ -258,6 +276,7 @@ impl Message for TxnOffsetCommitRequestTopic {
 }
 
 /// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct TxnOffsetCommitRequest {
     /// The ID of the transaction.
@@ -302,6 +321,14 @@ pub struct TxnOffsetCommitRequest {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for TxnOffsetCommitRequest {
+    type Builder = TxnOffsetCommitRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        TxnOffsetCommitRequestBuilder::default()
+    }
 }
 
 impl Encodable for TxnOffsetCommitRequest {

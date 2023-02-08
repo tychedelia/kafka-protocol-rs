@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-2
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DeletableGroupResult {
     /// The deletion error, or 0 if the deletion succeeded.
@@ -27,6 +28,14 @@ pub struct DeletableGroupResult {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DeletableGroupResult {
+    type Builder = DeletableGroupResultBuilder;
+
+    fn builder() -> Self::Builder{
+        DeletableGroupResultBuilder::default()
+    }
 }
 
 impl MapEncodable for DeletableGroupResult {
@@ -113,6 +122,7 @@ impl Message for DeletableGroupResult {
 }
 
 /// Valid versions: 0-2
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct DeleteGroupsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
@@ -127,6 +137,14 @@ pub struct DeleteGroupsResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for DeleteGroupsResponse {
+    type Builder = DeleteGroupsResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        DeleteGroupsResponseBuilder::default()
+    }
 }
 
 impl Encodable for DeleteGroupsResponse {

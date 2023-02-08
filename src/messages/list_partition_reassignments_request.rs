@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ListPartitionReassignmentsTopics {
     /// The topic name
@@ -32,6 +33,14 @@ pub struct ListPartitionReassignmentsTopics {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for ListPartitionReassignmentsTopics {
+    type Builder = ListPartitionReassignmentsTopicsBuilder;
+
+    fn builder() -> Self::Builder{
+        ListPartitionReassignmentsTopicsBuilder::default()
+    }
 }
 
 impl Encodable for ListPartitionReassignmentsTopics {
@@ -100,6 +109,7 @@ impl Message for ListPartitionReassignmentsTopics {
 }
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct ListPartitionReassignmentsRequest {
     /// The time in ms to wait for the request to complete.
@@ -114,6 +124,14 @@ pub struct ListPartitionReassignmentsRequest {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for ListPartitionReassignmentsRequest {
+    type Builder = ListPartitionReassignmentsRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        ListPartitionReassignmentsRequestBuilder::default()
+    }
 }
 
 impl Encodable for ListPartitionReassignmentsRequest {

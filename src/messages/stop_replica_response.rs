@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct StopReplicaPartitionError {
     /// The topic name.
@@ -37,6 +38,14 @@ pub struct StopReplicaPartitionError {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for StopReplicaPartitionError {
+    type Builder = StopReplicaPartitionErrorBuilder;
+
+    fn builder() -> Self::Builder{
+        StopReplicaPartitionErrorBuilder::default()
+    }
 }
 
 impl Encodable for StopReplicaPartitionError {
@@ -128,6 +137,7 @@ impl Message for StopReplicaPartitionError {
 }
 
 /// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct StopReplicaResponse {
     /// The top-level error code, or 0 if there was no top-level error.
@@ -142,6 +152,14 @@ pub struct StopReplicaResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for StopReplicaResponse {
+    type Builder = StopReplicaResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        StopReplicaResponseBuilder::default()
+    }
 }
 
 impl Encodable for StopReplicaResponse {

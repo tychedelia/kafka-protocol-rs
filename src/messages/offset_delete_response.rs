@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetDeleteResponsePartition {
     /// The error code, or 0 if there was no error.
@@ -25,6 +26,14 @@ pub struct OffsetDeleteResponsePartition {
     /// Supported API versions: 0
     pub error_code: i16,
 
+}
+
+impl Builder for OffsetDeleteResponsePartition {
+    type Builder = OffsetDeleteResponsePartitionBuilder;
+
+    fn builder() -> Self::Builder{
+        OffsetDeleteResponsePartitionBuilder::default()
+    }
 }
 
 impl MapEncodable for OffsetDeleteResponsePartition {
@@ -68,6 +77,7 @@ impl Message for OffsetDeleteResponsePartition {
 }
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetDeleteResponseTopic {
     /// The responses for each partition in the topic.
@@ -75,6 +85,14 @@ pub struct OffsetDeleteResponseTopic {
     /// Supported API versions: 0
     pub partitions: indexmap::IndexMap<i32, OffsetDeleteResponsePartition>,
 
+}
+
+impl Builder for OffsetDeleteResponseTopic {
+    type Builder = OffsetDeleteResponseTopicBuilder;
+
+    fn builder() -> Self::Builder{
+        OffsetDeleteResponseTopicBuilder::default()
+    }
 }
 
 impl MapEncodable for OffsetDeleteResponseTopic {
@@ -118,6 +136,7 @@ impl Message for OffsetDeleteResponseTopic {
 }
 
 /// Valid versions: 0
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetDeleteResponse {
     /// The top-level error code, or 0 if there was no error.
@@ -135,6 +154,14 @@ pub struct OffsetDeleteResponse {
     /// Supported API versions: 0
     pub topics: indexmap::IndexMap<super::TopicName, OffsetDeleteResponseTopic>,
 
+}
+
+impl Builder for OffsetDeleteResponse {
+    type Builder = OffsetDeleteResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        OffsetDeleteResponseBuilder::default()
+    }
 }
 
 impl Encodable for OffsetDeleteResponse {

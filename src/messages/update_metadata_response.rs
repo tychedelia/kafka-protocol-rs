@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-7
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct UpdateMetadataResponse {
     /// The error code, or 0 if there was no error.
@@ -27,6 +28,14 @@ pub struct UpdateMetadataResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for UpdateMetadataResponse {
+    type Builder = UpdateMetadataResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        UpdateMetadataResponseBuilder::default()
+    }
 }
 
 impl Encodable for UpdateMetadataResponse {

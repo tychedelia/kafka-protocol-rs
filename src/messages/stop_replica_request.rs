@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct StopReplicaPartitionV0 {
     /// The topic name.
@@ -32,6 +33,14 @@ pub struct StopReplicaPartitionV0 {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for StopReplicaPartitionV0 {
+    type Builder = StopReplicaPartitionV0Builder;
+
+    fn builder() -> Self::Builder{
+        StopReplicaPartitionV0Builder::default()
+    }
 }
 
 impl Encodable for StopReplicaPartitionV0 {
@@ -138,6 +147,7 @@ impl Message for StopReplicaPartitionV0 {
 }
 
 /// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct StopReplicaTopicV1 {
     /// The topic name.
@@ -152,6 +162,14 @@ pub struct StopReplicaTopicV1 {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for StopReplicaTopicV1 {
+    type Builder = StopReplicaTopicV1Builder;
+
+    fn builder() -> Self::Builder{
+        StopReplicaTopicV1Builder::default()
+    }
 }
 
 impl Encodable for StopReplicaTopicV1 {
@@ -282,6 +300,7 @@ impl Message for StopReplicaTopicV1 {
 }
 
 /// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct StopReplicaPartitionState {
     /// The partition index.
@@ -301,6 +320,14 @@ pub struct StopReplicaPartitionState {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for StopReplicaPartitionState {
+    type Builder = StopReplicaPartitionStateBuilder;
+
+    fn builder() -> Self::Builder{
+        StopReplicaPartitionStateBuilder::default()
+    }
 }
 
 impl Encodable for StopReplicaPartitionState {
@@ -428,6 +455,7 @@ impl Message for StopReplicaPartitionState {
 }
 
 /// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct StopReplicaTopicState {
     /// The topic name.
@@ -442,6 +470,14 @@ pub struct StopReplicaTopicState {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for StopReplicaTopicState {
+    type Builder = StopReplicaTopicStateBuilder;
+
+    fn builder() -> Self::Builder{
+        StopReplicaTopicStateBuilder::default()
+    }
 }
 
 impl Encodable for StopReplicaTopicState {
@@ -548,6 +584,7 @@ impl Message for StopReplicaTopicState {
 }
 
 /// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct StopReplicaRequest {
     /// The controller id.
@@ -587,6 +624,14 @@ pub struct StopReplicaRequest {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for StopReplicaRequest {
+    type Builder = StopReplicaRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        StopReplicaRequestBuilder::default()
+    }
 }
 
 impl Encodable for StopReplicaRequest {

@@ -13,25 +13,34 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
-/// Valid versions: 0-2
+/// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct AclCreationResult {
     /// The result error, or zero if there was no error.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub error_code: i16,
 
     /// The result message, or null if there was no error.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub error_message: Option<StrBytes>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for AclCreationResult {
+    type Builder = AclCreationResultBuilder;
+
+    fn builder() -> Self::Builder{
+        AclCreationResultBuilder::default()
+    }
 }
 
 impl Encodable for AclCreationResult {
@@ -114,24 +123,33 @@ impl Default for AclCreationResult {
 }
 
 impl Message for AclCreationResult {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
 }
 
-/// Valid versions: 0-2
+/// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct CreateAclsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub throttle_time_ms: i32,
 
     /// The results for each ACL creation.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub results: Vec<AclCreationResult>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for CreateAclsResponse {
+    type Builder = CreateAclsResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        CreateAclsResponseBuilder::default()
+    }
 }
 
 impl Encodable for CreateAclsResponse {
@@ -214,7 +232,7 @@ impl Default for CreateAclsResponse {
 }
 
 impl Message for CreateAclsResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
 }
 
 impl HeaderVersion for CreateAclsResponse {

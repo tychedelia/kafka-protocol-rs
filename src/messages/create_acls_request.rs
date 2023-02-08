@@ -13,50 +13,59 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
-/// Valid versions: 0-2
+/// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct AclCreation {
     /// The type of the resource.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub resource_type: i8,
 
     /// The resource name for the ACL.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub resource_name: StrBytes,
 
     /// The pattern type for the ACL.
     /// 
-    /// Supported API versions: 1-2
+    /// Supported API versions: 1-3
     pub resource_pattern_type: i8,
 
     /// The principal for the ACL.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub principal: StrBytes,
 
     /// The host for the ACL.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub host: StrBytes,
 
     /// The operation type for the ACL (read, write, etc.).
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub operation: i8,
 
     /// The permission type for the ACL (allow, deny, etc.).
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub permission_type: i8,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for AclCreation {
+    type Builder = AclCreationBuilder;
+
+    fn builder() -> Self::Builder{
+        AclCreationBuilder::default()
+    }
 }
 
 impl Encodable for AclCreation {
@@ -204,19 +213,28 @@ impl Default for AclCreation {
 }
 
 impl Message for AclCreation {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
 }
 
-/// Valid versions: 0-2
+/// Valid versions: 0-3
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct CreateAclsRequest {
     /// The ACLs that we want to create.
     /// 
-    /// Supported API versions: 0-2
+    /// Supported API versions: 0-3
     pub creations: Vec<AclCreation>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for CreateAclsRequest {
+    type Builder = CreateAclsRequestBuilder;
+
+    fn builder() -> Self::Builder{
+        CreateAclsRequestBuilder::default()
+    }
 }
 
 impl Encodable for CreateAclsRequest {
@@ -294,7 +312,7 @@ impl Default for CreateAclsRequest {
 }
 
 impl Message for CreateAclsRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
 }
 
 impl HeaderVersion for CreateAclsRequest {

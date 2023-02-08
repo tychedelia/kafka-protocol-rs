@@ -13,11 +13,12 @@ use uuid::Uuid;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}
+    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
 };
 
 
 /// Valid versions: 0-8
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetFetchResponsePartition {
     /// The partition index.
@@ -47,6 +48,14 @@ pub struct OffsetFetchResponsePartition {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for OffsetFetchResponsePartition {
+    type Builder = OffsetFetchResponsePartitionBuilder;
+
+    fn builder() -> Self::Builder{
+        OffsetFetchResponsePartitionBuilder::default()
+    }
 }
 
 impl Encodable for OffsetFetchResponsePartition {
@@ -220,6 +229,7 @@ impl Message for OffsetFetchResponsePartition {
 }
 
 /// Valid versions: 0-8
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetFetchResponseTopic {
     /// The topic name.
@@ -234,6 +244,14 @@ pub struct OffsetFetchResponseTopic {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for OffsetFetchResponseTopic {
+    type Builder = OffsetFetchResponseTopicBuilder;
+
+    fn builder() -> Self::Builder{
+        OffsetFetchResponseTopicBuilder::default()
+    }
 }
 
 impl Encodable for OffsetFetchResponseTopic {
@@ -364,6 +382,7 @@ impl Message for OffsetFetchResponseTopic {
 }
 
 /// Valid versions: 0-8
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetFetchResponsePartitions {
     /// The partition index.
@@ -393,6 +412,14 @@ pub struct OffsetFetchResponsePartitions {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for OffsetFetchResponsePartitions {
+    type Builder = OffsetFetchResponsePartitionsBuilder;
+
+    fn builder() -> Self::Builder{
+        OffsetFetchResponsePartitionsBuilder::default()
+    }
 }
 
 impl Encodable for OffsetFetchResponsePartitions {
@@ -554,6 +581,7 @@ impl Message for OffsetFetchResponsePartitions {
 }
 
 /// Valid versions: 0-8
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetFetchResponseTopics {
     /// The topic name.
@@ -568,6 +596,14 @@ pub struct OffsetFetchResponseTopics {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for OffsetFetchResponseTopics {
+    type Builder = OffsetFetchResponseTopicsBuilder;
+
+    fn builder() -> Self::Builder{
+        OffsetFetchResponseTopicsBuilder::default()
+    }
 }
 
 impl Encodable for OffsetFetchResponseTopics {
@@ -674,6 +710,7 @@ impl Message for OffsetFetchResponseTopics {
 }
 
 /// Valid versions: 0-8
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetFetchResponseGroup {
     /// The group ID.
@@ -693,6 +730,14 @@ pub struct OffsetFetchResponseGroup {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for OffsetFetchResponseGroup {
+    type Builder = OffsetFetchResponseGroupBuilder;
+
+    fn builder() -> Self::Builder{
+        OffsetFetchResponseGroupBuilder::default()
+    }
 }
 
 impl Encodable for OffsetFetchResponseGroup {
@@ -820,6 +865,7 @@ impl Message for OffsetFetchResponseGroup {
 }
 
 /// Valid versions: 0-8
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 pub struct OffsetFetchResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
@@ -844,6 +890,14 @@ pub struct OffsetFetchResponse {
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+}
+
+impl Builder for OffsetFetchResponse {
+    type Builder = OffsetFetchResponseBuilder;
+
+    fn builder() -> Self::Builder{
+        OffsetFetchResponseBuilder::default()
+    }
 }
 
 impl Encodable for OffsetFetchResponse {
