@@ -3,7 +3,7 @@ members = ["protocol_codegen"]
 
 [package]
 name = "kafka-protocol"
-version = "0.5.0"
+version = "0.5.1"
 authors = [
     "Diggory Blake <diggsey@googlemail.com>",
     "Jem McElwain <jmcelwain@gmail.com>",
