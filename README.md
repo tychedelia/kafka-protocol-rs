@@ -49,8 +49,8 @@ let request = MetadataRequest::builder()
 ```
 ### Serialization
 
-Once a message has been created, it can be serialized using [`Encodable`], writing
-the struct to a provided [`bytes::BytesMut`]. The API version for the given message
+Once a message has been created, it can be serialized using `Encodable`, writing
+the struct to a provided `bytes::BytesMut`. The API version for the given message
 matching the version specified in the request header must be provided.
 
 ```rust
@@ -65,7 +65,7 @@ request.encode(&mut bytes, 12).unwrap();
 
 ### Deserialization
 
-Messages can be decoded using [`Decodobale`] and providing the matching API version from their
+Messages can be decoded using `Decodobale` and providing the matching API version from their
 corresponding request.
 
 ```rust
