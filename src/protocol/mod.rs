@@ -25,7 +25,7 @@ pub struct DecodeError;
 
 impl std::fmt::Display for DecodeError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "DecodeErrror")
+        write!(f, "DecodeError")
     }
 }
 
