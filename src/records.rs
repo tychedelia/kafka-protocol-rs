@@ -32,7 +32,7 @@
 //! ```
 use bytes::Bytes;
 use indexmap::IndexMap;
-use log::{info, error};
+use log::{error};
 use crc::{CRC_32_CKSUM, CRC_32_ISCSI, Crc};
 use string::TryFrom;
 

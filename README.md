@@ -11,7 +11,7 @@ for an example of protocol schema.
 Protocol messages are generated against the most recent stable Kafka release, currently [3.3.2](https://github.com/apache/kafka/releases/tag/3.3.2).
 
 Although the Kafka protocol remains relatively stable and strives to be backwards compatible, new fields are occasionally 
-added. In order to ensure forward compatability with the protocol, this crate marks all exported items as `#[non-exhaustive]`.
+added. In order to ensure forward compatibility with the protocol, this crate marks all exported items as `#[non-exhaustive]`.
 Protocol messages can be constructed using either `Default::default` or their provided [builder](https://docs.rs/derive_builder/latest/derive_builder/). 
 
 ## Working with messages
@@ -65,7 +65,7 @@ request.encode(&mut bytes, 12).unwrap();
 
 ### Deserialization
 
-Messages can be decoded using `Decodobale` and providing the matching API version from their
+Messages can be decoded using `Decodable` and providing the matching API version from their
 corresponding request.
 
 ```rust
