@@ -3,3 +3,4 @@
 Cargo.lock
 /xtask/target
 .idea/
+kafka_repo
