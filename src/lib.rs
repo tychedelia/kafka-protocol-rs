@@ -25,7 +25,7 @@
 //! assert_eq!(request_header, RequestHeader::decode(&mut buf, 3).unwrap());
 //! ```
 //! Note that every message implementation of [`Encodable::encode`](crate::protocol::Encodable::encode)
-//! and [`Decodable::decode`](crate::protocol::Decodable::decode) requires  a version to be provided
+//! and [`Decodable::decode`](crate::protocol::Decodable::decode) requires a version to be provided
 //! explicitly. This is because every  message contains *all* the fields that are valid for every
 //! version. These fields are *not* marked [`Option`], which would represent nullability according
 //! to a message's schema, but rather have a default value that represents a nil value. It is the
@@ -37,7 +37,7 @@
 //! type to a [`bytes::Bytes`] buffer.
 //!
 //! ```rust
-//! use kafka_protocol::protocol::{StrBytes, Encodable};
+//! use kafka_protocol::protocol::{StrBytes, Encodable, HeaderVersion};
 //! use bytes::{BytesMut, Bytes};
 //! use kafka_protocol::messages::{RequestHeader, ApiKey, ApiVersionsRequest};
 //! # use std::error::Error;
@@ -47,11 +47,11 @@
 //! req_header.request_api_version = 3;
 //! req_header.request_api_key = ApiKey::ApiVersionsKey as i16;
 //! req_header.client_id = Some(StrBytes::from_str("example"));
-//! req_header.encode(&mut buf, 2).unwrap();
+//! req_header.encode(&mut buf, ApiVersionsRequest::header_version(req_header.request_api_version)).unwrap();
 //! let mut api_versions_req = ApiVersionsRequest::default();
 //! api_versions_req.client_software_version = StrBytes::from_str("1.0");
 //! api_versions_req.client_software_name = StrBytes::from_str("example-client");
-//! api_versions_req.encode(&mut buf, 3);
+//! api_versions_req.encode(&mut buf, req_header.request_api_version);
 //!
 //! # fn send_request(buf: &[u8]) -> Result<(), Box<dyn Error>> {
 //! #     Ok(())
@@ -69,7 +69,7 @@
 //! A simple example for decoding an unknown message encoded in `buf`:
 //! ```rust
 //! use kafka_protocol::messages::{RequestHeader, ApiVersionsRequest, ApiKey, RequestKind};
-//! use kafka_protocol::protocol::{Encodable, Decodable, StrBytes};
+//! use kafka_protocol::protocol::{Encodable, Decodable, StrBytes, HeaderVersion};
 //! use bytes::{BytesMut, Buf};
 //! use std::convert::TryFrom;
 //! use kafka_protocol::protocol::buf::ByteBuf;
@@ -78,15 +78,17 @@
 //! # req_header.request_api_version = 3;
 //! # req_header.request_api_key = ApiKey::ApiVersionsKey as i16;
 //! # req_header.client_id = Some(StrBytes::from_str("example"));
-//! # req_header.encode(&mut buf, 2).unwrap();
+//! # req_header.encode(&mut buf, ApiVersionsRequest::header_version(req_header.request_api_version)).unwrap();
 //! # let mut api_versions_req = ApiVersionsRequest::default();
 //! # api_versions_req.client_software_version = StrBytes::from_str("1.0");
 //! # api_versions_req.client_software_name = StrBytes::from_str("example-client");
 //! # api_versions_req.encode(&mut buf, 3);
+//! 
+//! let api_key = buf.peek_bytes(0..2).get_i16();
+//! let api_version = buf.peek_bytes(2..4).get_i16();
+//! let header_version = ApiKey::try_from(api_key).unwrap().request_header_version(api_version);
 //!
-//! // version is the second field in request header
-//! let version = buf.peek_bytes(2..4).get_i16();
-//! let header = RequestHeader::decode(&mut buf, version).unwrap();
+//! let header = RequestHeader::decode(&mut buf, header_version).unwrap();
 //! let api_key = ApiKey::try_from(header.request_api_version);
 //! let req = match api_key {
 //!     ApiVersionsKey => RequestKind::ApiVersionsRequest(ApiVersionsRequest::decode(&mut buf, header.request_api_version).unwrap()),
