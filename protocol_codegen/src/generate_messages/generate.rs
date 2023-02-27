@@ -754,92 +754,166 @@ fn write_struct_def<W: Write>(
     writeln!(w)?;
     writeln!(w)?;
 
-    if map_key.is_some() {
-        write!(w, "impl MapEncodable for {} ", name)?;
-    } else {
-        write!(w, "impl Encodable for {} ", name)?;
-    }
-    w.block(|w| {
-        if let Some(key) = &map_key {
-            writeln!(w, "type Key = {};", key.rust_name())?;
-            write!(w, "fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> ")?;
-        } else {
-            write!(w, "fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> ")?;
-        }
+    if name == "RequestHeader" {
+        write!(w, "impl {} ", name)?;
         w.block(|w| {
-            for prepared_field in &prepared_fields {
-                write_encode_field(w, prepared_field, valid_versions, false)?;
-            }
-            write_encode_tag_buffer(w, &prepared_fields, valid_versions, flexible_msg_versions, false)?;
-            write!(w, "Ok(())")?;
+            writeln!(w, "/// Encode the request header, appended to the end of the provided bytes")?;
+            write!(w, "pub fn encode<B: ByteBufMut>(&self, buf: &mut B) -> Result<(), EncodeError> ")?;
+            w.block(|w| {
+                writeln!(w, "use std::convert::TryFrom;")?;
+                writeln!(w, "let version = super::ApiKey::try_from(self.request_api_key).map_err(|_| EncodeError)?.request_header_version(self.request_api_version);")?;
+                for prepared_field in &prepared_fields {
+                    write_encode_field(w, prepared_field, valid_versions, false)?;
+                }
+                write_encode_tag_buffer(w, &prepared_fields, valid_versions, flexible_msg_versions, false)?;
+                write!(w, "Ok(())")?;
+                Ok(())
+            })?;
+            writeln!(w)?;
+            writeln!(w, "/// Calculate how many bytes would be needed to store this header when encoded")?;
+            write!(w, "pub fn compute_size(&self) -> Result<usize, EncodeError> ")?;
+            w.block(|w| {
+                writeln!(w, "use std::convert::TryFrom;")?;
+                writeln!(w, "let version = super::ApiKey::try_from(self.request_api_key).map_err(|_| EncodeError)?.request_header_version(self.request_api_version);")?;
+                writeln!(w, "let mut total_size = 0;")?;
+                for prepared_field in &prepared_fields {
+                    write_encode_field(w, prepared_field, valid_versions, true)?;
+                }
+                write_encode_tag_buffer(w, &prepared_fields, valid_versions, flexible_msg_versions, true)?;
+                write!(w, "Ok(total_size)")?;
+                Ok(())
+            })?;
             Ok(())
         })?;
-        writeln!(w)?;
+    }
+    else {
         if map_key.is_some() {
-            write!(w, "fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> ")?;
+            write!(w, "impl MapEncodable for {} ", name)?;
         } else {
-            write!(w, "fn compute_size(&self, version: i16) -> Result<usize, EncodeError> ")?;
+            write!(w, "impl Encodable for {} ", name)?;
         }
         w.block(|w| {
-            writeln!(w, "let mut total_size = 0;")?;
-            for prepared_field in &prepared_fields {
-                write_encode_field(w, prepared_field, valid_versions, true)?;
-            }
-            write_encode_tag_buffer(w, &prepared_fields, valid_versions, flexible_msg_versions, true)?;
-            write!(w, "Ok(total_size)")?;
-            Ok(())
-        })?;
-        Ok(())
-    })?;
-    writeln!(w)?;
-    writeln!(w)?;
-
-    if map_key.is_some() {
-        write!(w, "impl MapDecodable for {} ", name)?;
-    } else {
-        write!(w, "impl Decodable for {} ", name)?;
-    }
-    w.block(|w| {
-        if let Some(key) = &map_key {
-            writeln!(w, "type Key = {};", key.rust_name())?;
-            write!(w, "fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> ")?;
-        } else {
-            write!(w, "fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> ")?;
-        }
-        w.block(|w| {
-            for prepared_field in &prepared_fields {
-                write_decode_field(w, prepared_field, valid_versions)?;
-            }
-            if !flexible_msg_versions.is_none() {
-                writeln!(w, "let mut unknown_tagged_fields = BTreeMap::new();")?;
-                write_decode_tag_buffer(w, &prepared_fields, valid_versions, flexible_msg_versions)?;
-            }
-            if map_key.is_some() {
-                write!(w, "Ok((key_field, Self ")?;
+            if let Some(key) = &map_key {
+                writeln!(w, "type Key = {};", key.rust_name())?;
+                write!(w, "fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> ")?;
             } else {
-                write!(w, "Ok(Self ")?;
+                write!(w, "fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> ")?;
             }
             w.block(|w| {
                 for prepared_field in &prepared_fields {
-                    if !prepared_field.map_key {
-                        writeln!(w, "{},", prepared_field.name)?;
-                    }
+                    write_encode_field(w, prepared_field, valid_versions, false)?;
                 }
-
-                if !flexible_msg_versions.is_none() {
-                    writeln!(w, "unknown_tagged_fields,")?;
-                }
-
+                write_encode_tag_buffer(w, &prepared_fields, valid_versions, flexible_msg_versions, false)?;
+                write!(w, "Ok(())")?;
                 Ok(())
             })?;
+            writeln!(w)?;
             if map_key.is_some() {
-                write!(w, "))")?;
+                write!(w, "fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> ")?;
             } else {
-                write!(w, ")")?;
+                write!(w, "fn compute_size(&self, version: i16) -> Result<usize, EncodeError> ")?;
             }
+            w.block(|w| {
+                writeln!(w, "let mut total_size = 0;")?;
+                for prepared_field in &prepared_fields {
+                    write_encode_field(w, prepared_field, valid_versions, true)?;
+                }
+                write_encode_tag_buffer(w, &prepared_fields, valid_versions, flexible_msg_versions, true)?;
+                write!(w, "Ok(total_size)")?;
+                Ok(())
+            })?;
             Ok(())
-        })
-    })?;
+        })?;
+    }
+    writeln!(w)?;
+    writeln!(w)?;
+
+    if name == "RequestHeader" {
+        write!(w, "impl {} ", name)?;
+        w.block(|w| {
+            writeln!(w, "/// Decode the request header starting from the first byte of Bytes")?;
+            write!(w, "pub fn decode<B: ByteBuf>(buf: &mut B) -> Result<Self, DecodeError> ")?;
+            w.block(|w| {
+                writeln!(w, "let request_api_key = types::Int16.decode(buf)?;")?;
+                writeln!(w, "let request_api_version = types::Int16.decode(buf)?;")?;
+                writeln!(w, "use std::convert::TryFrom;")?;
+                writeln!(w, "let version = super::ApiKey::try_from(request_api_key).map_err(|_| DecodeError)?.request_header_version(request_api_version);")?;
+                for prepared_field in &prepared_fields {
+                    if prepared_field.name != "request_api_key" && prepared_field.name != "request_api_version" {
+                        write_decode_field(w, prepared_field, valid_versions)?;
+                    }
+                }
+                if !flexible_msg_versions.is_none() {
+                    writeln!(w, "let mut unknown_tagged_fields = BTreeMap::new();")?;
+                    write_decode_tag_buffer(w, &prepared_fields, valid_versions, flexible_msg_versions)?;
+                }
+                write!(w, "Ok(Self ")?;
+                w.block(|w| {
+                    for prepared_field in &prepared_fields {
+                        if !prepared_field.map_key {
+                            writeln!(w, "{},", prepared_field.name)?;
+                        }
+                    }
+
+                    if !flexible_msg_versions.is_none() {
+                        writeln!(w, "unknown_tagged_fields,")?;
+                    }
+
+                    Ok(())
+                })?;
+                write!(w, ")")?;
+                Ok(())
+            })
+        })?;
+    }
+    else {
+        if map_key.is_some() {
+            write!(w, "impl MapDecodable for {} ", name)?;
+        } else {
+            write!(w, "impl Decodable for {} ", name)?;
+        }
+        w.block(|w| {
+            if let Some(key) = &map_key {
+                writeln!(w, "type Key = {};", key.rust_name())?;
+                write!(w, "fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> ")?;
+            } else {
+                write!(w, "fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> ")?;
+            }
+            w.block(|w| {
+                for prepared_field in &prepared_fields {
+                    write_decode_field(w, prepared_field, valid_versions)?;
+                }
+                if !flexible_msg_versions.is_none() {
+                    writeln!(w, "let mut unknown_tagged_fields = BTreeMap::new();")?;
+                    write_decode_tag_buffer(w, &prepared_fields, valid_versions, flexible_msg_versions)?;
+                }
+                if map_key.is_some() {
+                    write!(w, "Ok((key_field, Self ")?;
+                } else {
+                    write!(w, "Ok(Self ")?;
+                }
+                w.block(|w| {
+                    for prepared_field in &prepared_fields {
+                        if !prepared_field.map_key {
+                            writeln!(w, "{},", prepared_field.name)?;
+                        }
+                    }
+
+                    if !flexible_msg_versions.is_none() {
+                        writeln!(w, "unknown_tagged_fields,")?;
+                    }
+
+                    Ok(())
+                })?;
+                if map_key.is_some() {
+                    write!(w, "))")?;
+                } else {
+                    write!(w, ")")?;
+                }
+                Ok(())
+            })
+        })?;
+    }
     writeln!(w)?;
     writeln!(w)?;
 

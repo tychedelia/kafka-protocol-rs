@@ -53,8 +53,11 @@ impl Builder for RequestHeader {
     }
 }
 
-impl Encodable for RequestHeader {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+impl RequestHeader {
+    /// Encode the request header, appended to the end of the provided bytes
+    pub fn encode<B: ByteBufMut>(&self, buf: &mut B) -> Result<(), EncodeError> {
+        use std::convert::TryFrom;
+        let version = super::ApiKey::try_from(self.request_api_key).map_err(|_| EncodeError)?.request_header_version(self.request_api_version);
         types::Int16.encode(buf, &self.request_api_key)?;
         types::Int16.encode(buf, &self.request_api_version)?;
         types::Int32.encode(buf, &self.correlation_id)?;
@@ -73,7 +76,10 @@ impl Encodable for RequestHeader {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    /// Calculate how many bytes would be needed to store this header when encoded
+    pub fn compute_size(&self) -> Result<usize, EncodeError> {
+        use std::convert::TryFrom;
+        let version = super::ApiKey::try_from(self.request_api_key).map_err(|_| EncodeError)?.request_header_version(self.request_api_version);
         let mut total_size = 0;
         total_size += types::Int16.compute_size(&self.request_api_key)?;
         total_size += types::Int16.compute_size(&self.request_api_version)?;
@@ -95,10 +101,13 @@ impl Encodable for RequestHeader {
     }
 }
 
-impl Decodable for RequestHeader {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+impl RequestHeader {
+    /// Decode the request header starting from the first byte of Bytes
+    pub fn decode<B: ByteBuf>(buf: &mut B) -> Result<Self, DecodeError> {
         let request_api_key = types::Int16.decode(buf)?;
         let request_api_version = types::Int16.decode(buf)?;
+        use std::convert::TryFrom;
+        let version = super::ApiKey::try_from(request_api_key).map_err(|_| DecodeError)?.request_header_version(request_api_version);
         let correlation_id = types::Int32.decode(buf)?;
         let client_id = if version >= 1 {
             types::String.decode(buf)?

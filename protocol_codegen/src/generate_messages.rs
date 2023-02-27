@@ -74,7 +74,7 @@ pub fn run() -> Result<(), Error> {
     writeln!(module_file, "//! These messages are generated programmatically. See the [Kafka's protocol documentation](https://kafka.apache.org/protocol.html) for more information about a given message type.")?;
     writeln!(module_file, "// WARNING: the items of this module are generated and should not be edited directly.")?;
     writeln!(module_file)?;
-    writeln!(module_file, "use crate::protocol::{{NewType, Request, StrBytes}};")?;
+    writeln!(module_file, "use crate::protocol::{{NewType, Request, StrBytes, HeaderVersion}};")?;
     writeln!(module_file, "use std::convert::TryFrom;")?;
     writeln!(module_file)?;
 
@@ -118,6 +118,26 @@ pub fn run() -> Result<(), Error> {
     }
     writeln!(module_file, "}}")?;
     writeln!(module_file)?;
+
+    writeln!(module_file, "impl ApiKey {{")?;
+    writeln!(module_file, "    /// Get the version of request header that needs to be prepended to this message")?;
+    writeln!(module_file, "    pub fn request_header_version(&self, version: i16) -> i16 {{")?;
+    writeln!(module_file, "        match self {{")?;
+    for request_type in request_types.values() {
+        writeln!(module_file, "            ApiKey::{} => {}::header_version(version),", request_type.replace("Request", "Key"), request_type)?;
+    }
+    writeln!(module_file, "        }}")?;
+    writeln!(module_file, "    }}")?;
+
+    writeln!(module_file, "    /// Get the version of response header that needs to be prepended to this message")?;
+    writeln!(module_file, "    pub fn response_header_version(&self, version: i16) -> i16 {{")?;
+    writeln!(module_file, "        match self {{")?;
+    for response_type in response_types.values() {
+        writeln!(module_file, "            ApiKey::{} => {}::header_version(version),", response_type.replace("Response", "Key"), response_type)?;
+    }
+    writeln!(module_file, "        }}")?;
+    writeln!(module_file, "    }}")?;
+    writeln!(module_file, "}}")?;
 
     writeln!(module_file, "impl TryFrom<i16> for ApiKey {{")?;
     writeln!(module_file, "    type Error = ();")?;

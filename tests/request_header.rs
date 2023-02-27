@@ -1,5 +1,4 @@
 use kafka_protocol::messages::RequestHeader;
-use kafka_protocol::protocol::Decodable;
 use bytes::Bytes;
 
 #[test]
@@ -10,7 +9,7 @@ fn request_header() {
         0x6c, 0x69, 0x65, 0x6e, 0x74, 0x2d, 0x31, 0x00
     ];
 
-    let res = RequestHeader::decode(&mut Bytes::from(bytes.to_vec()), 3).unwrap();
+    let res = RequestHeader::decode(&mut Bytes::from(bytes.to_vec())).unwrap();
     assert_eq!(res.request_api_key, 18);
     assert_eq!(res.request_api_version, 3);
     assert_eq!(res.client_id.unwrap().to_string(), "adminclient-1");
