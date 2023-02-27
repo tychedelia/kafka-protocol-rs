@@ -1,9 +1,10 @@
 use std::fs::{self, File};
 use std::io::Write;
 use std::collections::{BTreeSet, BTreeMap};
+use std::path::Path;
 
 use failure::Error;
-use git2::Oid;
+use git2::{Oid, Repository};
 
 mod code_writer;
 pub mod expr;
@@ -12,22 +13,27 @@ mod parse;
 mod generate;
 
 use spec::SpecType;
-use tempfile::tempdir;
 
 pub fn run() -> Result<(), Error> {
-    let input_tmpdir = tempdir()?.into_path();
-
     let mut dir = std::fs::canonicalize(std::file!().rsplit_once("/").unwrap().0)?;
     dir.push("../../src/messages");
     let output_path = std::fs::canonicalize(dir)?;
     let output_path = output_path.to_str().unwrap();
 
     // Download messages from head of Kafka repo
-    println!("Cloning kafka repo");
-    let repo = git2::build::RepoBuilder::new()
-        .fetch_options(git2::FetchOptions::new())
-        .with_checkout(git2::build::CheckoutBuilder::new())
-        .clone("https://github.com/apache/kafka.git", &input_tmpdir.as_path())?;
+    let kafka_repo = Path::new("kafka_repo");
+    let repo = if kafka_repo.exists() {
+        println!("Fetching latest kafka repo");
+        let repo = Repository::open(kafka_repo)?;
+        repo.find_remote("origin").unwrap().fetch(&["trunk"], None, None).unwrap();
+        repo
+    } else {
+        println!("Cloning kafka repo");
+        git2::build::RepoBuilder::new()
+            .fetch_options(git2::FetchOptions::new())
+            .with_checkout(git2::build::CheckoutBuilder::new())
+            .clone("https://github.com/apache/kafka.git", &kafka_repo)?
+    };
 
     // Checkout the release commit
     // https://github.com/apache/kafka/releases/tag/3.3.2
@@ -52,7 +58,7 @@ pub fn run() -> Result<(), Error> {
 
     // Find input files
     let mut input_file_paths = Vec::new();
-    for file in fs::read_dir(input_tmpdir.as_path().join("clients/src/main/resources/common/message"))? {
+    for file in fs::read_dir(kafka_repo.join("clients/src/main/resources/common/message"))? {
         let file = file?;
         if file.file_type()?.is_file() {
             let path = file.path();
