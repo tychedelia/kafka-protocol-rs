@@ -1,6 +1,15 @@
 # Changelog
 
-## v0.50
+## v0.6.0
+
+Add `ApiKey::request_header_version` and `ApiKey::response_header_version` to assist deserializing
+headers without reference to message type.
+
+## v0.5.1
+
+Bump `uuid` crate version.
+
+## v0.5.0
 
 Clarify versioning support for upstream Kafka, tracking the latest Kafka
 stable release. Improve docs.
