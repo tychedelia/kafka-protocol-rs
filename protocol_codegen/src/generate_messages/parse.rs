@@ -1,9 +1,9 @@
-use std::path::Path;
 use std::fs;
+use std::path::Path;
 
+use assert_json_diff::assert_json_eq;
 use failure::Error;
 use json_comments::StripComments;
-use assert_json_diff::assert_json_eq;
 
 use super::spec::Spec;
 

@@ -1,5 +1,5 @@
-use std::rc::Rc;
 use std::fmt;
+use std::rc::Rc;
 
 #[allow(unused)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -110,7 +110,7 @@ impl Expr {
             value: match &self.value {
                 ExprValue::ByRef(t, v) => ExprValue::ByRef(*t, format!("({})", v).into()),
                 _ => ExprValue::Flat(format!("({})", self).into()),
-            }
+            },
         }
     }
     fn tighten(&self, precedence: Precedence) -> Self {
@@ -134,17 +134,13 @@ impl Expr {
                 match self.tighten(Precedence::Unary).value {
                     ExprValue::ByRef(RefType::Ref, v) => format!("&{}", v).into(),
                     ExprValue::ByRef(RefType::Mut, v) => format!("&mut {}", v).into(),
-                    _ => unreachable!()
+                    _ => unreachable!(),
                 },
             ),
-            ExprValue::Comparison(a, op, b) => (
-                Precedence::Comparison,
-                format!("{} {} {}", a, op, b).into(),
-            ),
-            ExprValue::Not(e) => (
-                Precedence::Unary,
-                format!("!{}", e).into(),
-            ),
+            ExprValue::Comparison(a, op, b) => {
+                (Precedence::Comparison, format!("{} {} {}", a, op, b).into())
+            }
+            ExprValue::Not(e) => (Precedence::Unary, format!("!{}", e).into()),
             ExprValue::Flat(s) => (self.precedence, s.clone()),
         }
     }
@@ -175,13 +171,24 @@ impl Expr {
     pub fn field(&self, field: &str) -> Self {
         Expr {
             precedence: Precedence::Suffix,
-            value: format!("{}.{}", self.tighten(Precedence::Suffix).auto_deref(), field).into(),
+            value: format!(
+                "{}.{}",
+                self.tighten(Precedence::Suffix).auto_deref(),
+                field
+            )
+            .into(),
         }
     }
     pub fn method<T: fmt::Display>(&self, method: &str, args: T) -> Self {
         Expr {
             precedence: Precedence::Suffix,
-            value: format!("{}.{}({})", self.tighten(Precedence::Suffix).auto_deref(), method, args).into(),
+            value: format!(
+                "{}.{}({})",
+                self.tighten(Precedence::Suffix).auto_deref(),
+                method,
+                args
+            )
+            .into(),
         }
     }
     pub fn try_(&self) -> Self {
@@ -219,7 +226,7 @@ impl Expr {
             _ => Expr {
                 precedence: self.precedence,
                 value: ExprValue::Not(self.tighten(Precedence::Unary).to_string().into()),
-            }
+            },
         }
     }
     pub fn compare(&self, op: CmpType, other: &Expr) -> Self {

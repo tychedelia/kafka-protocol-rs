@@ -1,11 +1,11 @@
-use std::fmt::{self, Display};
-use std::str::FromStr;
 use std::cmp;
+use std::fmt::{self, Display};
 use std::ops::RangeInclusive;
+use std::str::FromStr;
 
-use serde::{Serialize, Deserialize};
-use serde_plain::*;
 use parse_display::{Display, FromStr};
+use serde::{Deserialize, Serialize};
+use serde_plain::*;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -66,7 +66,7 @@ pub struct StructSpec {
 
 #[derive(Debug, Copy, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
-pub enum  ListenerSpec {
+pub enum ListenerSpec {
     ZkBroker,
     Broker,
     Controller,
@@ -170,8 +170,20 @@ impl PrimitiveType {
             Self::Int32 => "types::Int32",
             Self::Int64 => "types::Int64",
             Self::Float64 => "types::Float64",
-            Self::String => if flexible { "types::CompactString" } else { "types::String" },
-            Self::Bytes | Self::Records => if flexible { "types::CompactBytes" } else { "types::Bytes" },
+            Self::String => {
+                if flexible {
+                    "types::CompactString"
+                } else {
+                    "types::String"
+                }
+            }
+            Self::Bytes | Self::Records => {
+                if flexible {
+                    "types::CompactBytes"
+                } else {
+                    "types::Bytes"
+                }
+            }
             Self::Uuid => "types::Uuid",
         }
     }
