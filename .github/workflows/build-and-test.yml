@@ -15,6 +15,10 @@ jobs:
         with:
           command: build
           args: --all-features
+      - name: Check `cargo fmt` was run
+        run: |
+          cd protocol_codegen
+          cargo fmt -- --check
       - uses: actions-rs/cargo@v1
         with:
           command: test

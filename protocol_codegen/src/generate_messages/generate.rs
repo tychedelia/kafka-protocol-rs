@@ -1,14 +1,14 @@
-use std::io::{Write, BufWriter};
-use std::fs::File;
-use std::collections::{BTreeSet, BTreeMap};
+use std::collections::{BTreeMap, BTreeSet};
 use std::fmt::Display;
+use std::fs::File;
+use std::io::{BufWriter, Write};
 
 use failure::Error;
 use inflector::Inflector;
 
-use super::spec::{FieldSpec, PrimitiveType, Spec, SpecType, TypeSpec, VersionSpec};
 use super::code_writer::CodeWriter;
-use super::expr::{Expr, CmpType};
+use super::expr::{CmpType, Expr};
+use super::spec::{FieldSpec, PrimitiveType, Spec, SpecType, TypeSpec, VersionSpec};
 use std::cmp::Ordering;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -55,12 +55,20 @@ fn primitive_default(prim: PrimitiveType) -> PreparedDefault {
     }
 }
 
-fn parse_primitive_default(prim: PrimitiveType, default_str: String, type_: &PreparedType) -> PreparedDefault {
+fn parse_primitive_default(
+    prim: PrimitiveType,
+    default_str: String,
+    type_: &PreparedType,
+) -> PreparedDefault {
     use PrimitiveType::*;
     match prim {
         Int8 | Int16 | Int32 | Int64 | Float64 => PreparedDefault::Numeric(default_str),
         String => PreparedDefault::String(default_str),
-        _ => panic!("Unexpected default value {:?} for {}", default_str, type_.rust_name()),
+        _ => panic!(
+            "Unexpected default value {:?} for {}",
+            default_str,
+            type_.rust_name()
+        ),
     }
 }
 
@@ -88,16 +96,20 @@ impl PreparedType {
             Self::Primitive(prim) => prim.name(flexible).into(),
             Self::Entity(entity_type) => entity_type.inner.name(flexible).into(),
             Self::Struct(_) => "types::Struct { version }".into(),
-            Self::Array(inner) => if flexible {
-                format!("types::CompactArray({})", inner.name(flexible))
-            } else {
-                format!("types::Array({})", inner.name(flexible))
-            },
-            Self::Map(_, _) => if flexible {
-                "types::CompactArray(types::Struct { version })".into()
-            } else {
-                "types::Array(types::Struct { version })".into()
-            },
+            Self::Array(inner) => {
+                if flexible {
+                    format!("types::CompactArray({})", inner.name(flexible))
+                } else {
+                    format!("types::Array({})", inner.name(flexible))
+                }
+            }
+            Self::Map(_, _) => {
+                if flexible {
+                    "types::CompactArray(types::Struct { version })".into()
+                } else {
+                    "types::Array(types::Struct { version })".into()
+                }
+            }
         }
     }
     pub fn has_compact_form(&self) -> bool {
@@ -117,7 +129,7 @@ impl PreparedType {
             Self::Array(_) | Self::Map(_, _) => PreparedDefault::Empty,
         }
     }
-    fn is_entity(&self) ->bool {
+    fn is_entity(&self) -> bool {
         if let Self::Entity(_) = self {
             true
         } else {
@@ -142,9 +154,11 @@ impl PreparedDefault {
             if let Self::Null = self {
                 expr.method("is_none", "")
             } else {
-                expr
-                    .method("as_ref", "")
-                    .method("map", format!("|x| {}", self.gen_is_default(&Expr::new_atom("x"), false)))
+                expr.method("as_ref", "")
+                    .method(
+                        "map",
+                        format!("|x| {}", self.gen_is_default(&Expr::new_atom("x"), false)),
+                    )
                     .method("unwrap_or_default", "")
             }
         } else {
@@ -156,7 +170,9 @@ impl PreparedDefault {
                 Self::Numeric(v) => expr.deref().compare(CmpType::Eq, &Expr::new_atom(v)),
                 Self::String(s) => expr.compare(CmpType::Eq, &Expr::new_str(s)),
                 Self::Uuid => expr.compare(CmpType::Eq, &Expr::new_atom("&Uuid::nil()")),
-                Self::EmptyStruct => expr.compare(CmpType::Eq, &Expr::new_atom("&Default::default()"))
+                Self::EmptyStruct => {
+                    expr.compare(CmpType::Eq, &Expr::new_atom("&Default::default()"))
+                }
             }
         }
     }
@@ -182,7 +198,7 @@ impl PreparedDefault {
                 Self::Boolean(false) => Expr::new_atom("false"),
                 Self::Numeric(v) => Expr::new_unary(v),
                 Self::String(s) => Expr::new_atom(&format!("StrBytes::from_str({:?})", s)),
-                Self::Uuid => Expr::new_atom(&format!("Uuid::nil()"))
+                Self::Uuid => Expr::new_atom(&format!("Uuid::nil()")),
             }
         }
     }
@@ -225,10 +241,17 @@ fn prepare_field_type<W: Write>(
             } else {
                 PreparedType::Primitive(*prim)
             }
-        },
+        }
         TypeSpec::Struct(name) => {
             if let Some(fields) = &field.fields {
-                let written_struct = write_struct_def(w, name, fields, entity_types, valid_versions, flexible_msg_versions)?;
+                let written_struct = write_struct_def(
+                    w,
+                    name,
+                    fields,
+                    entity_types,
+                    valid_versions,
+                    flexible_msg_versions,
+                )?;
                 PreparedType::Struct(written_struct)
             } else {
                 PreparedType::Struct(WrittenStruct {
@@ -236,18 +259,32 @@ fn prepare_field_type<W: Write>(
                     map_key: None,
                 })
             }
-        },
+        }
         TypeSpec::Array(elem) => {
-            let prepared_elem = prepare_field_type(w, elem, field, entity_types, valid_versions, flexible_msg_versions)?;
+            let prepared_elem = prepare_field_type(
+                w,
+                elem,
+                field,
+                entity_types,
+                valid_versions,
+                flexible_msg_versions,
+            )?;
             match prepared_elem {
-                PreparedType::Struct(WrittenStruct { name, map_key: Some(map_key) }) => PreparedType::Map(map_key, name),
+                PreparedType::Struct(WrittenStruct {
+                    name,
+                    map_key: Some(map_key),
+                }) => PreparedType::Map(map_key, name),
                 other => PreparedType::Array(Box::new(other)),
             }
-        },
+        }
     })
 }
 
-fn write_version_cond<W: Write, FT: FnOnce(&mut CodeWriter<W>) -> Result<(), Error>, FF: FnOnce(&mut CodeWriter<W>) -> Result<(), Error>>(
+fn write_version_cond<
+    W: Write,
+    FT: FnOnce(&mut CodeWriter<W>) -> Result<(), Error>,
+    FF: FnOnce(&mut CodeWriter<W>) -> Result<(), Error>,
+>(
     w: &mut CodeWriter<W>,
     valid_versions: VersionSpec,
     condition: VersionSpec,
@@ -269,7 +306,9 @@ fn write_version_cond<W: Write, FT: FnOnce(&mut CodeWriter<W>) -> Result<(), Err
         if !always_true {
             match condition {
                 VersionSpec::None => return if_false(w),
-                VersionSpec::Exact(version) if version == max => write!(w, "if version < {} ", version)?,
+                VersionSpec::Exact(version) if version == max => {
+                    write!(w, "if version < {} ", version)?
+                }
                 VersionSpec::Exact(version) => write!(w, "if version != {} ", version)?,
                 VersionSpec::Since(version) => write!(w, "if version < {} ", version)?,
                 VersionSpec::Range(a, b) if a == min => write!(w, "if version > {} ", b)?,
@@ -284,7 +323,9 @@ fn write_version_cond<W: Write, FT: FnOnce(&mut CodeWriter<W>) -> Result<(), Err
         } else {
             match condition {
                 VersionSpec::None => return if_false(w),
-                VersionSpec::Exact(version) if version == max => write!(w, "if version >= {} ", version)?,
+                VersionSpec::Exact(version) if version == max => {
+                    write!(w, "if version >= {} ", version)?
+                }
                 VersionSpec::Exact(version) => write!(w, "if version == {} ", version)?,
                 VersionSpec::Since(version) => write!(w, "if version >= {} ", version)?,
                 VersionSpec::Range(a, b) if a == min => write!(w, "if version <= {} ", b)?,
@@ -327,35 +368,84 @@ fn write_encode_field<W: Write>(
         Expr::new_atom("self").field(&field.name).by_ref()
     };
 
-    if field.tagged_versions.contains(field.versions.intersect(valid_versions)) {
+    if field
+        .tagged_versions
+        .contains(field.versions.intersect(valid_versions))
+    {
         return Ok(());
     }
 
-    write_version_cond(w, valid_versions, field.tagged_versions, |_| Ok(()), |w| {
-        write_version_cond(w, valid_versions, field.versions, |w| {
-            let valid_versions = valid_versions.intersect(field.versions);
-            if !field.type_.has_compact_form() {
-                write_encode_or_compute(w, &field.type_.name(false), &var_name, compute_size)?;
-            } else {
-                write_version_cond(w, valid_versions, field.flexible_versions, |w| {
-                    write_encode_or_compute(w, &field.type_.name(true), &var_name, compute_size)?;
+    write_version_cond(
+        w,
+        valid_versions,
+        field.tagged_versions,
+        |_| Ok(()),
+        |w| {
+            write_version_cond(
+                w,
+                valid_versions,
+                field.versions,
+                |w| {
+                    let valid_versions = valid_versions.intersect(field.versions);
+                    if !field.type_.has_compact_form() {
+                        write_encode_or_compute(
+                            w,
+                            &field.type_.name(false),
+                            &var_name,
+                            compute_size,
+                        )?;
+                    } else {
+                        write_version_cond(
+                            w,
+                            valid_versions,
+                            field.flexible_versions,
+                            |w| {
+                                write_encode_or_compute(
+                                    w,
+                                    &field.type_.name(true),
+                                    &var_name,
+                                    compute_size,
+                                )?;
+                                Ok(())
+                            },
+                            |w| {
+                                write_encode_or_compute(
+                                    w,
+                                    &field.type_.name(false),
+                                    &var_name,
+                                    compute_size,
+                                )?;
+                                Ok(())
+                            },
+                            false,
+                            false,
+                        )?;
+                    }
                     Ok(())
-                }, |w| {
-                    write_encode_or_compute(w, &field.type_.name(false), &var_name, compute_size)?;
+                },
+                |w| {
+                    write!(
+                        w,
+                        "if {} ",
+                        field
+                            .default
+                            .gen_is_default(&var_name, field.optional)
+                            .not()
+                    )?;
+                    w.block(|w| {
+                        write!(w, "return Err(EncodeError)")?;
+                        Ok(())
+                    })?;
                     Ok(())
-                }, false, false)?;
-            }
+                },
+                false,
+                field.ignorable,
+            )?;
             Ok(())
-        }, |w| {
-            write!(w, "if {} ", field.default.gen_is_default(&var_name, field.optional).not())?;
-            w.block(|w| {
-                write!(w, "return Err(EncodeError)")?;
-                Ok(())
-            })?;
-            Ok(())
-        }, false, field.ignorable)?;
-        Ok(())
-    }, true, false)?;
+        },
+        true,
+        false,
+    )?;
     writeln!(w)?;
     Ok(())
 }
@@ -380,126 +470,268 @@ fn write_encode_tag_buffer<W: Write>(
     flexible_msg_versions: VersionSpec,
     compute_size: bool,
 ) -> Result<(), Error> {
-    write_version_cond(w, valid_versions, flexible_msg_versions, |w| {
-        let valid_versions = valid_versions.intersect(flexible_msg_versions);
+    write_version_cond(
+        w,
+        valid_versions,
+        flexible_msg_versions,
+        |w| {
+            let valid_versions = valid_versions.intersect(flexible_msg_versions);
 
-        let sorted_tagged_fields: BTreeMap<i32, &PreparedField> = prepared_fields
-            .iter()
-            .filter_map(|field| Some((field.tag?, field)))
-            .collect();
-        
-        if sorted_tagged_fields.is_empty() {
-            writeln!(w, "let num_tagged_fields = self.unknown_tagged_fields.len();")?;
-        } else {
-            writeln!(w, "let mut num_tagged_fields = self.unknown_tagged_fields.len();")?;
-        }
+            let sorted_tagged_fields: BTreeMap<i32, &PreparedField> = prepared_fields
+                .iter()
+                .filter_map(|field| Some((field.tag?, field)))
+                .collect();
 
-        // Count number of tagged fields
-        for field in sorted_tagged_fields.values() {
-            let var_name = if field.map_key {
-                Expr::new_atom("key")
+            if sorted_tagged_fields.is_empty() {
+                writeln!(
+                    w,
+                    "let num_tagged_fields = self.unknown_tagged_fields.len();"
+                )?;
             } else {
-                Expr::new_atom("self").field(&field.name).by_ref()
-            };
-            write_version_cond(w, valid_versions, field.tagged_versions, |w| {
-                let valid_versions = valid_versions.intersect(field.tagged_versions);
-                write_version_cond(w, valid_versions, field.versions, |w| {
-                    write!(w, "if {} ", field.default.gen_is_default(&var_name, field.optional).not())?;
-                    w.block(|w| {
-                        write!(w, "num_tagged_fields += 1;")?;
-                        Ok(())
-                    })?;
-                    Ok(())
-                }, |_| Ok(()), false, true)?;
-                writeln!(w)?;
-                Ok(())
-            }, |_| Ok(()), false, true)?;
-        }
-
-        write_size_check(w, "num_tagged_fields", "u32", "Too many tagged fields to encode ({} fields)")?;
-        write_encode_or_compute(w, "types::UnsignedVarInt", "num_tagged_fields as u32", compute_size)?;
-        writeln!(w)?;
-
-        // Write out tagged fields
-        let mut current_tag = -1;
-        for (&k, field) in &sorted_tagged_fields {
-            current_tag += 1;
-            if k != current_tag {
-                if !compute_size {
-                    writeln!(w, "write_unknown_tagged_fields(buf, {}..{}, &self.unknown_tagged_fields)?;", current_tag, k)?;
-                }
-                current_tag = k;
+                writeln!(
+                    w,
+                    "let mut num_tagged_fields = self.unknown_tagged_fields.len();"
+                )?;
             }
 
-            let var_name = if field.map_key {
-                Expr::new_atom("key")
+            // Count number of tagged fields
+            for field in sorted_tagged_fields.values() {
+                let var_name = if field.map_key {
+                    Expr::new_atom("key")
+                } else {
+                    Expr::new_atom("self").field(&field.name).by_ref()
+                };
+                write_version_cond(
+                    w,
+                    valid_versions,
+                    field.tagged_versions,
+                    |w| {
+                        let valid_versions = valid_versions.intersect(field.tagged_versions);
+                        write_version_cond(
+                            w,
+                            valid_versions,
+                            field.versions,
+                            |w| {
+                                write!(
+                                    w,
+                                    "if {} ",
+                                    field
+                                        .default
+                                        .gen_is_default(&var_name, field.optional)
+                                        .not()
+                                )?;
+                                w.block(|w| {
+                                    write!(w, "num_tagged_fields += 1;")?;
+                                    Ok(())
+                                })?;
+                                Ok(())
+                            },
+                            |_| Ok(()),
+                            false,
+                            true,
+                        )?;
+                        writeln!(w)?;
+                        Ok(())
+                    },
+                    |_| Ok(()),
+                    false,
+                    true,
+                )?;
+            }
+
+            write_size_check(
+                w,
+                "num_tagged_fields",
+                "u32",
+                "Too many tagged fields to encode ({} fields)",
+            )?;
+            write_encode_or_compute(
+                w,
+                "types::UnsignedVarInt",
+                "num_tagged_fields as u32",
+                compute_size,
+            )?;
+            writeln!(w)?;
+
+            // Write out tagged fields
+            let mut current_tag = -1;
+            for (&k, field) in &sorted_tagged_fields {
+                current_tag += 1;
+                if k != current_tag {
+                    if !compute_size {
+                        writeln!(w, "write_unknown_tagged_fields(buf, {}..{}, &self.unknown_tagged_fields)?;", current_tag, k)?;
+                    }
+                    current_tag = k;
+                }
+
+                let var_name = if field.map_key {
+                    Expr::new_atom("key")
+                } else {
+                    Expr::new_atom("self").field(&field.name).by_ref()
+                };
+                write_version_cond(
+                    w,
+                    valid_versions,
+                    field.tagged_versions,
+                    |w| {
+                        let valid_versions = valid_versions.intersect(field.tagged_versions);
+                        write_version_cond(
+                            w,
+                            valid_versions,
+                            field.versions,
+                            |w| {
+                                let valid_versions = valid_versions.intersect(field.versions);
+                                write!(
+                                    w,
+                                    "if {} ",
+                                    field
+                                        .default
+                                        .gen_is_default(&var_name, field.optional)
+                                        .not()
+                                )?;
+                                w.block(|w| {
+                                    write!(w, "let computed_size = ")?;
+                                    if !field.type_.has_compact_form() {
+                                        write!(
+                                            w,
+                                            "{}.compute_size({})?",
+                                            &field.type_.name(false),
+                                            &var_name
+                                        )?;
+                                    } else {
+                                        write_version_cond(
+                                            w,
+                                            valid_versions,
+                                            field.flexible_versions,
+                                            |w| {
+                                                write!(
+                                                    w,
+                                                    "{}.compute_size({})?",
+                                                    &field.type_.name(true),
+                                                    &var_name
+                                                )?;
+                                                Ok(())
+                                            },
+                                            |w| {
+                                                write!(
+                                                    w,
+                                                    "{}.compute_size({})?",
+                                                    &field.type_.name(false),
+                                                    &var_name
+                                                )?;
+                                                Ok(())
+                                            },
+                                            false,
+                                            false,
+                                        )?;
+                                    }
+                                    writeln!(w, ";")?;
+                                    write_size_check(
+                                        w,
+                                        "computed_size",
+                                        "u32",
+                                        "Tagged field is too large to encode ({} bytes)",
+                                    )?;
+                                    write_encode_or_compute(
+                                        w,
+                                        "types::UnsignedVarInt",
+                                        k,
+                                        compute_size,
+                                    )?;
+                                    writeln!(w)?;
+                                    write_encode_or_compute(
+                                        w,
+                                        "types::UnsignedVarInt",
+                                        "computed_size as u32",
+                                        compute_size,
+                                    )?;
+                                    writeln!(w)?;
+                                    if compute_size {
+                                        writeln!(w, "total_size += computed_size;")?;
+                                    } else {
+                                        if !field.type_.has_compact_form() {
+                                            write_encode_or_compute(
+                                                w,
+                                                &field.type_.name(false),
+                                                &var_name,
+                                                compute_size,
+                                            )?;
+                                        } else {
+                                            write_version_cond(
+                                                w,
+                                                valid_versions,
+                                                field.flexible_versions,
+                                                |w| {
+                                                    write_encode_or_compute(
+                                                        w,
+                                                        &field.type_.name(true),
+                                                        &var_name,
+                                                        compute_size,
+                                                    )?;
+                                                    Ok(())
+                                                },
+                                                |w| {
+                                                    write_encode_or_compute(
+                                                        w,
+                                                        &field.type_.name(false),
+                                                        &var_name,
+                                                        compute_size,
+                                                    )?;
+                                                    Ok(())
+                                                },
+                                                false,
+                                                false,
+                                            )?;
+                                        }
+                                    }
+                                    Ok(())
+                                })?;
+                                Ok(())
+                            },
+                            |w| {
+                                write!(
+                                    w,
+                                    "if {} ",
+                                    field
+                                        .default
+                                        .gen_is_default(&var_name, field.optional)
+                                        .not()
+                                )?;
+                                w.block(|w| {
+                                    write!(w, "return Err(EncodeError)")?;
+                                    Ok(())
+                                })?;
+                                Ok(())
+                            },
+                            false,
+                            field.ignorable,
+                        )?;
+                        writeln!(w)?;
+                        Ok(())
+                    },
+                    |_| Ok(()),
+                    false,
+                    true,
+                )?;
+            }
+            writeln!(w)?;
+
+            if compute_size {
+                write!(w, "total_size += compute_unknown_tagged_fields_size(&self.unknown_tagged_fields)?;")?;
             } else {
-                Expr::new_atom("self").field(&field.name).by_ref()
-            };
-            write_version_cond(w, valid_versions, field.tagged_versions, |w| {
-                let valid_versions = valid_versions.intersect(field.tagged_versions);
-                write_version_cond(w, valid_versions, field.versions, |w| {
-                    let valid_versions = valid_versions.intersect(field.versions);
-                    write!(w, "if {} ", field.default.gen_is_default(&var_name, field.optional).not())?;
-                    w.block(|w| {
-                        write!(w, "let computed_size = ")?;
-                        if !field.type_.has_compact_form() {
-                            write!(w, "{}.compute_size({})?", &field.type_.name(false), &var_name)?;
-                        } else {
-                            write_version_cond(w, valid_versions, field.flexible_versions, |w| {
-                                write!(w, "{}.compute_size({})?", &field.type_.name(true), &var_name)?;
-                                Ok(())
-                            }, |w| {
-                                write!(w, "{}.compute_size({})?", &field.type_.name(false), &var_name)?;
-                                Ok(())
-                            }, false, false)?;
-                        }
-                        writeln!(w, ";")?;
-                        write_size_check(w, "computed_size", "u32", "Tagged field is too large to encode ({} bytes)")?;
-                        write_encode_or_compute(w, "types::UnsignedVarInt", k, compute_size)?;
-                        writeln!(w)?;
-                        write_encode_or_compute(w, "types::UnsignedVarInt", "computed_size as u32", compute_size)?;
-                        writeln!(w)?;
-                        if compute_size {
-                            writeln!(w, "total_size += computed_size;")?;
-                        } else {
-                            if !field.type_.has_compact_form() {
-                                write_encode_or_compute(w, &field.type_.name(false), &var_name, compute_size)?;
-                            } else {
-                                write_version_cond(w, valid_versions, field.flexible_versions, |w| {
-                                    write_encode_or_compute(w, &field.type_.name(true), &var_name, compute_size)?;
-                                    Ok(())
-                                }, |w| {
-                                    write_encode_or_compute(w, &field.type_.name(false), &var_name, compute_size)?;
-                                    Ok(())
-                                }, false, false)?;
-                            }
-                        }
-                        Ok(())
-                    })?;
-                    Ok(())
-                }, |w| {
-                    write!(w, "if {} ", field.default.gen_is_default(&var_name, field.optional).not())?;
-                    w.block(|w| {
-                        write!(w, "return Err(EncodeError)")?;
-                        Ok(())
-                    })?;
-                    Ok(())
-                }, false, field.ignorable)?;
-                writeln!(w)?;
-                Ok(())
-            }, |_| Ok(()), false, true)?;
-        }
-        writeln!(w)?;
+                write!(
+                    w,
+                    "write_unknown_tagged_fields(buf, {}.., &self.unknown_tagged_fields)?;",
+                    current_tag + 1
+                )?;
+            }
 
-        if compute_size {
-            write!(w, "total_size += compute_unknown_tagged_fields_size(&self.unknown_tagged_fields)?;")?;
-        } else {
-            write!(w, "write_unknown_tagged_fields(buf, {}.., &self.unknown_tagged_fields)?;", current_tag+1)?;
-        }
-
-        Ok(())
-    }, |_| Ok(()), false, true)?;
+            Ok(())
+        },
+        |_| Ok(()),
+        false,
+        true,
+    )?;
     writeln!(w)?;
     Ok(())
 }
@@ -521,36 +753,80 @@ fn write_decode_field<W: Write>(
         write!(w, "let mut {} = ", var_name)?;
     }
 
-    if field.tagged_versions.contains(field.versions.intersect(valid_versions)) {
-        writeln!(w, "{};", field.default.gen_default(field.optional, field.type_.is_entity()))?;
+    if field
+        .tagged_versions
+        .contains(field.versions.intersect(valid_versions))
+    {
+        writeln!(
+            w,
+            "{};",
+            field
+                .default
+                .gen_default(field.optional, field.type_.is_entity())
+        )?;
         return Ok(());
     }
 
-    write_version_cond(w, valid_versions, field.tagged_versions, |w| {
-        write!(w, "{}", field.default.gen_default(field.optional, field.type_.is_entity()))?;
-        Ok(())
-    }, |w| {
-        write_version_cond(w, valid_versions, field.versions, |w| {
-            let valid_versions = valid_versions.intersect(field.versions);
-            if !field.type_.has_compact_form() {
-                write!(w, "{}.decode(buf)?", field.type_.name(false))?;
-            } else {
-
-                write_version_cond(w, valid_versions, field.flexible_versions, |w| {
-                    write!(w, "{}.decode(buf)?", field.type_.name(true))?;
-                    Ok(())
-                }, |w| {
-                    write!(w, "{}.decode(buf)?", field.type_.name(false))?;
-                    Ok(())
-                }, false, false)?;
-            }
+    write_version_cond(
+        w,
+        valid_versions,
+        field.tagged_versions,
+        |w| {
+            write!(
+                w,
+                "{}",
+                field
+                    .default
+                    .gen_default(field.optional, field.type_.is_entity())
+            )?;
             Ok(())
-        }, |w| {
-            write!(w, "{}", field.default.gen_default(field.optional, field.type_.is_entity()))?;
+        },
+        |w| {
+            write_version_cond(
+                w,
+                valid_versions,
+                field.versions,
+                |w| {
+                    let valid_versions = valid_versions.intersect(field.versions);
+                    if !field.type_.has_compact_form() {
+                        write!(w, "{}.decode(buf)?", field.type_.name(false))?;
+                    } else {
+                        write_version_cond(
+                            w,
+                            valid_versions,
+                            field.flexible_versions,
+                            |w| {
+                                write!(w, "{}.decode(buf)?", field.type_.name(true))?;
+                                Ok(())
+                            },
+                            |w| {
+                                write!(w, "{}.decode(buf)?", field.type_.name(false))?;
+                                Ok(())
+                            },
+                            false,
+                            false,
+                        )?;
+                    }
+                    Ok(())
+                },
+                |w| {
+                    write!(
+                        w,
+                        "{}",
+                        field
+                            .default
+                            .gen_default(field.optional, field.type_.is_entity())
+                    )?;
+                    Ok(())
+                },
+                false,
+                false,
+            )?;
             Ok(())
-        }, false, false)?;
-        Ok(())
-    }, false, false)?;
+        },
+        false,
+        false,
+    )?;
     writeln!(w, ";")?;
 
     Ok(())
@@ -562,72 +838,125 @@ fn write_decode_tag_buffer<W: Write>(
     valid_versions: VersionSpec,
     flexible_msg_versions: VersionSpec,
 ) -> Result<(), Error> {
-    write_version_cond(w, valid_versions, flexible_msg_versions, |w| {
-        let valid_versions = valid_versions.intersect(flexible_msg_versions);
+    write_version_cond(
+        w,
+        valid_versions,
+        flexible_msg_versions,
+        |w| {
+            let valid_versions = valid_versions.intersect(flexible_msg_versions);
 
-        let sorted_tagged_fields: BTreeMap<i32, &PreparedField> = prepared_fields
-            .iter()
-            .filter_map(|field| Some((field.tag?, field)))
-            .collect();
-        
-        writeln!(w, "let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;")?;
-        write!(w, "for _ in 0..num_tagged_fields ")?;
-        w.block(|w| {
-            writeln!(w, "let tag: u32 = types::UnsignedVarInt.decode(buf)?;")?;
-            writeln!(w, "let size: u32 = types::UnsignedVarInt.decode(buf)?;")?;
+            let sorted_tagged_fields: BTreeMap<i32, &PreparedField> = prepared_fields
+                .iter()
+                .filter_map(|field| Some((field.tag?, field)))
+                .collect();
 
-            if sorted_tagged_fields.is_empty() {
-                writeln!(w, "let mut unknown_value = vec![0; size as usize];")?;
-                writeln!(w, "buf.try_copy_to_slice(&mut unknown_value)?;")?;
-                write!(w, "unknown_tagged_fields.insert(tag as i32, unknown_value);")?;
-                Ok(())
-            } else {
-                write!(w, "match tag ")?;
-                w.block(|w| {
-                    for (&k, field) in &sorted_tagged_fields {
-                        let var_name = if field.map_key {
-                            "key_field"
-                        } else {
-                            &field.name
-                        };
-                        write!(w, "{} => ", k)?;
-                        w.block(|w| {
-                            let tagged_field_versions = field.tagged_versions.intersect(field.versions);
-                            write_version_cond(w, valid_versions, tagged_field_versions, |w| {
-                                let valid_versions = valid_versions.intersect(tagged_field_versions);
-                                if !field.type_.has_compact_form() {
-                                    write!(w, "{} = {}.decode(buf)?;", var_name, field.type_.name(false))?;
-                                } else {
-    
-                                    write_version_cond(w, valid_versions, field.flexible_versions, |w| {
-                                        write!(w, "{} = {}.decode(buf)?;", var_name, field.type_.name(true))?;
-                                        Ok(())
-                                    }, |w| {
-                                        write!(w, "{} = {}.decode(buf)?;", var_name, field.type_.name(false))?;
-                                        Ok(())
-                                    }, false, false)?;
-                                }
-                                Ok(())
-                            }, |w| {
-                                writeln!(w, "error!({:?}, tag, version);", "Tag {} is not valid for version {}")?;
-                                write!(w, "return Err(DecodeError);")?;
-                                Ok(())
-                            }, false, false)?;
-                            Ok(())
-                        })?;
-                        writeln!(w, ",")?;
-                    }
-                    write!(w, "_ => ")?;
+            writeln!(
+                w,
+                "let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;"
+            )?;
+            write!(w, "for _ in 0..num_tagged_fields ")?;
+            w.block(|w| {
+                writeln!(w, "let tag: u32 = types::UnsignedVarInt.decode(buf)?;")?;
+                writeln!(w, "let size: u32 = types::UnsignedVarInt.decode(buf)?;")?;
+
+                if sorted_tagged_fields.is_empty() {
+                    writeln!(w, "let mut unknown_value = vec![0; size as usize];")?;
+                    writeln!(w, "buf.try_copy_to_slice(&mut unknown_value)?;")?;
+                    write!(
+                        w,
+                        "unknown_tagged_fields.insert(tag as i32, unknown_value);"
+                    )?;
+                    Ok(())
+                } else {
+                    write!(w, "match tag ")?;
                     w.block(|w| {
-                        writeln!(w, "let mut unknown_value = vec![0; size as usize];")?;
-                        writeln!(w, "buf.try_copy_to_slice(&mut unknown_value)?;")?;
-                        write!(w, "unknown_tagged_fields.insert(tag as i32, unknown_value);")?;
-                        Ok(())
+                        for (&k, field) in &sorted_tagged_fields {
+                            let var_name = if field.map_key {
+                                "key_field"
+                            } else {
+                                &field.name
+                            };
+                            write!(w, "{} => ", k)?;
+                            w.block(|w| {
+                                let tagged_field_versions =
+                                    field.tagged_versions.intersect(field.versions);
+                                write_version_cond(
+                                    w,
+                                    valid_versions,
+                                    tagged_field_versions,
+                                    |w| {
+                                        let valid_versions =
+                                            valid_versions.intersect(tagged_field_versions);
+                                        if !field.type_.has_compact_form() {
+                                            write!(
+                                                w,
+                                                "{} = {}.decode(buf)?;",
+                                                var_name,
+                                                field.type_.name(false)
+                                            )?;
+                                        } else {
+                                            write_version_cond(
+                                                w,
+                                                valid_versions,
+                                                field.flexible_versions,
+                                                |w| {
+                                                    write!(
+                                                        w,
+                                                        "{} = {}.decode(buf)?;",
+                                                        var_name,
+                                                        field.type_.name(true)
+                                                    )?;
+                                                    Ok(())
+                                                },
+                                                |w| {
+                                                    write!(
+                                                        w,
+                                                        "{} = {}.decode(buf)?;",
+                                                        var_name,
+                                                        field.type_.name(false)
+                                                    )?;
+                                                    Ok(())
+                                                },
+                                                false,
+                                                false,
+                                            )?;
+                                        }
+                                        Ok(())
+                                    },
+                                    |w| {
+                                        writeln!(
+                                            w,
+                                            "error!({:?}, tag, version);",
+                                            "Tag {} is not valid for version {}"
+                                        )?;
+                                        write!(w, "return Err(DecodeError);")?;
+                                        Ok(())
+                                    },
+                                    false,
+                                    false,
+                                )?;
+                                Ok(())
+                            })?;
+                            writeln!(w, ",")?;
+                        }
+                        write!(w, "_ => ")?;
+                        w.block(|w| {
+                            writeln!(w, "let mut unknown_value = vec![0; size as usize];")?;
+                            writeln!(w, "buf.try_copy_to_slice(&mut unknown_value)?;")?;
+                            write!(
+                                w,
+                                "unknown_tagged_fields.insert(tag as i32, unknown_value);"
+                            )?;
+                            Ok(())
+                        })
                     })
-                })
-            }
-        })
-    }, |_| Ok(()), false, true)?;
+                }
+            })
+        },
+        |_| Ok(()),
+        false,
+        true,
+    )?;
     writeln!(w)?;
     Ok(())
 }
@@ -646,7 +975,14 @@ fn write_struct_def<W: Write>(
     let num_map_keys = fields.iter().filter(|field| field.map_key).count();
 
     for field in fields {
-        let type_ = prepare_field_type(w, &field.type_, field, entity_types, valid_versions, flexible_msg_versions)?;
+        let type_ = prepare_field_type(
+            w,
+            &field.type_,
+            field,
+            entity_types,
+            valid_versions,
+            flexible_msg_versions,
+        )?;
 
         if field.map_key && num_map_keys == 1 {
             map_key = Some(Box::new(type_.clone()))
@@ -679,24 +1015,32 @@ fn write_struct_def<W: Write>(
                 "null" => {
                     assert!(nullable_versions.contains(field.versions));
                     PreparedDefault::Null
-                },
+                }
                 "true" | "false" => {
                     assert!(type_ == PreparedType::Primitive(PrimitiveType::Bool));
                     PreparedDefault::Boolean(default_str == "true")
-                },
-                _ => match &type_ {
-                    PreparedType::Primitive(prim) => parse_primitive_default(*prim, default_str, &type_),
-                    PreparedType::Entity(entity_type) => parse_primitive_default(entity_type.inner, default_str, &type_),
-                    _ => panic!("Unexpected default value {:?} for {}", default_str, type_.rust_name()),
                 }
+                _ => match &type_ {
+                    PreparedType::Primitive(prim) => {
+                        parse_primitive_default(*prim, default_str, &type_)
+                    }
+                    PreparedType::Entity(entity_type) => {
+                        parse_primitive_default(entity_type.inner, default_str, &type_)
+                    }
+                    _ => panic!(
+                        "Unexpected default value {:?} for {}",
+                        default_str,
+                        type_.rust_name()
+                    ),
+                },
             }
         } else {
             type_.default()
         };
 
         prepared_fields.push(PreparedField {
-            name, 
-            optional, 
+            name,
+            optional,
             type_,
             versions,
             tag: field.tag,
@@ -713,18 +1057,33 @@ fn write_struct_def<W: Write>(
 
     writeln!(w, "/// Valid versions: {}", valid_versions)?;
     writeln!(w, "#[non_exhaustive]")?;
-    writeln!(w, "#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]")?;
+    writeln!(
+        w,
+        "#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]"
+    )?;
     write!(w, "pub struct {} ", name)?;
     w.block(|w| {
         for prepared_field in &prepared_fields {
-            if prepared_field.map_key { continue; }
+            if prepared_field.map_key {
+                continue;
+            }
             writeln!(w, "/// {}", prepared_field.about)?;
             writeln!(w, "/// ")?;
             writeln!(w, "/// Supported API versions: {}", prepared_field.versions)?;
             if prepared_field.optional {
-                writeln!(w, "pub {}: Option<{}>,", prepared_field.name, prepared_field.type_.rust_name())?;
+                writeln!(
+                    w,
+                    "pub {}: Option<{}>,",
+                    prepared_field.name,
+                    prepared_field.type_.rust_name()
+                )?;
             } else {
-                writeln!(w, "pub {}: {},", prepared_field.name, prepared_field.type_.rust_name())?;
+                writeln!(
+                    w,
+                    "pub {}: {},",
+                    prepared_field.name,
+                    prepared_field.type_.rust_name()
+                )?;
             }
             writeln!(w)?;
         }
@@ -851,10 +1210,15 @@ fn write_struct_def<W: Write>(
             w.block(|w| {
                 for prepared_field in &prepared_fields {
                     if !prepared_field.map_key {
-                        writeln!(w, "{}: {},", prepared_field.name, prepared_field.default.gen_default(
-                            prepared_field.optional,
-                            prepared_field.type_.is_entity()
-                        ))?;
+                        writeln!(
+                            w,
+                            "{}: {},",
+                            prepared_field.name,
+                            prepared_field.default.gen_default(
+                                prepared_field.optional,
+                                prepared_field.type_.is_entity()
+                            )
+                        )?;
                     }
                 }
 
@@ -871,8 +1235,15 @@ fn write_struct_def<W: Write>(
 
     write!(w, "impl Message for {} ", name)?;
     w.block(|w| {
-        let range = valid_versions.range().expect("Valid versions should be bounded.");
-        writeln!(w, "const VERSIONS: VersionRange = VersionRange {{ min: {}, max: {} }};", range.start(), range.end())?;
+        let range = valid_versions
+            .range()
+            .expect("Valid versions should be bounded.");
+        writeln!(
+            w,
+            "const VERSIONS: VersionRange = VersionRange {{ min: {}, max: {} }};",
+            range.start(),
+            range.end()
+        )?;
         Ok(())
     })?;
     writeln!(w)?;
@@ -884,14 +1255,14 @@ fn write_struct_def<W: Write>(
     })
 }
 
-fn write_file_header<W: Write>(
-    w: &mut CodeWriter<W>,
-    name: &str,
-) -> Result<(), Error> {
+fn write_file_header<W: Write>(w: &mut CodeWriter<W>, name: &str) -> Result<(), Error> {
     writeln!(w, "//! {}", name)?;
     writeln!(w, "//!")?;
     writeln!(w, "//! See the schema for this message [here](https://github.com/apache/kafka/blob/trunk/clients/src/main/resources/common/message/{}.json).", name)?;
-    writeln!(w, "// WARNING: the items of this module are generated and should not be edited directly")?;
+    writeln!(
+        w,
+        "// WARNING: the items of this module are generated and should not be edited directly"
+    )?;
     writeln!(w, "#![allow(unused)]")?;
     writeln!(w)?;
     writeln!(w, "use std::borrow::Borrow;")?;
@@ -926,9 +1297,23 @@ pub fn generate(
 
     write_file_header(&mut file, &struct_name)?;
     for common_struct in &spec.common_structs {
-        write_struct_def(&mut file, &common_struct.name, &common_struct.fields, entity_types, valid_versions, flexible_msg_versions)?;
+        write_struct_def(
+            &mut file,
+            &common_struct.name,
+            &common_struct.fields,
+            entity_types,
+            valid_versions,
+            flexible_msg_versions,
+        )?;
     }
-    write_struct_def(&mut file, &struct_name, &spec.fields, entity_types, valid_versions, flexible_msg_versions)?;
+    write_struct_def(
+        &mut file,
+        &struct_name,
+        &spec.fields,
+        entity_types,
+        valid_versions,
+        flexible_msg_versions,
+    )?;
 
     if let Some(api_key) = spec.api_key {
         write!(&mut file, "impl HeaderVersion for {} ", struct_name)?;
@@ -940,32 +1325,48 @@ pub fn generate(
                     // See KIP-511 for details.
                     (SpecType::Response, 18) => {
                         write!(w, "0")?;
-                    },
+                    }
                     (SpecType::Request, _) => {
-                        write_version_cond(w, valid_versions, flexible_msg_versions, |w| {
-                            write!(w, "2")?;
-                            Ok(())
-                        }, |w| {
-                            // Version 0 of ControlledShutdownRequest has a non-standard request header
-                            // which does not include clientId.  Version 1 of ControlledShutdownRequest
-                            // and later use the standard request header.
-                            if api_key == 7 {
-                                write!(w, "if version == 0 {{ 0 }} else {{ 1 }}")?;
-                            } else {
-                                write!(w, "1")?;
-                            }
-                            Ok(())
-                        }, false, false)?;
-                    },
+                        write_version_cond(
+                            w,
+                            valid_versions,
+                            flexible_msg_versions,
+                            |w| {
+                                write!(w, "2")?;
+                                Ok(())
+                            },
+                            |w| {
+                                // Version 0 of ControlledShutdownRequest has a non-standard request header
+                                // which does not include clientId.  Version 1 of ControlledShutdownRequest
+                                // and later use the standard request header.
+                                if api_key == 7 {
+                                    write!(w, "if version == 0 {{ 0 }} else {{ 1 }}")?;
+                                } else {
+                                    write!(w, "1")?;
+                                }
+                                Ok(())
+                            },
+                            false,
+                            false,
+                        )?;
+                    }
                     (SpecType::Response, _) => {
-                        write_version_cond(w, valid_versions, flexible_msg_versions, |w| {
-                            write!(w, "1")?;
-                            Ok(())
-                        }, |w| {
-                            write!(w, "0")?;
-                            Ok(())
-                        }, false, false)?;
-                    },
+                        write_version_cond(
+                            w,
+                            valid_versions,
+                            flexible_msg_versions,
+                            |w| {
+                                write!(w, "1")?;
+                                Ok(())
+                            },
+                            |w| {
+                                write!(w, "0")?;
+                                Ok(())
+                            },
+                            false,
+                            false,
+                        )?;
+                    }
                     _ => unreachable!(),
                 }
                 Ok(())
@@ -980,8 +1381,8 @@ pub fn generate(
 
 #[cfg(test)]
 mod tests {
-    use crate::generate_messages::spec::VersionSpec;
     use super::*;
+    use crate::generate_messages::spec::VersionSpec;
 
     #[test]
     fn write_version_cond_unknown_tagged() -> Result<(), Box<dyn std::error::Error>> {
@@ -991,9 +1392,23 @@ mod tests {
         let v1 = VersionSpec::Range(0, 2);
         let v2 = VersionSpec::Since(2);
 
-        write_version_cond(&mut cw, v1, v2, |w| { write!(w, "true")?; Ok(()) }, |_| { Ok(())}, false, true)?;
+        write_version_cond(
+            &mut cw,
+            v1,
+            v2,
+            |w| {
+                write!(w, "true")?;
+                Ok(())
+            },
+            |_| Ok(()),
+            false,
+            true,
+        )?;
 
-        assert_eq!(String::from_utf8(cw.into_inner()).unwrap(), "if version >= 2 {\n    true\n}".to_string());
+        assert_eq!(
+            String::from_utf8(cw.into_inner()).unwrap(),
+            "if version >= 2 {\n    true\n}".to_string()
+        );
         Ok(())
     }
 }
