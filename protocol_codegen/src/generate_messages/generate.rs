@@ -220,6 +220,16 @@ struct PreparedField {
     flexible_versions: VersionSpec,
 }
 
+impl PreparedField {
+    fn var_name(&self) -> Expr {
+        if self.map_key {
+            Expr::new_atom("key")
+        } else {
+            Expr::new_atom("self").field(&self.name).by_ref()
+        }
+    }
+}
+
 fn prepare_field_type<W: Write>(
     w: &mut CodeWriter<W>,
     type_: &TypeSpec,
@@ -362,12 +372,6 @@ fn write_encode_field<W: Write>(
     valid_versions: VersionSpec,
     compute_size: bool,
 ) -> Result<(), Error> {
-    let var_name = if field.map_key {
-        Expr::new_atom("key")
-    } else {
-        Expr::new_atom("self").field(&field.name).by_ref()
-    };
-
     if field
         .tagged_versions
         .contains(field.versions.intersect(valid_versions))
@@ -385,69 +389,63 @@ fn write_encode_field<W: Write>(
                 w,
                 valid_versions,
                 field.versions,
-                |w| {
-                    let valid_versions = valid_versions.intersect(field.versions);
-                    if !field.type_.has_compact_form() {
-                        write_encode_or_compute(
-                            w,
-                            &field.type_.name(false),
-                            &var_name,
-                            compute_size,
-                        )?;
-                    } else {
-                        write_version_cond(
-                            w,
-                            valid_versions,
-                            field.flexible_versions,
-                            |w| {
-                                write_encode_or_compute(
-                                    w,
-                                    &field.type_.name(true),
-                                    &var_name,
-                                    compute_size,
-                                )?;
-                                Ok(())
-                            },
-                            |w| {
-                                write_encode_or_compute(
-                                    w,
-                                    &field.type_.name(false),
-                                    &var_name,
-                                    compute_size,
-                                )?;
-                                Ok(())
-                            },
-                            false,
-                            false,
-                        )?;
-                    }
-                    Ok(())
-                },
-                |w| {
-                    write!(
-                        w,
-                        "if {} ",
-                        field
-                            .default
-                            .gen_is_default(&var_name, field.optional)
-                            .not()
-                    )?;
-                    w.block(|w| {
-                        write!(w, "return Err(EncodeError)")?;
-                        Ok(())
-                    })?;
-                    Ok(())
-                },
+                // field is used in this version, encode it
+                |w| write_encode_field_inner(w, field, valid_versions, compute_size),
+                // field is not present in this version, ensure that the default value is used
+                |w| write_default_check(w, field),
                 false,
                 field.ignorable,
-            )?;
-            Ok(())
+            )
         },
         true,
         false,
     )?;
     writeln!(w)?;
     Ok(())
+}
+
+fn write_encode_field_inner<W: Write>(
+    w: &mut CodeWriter<W>,
+    field: &PreparedField,
+    valid_versions: VersionSpec,
+    compute_size: bool,
+) -> Result<(), Error> {
+    let var_name = field.var_name();
+
+    let valid_versions = valid_versions.intersect(field.versions);
+    if !field.type_.has_compact_form() {
+        write_encode_or_compute(w, &field.type_.name(false), &var_name, compute_size)
+    } else {
+        write_version_cond(
+            w,
+            valid_versions,
+            field.flexible_versions,
+            |w| write_encode_or_compute(w, &field.type_.name(true), &var_name, compute_size),
+            |w| write_encode_or_compute(w, &field.type_.name(false), &var_name, compute_size),
+            false,
+            false,
+        )
+    }
+}
+
+fn write_default_check<W: Write>(
+    w: &mut CodeWriter<W>,
+    field: &PreparedField,
+) -> Result<(), Error> {
+    let var_name = field.var_name();
+
+    write!(
+        w,
+        "if {} ",
+        field
+            .default
+            .gen_is_default(&var_name, field.optional)
+            .not()
+    )?;
+    w.block(|w| {
+        write!(w, "return Err(EncodeError)")?;
+        Ok(())
+    })
 }
 
 fn write_size_check<W: Write, T: Display>(
@@ -496,11 +494,7 @@ fn write_encode_tag_buffer<W: Write>(
 
             // Count number of tagged fields
             for field in sorted_tagged_fields.values() {
-                let var_name = if field.map_key {
-                    Expr::new_atom("key")
-                } else {
-                    Expr::new_atom("self").field(&field.name).by_ref()
-                };
+                let var_name = &field.var_name();
                 write_version_cond(
                     w,
                     valid_versions,
@@ -515,16 +509,12 @@ fn write_encode_tag_buffer<W: Write>(
                                 write!(
                                     w,
                                     "if {} ",
-                                    field
-                                        .default
-                                        .gen_is_default(&var_name, field.optional)
-                                        .not()
+                                    field.default.gen_is_default(var_name, field.optional).not()
                                 )?;
                                 w.block(|w| {
                                     write!(w, "num_tagged_fields += 1;")?;
                                     Ok(())
-                                })?;
-                                Ok(())
+                                })
                             },
                             |_| Ok(()),
                             false,
@@ -564,11 +554,6 @@ fn write_encode_tag_buffer<W: Write>(
                     current_tag = k;
                 }
 
-                let var_name = if field.map_key {
-                    Expr::new_atom("key")
-                } else {
-                    Expr::new_atom("self").field(&field.name).by_ref()
-                };
                 write_version_cond(
                     w,
                     valid_versions,
@@ -580,129 +565,15 @@ fn write_encode_tag_buffer<W: Write>(
                             valid_versions,
                             field.versions,
                             |w| {
-                                let valid_versions = valid_versions.intersect(field.versions);
-                                write!(
+                                write_encode_tag_buffer_inner(
                                     w,
-                                    "if {} ",
-                                    field
-                                        .default
-                                        .gen_is_default(&var_name, field.optional)
-                                        .not()
-                                )?;
-                                w.block(|w| {
-                                    write!(w, "let computed_size = ")?;
-                                    if !field.type_.has_compact_form() {
-                                        write!(
-                                            w,
-                                            "{}.compute_size({})?",
-                                            &field.type_.name(false),
-                                            &var_name
-                                        )?;
-                                    } else {
-                                        write_version_cond(
-                                            w,
-                                            valid_versions,
-                                            field.flexible_versions,
-                                            |w| {
-                                                write!(
-                                                    w,
-                                                    "{}.compute_size({})?",
-                                                    &field.type_.name(true),
-                                                    &var_name
-                                                )?;
-                                                Ok(())
-                                            },
-                                            |w| {
-                                                write!(
-                                                    w,
-                                                    "{}.compute_size({})?",
-                                                    &field.type_.name(false),
-                                                    &var_name
-                                                )?;
-                                                Ok(())
-                                            },
-                                            false,
-                                            false,
-                                        )?;
-                                    }
-                                    writeln!(w, ";")?;
-                                    write_size_check(
-                                        w,
-                                        "computed_size",
-                                        "u32",
-                                        "Tagged field is too large to encode ({} bytes)",
-                                    )?;
-                                    write_encode_or_compute(
-                                        w,
-                                        "types::UnsignedVarInt",
-                                        k,
-                                        compute_size,
-                                    )?;
-                                    writeln!(w)?;
-                                    write_encode_or_compute(
-                                        w,
-                                        "types::UnsignedVarInt",
-                                        "computed_size as u32",
-                                        compute_size,
-                                    )?;
-                                    writeln!(w)?;
-                                    if compute_size {
-                                        writeln!(w, "total_size += computed_size;")?;
-                                    } else {
-                                        if !field.type_.has_compact_form() {
-                                            write_encode_or_compute(
-                                                w,
-                                                &field.type_.name(false),
-                                                &var_name,
-                                                compute_size,
-                                            )?;
-                                        } else {
-                                            write_version_cond(
-                                                w,
-                                                valid_versions,
-                                                field.flexible_versions,
-                                                |w| {
-                                                    write_encode_or_compute(
-                                                        w,
-                                                        &field.type_.name(true),
-                                                        &var_name,
-                                                        compute_size,
-                                                    )?;
-                                                    Ok(())
-                                                },
-                                                |w| {
-                                                    write_encode_or_compute(
-                                                        w,
-                                                        &field.type_.name(false),
-                                                        &var_name,
-                                                        compute_size,
-                                                    )?;
-                                                    Ok(())
-                                                },
-                                                false,
-                                                false,
-                                            )?;
-                                        }
-                                    }
-                                    Ok(())
-                                })?;
-                                Ok(())
+                                    field,
+                                    k,
+                                    valid_versions,
+                                    compute_size,
+                                )
                             },
-                            |w| {
-                                write!(
-                                    w,
-                                    "if {} ",
-                                    field
-                                        .default
-                                        .gen_is_default(&var_name, field.optional)
-                                        .not()
-                                )?;
-                                w.block(|w| {
-                                    write!(w, "return Err(EncodeError)")?;
-                                    Ok(())
-                                })?;
-                                Ok(())
-                            },
+                            |w| write_default_check(w, field),
                             false,
                             field.ignorable,
                         )?;
@@ -734,6 +605,90 @@ fn write_encode_tag_buffer<W: Write>(
     )?;
     writeln!(w)?;
     Ok(())
+}
+
+fn write_encode_tag_buffer_inner<W: Write>(
+    w: &mut CodeWriter<W>,
+    field: &PreparedField,
+    k: i32,
+    valid_versions: VersionSpec,
+    compute_size: bool,
+) -> Result<(), Error> {
+    let var_name = &field.var_name();
+    let valid_versions = valid_versions.intersect(field.versions);
+    write!(
+        w,
+        "if {} ",
+        field.default.gen_is_default(var_name, field.optional).not()
+    )?;
+    w.block(|w| {
+        write!(w, "let computed_size = ")?;
+        if !field.type_.has_compact_form() {
+            write!(
+                w,
+                "{}.compute_size({})?",
+                &field.type_.name(false),
+                var_name
+            )?;
+        } else {
+            write_version_cond(
+                w,
+                valid_versions,
+                field.flexible_versions,
+                |w| {
+                    write!(w, "{}.compute_size({})?", &field.type_.name(true), var_name)?;
+                    Ok(())
+                },
+                |w| {
+                    write!(
+                        w,
+                        "{}.compute_size({})?",
+                        &field.type_.name(false),
+                        var_name
+                    )?;
+                    Ok(())
+                },
+                false,
+                false,
+            )?;
+        }
+        writeln!(w, ";")?;
+        write_size_check(
+            w,
+            "computed_size",
+            "u32",
+            "Tagged field is too large to encode ({} bytes)",
+        )?;
+        write_encode_or_compute(w, "types::UnsignedVarInt", k, compute_size)?;
+        writeln!(w)?;
+        write_encode_or_compute(
+            w,
+            "types::UnsignedVarInt",
+            "computed_size as u32",
+            compute_size,
+        )?;
+        writeln!(w)?;
+        if compute_size {
+            writeln!(w, "total_size += computed_size;")?;
+            Ok(())
+        } else {
+            if !field.type_.has_compact_form() {
+                write_encode_or_compute(w, &field.type_.name(false), var_name, compute_size)
+            } else {
+                write_version_cond(
+                    w,
+                    valid_versions,
+                    field.flexible_versions,
+                    |w| write_encode_or_compute(w, &field.type_.name(true), var_name, compute_size),
+                    |w| {
+                        write_encode_or_compute(w, &field.type_.name(false), var_name, compute_size)
+                    },
+                    false,
+                    false,
+                )
+            }
+        }
+    })
 }
 
 fn write_decode_field<W: Write>(
@@ -821,8 +776,7 @@ fn write_decode_field<W: Write>(
                 },
                 false,
                 false,
-            )?;
-            Ok(())
+            )
         },
         false,
         false,
@@ -934,8 +888,7 @@ fn write_decode_tag_buffer<W: Write>(
                                     },
                                     false,
                                     false,
-                                )?;
-                                Ok(())
+                                )
                             })?;
                             writeln!(w, ",")?;
                         }
