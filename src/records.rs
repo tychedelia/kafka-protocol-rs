@@ -31,12 +31,15 @@
 //! }
 //! ```
 use bytes::Bytes;
+use crc::{Crc, CRC_32_CKSUM, CRC_32_ISCSI};
 use indexmap::IndexMap;
-use log::{error};
-use crc::{CRC_32_CKSUM, CRC_32_ISCSI, Crc};
+use log::error;
 use string::TryFrom;
 
-use crate::protocol::{Encoder, Decoder, EncodeError, DecodeError, StrBytes, types, buf::{ByteBuf, ByteBufMut, gap}};
+use crate::protocol::{
+    buf::{gap, ByteBuf, ByteBufMut},
+    types, DecodeError, Decoder, EncodeError, Encoder, StrBytes,
+};
 
 use super::compression::{self as cmpr, Compressor, Decompressor};
 use std::cmp::Ordering;
@@ -152,11 +155,11 @@ impl RecordBatchEncoder {
     pub fn encode<'a, B, I>(
         buf: &mut B,
         records: I,
-        options: &RecordEncodeOptions
+        options: &RecordEncodeOptions,
     ) -> Result<(), EncodeError>
     where
         B: ByteBufMut,
-        I: Iterator<Item=&'a Record> + Clone,
+        I: Iterator<Item = &'a Record> + Clone,
     {
         match options.version {
             0..=1 => Self::encode_legacy(buf, records, options),
@@ -167,11 +170,11 @@ impl RecordBatchEncoder {
     fn encode_legacy_records<'a, B, I>(
         buf: &mut B,
         records: I,
-        options: &RecordEncodeOptions
+        options: &RecordEncodeOptions,
     ) -> Result<(), EncodeError>
     where
         B: ByteBufMut,
-        I: Iterator<Item=&'a Record> + Clone,
+        I: Iterator<Item = &'a Record> + Clone,
     {
         for record in records {
             record.encode_legacy(buf, options)?;
@@ -181,11 +184,11 @@ impl RecordBatchEncoder {
     fn encode_legacy<'a, B, I>(
         buf: &mut B,
         records: I,
-        options: &RecordEncodeOptions
+        options: &RecordEncodeOptions,
     ) -> Result<(), EncodeError>
     where
         B: ByteBufMut,
-        I: Iterator<Item=&'a Record> + Clone,
+        I: Iterator<Item = &'a Record> + Clone,
     {
         if options.compression == Compression::None {
             // No wrapper needed
@@ -200,7 +203,11 @@ impl RecordBatchEncoder {
             Record::encode_legacy_static(buf, options, |buf| {
                 // Timestamp
                 if options.version > 0 {
-                    let min_timestamp = records.clone().map(|r| r.timestamp).min().unwrap_or_default();
+                    let min_timestamp = records
+                        .clone()
+                        .map(|r| r.timestamp)
+                        .min()
+                        .unwrap_or_default();
                     types::Int64.encode(buf, min_timestamp)?;
                 };
 
@@ -211,15 +218,22 @@ impl RecordBatchEncoder {
                 let size_gap = buf.put_typed_gap(gap::I32);
                 let value_start = buf.offset();
                 match options.compression {
-                    Compression::Snappy => cmpr::Snappy::compress(buf, |buf| Self::encode_legacy_records(buf, records, &inner_opts))?,
-                    Compression::Gzip => cmpr::Gzip::compress(buf, |buf| Self::encode_legacy_records(buf, records, &inner_opts))?,
+                    Compression::Snappy => cmpr::Snappy::compress(buf, |buf| {
+                        Self::encode_legacy_records(buf, records, &inner_opts)
+                    })?,
+                    Compression::Gzip => cmpr::Gzip::compress(buf, |buf| {
+                        Self::encode_legacy_records(buf, records, &inner_opts)
+                    })?,
                     _ => unimplemented!(),
                 }
 
                 let value_end = buf.offset();
                 let value_size = value_end - value_start;
                 if value_size > i32::MAX as usize {
-                    error!("Record batch was too large to encode ({} bytes)", value_size);
+                    error!(
+                        "Record batch was too large to encode ({} bytes)",
+                        value_size
+                    );
                     return Err(EncodeError);
                 }
                 buf.fill_typed_gap(size_gap, value_size as i32);
@@ -229,17 +243,17 @@ impl RecordBatchEncoder {
         }
         Ok(())
     }
-    
+
     fn encode_new_records<'a, B, I>(
         buf: &mut B,
         records: I,
         min_offset: i64,
         min_timestamp: i64,
-        options: &RecordEncodeOptions
+        options: &RecordEncodeOptions,
     ) -> Result<(), EncodeError>
     where
         B: ByteBufMut,
-        I: Iterator<Item=&'a Record>,
+        I: Iterator<Item = &'a Record>,
     {
         for record in records {
             record.encode_new(buf, min_offset, min_timestamp, options)?;
@@ -250,11 +264,11 @@ impl RecordBatchEncoder {
     fn encode_new_batch<'a, B, I>(
         buf: &mut B,
         records: &mut I,
-        options: &RecordEncodeOptions
+        options: &RecordEncodeOptions,
     ) -> Result<bool, EncodeError>
     where
         B: ByteBufMut,
-        I: Iterator<Item=&'a Record> + Clone,
+        I: Iterator<Item = &'a Record> + Clone,
     {
         let mut record_peeker = records.clone();
 
@@ -265,21 +279,47 @@ impl RecordBatchEncoder {
         };
 
         // Determine how many additional records can be included in the batch
-        let num_records = record_peeker.take_while(|record| {
-            record.transactional == first_record.transactional &&
-            record.control == first_record.control &&
-            record.partition_leader_epoch == first_record.partition_leader_epoch &&
-            record.producer_id == first_record.producer_id &&
-            record.producer_epoch == first_record.producer_epoch &&
-            (record.offset as i32).wrapping_sub(record.sequence) == (first_record.offset as i32).wrapping_sub(first_record.sequence)
-        }).count() + 1;
+        let num_records = record_peeker
+            .take_while(|record| {
+                record.transactional == first_record.transactional
+                    && record.control == first_record.control
+                    && record.partition_leader_epoch == first_record.partition_leader_epoch
+                    && record.producer_id == first_record.producer_id
+                    && record.producer_epoch == first_record.producer_epoch
+                    && (record.offset as i32).wrapping_sub(record.sequence)
+                        == (first_record.offset as i32).wrapping_sub(first_record.sequence)
+            })
+            .count()
+            + 1;
 
         // Aggregate various record properties
-        let min_offset = records.clone().take(num_records).map(|r| r.offset).min().expect("Batch contains at least one element");
-        let max_offset = records.clone().take(num_records).map(|r| r.offset).max().expect("Batch contains at least one element");
-        let min_timestamp = records.clone().take(num_records).map(|r| r.timestamp).min().expect("Batch contains at least one element");
-        let max_timestamp = records.clone().take(num_records).map(|r| r.timestamp).max().expect("Batch contains at least one element");
-        let base_sequence = first_record.sequence.wrapping_sub((first_record.offset - min_offset) as i32);
+        let min_offset = records
+            .clone()
+            .take(num_records)
+            .map(|r| r.offset)
+            .min()
+            .expect("Batch contains at least one element");
+        let max_offset = records
+            .clone()
+            .take(num_records)
+            .map(|r| r.offset)
+            .max()
+            .expect("Batch contains at least one element");
+        let min_timestamp = records
+            .clone()
+            .take(num_records)
+            .map(|r| r.timestamp)
+            .min()
+            .expect("Batch contains at least one element");
+        let max_timestamp = records
+            .clone()
+            .take(num_records)
+            .map(|r| r.timestamp)
+            .max()
+            .expect("Batch contains at least one element");
+        let base_sequence = first_record
+            .sequence
+            .wrapping_sub((first_record.offset - min_offset) as i32);
 
         // Base offset
         types::Int64.encode(buf, min_offset)?;
@@ -328,7 +368,10 @@ impl RecordBatchEncoder {
 
         // Record count
         if num_records > i32::MAX as usize {
-            error!("Too many records to encode in one batch ({} records)", num_records);
+            error!(
+                "Too many records to encode in one batch ({} records)",
+                num_records
+            );
             return Err(EncodeError);
         }
         types::Int32.encode(buf, num_records as i32)?;
@@ -336,9 +379,15 @@ impl RecordBatchEncoder {
         // Records
         let records = records.take(num_records);
         match options.compression {
-            Compression::None => cmpr::None::compress(buf, |buf| Self::encode_new_records(buf, records, min_offset, min_timestamp, options))?,
-            Compression::Snappy => cmpr::Snappy::compress(buf, |buf| Self::encode_new_records(buf, records, min_offset, min_timestamp, options))?,
-            Compression::Gzip => cmpr::Gzip::compress(buf, |buf| Self::encode_new_records(buf, records, min_offset, min_timestamp, options))?,
+            Compression::None => cmpr::None::compress(buf, |buf| {
+                Self::encode_new_records(buf, records, min_offset, min_timestamp, options)
+            })?,
+            Compression::Snappy => cmpr::Snappy::compress(buf, |buf| {
+                Self::encode_new_records(buf, records, min_offset, min_timestamp, options)
+            })?,
+            Compression::Gzip => cmpr::Gzip::compress(buf, |buf| {
+                Self::encode_new_records(buf, records, min_offset, min_timestamp, options)
+            })?,
             _ => unimplemented!(),
         }
 
@@ -347,7 +396,10 @@ impl RecordBatchEncoder {
         // Fill size gap
         let batch_size = batch_end - batch_start;
         if batch_size > i32::MAX as usize {
-            error!("Record batch was too large to encode ({} bytes)", batch_size);
+            error!(
+                "Record batch was too large to encode ({} bytes)",
+                batch_size
+            );
             return Err(EncodeError);
         }
 
@@ -363,11 +415,11 @@ impl RecordBatchEncoder {
     fn encode_new<'a, B, I>(
         buf: &mut B,
         mut records: I,
-        options: &RecordEncodeOptions
+        options: &RecordEncodeOptions,
     ) -> Result<(), EncodeError>
     where
         B: ByteBufMut,
-        I: Iterator<Item=&'a Record> + Clone,
+        I: Iterator<Item = &'a Record> + Clone,
     {
         while Self::encode_new_batch(buf, &mut records, options)? {}
         Ok(())
@@ -384,7 +436,7 @@ impl RecordBatchDecoder {
         Ok(records)
     }
     fn decode_batch<B: ByteBuf>(buf: &mut B, records: &mut Vec<Record>) -> Result<(), DecodeError> {
-        let version = buf.try_peek_bytes(MAGIC_BYTE_OFFSET..(MAGIC_BYTE_OFFSET+1))?[0] as i8;
+        let version = buf.try_peek_bytes(MAGIC_BYTE_OFFSET..(MAGIC_BYTE_OFFSET + 1))?[0] as i8;
         debug!("Decoding record batch (version: {})", version);
         match version {
             0..=1 => Record::decode_legacy(buf, version, records),
@@ -392,7 +444,7 @@ impl RecordBatchDecoder {
             _ => {
                 error!("Unknown record batch version ({})", version);
                 Err(DecodeError)
-            },
+            }
         }
     }
     fn decode_new_records<B: ByteBuf>(
@@ -407,7 +459,11 @@ impl RecordBatchDecoder {
         }
         Ok(())
     }
-    fn decode_new_batch<B: ByteBuf>(buf: &mut B, version: i8, records: &mut Vec<Record>) -> Result<(), DecodeError> {
+    fn decode_new_batch<B: ByteBuf>(
+        buf: &mut B,
+        version: i8,
+        records: &mut Vec<Record>,
+    ) -> Result<(), DecodeError> {
         // Base offset
         let min_offset = types::Int64.decode(buf)?;
 
@@ -434,9 +490,12 @@ impl RecordBatchDecoder {
         // CRC
         let supplied_crc: u32 = types::UInt32.decode(buf)?;
         let actual_crc = CASTAGNOLI.checksum(buf);
-        
+
         if supplied_crc != actual_crc {
-            error!("Cyclic redundancy check failed ({} != {})", supplied_crc, actual_crc);
+            error!(
+                "Cyclic redundancy check failed ({} != {})",
+                supplied_crc, actual_crc
+            );
             return Err(DecodeError);
         }
 
@@ -502,9 +561,15 @@ impl RecordBatchDecoder {
 
         // Records
         match compression {
-            Compression::None => cmpr::None::decompress(buf, |buf| Self::decode_new_records(buf, &batch_decode_info, version, records))?,
-            Compression::Snappy => cmpr::Snappy::decompress(buf, |buf| Self::decode_new_records(buf, &batch_decode_info, version, records))?,
-            Compression::Gzip => cmpr::Gzip::decompress(buf, |buf| Self::decode_new_records(buf, &batch_decode_info, version, records))?,
+            Compression::None => cmpr::None::decompress(buf, |buf| {
+                Self::decode_new_records(buf, &batch_decode_info, version, records)
+            })?,
+            Compression::Snappy => cmpr::Snappy::decompress(buf, |buf| {
+                Self::decode_new_records(buf, &batch_decode_info, version, records)
+            })?,
+            Compression::Gzip => cmpr::Gzip::decompress(buf, |buf| {
+                Self::decode_new_records(buf, &batch_decode_info, version, records)
+            })?,
             _ => unimplemented!(),
         };
 
@@ -513,10 +578,14 @@ impl RecordBatchDecoder {
 }
 
 impl Record {
-    fn encode_legacy_static<B, F>(buf: &mut B, options: &RecordEncodeOptions, content_writer: F) -> Result<(), EncodeError>
+    fn encode_legacy_static<B, F>(
+        buf: &mut B,
+        options: &RecordEncodeOptions,
+        content_writer: F,
+    ) -> Result<(), EncodeError>
     where
         B: ByteBufMut,
-        F: FnOnce(&mut B) -> Result<(), EncodeError>
+        F: FnOnce(&mut B) -> Result<(), EncodeError>,
     {
         types::Int64.encode(buf, 0)?;
         let size_gap = buf.put_typed_gap(gap::I32);
@@ -528,7 +597,10 @@ impl Record {
 
         let compression = options.compression as i8;
         if compression > 2 + options.version {
-            error!("Compression algorithm '{:?}' is unsupported for record version '{}'", options.compression, options.version);
+            error!(
+                "Compression algorithm '{:?}' is unsupported for record version '{}'",
+                options.compression, options.version
+            );
             return Err(EncodeError);
         }
         types::Int8.encode(buf, compression)?;
@@ -550,7 +622,11 @@ impl Record {
 
         Ok(())
     }
-    fn encode_legacy<B: ByteBufMut>(&self, buf: &mut B, options: &RecordEncodeOptions) -> Result<(), EncodeError> {
+    fn encode_legacy<B: ByteBufMut>(
+        &self,
+        buf: &mut B,
+        options: &RecordEncodeOptions,
+    ) -> Result<(), EncodeError> {
         if self.transactional || self.control {
             error!("Transactional and control records are not supported in this version of the protocol!");
             return Err(EncodeError);
@@ -571,7 +647,13 @@ impl Record {
             Ok(())
         })
     }
-    fn encode_new<B: ByteBufMut>(&self, buf: &mut B, min_offset: i64, min_timestamp: i64, options: &RecordEncodeOptions) -> Result<(), EncodeError> {
+    fn encode_new<B: ByteBufMut>(
+        &self,
+        buf: &mut B,
+        min_offset: i64,
+        min_timestamp: i64,
+        options: &RecordEncodeOptions,
+    ) -> Result<(), EncodeError> {
         // Size
         let size = self.compute_size_new(min_offset, min_timestamp, options)?;
         if size > i32::MAX as usize {
@@ -586,7 +668,10 @@ impl Record {
         // Timestamp delta
         let timestamp_delta = self.timestamp - min_timestamp;
         if timestamp_delta > i32::MAX as i64 || timestamp_delta < i32::MIN as i64 {
-            error!("Timestamps within batch are too far apart ({}, {})", min_timestamp, self.timestamp);
+            error!(
+                "Timestamps within batch are too far apart ({}, {})",
+                min_timestamp, self.timestamp
+            );
             return Err(EncodeError);
         }
         types::VarInt.encode(buf, timestamp_delta as i32)?;
@@ -594,7 +679,10 @@ impl Record {
         // Offset delta
         let offset_delta = self.offset - min_offset;
         if offset_delta > i32::MAX as i64 || offset_delta < i32::MIN as i64 {
-            error!("Timestamps within batch are too far apart ({}, {})", min_offset, self.offset);
+            error!(
+                "Timestamps within batch are too far apart ({}, {})",
+                min_offset, self.offset
+            );
             return Err(EncodeError);
         }
         types::VarInt.encode(buf, offset_delta as i32)?;
@@ -632,7 +720,10 @@ impl Record {
         for (k, v) in &self.headers {
             // Key len
             if k.len() > i32::MAX as usize {
-                error!("Record header key was too large to encode ({} bytes)", k.len());
+                error!(
+                    "Record header key was too large to encode ({} bytes)",
+                    k.len()
+                );
                 return Err(EncodeError);
             }
             types::VarInt.encode(buf, k.len() as i32)?;
@@ -643,7 +734,10 @@ impl Record {
             // Value
             if let Some(v) = v.as_ref() {
                 if v.len() > i32::MAX as usize {
-                    error!("Record header value was too large to encode ({} bytes)", v.len());
+                    error!(
+                        "Record header value was too large to encode ({} bytes)",
+                        v.len()
+                    );
                     return Err(EncodeError);
                 }
                 types::VarInt.encode(buf, v.len() as i32)?;
@@ -655,7 +749,12 @@ impl Record {
 
         Ok(())
     }
-    fn compute_size_new(&self, min_offset: i64, min_timestamp: i64, _options: &RecordEncodeOptions) -> Result<usize, EncodeError> {
+    fn compute_size_new(
+        &self,
+        min_offset: i64,
+        min_timestamp: i64,
+        _options: &RecordEncodeOptions,
+    ) -> Result<usize, EncodeError> {
         let mut total_size = 0;
 
         // Attributes
@@ -664,7 +763,10 @@ impl Record {
         // Timestamp delta
         let timestamp_delta = self.timestamp - min_timestamp;
         if timestamp_delta > i32::MAX as i64 || timestamp_delta < i32::MIN as i64 {
-            error!("Timestamps within batch are too far apart ({}, {})", min_timestamp, self.timestamp);
+            error!(
+                "Timestamps within batch are too far apart ({}, {})",
+                min_timestamp, self.timestamp
+            );
             return Err(EncodeError);
         }
         total_size += types::VarInt.compute_size(timestamp_delta as i32)?;
@@ -672,7 +774,10 @@ impl Record {
         // Offset delta
         let offset_delta = self.offset - min_offset;
         if offset_delta > i32::MAX as i64 || offset_delta < i32::MIN as i64 {
-            error!("Timestamps within batch are too far apart ({}, {})", min_offset, self.offset);
+            error!(
+                "Timestamps within batch are too far apart ({}, {})",
+                min_offset, self.offset
+            );
             return Err(EncodeError);
         }
         total_size += types::VarInt.compute_size(offset_delta as i32)?;
@@ -710,7 +815,10 @@ impl Record {
         for (k, v) in &self.headers {
             // Key len
             if k.len() > i32::MAX as usize {
-                error!("Record header key was too large to encode ({} bytes)", k.len());
+                error!(
+                    "Record header key was too large to encode ({} bytes)",
+                    k.len()
+                );
                 return Err(EncodeError);
             }
             total_size += types::VarInt.compute_size(k.len() as i32)?;
@@ -721,7 +829,10 @@ impl Record {
             // Value
             if let Some(v) = v.as_ref() {
                 if v.len() > i32::MAX as usize {
-                    error!("Record header value was too large to encode ({} bytes)", v.len());
+                    error!(
+                        "Record header value was too large to encode ({} bytes)",
+                        v.len()
+                    );
                     return Err(EncodeError);
                 }
                 total_size += types::VarInt.compute_size(v.len() as i32)?;
@@ -733,7 +844,11 @@ impl Record {
 
         Ok(total_size)
     }
-    fn decode_legacy<B: ByteBuf>(buf: &mut B, version: i8, records: &mut Vec<Record>) -> Result<(), DecodeError> {
+    fn decode_legacy<B: ByteBuf>(
+        buf: &mut B,
+        version: i8,
+        records: &mut Vec<Record>,
+    ) -> Result<(), DecodeError> {
         let offset = types::Int64.decode(buf)?;
         let size: i32 = types::Int32.decode(buf)?;
         if size < 0 {
@@ -747,9 +862,12 @@ impl Record {
         // CRC
         let supplied_crc: u32 = types::UInt32.decode(buf)?;
         let actual_crc = IEEE.checksum(buf);
-        
+
         if supplied_crc != actual_crc {
-            error!("Cyclic redundancy check failed ({} != {})", supplied_crc, actual_crc);
+            error!(
+                "Cyclic redundancy check failed ({} != {})",
+                supplied_crc, actual_crc
+            );
             return Err(DecodeError);
         }
 
@@ -817,7 +935,11 @@ impl Record {
 
         Ok(())
     }
-    fn decode_new<B: ByteBuf>(buf: &mut B, batch_decode_info: &BatchDecodeInfo, _version: i8) -> Result<Self, DecodeError> {
+    fn decode_new<B: ByteBuf>(
+        buf: &mut B,
+        batch_decode_info: &BatchDecodeInfo,
+        _version: i8,
+    ) -> Result<Self, DecodeError> {
         // Size
         let size: i32 = types::VarInt.decode(buf)?;
         if size < 0 {
@@ -846,20 +968,23 @@ impl Record {
             Ordering::Less => {
                 error!("Unexpected negative record key length ({} bytes)", key_len);
                 return Err(DecodeError);
-            },
+            }
             Ordering::Equal => None,
-            Ordering::Greater => Some(buf.try_get_bytes(key_len as usize)?)
+            Ordering::Greater => Some(buf.try_get_bytes(key_len as usize)?),
         };
 
         // Value
         let value_len: i32 = types::VarInt.decode(buf)?;
         let value = match value_len.cmp(&-1) {
             Ordering::Less => {
-                error!("Unexpected negative record value length ({} bytes)", value_len);
+                error!(
+                    "Unexpected negative record value length ({} bytes)",
+                    value_len
+                );
                 return Err(DecodeError);
-            },
+            }
             Ordering::Equal => None,
-            Ordering::Greater => Some(buf.try_get_bytes(value_len as usize)?)
+            Ordering::Greater => Some(buf.try_get_bytes(value_len as usize)?),
         };
 
         // Headers
@@ -875,7 +1000,10 @@ impl Record {
             // Key len
             let key_len: i32 = types::VarInt.decode(buf)?;
             if key_len < 0 {
-                error!("Unexpected negative record header key length ({} bytes)", key_len);
+                error!(
+                    "Unexpected negative record header key length ({} bytes)",
+                    key_len
+                );
                 return Err(DecodeError);
             }
 
@@ -888,11 +1016,14 @@ impl Record {
             // Value
             let value = match value_len.cmp(&-2) {
                 Ordering::Less => {
-                        error!("Unexpected negative record header value length ({} bytes)", value_len);
-                        return Err(DecodeError);
-                },
+                    error!(
+                        "Unexpected negative record header value length ({} bytes)",
+                        value_len
+                    );
+                    return Err(DecodeError);
+                }
                 Ordering::Equal => None,
-                Ordering::Greater => Some(buf.try_get_bytes(value_len as usize)?)
+                Ordering::Greater => Some(buf.try_get_bytes(value_len as usize)?),
             };
 
             headers.insert(key, value);

@@ -4,15 +4,15 @@
 //! allows encoding and decoding records into a [`Record`](crate::records::Record).
 
 use crate::protocol::buf::{ByteBuf, ByteBufMut};
-use crate::protocol::{EncodeError, DecodeError};
+use crate::protocol::{DecodeError, EncodeError};
 
+mod gzip;
 mod none;
 mod snappy;
-mod gzip;
 
+pub use gzip::Gzip;
 pub use none::None;
 pub use snappy::Snappy;
-pub use gzip::Gzip;
 
 /// A trait for record compression algorithms.
 pub trait Compressor<B: ByteBufMut> {

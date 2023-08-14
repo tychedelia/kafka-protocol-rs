@@ -1,19 +1,19 @@
 //! Most types are used internally in encoding/decoding, and are not required by typical use cases
 //! for interacting with the protocol. However, types can be used for decoding partial messages,
 //! or rewriting parts of an encoded message.
+use std::borrow::Borrow;
+use std::cmp;
+use std::collections::BTreeMap;
+use std::ops::RangeBounds;
 use std::string::FromUtf8Error;
 use std::{error::Error, str::Utf8Error};
-use std::borrow::Borrow;
-use std::ops::RangeBounds;
-use std::collections::BTreeMap;
-use std::cmp;
 
 use buf::{ByteBuf, ByteBufMut};
 
 use self::buf::NotEnoughBytesError;
 
-pub mod types;
 pub mod buf;
+pub mod types;
 
 /// A string type backed by [`bytes::Bytes`].
 pub type StrBytes = string::String<bytes::Bytes>;
@@ -53,7 +53,6 @@ impl From<FromUtf8Error> for DecodeError {
 /// state is attempted to be encoded.
 #[derive(Debug)]
 pub struct EncodeError;
-
 
 impl std::fmt::Display for EncodeError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -131,7 +130,12 @@ pub trait Decodable: Sized {
 
 pub(crate) trait MapEncodable: Sized {
     type Key;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError>;
+    fn encode<B: ByteBufMut>(
+        &self,
+        key: &Self::Key,
+        buf: &mut B,
+        version: i16,
+    ) -> Result<(), EncodeError>;
     fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError>;
 }
 
