@@ -15,7 +15,7 @@ mod spec;
 use spec::SpecType;
 
 pub fn run() -> Result<(), Error> {
-    let mut dir = std::fs::canonicalize(std::file!().rsplit_once("/").unwrap().0)?;
+    let mut dir = std::fs::canonicalize(std::file!().rsplit_once('/').unwrap().0)?;
     dir.push("../../src/messages");
     let output_path = std::fs::canonicalize(dir)?;
     let output_path = output_path.to_str().unwrap();
@@ -35,7 +35,7 @@ pub fn run() -> Result<(), Error> {
         git2::build::RepoBuilder::new()
             .fetch_options(git2::FetchOptions::new())
             .with_checkout(git2::build::CheckoutBuilder::new())
-            .clone("https://github.com/apache/kafka.git", &kafka_repo)?
+            .clone("https://github.com/apache/kafka.git", kafka_repo)?
     };
 
     // Checkout the release commit
@@ -97,7 +97,7 @@ pub fn run() -> Result<(), Error> {
     writeln!(module_file)?;
 
     for input_file_path in &input_file_paths {
-        let spec = parse::parse(&input_file_path)?;
+        let spec = parse::parse(input_file_path)?;
         let spec_meta = (spec.type_, spec.api_key);
 
         let (module_name, struct_name) = generate::generate(output_path, spec, &mut entity_types)?;
@@ -119,7 +119,7 @@ pub fn run() -> Result<(), Error> {
 
     for (api_key, request_type) in request_types.iter() {
         let response_type = response_types
-            .get(&api_key)
+            .get(api_key)
             .expect("Every request type has a response type");
         writeln!(module_file, "impl Request for {} {{", request_type)?;
         writeln!(module_file, "    const KEY: i16 = {};", api_key)?;
