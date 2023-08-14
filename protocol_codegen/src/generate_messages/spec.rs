@@ -81,10 +81,11 @@ pub enum SpecType {
     Data,
 }
 
-#[derive(Debug, Copy, Clone, Display, FromStr, Eq, PartialEq)]
+#[derive(Debug, Copy, Clone, Display, FromStr, Eq, PartialEq, Default)]
 pub enum VersionSpec {
     #[display("none")]
     #[from_str(regex = r"none")]
+    #[default]
     None,
     #[display("{0}")]
     #[from_str(regex = r"(?P<0>\d+)")]
@@ -120,9 +121,9 @@ impl VersionSpec {
     }
     pub fn range(self) -> Option<RangeInclusive<i16>> {
         match self {
-            VersionSpec::None => Some(1..=0),
-            VersionSpec::Exact(v) => Some(v..=v),
+            VersionSpec::None => None,
             VersionSpec::Since(_) => None,
+            VersionSpec::Exact(v) => Some(v..=v),
             VersionSpec::Range(a, b) => Some(a..=b),
         }
     }
@@ -188,10 +189,7 @@ impl PrimitiveType {
         }
     }
     pub fn is_copy(&self) -> bool {
-        match self {
-            Self::String | Self::Bytes | Self::Records => false,
-            _ => true,
-        }
+        !matches!(self, Self::String | Self::Bytes | Self::Records)
     }
     pub fn has_compact_form(&self) -> bool {
         !self.is_copy()
@@ -209,8 +207,8 @@ impl FromStr for TypeSpec {
     type Err = ();
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let s = s.trim();
-        Ok(if s.starts_with("[]") {
-            Self::Array(Box::new(Self::from_str(&s[2..])?))
+        Ok(if let Some(stripped) = s.strip_prefix("[]") {
+            Self::Array(Box::new(Self::from_str(stripped)?))
         } else if let Ok(prim) = PrimitiveType::from_str(s) {
             Self::Primitive(prim)
         } else {
@@ -233,15 +231,6 @@ derive_deserialize_from_str!(TypeSpec, "valid type specification");
 
 impl VersionSpec {
     pub fn is_none(&self) -> bool {
-        match self {
-            VersionSpec::None => true,
-            _ => false,
-        }
-    }
-}
-
-impl Default for VersionSpec {
-    fn default() -> Self {
-        VersionSpec::None
+        matches!(self, VersionSpec::None)
     }
 }

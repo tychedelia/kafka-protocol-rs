@@ -130,11 +130,7 @@ impl PreparedType {
         }
     }
     fn is_entity(&self) -> bool {
-        if let Self::Entity(_) = self {
-            true
-        } else {
-            false
-        }
+        matches!(self, Self::Entity(_))
     }
 }
 
@@ -179,7 +175,7 @@ impl PreparedDefault {
     fn gen_default(&self, optional: bool, is_entity: bool) -> Expr {
         if optional {
             if let Self::Null = self {
-                Expr::new_atom("None".into())
+                Expr::new_atom("None")
             } else {
                 Expr::new_atom(&format!("Some({})", self.gen_default(false, is_entity)))
             }
@@ -198,7 +194,7 @@ impl PreparedDefault {
                 Self::Boolean(false) => Expr::new_atom("false"),
                 Self::Numeric(v) => Expr::new_unary(v),
                 Self::String(s) => Expr::new_atom(&format!("StrBytes::from_str({:?})", s)),
-                Self::Uuid => Expr::new_atom(&format!("Uuid::nil()")),
+                Self::Uuid => Expr::new_atom("Uuid::nil()"),
             }
         }
     }
@@ -327,26 +323,24 @@ fn write_version_cond<
             }
             w.block(if_false)?;
         }
+    } else if always_true {
+        if_true(w)?;
     } else {
-        if always_true {
-            if_true(w)?;
-        } else {
-            match condition {
-                VersionSpec::None => return if_false(w),
-                VersionSpec::Exact(version) if version == max => {
-                    write!(w, "if version >= {} ", version)?
-                }
-                VersionSpec::Exact(version) => write!(w, "if version == {} ", version)?,
-                VersionSpec::Since(version) => write!(w, "if version >= {} ", version)?,
-                VersionSpec::Range(a, b) if a == min => write!(w, "if version <= {} ", b)?,
-                VersionSpec::Range(a, b) if b == max => write!(w, "if version >= {} ", a)?,
-                VersionSpec::Range(a, b) => write!(w, "if version >= {} && version <= {} ", a, b)?,
+        match condition {
+            VersionSpec::None => return if_false(w),
+            VersionSpec::Exact(version) if version == max => {
+                write!(w, "if version >= {} ", version)?
             }
-            w.block(if_true)?;
-            if !skip_false {
-                write!(w, " else ")?;
-                w.block(if_false)?;
-            }
+            VersionSpec::Exact(version) => write!(w, "if version == {} ", version)?,
+            VersionSpec::Since(version) => write!(w, "if version >= {} ", version)?,
+            VersionSpec::Range(a, b) if a == min => write!(w, "if version <= {} ", b)?,
+            VersionSpec::Range(a, b) if b == max => write!(w, "if version >= {} ", a)?,
+            VersionSpec::Range(a, b) => write!(w, "if version >= {} && version <= {} ", a, b)?,
+        }
+        w.block(if_true)?;
+        if !skip_false {
+            write!(w, " else ")?;
+            w.block(if_false)?;
         }
     }
     Ok(())
@@ -663,22 +657,18 @@ fn write_encode_tag_buffer_inner<W: Write>(
         if compute_size {
             writeln!(w, "total_size += computed_size;")?;
             Ok(())
+        } else if !field.type_.has_compact_form() {
+            write_encode_or_compute(w, &field.type_.name(false), var_name, compute_size)
         } else {
-            if !field.type_.has_compact_form() {
-                write_encode_or_compute(w, &field.type_.name(false), var_name, compute_size)
-            } else {
-                write_version_cond(
-                    w,
-                    valid_versions,
-                    field.flexible_versions,
-                    |w| write_encode_or_compute(w, &field.type_.name(true), var_name, compute_size),
-                    |w| {
-                        write_encode_or_compute(w, &field.type_.name(false), var_name, compute_size)
-                    },
-                    false,
-                    false,
-                )
-            }
+            write_version_cond(
+                w,
+                valid_versions,
+                field.flexible_versions,
+                |w| write_encode_or_compute(w, &field.type_.name(true), var_name, compute_size),
+                |w| write_encode_or_compute(w, &field.type_.name(false), var_name, compute_size),
+                false,
+                false,
+            )
         }
     })
 }
