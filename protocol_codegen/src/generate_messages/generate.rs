@@ -434,14 +434,11 @@ fn write_default_check<W: Write>(
 ) -> Result<(), Error> {
     let var_name = field.var_name();
 
-    write!(
-        w,
-        "if {} ",
-        field
-            .default
-            .gen_is_default(&var_name, field.optional)
-            .not()
-    )?;
+    let is_default = field
+        .default
+        .gen_is_default(&var_name, field.optional)
+        .not();
+    write!(w, "if {is_default} ")?;
     w.block(|w| {
         write!(w, "return Err(EncodeError)")?;
         Ok(())
@@ -506,11 +503,9 @@ fn write_encode_tag_buffer<W: Write>(
                             valid_versions,
                             field.versions,
                             |w| {
-                                write!(
-                                    w,
-                                    "if {} ",
-                                    field.default.gen_is_default(var_name, field.optional).not()
-                                )?;
+                                let is_default =
+                                    field.default.gen_is_default(var_name, field.optional).not();
+                                write!(w, "if {is_default} ")?;
                                 w.block(|w| {
                                     write!(w, "num_tagged_fields += 1;")?;
                                     Ok(())
@@ -616,11 +611,8 @@ fn write_encode_tag_buffer_inner<W: Write>(
 ) -> Result<(), Error> {
     let var_name = &field.var_name();
     let valid_versions = valid_versions.intersect(field.versions);
-    write!(
-        w,
-        "if {} ",
-        field.default.gen_is_default(var_name, field.optional).not()
-    )?;
+    let is_default = field.default.gen_is_default(var_name, field.optional).not();
+    write!(w, "if {is_default} ")?;
     w.block(|w| {
         write!(w, "let computed_size = ")?;
         if !field.type_.has_compact_form() {
