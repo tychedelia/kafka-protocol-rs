@@ -1,8 +1,20 @@
 # Changelog
 
+## v0.7.0
+
+- Switch to [crc32c](https://crates.io/crates/crc32c) crate, providing hardware accelration for crc operations
+on supported platforms.
+- Formatting fixes.
+- Miscellaneous dependency updates.
+- Fix issue with `derive_builder` implementation in which default fields were not being used correctly.
+
+## v0.6.1
+
+- Miscellaneous dependency updates.
+
 ## v0.6.0
 
-Add `ApiKey::request_header_version` and `ApiKey::response_header_version` to assist deserializing
+- Add `ApiKey::request_header_version` and `ApiKey::response_header_version` to assist deserializing
 headers without reference to message type.
 
 ## v0.5.1
@@ -11,7 +23,7 @@ Bump `uuid` crate version.
 
 ## v0.5.0
 
-Clarify versioning support for upstream Kafka, tracking the latest Kafka
+- Clarify versioning support for upstream Kafka, tracking the latest Kafka
 stable release. Improve docs.
 
 #### Enhancements
