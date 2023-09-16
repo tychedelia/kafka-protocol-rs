@@ -11,9 +11,8 @@ failure = "0.1.6"
 Inflector = { version = "0.11.4", default-features = false }
 serde = { version = "1.0.104", features = ["derive"] }
 serde_json = "1.0.48"
-serde_plain = "0.3.0"
-parse-display = "0.1.1"
+serde_plain = "1.0.1"
+parse-display = "0.8.1"
 json_comments = "0.2.0"
-assert-json-diff = "1.0.1"
-git2 = "0.16"
-uuid = { version = "0.8.2", features = ["v4", "serde" ] }
+assert-json-diff = "2.0.2"
+git2 = "0.17"
