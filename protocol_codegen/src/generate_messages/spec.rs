@@ -98,7 +98,7 @@ pub enum VersionSpec {
     Range(i16, i16),
 }
 derive_serialize_from_display!(VersionSpec);
-derive_deserialize_from_str!(VersionSpec, "valid version specification");
+derive_deserialize_from_fromstr!(VersionSpec, "valid version specification");
 
 impl VersionSpec {
     pub fn intersect(self, other: VersionSpec) -> VersionSpec {
@@ -144,8 +144,8 @@ pub enum PrimitiveType {
     Records,
     Uuid,
 }
-forward_display_to_serde!(PrimitiveType);
-forward_from_str_to_serde!(PrimitiveType);
+derive_display_from_serialize!(PrimitiveType);
+derive_fromstr_from_deserialize!(PrimitiveType);
 
 impl PrimitiveType {
     pub fn rust_name(&self) -> &str {
@@ -227,7 +227,7 @@ impl Display for TypeSpec {
     }
 }
 derive_serialize_from_display!(TypeSpec);
-derive_deserialize_from_str!(TypeSpec, "valid type specification");
+derive_deserialize_from_fromstr!(TypeSpec, "valid type specification");
 
 impl VersionSpec {
     pub fn is_none(&self) -> bool {

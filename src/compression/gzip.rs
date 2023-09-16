@@ -1,13 +1,13 @@
 use std::io::Write;
 
-use bytes::{Bytes, BytesMut};
 use bytes::buf::BufMut;
+use bytes::{Bytes, BytesMut};
+use flate2::write::{GzDecoder, GzEncoder};
 use flate2::Compression;
-use flate2::write::{GzEncoder, GzDecoder};
 use log::error;
 
 use crate::protocol::buf::{ByteBuf, ByteBufMut};
-use crate::protocol::{EncodeError, DecodeError};
+use crate::protocol::{DecodeError, EncodeError};
 
 use super::{Compressor, Decompressor};
 
@@ -29,7 +29,7 @@ impl<B: ByteBufMut> Compressor<B> for Gzip {
     type BufMut = BytesMut;
     fn compress<R, F>(buf: &mut B, f: F) -> Result<R, EncodeError>
     where
-        F: FnOnce(&mut Self::BufMut) -> Result<R, EncodeError>
+        F: FnOnce(&mut Self::BufMut) -> Result<R, EncodeError>,
     {
         // Write uncompressed bytes into a temporary buffer
         let mut tmp = BytesMut::new();
@@ -48,13 +48,14 @@ impl<B: ByteBuf> Decompressor<B> for Gzip {
     type Buf = Bytes;
     fn decompress<R, F>(buf: &mut B, f: F) -> Result<R, DecodeError>
     where
-        F: FnOnce(&mut Self::Buf) -> Result<R, DecodeError>
+        F: FnOnce(&mut Self::Buf) -> Result<R, DecodeError>,
     {
         let mut tmp = BytesMut::new();
 
         // Decompress directly from the input buffer
         let mut d = GzDecoder::new((&mut tmp).writer());
-        d.write_all(&buf.copy_to_bytes(buf.remaining())).map_err(decompression_err)?;
+        d.write_all(&buf.copy_to_bytes(buf.remaining()))
+            .map_err(decompression_err)?;
         d.finish().map_err(decompression_err)?;
 
         f(&mut tmp.into())
