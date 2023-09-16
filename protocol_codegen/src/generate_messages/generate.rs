@@ -996,6 +996,7 @@ fn write_struct_def<W: Write>(
         w,
         "#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]"
     )?;
+    writeln!(w, "#[builder(default)]")?;
     write!(w, "pub struct {} ", name)?;
     w.block(|w| {
         for prepared_field in &prepared_fields {
