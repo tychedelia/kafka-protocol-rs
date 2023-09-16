@@ -31,9 +31,10 @@
 //! }
 //! ```
 use bytes::Bytes;
-use crc::{Crc, CRC_32_CKSUM, CRC_32_ISCSI};
 use indexmap::IndexMap;
+use crc32c::crc32c;
 use log::error;
+use crc::{CRC_32_CKSUM, Crc};
 use string::TryFrom;
 
 use crate::protocol::{
@@ -44,8 +45,6 @@ use crate::protocol::{
 use super::compression::{self as cmpr, Compressor, Decompressor};
 use std::cmp::Ordering;
 
-/// CRC-32C (Castagnoli) cyclic redundancy check
-pub const CASTAGNOLI: Crc<u32> = Crc::<u32>::new(&CRC_32_ISCSI);
 /// IEEE (checksum) cyclic redundancy check.
 pub const IEEE: Crc<u32> = Crc::<u32>::new(&CRC_32_CKSUM);
 
@@ -406,7 +405,7 @@ impl RecordBatchEncoder {
         buf.fill_typed_gap(size_gap, batch_size as i32);
 
         // Fill CRC gap
-        let crc = CASTAGNOLI.checksum(buf.range(content_start..batch_end));
+        let crc = crc32c(buf.range(content_start..batch_end));
         buf.fill_typed_gap(crc_gap, crc);
 
         Ok(true)
@@ -489,8 +488,8 @@ impl RecordBatchDecoder {
 
         // CRC
         let supplied_crc: u32 = types::UInt32.decode(buf)?;
-        let actual_crc = CASTAGNOLI.checksum(buf);
-
+        let actual_crc = crc32c(buf);
+        
         if supplied_crc != actual_crc {
             error!(
                 "Cyclic redundancy check failed ({} != {})",
