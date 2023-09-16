@@ -257,7 +257,10 @@ pub trait ByteBufMut: BufMut {
 
     /// Put a gap of `len` at the current buffer offset.
     fn put_gap(&mut self, len: usize) -> Gap {
-        let res = Gap { offset: self.offset(), len };
+        let res = Gap {
+            offset: self.offset(),
+            len,
+        };
         self.seek(res.offset + len);
         res
     }

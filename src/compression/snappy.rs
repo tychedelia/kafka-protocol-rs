@@ -1,9 +1,9 @@
 use bytes::{Bytes, BytesMut};
-use snap::raw::*;
 use log::error;
+use snap::raw::*;
 
 use crate::protocol::buf::{ByteBuf, ByteBufMut};
-use crate::protocol::{EncodeError, DecodeError};
+use crate::protocol::{DecodeError, EncodeError};
 
 use super::{Compressor, Decompressor};
 
@@ -15,7 +15,7 @@ impl<B: ByteBufMut> Compressor<B> for Snappy {
     type BufMut = BytesMut;
     fn compress<R, F>(buf: &mut B, f: F) -> Result<R, EncodeError>
     where
-        F: FnOnce(&mut Self::BufMut) -> Result<R, EncodeError>
+        F: FnOnce(&mut Self::BufMut) -> Result<R, EncodeError>,
     {
         // Write uncompressed bytes into a temporary buffer
         let mut tmp = BytesMut::new();
@@ -24,10 +24,12 @@ impl<B: ByteBufMut> Compressor<B> for Snappy {
         // Compress directly into the target buffer
         let start_pos = buf.offset();
         let compress_gap = buf.put_gap(max_compress_len(tmp.len()));
-        let actual_len = Encoder::new().compress(&tmp, buf.gap_buf(compress_gap)).map_err(|e| {
-            error!("Failed to compress buffer: {}", e);
-            EncodeError
-        })?;
+        let actual_len = Encoder::new()
+            .compress(&tmp, buf.gap_buf(compress_gap))
+            .map_err(|e| {
+                error!("Failed to compress buffer: {}", e);
+                EncodeError
+            })?;
         buf.seek(start_pos + actual_len);
 
         Ok(res)
@@ -38,7 +40,7 @@ impl<B: ByteBuf> Decompressor<B> for Snappy {
     type Buf = Bytes;
     fn decompress<R, F>(buf: &mut B, f: F) -> Result<R, DecodeError>
     where
-        F: FnOnce(&mut Self::Buf) -> Result<R, DecodeError>
+        F: FnOnce(&mut Self::Buf) -> Result<R, DecodeError>,
     {
         // Allocate a temporary buffer to hold the uncompressed bytes
         let buf = buf.copy_to_bytes(buf.remaining());

@@ -83,7 +83,7 @@
 //! # api_versions_req.client_software_version = StrBytes::from_str("1.0");
 //! # api_versions_req.client_software_name = StrBytes::from_str("example-client");
 //! # api_versions_req.encode(&mut buf, 3);
-//! 
+//!
 //! let api_key = buf.peek_bytes(0..2).get_i16();
 //! let api_version = buf.peek_bytes(2..4).get_i16();
 //! let header_version = ApiKey::try_from(api_key).unwrap().request_header_version(api_version);
@@ -107,11 +107,11 @@
 #[macro_use]
 extern crate log;
 
+pub mod compression;
+pub mod error;
 #[allow(clippy::all)]
 pub mod messages;
-pub mod records;
-pub mod compression;
 pub mod protocol;
-pub mod error;
+pub mod records;
 
 pub use error::ResponseError;
