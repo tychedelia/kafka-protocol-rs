@@ -20,6 +20,7 @@ use crate::protocol::{
 /// Valid versions: 0-4
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct DescribeConfigsSynonym {
     /// The synonym name.
     /// 
@@ -199,6 +200,7 @@ impl Message for DescribeConfigsSynonym {
 /// Valid versions: 0-4
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct DescribeConfigsResourceResult {
     /// The configuration name.
     /// 
@@ -462,6 +464,7 @@ impl Message for DescribeConfigsResourceResult {
 /// Valid versions: 0-4
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct DescribeConfigsResult {
     /// The error code, or 0 if we were able to successfully describe the configurations.
     /// 
@@ -625,6 +628,7 @@ impl Message for DescribeConfigsResult {
 /// Valid versions: 0-4
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct DescribeConfigsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 

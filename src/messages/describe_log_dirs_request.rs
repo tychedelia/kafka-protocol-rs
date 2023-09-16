@@ -20,6 +20,7 @@ use crate::protocol::{
 /// Valid versions: 0-4
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct DescribableLogDirTopic {
     /// The partition indexes.
     /// 
@@ -136,6 +137,7 @@ impl Message for DescribableLogDirTopic {
 /// Valid versions: 0-4
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct DescribeLogDirsRequest {
     /// Each topic that we want to describe log directories for, or null for all topics.
     /// 

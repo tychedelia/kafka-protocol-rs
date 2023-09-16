@@ -20,6 +20,7 @@ use crate::protocol::{
 /// Valid versions: 0
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct DescribeTransactionsRequest {
     /// Array of transactionalIds to include in describe results. If empty, then no results will be returned.
     /// 

@@ -20,6 +20,7 @@ use crate::protocol::{
 /// Valid versions: 0-1
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct EntityData {
     /// The entity type.
     /// 
@@ -141,6 +142,7 @@ impl Message for EntityData {
 /// Valid versions: 0-1
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct EntryData {
     /// The error code, or `0` if the quota alteration succeeded.
     /// 
@@ -272,6 +274,7 @@ impl Message for EntryData {
 /// Valid versions: 0-1
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct AlterClientQuotasResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 

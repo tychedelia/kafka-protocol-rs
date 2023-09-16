@@ -20,6 +20,7 @@ use crate::protocol::{
 /// Valid versions: 0
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct TopicRequest {
     /// The topic name.
     /// 
@@ -111,6 +112,7 @@ impl Message for TopicRequest {
 /// Valid versions: 0
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct DescribeProducersRequest {
     /// 
     /// 

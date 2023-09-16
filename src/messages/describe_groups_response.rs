@@ -20,6 +20,7 @@ use crate::protocol::{
 /// Valid versions: 0-5
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct DescribedGroupMember {
     /// The member ID assigned by the group coordinator.
     /// 
@@ -237,6 +238,7 @@ impl Message for DescribedGroupMember {
 /// Valid versions: 0-5
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct DescribedGroup {
     /// The describe error, or 0 if there was no error.
     /// 
@@ -460,6 +462,7 @@ impl Message for DescribedGroup {
 /// Valid versions: 0-5
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct DescribeGroupsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 

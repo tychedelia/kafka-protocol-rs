@@ -20,6 +20,7 @@ use crate::protocol::{
 /// Valid versions: 0
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct ProducerState {
     /// 
     /// 
@@ -151,6 +152,7 @@ impl Message for ProducerState {
 /// Valid versions: 0
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct PartitionResponse {
     /// The partition index.
     /// 
@@ -262,6 +264,7 @@ impl Message for PartitionResponse {
 /// Valid versions: 0
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct TopicResponse {
     /// The topic name
     /// 
@@ -353,6 +356,7 @@ impl Message for TopicResponse {
 /// Valid versions: 0
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct DescribeProducersResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 

@@ -20,6 +20,7 @@ use crate::protocol::{
 /// Valid versions: 0
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct ListPartitionReassignmentsTopics {
     /// The topic name
     /// 
@@ -111,6 +112,7 @@ impl Message for ListPartitionReassignmentsTopics {
 /// Valid versions: 0
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct ListPartitionReassignmentsRequest {
     /// The time in ms to wait for the request to complete.
     /// 

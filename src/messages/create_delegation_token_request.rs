@@ -20,6 +20,7 @@ use crate::protocol::{
 /// Valid versions: 0-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct CreatableRenewers {
     /// The type of the Kafka principal.
     /// 
@@ -141,6 +142,7 @@ impl Message for CreatableRenewers {
 /// Valid versions: 0-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct CreateDelegationTokenRequest {
     /// The principal type of the owner of the token. If it's null it defaults to the token request principal.
     /// 

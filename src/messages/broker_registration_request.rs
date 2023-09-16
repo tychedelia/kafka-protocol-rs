@@ -20,6 +20,7 @@ use crate::protocol::{
 /// Valid versions: 0
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct Listener {
     /// The hostname.
     /// 
@@ -126,6 +127,7 @@ impl Message for Listener {
 /// Valid versions: 0
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct Feature {
     /// The minimum supported feature level.
     /// 
@@ -222,6 +224,7 @@ impl Message for Feature {
 /// Valid versions: 0
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct BrokerRegistrationRequest {
     /// The broker ID.
     /// 

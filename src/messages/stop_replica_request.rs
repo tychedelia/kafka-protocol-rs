@@ -20,6 +20,7 @@ use crate::protocol::{
 /// Valid versions: 0-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct StopReplicaPartitionV0 {
     /// The topic name.
     /// 
@@ -149,6 +150,7 @@ impl Message for StopReplicaPartitionV0 {
 /// Valid versions: 0-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct StopReplicaTopicV1 {
     /// The topic name.
     /// 
@@ -302,6 +304,7 @@ impl Message for StopReplicaTopicV1 {
 /// Valid versions: 0-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct StopReplicaPartitionState {
     /// The partition index.
     /// 
@@ -457,6 +460,7 @@ impl Message for StopReplicaPartitionState {
 /// Valid versions: 0-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct StopReplicaTopicState {
     /// The topic name.
     /// 
@@ -586,6 +590,7 @@ impl Message for StopReplicaTopicState {
 /// Valid versions: 0-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct StopReplicaRequest {
     /// The controller id.
     /// 

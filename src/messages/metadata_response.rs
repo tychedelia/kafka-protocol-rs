@@ -20,6 +20,7 @@ use crate::protocol::{
 /// Valid versions: 0-12
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct MetadataResponseBroker {
     /// The broker hostname.
     /// 
@@ -164,6 +165,7 @@ impl Message for MetadataResponseBroker {
 /// Valid versions: 0-12
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct MetadataResponsePartition {
     /// The partition error, or 0 if there was no error.
     /// 
@@ -363,6 +365,7 @@ impl Message for MetadataResponsePartition {
 /// Valid versions: 0-12
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct MetadataResponseTopic {
     /// The topic error, or 0 if there was no error.
     /// 
@@ -551,6 +554,7 @@ impl Message for MetadataResponseTopic {
 /// Valid versions: 0-12
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct MetadataResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 

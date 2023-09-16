@@ -20,6 +20,7 @@ use crate::protocol::{
 /// Valid versions: 0-4
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct ListGroupsRequest {
     /// The states of the groups we want to list. If empty all groups are returned with their state.
     /// 

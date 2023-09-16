@@ -20,6 +20,7 @@ use crate::protocol::{
 /// Valid versions: 0
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct SnapshotId {
     /// 
     /// 
@@ -111,6 +112,7 @@ impl Message for SnapshotId {
 /// Valid versions: 0
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct PartitionSnapshot {
     /// The partition index
     /// 
@@ -222,6 +224,7 @@ impl Message for PartitionSnapshot {
 /// Valid versions: 0
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct TopicSnapshot {
     /// The name of the topic to fetch
     /// 
@@ -313,6 +316,7 @@ impl Message for TopicSnapshot {
 /// Valid versions: 0
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct FetchSnapshotRequest {
     /// The clusterId if known, this is used to validate metadata fetches prior to broker registration
     /// 

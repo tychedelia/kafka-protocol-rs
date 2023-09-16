@@ -20,6 +20,7 @@ use crate::protocol::{
 /// Valid versions: 0-2
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct AlterableConfig {
     /// The value to set for the configuration key.
     /// 
@@ -136,6 +137,7 @@ impl Message for AlterableConfig {
 /// Valid versions: 0-2
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct AlterConfigsResource {
     /// The resource type.
     /// 
@@ -267,6 +269,7 @@ impl Message for AlterConfigsResource {
 /// Valid versions: 0-2
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct AlterConfigsRequest {
     /// The updates for each resource.
     /// 

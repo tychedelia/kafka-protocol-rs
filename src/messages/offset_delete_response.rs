@@ -20,6 +20,7 @@ use crate::protocol::{
 /// Valid versions: 0
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct OffsetDeleteResponsePartition {
     /// The error code, or 0 if there was no error.
     /// 
@@ -79,6 +80,7 @@ impl Message for OffsetDeleteResponsePartition {
 /// Valid versions: 0
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct OffsetDeleteResponseTopic {
     /// The responses for each partition in the topic.
     /// 
@@ -138,6 +140,7 @@ impl Message for OffsetDeleteResponseTopic {
 /// Valid versions: 0
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct OffsetDeleteResponse {
     /// The top-level error code, or 0 if there was no error.
     /// 

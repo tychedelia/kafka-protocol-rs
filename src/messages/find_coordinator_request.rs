@@ -20,6 +20,7 @@ use crate::protocol::{
 /// Valid versions: 0-4
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct FindCoordinatorRequest {
     /// The coordinator key.
     /// 

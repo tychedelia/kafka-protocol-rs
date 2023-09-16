@@ -20,6 +20,7 @@ use crate::protocol::{
 /// Valid versions: 0-7
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct UpdateMetadataPartitionState {
     /// In older versions of this RPC, the topic name.
     /// 
@@ -239,6 +240,7 @@ impl Message for UpdateMetadataPartitionState {
 /// Valid versions: 0-7
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct UpdateMetadataTopicState {
     /// The topic name.
     /// 
@@ -410,6 +412,7 @@ impl Message for UpdateMetadataTopicState {
 /// Valid versions: 0-7
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct UpdateMetadataEndpoint {
     /// The port of this endpoint
     /// 
@@ -607,6 +610,7 @@ impl Message for UpdateMetadataEndpoint {
 /// Valid versions: 0-7
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct UpdateMetadataBroker {
     /// The broker id.
     /// 
@@ -790,6 +794,7 @@ impl Message for UpdateMetadataBroker {
 /// Valid versions: 0-7
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct UpdateMetadataRequest {
     /// The controller id.
     /// 

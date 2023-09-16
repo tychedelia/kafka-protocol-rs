@@ -20,6 +20,7 @@ use crate::protocol::{
 /// Valid versions: 0-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct ApiVersion {
     /// The minimum supported version, inclusive.
     /// 
@@ -122,6 +123,7 @@ impl Message for ApiVersion {
 /// Valid versions: 0-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct SupportedFeatureKey {
     /// The minimum supported version for the feature.
     /// 
@@ -272,6 +274,7 @@ impl Message for SupportedFeatureKey {
 /// Valid versions: 0-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct FinalizedFeatureKey {
     /// The cluster-wide finalized max version level for the feature.
     /// 
@@ -422,6 +425,7 @@ impl Message for FinalizedFeatureKey {
 /// Valid versions: 0-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct ApiVersionsResponse {
     /// The top-level error code.
     /// 

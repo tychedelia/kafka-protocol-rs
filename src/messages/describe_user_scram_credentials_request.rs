@@ -20,6 +20,7 @@ use crate::protocol::{
 /// Valid versions: 0
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct UserName {
     /// The user name.
     /// 
@@ -101,6 +102,7 @@ impl Message for UserName {
 /// Valid versions: 0
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct DescribeUserScramCredentialsRequest {
     /// The users to describe, or null/empty to describe all users.
     /// 

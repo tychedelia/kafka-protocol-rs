@@ -20,6 +20,7 @@ use crate::protocol::{
 /// Valid versions: 0-4
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct DescribeLogDirsPartition {
     /// The partition index.
     /// 
@@ -137,6 +138,7 @@ impl Message for DescribeLogDirsPartition {
 /// Valid versions: 0-4
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct DescribeLogDirsTopic {
     /// The topic name.
     /// 
@@ -258,6 +260,7 @@ impl Message for DescribeLogDirsTopic {
 /// Valid versions: 0-4
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct DescribeLogDirsResult {
     /// The error code, or 0 if there was no error.
     /// 
@@ -425,6 +428,7 @@ impl Message for DescribeLogDirsResult {
 /// Valid versions: 0-4
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct DescribeLogDirsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 

@@ -20,6 +20,7 @@ use crate::protocol::{
 /// Valid versions: 0-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct DescribedDelegationTokenRenewer {
     /// The renewer principal type
     /// 
@@ -141,6 +142,7 @@ impl Message for DescribedDelegationTokenRenewer {
 /// Valid versions: 0-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct DescribedDelegationToken {
     /// The token principal type.
     /// 
@@ -410,6 +412,7 @@ impl Message for DescribedDelegationToken {
 /// Valid versions: 0-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct DescribeDelegationTokenResponse {
     /// The error code, or 0 if there was no error.
     /// 

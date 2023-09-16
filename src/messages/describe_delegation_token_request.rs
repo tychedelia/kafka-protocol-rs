@@ -20,6 +20,7 @@ use crate::protocol::{
 /// Valid versions: 0-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct DescribeDelegationTokenOwner {
     /// The owner principal type.
     /// 
@@ -141,6 +142,7 @@ impl Message for DescribeDelegationTokenOwner {
 /// Valid versions: 0-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct DescribeDelegationTokenRequest {
     /// Each owner that we want to describe delegation tokens for, or null to describe all tokens.
     /// 

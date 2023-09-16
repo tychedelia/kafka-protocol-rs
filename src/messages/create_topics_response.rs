@@ -20,6 +20,7 @@ use crate::protocol::{
 /// Valid versions: 0-7
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct CreatableTopicConfigs {
     /// The configuration name.
     /// 
@@ -219,6 +220,7 @@ impl Message for CreatableTopicConfigs {
 /// Valid versions: 0-7
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct CreatableTopicResult {
     /// The unique topic ID
     /// 
@@ -466,6 +468,7 @@ impl Message for CreatableTopicResult {
 /// Valid versions: 0-7
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct CreateTopicsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 

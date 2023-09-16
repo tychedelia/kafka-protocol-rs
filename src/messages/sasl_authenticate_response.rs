@@ -20,6 +20,7 @@ use crate::protocol::{
 /// Valid versions: 0-2
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct SaslAuthenticateResponse {
     /// The error code, or 0 if there was no error.
     /// 

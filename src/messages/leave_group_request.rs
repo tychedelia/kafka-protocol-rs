@@ -20,6 +20,7 @@ use crate::protocol::{
 /// Valid versions: 0-5
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct MemberIdentity {
     /// The member ID to remove from the group.
     /// 
@@ -191,6 +192,7 @@ impl Message for MemberIdentity {
 /// Valid versions: 0-5
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct LeaveGroupRequest {
     /// The ID of the group to leave.
     /// 

@@ -20,6 +20,7 @@ use crate::protocol::{
 /// Valid versions: 0-1
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct EntityData {
     /// The entity type.
     /// 
@@ -141,6 +142,7 @@ impl Message for EntityData {
 /// Valid versions: 0-1
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct OpData {
     /// The quota configuration key.
     /// 
@@ -260,6 +262,7 @@ impl Message for OpData {
 /// Valid versions: 0-1
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct EntryData {
     /// The quota entity to alter.
     /// 
@@ -381,6 +384,7 @@ impl Message for EntryData {
 /// Valid versions: 0-1
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct AlterClientQuotasRequest {
     /// The quota configuration entries to alter.
     /// 

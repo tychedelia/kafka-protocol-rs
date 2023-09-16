@@ -20,6 +20,7 @@ use crate::protocol::{
 /// Valid versions: 0-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct TxnOffsetCommitResponsePartition {
     /// The partition index.
     /// 
@@ -117,6 +118,7 @@ impl Message for TxnOffsetCommitResponsePartition {
 /// Valid versions: 0-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct TxnOffsetCommitResponseTopic {
     /// The topic name.
     /// 
@@ -238,6 +240,7 @@ impl Message for TxnOffsetCommitResponseTopic {
 /// Valid versions: 0-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct TxnOffsetCommitResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 

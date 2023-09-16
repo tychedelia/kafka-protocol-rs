@@ -20,6 +20,7 @@ use crate::protocol::{
 /// Valid versions: 0-4
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct DescribeConfigsResource {
     /// The resource type.
     /// 
@@ -151,6 +152,7 @@ impl Message for DescribeConfigsResource {
 /// Valid versions: 0-4
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct DescribeConfigsRequest {
     /// The resources whose configurations we want to describe.
     /// 

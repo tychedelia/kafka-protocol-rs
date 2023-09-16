@@ -20,6 +20,7 @@ use crate::protocol::{
 /// Valid versions: 0-9
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct JoinGroupRequestProtocol {
     /// The protocol metadata.
     /// 
@@ -136,6 +137,7 @@ impl Message for JoinGroupRequestProtocol {
 /// Valid versions: 0-9
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct JoinGroupRequest {
     /// The group identifier.
     /// 

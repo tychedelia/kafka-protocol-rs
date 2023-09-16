@@ -20,6 +20,7 @@ use crate::protocol::{
 /// Valid versions: 0-1
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct WritableTxnMarkerTopic {
     /// The topic name.
     /// 
@@ -141,6 +142,7 @@ impl Message for WritableTxnMarkerTopic {
 /// Valid versions: 0-1
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct WritableTxnMarker {
     /// The current producer ID.
     /// 
@@ -280,6 +282,7 @@ impl Message for WritableTxnMarker {
 /// Valid versions: 0-1
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct WriteTxnMarkersRequest {
     /// The transaction markers to be written.
     /// 

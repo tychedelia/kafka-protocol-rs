@@ -20,6 +20,7 @@ use crate::protocol::{
 /// Valid versions: 0-2
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct PartitionData {
     /// The partition index
     /// 
@@ -157,6 +158,7 @@ impl Message for PartitionData {
 /// Valid versions: 0-2
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct TopicData {
     /// The name of the topic to alter ISRs for
     /// 
@@ -274,6 +276,7 @@ impl Message for TopicData {
 /// Valid versions: 0-2
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct AlterPartitionRequest {
     /// The ID of the requesting broker
     /// 

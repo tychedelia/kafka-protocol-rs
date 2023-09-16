@@ -20,6 +20,7 @@ use crate::protocol::{
 /// Valid versions: 0-9
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct JoinGroupResponseMember {
     /// The group member ID.
     /// 
@@ -171,6 +172,7 @@ impl Message for JoinGroupResponseMember {
 /// Valid versions: 0-9
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct JoinGroupResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     /// 

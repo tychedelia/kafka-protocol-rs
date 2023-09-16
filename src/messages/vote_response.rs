@@ -20,6 +20,7 @@ use crate::protocol::{
 /// Valid versions: 0
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct PartitionData {
     /// The partition index.
     /// 
@@ -141,6 +142,7 @@ impl Message for PartitionData {
 /// Valid versions: 0
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct TopicData {
     /// The topic name.
     /// 
@@ -232,6 +234,7 @@ impl Message for TopicData {
 /// Valid versions: 0
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct VoteResponse {
     /// The top level error code.
     /// 

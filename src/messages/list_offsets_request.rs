@@ -20,6 +20,7 @@ use crate::protocol::{
 /// Valid versions: 0-7
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct ListOffsetsPartition {
     /// The partition index.
     /// 
@@ -161,6 +162,7 @@ impl Message for ListOffsetsPartition {
 /// Valid versions: 0-7
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct ListOffsetsTopic {
     /// The topic name.
     /// 
@@ -282,6 +284,7 @@ impl Message for ListOffsetsTopic {
 /// Valid versions: 0-7
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct ListOffsetsRequest {
     /// The broker ID of the requestor, or -1 if this request is being made by a normal consumer.
     /// 
