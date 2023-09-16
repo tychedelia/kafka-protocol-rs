@@ -6,7 +6,7 @@ name = "kafka-protocol"
 version = "0.6.1"
 authors = [
     "Diggory Blake <diggsey@googlemail.com>",
-    "Jem McElwain <jmcelwain@gmail.com>",
+    "Charlotte McElwain <charlotte.c.mcelwain@gmail.com>",
     "belltoy <belltoy@gmail.com>",
 ]
 edition = "2018"
