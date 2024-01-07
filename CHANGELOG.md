@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.8.0
+- Implement Zstd and Lz4 compression.
+
 ## v0.7.0
 
 - Switch to [crc32c](https://crates.io/crates/crc32c) crate, providing hardware accelration for crc operations
