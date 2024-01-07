@@ -223,6 +223,12 @@ impl RecordBatchEncoder {
                     Compression::Gzip => cmpr::Gzip::compress(buf, |buf| {
                         Self::encode_legacy_records(buf, records, &inner_opts)
                     })?,
+                    Compression::Lz4 => cmpr::Lz4::compress(buf, |buf| {
+                        Self::encode_legacy_records(buf, records, &inner_opts)
+                    })?,
+                    Compression::Zstd => cmpr::Zstd::compress(buf, |buf| {
+                        Self::encode_legacy_records(buf, records, &inner_opts)
+                    })?,
                     _ => unimplemented!(),
                 }
 
@@ -387,7 +393,12 @@ impl RecordBatchEncoder {
             Compression::Gzip => cmpr::Gzip::compress(buf, |buf| {
                 Self::encode_new_records(buf, records, min_offset, min_timestamp, options)
             })?,
-            _ => unimplemented!(),
+            Compression::Lz4 => cmpr::Lz4::compress(buf, |buf| {
+                Self::encode_new_records(buf, records, min_offset, min_timestamp, options)
+            })?,
+            Compression::Zstd => cmpr::Zstd::compress(buf, |buf| {
+                Self::encode_new_records(buf, records, min_offset, min_timestamp, options)
+            })?,
         }
 
         let batch_end = buf.offset();
@@ -569,7 +580,12 @@ impl RecordBatchDecoder {
             Compression::Gzip => cmpr::Gzip::decompress(buf, |buf| {
                 Self::decode_new_records(buf, &batch_decode_info, version, records)
             })?,
-            _ => unimplemented!(),
+            Compression::Zstd => cmpr::Zstd::decompress(buf, |buf| {
+                Self::decode_new_records(buf, &batch_decode_info, version, records)
+            })?,
+            Compression::Lz4 => cmpr::Lz4::decompress(buf, |buf| {
+                Self::decode_new_records(buf, &batch_decode_info, version, records)
+            })?,
         };
 
         Ok(())

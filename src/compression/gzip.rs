@@ -4,26 +4,15 @@ use bytes::buf::BufMut;
 use bytes::{Bytes, BytesMut};
 use flate2::write::{GzDecoder, GzEncoder};
 use flate2::Compression;
-use log::error;
 
 use crate::protocol::buf::{ByteBuf, ByteBufMut};
 use crate::protocol::{DecodeError, EncodeError};
 
-use super::{Compressor, Decompressor};
+use super::{Compressor, Decompressor, compression_err, decompression_err};
 
 /// Gzip compression algorithm. See [Kafka's broker configuration](https://kafka.apache.org/documentation/#brokerconfigs_compression.type)
 /// for more information.
 pub struct Gzip;
-
-fn compression_err(e: std::io::Error) -> EncodeError {
-    error!("Error whilst compressing data: {}", e);
-    EncodeError
-}
-
-fn decompression_err(e: std::io::Error) -> DecodeError {
-    error!("Error whilst decompressing data: {}", e);
-    DecodeError
-}
 
 impl<B: ByteBufMut> Compressor<B> for Gzip {
     type BufMut = BytesMut;
