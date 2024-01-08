@@ -115,3 +115,4 @@ pub mod protocol;
 pub mod records;
 
 pub use error::ResponseError;
+pub use indexmap;
