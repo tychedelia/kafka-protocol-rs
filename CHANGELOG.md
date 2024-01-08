@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.8.1
+- Re-export `indexmap` as part of the public api.
+
 ## v0.8.0
 - Implement Zstd and Lz4 compression.
 
