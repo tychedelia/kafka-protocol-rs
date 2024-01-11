@@ -199,7 +199,8 @@ pub struct TypedGap<T> {
 
 macro_rules! define_gap_types {
     {$($n:ident => $f:ident($t:ty)),*$(,)*} => {
-        pub(crate) mod gap {
+        /// Types which implement `GapType`.
+        pub mod gap {
             use super::*;
             $(
                 #[derive(Copy, Clone, Debug)]
