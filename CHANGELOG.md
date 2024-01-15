@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.8.2
+- Expose protocol::buf::gap module.
+
 ## v0.8.1
 - Re-export `indexmap` as part of the public api.
 
