@@ -5,6 +5,7 @@
 
 use crate::protocol::{NewType, Request, StrBytes, HeaderVersion};
 use std::convert::TryFrom;
+use bytes::Bytes;
 
 pub mod add_offsets_to_txn_request;
 pub use add_offsets_to_txn_request::AddOffsetsToTxnRequest;
@@ -1507,6 +1508,21 @@ impl NewType<i64> for ProducerId {}
 /// The name of the topic.
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default)]
 pub struct TopicName(pub StrBytes);
+
+impl TopicName {
+    /// Get a &str reference to the topic name.
+    pub fn as_str(&self) -> &str {
+        &**self
+    }
+}
+
+impl From<String> for TopicName {
+    fn from(value: String) -> Self {
+        let bytes = Bytes::from(value);
+        let str_bytes = <StrBytes as string::TryFrom<Bytes>>::try_from(bytes).expect("valid string");
+        TopicName(str_bytes)
+    }
+}
 
 impl From<StrBytes> for TopicName {
     fn from(other: StrBytes) -> Self { Self(other) }
