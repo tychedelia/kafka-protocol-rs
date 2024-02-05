@@ -15,8 +15,81 @@ use self::buf::NotEnoughBytesError;
 pub mod buf;
 pub mod types;
 
-/// A string type backed by [`bytes::Bytes`].
-pub type StrBytes = string::String<bytes::Bytes>;
+mod str_bytes {
+    use std::convert::TryFrom;
+    use std::fmt::{Debug, Display, Formatter};
+    use std::ops::Deref;
+    use std::str::Utf8Error;
+    use bytes::Bytes;
+
+    /// A string type backed by [Bytes].
+    #[derive(Clone, Hash, Ord, PartialOrd, PartialEq, Eq, Default)]
+    pub struct StrBytes(Bytes);
+
+    impl StrBytes {
+        /// Construct a [StrBytes] from the given [Bytes] instance,
+        /// checking that it contains valid UTF-8 data.
+        pub fn from_utf8(bytes: Bytes) -> Result<Self, Utf8Error> {
+            let _: &str = std::str::from_utf8(&bytes)?;
+            Ok(Self(bytes))
+        }
+
+        /// Construct a [StrBytes] from the provided static [str].
+        pub fn from_str(s: &'static str) -> Self {
+            Self(Bytes::from_static(s.as_bytes()))
+        }
+
+        /// Construct a [StrBytes] from the provided [String] without additional allocations.
+        pub fn from_string(s: String) -> Self {
+            Self(Bytes::from(s.into_bytes()))
+        }
+
+        /// View the contents of this [StrBytes] as a [str] reference.
+        pub fn as_str(&self) -> &str {
+            // SAFETY: all methods of constructing `self` check that the backing data is valid utf8,
+            // and bytes::Bytes guarantees that its contents will not change unless we mutate it,
+            // and we never mutate it.
+            unsafe {
+                std::str::from_utf8_unchecked(&*self.0)
+            }
+        }
+
+        /// Extract the underlying [Bytes].
+        pub fn into_bytes(self) -> Bytes {
+            self.0
+        }
+    }
+
+    impl TryFrom<Bytes> for StrBytes {
+        type Error = Utf8Error;
+
+        fn try_from(value: Bytes) -> Result<Self, Self::Error> {
+            StrBytes::from_utf8(value)
+        }
+    }
+
+    impl Deref for StrBytes {
+        type Target = str;
+
+        fn deref(&self) -> &Self::Target {
+            self.as_str()
+        }
+    }
+
+    impl Debug for StrBytes {
+        fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+            Debug::fmt(self.as_str(), f)
+        }
+    }
+
+    impl PartialEq<str> for StrBytes {
+        fn eq(&self, other: &str) -> bool {
+            self.as_str().eq(other)
+        }
+    }
+}
+
+pub use str_bytes::StrBytes;
 
 /// An error representing any fault while decoding a message, usually when the buffer is incorrectly
 /// sized or otherwise invalid for the decoded message.

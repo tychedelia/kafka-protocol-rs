@@ -4,11 +4,11 @@
 //! types that use zigzag encoded to represent length as a "compact" representation.
 //!
 //! It is unnecessary to interact directly with these types for most use cases.
+use std::convert::TryFrom;
 use std::hash::Hash;
 use std::string::String as StdString;
 
 use indexmap::IndexMap;
-use string::TryFrom;
 
 use super::{
     Decodable, DecodeError, Decoder, Encodable, EncodeError, Encoder, MapDecodable, MapEncodable,

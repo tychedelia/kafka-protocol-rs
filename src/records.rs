@@ -35,7 +35,6 @@ use indexmap::IndexMap;
 use crc32c::crc32c;
 use log::error;
 use crc::{CRC_32_CKSUM, Crc};
-use string::TryFrom;
 
 use crate::protocol::{
     buf::{gap, ByteBuf, ByteBufMut},
@@ -44,6 +43,7 @@ use crate::protocol::{
 
 use super::compression::{self as cmpr, Compressor, Decompressor};
 use std::cmp::Ordering;
+use std::convert::TryFrom;
 
 /// IEEE (checksum) cyclic redundancy check.
 pub const IEEE: Crc<u32> = Crc::<u32>::new(&CRC_32_CKSUM);
