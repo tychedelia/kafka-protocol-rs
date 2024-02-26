@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.9.0
+
+- Remove the `string` crate.
+- Update `derive-builder`.
+
 ## v0.8.2
 - Expose protocol::buf::gap module.
 
