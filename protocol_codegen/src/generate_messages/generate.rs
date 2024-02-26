@@ -796,8 +796,7 @@ fn write_decode_tag_buffer<W: Write>(
                 writeln!(w, "let size: u32 = types::UnsignedVarInt.decode(buf)?;")?;
 
                 if sorted_tagged_fields.is_empty() {
-                    writeln!(w, "let mut unknown_value = vec![0; size as usize];")?;
-                    writeln!(w, "buf.try_copy_to_slice(&mut unknown_value)?;")?;
+                    writeln!(w, "let unknown_value = buf.try_get_bytes(size as usize)?;")?;
                     write!(
                         w,
                         "unknown_tagged_fields.insert(tag as i32, unknown_value);"
@@ -876,8 +875,7 @@ fn write_decode_tag_buffer<W: Write>(
                         }
                         write!(w, "_ => ")?;
                         w.block(|w| {
-                            writeln!(w, "let mut unknown_value = vec![0; size as usize];")?;
-                            writeln!(w, "buf.try_copy_to_slice(&mut unknown_value)?;")?;
+                            writeln!(w, "let unknown_value = buf.try_get_bytes(size as usize)?;")?;
                             write!(
                                 w,
                                 "unknown_tagged_fields.insert(tag as i32, unknown_value);"
@@ -1026,7 +1024,7 @@ fn write_struct_def<W: Write>(
 
         if !flexible_msg_versions.is_none() {
             writeln!(w, "/// Other tagged fields")?;
-            writeln!(w, "pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,")?;
+            writeln!(w, "pub unknown_tagged_fields: BTreeMap<i32, Bytes>,")?;
         }
 
         Ok(())

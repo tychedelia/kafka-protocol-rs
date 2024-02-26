@@ -9,6 +9,7 @@ use std::string::FromUtf8Error;
 use std::{error::Error, str::Utf8Error};
 
 use buf::{ByteBuf, ByteBufMut};
+use bytes::Bytes;
 
 use self::buf::NotEnoughBytesError;
 
@@ -165,7 +166,7 @@ pub trait Request: Message + Encodable + Decodable + HeaderVersion {
 pub(crate) fn write_unknown_tagged_fields<B: ByteBufMut, R: RangeBounds<i32>>(
     buf: &mut B,
     range: R,
-    unknown_tagged_fields: &BTreeMap<i32, Vec<u8>>,
+    unknown_tagged_fields: &BTreeMap<i32, Bytes>,
 ) -> Result<(), EncodeError> {
     for (&k, v) in unknown_tagged_fields.range(range) {
         if v.len() > std::u32::MAX as usize {
@@ -174,13 +175,13 @@ pub(crate) fn write_unknown_tagged_fields<B: ByteBufMut, R: RangeBounds<i32>>(
         }
         types::UnsignedVarInt.encode(buf, k as u32)?;
         types::UnsignedVarInt.encode(buf, v.len() as u32)?;
-        buf.put_slice(v.as_slice());
+        buf.put_slice(v);
     }
     Ok(())
 }
 
 pub(crate) fn compute_unknown_tagged_fields_size(
-    unknown_tagged_fields: &BTreeMap<i32, Vec<u8>>,
+    unknown_tagged_fields: &BTreeMap<i32, Bytes>,
 ) -> Result<usize, EncodeError> {
     let mut total_size = 0;
     for (&k, v) in unknown_tagged_fields {
