@@ -79,7 +79,7 @@ pub fn run() -> Result<(), Error> {
     let mut response_types = BTreeMap::new();
 
     let module_path = format!("{}.rs", output_path);
-    let mut module_file = File::create(&module_path)?;
+    let mut module_file = File::create(module_path)?;
 
     writeln!(module_file, "//! Messages used by the Kafka protocol.")?;
     writeln!(module_file, "//!")?;
