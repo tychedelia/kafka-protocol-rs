@@ -33,7 +33,7 @@ pub struct EpochEndOffset {
     pub end_offset: i64,
 
     /// Other tagged fields
-    pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+    pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
 impl Builder for EpochEndOffset {
@@ -120,8 +120,7 @@ impl Decodable for EpochEndOffset {
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
                 let size: u32 = types::UnsignedVarInt.decode(buf)?;
-                let mut unknown_value = vec![0; size as usize];
-                buf.try_copy_to_slice(&mut unknown_value)?;
+                let unknown_value = buf.try_get_bytes(size as usize)?;
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
@@ -163,7 +162,7 @@ pub struct LeaderIdAndEpoch {
     pub leader_epoch: i32,
 
     /// Other tagged fields
-    pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+    pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
 impl Builder for LeaderIdAndEpoch {
@@ -250,8 +249,7 @@ impl Decodable for LeaderIdAndEpoch {
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
                 let size: u32 = types::UnsignedVarInt.decode(buf)?;
-                let mut unknown_value = vec![0; size as usize];
-                buf.try_copy_to_slice(&mut unknown_value)?;
+                let unknown_value = buf.try_get_bytes(size as usize)?;
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
@@ -293,7 +291,7 @@ pub struct SnapshotId {
     pub epoch: i32,
 
     /// Other tagged fields
-    pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+    pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
 impl Builder for SnapshotId {
@@ -348,8 +346,7 @@ impl Decodable for SnapshotId {
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
                 let size: u32 = types::UnsignedVarInt.decode(buf)?;
-                let mut unknown_value = vec![0; size as usize];
-                buf.try_copy_to_slice(&mut unknown_value)?;
+                let unknown_value = buf.try_get_bytes(size as usize)?;
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
@@ -391,7 +388,7 @@ pub struct AbortedTransaction {
     pub first_offset: i64,
 
     /// Other tagged fields
-    pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+    pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
 impl Builder for AbortedTransaction {
@@ -478,8 +475,7 @@ impl Decodable for AbortedTransaction {
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
                 let size: u32 = types::UnsignedVarInt.decode(buf)?;
-                let mut unknown_value = vec![0; size as usize];
-                buf.try_copy_to_slice(&mut unknown_value)?;
+                let unknown_value = buf.try_get_bytes(size as usize)?;
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
@@ -566,7 +562,7 @@ pub struct PartitionData {
     pub records: Option<Bytes>,
 
     /// Other tagged fields
-    pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+    pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
 impl Builder for PartitionData {
@@ -795,8 +791,7 @@ impl Decodable for PartitionData {
                         snapshot_id = types::Struct { version }.decode(buf)?;
                     },
                     _ => {
-                        let mut unknown_value = vec![0; size as usize];
-                        buf.try_copy_to_slice(&mut unknown_value)?;
+                        let unknown_value = buf.try_get_bytes(size as usize)?;
                         unknown_tagged_fields.insert(tag as i32, unknown_value);
                     }
                 }
@@ -863,7 +858,7 @@ pub struct FetchableTopicResponse {
     pub partitions: Vec<PartitionData>,
 
     /// Other tagged fields
-    pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+    pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
 impl Builder for FetchableTopicResponse {
@@ -961,8 +956,7 @@ impl Decodable for FetchableTopicResponse {
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
                 let size: u32 = types::UnsignedVarInt.decode(buf)?;
-                let mut unknown_value = vec![0; size as usize];
-                buf.try_copy_to_slice(&mut unknown_value)?;
+                let unknown_value = buf.try_get_bytes(size as usize)?;
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
@@ -1016,7 +1010,7 @@ pub struct FetchResponse {
     pub responses: Vec<FetchableTopicResponse>,
 
     /// Other tagged fields
-    pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+    pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
 impl Builder for FetchResponse {
@@ -1121,8 +1115,7 @@ impl Decodable for FetchResponse {
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
                 let size: u32 = types::UnsignedVarInt.decode(buf)?;
-                let mut unknown_value = vec![0; size as usize];
-                buf.try_copy_to_slice(&mut unknown_value)?;
+                let unknown_value = buf.try_get_bytes(size as usize)?;
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }

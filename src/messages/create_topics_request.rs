@@ -28,7 +28,7 @@ pub struct CreatableReplicaAssignment {
     pub broker_ids: Vec<super::BrokerId>,
 
     /// Other tagged fields
-    pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+    pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
 impl Builder for CreatableReplicaAssignment {
@@ -97,8 +97,7 @@ impl MapDecodable for CreatableReplicaAssignment {
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
                 let size: u32 = types::UnsignedVarInt.decode(buf)?;
-                let mut unknown_value = vec![0; size as usize];
-                buf.try_copy_to_slice(&mut unknown_value)?;
+                let unknown_value = buf.try_get_bytes(size as usize)?;
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
@@ -133,7 +132,7 @@ pub struct CreateableTopicConfig {
     pub value: Option<StrBytes>,
 
     /// Other tagged fields
-    pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+    pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
 impl Builder for CreateableTopicConfig {
@@ -214,8 +213,7 @@ impl MapDecodable for CreateableTopicConfig {
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
                 let size: u32 = types::UnsignedVarInt.decode(buf)?;
-                let mut unknown_value = vec![0; size as usize];
-                buf.try_copy_to_slice(&mut unknown_value)?;
+                let unknown_value = buf.try_get_bytes(size as usize)?;
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
@@ -265,7 +263,7 @@ pub struct CreatableTopic {
     pub configs: indexmap::IndexMap<StrBytes, CreateableTopicConfig>,
 
     /// Other tagged fields
-    pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+    pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
 impl Builder for CreatableTopic {
@@ -367,8 +365,7 @@ impl MapDecodable for CreatableTopic {
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
                 let size: u32 = types::UnsignedVarInt.decode(buf)?;
-                let mut unknown_value = vec![0; size as usize];
-                buf.try_copy_to_slice(&mut unknown_value)?;
+                let unknown_value = buf.try_get_bytes(size as usize)?;
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
@@ -419,7 +416,7 @@ pub struct CreateTopicsRequest {
     pub validate_only: bool,
 
     /// Other tagged fields
-    pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+    pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
 impl Builder for CreateTopicsRequest {
@@ -505,8 +502,7 @@ impl Decodable for CreateTopicsRequest {
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
                 let size: u32 = types::UnsignedVarInt.decode(buf)?;
-                let mut unknown_value = vec![0; size as usize];
-                buf.try_copy_to_slice(&mut unknown_value)?;
+                let unknown_value = buf.try_get_bytes(size as usize)?;
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }

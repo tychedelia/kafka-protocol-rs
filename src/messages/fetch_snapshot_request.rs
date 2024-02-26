@@ -33,7 +33,7 @@ pub struct SnapshotId {
     pub epoch: i32,
 
     /// Other tagged fields
-    pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+    pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
 impl Builder for SnapshotId {
@@ -83,8 +83,7 @@ impl Decodable for SnapshotId {
         for _ in 0..num_tagged_fields {
             let tag: u32 = types::UnsignedVarInt.decode(buf)?;
             let size: u32 = types::UnsignedVarInt.decode(buf)?;
-            let mut unknown_value = vec![0; size as usize];
-            buf.try_copy_to_slice(&mut unknown_value)?;
+            let unknown_value = buf.try_get_bytes(size as usize)?;
             unknown_tagged_fields.insert(tag as i32, unknown_value);
         }
         Ok(Self {
@@ -135,7 +134,7 @@ pub struct PartitionSnapshot {
     pub position: i64,
 
     /// Other tagged fields
-    pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+    pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
 impl Builder for PartitionSnapshot {
@@ -191,8 +190,7 @@ impl Decodable for PartitionSnapshot {
         for _ in 0..num_tagged_fields {
             let tag: u32 = types::UnsignedVarInt.decode(buf)?;
             let size: u32 = types::UnsignedVarInt.decode(buf)?;
-            let mut unknown_value = vec![0; size as usize];
-            buf.try_copy_to_slice(&mut unknown_value)?;
+            let unknown_value = buf.try_get_bytes(size as usize)?;
             unknown_tagged_fields.insert(tag as i32, unknown_value);
         }
         Ok(Self {
@@ -237,7 +235,7 @@ pub struct TopicSnapshot {
     pub partitions: Vec<PartitionSnapshot>,
 
     /// Other tagged fields
-    pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+    pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
 impl Builder for TopicSnapshot {
@@ -287,8 +285,7 @@ impl Decodable for TopicSnapshot {
         for _ in 0..num_tagged_fields {
             let tag: u32 = types::UnsignedVarInt.decode(buf)?;
             let size: u32 = types::UnsignedVarInt.decode(buf)?;
-            let mut unknown_value = vec![0; size as usize];
-            buf.try_copy_to_slice(&mut unknown_value)?;
+            let unknown_value = buf.try_get_bytes(size as usize)?;
             unknown_tagged_fields.insert(tag as i32, unknown_value);
         }
         Ok(Self {
@@ -339,7 +336,7 @@ pub struct FetchSnapshotRequest {
     pub topics: Vec<TopicSnapshot>,
 
     /// Other tagged fields
-    pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+    pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
 impl Builder for FetchSnapshotRequest {
@@ -424,8 +421,7 @@ impl Decodable for FetchSnapshotRequest {
                     cluster_id = types::CompactString.decode(buf)?;
                 },
                 _ => {
-                    let mut unknown_value = vec![0; size as usize];
-                    buf.try_copy_to_slice(&mut unknown_value)?;
+                    let unknown_value = buf.try_get_bytes(size as usize)?;
                     unknown_tagged_fields.insert(tag as i32, unknown_value);
                 }
             }

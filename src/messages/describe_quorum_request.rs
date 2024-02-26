@@ -28,7 +28,7 @@ pub struct PartitionData {
     pub partition_index: i32,
 
     /// Other tagged fields
-    pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+    pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
 impl Builder for PartitionData {
@@ -75,8 +75,7 @@ impl Decodable for PartitionData {
         for _ in 0..num_tagged_fields {
             let tag: u32 = types::UnsignedVarInt.decode(buf)?;
             let size: u32 = types::UnsignedVarInt.decode(buf)?;
-            let mut unknown_value = vec![0; size as usize];
-            buf.try_copy_to_slice(&mut unknown_value)?;
+            let unknown_value = buf.try_get_bytes(size as usize)?;
             unknown_tagged_fields.insert(tag as i32, unknown_value);
         }
         Ok(Self {
@@ -115,7 +114,7 @@ pub struct TopicData {
     pub partitions: Vec<PartitionData>,
 
     /// Other tagged fields
-    pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+    pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
 impl Builder for TopicData {
@@ -165,8 +164,7 @@ impl Decodable for TopicData {
         for _ in 0..num_tagged_fields {
             let tag: u32 = types::UnsignedVarInt.decode(buf)?;
             let size: u32 = types::UnsignedVarInt.decode(buf)?;
-            let mut unknown_value = vec![0; size as usize];
-            buf.try_copy_to_slice(&mut unknown_value)?;
+            let unknown_value = buf.try_get_bytes(size as usize)?;
             unknown_tagged_fields.insert(tag as i32, unknown_value);
         }
         Ok(Self {
@@ -202,7 +200,7 @@ pub struct DescribeQuorumRequest {
     pub topics: Vec<TopicData>,
 
     /// Other tagged fields
-    pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+    pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
 impl Builder for DescribeQuorumRequest {
@@ -249,8 +247,7 @@ impl Decodable for DescribeQuorumRequest {
         for _ in 0..num_tagged_fields {
             let tag: u32 = types::UnsignedVarInt.decode(buf)?;
             let size: u32 = types::UnsignedVarInt.decode(buf)?;
-            let mut unknown_value = vec![0; size as usize];
-            buf.try_copy_to_slice(&mut unknown_value)?;
+            let unknown_value = buf.try_get_bytes(size as usize)?;
             unknown_tagged_fields.insert(tag as i32, unknown_value);
         }
         Ok(Self {

@@ -69,7 +69,7 @@ mod test {
     #[test]
     fn test_lz4() {
         let mut compressed = BytesMut::new();
-        let _ = Lz4::compress(
+        Lz4::compress(
             &mut compressed,
             |buf| -> Result<(), EncodeError> {
                 buf.write_str("hello lz4").map_err(compression_err)?;
@@ -77,7 +77,7 @@ mod test {
             }
         ).unwrap();
 
-        let _ = Lz4::decompress(
+        Lz4::decompress(
             &mut compressed,
             |buf| -> Result<(), DecodeError> {
                 let decompressed_str = str::from_utf8(buf.as_slice())

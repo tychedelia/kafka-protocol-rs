@@ -33,7 +33,7 @@ pub struct CreatableRenewers {
     pub principal_name: StrBytes,
 
     /// Other tagged fields
-    pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+    pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
 impl Builder for CreatableRenewers {
@@ -112,8 +112,7 @@ impl Decodable for CreatableRenewers {
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
                 let size: u32 = types::UnsignedVarInt.decode(buf)?;
-                let mut unknown_value = vec![0; size as usize];
-                buf.try_copy_to_slice(&mut unknown_value)?;
+                let unknown_value = buf.try_get_bytes(size as usize)?;
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
@@ -165,7 +164,7 @@ pub struct CreateDelegationTokenRequest {
     pub max_lifetime_ms: i64,
 
     /// Other tagged fields
-    pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+    pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
 impl Builder for CreateDelegationTokenRequest {
@@ -270,8 +269,7 @@ impl Decodable for CreateDelegationTokenRequest {
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
                 let size: u32 = types::UnsignedVarInt.decode(buf)?;
-                let mut unknown_value = vec![0; size as usize];
-                buf.try_copy_to_slice(&mut unknown_value)?;
+                let unknown_value = buf.try_get_bytes(size as usize)?;
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
