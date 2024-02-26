@@ -101,6 +101,16 @@ define_simple_ints! {
 #[derive(Debug, Copy, Clone, Default)]
 pub struct UnsignedVarInt;
 
+impl UnsignedVarInt {
+    pub(crate) fn put_u32<B: ByteBufMut>(buf: &mut B, mut value: u32) {
+        while value >= 0x80 {
+            buf.put_u8((value as u8) | 0x80);
+            value >>= 7;
+        }
+        buf.put_u8(value as u8);
+    }
+}
+
 impl<T: NewType<u32>> Encoder<&T> for UnsignedVarInt {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, value: &T) -> Result<(), EncodeError> {
         let mut value = *value.borrow();

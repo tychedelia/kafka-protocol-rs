@@ -204,7 +204,7 @@ impl Expr {
                 value: ExprValue::Flat(s.clone()),
             }
         } else {
-            self.unary("*")
+            self.clone()
         }
     }
     pub fn unary(&self, op: &str) -> Self {

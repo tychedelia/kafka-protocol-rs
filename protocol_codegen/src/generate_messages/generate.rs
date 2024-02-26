@@ -132,6 +132,13 @@ impl PreparedType {
     fn is_entity(&self) -> bool {
         matches!(self, Self::Entity(_))
     }
+
+    pub fn is_copy(&self) -> bool {
+        match self {
+            PreparedType::Primitive(x) => x.is_copy(),
+            _ => false,
+        }
+    }
 }
 
 enum PreparedDefault {
@@ -165,7 +172,7 @@ impl PreparedDefault {
                 Self::Boolean(false) => expr.deref().not(),
                 Self::Numeric(v) => expr.deref().compare(CmpType::Eq, &Expr::new_atom(v)),
                 Self::String(s) => expr.compare(CmpType::Eq, &Expr::new_str(s)),
-                Self::Uuid => expr.compare(CmpType::Eq, &Expr::new_atom("&Uuid::nil()")),
+                Self::Uuid => expr.compare(CmpType::Eq, &Expr::new_atom("Uuid::nil()")),
                 Self::EmptyStruct => {
                     expr.compare(CmpType::Eq, &Expr::new_atom("&Default::default()"))
                 }
@@ -219,9 +226,17 @@ struct PreparedField {
 impl PreparedField {
     fn var_name(&self) -> Expr {
         if self.map_key {
-            Expr::new_atom("key")
+            if self.type_.is_copy() {
+                Expr::new_atom("key").unary("*")
+            } else {
+                Expr::new_atom("key")
+            }
         } else {
-            Expr::new_atom("self").field(&self.name).by_ref()
+            if self.type_.is_copy() {
+                Expr::new_atom("self").field(&self.name)
+            } else {
+                Expr::new_atom("self").field(&self.name).by_ref()
+            }
         }
     }
 }
@@ -348,14 +363,28 @@ fn write_version_cond<
 
 fn write_encode_or_compute<W: Write, T: Display>(
     w: &mut CodeWriter<W>,
-    type_: &str,
+    encoder: &str,
     var_name: T,
     compute_size: bool,
+    real_ty: &PreparedType,
 ) -> Result<(), Error> {
     if compute_size {
-        write!(w, "total_size += {}.compute_size({})?;", type_, var_name)?;
+        write!(w, "total_size += ")?;
+        match real_ty {
+            PreparedType::Primitive(PrimitiveType::Int8) => write!(w, "1;")?,
+            PreparedType::Primitive(PrimitiveType::Int16) => write!(w, "2;")?,
+            PreparedType::Primitive(PrimitiveType::Int32) => write!(w, "4;")?,
+            PreparedType::Primitive(PrimitiveType::Int64) => write!(w, "8;")?,
+            _ => write!(w, "{encoder}.compute_size({var_name})?;")?,
+        }
     } else {
-        write!(w, "{}.encode(buf, {})?;", type_, var_name)?;
+        match real_ty {
+            PreparedType::Primitive(PrimitiveType::Int8) => write!(w, "buf.put_i8({var_name});")?,
+            PreparedType::Primitive(PrimitiveType::Int16) => write!(w, "buf.put_i16({var_name});")?,
+            PreparedType::Primitive(PrimitiveType::Int32) => write!(w, "buf.put_i32({var_name});")?,
+            PreparedType::Primitive(PrimitiveType::Int64) => write!(w, "buf.put_i64({var_name});")?,
+            _ => write!(w, "{encoder}.encode(buf, {var_name})?;")?,
+        }
     }
     Ok(())
 }
@@ -408,14 +437,36 @@ fn write_encode_field_inner<W: Write>(
 
     let valid_versions = valid_versions.intersect(field.versions);
     if !field.type_.has_compact_form() {
-        write_encode_or_compute(w, &field.type_.name(false), &var_name, compute_size)
+        write_encode_or_compute(
+            w,
+            &field.type_.name(false),
+            &var_name,
+            compute_size,
+            &field.type_,
+        )
     } else {
         write_version_cond(
             w,
             valid_versions,
             field.flexible_versions,
-            |w| write_encode_or_compute(w, &field.type_.name(true), &var_name, compute_size),
-            |w| write_encode_or_compute(w, &field.type_.name(false), &var_name, compute_size),
+            |w| {
+                write_encode_or_compute(
+                    w,
+                    &field.type_.name(true),
+                    &var_name,
+                    compute_size,
+                    &field.type_,
+                )
+            },
+            |w| {
+                write_encode_or_compute(
+                    w,
+                    &field.type_.name(false),
+                    &var_name,
+                    compute_size,
+                    &field.type_,
+                )
+            },
             false,
             false,
         )
@@ -524,13 +575,17 @@ fn write_encode_tag_buffer<W: Write>(
                 "u32",
                 "Too many tagged fields to encode ({} fields)",
             )?;
-            write_encode_or_compute(
-                w,
-                "types::UnsignedVarInt",
-                "num_tagged_fields as u32",
-                compute_size,
-            )?;
-            writeln!(w)?;
+            if compute_size {
+                writeln!(
+                    w,
+                    "total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;"
+                )?;
+            } else {
+                writeln!(
+                    w,
+                    "types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);"
+                )?;
+            }
 
             // Write out tagged fields
             let mut current_tag = -1;
@@ -645,27 +700,66 @@ fn write_encode_tag_buffer_inner<W: Write>(
             "u32",
             "Tagged field is too large to encode ({} bytes)",
         )?;
-        write_encode_or_compute(w, "types::UnsignedVarInt", k, compute_size)?;
-        writeln!(w)?;
         write_encode_or_compute(
             w,
             "types::UnsignedVarInt",
-            "computed_size as u32",
+            k,
             compute_size,
+            &PreparedType::Primitive(PrimitiveType::Int32),
         )?;
+        writeln!(w)?;
+        if compute_size {
+            write_encode_or_compute(
+                w,
+                "types::UnsignedVarInt",
+                "computed_size as u32",
+                compute_size,
+                &PreparedType::Primitive(PrimitiveType::Int32),
+            )?;
+        } else {
+            write_encode_or_compute(
+                w,
+                "types::UnsignedVarInt",
+                "computed_size as i32",
+                compute_size,
+                &PreparedType::Primitive(PrimitiveType::Int32),
+            )?;
+        }
         writeln!(w)?;
         if compute_size {
             writeln!(w, "total_size += computed_size;")?;
             Ok(())
         } else if !field.type_.has_compact_form() {
-            write_encode_or_compute(w, &field.type_.name(false), var_name, compute_size)
+            write_encode_or_compute(
+                w,
+                &field.type_.name(false),
+                var_name,
+                compute_size,
+                &field.type_,
+            )
         } else {
             write_version_cond(
                 w,
                 valid_versions,
                 field.flexible_versions,
-                |w| write_encode_or_compute(w, &field.type_.name(true), var_name, compute_size),
-                |w| write_encode_or_compute(w, &field.type_.name(false), var_name, compute_size),
+                |w| {
+                    write_encode_or_compute(
+                        w,
+                        &field.type_.name(true),
+                        var_name,
+                        compute_size,
+                        &field.type_,
+                    )
+                },
+                |w| {
+                    write_encode_or_compute(
+                        w,
+                        &field.type_.name(false),
+                        var_name,
+                        compute_size,
+                        &field.type_,
+                    )
+                },
                 false,
                 false,
             )
@@ -726,20 +820,14 @@ fn write_decode_field<W: Write>(
                 |w| {
                     let valid_versions = valid_versions.intersect(field.versions);
                     if !field.type_.has_compact_form() {
-                        write!(w, "{}.decode(buf)?", field.type_.name(false))?;
+                        write_buf_decode(w, field, false)?;
                     } else {
                         write_version_cond(
                             w,
                             valid_versions,
                             field.flexible_versions,
-                            |w| {
-                                write!(w, "{}.decode(buf)?", field.type_.name(true))?;
-                                Ok(())
-                            },
-                            |w| {
-                                write!(w, "{}.decode(buf)?", field.type_.name(false))?;
-                                Ok(())
-                            },
+                            |w| write_buf_decode(w, field, true),
+                            |w| write_buf_decode(w, field, false),
                             false,
                             false,
                         )?;
@@ -765,6 +853,21 @@ fn write_decode_field<W: Write>(
     )?;
     writeln!(w, ";")?;
 
+    Ok(())
+}
+
+fn write_buf_decode<W: Write>(
+    w: &mut CodeWriter<W>,
+    field: &PreparedField,
+    flexible: bool,
+) -> Result<(), Error> {
+    match field.type_ {
+        PreparedType::Primitive(PrimitiveType::Int8) => write!(w, "buf.try_get_i8()?")?,
+        PreparedType::Primitive(PrimitiveType::Int16) => write!(w, "buf.try_get_i16()?")?,
+        PreparedType::Primitive(PrimitiveType::Int32) => write!(w, "buf.try_get_i32()?")?,
+        PreparedType::Primitive(PrimitiveType::Int64) => write!(w, "buf.try_get_i64()?")?,
+        _ => write!(w, "{}.decode(buf)?", field.type_.name(flexible))?,
+    }
     Ok(())
 }
 
