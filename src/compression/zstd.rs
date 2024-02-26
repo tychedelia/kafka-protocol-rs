@@ -59,7 +59,7 @@ mod test {
     #[test]
     fn test_zstd() {
         let mut compressed = BytesMut::new();
-        let _ = Zstd::compress(
+        Zstd::compress(
             &mut compressed,
             |buf| -> Result<(), EncodeError> {
                 buf.write_str("hello zstd").map_err(compression_err)?;
@@ -67,7 +67,7 @@ mod test {
             }
         ).unwrap();
 
-        let _ = Zstd::decompress(
+        Zstd::decompress(
             &mut compressed,
             |buf| -> Result<(), DecodeError> {
                 let decompressed_str = str::from_utf8(buf.as_slice())
