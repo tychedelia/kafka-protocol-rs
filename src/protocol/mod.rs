@@ -17,11 +17,11 @@ pub mod buf;
 pub mod types;
 
 mod str_bytes {
+    use bytes::Bytes;
     use std::convert::TryFrom;
-    use std::fmt::{Debug, Display, Formatter};
+    use std::fmt::{Debug, Formatter};
     use std::ops::Deref;
     use std::str::Utf8Error;
-    use bytes::Bytes;
 
     /// A string type backed by [Bytes].
     #[derive(Clone, Hash, Ord, PartialOrd, PartialEq, Eq, Default)]
@@ -36,6 +36,8 @@ mod str_bytes {
         }
 
         /// Construct a [StrBytes] from the provided static [str].
+        #[allow(clippy::should_implement_trait)]
+        // TODO: this should be renamed to `from_static_str` in the next breaking release.
         pub fn from_str(s: &'static str) -> Self {
             Self(Bytes::from_static(s.as_bytes()))
         }
@@ -50,9 +52,7 @@ mod str_bytes {
             // SAFETY: all methods of constructing `self` check that the backing data is valid utf8,
             // and bytes::Bytes guarantees that its contents will not change unless we mutate it,
             // and we never mutate it.
-            unsafe {
-                std::str::from_utf8_unchecked(&*self.0)
-            }
+            unsafe { std::str::from_utf8_unchecked(&self.0) }
         }
 
         /// Extract the underlying [Bytes].
