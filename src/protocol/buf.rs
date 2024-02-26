@@ -25,7 +25,7 @@ pub trait ByteBuf: Buf {
     fn peek_bytes(&mut self, r: Range<usize>) -> Bytes;
     /// Get `size` bytes from the underlying buffer.
     fn get_bytes(&mut self, size: usize) -> Bytes;
-    /// Try to peek ahead in the buffer bu the provided range, returning an error if there are less
+    /// Try to peek ahead in the buffer by the provided range, returning an error if there are less
     /// bytes than the requested range.
     fn try_peek_bytes(&mut self, r: Range<usize>) -> Result<Bytes, NotEnoughBytesError> {
         if self.remaining() < r.end {
