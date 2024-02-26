@@ -53,7 +53,7 @@ pub struct ProducerState {
     pub current_txn_start_offset: i64,
 
     /// Other tagged fields
-    pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+    pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
 impl Builder for ProducerState {
@@ -115,8 +115,7 @@ impl Decodable for ProducerState {
         for _ in 0..num_tagged_fields {
             let tag: u32 = types::UnsignedVarInt.decode(buf)?;
             let size: u32 = types::UnsignedVarInt.decode(buf)?;
-            let mut unknown_value = vec![0; size as usize];
-            buf.try_copy_to_slice(&mut unknown_value)?;
+            let unknown_value = buf.try_get_bytes(size as usize)?;
             unknown_tagged_fields.insert(tag as i32, unknown_value);
         }
         Ok(Self {
@@ -175,7 +174,7 @@ pub struct PartitionResponse {
     pub active_producers: Vec<ProducerState>,
 
     /// Other tagged fields
-    pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+    pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
 impl Builder for PartitionResponse {
@@ -231,8 +230,7 @@ impl Decodable for PartitionResponse {
         for _ in 0..num_tagged_fields {
             let tag: u32 = types::UnsignedVarInt.decode(buf)?;
             let size: u32 = types::UnsignedVarInt.decode(buf)?;
-            let mut unknown_value = vec![0; size as usize];
-            buf.try_copy_to_slice(&mut unknown_value)?;
+            let unknown_value = buf.try_get_bytes(size as usize)?;
             unknown_tagged_fields.insert(tag as i32, unknown_value);
         }
         Ok(Self {
@@ -277,7 +275,7 @@ pub struct TopicResponse {
     pub partitions: Vec<PartitionResponse>,
 
     /// Other tagged fields
-    pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+    pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
 impl Builder for TopicResponse {
@@ -327,8 +325,7 @@ impl Decodable for TopicResponse {
         for _ in 0..num_tagged_fields {
             let tag: u32 = types::UnsignedVarInt.decode(buf)?;
             let size: u32 = types::UnsignedVarInt.decode(buf)?;
-            let mut unknown_value = vec![0; size as usize];
-            buf.try_copy_to_slice(&mut unknown_value)?;
+            let unknown_value = buf.try_get_bytes(size as usize)?;
             unknown_tagged_fields.insert(tag as i32, unknown_value);
         }
         Ok(Self {
@@ -369,7 +366,7 @@ pub struct DescribeProducersResponse {
     pub topics: Vec<TopicResponse>,
 
     /// Other tagged fields
-    pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+    pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
 impl Builder for DescribeProducersResponse {
@@ -419,8 +416,7 @@ impl Decodable for DescribeProducersResponse {
         for _ in 0..num_tagged_fields {
             let tag: u32 = types::UnsignedVarInt.decode(buf)?;
             let size: u32 = types::UnsignedVarInt.decode(buf)?;
-            let mut unknown_value = vec![0; size as usize];
-            buf.try_copy_to_slice(&mut unknown_value)?;
+            let unknown_value = buf.try_get_bytes(size as usize)?;
             unknown_tagged_fields.insert(tag as i32, unknown_value);
         }
         Ok(Self {

@@ -33,7 +33,7 @@ pub struct DeleteRecordsPartition {
     pub offset: i64,
 
     /// Other tagged fields
-    pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+    pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
 impl Builder for DeleteRecordsPartition {
@@ -88,8 +88,7 @@ impl Decodable for DeleteRecordsPartition {
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
                 let size: u32 = types::UnsignedVarInt.decode(buf)?;
-                let mut unknown_value = vec![0; size as usize];
-                buf.try_copy_to_slice(&mut unknown_value)?;
+                let unknown_value = buf.try_get_bytes(size as usize)?;
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
@@ -131,7 +130,7 @@ pub struct DeleteRecordsTopic {
     pub partitions: Vec<DeleteRecordsPartition>,
 
     /// Other tagged fields
-    pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+    pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
 impl Builder for DeleteRecordsTopic {
@@ -210,8 +209,7 @@ impl Decodable for DeleteRecordsTopic {
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
                 let size: u32 = types::UnsignedVarInt.decode(buf)?;
-                let mut unknown_value = vec![0; size as usize];
-                buf.try_copy_to_slice(&mut unknown_value)?;
+                let unknown_value = buf.try_get_bytes(size as usize)?;
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
@@ -253,7 +251,7 @@ pub struct DeleteRecordsRequest {
     pub timeout_ms: i32,
 
     /// Other tagged fields
-    pub unknown_tagged_fields: BTreeMap<i32, Vec<u8>>,
+    pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
 impl Builder for DeleteRecordsRequest {
@@ -320,8 +318,7 @@ impl Decodable for DeleteRecordsRequest {
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
                 let size: u32 = types::UnsignedVarInt.decode(buf)?;
-                let mut unknown_value = vec![0; size as usize];
-                buf.try_copy_to_slice(&mut unknown_value)?;
+                let unknown_value = buf.try_get_bytes(size as usize)?;
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
