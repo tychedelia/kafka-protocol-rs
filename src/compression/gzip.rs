@@ -8,7 +8,7 @@ use flate2::Compression;
 use crate::protocol::buf::{ByteBuf, ByteBufMut};
 use crate::protocol::{DecodeError, EncodeError};
 
-use super::{Compressor, Decompressor, compression_err, decompression_err};
+use super::{Compressor, Decompressor};
 
 /// Gzip compression algorithm. See [Kafka's broker configuration](https://kafka.apache.org/documentation/#brokerconfigs_compression.type)
 /// for more information.
@@ -26,8 +26,8 @@ impl<B: ByteBufMut> Compressor<B> for Gzip {
 
         // Compress directly into the target buffer
         let mut e = GzEncoder::new(buf.writer(), Compression::default());
-        e.write_all(&tmp).map_err(compression_err)?;
-        e.finish().map_err(compression_err)?;
+        e.write_all(&tmp)?;
+        e.finish()?;
 
         Ok(res)
     }
@@ -43,9 +43,8 @@ impl<B: ByteBuf> Decompressor<B> for Gzip {
 
         // Decompress directly from the input buffer
         let mut d = GzDecoder::new((&mut tmp).writer());
-        d.write_all(&buf.copy_to_bytes(buf.remaining()))
-            .map_err(decompression_err)?;
-        d.finish().map_err(decompression_err)?;
+        d.write_all(&buf.copy_to_bytes(buf.remaining()))?;
+        d.finish()?;
 
         f(&mut tmp.into())
     }

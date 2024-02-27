@@ -104,9 +104,6 @@
 //! ```
 #![deny(missing_docs)]
 
-#[macro_use]
-extern crate log;
-
 pub mod compression;
 pub mod error;
 #[allow(clippy::all)]

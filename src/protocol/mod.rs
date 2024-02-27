@@ -5,13 +5,10 @@ use std::borrow::Borrow;
 use std::cmp;
 use std::collections::BTreeMap;
 use std::ops::RangeBounds;
-use std::string::FromUtf8Error;
-use std::{error::Error, str::Utf8Error};
 
+use anyhow::bail;
 use buf::{ByteBuf, ByteBufMut};
 use bytes::Bytes;
-
-use self::buf::NotEnoughBytesError;
 
 pub mod buf;
 pub mod types;
@@ -94,51 +91,11 @@ pub use str_bytes::StrBytes;
 
 /// An error representing any fault while decoding a message, usually when the buffer is incorrectly
 /// sized or otherwise invalid for the decoded message.
-#[derive(Debug)]
-pub struct DecodeError;
-
-impl std::fmt::Display for DecodeError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "DecodeError")
-    }
-}
-
-impl Error for DecodeError {}
-
-impl From<NotEnoughBytesError> for DecodeError {
-    fn from(_: NotEnoughBytesError) -> Self {
-        DecodeError
-    }
-}
-
-impl From<Utf8Error> for DecodeError {
-    fn from(_: Utf8Error) -> Self {
-        DecodeError
-    }
-}
-
-impl From<FromUtf8Error> for DecodeError {
-    fn from(_: FromUtf8Error) -> Self {
-        DecodeError
-    }
-}
+pub use anyhow::Error as DecodeError;
 
 /// An error representing any fault while encoding a message, usually when a message in an invalid
 /// state is attempted to be encoded.
-#[derive(Debug)]
-pub struct EncodeError;
-
-impl std::fmt::Display for EncodeError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "EncodeError")
-    }
-}
-
-impl Error for EncodeError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        None
-    }
-}
+pub use anyhow::Error as EncodeError;
 
 pub(crate) trait NewType<Inner>: From<Inner> + Into<Inner> + Borrow<Inner> {}
 
@@ -243,8 +200,7 @@ pub(crate) fn write_unknown_tagged_fields<B: ByteBufMut, R: RangeBounds<i32>>(
 ) -> Result<(), EncodeError> {
     for (&k, v) in unknown_tagged_fields.range(range) {
         if v.len() > std::u32::MAX as usize {
-            error!("Tagged field is too long to encode ({} bytes)", v.len());
-            return Err(EncodeError);
+            bail!("Tagged field is too long to encode ({} bytes)", v.len());
         }
         types::UnsignedVarInt.encode(buf, k as u32)?;
         types::UnsignedVarInt.encode(buf, v.len() as u32)?;
@@ -259,8 +215,7 @@ pub(crate) fn compute_unknown_tagged_fields_size(
     let mut total_size = 0;
     for (&k, v) in unknown_tagged_fields {
         if v.len() > std::u32::MAX as usize {
-            error!("Tagged field is too long to encode ({} bytes)", v.len());
-            return Err(EncodeError);
+            bail!("Tagged field is too long to encode ({} bytes)", v.len());
         }
         total_size += types::UnsignedVarInt.compute_size(k as u32)?;
         total_size += types::UnsignedVarInt.compute_size(v.len() as u32)?;
