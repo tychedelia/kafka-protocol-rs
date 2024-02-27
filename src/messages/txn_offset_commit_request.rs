@@ -8,8 +8,8 @@ use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
 use bytes::Bytes;
-use log::error;
 use uuid::Uuid;
+use anyhow::bail;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
@@ -69,8 +69,7 @@ impl Encodable for TxnOffsetCommitRequestPartition {
         if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -93,8 +92,7 @@ impl Encodable for TxnOffsetCommitRequestPartition {
         if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -196,8 +194,7 @@ impl Encodable for TxnOffsetCommitRequestTopic {
         if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -220,8 +217,7 @@ impl Encodable for TxnOffsetCommitRequestTopic {
         if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -350,21 +346,21 @@ impl Encodable for TxnOffsetCommitRequest {
             types::Int32.encode(buf, &self.generation_id)?;
         } else {
             if self.generation_id != -1 {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 3 {
             types::CompactString.encode(buf, &self.member_id)?;
         } else {
             if &self.member_id != "" {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 3 {
             types::CompactString.encode(buf, &self.group_instance_id)?;
         } else {
             if !self.group_instance_id.is_none() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 3 {
@@ -375,8 +371,7 @@ impl Encodable for TxnOffsetCommitRequest {
         if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -402,21 +397,21 @@ impl Encodable for TxnOffsetCommitRequest {
             total_size += types::Int32.compute_size(&self.generation_id)?;
         } else {
             if self.generation_id != -1 {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 3 {
             total_size += types::CompactString.compute_size(&self.member_id)?;
         } else {
             if &self.member_id != "" {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 3 {
             total_size += types::CompactString.compute_size(&self.group_instance_id)?;
         } else {
             if !self.group_instance_id.is_none() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 3 {
@@ -427,8 +422,7 @@ impl Encodable for TxnOffsetCommitRequest {
         if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 

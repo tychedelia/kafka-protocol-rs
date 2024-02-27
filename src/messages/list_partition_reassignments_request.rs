@@ -8,8 +8,8 @@ use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
 use bytes::Bytes;
-use log::error;
 use uuid::Uuid;
+use anyhow::bail;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
@@ -50,8 +50,7 @@ impl Encodable for ListPartitionReassignmentsTopics {
         types::CompactArray(types::Int32).encode(buf, &self.partition_indexes)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
-            error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-            return Err(EncodeError);
+            bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
         }
         types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -64,8 +63,7 @@ impl Encodable for ListPartitionReassignmentsTopics {
         total_size += types::CompactArray(types::Int32).compute_size(&self.partition_indexes)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
-            error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-            return Err(EncodeError);
+            bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
         }
         total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -141,8 +139,7 @@ impl Encodable for ListPartitionReassignmentsRequest {
         types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
-            error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-            return Err(EncodeError);
+            bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
         }
         types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -155,8 +152,7 @@ impl Encodable for ListPartitionReassignmentsRequest {
         total_size += types::CompactArray(types::Struct { version }).compute_size(&self.topics)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
-            error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-            return Err(EncodeError);
+            bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
         }
         total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 

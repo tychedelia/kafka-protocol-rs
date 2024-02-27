@@ -8,8 +8,8 @@ use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
 use bytes::Bytes;
-use log::error;
 use uuid::Uuid;
+use anyhow::bail;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
@@ -82,8 +82,7 @@ impl Encodable for PartitionData {
         types::Int32.encode(buf, &self.partition_epoch)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
-            error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-            return Err(EncodeError);
+            bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
         }
         types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -103,8 +102,7 @@ impl Encodable for PartitionData {
         total_size += types::Int32.compute_size(&self.partition_epoch)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
-            error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-            return Err(EncodeError);
+            bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
         }
         total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -209,8 +207,7 @@ impl Encodable for TopicData {
         types::CompactArray(types::Struct { version }).encode(buf, &self.partitions)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
-            error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-            return Err(EncodeError);
+            bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
         }
         types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -228,8 +225,7 @@ impl Encodable for TopicData {
         total_size += types::CompactArray(types::Struct { version }).compute_size(&self.partitions)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
-            error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-            return Err(EncodeError);
+            bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
         }
         total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -322,8 +318,7 @@ impl Encodable for AlterPartitionResponse {
         types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
-            error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-            return Err(EncodeError);
+            bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
         }
         types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -337,8 +332,7 @@ impl Encodable for AlterPartitionResponse {
         total_size += types::CompactArray(types::Struct { version }).compute_size(&self.topics)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
-            error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-            return Err(EncodeError);
+            bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
         }
         total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 

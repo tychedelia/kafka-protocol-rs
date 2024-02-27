@@ -8,8 +8,8 @@ use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
 use bytes::Bytes;
-use log::error;
 use uuid::Uuid;
+use anyhow::bail;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
@@ -75,7 +75,7 @@ impl Encodable for FetchPartition {
             types::Int32.encode(buf, &self.last_fetched_epoch)?;
         } else {
             if self.last_fetched_epoch != -1 {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 5 {
@@ -85,8 +85,7 @@ impl Encodable for FetchPartition {
         if version >= 12 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -105,7 +104,7 @@ impl Encodable for FetchPartition {
             total_size += types::Int32.compute_size(&self.last_fetched_epoch)?;
         } else {
             if self.last_fetched_epoch != -1 {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 5 {
@@ -115,8 +114,7 @@ impl Encodable for FetchPartition {
         if version >= 12 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -238,8 +236,7 @@ impl Encodable for FetchTopic {
         if version >= 12 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -267,8 +264,7 @@ impl Encodable for FetchTopic {
         if version >= 12 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -385,14 +381,13 @@ impl Encodable for ForgottenTopic {
             }
         } else {
             if !self.partitions.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 12 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -420,14 +415,13 @@ impl Encodable for ForgottenTopic {
             }
         } else {
             if !self.partitions.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 12 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -598,7 +592,7 @@ impl Encodable for FetchRequest {
             }
         } else {
             if !self.forgotten_topics_data.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 11 {
@@ -614,15 +608,13 @@ impl Encodable for FetchRequest {
                 num_tagged_fields += 1;
             }
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
             if !self.cluster_id.is_none() {
                 let computed_size = types::CompactString.compute_size(&self.cluster_id)?;
                 if computed_size > std::u32::MAX as usize {
-                    error!("Tagged field is too large to encode ({} bytes)", computed_size);
-                    return Err(EncodeError);
+                    bail!("Tagged field is too large to encode ({} bytes)", computed_size);
                 }
                 types::UnsignedVarInt.encode(buf, 0)?;
                 types::UnsignedVarInt.encode(buf, computed_size as u32)?;
@@ -663,7 +655,7 @@ impl Encodable for FetchRequest {
             }
         } else {
             if !self.forgotten_topics_data.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 11 {
@@ -679,15 +671,13 @@ impl Encodable for FetchRequest {
                 num_tagged_fields += 1;
             }
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
             if !self.cluster_id.is_none() {
                 let computed_size = types::CompactString.compute_size(&self.cluster_id)?;
                 if computed_size > std::u32::MAX as usize {
-                    error!("Tagged field is too large to encode ({} bytes)", computed_size);
-                    return Err(EncodeError);
+                    bail!("Tagged field is too large to encode ({} bytes)", computed_size);
                 }
                 total_size += types::UnsignedVarInt.compute_size(0)?;
                 total_size += types::UnsignedVarInt.compute_size(computed_size as u32)?;

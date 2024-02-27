@@ -8,8 +8,8 @@ use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
 use bytes::Bytes;
-use log::error;
 use uuid::Uuid;
+use anyhow::bail;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
@@ -71,8 +71,7 @@ impl Encodable for JoinGroupResponseMember {
         if version >= 6 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -102,8 +101,7 @@ impl Encodable for JoinGroupResponseMember {
         if version >= 6 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -254,7 +252,7 @@ impl Encodable for JoinGroupResponse {
             types::Boolean.encode(buf, &self.skip_assignment)?;
         } else {
             if self.skip_assignment {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 6 {
@@ -270,8 +268,7 @@ impl Encodable for JoinGroupResponse {
         if version >= 6 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -303,7 +300,7 @@ impl Encodable for JoinGroupResponse {
             total_size += types::Boolean.compute_size(&self.skip_assignment)?;
         } else {
             if self.skip_assignment {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 6 {
@@ -319,8 +316,7 @@ impl Encodable for JoinGroupResponse {
         if version >= 6 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 

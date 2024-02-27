@@ -8,8 +8,8 @@ use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
 use bytes::Bytes;
-use log::error;
 use uuid::Uuid;
+use anyhow::bail;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
@@ -65,21 +65,21 @@ impl Encodable for CreatableTopicConfigs {
             types::CompactString.encode(buf, &self.name)?;
         } else {
             if !self.name.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 5 {
             types::CompactString.encode(buf, &self.value)?;
         } else {
             if !self.value.as_ref().map(|x| x.is_empty()).unwrap_or_default() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 5 {
             types::Boolean.encode(buf, &self.read_only)?;
         } else {
             if self.read_only {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 5 {
@@ -89,14 +89,13 @@ impl Encodable for CreatableTopicConfigs {
             types::Boolean.encode(buf, &self.is_sensitive)?;
         } else {
             if self.is_sensitive {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 5 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -110,21 +109,21 @@ impl Encodable for CreatableTopicConfigs {
             total_size += types::CompactString.compute_size(&self.name)?;
         } else {
             if !self.name.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 5 {
             total_size += types::CompactString.compute_size(&self.value)?;
         } else {
             if !self.value.as_ref().map(|x| x.is_empty()).unwrap_or_default() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 5 {
             total_size += types::Boolean.compute_size(&self.read_only)?;
         } else {
             if self.read_only {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 5 {
@@ -134,14 +133,13 @@ impl Encodable for CreatableTopicConfigs {
             total_size += types::Boolean.compute_size(&self.is_sensitive)?;
         } else {
             if self.is_sensitive {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 5 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -302,15 +300,13 @@ impl MapEncodable for CreatableTopicResult {
                 num_tagged_fields += 1;
             }
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
             if self.topic_config_error_code != 0 {
                 let computed_size = types::Int16.compute_size(&self.topic_config_error_code)?;
                 if computed_size > std::u32::MAX as usize {
-                    error!("Tagged field is too large to encode ({} bytes)", computed_size);
-                    return Err(EncodeError);
+                    bail!("Tagged field is too large to encode ({} bytes)", computed_size);
                 }
                 types::UnsignedVarInt.encode(buf, 0)?;
                 types::UnsignedVarInt.encode(buf, computed_size as u32)?;
@@ -354,15 +350,13 @@ impl MapEncodable for CreatableTopicResult {
                 num_tagged_fields += 1;
             }
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
             if self.topic_config_error_code != 0 {
                 let computed_size = types::Int16.compute_size(&self.topic_config_error_code)?;
                 if computed_size > std::u32::MAX as usize {
-                    error!("Tagged field is too large to encode ({} bytes)", computed_size);
-                    return Err(EncodeError);
+                    bail!("Tagged field is too large to encode ({} bytes)", computed_size);
                 }
                 total_size += types::UnsignedVarInt.compute_size(0)?;
                 total_size += types::UnsignedVarInt.compute_size(computed_size as u32)?;
@@ -503,8 +497,7 @@ impl Encodable for CreateTopicsResponse {
         if version >= 5 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -525,8 +518,7 @@ impl Encodable for CreateTopicsResponse {
         if version >= 5 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 

@@ -8,8 +8,8 @@ use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
 use bytes::Bytes;
-use log::error;
 use uuid::Uuid;
+use anyhow::bail;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
@@ -50,8 +50,7 @@ impl Encodable for ScramCredentialDeletion {
         types::Int8.encode(buf, &self.mechanism)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
-            error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-            return Err(EncodeError);
+            bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
         }
         types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -64,8 +63,7 @@ impl Encodable for ScramCredentialDeletion {
         total_size += types::Int8.compute_size(&self.mechanism)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
-            error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-            return Err(EncodeError);
+            bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
         }
         total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -159,8 +157,7 @@ impl Encodable for ScramCredentialUpsertion {
         types::CompactBytes.encode(buf, &self.salted_password)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
-            error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-            return Err(EncodeError);
+            bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
         }
         types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -176,8 +173,7 @@ impl Encodable for ScramCredentialUpsertion {
         total_size += types::CompactBytes.compute_size(&self.salted_password)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
-            error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-            return Err(EncodeError);
+            bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
         }
         total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -262,8 +258,7 @@ impl Encodable for AlterUserScramCredentialsRequest {
         types::CompactArray(types::Struct { version }).encode(buf, &self.upsertions)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
-            error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-            return Err(EncodeError);
+            bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
         }
         types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -276,8 +271,7 @@ impl Encodable for AlterUserScramCredentialsRequest {
         total_size += types::CompactArray(types::Struct { version }).compute_size(&self.upsertions)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
-            error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-            return Err(EncodeError);
+            bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
         }
         total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 

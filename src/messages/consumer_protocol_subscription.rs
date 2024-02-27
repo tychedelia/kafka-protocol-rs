@@ -8,8 +8,8 @@ use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
 use bytes::Bytes;
-use log::error;
 use uuid::Uuid;
+use anyhow::bail;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
@@ -44,14 +44,14 @@ impl MapEncodable for TopicPartition {
             types::String.encode(buf, key)?;
         } else {
             if !key.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 1 {
             types::Array(types::Int32).encode(buf, &self.partitions)?;
         } else {
             if !self.partitions.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
 
@@ -63,14 +63,14 @@ impl MapEncodable for TopicPartition {
             total_size += types::String.compute_size(key)?;
         } else {
             if !key.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 1 {
             total_size += types::Array(types::Int32).compute_size(&self.partitions)?;
         } else {
             if !self.partitions.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
 

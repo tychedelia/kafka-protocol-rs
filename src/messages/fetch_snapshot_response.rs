@@ -8,8 +8,8 @@ use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
 use bytes::Bytes;
-use log::error;
 use uuid::Uuid;
+use anyhow::bail;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
@@ -50,8 +50,7 @@ impl Encodable for SnapshotId {
         types::Int32.encode(buf, &self.epoch)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
-            error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-            return Err(EncodeError);
+            bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
         }
         types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -64,8 +63,7 @@ impl Encodable for SnapshotId {
         total_size += types::Int32.compute_size(&self.epoch)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
-            error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-            return Err(EncodeError);
+            bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
         }
         total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -141,8 +139,7 @@ impl Encodable for LeaderIdAndEpoch {
         types::Int32.encode(buf, &self.leader_epoch)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
-            error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-            return Err(EncodeError);
+            bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
         }
         types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -155,8 +152,7 @@ impl Encodable for LeaderIdAndEpoch {
         total_size += types::Int32.compute_size(&self.leader_epoch)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
-            error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-            return Err(EncodeError);
+            bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
         }
         total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -264,15 +260,13 @@ impl Encodable for PartitionSnapshot {
             num_tagged_fields += 1;
         }
         if num_tagged_fields > std::u32::MAX as usize {
-            error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-            return Err(EncodeError);
+            bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
         }
         types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
         if &self.current_leader != &Default::default() {
             let computed_size = types::Struct { version }.compute_size(&self.current_leader)?;
             if computed_size > std::u32::MAX as usize {
-                error!("Tagged field is too large to encode ({} bytes)", computed_size);
-                return Err(EncodeError);
+                bail!("Tagged field is too large to encode ({} bytes)", computed_size);
             }
             types::UnsignedVarInt.encode(buf, 0)?;
             types::UnsignedVarInt.encode(buf, computed_size as u32)?;
@@ -295,15 +289,13 @@ impl Encodable for PartitionSnapshot {
             num_tagged_fields += 1;
         }
         if num_tagged_fields > std::u32::MAX as usize {
-            error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-            return Err(EncodeError);
+            bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
         }
         total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
         if &self.current_leader != &Default::default() {
             let computed_size = types::Struct { version }.compute_size(&self.current_leader)?;
             if computed_size > std::u32::MAX as usize {
-                error!("Tagged field is too large to encode ({} bytes)", computed_size);
-                return Err(EncodeError);
+                bail!("Tagged field is too large to encode ({} bytes)", computed_size);
             }
             total_size += types::UnsignedVarInt.compute_size(0)?;
             total_size += types::UnsignedVarInt.compute_size(computed_size as u32)?;
@@ -404,8 +396,7 @@ impl Encodable for TopicSnapshot {
         types::CompactArray(types::Struct { version }).encode(buf, &self.partitions)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
-            error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-            return Err(EncodeError);
+            bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
         }
         types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -418,8 +409,7 @@ impl Encodable for TopicSnapshot {
         total_size += types::CompactArray(types::Struct { version }).compute_size(&self.partitions)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
-            error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-            return Err(EncodeError);
+            bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
         }
         total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -501,8 +491,7 @@ impl Encodable for FetchSnapshotResponse {
         types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
-            error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-            return Err(EncodeError);
+            bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
         }
         types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -516,8 +505,7 @@ impl Encodable for FetchSnapshotResponse {
         total_size += types::CompactArray(types::Struct { version }).compute_size(&self.topics)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
-            error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-            return Err(EncodeError);
+            bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
         }
         total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 

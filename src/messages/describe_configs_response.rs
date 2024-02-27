@@ -8,8 +8,8 @@ use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
 use bytes::Bytes;
-use log::error;
 use uuid::Uuid;
+use anyhow::bail;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
@@ -59,7 +59,7 @@ impl Encodable for DescribeConfigsSynonym {
             }
         } else {
             if !self.name.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 1 {
@@ -70,21 +70,20 @@ impl Encodable for DescribeConfigsSynonym {
             }
         } else {
             if !self.value.as_ref().map(|x| x.is_empty()).unwrap_or_default() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 1 {
             types::Int8.encode(buf, &self.source)?;
         } else {
             if self.source != 0 {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -102,7 +101,7 @@ impl Encodable for DescribeConfigsSynonym {
             }
         } else {
             if !self.name.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 1 {
@@ -113,21 +112,20 @@ impl Encodable for DescribeConfigsSynonym {
             }
         } else {
             if !self.value.as_ref().map(|x| x.is_empty()).unwrap_or_default() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 1 {
             total_size += types::Int8.compute_size(&self.source)?;
         } else {
             if self.source != 0 {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -275,7 +273,7 @@ impl Encodable for DescribeConfigsResourceResult {
             types::Boolean.encode(buf, &self.is_default)?;
         } else {
             if self.is_default {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 1 {
@@ -302,8 +300,7 @@ impl Encodable for DescribeConfigsResourceResult {
         if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -328,7 +325,7 @@ impl Encodable for DescribeConfigsResourceResult {
             total_size += types::Boolean.compute_size(&self.is_default)?;
         } else {
             if self.is_default {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 1 {
@@ -355,8 +352,7 @@ impl Encodable for DescribeConfigsResourceResult {
         if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -523,8 +519,7 @@ impl Encodable for DescribeConfigsResult {
         if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -554,8 +549,7 @@ impl Encodable for DescribeConfigsResult {
         if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -660,8 +654,7 @@ impl Encodable for DescribeConfigsResponse {
         if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -680,8 +673,7 @@ impl Encodable for DescribeConfigsResponse {
         if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
