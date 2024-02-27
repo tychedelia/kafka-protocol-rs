@@ -1,5 +1,6 @@
 use crate::protocol::buf::{ByteBuf, ByteBufMut};
 use crate::protocol::{DecodeError, EncodeError};
+use anyhow::Context;
 use bytes::{Buf, BufMut, Bytes, BytesMut};
 
 use super::{Compressor, Decompressor};
@@ -21,8 +22,8 @@ impl<B: ByteBufMut> Compressor<B> for Zstd {
         let res = f(&mut tmp)?;
 
         // Compress directly into the target buffer
-        zstd::stream::copy_encode(tmp.reader(), buf.writer(), COMPRESSION_LEVEL)?;
-
+        zstd::stream::copy_encode(tmp.reader(), buf.writer(), COMPRESSION_LEVEL)
+            .context("Failed to compress zstd")?;
         Ok(res)
     }
 }
@@ -37,7 +38,7 @@ impl<B: ByteBuf> Decompressor<B> for Zstd {
         let mut tmp = BytesMut::new().writer();
         // Allocate a temporary buffer to hold the uncompressed bytes
         let buf = buf.copy_to_bytes(buf.remaining());
-        zstd::stream::copy_decode(buf.reader(), &mut tmp)?;
+        zstd::stream::copy_decode(buf.reader(), &mut tmp).context("Failed to decompress zstd")?;
 
         f(&mut tmp.into_inner().into())
     }

@@ -1,5 +1,6 @@
 use crate::protocol::buf::{ByteBuf, ByteBufMut};
 use crate::protocol::{DecodeError, EncodeError};
+use anyhow::Context;
 use bytes::{Buf, BufMut, Bytes, BytesMut};
 use std::io;
 
@@ -25,10 +26,11 @@ impl<B: ByteBufMut> Compressor<B> for Lz4 {
 
         let mut encoder = EncoderBuilder::new()
             .level(COMPRESSION_LEVEL)
-            .build(buf.writer())?;
+            .build(buf.writer())
+            .context("Failed to compress lz4")?;
 
-        io::copy(&mut tmp.reader(), &mut encoder)?;
-        encoder.finish().1?;
+        io::copy(&mut tmp.reader(), &mut encoder).context("Failed to compress lz4")?;
+        encoder.finish().1.context("Failed to compress lz4")?;
 
         Ok(res)
     }
@@ -45,8 +47,8 @@ impl<B: ByteBuf> Decompressor<B> for Lz4 {
         // Allocate a temporary buffer to hold the uncompressed bytes
         let buf = buf.copy_to_bytes(buf.remaining());
 
-        let mut decoder = Decoder::new(buf.reader())?;
-        io::copy(&mut decoder, &mut tmp)?;
+        let mut decoder = Decoder::new(buf.reader()).context("Failed to decompress lz4")?;
+        io::copy(&mut decoder, &mut tmp).context("Failed to decompress lz4")?;
 
         f(&mut tmp.into_inner().into())
     }
@@ -66,13 +68,13 @@ mod test {
     fn test_lz4() {
         let mut compressed = BytesMut::new();
         Lz4::compress(&mut compressed, |buf| -> Result<(), EncodeError> {
-            buf.write_str("hello lz4")?;
+            buf.write_str("hello lz4").unwrap();
             Ok(())
         })
         .unwrap();
 
         Lz4::decompress(&mut compressed, |buf| -> Result<(), DecodeError> {
-            let decompressed_str = str::from_utf8(buf.as_slice())?;
+            let decompressed_str = str::from_utf8(buf.as_slice()).unwrap();
             assert_eq!(decompressed_str, "hello lz4");
             Ok(())
         })
