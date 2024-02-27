@@ -84,16 +84,16 @@ impl Encodable for UpdateMetadataPartitionState {
         if version <= 4 {
             types::String.encode(buf, &self.topic_name)?;
         }
-        types::Int32.encode(buf, &self.partition_index)?;
-        types::Int32.encode(buf, &self.controller_epoch)?;
+        buf.put_i32(self.partition_index);
+        buf.put_i32(self.controller_epoch);
         types::Int32.encode(buf, &self.leader)?;
-        types::Int32.encode(buf, &self.leader_epoch)?;
+        buf.put_i32(self.leader_epoch);
         if version >= 6 {
             types::CompactArray(types::Int32).encode(buf, &self.isr)?;
         } else {
             types::Array(types::Int32).encode(buf, &self.isr)?;
         }
-        types::Int32.encode(buf, &self.zk_version)?;
+        buf.put_i32(self.zk_version);
         if version >= 6 {
             types::CompactArray(types::Int32).encode(buf, &self.replicas)?;
         } else {
@@ -112,7 +112,7 @@ impl Encodable for UpdateMetadataPartitionState {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -123,16 +123,16 @@ impl Encodable for UpdateMetadataPartitionState {
         if version <= 4 {
             total_size += types::String.compute_size(&self.topic_name)?;
         }
-        total_size += types::Int32.compute_size(&self.partition_index)?;
-        total_size += types::Int32.compute_size(&self.controller_epoch)?;
+        total_size += 4;
+        total_size += 4;
         total_size += types::Int32.compute_size(&self.leader)?;
-        total_size += types::Int32.compute_size(&self.leader_epoch)?;
+        total_size += 4;
         if version >= 6 {
             total_size += types::CompactArray(types::Int32).compute_size(&self.isr)?;
         } else {
             total_size += types::Array(types::Int32).compute_size(&self.isr)?;
         }
-        total_size += types::Int32.compute_size(&self.zk_version)?;
+        total_size += 4;
         if version >= 6 {
             total_size += types::CompactArray(types::Int32).compute_size(&self.replicas)?;
         } else {
@@ -166,16 +166,16 @@ impl Decodable for UpdateMetadataPartitionState {
         } else {
             Default::default()
         };
-        let partition_index = types::Int32.decode(buf)?;
-        let controller_epoch = types::Int32.decode(buf)?;
+        let partition_index = buf.try_get_i32()?;
+        let controller_epoch = buf.try_get_i32()?;
         let leader = types::Int32.decode(buf)?;
-        let leader_epoch = types::Int32.decode(buf)?;
+        let leader_epoch = buf.try_get_i32()?;
         let isr = if version >= 6 {
             types::CompactArray(types::Int32).decode(buf)?
         } else {
             types::Array(types::Int32).decode(buf)?
         };
-        let zk_version = types::Int32.decode(buf)?;
+        let zk_version = buf.try_get_i32()?;
         let replicas = if version >= 6 {
             types::CompactArray(types::Int32).decode(buf)?
         } else {
@@ -282,7 +282,7 @@ impl Encodable for UpdateMetadataTopicState {
             }
         }
         if version >= 7 {
-            types::Uuid.encode(buf, &self.topic_id)?;
+            types::Uuid.encode(buf, self.topic_id)?;
         }
         if version >= 5 {
             if version >= 6 {
@@ -301,7 +301,7 @@ impl Encodable for UpdateMetadataTopicState {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -321,7 +321,7 @@ impl Encodable for UpdateMetadataTopicState {
             }
         }
         if version >= 7 {
-            total_size += types::Uuid.compute_size(&self.topic_id)?;
+            total_size += types::Uuid.compute_size(self.topic_id)?;
         }
         if version >= 5 {
             if version >= 6 {
@@ -447,7 +447,7 @@ impl Builder for UpdateMetadataEndpoint {
 impl Encodable for UpdateMetadataEndpoint {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version >= 1 {
-            types::Int32.encode(buf, &self.port)?;
+            buf.put_i32(self.port);
         } else {
             if self.port != 0 {
                 return Err(EncodeError)
@@ -472,7 +472,7 @@ impl Encodable for UpdateMetadataEndpoint {
             }
         }
         if version >= 1 {
-            types::Int16.encode(buf, &self.security_protocol)?;
+            buf.put_i16(self.security_protocol);
         } else {
             if self.security_protocol != 0 {
                 return Err(EncodeError)
@@ -484,7 +484,7 @@ impl Encodable for UpdateMetadataEndpoint {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -493,7 +493,7 @@ impl Encodable for UpdateMetadataEndpoint {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         if version >= 1 {
-            total_size += types::Int32.compute_size(&self.port)?;
+            total_size += 4;
         } else {
             if self.port != 0 {
                 return Err(EncodeError)
@@ -518,7 +518,7 @@ impl Encodable for UpdateMetadataEndpoint {
             }
         }
         if version >= 1 {
-            total_size += types::Int16.compute_size(&self.security_protocol)?;
+            total_size += 2;
         } else {
             if self.security_protocol != 0 {
                 return Err(EncodeError)
@@ -541,7 +541,7 @@ impl Encodable for UpdateMetadataEndpoint {
 impl Decodable for UpdateMetadataEndpoint {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let port = if version >= 1 {
-            types::Int32.decode(buf)?
+            buf.try_get_i32()?
         } else {
             0
         };
@@ -564,7 +564,7 @@ impl Decodable for UpdateMetadataEndpoint {
             Default::default()
         };
         let security_protocol = if version >= 1 {
-            types::Int16.decode(buf)?
+            buf.try_get_i16()?
         } else {
             0
         };
@@ -653,7 +653,7 @@ impl Encodable for UpdateMetadataBroker {
             types::String.encode(buf, &self.v0_host)?;
         }
         if version == 0 {
-            types::Int32.encode(buf, &self.v0_port)?;
+            buf.put_i32(self.v0_port);
         }
         if version >= 1 {
             if version >= 6 {
@@ -675,7 +675,7 @@ impl Encodable for UpdateMetadataBroker {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -688,7 +688,7 @@ impl Encodable for UpdateMetadataBroker {
             total_size += types::String.compute_size(&self.v0_host)?;
         }
         if version == 0 {
-            total_size += types::Int32.compute_size(&self.v0_port)?;
+            total_size += 4;
         }
         if version >= 1 {
             if version >= 6 {
@@ -727,7 +727,7 @@ impl Decodable for UpdateMetadataBroker {
             Default::default()
         };
         let v0_port = if version == 0 {
-            types::Int32.decode(buf)?
+            buf.try_get_i32()?
         } else {
             0
         };
@@ -837,9 +837,9 @@ impl Builder for UpdateMetadataRequest {
 impl Encodable for UpdateMetadataRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.controller_id)?;
-        types::Int32.encode(buf, &self.controller_epoch)?;
+        buf.put_i32(self.controller_epoch);
         if version >= 5 {
-            types::Int64.encode(buf, &self.broker_epoch)?;
+            buf.put_i64(self.broker_epoch);
         }
         if version <= 4 {
             types::Array(types::Struct { version }).encode(buf, &self.ungrouped_partition_states)?;
@@ -870,7 +870,7 @@ impl Encodable for UpdateMetadataRequest {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -879,9 +879,9 @@ impl Encodable for UpdateMetadataRequest {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.controller_id)?;
-        total_size += types::Int32.compute_size(&self.controller_epoch)?;
+        total_size += 4;
         if version >= 5 {
-            total_size += types::Int64.compute_size(&self.broker_epoch)?;
+            total_size += 8;
         }
         if version <= 4 {
             total_size += types::Array(types::Struct { version }).compute_size(&self.ungrouped_partition_states)?;
@@ -923,9 +923,9 @@ impl Encodable for UpdateMetadataRequest {
 impl Decodable for UpdateMetadataRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let controller_id = types::Int32.decode(buf)?;
-        let controller_epoch = types::Int32.decode(buf)?;
+        let controller_epoch = buf.try_get_i32()?;
         let broker_epoch = if version >= 5 {
-            types::Int64.decode(buf)?
+            buf.try_get_i64()?
         } else {
             -1
         };

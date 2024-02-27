@@ -62,16 +62,16 @@ impl Builder for BrokerHeartbeatRequest {
 impl Encodable for BrokerHeartbeatRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.broker_id)?;
-        types::Int64.encode(buf, &self.broker_epoch)?;
-        types::Int64.encode(buf, &self.current_metadata_offset)?;
-        types::Boolean.encode(buf, &self.want_fence)?;
-        types::Boolean.encode(buf, &self.want_shut_down)?;
+        buf.put_i64(self.broker_epoch);
+        buf.put_i64(self.current_metadata_offset);
+        types::Boolean.encode(buf, self.want_fence)?;
+        types::Boolean.encode(buf, self.want_shut_down)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             return Err(EncodeError);
         }
-        types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+        types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
@@ -79,10 +79,10 @@ impl Encodable for BrokerHeartbeatRequest {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.broker_id)?;
-        total_size += types::Int64.compute_size(&self.broker_epoch)?;
-        total_size += types::Int64.compute_size(&self.current_metadata_offset)?;
-        total_size += types::Boolean.compute_size(&self.want_fence)?;
-        total_size += types::Boolean.compute_size(&self.want_shut_down)?;
+        total_size += 8;
+        total_size += 8;
+        total_size += types::Boolean.compute_size(self.want_fence)?;
+        total_size += types::Boolean.compute_size(self.want_shut_down)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -98,8 +98,8 @@ impl Encodable for BrokerHeartbeatRequest {
 impl Decodable for BrokerHeartbeatRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let broker_id = types::Int32.decode(buf)?;
-        let broker_epoch = types::Int64.decode(buf)?;
-        let current_metadata_offset = types::Int64.decode(buf)?;
+        let broker_epoch = buf.try_get_i64()?;
+        let current_metadata_offset = buf.try_get_i64()?;
         let want_fence = types::Boolean.decode(buf)?;
         let want_shut_down = types::Boolean.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();

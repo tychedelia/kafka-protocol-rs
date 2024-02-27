@@ -47,7 +47,7 @@ impl Builder for MetadataRequestTopic {
 impl Encodable for MetadataRequestTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version >= 10 {
-            types::Uuid.encode(buf, &self.topic_id)?;
+            types::Uuid.encode(buf, self.topic_id)?;
         }
         if version >= 9 {
             types::CompactString.encode(buf, &self.name)?;
@@ -60,7 +60,7 @@ impl Encodable for MetadataRequestTopic {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -69,7 +69,7 @@ impl Encodable for MetadataRequestTopic {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         if version >= 10 {
-            total_size += types::Uuid.compute_size(&self.topic_id)?;
+            total_size += types::Uuid.compute_size(self.topic_id)?;
         }
         if version >= 9 {
             total_size += types::CompactString.compute_size(&self.name)?;
@@ -179,21 +179,21 @@ impl Encodable for MetadataRequest {
             types::Array(types::Struct { version }).encode(buf, &self.topics)?;
         }
         if version >= 4 {
-            types::Boolean.encode(buf, &self.allow_auto_topic_creation)?;
+            types::Boolean.encode(buf, self.allow_auto_topic_creation)?;
         } else {
             if !self.allow_auto_topic_creation {
                 return Err(EncodeError)
             }
         }
         if version >= 8 && version <= 10 {
-            types::Boolean.encode(buf, &self.include_cluster_authorized_operations)?;
+            types::Boolean.encode(buf, self.include_cluster_authorized_operations)?;
         } else {
             if self.include_cluster_authorized_operations {
                 return Err(EncodeError)
             }
         }
         if version >= 8 {
-            types::Boolean.encode(buf, &self.include_topic_authorized_operations)?;
+            types::Boolean.encode(buf, self.include_topic_authorized_operations)?;
         } else {
             if self.include_topic_authorized_operations {
                 return Err(EncodeError)
@@ -205,7 +205,7 @@ impl Encodable for MetadataRequest {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -219,21 +219,21 @@ impl Encodable for MetadataRequest {
             total_size += types::Array(types::Struct { version }).compute_size(&self.topics)?;
         }
         if version >= 4 {
-            total_size += types::Boolean.compute_size(&self.allow_auto_topic_creation)?;
+            total_size += types::Boolean.compute_size(self.allow_auto_topic_creation)?;
         } else {
             if !self.allow_auto_topic_creation {
                 return Err(EncodeError)
             }
         }
         if version >= 8 && version <= 10 {
-            total_size += types::Boolean.compute_size(&self.include_cluster_authorized_operations)?;
+            total_size += types::Boolean.compute_size(self.include_cluster_authorized_operations)?;
         } else {
             if self.include_cluster_authorized_operations {
                 return Err(EncodeError)
             }
         }
         if version >= 8 {
-            total_size += types::Boolean.compute_size(&self.include_topic_authorized_operations)?;
+            total_size += types::Boolean.compute_size(self.include_topic_authorized_operations)?;
         } else {
             if self.include_topic_authorized_operations {
                 return Err(EncodeError)

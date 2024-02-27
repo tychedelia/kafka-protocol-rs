@@ -41,20 +41,20 @@ impl Builder for SnapshotFooterRecord {
 
 impl Encodable for SnapshotFooterRecord {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int16.encode(buf, &self.version)?;
+        buf.put_i16(self.version);
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             return Err(EncodeError);
         }
-        types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+        types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int16.compute_size(&self.version)?;
+        total_size += 2;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -69,7 +69,7 @@ impl Encodable for SnapshotFooterRecord {
 
 impl Decodable for SnapshotFooterRecord {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let version = types::Int16.decode(buf)?;
+        let version = buf.try_get_i16()?;
         let mut unknown_tagged_fields = BTreeMap::new();
         let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
         for _ in 0..num_tagged_fields {

@@ -62,7 +62,7 @@ impl Encodable for CreatableRenewers {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -196,14 +196,14 @@ impl Encodable for CreateDelegationTokenRequest {
         } else {
             types::Array(types::Struct { version }).encode(buf, &self.renewers)?;
         }
-        types::Int64.encode(buf, &self.max_lifetime_ms)?;
+        buf.put_i64(self.max_lifetime_ms);
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -230,7 +230,7 @@ impl Encodable for CreateDelegationTokenRequest {
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.renewers)?;
         }
-        total_size += types::Int64.compute_size(&self.max_lifetime_ms)?;
+        total_size += 8;
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
@@ -262,7 +262,7 @@ impl Decodable for CreateDelegationTokenRequest {
         } else {
             types::Array(types::Struct { version }).decode(buf)?
         };
-        let max_lifetime_ms = types::Int64.decode(buf)?;
+        let max_lifetime_ms = buf.try_get_i64()?;
         let mut unknown_tagged_fields = BTreeMap::new();
         if version >= 2 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;

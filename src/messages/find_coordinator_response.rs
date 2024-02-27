@@ -88,14 +88,14 @@ impl Encodable for Coordinator {
             }
         }
         if version >= 4 {
-            types::Int32.encode(buf, &self.port)?;
+            buf.put_i32(self.port);
         } else {
             if self.port != 0 {
                 return Err(EncodeError)
             }
         }
         if version >= 4 {
-            types::Int16.encode(buf, &self.error_code)?;
+            buf.put_i16(self.error_code);
         } else {
             if self.error_code != 0 {
                 return Err(EncodeError)
@@ -110,7 +110,7 @@ impl Encodable for Coordinator {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -140,14 +140,14 @@ impl Encodable for Coordinator {
             }
         }
         if version >= 4 {
-            total_size += types::Int32.compute_size(&self.port)?;
+            total_size += 4;
         } else {
             if self.port != 0 {
                 return Err(EncodeError)
             }
         }
         if version >= 4 {
-            total_size += types::Int16.compute_size(&self.error_code)?;
+            total_size += 2;
         } else {
             if self.error_code != 0 {
                 return Err(EncodeError)
@@ -188,12 +188,12 @@ impl Decodable for Coordinator {
             Default::default()
         };
         let port = if version >= 4 {
-            types::Int32.decode(buf)?
+            buf.try_get_i32()?
         } else {
             0
         };
         let error_code = if version >= 4 {
-            types::Int16.decode(buf)?
+            buf.try_get_i16()?
         } else {
             0
         };
@@ -297,10 +297,10 @@ impl Builder for FindCoordinatorResponse {
 impl Encodable for FindCoordinatorResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version >= 1 {
-            types::Int32.encode(buf, &self.throttle_time_ms)?;
+            buf.put_i32(self.throttle_time_ms);
         }
         if version <= 3 {
-            types::Int16.encode(buf, &self.error_code)?;
+            buf.put_i16(self.error_code);
         } else {
             if self.error_code != 0 {
                 return Err(EncodeError)
@@ -332,7 +332,7 @@ impl Encodable for FindCoordinatorResponse {
             }
         }
         if version <= 3 {
-            types::Int32.encode(buf, &self.port)?;
+            buf.put_i32(self.port);
         } else {
             if self.port != 0 {
                 return Err(EncodeError)
@@ -351,7 +351,7 @@ impl Encodable for FindCoordinatorResponse {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -360,10 +360,10 @@ impl Encodable for FindCoordinatorResponse {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         if version >= 1 {
-            total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
+            total_size += 4;
         }
         if version <= 3 {
-            total_size += types::Int16.compute_size(&self.error_code)?;
+            total_size += 2;
         } else {
             if self.error_code != 0 {
                 return Err(EncodeError)
@@ -395,7 +395,7 @@ impl Encodable for FindCoordinatorResponse {
             }
         }
         if version <= 3 {
-            total_size += types::Int32.compute_size(&self.port)?;
+            total_size += 4;
         } else {
             if self.port != 0 {
                 return Err(EncodeError)
@@ -425,12 +425,12 @@ impl Encodable for FindCoordinatorResponse {
 impl Decodable for FindCoordinatorResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let throttle_time_ms = if version >= 1 {
-            types::Int32.decode(buf)?
+            buf.try_get_i32()?
         } else {
             0
         };
         let error_code = if version <= 3 {
-            types::Int16.decode(buf)?
+            buf.try_get_i16()?
         } else {
             0
         };
@@ -458,7 +458,7 @@ impl Decodable for FindCoordinatorResponse {
             Default::default()
         };
         let port = if version <= 3 {
-            types::Int32.decode(buf)?
+            buf.try_get_i32()?
         } else {
             0
         };

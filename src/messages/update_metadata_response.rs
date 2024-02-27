@@ -41,14 +41,14 @@ impl Builder for UpdateMetadataResponse {
 
 impl Encodable for UpdateMetadataResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int16.encode(buf, &self.error_code)?;
+        buf.put_i16(self.error_code);
         if version >= 6 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -56,7 +56,7 @@ impl Encodable for UpdateMetadataResponse {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int16.compute_size(&self.error_code)?;
+        total_size += 2;
         if version >= 6 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
@@ -73,7 +73,7 @@ impl Encodable for UpdateMetadataResponse {
 
 impl Decodable for UpdateMetadataResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let error_code = types::Int16.decode(buf)?;
+        let error_code = buf.try_get_i16()?;
         let mut unknown_tagged_fields = BTreeMap::new();
         if version >= 6 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;

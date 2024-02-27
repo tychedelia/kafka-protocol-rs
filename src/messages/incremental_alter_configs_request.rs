@@ -56,7 +56,7 @@ impl Encodable for AlterableConfig {
         } else {
             types::String.encode(buf, &self.name)?;
         }
-        types::Int8.encode(buf, &self.config_operation)?;
+        buf.put_i8(self.config_operation);
         if version >= 1 {
             types::CompactString.encode(buf, &self.value)?;
         } else {
@@ -68,7 +68,7 @@ impl Encodable for AlterableConfig {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -81,7 +81,7 @@ impl Encodable for AlterableConfig {
         } else {
             total_size += types::String.compute_size(&self.name)?;
         }
-        total_size += types::Int8.compute_size(&self.config_operation)?;
+        total_size += 1;
         if version >= 1 {
             total_size += types::CompactString.compute_size(&self.value)?;
         } else {
@@ -108,7 +108,7 @@ impl Decodable for AlterableConfig {
         } else {
             types::String.decode(buf)?
         };
-        let config_operation = types::Int8.decode(buf)?;
+        let config_operation = buf.try_get_i8()?;
         let value = if version >= 1 {
             types::CompactString.decode(buf)?
         } else {
@@ -182,7 +182,7 @@ impl Builder for AlterConfigsResource {
 
 impl Encodable for AlterConfigsResource {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int8.encode(buf, &self.resource_type)?;
+        buf.put_i8(self.resource_type);
         if version >= 1 {
             types::CompactString.encode(buf, &self.resource_name)?;
         } else {
@@ -199,7 +199,7 @@ impl Encodable for AlterConfigsResource {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -207,7 +207,7 @@ impl Encodable for AlterConfigsResource {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int8.compute_size(&self.resource_type)?;
+        total_size += 1;
         if version >= 1 {
             total_size += types::CompactString.compute_size(&self.resource_name)?;
         } else {
@@ -234,7 +234,7 @@ impl Encodable for AlterConfigsResource {
 
 impl Decodable for AlterConfigsResource {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let resource_type = types::Int8.decode(buf)?;
+        let resource_type = buf.try_get_i8()?;
         let resource_name = if version >= 1 {
             types::CompactString.decode(buf)?
         } else {
@@ -313,14 +313,14 @@ impl Encodable for IncrementalAlterConfigsRequest {
         } else {
             types::Array(types::Struct { version }).encode(buf, &self.resources)?;
         }
-        types::Boolean.encode(buf, &self.validate_only)?;
+        types::Boolean.encode(buf, self.validate_only)?;
         if version >= 1 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -333,7 +333,7 @@ impl Encodable for IncrementalAlterConfigsRequest {
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.resources)?;
         }
-        total_size += types::Boolean.compute_size(&self.validate_only)?;
+        total_size += types::Boolean.compute_size(self.validate_only)?;
         if version >= 1 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {

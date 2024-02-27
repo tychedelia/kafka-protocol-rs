@@ -81,20 +81,20 @@ impl Builder for DeleteAclsMatchingAcl {
 
 impl Encodable for DeleteAclsMatchingAcl {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int16.encode(buf, &self.error_code)?;
+        buf.put_i16(self.error_code);
         if version >= 2 {
             types::CompactString.encode(buf, &self.error_message)?;
         } else {
             types::String.encode(buf, &self.error_message)?;
         }
-        types::Int8.encode(buf, &self.resource_type)?;
+        buf.put_i8(self.resource_type);
         if version >= 2 {
             types::CompactString.encode(buf, &self.resource_name)?;
         } else {
             types::String.encode(buf, &self.resource_name)?;
         }
         if version >= 1 {
-            types::Int8.encode(buf, &self.pattern_type)?;
+            buf.put_i8(self.pattern_type);
         } else {
             if self.pattern_type != 3 {
                 return Err(EncodeError)
@@ -110,15 +110,15 @@ impl Encodable for DeleteAclsMatchingAcl {
         } else {
             types::String.encode(buf, &self.host)?;
         }
-        types::Int8.encode(buf, &self.operation)?;
-        types::Int8.encode(buf, &self.permission_type)?;
+        buf.put_i8(self.operation);
+        buf.put_i8(self.permission_type);
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -126,20 +126,20 @@ impl Encodable for DeleteAclsMatchingAcl {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int16.compute_size(&self.error_code)?;
+        total_size += 2;
         if version >= 2 {
             total_size += types::CompactString.compute_size(&self.error_message)?;
         } else {
             total_size += types::String.compute_size(&self.error_message)?;
         }
-        total_size += types::Int8.compute_size(&self.resource_type)?;
+        total_size += 1;
         if version >= 2 {
             total_size += types::CompactString.compute_size(&self.resource_name)?;
         } else {
             total_size += types::String.compute_size(&self.resource_name)?;
         }
         if version >= 1 {
-            total_size += types::Int8.compute_size(&self.pattern_type)?;
+            total_size += 1;
         } else {
             if self.pattern_type != 3 {
                 return Err(EncodeError)
@@ -155,8 +155,8 @@ impl Encodable for DeleteAclsMatchingAcl {
         } else {
             total_size += types::String.compute_size(&self.host)?;
         }
-        total_size += types::Int8.compute_size(&self.operation)?;
-        total_size += types::Int8.compute_size(&self.permission_type)?;
+        total_size += 1;
+        total_size += 1;
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
@@ -173,20 +173,20 @@ impl Encodable for DeleteAclsMatchingAcl {
 
 impl Decodable for DeleteAclsMatchingAcl {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let error_code = types::Int16.decode(buf)?;
+        let error_code = buf.try_get_i16()?;
         let error_message = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
         };
-        let resource_type = types::Int8.decode(buf)?;
+        let resource_type = buf.try_get_i8()?;
         let resource_name = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
         };
         let pattern_type = if version >= 1 {
-            types::Int8.decode(buf)?
+            buf.try_get_i8()?
         } else {
             3
         };
@@ -200,8 +200,8 @@ impl Decodable for DeleteAclsMatchingAcl {
         } else {
             types::String.decode(buf)?
         };
-        let operation = types::Int8.decode(buf)?;
-        let permission_type = types::Int8.decode(buf)?;
+        let operation = buf.try_get_i8()?;
+        let permission_type = buf.try_get_i8()?;
         let mut unknown_tagged_fields = BTreeMap::new();
         if version >= 2 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
@@ -282,7 +282,7 @@ impl Builder for DeleteAclsFilterResult {
 
 impl Encodable for DeleteAclsFilterResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int16.encode(buf, &self.error_code)?;
+        buf.put_i16(self.error_code);
         if version >= 2 {
             types::CompactString.encode(buf, &self.error_message)?;
         } else {
@@ -299,7 +299,7 @@ impl Encodable for DeleteAclsFilterResult {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -307,7 +307,7 @@ impl Encodable for DeleteAclsFilterResult {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int16.compute_size(&self.error_code)?;
+        total_size += 2;
         if version >= 2 {
             total_size += types::CompactString.compute_size(&self.error_message)?;
         } else {
@@ -334,7 +334,7 @@ impl Encodable for DeleteAclsFilterResult {
 
 impl Decodable for DeleteAclsFilterResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let error_code = types::Int16.decode(buf)?;
+        let error_code = buf.try_get_i16()?;
         let error_message = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
@@ -408,7 +408,7 @@ impl Builder for DeleteAclsResponse {
 
 impl Encodable for DeleteAclsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int32.encode(buf, &self.throttle_time_ms)?;
+        buf.put_i32(self.throttle_time_ms);
         if version >= 2 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.filter_results)?;
         } else {
@@ -420,7 +420,7 @@ impl Encodable for DeleteAclsResponse {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -428,7 +428,7 @@ impl Encodable for DeleteAclsResponse {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
+        total_size += 4;
         if version >= 2 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.filter_results)?;
         } else {
@@ -450,7 +450,7 @@ impl Encodable for DeleteAclsResponse {
 
 impl Decodable for DeleteAclsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let throttle_time_ms = types::Int32.decode(buf)?;
+        let throttle_time_ms = buf.try_get_i32()?;
         let filter_results = if version >= 2 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {

@@ -56,7 +56,7 @@ impl Encodable for ComponentData {
         } else {
             types::String.encode(buf, &self.entity_type)?;
         }
-        types::Int8.encode(buf, &self.match_type)?;
+        buf.put_i8(self.match_type);
         if version >= 1 {
             types::CompactString.encode(buf, &self._match)?;
         } else {
@@ -68,7 +68,7 @@ impl Encodable for ComponentData {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -81,7 +81,7 @@ impl Encodable for ComponentData {
         } else {
             total_size += types::String.compute_size(&self.entity_type)?;
         }
-        total_size += types::Int8.compute_size(&self.match_type)?;
+        total_size += 1;
         if version >= 1 {
             total_size += types::CompactString.compute_size(&self._match)?;
         } else {
@@ -108,7 +108,7 @@ impl Decodable for ComponentData {
         } else {
             types::String.decode(buf)?
         };
-        let match_type = types::Int8.decode(buf)?;
+        let match_type = buf.try_get_i8()?;
         let _match = if version >= 1 {
             types::CompactString.decode(buf)?
         } else {
@@ -182,14 +182,14 @@ impl Encodable for DescribeClientQuotasRequest {
         } else {
             types::Array(types::Struct { version }).encode(buf, &self.components)?;
         }
-        types::Boolean.encode(buf, &self.strict)?;
+        types::Boolean.encode(buf, self.strict)?;
         if version >= 1 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -202,7 +202,7 @@ impl Encodable for DescribeClientQuotasRequest {
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.components)?;
         }
-        total_size += types::Boolean.compute_size(&self.strict)?;
+        total_size += types::Boolean.compute_size(self.strict)?;
         if version >= 1 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {

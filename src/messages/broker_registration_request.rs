@@ -54,14 +54,14 @@ impl MapEncodable for Listener {
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::CompactString.encode(buf, key)?;
         types::CompactString.encode(buf, &self.host)?;
-        types::UInt16.encode(buf, &self.port)?;
-        types::Int16.encode(buf, &self.security_protocol)?;
+        types::UInt16.encode(buf, self.port)?;
+        buf.put_i16(self.security_protocol);
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             return Err(EncodeError);
         }
-        types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+        types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
@@ -70,8 +70,8 @@ impl MapEncodable for Listener {
         let mut total_size = 0;
         total_size += types::CompactString.compute_size(key)?;
         total_size += types::CompactString.compute_size(&self.host)?;
-        total_size += types::UInt16.compute_size(&self.port)?;
-        total_size += types::Int16.compute_size(&self.security_protocol)?;
+        total_size += types::UInt16.compute_size(self.port)?;
+        total_size += 2;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -90,7 +90,7 @@ impl MapDecodable for Listener {
         let key_field = types::CompactString.decode(buf)?;
         let host = types::CompactString.decode(buf)?;
         let port = types::UInt16.decode(buf)?;
-        let security_protocol = types::Int16.decode(buf)?;
+        let security_protocol = buf.try_get_i16()?;
         let mut unknown_tagged_fields = BTreeMap::new();
         let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
         for _ in 0..num_tagged_fields {
@@ -154,14 +154,14 @@ impl MapEncodable for Feature {
     type Key = StrBytes;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::CompactString.encode(buf, key)?;
-        types::Int16.encode(buf, &self.min_supported_version)?;
-        types::Int16.encode(buf, &self.max_supported_version)?;
+        buf.put_i16(self.min_supported_version);
+        buf.put_i16(self.max_supported_version);
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             return Err(EncodeError);
         }
-        types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+        types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
@@ -169,8 +169,8 @@ impl MapEncodable for Feature {
     fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         total_size += types::CompactString.compute_size(key)?;
-        total_size += types::Int16.compute_size(&self.min_supported_version)?;
-        total_size += types::Int16.compute_size(&self.max_supported_version)?;
+        total_size += 2;
+        total_size += 2;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -187,8 +187,8 @@ impl MapDecodable for Feature {
     type Key = StrBytes;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
         let key_field = types::CompactString.decode(buf)?;
-        let min_supported_version = types::Int16.decode(buf)?;
-        let max_supported_version = types::Int16.decode(buf)?;
+        let min_supported_version = buf.try_get_i16()?;
+        let max_supported_version = buf.try_get_i16()?;
         let mut unknown_tagged_fields = BTreeMap::new();
         let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
         for _ in 0..num_tagged_fields {
@@ -270,7 +270,7 @@ impl Encodable for BrokerRegistrationRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.broker_id)?;
         types::CompactString.encode(buf, &self.cluster_id)?;
-        types::Uuid.encode(buf, &self.incarnation_id)?;
+        types::Uuid.encode(buf, self.incarnation_id)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.listeners)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.features)?;
         types::CompactString.encode(buf, &self.rack)?;
@@ -279,7 +279,7 @@ impl Encodable for BrokerRegistrationRequest {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             return Err(EncodeError);
         }
-        types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+        types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
@@ -288,7 +288,7 @@ impl Encodable for BrokerRegistrationRequest {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.broker_id)?;
         total_size += types::CompactString.compute_size(&self.cluster_id)?;
-        total_size += types::Uuid.compute_size(&self.incarnation_id)?;
+        total_size += types::Uuid.compute_size(self.incarnation_id)?;
         total_size += types::CompactArray(types::Struct { version }).compute_size(&self.listeners)?;
         total_size += types::CompactArray(types::Struct { version }).compute_size(&self.features)?;
         total_size += types::CompactString.compute_size(&self.rack)?;

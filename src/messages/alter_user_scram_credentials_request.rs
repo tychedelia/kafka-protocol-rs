@@ -47,13 +47,13 @@ impl Builder for ScramCredentialDeletion {
 impl Encodable for ScramCredentialDeletion {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::CompactString.encode(buf, &self.name)?;
-        types::Int8.encode(buf, &self.mechanism)?;
+        buf.put_i8(self.mechanism);
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             return Err(EncodeError);
         }
-        types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+        types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
@@ -61,7 +61,7 @@ impl Encodable for ScramCredentialDeletion {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         total_size += types::CompactString.compute_size(&self.name)?;
-        total_size += types::Int8.compute_size(&self.mechanism)?;
+        total_size += 1;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -77,7 +77,7 @@ impl Encodable for ScramCredentialDeletion {
 impl Decodable for ScramCredentialDeletion {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let name = types::CompactString.decode(buf)?;
-        let mechanism = types::Int8.decode(buf)?;
+        let mechanism = buf.try_get_i8()?;
         let mut unknown_tagged_fields = BTreeMap::new();
         let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
         for _ in 0..num_tagged_fields {
@@ -153,8 +153,8 @@ impl Builder for ScramCredentialUpsertion {
 impl Encodable for ScramCredentialUpsertion {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::CompactString.encode(buf, &self.name)?;
-        types::Int8.encode(buf, &self.mechanism)?;
-        types::Int32.encode(buf, &self.iterations)?;
+        buf.put_i8(self.mechanism);
+        buf.put_i32(self.iterations);
         types::CompactBytes.encode(buf, &self.salt)?;
         types::CompactBytes.encode(buf, &self.salted_password)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -162,7 +162,7 @@ impl Encodable for ScramCredentialUpsertion {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             return Err(EncodeError);
         }
-        types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+        types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
@@ -170,8 +170,8 @@ impl Encodable for ScramCredentialUpsertion {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         total_size += types::CompactString.compute_size(&self.name)?;
-        total_size += types::Int8.compute_size(&self.mechanism)?;
-        total_size += types::Int32.compute_size(&self.iterations)?;
+        total_size += 1;
+        total_size += 4;
         total_size += types::CompactBytes.compute_size(&self.salt)?;
         total_size += types::CompactBytes.compute_size(&self.salted_password)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -189,8 +189,8 @@ impl Encodable for ScramCredentialUpsertion {
 impl Decodable for ScramCredentialUpsertion {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let name = types::CompactString.decode(buf)?;
-        let mechanism = types::Int8.decode(buf)?;
-        let iterations = types::Int32.decode(buf)?;
+        let mechanism = buf.try_get_i8()?;
+        let iterations = buf.try_get_i32()?;
         let salt = types::CompactBytes.decode(buf)?;
         let salted_password = types::CompactBytes.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
@@ -265,7 +265,7 @@ impl Encodable for AlterUserScramCredentialsRequest {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             return Err(EncodeError);
         }
-        types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+        types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())

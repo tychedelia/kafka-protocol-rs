@@ -52,7 +52,7 @@ impl Encodable for CreatePartitionsAssignment {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -151,7 +151,7 @@ impl MapEncodable for CreatePartitionsTopic {
         } else {
             types::String.encode(buf, key)?;
         }
-        types::Int32.encode(buf, &self.count)?;
+        buf.put_i32(self.count);
         if version >= 2 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.assignments)?;
         } else {
@@ -163,7 +163,7 @@ impl MapEncodable for CreatePartitionsTopic {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -176,7 +176,7 @@ impl MapEncodable for CreatePartitionsTopic {
         } else {
             total_size += types::String.compute_size(key)?;
         }
-        total_size += types::Int32.compute_size(&self.count)?;
+        total_size += 4;
         if version >= 2 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.assignments)?;
         } else {
@@ -204,7 +204,7 @@ impl MapDecodable for CreatePartitionsTopic {
         } else {
             types::String.decode(buf)?
         };
-        let count = types::Int32.decode(buf)?;
+        let count = buf.try_get_i32()?;
         let assignments = if version >= 2 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
@@ -281,15 +281,15 @@ impl Encodable for CreatePartitionsRequest {
         } else {
             types::Array(types::Struct { version }).encode(buf, &self.topics)?;
         }
-        types::Int32.encode(buf, &self.timeout_ms)?;
-        types::Boolean.encode(buf, &self.validate_only)?;
+        buf.put_i32(self.timeout_ms);
+        types::Boolean.encode(buf, self.validate_only)?;
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -302,8 +302,8 @@ impl Encodable for CreatePartitionsRequest {
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.topics)?;
         }
-        total_size += types::Int32.compute_size(&self.timeout_ms)?;
-        total_size += types::Boolean.compute_size(&self.validate_only)?;
+        total_size += 4;
+        total_size += types::Boolean.compute_size(self.validate_only)?;
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
@@ -325,7 +325,7 @@ impl Decodable for CreatePartitionsRequest {
         } else {
             types::Array(types::Struct { version }).decode(buf)?
         };
-        let timeout_ms = types::Int32.decode(buf)?;
+        let timeout_ms = buf.try_get_i32()?;
         let validate_only = types::Boolean.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
         if version >= 2 {

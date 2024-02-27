@@ -51,23 +51,23 @@ impl Builder for UnregisterBrokerResponse {
 
 impl Encodable for UnregisterBrokerResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int32.encode(buf, &self.throttle_time_ms)?;
-        types::Int16.encode(buf, &self.error_code)?;
+        buf.put_i32(self.throttle_time_ms);
+        buf.put_i16(self.error_code);
         types::CompactString.encode(buf, &self.error_message)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             return Err(EncodeError);
         }
-        types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+        types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
-        total_size += types::Int16.compute_size(&self.error_code)?;
+        total_size += 4;
+        total_size += 2;
         total_size += types::CompactString.compute_size(&self.error_message)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
@@ -83,8 +83,8 @@ impl Encodable for UnregisterBrokerResponse {
 
 impl Decodable for UnregisterBrokerResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let throttle_time_ms = types::Int32.decode(buf)?;
-        let error_code = types::Int16.decode(buf)?;
+        let throttle_time_ms = buf.try_get_i32()?;
+        let error_code = buf.try_get_i16()?;
         let error_message = types::CompactString.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
         let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;

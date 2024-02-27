@@ -53,13 +53,13 @@ impl Encodable for DefaultPrincipalData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::CompactString.encode(buf, &self._type)?;
         types::CompactString.encode(buf, &self.name)?;
-        types::Boolean.encode(buf, &self.token_authenticated)?;
+        types::Boolean.encode(buf, self.token_authenticated)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             return Err(EncodeError);
         }
-        types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+        types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
@@ -68,7 +68,7 @@ impl Encodable for DefaultPrincipalData {
         let mut total_size = 0;
         total_size += types::CompactString.compute_size(&self._type)?;
         total_size += types::CompactString.compute_size(&self.name)?;
-        total_size += types::Boolean.compute_size(&self.token_authenticated)?;
+        total_size += types::Boolean.compute_size(self.token_authenticated)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);

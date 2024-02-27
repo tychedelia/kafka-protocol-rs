@@ -52,7 +52,7 @@ impl Encodable for DescribeGroupsRequest {
             types::Array(types::String).encode(buf, &self.groups)?;
         }
         if version >= 3 {
-            types::Boolean.encode(buf, &self.include_authorized_operations)?;
+            types::Boolean.encode(buf, self.include_authorized_operations)?;
         } else {
             if self.include_authorized_operations {
                 return Err(EncodeError)
@@ -64,7 +64,7 @@ impl Encodable for DescribeGroupsRequest {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -78,7 +78,7 @@ impl Encodable for DescribeGroupsRequest {
             total_size += types::Array(types::String).compute_size(&self.groups)?;
         }
         if version >= 3 {
-            total_size += types::Boolean.compute_size(&self.include_authorized_operations)?;
+            total_size += types::Boolean.compute_size(self.include_authorized_operations)?;
         } else {
             if self.include_authorized_operations {
                 return Err(EncodeError)

@@ -51,7 +51,7 @@ impl Builder for DescribeConfigsResource {
 
 impl Encodable for DescribeConfigsResource {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int8.encode(buf, &self.resource_type)?;
+        buf.put_i8(self.resource_type);
         if version >= 4 {
             types::CompactString.encode(buf, &self.resource_name)?;
         } else {
@@ -68,7 +68,7 @@ impl Encodable for DescribeConfigsResource {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -76,7 +76,7 @@ impl Encodable for DescribeConfigsResource {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int8.compute_size(&self.resource_type)?;
+        total_size += 1;
         if version >= 4 {
             total_size += types::CompactString.compute_size(&self.resource_name)?;
         } else {
@@ -103,7 +103,7 @@ impl Encodable for DescribeConfigsResource {
 
 impl Decodable for DescribeConfigsResource {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let resource_type = types::Int8.decode(buf)?;
+        let resource_type = buf.try_get_i8()?;
         let resource_name = if version >= 4 {
             types::CompactString.decode(buf)?
         } else {
@@ -188,14 +188,14 @@ impl Encodable for DescribeConfigsRequest {
             types::Array(types::Struct { version }).encode(buf, &self.resources)?;
         }
         if version >= 1 {
-            types::Boolean.encode(buf, &self.include_synonyms)?;
+            types::Boolean.encode(buf, self.include_synonyms)?;
         } else {
             if self.include_synonyms {
                 return Err(EncodeError)
             }
         }
         if version >= 3 {
-            types::Boolean.encode(buf, &self.include_documentation)?;
+            types::Boolean.encode(buf, self.include_documentation)?;
         } else {
             if self.include_documentation {
                 return Err(EncodeError)
@@ -207,7 +207,7 @@ impl Encodable for DescribeConfigsRequest {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -221,14 +221,14 @@ impl Encodable for DescribeConfigsRequest {
             total_size += types::Array(types::Struct { version }).compute_size(&self.resources)?;
         }
         if version >= 1 {
-            total_size += types::Boolean.compute_size(&self.include_synonyms)?;
+            total_size += types::Boolean.compute_size(self.include_synonyms)?;
         } else {
             if self.include_synonyms {
                 return Err(EncodeError)
             }
         }
         if version >= 3 {
-            total_size += types::Boolean.compute_size(&self.include_documentation)?;
+            total_size += types::Boolean.compute_size(self.include_documentation)?;
         } else {
             if self.include_documentation {
                 return Err(EncodeError)

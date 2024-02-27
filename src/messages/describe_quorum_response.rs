@@ -57,19 +57,19 @@ impl Builder for ReplicaState {
 impl Encodable for ReplicaState {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.replica_id)?;
-        types::Int64.encode(buf, &self.log_end_offset)?;
+        buf.put_i64(self.log_end_offset);
         if version >= 1 {
-            types::Int64.encode(buf, &self.last_fetch_timestamp)?;
+            buf.put_i64(self.last_fetch_timestamp);
         }
         if version >= 1 {
-            types::Int64.encode(buf, &self.last_caught_up_timestamp)?;
+            buf.put_i64(self.last_caught_up_timestamp);
         }
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             return Err(EncodeError);
         }
-        types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+        types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
@@ -77,12 +77,12 @@ impl Encodable for ReplicaState {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.replica_id)?;
-        total_size += types::Int64.compute_size(&self.log_end_offset)?;
+        total_size += 8;
         if version >= 1 {
-            total_size += types::Int64.compute_size(&self.last_fetch_timestamp)?;
+            total_size += 8;
         }
         if version >= 1 {
-            total_size += types::Int64.compute_size(&self.last_caught_up_timestamp)?;
+            total_size += 8;
         }
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
@@ -99,14 +99,14 @@ impl Encodable for ReplicaState {
 impl Decodable for ReplicaState {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let replica_id = types::Int32.decode(buf)?;
-        let log_end_offset = types::Int64.decode(buf)?;
+        let log_end_offset = buf.try_get_i64()?;
         let last_fetch_timestamp = if version >= 1 {
-            types::Int64.decode(buf)?
+            buf.try_get_i64()?
         } else {
             -1
         };
         let last_caught_up_timestamp = if version >= 1 {
-            types::Int64.decode(buf)?
+            buf.try_get_i64()?
         } else {
             -1
         };
@@ -198,11 +198,11 @@ impl Builder for PartitionData {
 
 impl Encodable for PartitionData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int32.encode(buf, &self.partition_index)?;
-        types::Int16.encode(buf, &self.error_code)?;
+        buf.put_i32(self.partition_index);
+        buf.put_i16(self.error_code);
         types::Int32.encode(buf, &self.leader_id)?;
-        types::Int32.encode(buf, &self.leader_epoch)?;
-        types::Int64.encode(buf, &self.high_watermark)?;
+        buf.put_i32(self.leader_epoch);
+        buf.put_i64(self.high_watermark);
         types::CompactArray(types::Struct { version }).encode(buf, &self.current_voters)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.observers)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -210,18 +210,18 @@ impl Encodable for PartitionData {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             return Err(EncodeError);
         }
-        types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+        types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int32.compute_size(&self.partition_index)?;
-        total_size += types::Int16.compute_size(&self.error_code)?;
+        total_size += 4;
+        total_size += 2;
         total_size += types::Int32.compute_size(&self.leader_id)?;
-        total_size += types::Int32.compute_size(&self.leader_epoch)?;
-        total_size += types::Int64.compute_size(&self.high_watermark)?;
+        total_size += 4;
+        total_size += 8;
         total_size += types::CompactArray(types::Struct { version }).compute_size(&self.current_voters)?;
         total_size += types::CompactArray(types::Struct { version }).compute_size(&self.observers)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -238,11 +238,11 @@ impl Encodable for PartitionData {
 
 impl Decodable for PartitionData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let partition_index = types::Int32.decode(buf)?;
-        let error_code = types::Int16.decode(buf)?;
+        let partition_index = buf.try_get_i32()?;
+        let error_code = buf.try_get_i16()?;
         let leader_id = types::Int32.decode(buf)?;
-        let leader_epoch = types::Int32.decode(buf)?;
-        let high_watermark = types::Int64.decode(buf)?;
+        let leader_epoch = buf.try_get_i32()?;
+        let high_watermark = buf.try_get_i64()?;
         let current_voters = types::CompactArray(types::Struct { version }).decode(buf)?;
         let observers = types::CompactArray(types::Struct { version }).decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
@@ -321,7 +321,7 @@ impl Encodable for TopicData {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             return Err(EncodeError);
         }
-        types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+        types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
@@ -405,21 +405,21 @@ impl Builder for DescribeQuorumResponse {
 
 impl Encodable for DescribeQuorumResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int16.encode(buf, &self.error_code)?;
+        buf.put_i16(self.error_code);
         types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             return Err(EncodeError);
         }
-        types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+        types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int16.compute_size(&self.error_code)?;
+        total_size += 2;
         total_size += types::CompactArray(types::Struct { version }).compute_size(&self.topics)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
@@ -435,7 +435,7 @@ impl Encodable for DescribeQuorumResponse {
 
 impl Decodable for DescribeQuorumResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let error_code = types::Int16.decode(buf)?;
+        let error_code = buf.try_get_i16()?;
         let topics = types::CompactArray(types::Struct { version }).decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
         let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;

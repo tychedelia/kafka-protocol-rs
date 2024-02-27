@@ -42,15 +42,15 @@ impl Builder for AddPartitionsToTxnPartitionResult {
 impl MapEncodable for AddPartitionsToTxnPartitionResult {
     type Key = i32;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int32.encode(buf, key)?;
-        types::Int16.encode(buf, &self.error_code)?;
+        buf.put_i32(*key);
+        buf.put_i16(self.error_code);
         if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -58,8 +58,8 @@ impl MapEncodable for AddPartitionsToTxnPartitionResult {
     }
     fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int32.compute_size(key)?;
-        total_size += types::Int16.compute_size(&self.error_code)?;
+        total_size += 4;
+        total_size += 2;
         if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
@@ -77,8 +77,8 @@ impl MapEncodable for AddPartitionsToTxnPartitionResult {
 impl MapDecodable for AddPartitionsToTxnPartitionResult {
     type Key = i32;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
-        let key_field = types::Int32.decode(buf)?;
-        let error_code = types::Int16.decode(buf)?;
+        let key_field = buf.try_get_i32()?;
+        let error_code = buf.try_get_i16()?;
         let mut unknown_tagged_fields = BTreeMap::new();
         if version >= 3 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
@@ -150,7 +150,7 @@ impl MapEncodable for AddPartitionsToTxnTopicResult {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -254,7 +254,7 @@ impl Builder for AddPartitionsToTxnResponse {
 
 impl Encodable for AddPartitionsToTxnResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int32.encode(buf, &self.throttle_time_ms)?;
+        buf.put_i32(self.throttle_time_ms);
         if version >= 3 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.results)?;
         } else {
@@ -266,7 +266,7 @@ impl Encodable for AddPartitionsToTxnResponse {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -274,7 +274,7 @@ impl Encodable for AddPartitionsToTxnResponse {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
+        total_size += 4;
         if version >= 3 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.results)?;
         } else {
@@ -296,7 +296,7 @@ impl Encodable for AddPartitionsToTxnResponse {
 
 impl Decodable for AddPartitionsToTxnResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let throttle_time_ms = types::Int32.decode(buf)?;
+        let throttle_time_ms = buf.try_get_i32()?;
         let results = if version >= 3 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {

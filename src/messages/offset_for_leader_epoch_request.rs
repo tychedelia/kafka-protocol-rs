@@ -51,18 +51,18 @@ impl Builder for OffsetForLeaderPartition {
 
 impl Encodable for OffsetForLeaderPartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int32.encode(buf, &self.partition)?;
+        buf.put_i32(self.partition);
         if version >= 2 {
-            types::Int32.encode(buf, &self.current_leader_epoch)?;
+            buf.put_i32(self.current_leader_epoch);
         }
-        types::Int32.encode(buf, &self.leader_epoch)?;
+        buf.put_i32(self.leader_epoch);
         if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -70,11 +70,11 @@ impl Encodable for OffsetForLeaderPartition {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int32.compute_size(&self.partition)?;
+        total_size += 4;
         if version >= 2 {
-            total_size += types::Int32.compute_size(&self.current_leader_epoch)?;
+            total_size += 4;
         }
-        total_size += types::Int32.compute_size(&self.leader_epoch)?;
+        total_size += 4;
         if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
@@ -91,13 +91,13 @@ impl Encodable for OffsetForLeaderPartition {
 
 impl Decodable for OffsetForLeaderPartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let partition = types::Int32.decode(buf)?;
+        let partition = buf.try_get_i32()?;
         let current_leader_epoch = if version >= 2 {
-            types::Int32.decode(buf)?
+            buf.try_get_i32()?
         } else {
             -1
         };
-        let leader_epoch = types::Int32.decode(buf)?;
+        let leader_epoch = buf.try_get_i32()?;
         let mut unknown_tagged_fields = BTreeMap::new();
         if version >= 4 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
@@ -173,7 +173,7 @@ impl MapEncodable for OffsetForLeaderTopic {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -291,7 +291,7 @@ impl Encodable for OffsetForLeaderEpochRequest {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }

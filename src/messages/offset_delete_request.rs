@@ -39,13 +39,13 @@ impl Builder for OffsetDeleteRequestPartition {
 
 impl Encodable for OffsetDeleteRequestPartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int32.encode(buf, &self.partition_index)?;
+        buf.put_i32(self.partition_index);
 
         Ok(())
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int32.compute_size(&self.partition_index)?;
+        total_size += 4;
 
         Ok(total_size)
     }
@@ -53,7 +53,7 @@ impl Encodable for OffsetDeleteRequestPartition {
 
 impl Decodable for OffsetDeleteRequestPartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let partition_index = types::Int32.decode(buf)?;
+        let partition_index = buf.try_get_i32()?;
         Ok(Self {
             partition_index,
         })

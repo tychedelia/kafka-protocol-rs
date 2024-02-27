@@ -61,28 +61,28 @@ impl Builder for PartitionData {
 
 impl Encodable for PartitionData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int32.encode(buf, &self.partition_index)?;
-        types::Int32.encode(buf, &self.candidate_epoch)?;
+        buf.put_i32(self.partition_index);
+        buf.put_i32(self.candidate_epoch);
         types::Int32.encode(buf, &self.candidate_id)?;
-        types::Int32.encode(buf, &self.last_offset_epoch)?;
-        types::Int64.encode(buf, &self.last_offset)?;
+        buf.put_i32(self.last_offset_epoch);
+        buf.put_i64(self.last_offset);
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             return Err(EncodeError);
         }
-        types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+        types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int32.compute_size(&self.partition_index)?;
-        total_size += types::Int32.compute_size(&self.candidate_epoch)?;
+        total_size += 4;
+        total_size += 4;
         total_size += types::Int32.compute_size(&self.candidate_id)?;
-        total_size += types::Int32.compute_size(&self.last_offset_epoch)?;
-        total_size += types::Int64.compute_size(&self.last_offset)?;
+        total_size += 4;
+        total_size += 8;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -97,11 +97,11 @@ impl Encodable for PartitionData {
 
 impl Decodable for PartitionData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let partition_index = types::Int32.decode(buf)?;
-        let candidate_epoch = types::Int32.decode(buf)?;
+        let partition_index = buf.try_get_i32()?;
+        let candidate_epoch = buf.try_get_i32()?;
         let candidate_id = types::Int32.decode(buf)?;
-        let last_offset_epoch = types::Int32.decode(buf)?;
-        let last_offset = types::Int64.decode(buf)?;
+        let last_offset_epoch = buf.try_get_i32()?;
+        let last_offset = buf.try_get_i64()?;
         let mut unknown_tagged_fields = BTreeMap::new();
         let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
         for _ in 0..num_tagged_fields {
@@ -174,7 +174,7 @@ impl Encodable for TopicData {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             return Err(EncodeError);
         }
-        types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+        types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
@@ -265,7 +265,7 @@ impl Encodable for VoteRequest {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             return Err(EncodeError);
         }
-        types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+        types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())

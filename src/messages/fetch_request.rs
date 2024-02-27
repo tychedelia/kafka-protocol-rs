@@ -66,29 +66,29 @@ impl Builder for FetchPartition {
 
 impl Encodable for FetchPartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int32.encode(buf, &self.partition)?;
+        buf.put_i32(self.partition);
         if version >= 9 {
-            types::Int32.encode(buf, &self.current_leader_epoch)?;
+            buf.put_i32(self.current_leader_epoch);
         }
-        types::Int64.encode(buf, &self.fetch_offset)?;
+        buf.put_i64(self.fetch_offset);
         if version >= 12 {
-            types::Int32.encode(buf, &self.last_fetched_epoch)?;
+            buf.put_i32(self.last_fetched_epoch);
         } else {
             if self.last_fetched_epoch != -1 {
                 return Err(EncodeError)
             }
         }
         if version >= 5 {
-            types::Int64.encode(buf, &self.log_start_offset)?;
+            buf.put_i64(self.log_start_offset);
         }
-        types::Int32.encode(buf, &self.partition_max_bytes)?;
+        buf.put_i32(self.partition_max_bytes);
         if version >= 12 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -96,22 +96,22 @@ impl Encodable for FetchPartition {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int32.compute_size(&self.partition)?;
+        total_size += 4;
         if version >= 9 {
-            total_size += types::Int32.compute_size(&self.current_leader_epoch)?;
+            total_size += 4;
         }
-        total_size += types::Int64.compute_size(&self.fetch_offset)?;
+        total_size += 8;
         if version >= 12 {
-            total_size += types::Int32.compute_size(&self.last_fetched_epoch)?;
+            total_size += 4;
         } else {
             if self.last_fetched_epoch != -1 {
                 return Err(EncodeError)
             }
         }
         if version >= 5 {
-            total_size += types::Int64.compute_size(&self.log_start_offset)?;
+            total_size += 8;
         }
-        total_size += types::Int32.compute_size(&self.partition_max_bytes)?;
+        total_size += 4;
         if version >= 12 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
@@ -128,24 +128,24 @@ impl Encodable for FetchPartition {
 
 impl Decodable for FetchPartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let partition = types::Int32.decode(buf)?;
+        let partition = buf.try_get_i32()?;
         let current_leader_epoch = if version >= 9 {
-            types::Int32.decode(buf)?
+            buf.try_get_i32()?
         } else {
             -1
         };
-        let fetch_offset = types::Int64.decode(buf)?;
+        let fetch_offset = buf.try_get_i64()?;
         let last_fetched_epoch = if version >= 12 {
-            types::Int32.decode(buf)?
+            buf.try_get_i32()?
         } else {
             -1
         };
         let log_start_offset = if version >= 5 {
-            types::Int64.decode(buf)?
+            buf.try_get_i64()?
         } else {
             -1
         };
-        let partition_max_bytes = types::Int32.decode(buf)?;
+        let partition_max_bytes = buf.try_get_i32()?;
         let mut unknown_tagged_fields = BTreeMap::new();
         if version >= 12 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
@@ -228,7 +228,7 @@ impl Encodable for FetchTopic {
             }
         }
         if version >= 13 {
-            types::Uuid.encode(buf, &self.topic_id)?;
+            types::Uuid.encode(buf, self.topic_id)?;
         }
         if version >= 12 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.partitions)?;
@@ -241,7 +241,7 @@ impl Encodable for FetchTopic {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -257,7 +257,7 @@ impl Encodable for FetchTopic {
             }
         }
         if version >= 13 {
-            total_size += types::Uuid.compute_size(&self.topic_id)?;
+            total_size += types::Uuid.compute_size(self.topic_id)?;
         }
         if version >= 12 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.partitions)?;
@@ -375,7 +375,7 @@ impl Encodable for ForgottenTopic {
             }
         }
         if version >= 13 {
-            types::Uuid.encode(buf, &self.topic_id)?;
+            types::Uuid.encode(buf, self.topic_id)?;
         }
         if version >= 7 {
             if version >= 12 {
@@ -394,7 +394,7 @@ impl Encodable for ForgottenTopic {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -410,7 +410,7 @@ impl Encodable for ForgottenTopic {
             }
         }
         if version >= 13 {
-            total_size += types::Uuid.compute_size(&self.topic_id)?;
+            total_size += types::Uuid.compute_size(self.topic_id)?;
         }
         if version >= 7 {
             if version >= 12 {
@@ -571,19 +571,19 @@ impl Builder for FetchRequest {
 impl Encodable for FetchRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.replica_id)?;
-        types::Int32.encode(buf, &self.max_wait_ms)?;
-        types::Int32.encode(buf, &self.min_bytes)?;
+        buf.put_i32(self.max_wait_ms);
+        buf.put_i32(self.min_bytes);
         if version >= 3 {
-            types::Int32.encode(buf, &self.max_bytes)?;
+            buf.put_i32(self.max_bytes);
         }
         if version >= 4 {
-            types::Int8.encode(buf, &self.isolation_level)?;
+            buf.put_i8(self.isolation_level);
         }
         if version >= 7 {
-            types::Int32.encode(buf, &self.session_id)?;
+            buf.put_i32(self.session_id);
         }
         if version >= 7 {
-            types::Int32.encode(buf, &self.session_epoch)?;
+            buf.put_i32(self.session_epoch);
         }
         if version >= 12 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
@@ -617,15 +617,15 @@ impl Encodable for FetchRequest {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
             if !self.cluster_id.is_none() {
                 let computed_size = types::CompactString.compute_size(&self.cluster_id)?;
                 if computed_size > std::u32::MAX as usize {
                     error!("Tagged field is too large to encode ({} bytes)", computed_size);
                     return Err(EncodeError);
                 }
-                types::UnsignedVarInt.encode(buf, 0)?;
-                types::UnsignedVarInt.encode(buf, computed_size as u32)?;
+                buf.put_i32(0);
+                buf.put_i32(computed_size as i32);
                 types::CompactString.encode(buf, &self.cluster_id)?;
             }
 
@@ -636,19 +636,19 @@ impl Encodable for FetchRequest {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.replica_id)?;
-        total_size += types::Int32.compute_size(&self.max_wait_ms)?;
-        total_size += types::Int32.compute_size(&self.min_bytes)?;
+        total_size += 4;
+        total_size += 4;
         if version >= 3 {
-            total_size += types::Int32.compute_size(&self.max_bytes)?;
+            total_size += 4;
         }
         if version >= 4 {
-            total_size += types::Int8.compute_size(&self.isolation_level)?;
+            total_size += 1;
         }
         if version >= 7 {
-            total_size += types::Int32.compute_size(&self.session_id)?;
+            total_size += 4;
         }
         if version >= 7 {
-            total_size += types::Int32.compute_size(&self.session_epoch)?;
+            total_size += 4;
         }
         if version >= 12 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.topics)?;
@@ -689,8 +689,8 @@ impl Encodable for FetchRequest {
                     error!("Tagged field is too large to encode ({} bytes)", computed_size);
                     return Err(EncodeError);
                 }
-                total_size += types::UnsignedVarInt.compute_size(0)?;
-                total_size += types::UnsignedVarInt.compute_size(computed_size as u32)?;
+                total_size += 4;
+                total_size += 4;
                 total_size += computed_size;
             }
 
@@ -704,25 +704,25 @@ impl Decodable for FetchRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let mut cluster_id = None;
         let replica_id = types::Int32.decode(buf)?;
-        let max_wait_ms = types::Int32.decode(buf)?;
-        let min_bytes = types::Int32.decode(buf)?;
+        let max_wait_ms = buf.try_get_i32()?;
+        let min_bytes = buf.try_get_i32()?;
         let max_bytes = if version >= 3 {
-            types::Int32.decode(buf)?
+            buf.try_get_i32()?
         } else {
             0x7fffffff
         };
         let isolation_level = if version >= 4 {
-            types::Int8.decode(buf)?
+            buf.try_get_i8()?
         } else {
             0
         };
         let session_id = if version >= 7 {
-            types::Int32.decode(buf)?
+            buf.try_get_i32()?
         } else {
             0
         };
         let session_epoch = if version >= 7 {
-            types::Int32.decode(buf)?
+            buf.try_get_i32()?
         } else {
             -1
         };

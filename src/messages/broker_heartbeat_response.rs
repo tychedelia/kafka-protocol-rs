@@ -61,28 +61,28 @@ impl Builder for BrokerHeartbeatResponse {
 
 impl Encodable for BrokerHeartbeatResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int32.encode(buf, &self.throttle_time_ms)?;
-        types::Int16.encode(buf, &self.error_code)?;
-        types::Boolean.encode(buf, &self.is_caught_up)?;
-        types::Boolean.encode(buf, &self.is_fenced)?;
-        types::Boolean.encode(buf, &self.should_shut_down)?;
+        buf.put_i32(self.throttle_time_ms);
+        buf.put_i16(self.error_code);
+        types::Boolean.encode(buf, self.is_caught_up)?;
+        types::Boolean.encode(buf, self.is_fenced)?;
+        types::Boolean.encode(buf, self.should_shut_down)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             return Err(EncodeError);
         }
-        types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+        types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
-        total_size += types::Int16.compute_size(&self.error_code)?;
-        total_size += types::Boolean.compute_size(&self.is_caught_up)?;
-        total_size += types::Boolean.compute_size(&self.is_fenced)?;
-        total_size += types::Boolean.compute_size(&self.should_shut_down)?;
+        total_size += 4;
+        total_size += 2;
+        total_size += types::Boolean.compute_size(self.is_caught_up)?;
+        total_size += types::Boolean.compute_size(self.is_fenced)?;
+        total_size += types::Boolean.compute_size(self.should_shut_down)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -97,8 +97,8 @@ impl Encodable for BrokerHeartbeatResponse {
 
 impl Decodable for BrokerHeartbeatResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let throttle_time_ms = types::Int32.decode(buf)?;
-        let error_code = types::Int16.decode(buf)?;
+        let throttle_time_ms = buf.try_get_i32()?;
+        let error_code = buf.try_get_i16()?;
         let is_caught_up = types::Boolean.decode(buf)?;
         let is_fenced = types::Boolean.decode(buf)?;
         let should_shut_down = types::Boolean.decode(buf)?;

@@ -41,20 +41,20 @@ impl Builder for Voter {
 
 impl Encodable for Voter {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int32.encode(buf, &self.voter_id)?;
+        buf.put_i32(self.voter_id);
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             return Err(EncodeError);
         }
-        types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+        types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int32.compute_size(&self.voter_id)?;
+        total_size += 4;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -69,7 +69,7 @@ impl Encodable for Voter {
 
 impl Decodable for Voter {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let voter_id = types::Int32.decode(buf)?;
+        let voter_id = buf.try_get_i32()?;
         let mut unknown_tagged_fields = BTreeMap::new();
         let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
         for _ in 0..num_tagged_fields {
@@ -137,7 +137,7 @@ impl Builder for LeaderChangeMessage {
 
 impl Encodable for LeaderChangeMessage {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int16.encode(buf, &self.version)?;
+        buf.put_i16(self.version);
         types::Int32.encode(buf, &self.leader_id)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.voters)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.granting_voters)?;
@@ -146,14 +146,14 @@ impl Encodable for LeaderChangeMessage {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             return Err(EncodeError);
         }
-        types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+        types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int16.compute_size(&self.version)?;
+        total_size += 2;
         total_size += types::Int32.compute_size(&self.leader_id)?;
         total_size += types::CompactArray(types::Struct { version }).compute_size(&self.voters)?;
         total_size += types::CompactArray(types::Struct { version }).compute_size(&self.granting_voters)?;
@@ -171,7 +171,7 @@ impl Encodable for LeaderChangeMessage {
 
 impl Decodable for LeaderChangeMessage {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let version = types::Int16.decode(buf)?;
+        let version = buf.try_get_i16()?;
         let leader_id = types::Int32.decode(buf)?;
         let voters = types::CompactArray(types::Struct { version }).decode(buf)?;
         let granting_voters = types::CompactArray(types::Struct { version }).decode(buf)?;

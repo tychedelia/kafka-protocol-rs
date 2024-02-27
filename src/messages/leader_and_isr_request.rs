@@ -99,16 +99,16 @@ impl Encodable for LeaderAndIsrPartitionState {
         if version <= 1 {
             types::String.encode(buf, &self.topic_name)?;
         }
-        types::Int32.encode(buf, &self.partition_index)?;
-        types::Int32.encode(buf, &self.controller_epoch)?;
+        buf.put_i32(self.partition_index);
+        buf.put_i32(self.controller_epoch);
         types::Int32.encode(buf, &self.leader)?;
-        types::Int32.encode(buf, &self.leader_epoch)?;
+        buf.put_i32(self.leader_epoch);
         if version >= 4 {
             types::CompactArray(types::Int32).encode(buf, &self.isr)?;
         } else {
             types::Array(types::Int32).encode(buf, &self.isr)?;
         }
-        types::Int32.encode(buf, &self.partition_epoch)?;
+        buf.put_i32(self.partition_epoch);
         if version >= 4 {
             types::CompactArray(types::Int32).encode(buf, &self.replicas)?;
         } else {
@@ -129,10 +129,10 @@ impl Encodable for LeaderAndIsrPartitionState {
             }
         }
         if version >= 1 {
-            types::Boolean.encode(buf, &self.is_new)?;
+            types::Boolean.encode(buf, self.is_new)?;
         }
         if version >= 6 {
-            types::Int8.encode(buf, &self.leader_recovery_state)?;
+            buf.put_i8(self.leader_recovery_state);
         } else {
             if self.leader_recovery_state != 0 {
                 return Err(EncodeError)
@@ -144,7 +144,7 @@ impl Encodable for LeaderAndIsrPartitionState {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -155,16 +155,16 @@ impl Encodable for LeaderAndIsrPartitionState {
         if version <= 1 {
             total_size += types::String.compute_size(&self.topic_name)?;
         }
-        total_size += types::Int32.compute_size(&self.partition_index)?;
-        total_size += types::Int32.compute_size(&self.controller_epoch)?;
+        total_size += 4;
+        total_size += 4;
         total_size += types::Int32.compute_size(&self.leader)?;
-        total_size += types::Int32.compute_size(&self.leader_epoch)?;
+        total_size += 4;
         if version >= 4 {
             total_size += types::CompactArray(types::Int32).compute_size(&self.isr)?;
         } else {
             total_size += types::Array(types::Int32).compute_size(&self.isr)?;
         }
-        total_size += types::Int32.compute_size(&self.partition_epoch)?;
+        total_size += 4;
         if version >= 4 {
             total_size += types::CompactArray(types::Int32).compute_size(&self.replicas)?;
         } else {
@@ -185,10 +185,10 @@ impl Encodable for LeaderAndIsrPartitionState {
             }
         }
         if version >= 1 {
-            total_size += types::Boolean.compute_size(&self.is_new)?;
+            total_size += types::Boolean.compute_size(self.is_new)?;
         }
         if version >= 6 {
-            total_size += types::Int8.compute_size(&self.leader_recovery_state)?;
+            total_size += 1;
         } else {
             if self.leader_recovery_state != 0 {
                 return Err(EncodeError)
@@ -215,16 +215,16 @@ impl Decodable for LeaderAndIsrPartitionState {
         } else {
             Default::default()
         };
-        let partition_index = types::Int32.decode(buf)?;
-        let controller_epoch = types::Int32.decode(buf)?;
+        let partition_index = buf.try_get_i32()?;
+        let controller_epoch = buf.try_get_i32()?;
         let leader = types::Int32.decode(buf)?;
-        let leader_epoch = types::Int32.decode(buf)?;
+        let leader_epoch = buf.try_get_i32()?;
         let isr = if version >= 4 {
             types::CompactArray(types::Int32).decode(buf)?
         } else {
             types::Array(types::Int32).decode(buf)?
         };
-        let partition_epoch = types::Int32.decode(buf)?;
+        let partition_epoch = buf.try_get_i32()?;
         let replicas = if version >= 4 {
             types::CompactArray(types::Int32).decode(buf)?
         } else {
@@ -254,7 +254,7 @@ impl Decodable for LeaderAndIsrPartitionState {
             false
         };
         let leader_recovery_state = if version >= 6 {
-            types::Int8.decode(buf)?
+            buf.try_get_i8()?
         } else {
             0
         };
@@ -356,7 +356,7 @@ impl Encodable for LeaderAndIsrTopicState {
             }
         }
         if version >= 5 {
-            types::Uuid.encode(buf, &self.topic_id)?;
+            types::Uuid.encode(buf, self.topic_id)?;
         }
         if version >= 2 {
             if version >= 4 {
@@ -375,7 +375,7 @@ impl Encodable for LeaderAndIsrTopicState {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -395,7 +395,7 @@ impl Encodable for LeaderAndIsrTopicState {
             }
         }
         if version >= 5 {
-            total_size += types::Uuid.compute_size(&self.topic_id)?;
+            total_size += types::Uuid.compute_size(self.topic_id)?;
         }
         if version >= 2 {
             if version >= 4 {
@@ -521,14 +521,14 @@ impl Encodable for LeaderAndIsrLiveLeader {
         } else {
             types::String.encode(buf, &self.host_name)?;
         }
-        types::Int32.encode(buf, &self.port)?;
+        buf.put_i32(self.port);
         if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -542,7 +542,7 @@ impl Encodable for LeaderAndIsrLiveLeader {
         } else {
             total_size += types::String.compute_size(&self.host_name)?;
         }
-        total_size += types::Int32.compute_size(&self.port)?;
+        total_size += 4;
         if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
@@ -565,7 +565,7 @@ impl Decodable for LeaderAndIsrLiveLeader {
         } else {
             types::String.decode(buf)?
         };
-        let port = types::Int32.decode(buf)?;
+        let port = buf.try_get_i32()?;
         let mut unknown_tagged_fields = BTreeMap::new();
         if version >= 4 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
@@ -655,12 +655,12 @@ impl Builder for LeaderAndIsrRequest {
 impl Encodable for LeaderAndIsrRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.controller_id)?;
-        types::Int32.encode(buf, &self.controller_epoch)?;
+        buf.put_i32(self.controller_epoch);
         if version >= 2 {
-            types::Int64.encode(buf, &self.broker_epoch)?;
+            buf.put_i64(self.broker_epoch);
         }
         if version >= 5 {
-            types::Int8.encode(buf, &self._type)?;
+            buf.put_i8(self._type);
         } else {
             if self._type != 0 {
                 return Err(EncodeError)
@@ -695,7 +695,7 @@ impl Encodable for LeaderAndIsrRequest {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -704,12 +704,12 @@ impl Encodable for LeaderAndIsrRequest {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.controller_id)?;
-        total_size += types::Int32.compute_size(&self.controller_epoch)?;
+        total_size += 4;
         if version >= 2 {
-            total_size += types::Int64.compute_size(&self.broker_epoch)?;
+            total_size += 8;
         }
         if version >= 5 {
-            total_size += types::Int8.compute_size(&self._type)?;
+            total_size += 1;
         } else {
             if self._type != 0 {
                 return Err(EncodeError)
@@ -755,14 +755,14 @@ impl Encodable for LeaderAndIsrRequest {
 impl Decodable for LeaderAndIsrRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let controller_id = types::Int32.decode(buf)?;
-        let controller_epoch = types::Int32.decode(buf)?;
+        let controller_epoch = buf.try_get_i32()?;
         let broker_epoch = if version >= 2 {
-            types::Int64.decode(buf)?
+            buf.try_get_i64()?
         } else {
             -1
         };
         let _type = if version >= 5 {
-            types::Int8.decode(buf)?
+            buf.try_get_i8()?
         } else {
             0
         };

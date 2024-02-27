@@ -62,7 +62,7 @@ impl Encodable for EntityData {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -177,15 +177,15 @@ impl Encodable for OpData {
         } else {
             types::String.encode(buf, &self.key)?;
         }
-        types::Float64.encode(buf, &self.value)?;
-        types::Boolean.encode(buf, &self.remove)?;
+        types::Float64.encode(buf, self.value)?;
+        types::Boolean.encode(buf, self.remove)?;
         if version >= 1 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -198,8 +198,8 @@ impl Encodable for OpData {
         } else {
             total_size += types::String.compute_size(&self.key)?;
         }
-        total_size += types::Float64.compute_size(&self.value)?;
-        total_size += types::Boolean.compute_size(&self.remove)?;
+        total_size += types::Float64.compute_size(self.value)?;
+        total_size += types::Boolean.compute_size(self.remove)?;
         if version >= 1 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
@@ -302,7 +302,7 @@ impl Encodable for EntryData {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -412,14 +412,14 @@ impl Encodable for AlterClientQuotasRequest {
         } else {
             types::Array(types::Struct { version }).encode(buf, &self.entries)?;
         }
-        types::Boolean.encode(buf, &self.validate_only)?;
+        types::Boolean.encode(buf, self.validate_only)?;
         if version >= 1 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -432,7 +432,7 @@ impl Encodable for AlterClientQuotasRequest {
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.entries)?;
         }
-        total_size += types::Boolean.compute_size(&self.validate_only)?;
+        total_size += types::Boolean.compute_size(self.validate_only)?;
         if version >= 1 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {

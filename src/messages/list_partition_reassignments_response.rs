@@ -56,7 +56,7 @@ impl Builder for OngoingPartitionReassignment {
 
 impl Encodable for OngoingPartitionReassignment {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int32.encode(buf, &self.partition_index)?;
+        buf.put_i32(self.partition_index);
         types::CompactArray(types::Int32).encode(buf, &self.replicas)?;
         types::CompactArray(types::Int32).encode(buf, &self.adding_replicas)?;
         types::CompactArray(types::Int32).encode(buf, &self.removing_replicas)?;
@@ -65,14 +65,14 @@ impl Encodable for OngoingPartitionReassignment {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             return Err(EncodeError);
         }
-        types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+        types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int32.compute_size(&self.partition_index)?;
+        total_size += 4;
         total_size += types::CompactArray(types::Int32).compute_size(&self.replicas)?;
         total_size += types::CompactArray(types::Int32).compute_size(&self.adding_replicas)?;
         total_size += types::CompactArray(types::Int32).compute_size(&self.removing_replicas)?;
@@ -90,7 +90,7 @@ impl Encodable for OngoingPartitionReassignment {
 
 impl Decodable for OngoingPartitionReassignment {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let partition_index = types::Int32.decode(buf)?;
+        let partition_index = buf.try_get_i32()?;
         let replicas = types::CompactArray(types::Int32).decode(buf)?;
         let adding_replicas = types::CompactArray(types::Int32).decode(buf)?;
         let removing_replicas = types::CompactArray(types::Int32).decode(buf)?;
@@ -164,7 +164,7 @@ impl Encodable for OngoingTopicReassignment {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             return Err(EncodeError);
         }
-        types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+        types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
@@ -258,8 +258,8 @@ impl Builder for ListPartitionReassignmentsResponse {
 
 impl Encodable for ListPartitionReassignmentsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int32.encode(buf, &self.throttle_time_ms)?;
-        types::Int16.encode(buf, &self.error_code)?;
+        buf.put_i32(self.throttle_time_ms);
+        buf.put_i16(self.error_code);
         types::CompactString.encode(buf, &self.error_message)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -267,15 +267,15 @@ impl Encodable for ListPartitionReassignmentsResponse {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             return Err(EncodeError);
         }
-        types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+        types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
-        total_size += types::Int16.compute_size(&self.error_code)?;
+        total_size += 4;
+        total_size += 2;
         total_size += types::CompactString.compute_size(&self.error_message)?;
         total_size += types::CompactArray(types::Struct { version }).compute_size(&self.topics)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -292,8 +292,8 @@ impl Encodable for ListPartitionReassignmentsResponse {
 
 impl Decodable for ListPartitionReassignmentsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let throttle_time_ms = types::Int32.decode(buf)?;
-        let error_code = types::Int16.decode(buf)?;
+        let throttle_time_ms = buf.try_get_i32()?;
+        let error_code = buf.try_get_i16()?;
         let error_message = types::CompactString.decode(buf)?;
         let topics = types::CompactArray(types::Struct { version }).decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();

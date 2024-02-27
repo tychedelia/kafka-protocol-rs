@@ -74,7 +74,7 @@ impl Encodable for JoinGroupResponseMember {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -233,10 +233,10 @@ impl Builder for JoinGroupResponse {
 impl Encodable for JoinGroupResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version >= 2 {
-            types::Int32.encode(buf, &self.throttle_time_ms)?;
+            buf.put_i32(self.throttle_time_ms);
         }
-        types::Int16.encode(buf, &self.error_code)?;
-        types::Int32.encode(buf, &self.generation_id)?;
+        buf.put_i16(self.error_code);
+        buf.put_i32(self.generation_id);
         if version >= 7 {
             types::CompactString.encode(buf, &self.protocol_type)?;
         }
@@ -251,7 +251,7 @@ impl Encodable for JoinGroupResponse {
             types::String.encode(buf, &self.leader)?;
         }
         if version >= 9 {
-            types::Boolean.encode(buf, &self.skip_assignment)?;
+            types::Boolean.encode(buf, self.skip_assignment)?;
         } else {
             if self.skip_assignment {
                 return Err(EncodeError)
@@ -273,7 +273,7 @@ impl Encodable for JoinGroupResponse {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -282,10 +282,10 @@ impl Encodable for JoinGroupResponse {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         if version >= 2 {
-            total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
+            total_size += 4;
         }
-        total_size += types::Int16.compute_size(&self.error_code)?;
-        total_size += types::Int32.compute_size(&self.generation_id)?;
+        total_size += 2;
+        total_size += 4;
         if version >= 7 {
             total_size += types::CompactString.compute_size(&self.protocol_type)?;
         }
@@ -300,7 +300,7 @@ impl Encodable for JoinGroupResponse {
             total_size += types::String.compute_size(&self.leader)?;
         }
         if version >= 9 {
-            total_size += types::Boolean.compute_size(&self.skip_assignment)?;
+            total_size += types::Boolean.compute_size(self.skip_assignment)?;
         } else {
             if self.skip_assignment {
                 return Err(EncodeError)
@@ -333,12 +333,12 @@ impl Encodable for JoinGroupResponse {
 impl Decodable for JoinGroupResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let throttle_time_ms = if version >= 2 {
-            types::Int32.decode(buf)?
+            buf.try_get_i32()?
         } else {
             0
         };
-        let error_code = types::Int16.decode(buf)?;
-        let generation_id = types::Int32.decode(buf)?;
+        let error_code = buf.try_get_i16()?;
+        let generation_id = buf.try_get_i32()?;
         let protocol_type = if version >= 7 {
             types::CompactString.decode(buf)?
         } else {

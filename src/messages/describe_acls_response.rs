@@ -66,15 +66,15 @@ impl Encodable for AclDescription {
         } else {
             types::String.encode(buf, &self.host)?;
         }
-        types::Int8.encode(buf, &self.operation)?;
-        types::Int8.encode(buf, &self.permission_type)?;
+        buf.put_i8(self.operation);
+        buf.put_i8(self.permission_type);
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -92,8 +92,8 @@ impl Encodable for AclDescription {
         } else {
             total_size += types::String.compute_size(&self.host)?;
         }
-        total_size += types::Int8.compute_size(&self.operation)?;
-        total_size += types::Int8.compute_size(&self.permission_type)?;
+        total_size += 1;
+        total_size += 1;
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
@@ -120,8 +120,8 @@ impl Decodable for AclDescription {
         } else {
             types::String.decode(buf)?
         };
-        let operation = types::Int8.decode(buf)?;
-        let permission_type = types::Int8.decode(buf)?;
+        let operation = buf.try_get_i8()?;
+        let permission_type = buf.try_get_i8()?;
         let mut unknown_tagged_fields = BTreeMap::new();
         if version >= 2 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
@@ -197,14 +197,14 @@ impl Builder for DescribeAclsResource {
 
 impl Encodable for DescribeAclsResource {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int8.encode(buf, &self.resource_type)?;
+        buf.put_i8(self.resource_type);
         if version >= 2 {
             types::CompactString.encode(buf, &self.resource_name)?;
         } else {
             types::String.encode(buf, &self.resource_name)?;
         }
         if version >= 1 {
-            types::Int8.encode(buf, &self.pattern_type)?;
+            buf.put_i8(self.pattern_type);
         } else {
             if self.pattern_type != 3 {
                 return Err(EncodeError)
@@ -221,7 +221,7 @@ impl Encodable for DescribeAclsResource {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -229,14 +229,14 @@ impl Encodable for DescribeAclsResource {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int8.compute_size(&self.resource_type)?;
+        total_size += 1;
         if version >= 2 {
             total_size += types::CompactString.compute_size(&self.resource_name)?;
         } else {
             total_size += types::String.compute_size(&self.resource_name)?;
         }
         if version >= 1 {
-            total_size += types::Int8.compute_size(&self.pattern_type)?;
+            total_size += 1;
         } else {
             if self.pattern_type != 3 {
                 return Err(EncodeError)
@@ -263,14 +263,14 @@ impl Encodable for DescribeAclsResource {
 
 impl Decodable for DescribeAclsResource {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let resource_type = types::Int8.decode(buf)?;
+        let resource_type = buf.try_get_i8()?;
         let resource_name = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
         };
         let pattern_type = if version >= 1 {
-            types::Int8.decode(buf)?
+            buf.try_get_i8()?
         } else {
             3
         };
@@ -354,8 +354,8 @@ impl Builder for DescribeAclsResponse {
 
 impl Encodable for DescribeAclsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int32.encode(buf, &self.throttle_time_ms)?;
-        types::Int16.encode(buf, &self.error_code)?;
+        buf.put_i32(self.throttle_time_ms);
+        buf.put_i16(self.error_code);
         if version >= 2 {
             types::CompactString.encode(buf, &self.error_message)?;
         } else {
@@ -372,7 +372,7 @@ impl Encodable for DescribeAclsResponse {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -380,8 +380,8 @@ impl Encodable for DescribeAclsResponse {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
-        total_size += types::Int16.compute_size(&self.error_code)?;
+        total_size += 4;
+        total_size += 2;
         if version >= 2 {
             total_size += types::CompactString.compute_size(&self.error_message)?;
         } else {
@@ -408,8 +408,8 @@ impl Encodable for DescribeAclsResponse {
 
 impl Decodable for DescribeAclsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let throttle_time_ms = types::Int32.decode(buf)?;
-        let error_code = types::Int16.decode(buf)?;
+        let throttle_time_ms = buf.try_get_i32()?;
+        let error_code = buf.try_get_i16()?;
         let error_message = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {

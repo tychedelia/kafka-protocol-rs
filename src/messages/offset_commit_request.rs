@@ -61,13 +61,13 @@ impl Builder for OffsetCommitRequestPartition {
 
 impl Encodable for OffsetCommitRequestPartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int32.encode(buf, &self.partition_index)?;
-        types::Int64.encode(buf, &self.committed_offset)?;
+        buf.put_i32(self.partition_index);
+        buf.put_i64(self.committed_offset);
         if version >= 6 {
-            types::Int32.encode(buf, &self.committed_leader_epoch)?;
+            buf.put_i32(self.committed_leader_epoch);
         }
         if version == 1 {
-            types::Int64.encode(buf, &self.commit_timestamp)?;
+            buf.put_i64(self.commit_timestamp);
         } else {
             if self.commit_timestamp != -1 {
                 return Err(EncodeError)
@@ -84,7 +84,7 @@ impl Encodable for OffsetCommitRequestPartition {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -92,13 +92,13 @@ impl Encodable for OffsetCommitRequestPartition {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int32.compute_size(&self.partition_index)?;
-        total_size += types::Int64.compute_size(&self.committed_offset)?;
+        total_size += 4;
+        total_size += 8;
         if version >= 6 {
-            total_size += types::Int32.compute_size(&self.committed_leader_epoch)?;
+            total_size += 4;
         }
         if version == 1 {
-            total_size += types::Int64.compute_size(&self.commit_timestamp)?;
+            total_size += 8;
         } else {
             if self.commit_timestamp != -1 {
                 return Err(EncodeError)
@@ -125,15 +125,15 @@ impl Encodable for OffsetCommitRequestPartition {
 
 impl Decodable for OffsetCommitRequestPartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let partition_index = types::Int32.decode(buf)?;
-        let committed_offset = types::Int64.decode(buf)?;
+        let partition_index = buf.try_get_i32()?;
+        let committed_offset = buf.try_get_i64()?;
         let committed_leader_epoch = if version >= 6 {
-            types::Int32.decode(buf)?
+            buf.try_get_i32()?
         } else {
             -1
         };
         let commit_timestamp = if version == 1 {
-            types::Int64.decode(buf)?
+            buf.try_get_i64()?
         } else {
             -1
         };
@@ -225,7 +225,7 @@ impl Encodable for OffsetCommitRequestTopic {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -356,7 +356,7 @@ impl Encodable for OffsetCommitRequest {
             types::String.encode(buf, &self.group_id)?;
         }
         if version >= 1 {
-            types::Int32.encode(buf, &self.generation_id)?;
+            buf.put_i32(self.generation_id);
         }
         if version >= 1 {
             if version >= 8 {
@@ -377,7 +377,7 @@ impl Encodable for OffsetCommitRequest {
             }
         }
         if version >= 2 && version <= 4 {
-            types::Int64.encode(buf, &self.retention_time_ms)?;
+            buf.put_i64(self.retention_time_ms);
         }
         if version >= 8 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
@@ -390,7 +390,7 @@ impl Encodable for OffsetCommitRequest {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -404,7 +404,7 @@ impl Encodable for OffsetCommitRequest {
             total_size += types::String.compute_size(&self.group_id)?;
         }
         if version >= 1 {
-            total_size += types::Int32.compute_size(&self.generation_id)?;
+            total_size += 4;
         }
         if version >= 1 {
             if version >= 8 {
@@ -425,7 +425,7 @@ impl Encodable for OffsetCommitRequest {
             }
         }
         if version >= 2 && version <= 4 {
-            total_size += types::Int64.compute_size(&self.retention_time_ms)?;
+            total_size += 8;
         }
         if version >= 8 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.topics)?;
@@ -454,7 +454,7 @@ impl Decodable for OffsetCommitRequest {
             types::String.decode(buf)?
         };
         let generation_id = if version >= 1 {
-            types::Int32.decode(buf)?
+            buf.try_get_i32()?
         } else {
             -1
         };
@@ -477,7 +477,7 @@ impl Decodable for OffsetCommitRequest {
             None
         };
         let retention_time_ms = if version >= 2 && version <= 4 {
-            types::Int64.decode(buf)?
+            buf.try_get_i64()?
         } else {
             -1
         };

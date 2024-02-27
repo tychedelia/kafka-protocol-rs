@@ -62,7 +62,7 @@ impl Encodable for WritableTxnMarkerTopic {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -183,21 +183,21 @@ impl Builder for WritableTxnMarker {
 impl Encodable for WritableTxnMarker {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int64.encode(buf, &self.producer_id)?;
-        types::Int16.encode(buf, &self.producer_epoch)?;
-        types::Boolean.encode(buf, &self.transaction_result)?;
+        buf.put_i16(self.producer_epoch);
+        types::Boolean.encode(buf, self.transaction_result)?;
         if version >= 1 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
         } else {
             types::Array(types::Struct { version }).encode(buf, &self.topics)?;
         }
-        types::Int32.encode(buf, &self.coordinator_epoch)?;
+        buf.put_i32(self.coordinator_epoch);
         if version >= 1 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -206,14 +206,14 @@ impl Encodable for WritableTxnMarker {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         total_size += types::Int64.compute_size(&self.producer_id)?;
-        total_size += types::Int16.compute_size(&self.producer_epoch)?;
-        total_size += types::Boolean.compute_size(&self.transaction_result)?;
+        total_size += 2;
+        total_size += types::Boolean.compute_size(self.transaction_result)?;
         if version >= 1 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.topics)?;
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.topics)?;
         }
-        total_size += types::Int32.compute_size(&self.coordinator_epoch)?;
+        total_size += 4;
         if version >= 1 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
@@ -231,14 +231,14 @@ impl Encodable for WritableTxnMarker {
 impl Decodable for WritableTxnMarker {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let producer_id = types::Int64.decode(buf)?;
-        let producer_epoch = types::Int16.decode(buf)?;
+        let producer_epoch = buf.try_get_i16()?;
         let transaction_result = types::Boolean.decode(buf)?;
         let topics = if version >= 1 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
             types::Array(types::Struct { version }).decode(buf)?
         };
-        let coordinator_epoch = types::Int32.decode(buf)?;
+        let coordinator_epoch = buf.try_get_i32()?;
         let mut unknown_tagged_fields = BTreeMap::new();
         if version >= 1 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
@@ -312,7 +312,7 @@ impl Encodable for WriteTxnMarkersRequest {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }

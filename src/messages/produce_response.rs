@@ -47,7 +47,7 @@ impl Builder for BatchIndexAndErrorMessage {
 impl Encodable for BatchIndexAndErrorMessage {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version >= 8 {
-            types::Int32.encode(buf, &self.batch_index)?;
+            buf.put_i32(self.batch_index);
         } else {
             if self.batch_index != 0 {
                 return Err(EncodeError)
@@ -70,7 +70,7 @@ impl Encodable for BatchIndexAndErrorMessage {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -79,7 +79,7 @@ impl Encodable for BatchIndexAndErrorMessage {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         if version >= 8 {
-            total_size += types::Int32.compute_size(&self.batch_index)?;
+            total_size += 4;
         } else {
             if self.batch_index != 0 {
                 return Err(EncodeError)
@@ -113,7 +113,7 @@ impl Encodable for BatchIndexAndErrorMessage {
 impl Decodable for BatchIndexAndErrorMessage {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let batch_index = if version >= 8 {
-            types::Int32.decode(buf)?
+            buf.try_get_i32()?
         } else {
             0
         };
@@ -212,14 +212,14 @@ impl Builder for PartitionProduceResponse {
 
 impl Encodable for PartitionProduceResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int32.encode(buf, &self.index)?;
-        types::Int16.encode(buf, &self.error_code)?;
-        types::Int64.encode(buf, &self.base_offset)?;
+        buf.put_i32(self.index);
+        buf.put_i16(self.error_code);
+        buf.put_i64(self.base_offset);
         if version >= 2 {
-            types::Int64.encode(buf, &self.log_append_time_ms)?;
+            buf.put_i64(self.log_append_time_ms);
         }
         if version >= 5 {
-            types::Int64.encode(buf, &self.log_start_offset)?;
+            buf.put_i64(self.log_start_offset);
         }
         if version >= 8 {
             if version >= 9 {
@@ -241,7 +241,7 @@ impl Encodable for PartitionProduceResponse {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -249,14 +249,14 @@ impl Encodable for PartitionProduceResponse {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int32.compute_size(&self.index)?;
-        total_size += types::Int16.compute_size(&self.error_code)?;
-        total_size += types::Int64.compute_size(&self.base_offset)?;
+        total_size += 4;
+        total_size += 2;
+        total_size += 8;
         if version >= 2 {
-            total_size += types::Int64.compute_size(&self.log_append_time_ms)?;
+            total_size += 8;
         }
         if version >= 5 {
-            total_size += types::Int64.compute_size(&self.log_start_offset)?;
+            total_size += 8;
         }
         if version >= 8 {
             if version >= 9 {
@@ -288,16 +288,16 @@ impl Encodable for PartitionProduceResponse {
 
 impl Decodable for PartitionProduceResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let index = types::Int32.decode(buf)?;
-        let error_code = types::Int16.decode(buf)?;
-        let base_offset = types::Int64.decode(buf)?;
+        let index = buf.try_get_i32()?;
+        let error_code = buf.try_get_i16()?;
+        let base_offset = buf.try_get_i64()?;
         let log_append_time_ms = if version >= 2 {
-            types::Int64.decode(buf)?
+            buf.try_get_i64()?
         } else {
             -1
         };
         let log_start_offset = if version >= 5 {
-            types::Int64.decode(buf)?
+            buf.try_get_i64()?
         } else {
             -1
         };
@@ -402,7 +402,7 @@ impl MapEncodable for TopicProduceResponse {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -512,7 +512,7 @@ impl Encodable for ProduceResponse {
             types::Array(types::Struct { version }).encode(buf, &self.responses)?;
         }
         if version >= 1 {
-            types::Int32.encode(buf, &self.throttle_time_ms)?;
+            buf.put_i32(self.throttle_time_ms);
         }
         if version >= 9 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -520,7 +520,7 @@ impl Encodable for ProduceResponse {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -534,7 +534,7 @@ impl Encodable for ProduceResponse {
             total_size += types::Array(types::Struct { version }).compute_size(&self.responses)?;
         }
         if version >= 1 {
-            total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
+            total_size += 4;
         }
         if version >= 9 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -558,7 +558,7 @@ impl Decodable for ProduceResponse {
             types::Array(types::Struct { version }).decode(buf)?
         };
         let throttle_time_ms = if version >= 1 {
-            types::Int32.decode(buf)?
+            buf.try_get_i32()?
         } else {
             0
         };

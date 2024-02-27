@@ -51,14 +51,14 @@ impl Encodable for RenewDelegationTokenRequest {
         } else {
             types::Bytes.encode(buf, &self.hmac)?;
         }
-        types::Int64.encode(buf, &self.renew_period_ms)?;
+        buf.put_i64(self.renew_period_ms);
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -71,7 +71,7 @@ impl Encodable for RenewDelegationTokenRequest {
         } else {
             total_size += types::Bytes.compute_size(&self.hmac)?;
         }
-        total_size += types::Int64.compute_size(&self.renew_period_ms)?;
+        total_size += 8;
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
@@ -93,7 +93,7 @@ impl Decodable for RenewDelegationTokenRequest {
         } else {
             types::Bytes.decode(buf)?
         };
-        let renew_period_ms = types::Int64.decode(buf)?;
+        let renew_period_ms = buf.try_get_i64()?;
         let mut unknown_tagged_fields = BTreeMap::new();
         if version >= 2 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;

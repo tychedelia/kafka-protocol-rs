@@ -63,7 +63,7 @@ impl Encodable for FindCoordinatorRequest {
             }
         }
         if version >= 1 {
-            types::Int8.encode(buf, &self.key_type)?;
+            buf.put_i8(self.key_type);
         } else {
             if self.key_type != 0 {
                 return Err(EncodeError)
@@ -82,7 +82,7 @@ impl Encodable for FindCoordinatorRequest {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -102,7 +102,7 @@ impl Encodable for FindCoordinatorRequest {
             }
         }
         if version >= 1 {
-            total_size += types::Int8.compute_size(&self.key_type)?;
+            total_size += 1;
         } else {
             if self.key_type != 0 {
                 return Err(EncodeError)
@@ -141,7 +141,7 @@ impl Decodable for FindCoordinatorRequest {
             Default::default()
         };
         let key_type = if version >= 1 {
-            types::Int8.decode(buf)?
+            buf.try_get_i8()?
         } else {
             0
         };

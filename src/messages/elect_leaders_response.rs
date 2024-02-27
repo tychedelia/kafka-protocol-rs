@@ -51,8 +51,8 @@ impl Builder for PartitionResult {
 
 impl Encodable for PartitionResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int32.encode(buf, &self.partition_id)?;
-        types::Int16.encode(buf, &self.error_code)?;
+        buf.put_i32(self.partition_id);
+        buf.put_i16(self.error_code);
         if version >= 2 {
             types::CompactString.encode(buf, &self.error_message)?;
         } else {
@@ -64,7 +64,7 @@ impl Encodable for PartitionResult {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -72,8 +72,8 @@ impl Encodable for PartitionResult {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int32.compute_size(&self.partition_id)?;
-        total_size += types::Int16.compute_size(&self.error_code)?;
+        total_size += 4;
+        total_size += 2;
         if version >= 2 {
             total_size += types::CompactString.compute_size(&self.error_message)?;
         } else {
@@ -95,8 +95,8 @@ impl Encodable for PartitionResult {
 
 impl Decodable for PartitionResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let partition_id = types::Int32.decode(buf)?;
-        let error_code = types::Int16.decode(buf)?;
+        let partition_id = buf.try_get_i32()?;
+        let error_code = buf.try_get_i16()?;
         let error_message = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
@@ -181,7 +181,7 @@ impl Encodable for ReplicaElectionResult {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -291,9 +291,9 @@ impl Builder for ElectLeadersResponse {
 
 impl Encodable for ElectLeadersResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int32.encode(buf, &self.throttle_time_ms)?;
+        buf.put_i32(self.throttle_time_ms);
         if version >= 1 {
-            types::Int16.encode(buf, &self.error_code)?;
+            buf.put_i16(self.error_code);
         } else {
             if self.error_code != 0 {
                 return Err(EncodeError)
@@ -310,7 +310,7 @@ impl Encodable for ElectLeadersResponse {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -318,9 +318,9 @@ impl Encodable for ElectLeadersResponse {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
+        total_size += 4;
         if version >= 1 {
-            total_size += types::Int16.compute_size(&self.error_code)?;
+            total_size += 2;
         } else {
             if self.error_code != 0 {
                 return Err(EncodeError)
@@ -347,9 +347,9 @@ impl Encodable for ElectLeadersResponse {
 
 impl Decodable for ElectLeadersResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let throttle_time_ms = types::Int32.decode(buf)?;
+        let throttle_time_ms = buf.try_get_i32()?;
         let error_code = if version >= 1 {
-            types::Int16.decode(buf)?
+            buf.try_get_i16()?
         } else {
             0
         };

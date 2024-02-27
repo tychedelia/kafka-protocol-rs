@@ -62,15 +62,15 @@ impl Encodable for EndTxnRequest {
             types::String.encode(buf, &self.transactional_id)?;
         }
         types::Int64.encode(buf, &self.producer_id)?;
-        types::Int16.encode(buf, &self.producer_epoch)?;
-        types::Boolean.encode(buf, &self.committed)?;
+        buf.put_i16(self.producer_epoch);
+        types::Boolean.encode(buf, self.committed)?;
         if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -84,8 +84,8 @@ impl Encodable for EndTxnRequest {
             total_size += types::String.compute_size(&self.transactional_id)?;
         }
         total_size += types::Int64.compute_size(&self.producer_id)?;
-        total_size += types::Int16.compute_size(&self.producer_epoch)?;
-        total_size += types::Boolean.compute_size(&self.committed)?;
+        total_size += 2;
+        total_size += types::Boolean.compute_size(self.committed)?;
         if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
@@ -108,7 +108,7 @@ impl Decodable for EndTxnRequest {
             types::String.decode(buf)?
         };
         let producer_id = types::Int64.decode(buf)?;
-        let producer_epoch = types::Int16.decode(buf)?;
+        let producer_epoch = buf.try_get_i16()?;
         let committed = types::Boolean.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
         if version >= 3 {

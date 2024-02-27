@@ -62,21 +62,21 @@ impl Builder for OffsetFetchResponsePartition {
 impl Encodable for OffsetFetchResponsePartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version <= 7 {
-            types::Int32.encode(buf, &self.partition_index)?;
+            buf.put_i32(self.partition_index);
         } else {
             if self.partition_index != 0 {
                 return Err(EncodeError)
             }
         }
         if version <= 7 {
-            types::Int64.encode(buf, &self.committed_offset)?;
+            buf.put_i64(self.committed_offset);
         } else {
             if self.committed_offset != 0 {
                 return Err(EncodeError)
             }
         }
         if version >= 5 && version <= 7 {
-            types::Int32.encode(buf, &self.committed_leader_epoch)?;
+            buf.put_i32(self.committed_leader_epoch);
         }
         if version <= 7 {
             if version >= 6 {
@@ -90,7 +90,7 @@ impl Encodable for OffsetFetchResponsePartition {
             }
         }
         if version <= 7 {
-            types::Int16.encode(buf, &self.error_code)?;
+            buf.put_i16(self.error_code);
         } else {
             if self.error_code != 0 {
                 return Err(EncodeError)
@@ -102,7 +102,7 @@ impl Encodable for OffsetFetchResponsePartition {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -111,21 +111,21 @@ impl Encodable for OffsetFetchResponsePartition {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         if version <= 7 {
-            total_size += types::Int32.compute_size(&self.partition_index)?;
+            total_size += 4;
         } else {
             if self.partition_index != 0 {
                 return Err(EncodeError)
             }
         }
         if version <= 7 {
-            total_size += types::Int64.compute_size(&self.committed_offset)?;
+            total_size += 8;
         } else {
             if self.committed_offset != 0 {
                 return Err(EncodeError)
             }
         }
         if version >= 5 && version <= 7 {
-            total_size += types::Int32.compute_size(&self.committed_leader_epoch)?;
+            total_size += 4;
         }
         if version <= 7 {
             if version >= 6 {
@@ -139,7 +139,7 @@ impl Encodable for OffsetFetchResponsePartition {
             }
         }
         if version <= 7 {
-            total_size += types::Int16.compute_size(&self.error_code)?;
+            total_size += 2;
         } else {
             if self.error_code != 0 {
                 return Err(EncodeError)
@@ -162,17 +162,17 @@ impl Encodable for OffsetFetchResponsePartition {
 impl Decodable for OffsetFetchResponsePartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let partition_index = if version <= 7 {
-            types::Int32.decode(buf)?
+            buf.try_get_i32()?
         } else {
             0
         };
         let committed_offset = if version <= 7 {
-            types::Int64.decode(buf)?
+            buf.try_get_i64()?
         } else {
             0
         };
         let committed_leader_epoch = if version >= 5 && version <= 7 {
-            types::Int32.decode(buf)?
+            buf.try_get_i32()?
         } else {
             -1
         };
@@ -186,7 +186,7 @@ impl Decodable for OffsetFetchResponsePartition {
             Some(Default::default())
         };
         let error_code = if version <= 7 {
-            types::Int16.decode(buf)?
+            buf.try_get_i16()?
         } else {
             0
         };
@@ -285,7 +285,7 @@ impl Encodable for OffsetFetchResponseTopic {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -426,21 +426,21 @@ impl Builder for OffsetFetchResponsePartitions {
 impl Encodable for OffsetFetchResponsePartitions {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version >= 8 {
-            types::Int32.encode(buf, &self.partition_index)?;
+            buf.put_i32(self.partition_index);
         } else {
             if self.partition_index != 0 {
                 return Err(EncodeError)
             }
         }
         if version >= 8 {
-            types::Int64.encode(buf, &self.committed_offset)?;
+            buf.put_i64(self.committed_offset);
         } else {
             if self.committed_offset != 0 {
                 return Err(EncodeError)
             }
         }
         if version >= 8 {
-            types::Int32.encode(buf, &self.committed_leader_epoch)?;
+            buf.put_i32(self.committed_leader_epoch);
         }
         if version >= 8 {
             types::CompactString.encode(buf, &self.metadata)?;
@@ -450,7 +450,7 @@ impl Encodable for OffsetFetchResponsePartitions {
             }
         }
         if version >= 8 {
-            types::Int16.encode(buf, &self.error_code)?;
+            buf.put_i16(self.error_code);
         } else {
             if self.error_code != 0 {
                 return Err(EncodeError)
@@ -462,7 +462,7 @@ impl Encodable for OffsetFetchResponsePartitions {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -471,21 +471,21 @@ impl Encodable for OffsetFetchResponsePartitions {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         if version >= 8 {
-            total_size += types::Int32.compute_size(&self.partition_index)?;
+            total_size += 4;
         } else {
             if self.partition_index != 0 {
                 return Err(EncodeError)
             }
         }
         if version >= 8 {
-            total_size += types::Int64.compute_size(&self.committed_offset)?;
+            total_size += 8;
         } else {
             if self.committed_offset != 0 {
                 return Err(EncodeError)
             }
         }
         if version >= 8 {
-            total_size += types::Int32.compute_size(&self.committed_leader_epoch)?;
+            total_size += 4;
         }
         if version >= 8 {
             total_size += types::CompactString.compute_size(&self.metadata)?;
@@ -495,7 +495,7 @@ impl Encodable for OffsetFetchResponsePartitions {
             }
         }
         if version >= 8 {
-            total_size += types::Int16.compute_size(&self.error_code)?;
+            total_size += 2;
         } else {
             if self.error_code != 0 {
                 return Err(EncodeError)
@@ -518,17 +518,17 @@ impl Encodable for OffsetFetchResponsePartitions {
 impl Decodable for OffsetFetchResponsePartitions {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let partition_index = if version >= 8 {
-            types::Int32.decode(buf)?
+            buf.try_get_i32()?
         } else {
             0
         };
         let committed_offset = if version >= 8 {
-            types::Int64.decode(buf)?
+            buf.try_get_i64()?
         } else {
             0
         };
         let committed_leader_epoch = if version >= 8 {
-            types::Int32.decode(buf)?
+            buf.try_get_i32()?
         } else {
             -1
         };
@@ -538,7 +538,7 @@ impl Decodable for OffsetFetchResponsePartitions {
             Some(Default::default())
         };
         let error_code = if version >= 8 {
-            types::Int16.decode(buf)?
+            buf.try_get_i16()?
         } else {
             0
         };
@@ -629,7 +629,7 @@ impl Encodable for OffsetFetchResponseTopics {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -758,7 +758,7 @@ impl Encodable for OffsetFetchResponseGroup {
             }
         }
         if version >= 8 {
-            types::Int16.encode(buf, &self.error_code)?;
+            buf.put_i16(self.error_code);
         } else {
             if self.error_code != 0 {
                 return Err(EncodeError)
@@ -770,7 +770,7 @@ impl Encodable for OffsetFetchResponseGroup {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -793,7 +793,7 @@ impl Encodable for OffsetFetchResponseGroup {
             }
         }
         if version >= 8 {
-            total_size += types::Int16.compute_size(&self.error_code)?;
+            total_size += 2;
         } else {
             if self.error_code != 0 {
                 return Err(EncodeError)
@@ -826,7 +826,7 @@ impl Decodable for OffsetFetchResponseGroup {
             Default::default()
         };
         let error_code = if version >= 8 {
-            types::Int16.decode(buf)?
+            buf.try_get_i16()?
         } else {
             0
         };
@@ -904,7 +904,7 @@ impl Builder for OffsetFetchResponse {
 impl Encodable for OffsetFetchResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version >= 3 {
-            types::Int32.encode(buf, &self.throttle_time_ms)?;
+            buf.put_i32(self.throttle_time_ms);
         }
         if version <= 7 {
             if version >= 6 {
@@ -918,7 +918,7 @@ impl Encodable for OffsetFetchResponse {
             }
         }
         if version >= 2 && version <= 7 {
-            types::Int16.encode(buf, &self.error_code)?;
+            buf.put_i16(self.error_code);
         }
         if version >= 8 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.groups)?;
@@ -933,7 +933,7 @@ impl Encodable for OffsetFetchResponse {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -942,7 +942,7 @@ impl Encodable for OffsetFetchResponse {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         if version >= 3 {
-            total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
+            total_size += 4;
         }
         if version <= 7 {
             if version >= 6 {
@@ -956,7 +956,7 @@ impl Encodable for OffsetFetchResponse {
             }
         }
         if version >= 2 && version <= 7 {
-            total_size += types::Int16.compute_size(&self.error_code)?;
+            total_size += 2;
         }
         if version >= 8 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.groups)?;
@@ -982,7 +982,7 @@ impl Encodable for OffsetFetchResponse {
 impl Decodable for OffsetFetchResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let throttle_time_ms = if version >= 3 {
-            types::Int32.decode(buf)?
+            buf.try_get_i32()?
         } else {
             0
         };
@@ -996,7 +996,7 @@ impl Decodable for OffsetFetchResponse {
             Default::default()
         };
         let error_code = if version >= 2 && version <= 7 {
-            types::Int16.decode(buf)?
+            buf.try_get_i16()?
         } else {
             0
         };

@@ -74,7 +74,7 @@ impl Encodable for OffsetFetchRequestTopic {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -219,7 +219,7 @@ impl Encodable for OffsetFetchRequestTopics {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -348,7 +348,7 @@ impl Encodable for OffsetFetchRequestGroup {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -497,7 +497,7 @@ impl Encodable for OffsetFetchRequest {
             }
         }
         if version >= 7 {
-            types::Boolean.encode(buf, &self.require_stable)?;
+            types::Boolean.encode(buf, self.require_stable)?;
         } else {
             if self.require_stable {
                 return Err(EncodeError)
@@ -509,7 +509,7 @@ impl Encodable for OffsetFetchRequest {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -547,7 +547,7 @@ impl Encodable for OffsetFetchRequest {
             }
         }
         if version >= 7 {
-            total_size += types::Boolean.compute_size(&self.require_stable)?;
+            total_size += types::Boolean.compute_size(self.require_stable)?;
         } else {
             if self.require_stable {
                 return Err(EncodeError)

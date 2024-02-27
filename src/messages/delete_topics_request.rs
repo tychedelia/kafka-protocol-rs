@@ -54,9 +54,9 @@ impl Encodable for DeleteTopicState {
             }
         }
         if version >= 6 {
-            types::Uuid.encode(buf, &self.topic_id)?;
+            types::Uuid.encode(buf, self.topic_id)?;
         } else {
-            if &self.topic_id != &Uuid::nil() {
+            if self.topic_id != Uuid::nil() {
                 return Err(EncodeError)
             }
         }
@@ -66,7 +66,7 @@ impl Encodable for DeleteTopicState {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -82,9 +82,9 @@ impl Encodable for DeleteTopicState {
             }
         }
         if version >= 6 {
-            total_size += types::Uuid.compute_size(&self.topic_id)?;
+            total_size += types::Uuid.compute_size(self.topic_id)?;
         } else {
-            if &self.topic_id != &Uuid::nil() {
+            if self.topic_id != Uuid::nil() {
                 return Err(EncodeError)
             }
         }
@@ -194,14 +194,14 @@ impl Encodable for DeleteTopicsRequest {
                 types::Array(types::String).encode(buf, &self.topic_names)?;
             }
         }
-        types::Int32.encode(buf, &self.timeout_ms)?;
+        buf.put_i32(self.timeout_ms);
         if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -223,7 +223,7 @@ impl Encodable for DeleteTopicsRequest {
                 total_size += types::Array(types::String).compute_size(&self.topic_names)?;
             }
         }
-        total_size += types::Int32.compute_size(&self.timeout_ms)?;
+        total_size += 4;
         if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
@@ -254,7 +254,7 @@ impl Decodable for DeleteTopicsRequest {
         } else {
             Default::default()
         };
-        let timeout_ms = types::Int32.decode(buf)?;
+        let timeout_ms = buf.try_get_i32()?;
         let mut unknown_tagged_fields = BTreeMap::new();
         if version >= 4 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;

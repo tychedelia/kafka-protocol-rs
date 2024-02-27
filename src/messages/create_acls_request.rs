@@ -71,14 +71,14 @@ impl Builder for AclCreation {
 
 impl Encodable for AclCreation {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int8.encode(buf, &self.resource_type)?;
+        buf.put_i8(self.resource_type);
         if version >= 2 {
             types::CompactString.encode(buf, &self.resource_name)?;
         } else {
             types::String.encode(buf, &self.resource_name)?;
         }
         if version >= 1 {
-            types::Int8.encode(buf, &self.resource_pattern_type)?;
+            buf.put_i8(self.resource_pattern_type);
         } else {
             if self.resource_pattern_type != 3 {
                 return Err(EncodeError)
@@ -94,15 +94,15 @@ impl Encodable for AclCreation {
         } else {
             types::String.encode(buf, &self.host)?;
         }
-        types::Int8.encode(buf, &self.operation)?;
-        types::Int8.encode(buf, &self.permission_type)?;
+        buf.put_i8(self.operation);
+        buf.put_i8(self.permission_type);
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -110,14 +110,14 @@ impl Encodable for AclCreation {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int8.compute_size(&self.resource_type)?;
+        total_size += 1;
         if version >= 2 {
             total_size += types::CompactString.compute_size(&self.resource_name)?;
         } else {
             total_size += types::String.compute_size(&self.resource_name)?;
         }
         if version >= 1 {
-            total_size += types::Int8.compute_size(&self.resource_pattern_type)?;
+            total_size += 1;
         } else {
             if self.resource_pattern_type != 3 {
                 return Err(EncodeError)
@@ -133,8 +133,8 @@ impl Encodable for AclCreation {
         } else {
             total_size += types::String.compute_size(&self.host)?;
         }
-        total_size += types::Int8.compute_size(&self.operation)?;
-        total_size += types::Int8.compute_size(&self.permission_type)?;
+        total_size += 1;
+        total_size += 1;
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
@@ -151,14 +151,14 @@ impl Encodable for AclCreation {
 
 impl Decodable for AclCreation {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let resource_type = types::Int8.decode(buf)?;
+        let resource_type = buf.try_get_i8()?;
         let resource_name = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
         };
         let resource_pattern_type = if version >= 1 {
-            types::Int8.decode(buf)?
+            buf.try_get_i8()?
         } else {
             3
         };
@@ -172,8 +172,8 @@ impl Decodable for AclCreation {
         } else {
             types::String.decode(buf)?
         };
-        let operation = types::Int8.decode(buf)?;
-        let permission_type = types::Int8.decode(buf)?;
+        let operation = buf.try_get_i8()?;
+        let permission_type = buf.try_get_i8()?;
         let mut unknown_tagged_fields = BTreeMap::new();
         if version >= 2 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
@@ -251,7 +251,7 @@ impl Encodable for CreateAclsRequest {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }

@@ -61,7 +61,7 @@ impl Encodable for InitProducerIdRequest {
         } else {
             types::String.encode(buf, &self.transactional_id)?;
         }
-        types::Int32.encode(buf, &self.transaction_timeout_ms)?;
+        buf.put_i32(self.transaction_timeout_ms);
         if version >= 3 {
             types::Int64.encode(buf, &self.producer_id)?;
         } else {
@@ -70,7 +70,7 @@ impl Encodable for InitProducerIdRequest {
             }
         }
         if version >= 3 {
-            types::Int16.encode(buf, &self.producer_epoch)?;
+            buf.put_i16(self.producer_epoch);
         } else {
             if self.producer_epoch != -1 {
                 return Err(EncodeError)
@@ -82,7 +82,7 @@ impl Encodable for InitProducerIdRequest {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -95,7 +95,7 @@ impl Encodable for InitProducerIdRequest {
         } else {
             total_size += types::String.compute_size(&self.transactional_id)?;
         }
-        total_size += types::Int32.compute_size(&self.transaction_timeout_ms)?;
+        total_size += 4;
         if version >= 3 {
             total_size += types::Int64.compute_size(&self.producer_id)?;
         } else {
@@ -104,7 +104,7 @@ impl Encodable for InitProducerIdRequest {
             }
         }
         if version >= 3 {
-            total_size += types::Int16.compute_size(&self.producer_epoch)?;
+            total_size += 2;
         } else {
             if self.producer_epoch != -1 {
                 return Err(EncodeError)
@@ -131,14 +131,14 @@ impl Decodable for InitProducerIdRequest {
         } else {
             types::String.decode(buf)?
         };
-        let transaction_timeout_ms = types::Int32.decode(buf)?;
+        let transaction_timeout_ms = buf.try_get_i32()?;
         let producer_id = if version >= 3 {
             types::Int64.decode(buf)?
         } else {
             (-1).into()
         };
         let producer_epoch = if version >= 3 {
-            types::Int16.decode(buf)?
+            buf.try_get_i16()?
         } else {
             -1
         };

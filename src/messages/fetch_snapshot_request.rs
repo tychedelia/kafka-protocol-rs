@@ -46,22 +46,22 @@ impl Builder for SnapshotId {
 
 impl Encodable for SnapshotId {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int64.encode(buf, &self.end_offset)?;
-        types::Int32.encode(buf, &self.epoch)?;
+        buf.put_i64(self.end_offset);
+        buf.put_i32(self.epoch);
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             return Err(EncodeError);
         }
-        types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+        types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int64.compute_size(&self.end_offset)?;
-        total_size += types::Int32.compute_size(&self.epoch)?;
+        total_size += 8;
+        total_size += 4;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -76,8 +76,8 @@ impl Encodable for SnapshotId {
 
 impl Decodable for SnapshotId {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let end_offset = types::Int64.decode(buf)?;
-        let epoch = types::Int32.decode(buf)?;
+        let end_offset = buf.try_get_i64()?;
+        let epoch = buf.try_get_i32()?;
         let mut unknown_tagged_fields = BTreeMap::new();
         let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
         for _ in 0..num_tagged_fields {
@@ -147,26 +147,26 @@ impl Builder for PartitionSnapshot {
 
 impl Encodable for PartitionSnapshot {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int32.encode(buf, &self.partition)?;
-        types::Int32.encode(buf, &self.current_leader_epoch)?;
+        buf.put_i32(self.partition);
+        buf.put_i32(self.current_leader_epoch);
         types::Struct { version }.encode(buf, &self.snapshot_id)?;
-        types::Int64.encode(buf, &self.position)?;
+        buf.put_i64(self.position);
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             return Err(EncodeError);
         }
-        types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+        types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int32.compute_size(&self.partition)?;
-        total_size += types::Int32.compute_size(&self.current_leader_epoch)?;
+        total_size += 4;
+        total_size += 4;
         total_size += types::Struct { version }.compute_size(&self.snapshot_id)?;
-        total_size += types::Int64.compute_size(&self.position)?;
+        total_size += 8;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
@@ -181,10 +181,10 @@ impl Encodable for PartitionSnapshot {
 
 impl Decodable for PartitionSnapshot {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let partition = types::Int32.decode(buf)?;
-        let current_leader_epoch = types::Int32.decode(buf)?;
+        let partition = buf.try_get_i32()?;
+        let current_leader_epoch = buf.try_get_i32()?;
         let snapshot_id = types::Struct { version }.decode(buf)?;
-        let position = types::Int64.decode(buf)?;
+        let position = buf.try_get_i64()?;
         let mut unknown_tagged_fields = BTreeMap::new();
         let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
         for _ in 0..num_tagged_fields {
@@ -255,7 +255,7 @@ impl Encodable for TopicSnapshot {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             return Err(EncodeError);
         }
-        types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+        types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
@@ -350,7 +350,7 @@ impl Builder for FetchSnapshotRequest {
 impl Encodable for FetchSnapshotRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.replica_id)?;
-        types::Int32.encode(buf, &self.max_bytes)?;
+        buf.put_i32(self.max_bytes);
         types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
         let mut num_tagged_fields = self.unknown_tagged_fields.len();
         if !self.cluster_id.is_none() {
@@ -360,15 +360,15 @@ impl Encodable for FetchSnapshotRequest {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             return Err(EncodeError);
         }
-        types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+        types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
         if !self.cluster_id.is_none() {
             let computed_size = types::CompactString.compute_size(&self.cluster_id)?;
             if computed_size > std::u32::MAX as usize {
                 error!("Tagged field is too large to encode ({} bytes)", computed_size);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, 0)?;
-            types::UnsignedVarInt.encode(buf, computed_size as u32)?;
+            buf.put_i32(0);
+            buf.put_i32(computed_size as i32);
             types::CompactString.encode(buf, &self.cluster_id)?;
         }
 
@@ -378,7 +378,7 @@ impl Encodable for FetchSnapshotRequest {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.replica_id)?;
-        total_size += types::Int32.compute_size(&self.max_bytes)?;
+        total_size += 4;
         total_size += types::CompactArray(types::Struct { version }).compute_size(&self.topics)?;
         let mut num_tagged_fields = self.unknown_tagged_fields.len();
         if !self.cluster_id.is_none() {
@@ -395,8 +395,8 @@ impl Encodable for FetchSnapshotRequest {
                 error!("Tagged field is too large to encode ({} bytes)", computed_size);
                 return Err(EncodeError);
             }
-            total_size += types::UnsignedVarInt.compute_size(0)?;
-            total_size += types::UnsignedVarInt.compute_size(computed_size as u32)?;
+            total_size += 4;
+            total_size += 4;
             total_size += computed_size;
         }
 
@@ -409,7 +409,7 @@ impl Decodable for FetchSnapshotRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let mut cluster_id = None;
         let replica_id = types::Int32.decode(buf)?;
-        let max_bytes = types::Int32.decode(buf)?;
+        let max_bytes = buf.try_get_i32()?;
         let topics = types::CompactArray(types::Struct { version }).decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
         let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;

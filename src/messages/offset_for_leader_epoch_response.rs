@@ -56,19 +56,19 @@ impl Builder for EpochEndOffset {
 
 impl Encodable for EpochEndOffset {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int16.encode(buf, &self.error_code)?;
-        types::Int32.encode(buf, &self.partition)?;
+        buf.put_i16(self.error_code);
+        buf.put_i32(self.partition);
         if version >= 1 {
-            types::Int32.encode(buf, &self.leader_epoch)?;
+            buf.put_i32(self.leader_epoch);
         }
-        types::Int64.encode(buf, &self.end_offset)?;
+        buf.put_i64(self.end_offset);
         if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -76,12 +76,12 @@ impl Encodable for EpochEndOffset {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int16.compute_size(&self.error_code)?;
-        total_size += types::Int32.compute_size(&self.partition)?;
+        total_size += 2;
+        total_size += 4;
         if version >= 1 {
-            total_size += types::Int32.compute_size(&self.leader_epoch)?;
+            total_size += 4;
         }
-        total_size += types::Int64.compute_size(&self.end_offset)?;
+        total_size += 8;
         if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
@@ -98,14 +98,14 @@ impl Encodable for EpochEndOffset {
 
 impl Decodable for EpochEndOffset {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let error_code = types::Int16.decode(buf)?;
-        let partition = types::Int32.decode(buf)?;
+        let error_code = buf.try_get_i16()?;
+        let partition = buf.try_get_i32()?;
         let leader_epoch = if version >= 1 {
-            types::Int32.decode(buf)?
+            buf.try_get_i32()?
         } else {
             -1
         };
-        let end_offset = types::Int64.decode(buf)?;
+        let end_offset = buf.try_get_i64()?;
         let mut unknown_tagged_fields = BTreeMap::new();
         if version >= 4 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
@@ -183,7 +183,7 @@ impl MapEncodable for OffsetForLeaderTopicResult {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -288,7 +288,7 @@ impl Builder for OffsetForLeaderEpochResponse {
 impl Encodable for OffsetForLeaderEpochResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version >= 2 {
-            types::Int32.encode(buf, &self.throttle_time_ms)?;
+            buf.put_i32(self.throttle_time_ms);
         }
         if version >= 4 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
@@ -301,7 +301,7 @@ impl Encodable for OffsetForLeaderEpochResponse {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -310,7 +310,7 @@ impl Encodable for OffsetForLeaderEpochResponse {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         if version >= 2 {
-            total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
+            total_size += 4;
         }
         if version >= 4 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.topics)?;
@@ -334,7 +334,7 @@ impl Encodable for OffsetForLeaderEpochResponse {
 impl Decodable for OffsetForLeaderEpochResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let throttle_time_ms = if version >= 2 {
-            types::Int32.decode(buf)?
+            buf.try_get_i32()?
         } else {
             0
         };

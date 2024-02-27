@@ -54,7 +54,7 @@ impl Encodable for StopReplicaPartitionV0 {
             }
         }
         if version == 0 {
-            types::Int32.encode(buf, &self.partition_index)?;
+            buf.put_i32(self.partition_index);
         } else {
             if self.partition_index != 0 {
                 return Err(EncodeError)
@@ -66,7 +66,7 @@ impl Encodable for StopReplicaPartitionV0 {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -82,7 +82,7 @@ impl Encodable for StopReplicaPartitionV0 {
             }
         }
         if version == 0 {
-            total_size += types::Int32.compute_size(&self.partition_index)?;
+            total_size += 4;
         } else {
             if self.partition_index != 0 {
                 return Err(EncodeError)
@@ -110,7 +110,7 @@ impl Decodable for StopReplicaPartitionV0 {
             Default::default()
         };
         let partition_index = if version == 0 {
-            types::Int32.decode(buf)?
+            buf.try_get_i32()?
         } else {
             0
         };
@@ -203,7 +203,7 @@ impl Encodable for StopReplicaTopicV1 {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -334,21 +334,21 @@ impl Builder for StopReplicaPartitionState {
 impl Encodable for StopReplicaPartitionState {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version >= 3 {
-            types::Int32.encode(buf, &self.partition_index)?;
+            buf.put_i32(self.partition_index);
         } else {
             if self.partition_index != 0 {
                 return Err(EncodeError)
             }
         }
         if version >= 3 {
-            types::Int32.encode(buf, &self.leader_epoch)?;
+            buf.put_i32(self.leader_epoch);
         } else {
             if self.leader_epoch != -1 {
                 return Err(EncodeError)
             }
         }
         if version >= 3 {
-            types::Boolean.encode(buf, &self.delete_partition)?;
+            types::Boolean.encode(buf, self.delete_partition)?;
         } else {
             if self.delete_partition {
                 return Err(EncodeError)
@@ -360,7 +360,7 @@ impl Encodable for StopReplicaPartitionState {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -369,21 +369,21 @@ impl Encodable for StopReplicaPartitionState {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         if version >= 3 {
-            total_size += types::Int32.compute_size(&self.partition_index)?;
+            total_size += 4;
         } else {
             if self.partition_index != 0 {
                 return Err(EncodeError)
             }
         }
         if version >= 3 {
-            total_size += types::Int32.compute_size(&self.leader_epoch)?;
+            total_size += 4;
         } else {
             if self.leader_epoch != -1 {
                 return Err(EncodeError)
             }
         }
         if version >= 3 {
-            total_size += types::Boolean.compute_size(&self.delete_partition)?;
+            total_size += types::Boolean.compute_size(self.delete_partition)?;
         } else {
             if self.delete_partition {
                 return Err(EncodeError)
@@ -406,12 +406,12 @@ impl Encodable for StopReplicaPartitionState {
 impl Decodable for StopReplicaPartitionState {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let partition_index = if version >= 3 {
-            types::Int32.decode(buf)?
+            buf.try_get_i32()?
         } else {
             0
         };
         let leader_epoch = if version >= 3 {
-            types::Int32.decode(buf)?
+            buf.try_get_i32()?
         } else {
             -1
         };
@@ -503,7 +503,7 @@ impl Encodable for StopReplicaTopicState {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -638,12 +638,12 @@ impl Builder for StopReplicaRequest {
 impl Encodable for StopReplicaRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.controller_id)?;
-        types::Int32.encode(buf, &self.controller_epoch)?;
+        buf.put_i32(self.controller_epoch);
         if version >= 1 {
-            types::Int64.encode(buf, &self.broker_epoch)?;
+            buf.put_i64(self.broker_epoch);
         }
         if version <= 2 {
-            types::Boolean.encode(buf, &self.delete_partitions)?;
+            types::Boolean.encode(buf, self.delete_partitions)?;
         } else {
             if self.delete_partitions {
                 return Err(EncodeError)
@@ -680,7 +680,7 @@ impl Encodable for StopReplicaRequest {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -689,12 +689,12 @@ impl Encodable for StopReplicaRequest {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.controller_id)?;
-        total_size += types::Int32.compute_size(&self.controller_epoch)?;
+        total_size += 4;
         if version >= 1 {
-            total_size += types::Int64.compute_size(&self.broker_epoch)?;
+            total_size += 8;
         }
         if version <= 2 {
-            total_size += types::Boolean.compute_size(&self.delete_partitions)?;
+            total_size += types::Boolean.compute_size(self.delete_partitions)?;
         } else {
             if self.delete_partitions {
                 return Err(EncodeError)
@@ -742,9 +742,9 @@ impl Encodable for StopReplicaRequest {
 impl Decodable for StopReplicaRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let controller_id = types::Int32.decode(buf)?;
-        let controller_epoch = types::Int32.decode(buf)?;
+        let controller_epoch = buf.try_get_i32()?;
         let broker_epoch = if version >= 1 {
-            types::Int64.decode(buf)?
+            buf.try_get_i64()?
         } else {
             -1
         };

@@ -58,7 +58,7 @@ impl MapEncodable for MetadataResponseBroker {
         } else {
             types::String.encode(buf, &self.host)?;
         }
-        types::Int32.encode(buf, &self.port)?;
+        buf.put_i32(self.port);
         if version >= 1 {
             if version >= 9 {
                 types::CompactString.encode(buf, &self.rack)?;
@@ -72,7 +72,7 @@ impl MapEncodable for MetadataResponseBroker {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -86,7 +86,7 @@ impl MapEncodable for MetadataResponseBroker {
         } else {
             total_size += types::String.compute_size(&self.host)?;
         }
-        total_size += types::Int32.compute_size(&self.port)?;
+        total_size += 4;
         if version >= 1 {
             if version >= 9 {
                 total_size += types::CompactString.compute_size(&self.rack)?;
@@ -117,7 +117,7 @@ impl MapDecodable for MetadataResponseBroker {
         } else {
             types::String.decode(buf)?
         };
-        let port = types::Int32.decode(buf)?;
+        let port = buf.try_get_i32()?;
         let rack = if version >= 1 {
             if version >= 9 {
                 types::CompactString.decode(buf)?
@@ -215,11 +215,11 @@ impl Builder for MetadataResponsePartition {
 
 impl Encodable for MetadataResponsePartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int16.encode(buf, &self.error_code)?;
-        types::Int32.encode(buf, &self.partition_index)?;
+        buf.put_i16(self.error_code);
+        buf.put_i32(self.partition_index);
         types::Int32.encode(buf, &self.leader_id)?;
         if version >= 7 {
-            types::Int32.encode(buf, &self.leader_epoch)?;
+            buf.put_i32(self.leader_epoch);
         }
         if version >= 9 {
             types::CompactArray(types::Int32).encode(buf, &self.replica_nodes)?;
@@ -244,7 +244,7 @@ impl Encodable for MetadataResponsePartition {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -252,11 +252,11 @@ impl Encodable for MetadataResponsePartition {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int16.compute_size(&self.error_code)?;
-        total_size += types::Int32.compute_size(&self.partition_index)?;
+        total_size += 2;
+        total_size += 4;
         total_size += types::Int32.compute_size(&self.leader_id)?;
         if version >= 7 {
-            total_size += types::Int32.compute_size(&self.leader_epoch)?;
+            total_size += 4;
         }
         if version >= 9 {
             total_size += types::CompactArray(types::Int32).compute_size(&self.replica_nodes)?;
@@ -291,11 +291,11 @@ impl Encodable for MetadataResponsePartition {
 
 impl Decodable for MetadataResponsePartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let error_code = types::Int16.decode(buf)?;
-        let partition_index = types::Int32.decode(buf)?;
+        let error_code = buf.try_get_i16()?;
+        let partition_index = buf.try_get_i32()?;
         let leader_id = types::Int32.decode(buf)?;
         let leader_epoch = if version >= 7 {
-            types::Int32.decode(buf)?
+            buf.try_get_i32()?
         } else {
             -1
         };
@@ -405,17 +405,17 @@ impl Builder for MetadataResponseTopic {
 impl MapEncodable for MetadataResponseTopic {
     type Key = super::TopicName;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int16.encode(buf, &self.error_code)?;
+        buf.put_i16(self.error_code);
         if version >= 9 {
             types::CompactString.encode(buf, key)?;
         } else {
             types::String.encode(buf, key)?;
         }
         if version >= 10 {
-            types::Uuid.encode(buf, &self.topic_id)?;
+            types::Uuid.encode(buf, self.topic_id)?;
         }
         if version >= 1 {
-            types::Boolean.encode(buf, &self.is_internal)?;
+            types::Boolean.encode(buf, self.is_internal)?;
         }
         if version >= 9 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.partitions)?;
@@ -423,7 +423,7 @@ impl MapEncodable for MetadataResponseTopic {
             types::Array(types::Struct { version }).encode(buf, &self.partitions)?;
         }
         if version >= 8 {
-            types::Int32.encode(buf, &self.topic_authorized_operations)?;
+            buf.put_i32(self.topic_authorized_operations);
         } else {
             if self.topic_authorized_operations != -2147483648 {
                 return Err(EncodeError)
@@ -435,7 +435,7 @@ impl MapEncodable for MetadataResponseTopic {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -443,17 +443,17 @@ impl MapEncodable for MetadataResponseTopic {
     }
     fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int16.compute_size(&self.error_code)?;
+        total_size += 2;
         if version >= 9 {
             total_size += types::CompactString.compute_size(key)?;
         } else {
             total_size += types::String.compute_size(key)?;
         }
         if version >= 10 {
-            total_size += types::Uuid.compute_size(&self.topic_id)?;
+            total_size += types::Uuid.compute_size(self.topic_id)?;
         }
         if version >= 1 {
-            total_size += types::Boolean.compute_size(&self.is_internal)?;
+            total_size += types::Boolean.compute_size(self.is_internal)?;
         }
         if version >= 9 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.partitions)?;
@@ -461,7 +461,7 @@ impl MapEncodable for MetadataResponseTopic {
             total_size += types::Array(types::Struct { version }).compute_size(&self.partitions)?;
         }
         if version >= 8 {
-            total_size += types::Int32.compute_size(&self.topic_authorized_operations)?;
+            total_size += 4;
         } else {
             if self.topic_authorized_operations != -2147483648 {
                 return Err(EncodeError)
@@ -484,7 +484,7 @@ impl MapEncodable for MetadataResponseTopic {
 impl MapDecodable for MetadataResponseTopic {
     type Key = super::TopicName;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
-        let error_code = types::Int16.decode(buf)?;
+        let error_code = buf.try_get_i16()?;
         let key_field = if version >= 9 {
             types::CompactString.decode(buf)?
         } else {
@@ -506,7 +506,7 @@ impl MapDecodable for MetadataResponseTopic {
             types::Array(types::Struct { version }).decode(buf)?
         };
         let topic_authorized_operations = if version >= 8 {
-            types::Int32.decode(buf)?
+            buf.try_get_i32()?
         } else {
             -2147483648
         };
@@ -598,7 +598,7 @@ impl Builder for MetadataResponse {
 impl Encodable for MetadataResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version >= 3 {
-            types::Int32.encode(buf, &self.throttle_time_ms)?;
+            buf.put_i32(self.throttle_time_ms);
         }
         if version >= 9 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.brokers)?;
@@ -621,7 +621,7 @@ impl Encodable for MetadataResponse {
             types::Array(types::Struct { version }).encode(buf, &self.topics)?;
         }
         if version >= 8 && version <= 10 {
-            types::Int32.encode(buf, &self.cluster_authorized_operations)?;
+            buf.put_i32(self.cluster_authorized_operations);
         } else {
             if self.cluster_authorized_operations != -2147483648 {
                 return Err(EncodeError)
@@ -633,7 +633,7 @@ impl Encodable for MetadataResponse {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -642,7 +642,7 @@ impl Encodable for MetadataResponse {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         if version >= 3 {
-            total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
+            total_size += 4;
         }
         if version >= 9 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.brokers)?;
@@ -665,7 +665,7 @@ impl Encodable for MetadataResponse {
             total_size += types::Array(types::Struct { version }).compute_size(&self.topics)?;
         }
         if version >= 8 && version <= 10 {
-            total_size += types::Int32.compute_size(&self.cluster_authorized_operations)?;
+            total_size += 4;
         } else {
             if self.cluster_authorized_operations != -2147483648 {
                 return Err(EncodeError)
@@ -688,7 +688,7 @@ impl Encodable for MetadataResponse {
 impl Decodable for MetadataResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let throttle_time_ms = if version >= 3 {
-            types::Int32.decode(buf)?
+            buf.try_get_i32()?
         } else {
             0
         };
@@ -717,7 +717,7 @@ impl Decodable for MetadataResponse {
             types::Array(types::Struct { version }).decode(buf)?
         };
         let cluster_authorized_operations = if version >= 8 && version <= 10 {
-            types::Int32.decode(buf)?
+            buf.try_get_i32()?
         } else {
             -2147483648
         };

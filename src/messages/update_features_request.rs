@@ -53,16 +53,16 @@ impl MapEncodable for FeatureUpdateKey {
     type Key = StrBytes;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::CompactString.encode(buf, key)?;
-        types::Int16.encode(buf, &self.max_version_level)?;
+        buf.put_i16(self.max_version_level);
         if version == 0 {
-            types::Boolean.encode(buf, &self.allow_downgrade)?;
+            types::Boolean.encode(buf, self.allow_downgrade)?;
         } else {
             if self.allow_downgrade {
                 return Err(EncodeError)
             }
         }
         if version >= 1 {
-            types::Int8.encode(buf, &self.upgrade_type)?;
+            buf.put_i8(self.upgrade_type);
         } else {
             if self.upgrade_type != 1 {
                 return Err(EncodeError)
@@ -73,7 +73,7 @@ impl MapEncodable for FeatureUpdateKey {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             return Err(EncodeError);
         }
-        types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+        types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
@@ -81,16 +81,16 @@ impl MapEncodable for FeatureUpdateKey {
     fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         total_size += types::CompactString.compute_size(key)?;
-        total_size += types::Int16.compute_size(&self.max_version_level)?;
+        total_size += 2;
         if version == 0 {
-            total_size += types::Boolean.compute_size(&self.allow_downgrade)?;
+            total_size += types::Boolean.compute_size(self.allow_downgrade)?;
         } else {
             if self.allow_downgrade {
                 return Err(EncodeError)
             }
         }
         if version >= 1 {
-            total_size += types::Int8.compute_size(&self.upgrade_type)?;
+            total_size += 1;
         } else {
             if self.upgrade_type != 1 {
                 return Err(EncodeError)
@@ -112,14 +112,14 @@ impl MapDecodable for FeatureUpdateKey {
     type Key = StrBytes;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
         let key_field = types::CompactString.decode(buf)?;
-        let max_version_level = types::Int16.decode(buf)?;
+        let max_version_level = buf.try_get_i16()?;
         let allow_downgrade = if version == 0 {
             types::Boolean.decode(buf)?
         } else {
             false
         };
         let upgrade_type = if version >= 1 {
-            types::Int8.decode(buf)?
+            buf.try_get_i8()?
         } else {
             1
         };
@@ -189,10 +189,10 @@ impl Builder for UpdateFeaturesRequest {
 
 impl Encodable for UpdateFeaturesRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int32.encode(buf, &self.timeout_ms)?;
+        buf.put_i32(self.timeout_ms);
         types::CompactArray(types::Struct { version }).encode(buf, &self.feature_updates)?;
         if version >= 1 {
-            types::Boolean.encode(buf, &self.validate_only)?;
+            types::Boolean.encode(buf, self.validate_only)?;
         } else {
             if self.validate_only {
                 return Err(EncodeError)
@@ -203,17 +203,17 @@ impl Encodable for UpdateFeaturesRequest {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             return Err(EncodeError);
         }
-        types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+        types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int32.compute_size(&self.timeout_ms)?;
+        total_size += 4;
         total_size += types::CompactArray(types::Struct { version }).compute_size(&self.feature_updates)?;
         if version >= 1 {
-            total_size += types::Boolean.compute_size(&self.validate_only)?;
+            total_size += types::Boolean.compute_size(self.validate_only)?;
         } else {
             if self.validate_only {
                 return Err(EncodeError)
@@ -233,7 +233,7 @@ impl Encodable for UpdateFeaturesRequest {
 
 impl Decodable for UpdateFeaturesRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let timeout_ms = types::Int32.decode(buf)?;
+        let timeout_ms = buf.try_get_i32()?;
         let feature_updates = types::CompactArray(types::Struct { version }).decode(buf)?;
         let validate_only = if version >= 1 {
             types::Boolean.decode(buf)?

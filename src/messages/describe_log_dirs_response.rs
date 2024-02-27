@@ -56,17 +56,17 @@ impl Builder for DescribeLogDirsPartition {
 
 impl Encodable for DescribeLogDirsPartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int32.encode(buf, &self.partition_index)?;
-        types::Int64.encode(buf, &self.partition_size)?;
-        types::Int64.encode(buf, &self.offset_lag)?;
-        types::Boolean.encode(buf, &self.is_future_key)?;
+        buf.put_i32(self.partition_index);
+        buf.put_i64(self.partition_size);
+        buf.put_i64(self.offset_lag);
+        types::Boolean.encode(buf, self.is_future_key)?;
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -74,10 +74,10 @@ impl Encodable for DescribeLogDirsPartition {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int32.compute_size(&self.partition_index)?;
-        total_size += types::Int64.compute_size(&self.partition_size)?;
-        total_size += types::Int64.compute_size(&self.offset_lag)?;
-        total_size += types::Boolean.compute_size(&self.is_future_key)?;
+        total_size += 4;
+        total_size += 8;
+        total_size += 8;
+        total_size += types::Boolean.compute_size(self.is_future_key)?;
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
@@ -94,9 +94,9 @@ impl Encodable for DescribeLogDirsPartition {
 
 impl Decodable for DescribeLogDirsPartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let partition_index = types::Int32.decode(buf)?;
-        let partition_size = types::Int64.decode(buf)?;
-        let offset_lag = types::Int64.decode(buf)?;
+        let partition_index = buf.try_get_i32()?;
+        let partition_size = buf.try_get_i64()?;
+        let offset_lag = buf.try_get_i64()?;
         let is_future_key = types::Boolean.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
         if version >= 2 {
@@ -179,7 +179,7 @@ impl Encodable for DescribeLogDirsTopic {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -299,7 +299,7 @@ impl Builder for DescribeLogDirsResult {
 
 impl Encodable for DescribeLogDirsResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int16.encode(buf, &self.error_code)?;
+        buf.put_i16(self.error_code);
         if version >= 2 {
             types::CompactString.encode(buf, &self.log_dir)?;
         } else {
@@ -311,10 +311,10 @@ impl Encodable for DescribeLogDirsResult {
             types::Array(types::Struct { version }).encode(buf, &self.topics)?;
         }
         if version >= 4 {
-            types::Int64.encode(buf, &self.total_bytes)?;
+            buf.put_i64(self.total_bytes);
         }
         if version >= 4 {
-            types::Int64.encode(buf, &self.usable_bytes)?;
+            buf.put_i64(self.usable_bytes);
         }
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -322,7 +322,7 @@ impl Encodable for DescribeLogDirsResult {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -330,7 +330,7 @@ impl Encodable for DescribeLogDirsResult {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int16.compute_size(&self.error_code)?;
+        total_size += 2;
         if version >= 2 {
             total_size += types::CompactString.compute_size(&self.log_dir)?;
         } else {
@@ -342,10 +342,10 @@ impl Encodable for DescribeLogDirsResult {
             total_size += types::Array(types::Struct { version }).compute_size(&self.topics)?;
         }
         if version >= 4 {
-            total_size += types::Int64.compute_size(&self.total_bytes)?;
+            total_size += 8;
         }
         if version >= 4 {
-            total_size += types::Int64.compute_size(&self.usable_bytes)?;
+            total_size += 8;
         }
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -363,7 +363,7 @@ impl Encodable for DescribeLogDirsResult {
 
 impl Decodable for DescribeLogDirsResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let error_code = types::Int16.decode(buf)?;
+        let error_code = buf.try_get_i16()?;
         let log_dir = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
@@ -375,12 +375,12 @@ impl Decodable for DescribeLogDirsResult {
             types::Array(types::Struct { version }).decode(buf)?
         };
         let total_bytes = if version >= 4 {
-            types::Int64.decode(buf)?
+            buf.try_get_i64()?
         } else {
             -1
         };
         let usable_bytes = if version >= 4 {
-            types::Int64.decode(buf)?
+            buf.try_get_i64()?
         } else {
             -1
         };
@@ -456,9 +456,9 @@ impl Builder for DescribeLogDirsResponse {
 
 impl Encodable for DescribeLogDirsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int32.encode(buf, &self.throttle_time_ms)?;
+        buf.put_i32(self.throttle_time_ms);
         if version >= 3 {
-            types::Int16.encode(buf, &self.error_code)?;
+            buf.put_i16(self.error_code);
         }
         if version >= 2 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.results)?;
@@ -471,7 +471,7 @@ impl Encodable for DescribeLogDirsResponse {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -479,9 +479,9 @@ impl Encodable for DescribeLogDirsResponse {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
+        total_size += 4;
         if version >= 3 {
-            total_size += types::Int16.compute_size(&self.error_code)?;
+            total_size += 2;
         }
         if version >= 2 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.results)?;
@@ -504,9 +504,9 @@ impl Encodable for DescribeLogDirsResponse {
 
 impl Decodable for DescribeLogDirsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let throttle_time_ms = types::Int32.decode(buf)?;
+        let throttle_time_ms = buf.try_get_i32()?;
         let error_code = if version >= 3 {
-            types::Int16.decode(buf)?
+            buf.try_get_i16()?
         } else {
             0
         };

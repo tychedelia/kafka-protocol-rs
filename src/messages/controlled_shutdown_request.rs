@@ -48,7 +48,7 @@ impl Encodable for ControlledShutdownRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.broker_id)?;
         if version >= 2 {
-            types::Int64.encode(buf, &self.broker_epoch)?;
+            buf.put_i64(self.broker_epoch);
         }
         if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -56,7 +56,7 @@ impl Encodable for ControlledShutdownRequest {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -66,7 +66,7 @@ impl Encodable for ControlledShutdownRequest {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.broker_id)?;
         if version >= 2 {
-            total_size += types::Int64.compute_size(&self.broker_epoch)?;
+            total_size += 8;
         }
         if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -86,7 +86,7 @@ impl Decodable for ControlledShutdownRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let broker_id = types::Int32.decode(buf)?;
         let broker_epoch = if version >= 2 {
-            types::Int64.decode(buf)?
+            buf.try_get_i64()?
         } else {
             -1
         };

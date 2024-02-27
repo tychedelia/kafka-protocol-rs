@@ -58,7 +58,7 @@ impl MapEncodable for TopicPartitions {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -168,7 +168,7 @@ impl Builder for ElectLeadersRequest {
 impl Encodable for ElectLeadersRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version >= 1 {
-            types::Int8.encode(buf, &self.election_type)?;
+            buf.put_i8(self.election_type);
         } else {
             if self.election_type != 0 {
                 return Err(EncodeError)
@@ -179,14 +179,14 @@ impl Encodable for ElectLeadersRequest {
         } else {
             types::Array(types::Struct { version }).encode(buf, &self.topic_partitions)?;
         }
-        types::Int32.encode(buf, &self.timeout_ms)?;
+        buf.put_i32(self.timeout_ms);
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -195,7 +195,7 @@ impl Encodable for ElectLeadersRequest {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         if version >= 1 {
-            total_size += types::Int8.compute_size(&self.election_type)?;
+            total_size += 1;
         } else {
             if self.election_type != 0 {
                 return Err(EncodeError)
@@ -206,7 +206,7 @@ impl Encodable for ElectLeadersRequest {
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.topic_partitions)?;
         }
-        total_size += types::Int32.compute_size(&self.timeout_ms)?;
+        total_size += 4;
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
@@ -224,7 +224,7 @@ impl Encodable for ElectLeadersRequest {
 impl Decodable for ElectLeadersRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let election_type = if version >= 1 {
-            types::Int8.decode(buf)?
+            buf.try_get_i8()?
         } else {
             0
         };
@@ -233,7 +233,7 @@ impl Decodable for ElectLeadersRequest {
         } else {
             types::Array(types::Struct { version }).decode(buf)?
         };
-        let timeout_ms = types::Int32.decode(buf)?;
+        let timeout_ms = buf.try_get_i32()?;
         let mut unknown_tagged_fields = BTreeMap::new();
         if version >= 2 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;

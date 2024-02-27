@@ -74,7 +74,7 @@ impl Encodable for DescribeConfigsSynonym {
             }
         }
         if version >= 1 {
-            types::Int8.encode(buf, &self.source)?;
+            buf.put_i8(self.source);
         } else {
             if self.source != 0 {
                 return Err(EncodeError)
@@ -86,7 +86,7 @@ impl Encodable for DescribeConfigsSynonym {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -117,7 +117,7 @@ impl Encodable for DescribeConfigsSynonym {
             }
         }
         if version >= 1 {
-            total_size += types::Int8.compute_size(&self.source)?;
+            total_size += 1;
         } else {
             if self.source != 0 {
                 return Err(EncodeError)
@@ -158,7 +158,7 @@ impl Decodable for DescribeConfigsSynonym {
             Some(Default::default())
         };
         let source = if version >= 1 {
-            types::Int8.decode(buf)?
+            buf.try_get_i8()?
         } else {
             0
         };
@@ -270,18 +270,18 @@ impl Encodable for DescribeConfigsResourceResult {
         } else {
             types::String.encode(buf, &self.value)?;
         }
-        types::Boolean.encode(buf, &self.read_only)?;
+        types::Boolean.encode(buf, self.read_only)?;
         if version == 0 {
-            types::Boolean.encode(buf, &self.is_default)?;
+            types::Boolean.encode(buf, self.is_default)?;
         } else {
             if self.is_default {
                 return Err(EncodeError)
             }
         }
         if version >= 1 {
-            types::Int8.encode(buf, &self.config_source)?;
+            buf.put_i8(self.config_source);
         }
-        types::Boolean.encode(buf, &self.is_sensitive)?;
+        types::Boolean.encode(buf, self.is_sensitive)?;
         if version >= 1 {
             if version >= 4 {
                 types::CompactArray(types::Struct { version }).encode(buf, &self.synonyms)?;
@@ -290,7 +290,7 @@ impl Encodable for DescribeConfigsResourceResult {
             }
         }
         if version >= 3 {
-            types::Int8.encode(buf, &self.config_type)?;
+            buf.put_i8(self.config_type);
         }
         if version >= 3 {
             if version >= 4 {
@@ -305,7 +305,7 @@ impl Encodable for DescribeConfigsResourceResult {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -323,18 +323,18 @@ impl Encodable for DescribeConfigsResourceResult {
         } else {
             total_size += types::String.compute_size(&self.value)?;
         }
-        total_size += types::Boolean.compute_size(&self.read_only)?;
+        total_size += types::Boolean.compute_size(self.read_only)?;
         if version == 0 {
-            total_size += types::Boolean.compute_size(&self.is_default)?;
+            total_size += types::Boolean.compute_size(self.is_default)?;
         } else {
             if self.is_default {
                 return Err(EncodeError)
             }
         }
         if version >= 1 {
-            total_size += types::Int8.compute_size(&self.config_source)?;
+            total_size += 1;
         }
-        total_size += types::Boolean.compute_size(&self.is_sensitive)?;
+        total_size += types::Boolean.compute_size(self.is_sensitive)?;
         if version >= 1 {
             if version >= 4 {
                 total_size += types::CompactArray(types::Struct { version }).compute_size(&self.synonyms)?;
@@ -343,7 +343,7 @@ impl Encodable for DescribeConfigsResourceResult {
             }
         }
         if version >= 3 {
-            total_size += types::Int8.compute_size(&self.config_type)?;
+            total_size += 1;
         }
         if version >= 3 {
             if version >= 4 {
@@ -385,7 +385,7 @@ impl Decodable for DescribeConfigsResourceResult {
             false
         };
         let config_source = if version >= 1 {
-            types::Int8.decode(buf)?
+            buf.try_get_i8()?
         } else {
             -1
         };
@@ -400,7 +400,7 @@ impl Decodable for DescribeConfigsResourceResult {
             Default::default()
         };
         let config_type = if version >= 3 {
-            types::Int8.decode(buf)?
+            buf.try_get_i8()?
         } else {
             0
         };
@@ -503,13 +503,13 @@ impl Builder for DescribeConfigsResult {
 
 impl Encodable for DescribeConfigsResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int16.encode(buf, &self.error_code)?;
+        buf.put_i16(self.error_code);
         if version >= 4 {
             types::CompactString.encode(buf, &self.error_message)?;
         } else {
             types::String.encode(buf, &self.error_message)?;
         }
-        types::Int8.encode(buf, &self.resource_type)?;
+        buf.put_i8(self.resource_type);
         if version >= 4 {
             types::CompactString.encode(buf, &self.resource_name)?;
         } else {
@@ -526,7 +526,7 @@ impl Encodable for DescribeConfigsResult {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -534,13 +534,13 @@ impl Encodable for DescribeConfigsResult {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int16.compute_size(&self.error_code)?;
+        total_size += 2;
         if version >= 4 {
             total_size += types::CompactString.compute_size(&self.error_message)?;
         } else {
             total_size += types::String.compute_size(&self.error_message)?;
         }
-        total_size += types::Int8.compute_size(&self.resource_type)?;
+        total_size += 1;
         if version >= 4 {
             total_size += types::CompactString.compute_size(&self.resource_name)?;
         } else {
@@ -567,13 +567,13 @@ impl Encodable for DescribeConfigsResult {
 
 impl Decodable for DescribeConfigsResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let error_code = types::Int16.decode(buf)?;
+        let error_code = buf.try_get_i16()?;
         let error_message = if version >= 4 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
         };
-        let resource_type = types::Int8.decode(buf)?;
+        let resource_type = buf.try_get_i8()?;
         let resource_name = if version >= 4 {
             types::CompactString.decode(buf)?
         } else {
@@ -651,7 +651,7 @@ impl Builder for DescribeConfigsResponse {
 
 impl Encodable for DescribeConfigsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int32.encode(buf, &self.throttle_time_ms)?;
+        buf.put_i32(self.throttle_time_ms);
         if version >= 4 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.results)?;
         } else {
@@ -663,7 +663,7 @@ impl Encodable for DescribeConfigsResponse {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -671,7 +671,7 @@ impl Encodable for DescribeConfigsResponse {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
+        total_size += 4;
         if version >= 4 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.results)?;
         } else {
@@ -693,7 +693,7 @@ impl Encodable for DescribeConfigsResponse {
 
 impl Decodable for DescribeConfigsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let throttle_time_ms = types::Int32.decode(buf)?;
+        let throttle_time_ms = buf.try_get_i32()?;
         let results = if version >= 4 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {

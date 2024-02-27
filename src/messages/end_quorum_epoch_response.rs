@@ -54,19 +54,19 @@ impl Builder for PartitionData {
 
 impl Encodable for PartitionData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int32.encode(buf, &self.partition_index)?;
-        types::Int16.encode(buf, &self.error_code)?;
+        buf.put_i32(self.partition_index);
+        buf.put_i16(self.error_code);
         types::Int32.encode(buf, &self.leader_id)?;
-        types::Int32.encode(buf, &self.leader_epoch)?;
+        buf.put_i32(self.leader_epoch);
 
         Ok(())
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int32.compute_size(&self.partition_index)?;
-        total_size += types::Int16.compute_size(&self.error_code)?;
+        total_size += 4;
+        total_size += 2;
         total_size += types::Int32.compute_size(&self.leader_id)?;
-        total_size += types::Int32.compute_size(&self.leader_epoch)?;
+        total_size += 4;
 
         Ok(total_size)
     }
@@ -74,10 +74,10 @@ impl Encodable for PartitionData {
 
 impl Decodable for PartitionData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let partition_index = types::Int32.decode(buf)?;
-        let error_code = types::Int16.decode(buf)?;
+        let partition_index = buf.try_get_i32()?;
+        let error_code = buf.try_get_i16()?;
         let leader_id = types::Int32.decode(buf)?;
-        let leader_epoch = types::Int32.decode(buf)?;
+        let leader_epoch = buf.try_get_i32()?;
         Ok(Self {
             partition_index,
             error_code,
@@ -194,14 +194,14 @@ impl Builder for EndQuorumEpochResponse {
 
 impl Encodable for EndQuorumEpochResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int16.encode(buf, &self.error_code)?;
+        buf.put_i16(self.error_code);
         types::Array(types::Struct { version }).encode(buf, &self.topics)?;
 
         Ok(())
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int16.compute_size(&self.error_code)?;
+        total_size += 2;
         total_size += types::Array(types::Struct { version }).compute_size(&self.topics)?;
 
         Ok(total_size)
@@ -210,7 +210,7 @@ impl Encodable for EndQuorumEpochResponse {
 
 impl Decodable for EndQuorumEpochResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let error_code = types::Int16.decode(buf)?;
+        let error_code = buf.try_get_i16()?;
         let topics = types::Array(types::Struct { version }).decode(buf)?;
         Ok(Self {
             error_code,

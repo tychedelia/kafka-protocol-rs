@@ -54,18 +54,18 @@ impl Builder for PartitionData {
 
 impl Encodable for PartitionData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int32.encode(buf, &self.partition_index)?;
+        buf.put_i32(self.partition_index);
         types::Int32.encode(buf, &self.leader_id)?;
-        types::Int32.encode(buf, &self.leader_epoch)?;
+        buf.put_i32(self.leader_epoch);
         types::Array(types::Int32).encode(buf, &self.preferred_successors)?;
 
         Ok(())
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int32.compute_size(&self.partition_index)?;
+        total_size += 4;
         total_size += types::Int32.compute_size(&self.leader_id)?;
-        total_size += types::Int32.compute_size(&self.leader_epoch)?;
+        total_size += 4;
         total_size += types::Array(types::Int32).compute_size(&self.preferred_successors)?;
 
         Ok(total_size)
@@ -74,9 +74,9 @@ impl Encodable for PartitionData {
 
 impl Decodable for PartitionData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let partition_index = types::Int32.decode(buf)?;
+        let partition_index = buf.try_get_i32()?;
         let leader_id = types::Int32.decode(buf)?;
-        let leader_epoch = types::Int32.decode(buf)?;
+        let leader_epoch = buf.try_get_i32()?;
         let preferred_successors = types::Array(types::Int32).decode(buf)?;
         Ok(Self {
             partition_index,

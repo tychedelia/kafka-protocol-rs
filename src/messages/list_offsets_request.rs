@@ -56,13 +56,13 @@ impl Builder for ListOffsetsPartition {
 
 impl Encodable for ListOffsetsPartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int32.encode(buf, &self.partition_index)?;
+        buf.put_i32(self.partition_index);
         if version >= 4 {
-            types::Int32.encode(buf, &self.current_leader_epoch)?;
+            buf.put_i32(self.current_leader_epoch);
         }
-        types::Int64.encode(buf, &self.timestamp)?;
+        buf.put_i64(self.timestamp);
         if version == 0 {
-            types::Int32.encode(buf, &self.max_num_offsets)?;
+            buf.put_i32(self.max_num_offsets);
         } else {
             if self.max_num_offsets != 1 {
                 return Err(EncodeError)
@@ -74,7 +74,7 @@ impl Encodable for ListOffsetsPartition {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -82,13 +82,13 @@ impl Encodable for ListOffsetsPartition {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int32.compute_size(&self.partition_index)?;
+        total_size += 4;
         if version >= 4 {
-            total_size += types::Int32.compute_size(&self.current_leader_epoch)?;
+            total_size += 4;
         }
-        total_size += types::Int64.compute_size(&self.timestamp)?;
+        total_size += 8;
         if version == 0 {
-            total_size += types::Int32.compute_size(&self.max_num_offsets)?;
+            total_size += 4;
         } else {
             if self.max_num_offsets != 1 {
                 return Err(EncodeError)
@@ -110,15 +110,15 @@ impl Encodable for ListOffsetsPartition {
 
 impl Decodable for ListOffsetsPartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let partition_index = types::Int32.decode(buf)?;
+        let partition_index = buf.try_get_i32()?;
         let current_leader_epoch = if version >= 4 {
-            types::Int32.decode(buf)?
+            buf.try_get_i32()?
         } else {
             -1
         };
-        let timestamp = types::Int64.decode(buf)?;
+        let timestamp = buf.try_get_i64()?;
         let max_num_offsets = if version == 0 {
-            types::Int32.decode(buf)?
+            buf.try_get_i32()?
         } else {
             1
         };
@@ -203,7 +203,7 @@ impl Encodable for ListOffsetsTopic {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -315,7 +315,7 @@ impl Encodable for ListOffsetsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         types::Int32.encode(buf, &self.replica_id)?;
         if version >= 2 {
-            types::Int8.encode(buf, &self.isolation_level)?;
+            buf.put_i8(self.isolation_level);
         } else {
             if self.isolation_level != 0 {
                 return Err(EncodeError)
@@ -332,7 +332,7 @@ impl Encodable for ListOffsetsRequest {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -342,7 +342,7 @@ impl Encodable for ListOffsetsRequest {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.replica_id)?;
         if version >= 2 {
-            total_size += types::Int8.compute_size(&self.isolation_level)?;
+            total_size += 1;
         } else {
             if self.isolation_level != 0 {
                 return Err(EncodeError)
@@ -371,7 +371,7 @@ impl Decodable for ListOffsetsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let replica_id = types::Int32.decode(buf)?;
         let isolation_level = if version >= 2 {
-            types::Int8.decode(buf)?
+            buf.try_get_i8()?
         } else {
             0
         };

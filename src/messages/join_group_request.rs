@@ -58,7 +58,7 @@ impl MapEncodable for JoinGroupRequestProtocol {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -197,9 +197,9 @@ impl Encodable for JoinGroupRequest {
         } else {
             types::String.encode(buf, &self.group_id)?;
         }
-        types::Int32.encode(buf, &self.session_timeout_ms)?;
+        buf.put_i32(self.session_timeout_ms);
         if version >= 1 {
-            types::Int32.encode(buf, &self.rebalance_timeout_ms)?;
+            buf.put_i32(self.rebalance_timeout_ms);
         }
         if version >= 6 {
             types::CompactString.encode(buf, &self.member_id)?;
@@ -236,7 +236,7 @@ impl Encodable for JoinGroupRequest {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -249,9 +249,9 @@ impl Encodable for JoinGroupRequest {
         } else {
             total_size += types::String.compute_size(&self.group_id)?;
         }
-        total_size += types::Int32.compute_size(&self.session_timeout_ms)?;
+        total_size += 4;
         if version >= 1 {
-            total_size += types::Int32.compute_size(&self.rebalance_timeout_ms)?;
+            total_size += 4;
         }
         if version >= 6 {
             total_size += types::CompactString.compute_size(&self.member_id)?;
@@ -303,9 +303,9 @@ impl Decodable for JoinGroupRequest {
         } else {
             types::String.decode(buf)?
         };
-        let session_timeout_ms = types::Int32.decode(buf)?;
+        let session_timeout_ms = buf.try_get_i32()?;
         let rebalance_timeout_ms = if version >= 1 {
-            types::Int32.decode(buf)?
+            buf.try_get_i32()?
         } else {
             -1
         };

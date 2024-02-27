@@ -59,7 +59,7 @@ impl Encodable for TransactionState {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             return Err(EncodeError);
         }
-        types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+        types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
@@ -157,8 +157,8 @@ impl Builder for ListTransactionsResponse {
 
 impl Encodable for ListTransactionsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int32.encode(buf, &self.throttle_time_ms)?;
-        types::Int16.encode(buf, &self.error_code)?;
+        buf.put_i32(self.throttle_time_ms);
+        buf.put_i16(self.error_code);
         types::CompactArray(types::CompactString).encode(buf, &self.unknown_state_filters)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.transaction_states)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -166,15 +166,15 @@ impl Encodable for ListTransactionsResponse {
             error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             return Err(EncodeError);
         }
-        types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+        types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
-        total_size += types::Int16.compute_size(&self.error_code)?;
+        total_size += 4;
+        total_size += 2;
         total_size += types::CompactArray(types::CompactString).compute_size(&self.unknown_state_filters)?;
         total_size += types::CompactArray(types::Struct { version }).compute_size(&self.transaction_states)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -191,8 +191,8 @@ impl Encodable for ListTransactionsResponse {
 
 impl Decodable for ListTransactionsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let throttle_time_ms = types::Int32.decode(buf)?;
-        let error_code = types::Int16.decode(buf)?;
+        let throttle_time_ms = buf.try_get_i32()?;
+        let error_code = buf.try_get_i16()?;
         let unknown_state_filters = types::CompactArray(types::CompactString).decode(buf)?;
         let transaction_states = types::CompactArray(types::Struct { version }).decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();

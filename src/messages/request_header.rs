@@ -56,9 +56,9 @@ impl Builder for RequestHeader {
 
 impl Encodable for RequestHeader {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int16.encode(buf, &self.request_api_key)?;
-        types::Int16.encode(buf, &self.request_api_version)?;
-        types::Int32.encode(buf, &self.correlation_id)?;
+        buf.put_i16(self.request_api_key);
+        buf.put_i16(self.request_api_version);
+        buf.put_i32(self.correlation_id);
         if version >= 1 {
             types::String.encode(buf, &self.client_id)?;
         }
@@ -68,7 +68,7 @@ impl Encodable for RequestHeader {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -76,9 +76,9 @@ impl Encodable for RequestHeader {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int16.compute_size(&self.request_api_key)?;
-        total_size += types::Int16.compute_size(&self.request_api_version)?;
-        total_size += types::Int32.compute_size(&self.correlation_id)?;
+        total_size += 2;
+        total_size += 2;
+        total_size += 4;
         if version >= 1 {
             total_size += types::String.compute_size(&self.client_id)?;
         }
@@ -98,9 +98,9 @@ impl Encodable for RequestHeader {
 
 impl Decodable for RequestHeader {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let request_api_key = types::Int16.decode(buf)?;
-        let request_api_version = types::Int16.decode(buf)?;
-        let correlation_id = types::Int32.decode(buf)?;
+        let request_api_key = buf.try_get_i16()?;
+        let request_api_version = buf.try_get_i16()?;
+        let correlation_id = buf.try_get_i32()?;
         let client_id = if version >= 1 {
             types::String.decode(buf)?
         } else {

@@ -61,7 +61,7 @@ impl Encodable for HeartbeatRequest {
         } else {
             types::String.encode(buf, &self.group_id)?;
         }
-        types::Int32.encode(buf, &self.generation_id)?;
+        buf.put_i32(self.generation_id);
         if version >= 4 {
             types::CompactString.encode(buf, &self.member_id)?;
         } else {
@@ -84,7 +84,7 @@ impl Encodable for HeartbeatRequest {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -97,7 +97,7 @@ impl Encodable for HeartbeatRequest {
         } else {
             total_size += types::String.compute_size(&self.group_id)?;
         }
-        total_size += types::Int32.compute_size(&self.generation_id)?;
+        total_size += 4;
         if version >= 4 {
             total_size += types::CompactString.compute_size(&self.member_id)?;
         } else {
@@ -135,7 +135,7 @@ impl Decodable for HeartbeatRequest {
         } else {
             types::String.decode(buf)?
         };
-        let generation_id = types::Int32.decode(buf)?;
+        let generation_id = buf.try_get_i32()?;
         let member_id = if version >= 4 {
             types::CompactString.decode(buf)?
         } else {

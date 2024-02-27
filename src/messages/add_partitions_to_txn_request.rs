@@ -58,7 +58,7 @@ impl MapEncodable for AddPartitionsToTxnTopic {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -178,7 +178,7 @@ impl Encodable for AddPartitionsToTxnRequest {
             types::String.encode(buf, &self.transactional_id)?;
         }
         types::Int64.encode(buf, &self.producer_id)?;
-        types::Int16.encode(buf, &self.producer_epoch)?;
+        buf.put_i16(self.producer_epoch);
         if version >= 3 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
         } else {
@@ -190,7 +190,7 @@ impl Encodable for AddPartitionsToTxnRequest {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -204,7 +204,7 @@ impl Encodable for AddPartitionsToTxnRequest {
             total_size += types::String.compute_size(&self.transactional_id)?;
         }
         total_size += types::Int64.compute_size(&self.producer_id)?;
-        total_size += types::Int16.compute_size(&self.producer_epoch)?;
+        total_size += 2;
         if version >= 3 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.topics)?;
         } else {
@@ -232,7 +232,7 @@ impl Decodable for AddPartitionsToTxnRequest {
             types::String.decode(buf)?
         };
         let producer_id = types::Int64.decode(buf)?;
-        let producer_epoch = types::Int16.decode(buf)?;
+        let producer_epoch = buf.try_get_i16()?;
         let topics = if version >= 3 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {

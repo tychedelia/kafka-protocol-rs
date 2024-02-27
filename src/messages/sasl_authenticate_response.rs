@@ -56,7 +56,7 @@ impl Builder for SaslAuthenticateResponse {
 
 impl Encodable for SaslAuthenticateResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int16.encode(buf, &self.error_code)?;
+        buf.put_i16(self.error_code);
         if version >= 2 {
             types::CompactString.encode(buf, &self.error_message)?;
         } else {
@@ -68,7 +68,7 @@ impl Encodable for SaslAuthenticateResponse {
             types::Bytes.encode(buf, &self.auth_bytes)?;
         }
         if version >= 1 {
-            types::Int64.encode(buf, &self.session_lifetime_ms)?;
+            buf.put_i64(self.session_lifetime_ms);
         }
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -76,7 +76,7 @@ impl Encodable for SaslAuthenticateResponse {
                 error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
                 return Err(EncodeError);
             }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            types::UnsignedVarInt::put_u32(buf, num_tagged_fields as u32);
 
             write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         }
@@ -84,7 +84,7 @@ impl Encodable for SaslAuthenticateResponse {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int16.compute_size(&self.error_code)?;
+        total_size += 2;
         if version >= 2 {
             total_size += types::CompactString.compute_size(&self.error_message)?;
         } else {
@@ -96,7 +96,7 @@ impl Encodable for SaslAuthenticateResponse {
             total_size += types::Bytes.compute_size(&self.auth_bytes)?;
         }
         if version >= 1 {
-            total_size += types::Int64.compute_size(&self.session_lifetime_ms)?;
+            total_size += 8;
         }
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -114,7 +114,7 @@ impl Encodable for SaslAuthenticateResponse {
 
 impl Decodable for SaslAuthenticateResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let error_code = types::Int16.decode(buf)?;
+        let error_code = buf.try_get_i16()?;
         let error_message = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
@@ -126,7 +126,7 @@ impl Decodable for SaslAuthenticateResponse {
             types::Bytes.decode(buf)?
         };
         let session_lifetime_ms = if version >= 1 {
-            types::Int64.decode(buf)?
+            buf.try_get_i64()?
         } else {
             0
         };

@@ -44,14 +44,14 @@ impl Builder for SaslHandshakeResponse {
 
 impl Encodable for SaslHandshakeResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int16.encode(buf, &self.error_code)?;
+        buf.put_i16(self.error_code);
         types::Array(types::String).encode(buf, &self.mechanisms)?;
 
         Ok(())
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int16.compute_size(&self.error_code)?;
+        total_size += 2;
         total_size += types::Array(types::String).compute_size(&self.mechanisms)?;
 
         Ok(total_size)
@@ -60,7 +60,7 @@ impl Encodable for SaslHandshakeResponse {
 
 impl Decodable for SaslHandshakeResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let error_code = types::Int16.decode(buf)?;
+        let error_code = buf.try_get_i16()?;
         let mechanisms = types::Array(types::String).decode(buf)?;
         Ok(Self {
             error_code,
