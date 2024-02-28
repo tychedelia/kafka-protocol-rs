@@ -8,8 +8,8 @@ use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
 use bytes::Bytes;
-use log::error;
 use uuid::Uuid;
+use anyhow::bail;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
@@ -135,14 +135,13 @@ impl Encodable for LeaderAndIsrPartitionState {
             types::Int8.encode(buf, &self.leader_recovery_state)?;
         } else {
             if self.leader_recovery_state != 0 {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -191,14 +190,13 @@ impl Encodable for LeaderAndIsrPartitionState {
             total_size += types::Int8.compute_size(&self.leader_recovery_state)?;
         } else {
             if self.leader_recovery_state != 0 {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -352,7 +350,7 @@ impl Encodable for LeaderAndIsrTopicState {
             }
         } else {
             if !self.topic_name.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 5 {
@@ -366,14 +364,13 @@ impl Encodable for LeaderAndIsrTopicState {
             }
         } else {
             if !self.partition_states.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -391,7 +388,7 @@ impl Encodable for LeaderAndIsrTopicState {
             }
         } else {
             if !self.topic_name.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 5 {
@@ -405,14 +402,13 @@ impl Encodable for LeaderAndIsrTopicState {
             }
         } else {
             if !self.partition_states.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -525,8 +521,7 @@ impl Encodable for LeaderAndIsrLiveLeader {
         if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -546,8 +541,7 @@ impl Encodable for LeaderAndIsrLiveLeader {
         if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -663,14 +657,14 @@ impl Encodable for LeaderAndIsrRequest {
             types::Int8.encode(buf, &self._type)?;
         } else {
             if self._type != 0 {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version <= 1 {
             types::Array(types::Struct { version }).encode(buf, &self.ungrouped_partition_states)?;
         } else {
             if !self.ungrouped_partition_states.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 2 {
@@ -681,7 +675,7 @@ impl Encodable for LeaderAndIsrRequest {
             }
         } else {
             if !self.topic_states.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 4 {
@@ -692,8 +686,7 @@ impl Encodable for LeaderAndIsrRequest {
         if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -712,14 +705,14 @@ impl Encodable for LeaderAndIsrRequest {
             total_size += types::Int8.compute_size(&self._type)?;
         } else {
             if self._type != 0 {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version <= 1 {
             total_size += types::Array(types::Struct { version }).compute_size(&self.ungrouped_partition_states)?;
         } else {
             if !self.ungrouped_partition_states.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 2 {
@@ -730,7 +723,7 @@ impl Encodable for LeaderAndIsrRequest {
             }
         } else {
             if !self.topic_states.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 4 {
@@ -741,8 +734,7 @@ impl Encodable for LeaderAndIsrRequest {
         if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 

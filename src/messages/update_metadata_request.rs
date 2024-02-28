@@ -8,8 +8,8 @@ use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
 use bytes::Bytes;
-use log::error;
 use uuid::Uuid;
+use anyhow::bail;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
@@ -109,8 +109,7 @@ impl Encodable for UpdateMetadataPartitionState {
         if version >= 6 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -148,8 +147,7 @@ impl Encodable for UpdateMetadataPartitionState {
         if version >= 6 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -278,7 +276,7 @@ impl Encodable for UpdateMetadataTopicState {
             }
         } else {
             if !self.topic_name.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 7 {
@@ -292,14 +290,13 @@ impl Encodable for UpdateMetadataTopicState {
             }
         } else {
             if !self.partition_states.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 6 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -317,7 +314,7 @@ impl Encodable for UpdateMetadataTopicState {
             }
         } else {
             if !self.topic_name.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 7 {
@@ -331,14 +328,13 @@ impl Encodable for UpdateMetadataTopicState {
             }
         } else {
             if !self.partition_states.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 6 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -450,7 +446,7 @@ impl Encodable for UpdateMetadataEndpoint {
             types::Int32.encode(buf, &self.port)?;
         } else {
             if self.port != 0 {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 1 {
@@ -461,7 +457,7 @@ impl Encodable for UpdateMetadataEndpoint {
             }
         } else {
             if !self.host.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 3 {
@@ -475,14 +471,13 @@ impl Encodable for UpdateMetadataEndpoint {
             types::Int16.encode(buf, &self.security_protocol)?;
         } else {
             if self.security_protocol != 0 {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 6 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -496,7 +491,7 @@ impl Encodable for UpdateMetadataEndpoint {
             total_size += types::Int32.compute_size(&self.port)?;
         } else {
             if self.port != 0 {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 1 {
@@ -507,7 +502,7 @@ impl Encodable for UpdateMetadataEndpoint {
             }
         } else {
             if !self.host.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 3 {
@@ -521,14 +516,13 @@ impl Encodable for UpdateMetadataEndpoint {
             total_size += types::Int16.compute_size(&self.security_protocol)?;
         } else {
             if self.security_protocol != 0 {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 6 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -672,8 +666,7 @@ impl Encodable for UpdateMetadataBroker {
         if version >= 6 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -707,8 +700,7 @@ impl Encodable for UpdateMetadataBroker {
         if version >= 6 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -845,7 +837,7 @@ impl Encodable for UpdateMetadataRequest {
             types::Array(types::Struct { version }).encode(buf, &self.ungrouped_partition_states)?;
         } else {
             if !self.ungrouped_partition_states.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 5 {
@@ -856,7 +848,7 @@ impl Encodable for UpdateMetadataRequest {
             }
         } else {
             if !self.topic_states.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 6 {
@@ -867,8 +859,7 @@ impl Encodable for UpdateMetadataRequest {
         if version >= 6 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -887,7 +878,7 @@ impl Encodable for UpdateMetadataRequest {
             total_size += types::Array(types::Struct { version }).compute_size(&self.ungrouped_partition_states)?;
         } else {
             if !self.ungrouped_partition_states.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 5 {
@@ -898,7 +889,7 @@ impl Encodable for UpdateMetadataRequest {
             }
         } else {
             if !self.topic_states.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 6 {
@@ -909,8 +900,7 @@ impl Encodable for UpdateMetadataRequest {
         if version >= 6 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 

@@ -1,5 +1,6 @@
 use std::io::Write;
 
+use anyhow::Context;
 use bytes::buf::BufMut;
 use bytes::{Bytes, BytesMut};
 use flate2::write::{GzDecoder, GzEncoder};
@@ -8,7 +9,7 @@ use flate2::Compression;
 use crate::protocol::buf::{ByteBuf, ByteBufMut};
 use crate::protocol::{DecodeError, EncodeError};
 
-use super::{Compressor, Decompressor, compression_err, decompression_err};
+use super::{Compressor, Decompressor};
 
 /// Gzip compression algorithm. See [Kafka's broker configuration](https://kafka.apache.org/documentation/#brokerconfigs_compression.type)
 /// for more information.
@@ -26,8 +27,8 @@ impl<B: ByteBufMut> Compressor<B> for Gzip {
 
         // Compress directly into the target buffer
         let mut e = GzEncoder::new(buf.writer(), Compression::default());
-        e.write_all(&tmp).map_err(compression_err)?;
-        e.finish().map_err(compression_err)?;
+        e.write_all(&tmp).context("Failed to compress gzip")?;
+        e.finish().context("Failed to compress gzip")?;
 
         Ok(res)
     }
@@ -44,8 +45,8 @@ impl<B: ByteBuf> Decompressor<B> for Gzip {
         // Decompress directly from the input buffer
         let mut d = GzDecoder::new((&mut tmp).writer());
         d.write_all(&buf.copy_to_bytes(buf.remaining()))
-            .map_err(decompression_err)?;
-        d.finish().map_err(decompression_err)?;
+            .context("Failed to decompress gzip")?;
+        d.finish().context("Failed to decompress gzip")?;
 
         f(&mut tmp.into())
     }

@@ -8,8 +8,8 @@ use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
 use bytes::Bytes;
-use log::error;
 use uuid::Uuid;
+use anyhow::bail;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
@@ -57,8 +57,7 @@ impl Encodable for MetadataRequestTopic {
         if version >= 9 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -79,8 +78,7 @@ impl Encodable for MetadataRequestTopic {
         if version >= 9 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -182,28 +180,27 @@ impl Encodable for MetadataRequest {
             types::Boolean.encode(buf, &self.allow_auto_topic_creation)?;
         } else {
             if !self.allow_auto_topic_creation {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 8 && version <= 10 {
             types::Boolean.encode(buf, &self.include_cluster_authorized_operations)?;
         } else {
             if self.include_cluster_authorized_operations {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 8 {
             types::Boolean.encode(buf, &self.include_topic_authorized_operations)?;
         } else {
             if self.include_topic_authorized_operations {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 9 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -222,28 +219,27 @@ impl Encodable for MetadataRequest {
             total_size += types::Boolean.compute_size(&self.allow_auto_topic_creation)?;
         } else {
             if !self.allow_auto_topic_creation {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 8 && version <= 10 {
             total_size += types::Boolean.compute_size(&self.include_cluster_authorized_operations)?;
         } else {
             if self.include_cluster_authorized_operations {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 8 {
             total_size += types::Boolean.compute_size(&self.include_topic_authorized_operations)?;
         } else {
             if self.include_topic_authorized_operations {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 9 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 

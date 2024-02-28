@@ -8,8 +8,8 @@ use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
 use bytes::Bytes;
-use log::error;
 use uuid::Uuid;
+use anyhow::bail;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
@@ -50,21 +50,20 @@ impl Encodable for StopReplicaPartitionV0 {
             types::String.encode(buf, &self.topic_name)?;
         } else {
             if !self.topic_name.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version == 0 {
             types::Int32.encode(buf, &self.partition_index)?;
         } else {
             if self.partition_index != 0 {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -78,21 +77,20 @@ impl Encodable for StopReplicaPartitionV0 {
             total_size += types::String.compute_size(&self.topic_name)?;
         } else {
             if !self.topic_name.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version == 0 {
             total_size += types::Int32.compute_size(&self.partition_index)?;
         } else {
             if self.partition_index != 0 {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -183,7 +181,7 @@ impl Encodable for StopReplicaTopicV1 {
             }
         } else {
             if !self.name.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 1 && version <= 2 {
@@ -194,14 +192,13 @@ impl Encodable for StopReplicaTopicV1 {
             }
         } else {
             if !self.partition_indexes.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -219,7 +216,7 @@ impl Encodable for StopReplicaTopicV1 {
             }
         } else {
             if !self.name.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 1 && version <= 2 {
@@ -230,14 +227,13 @@ impl Encodable for StopReplicaTopicV1 {
             }
         } else {
             if !self.partition_indexes.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -337,28 +333,27 @@ impl Encodable for StopReplicaPartitionState {
             types::Int32.encode(buf, &self.partition_index)?;
         } else {
             if self.partition_index != 0 {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 3 {
             types::Int32.encode(buf, &self.leader_epoch)?;
         } else {
             if self.leader_epoch != -1 {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 3 {
             types::Boolean.encode(buf, &self.delete_partition)?;
         } else {
             if self.delete_partition {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -372,28 +367,27 @@ impl Encodable for StopReplicaPartitionState {
             total_size += types::Int32.compute_size(&self.partition_index)?;
         } else {
             if self.partition_index != 0 {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 3 {
             total_size += types::Int32.compute_size(&self.leader_epoch)?;
         } else {
             if self.leader_epoch != -1 {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 3 {
             total_size += types::Boolean.compute_size(&self.delete_partition)?;
         } else {
             if self.delete_partition {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -487,21 +481,20 @@ impl Encodable for StopReplicaTopicState {
             types::CompactString.encode(buf, &self.topic_name)?;
         } else {
             if !self.topic_name.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 3 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.partition_states)?;
         } else {
             if !self.partition_states.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -515,21 +508,20 @@ impl Encodable for StopReplicaTopicState {
             total_size += types::CompactString.compute_size(&self.topic_name)?;
         } else {
             if !self.topic_name.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 3 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.partition_states)?;
         } else {
             if !self.partition_states.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -646,14 +638,14 @@ impl Encodable for StopReplicaRequest {
             types::Boolean.encode(buf, &self.delete_partitions)?;
         } else {
             if self.delete_partitions {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version == 0 {
             types::Array(types::Struct { version }).encode(buf, &self.ungrouped_partitions)?;
         } else {
             if !self.ungrouped_partitions.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 1 && version <= 2 {
@@ -664,21 +656,20 @@ impl Encodable for StopReplicaRequest {
             }
         } else {
             if !self.topics.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 3 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.topic_states)?;
         } else {
             if !self.topic_states.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -697,14 +688,14 @@ impl Encodable for StopReplicaRequest {
             total_size += types::Boolean.compute_size(&self.delete_partitions)?;
         } else {
             if self.delete_partitions {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version == 0 {
             total_size += types::Array(types::Struct { version }).compute_size(&self.ungrouped_partitions)?;
         } else {
             if !self.ungrouped_partitions.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 1 && version <= 2 {
@@ -715,21 +706,20 @@ impl Encodable for StopReplicaRequest {
             }
         } else {
             if !self.topics.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 3 {
             total_size += types::CompactArray(types::Struct { version }).compute_size(&self.topic_states)?;
         } else {
             if !self.topic_states.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 

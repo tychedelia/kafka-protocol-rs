@@ -33,6 +33,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "anyhow"
+version = "1.0.80"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5ad32ce52e4161730f7098c077cd2ed6229b5804ccf99e5366be1ab72a98b4e1"
+
+[[package]]
 name = "assert-json-diff"
 version = "2.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -305,13 +311,13 @@ checksum = "9dbbfed4e59ba9750e15ba154fdfd9329cee16ff3df539c2666b70f58cc32105"
 name = "kafka-protocol"
 version = "0.9.0"
 dependencies = [
+ "anyhow",
  "bytes",
  "crc",
  "crc32c",
  "derive_builder",
  "flate2",
  "indexmap",
- "log",
  "lz4",
  "paste",
  "snap",

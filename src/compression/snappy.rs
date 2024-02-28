@@ -1,10 +1,11 @@
+use anyhow::Context;
 use bytes::{Bytes, BytesMut};
 use snap::raw::*;
 
 use crate::protocol::buf::{ByteBuf, ByteBufMut};
 use crate::protocol::{DecodeError, EncodeError};
 
-use super::{Compressor, Decompressor, compression_err, decompression_err};
+use super::{Compressor, Decompressor};
 
 /// Snappy compression algorithm. See [Kafka's broker configuration](https://kafka.apache.org/documentation/#brokerconfigs_compression.type)
 /// for more information.
@@ -25,7 +26,7 @@ impl<B: ByteBufMut> Compressor<B> for Snappy {
         let compress_gap = buf.put_gap(max_compress_len(tmp.len()));
         let actual_len = Encoder::new()
             .compress(&tmp, buf.gap_buf(compress_gap))
-            .map_err(compression_err)?;
+            .context("Failed to compress snappy")?;
         buf.seek(start_pos + actual_len);
 
         Ok(res)
@@ -40,12 +41,14 @@ impl<B: ByteBuf> Decompressor<B> for Snappy {
     {
         // Allocate a temporary buffer to hold the uncompressed bytes
         let buf = buf.copy_to_bytes(buf.remaining());
-        let actual_len = decompress_len(&buf).map_err(decompression_err)?;
+        let actual_len = decompress_len(&buf).context("Failed to decompress snappy")?;
         let mut tmp = BytesMut::new();
         tmp.resize(actual_len, 0);
 
         // Decompress directly from the input buffer
-        Decoder::new().decompress(&buf, &mut tmp).map_err(decompression_err)?;
+        Decoder::new()
+            .decompress(&buf, &mut tmp)
+            .context("Failed to decompress snappy")?;
 
         f(&mut tmp.into())
     }

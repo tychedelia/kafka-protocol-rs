@@ -8,8 +8,8 @@ use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
 use bytes::Bytes;
-use log::error;
 use uuid::Uuid;
+use anyhow::bail;
 
 use crate::protocol::{
     Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
@@ -53,8 +53,7 @@ impl MapEncodable for ApiVersion {
         if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -70,8 +69,7 @@ impl MapEncodable for ApiVersion {
         if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -153,28 +151,27 @@ impl MapEncodable for SupportedFeatureKey {
             types::CompactString.encode(buf, key)?;
         } else {
             if !key.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 3 {
             types::Int16.encode(buf, &self.min_version)?;
         } else {
             if self.min_version != 0 {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 3 {
             types::Int16.encode(buf, &self.max_version)?;
         } else {
             if self.max_version != 0 {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -188,28 +185,27 @@ impl MapEncodable for SupportedFeatureKey {
             total_size += types::CompactString.compute_size(key)?;
         } else {
             if !key.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 3 {
             total_size += types::Int16.compute_size(&self.min_version)?;
         } else {
             if self.min_version != 0 {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 3 {
             total_size += types::Int16.compute_size(&self.max_version)?;
         } else {
             if self.max_version != 0 {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -303,28 +299,27 @@ impl MapEncodable for FinalizedFeatureKey {
             types::CompactString.encode(buf, key)?;
         } else {
             if !key.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 3 {
             types::Int16.encode(buf, &self.max_version_level)?;
         } else {
             if self.max_version_level != 0 {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 3 {
             types::Int16.encode(buf, &self.min_version_level)?;
         } else {
             if self.min_version_level != 0 {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -338,28 +333,27 @@ impl MapEncodable for FinalizedFeatureKey {
             total_size += types::CompactString.compute_size(key)?;
         } else {
             if !key.is_empty() {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 3 {
             total_size += types::Int16.compute_size(&self.max_version_level)?;
         } else {
             if self.max_version_level != 0 {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 3 {
             total_size += types::Int16.compute_size(&self.min_version_level)?;
         } else {
             if self.min_version_level != 0 {
-                return Err(EncodeError)
+                bail!("failed to decode");
             }
         }
         if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -489,15 +483,13 @@ impl Encodable for ApiVersionsResponse {
                 num_tagged_fields += 1;
             }
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
             if !self.supported_features.is_empty() {
                 let computed_size = types::CompactArray(types::Struct { version }).compute_size(&self.supported_features)?;
                 if computed_size > std::u32::MAX as usize {
-                    error!("Tagged field is too large to encode ({} bytes)", computed_size);
-                    return Err(EncodeError);
+                    bail!("Tagged field is too large to encode ({} bytes)", computed_size);
                 }
                 types::UnsignedVarInt.encode(buf, 0)?;
                 types::UnsignedVarInt.encode(buf, computed_size as u32)?;
@@ -506,8 +498,7 @@ impl Encodable for ApiVersionsResponse {
             if self.finalized_features_epoch != -1 {
                 let computed_size = types::Int64.compute_size(&self.finalized_features_epoch)?;
                 if computed_size > std::u32::MAX as usize {
-                    error!("Tagged field is too large to encode ({} bytes)", computed_size);
-                    return Err(EncodeError);
+                    bail!("Tagged field is too large to encode ({} bytes)", computed_size);
                 }
                 types::UnsignedVarInt.encode(buf, 1)?;
                 types::UnsignedVarInt.encode(buf, computed_size as u32)?;
@@ -516,8 +507,7 @@ impl Encodable for ApiVersionsResponse {
             if !self.finalized_features.is_empty() {
                 let computed_size = types::CompactArray(types::Struct { version }).compute_size(&self.finalized_features)?;
                 if computed_size > std::u32::MAX as usize {
-                    error!("Tagged field is too large to encode ({} bytes)", computed_size);
-                    return Err(EncodeError);
+                    bail!("Tagged field is too large to encode ({} bytes)", computed_size);
                 }
                 types::UnsignedVarInt.encode(buf, 2)?;
                 types::UnsignedVarInt.encode(buf, computed_size as u32)?;
@@ -551,15 +541,13 @@ impl Encodable for ApiVersionsResponse {
                 num_tagged_fields += 1;
             }
             if num_tagged_fields > std::u32::MAX as usize {
-                error!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-                return Err(EncodeError);
+                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
             if !self.supported_features.is_empty() {
                 let computed_size = types::CompactArray(types::Struct { version }).compute_size(&self.supported_features)?;
                 if computed_size > std::u32::MAX as usize {
-                    error!("Tagged field is too large to encode ({} bytes)", computed_size);
-                    return Err(EncodeError);
+                    bail!("Tagged field is too large to encode ({} bytes)", computed_size);
                 }
                 total_size += types::UnsignedVarInt.compute_size(0)?;
                 total_size += types::UnsignedVarInt.compute_size(computed_size as u32)?;
@@ -568,8 +556,7 @@ impl Encodable for ApiVersionsResponse {
             if self.finalized_features_epoch != -1 {
                 let computed_size = types::Int64.compute_size(&self.finalized_features_epoch)?;
                 if computed_size > std::u32::MAX as usize {
-                    error!("Tagged field is too large to encode ({} bytes)", computed_size);
-                    return Err(EncodeError);
+                    bail!("Tagged field is too large to encode ({} bytes)", computed_size);
                 }
                 total_size += types::UnsignedVarInt.compute_size(1)?;
                 total_size += types::UnsignedVarInt.compute_size(computed_size as u32)?;
@@ -578,8 +565,7 @@ impl Encodable for ApiVersionsResponse {
             if !self.finalized_features.is_empty() {
                 let computed_size = types::CompactArray(types::Struct { version }).compute_size(&self.finalized_features)?;
                 if computed_size > std::u32::MAX as usize {
-                    error!("Tagged field is too large to encode ({} bytes)", computed_size);
-                    return Err(EncodeError);
+                    bail!("Tagged field is too large to encode ({} bytes)", computed_size);
                 }
                 total_size += types::UnsignedVarInt.compute_size(2)?;
                 total_size += types::UnsignedVarInt.compute_size(computed_size as u32)?;

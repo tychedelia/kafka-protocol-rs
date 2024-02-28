@@ -434,7 +434,7 @@ fn write_default_check<W: Write>(
         .not();
     write!(w, "if {is_default} ")?;
     w.block(|w| {
-        write!(w, "return Err(EncodeError)")?;
+        write!(w, r#"bail!("failed to decode");"#)?;
         Ok(())
     })
 }
@@ -446,8 +446,7 @@ fn write_size_check<W: Write, T: Display>(
     msg: &str,
 ) -> Result<(), Error> {
     writeln!(w, "if {} > std::{}::MAX as usize {{", expr, t)?;
-    writeln!(w, "    error!({:?}, {});", msg, expr)?;
-    writeln!(w, "    return Err(EncodeError);")?;
+    writeln!(w, "    bail!({:?}, {});", msg, expr)?;
     writeln!(w, "}}")?;
     Ok(())
 }
@@ -861,10 +860,9 @@ fn write_decode_tag_buffer<W: Write>(
                                     |w| {
                                         writeln!(
                                             w,
-                                            "error!({:?}, tag, version);",
+                                            "bail!({:?}, tag, version);",
                                             "Tag {} is not valid for version {}"
                                         )?;
-                                        write!(w, "return Err(DecodeError);")?;
                                         Ok(())
                                     },
                                     false,
@@ -1203,8 +1201,8 @@ fn write_file_header<W: Write>(w: &mut CodeWriter<W>, name: &str) -> Result<(), 
     writeln!(w, "use std::collections::BTreeMap;")?;
     writeln!(w)?;
     writeln!(w, "use bytes::Bytes;")?;
-    writeln!(w, "use log::error;")?;
     writeln!(w, "use uuid::Uuid;")?;
+    writeln!(w, "use anyhow::bail;")?;
     writeln!(w)?;
     writeln!(w, "use crate::protocol::{{")?;
     writeln!(w, "    Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,")?;
