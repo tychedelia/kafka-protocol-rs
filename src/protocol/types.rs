@@ -920,6 +920,43 @@ impl<T: Decodable> Decoder<T> for Struct {
     }
 }
 
+/// An optional structure
+#[derive(Debug, Copy, Clone)]
+pub struct OptionStruct {
+    /// The version of the struct.
+    pub version: i16,
+}
+
+impl<T: Encodable> Encoder<&Option<T>> for OptionStruct {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, value: &Option<T>) -> Result<(), EncodeError> {
+        if let Some(value) = value {
+            Int8.encode(buf, 1)?;
+            value.encode(buf, self.version)?;
+        } else {
+            Int8.encode(buf, -1)?;
+        }
+        Ok(())
+    }
+
+    fn compute_size(&self, value: &Option<T>) -> Result<usize, EncodeError> {
+        Ok(match value {
+            Some(value) => 1 + value.compute_size(self.version)?,
+            None => 1,
+        })
+    }
+}
+
+impl<T: Decodable> Decoder<Option<T>> for OptionStruct {
+    fn decode<B: ByteBuf>(&self, buf: &mut B) -> Result<Option<T>, DecodeError> {
+        let present: i8 = Int8.decode(buf)?;
+        if present == 1 {
+            Ok(Some(T::decode(buf, self.version)?))
+        } else {
+            Ok(None)
+        }
+    }
+}
+
 impl<T: MapEncodable> Encoder<(&T::Key, &T)> for Struct {
     fn encode<B: ByteBufMut>(
         &self,

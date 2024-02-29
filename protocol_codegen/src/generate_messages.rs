@@ -2,6 +2,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::fs::{self, File};
 use std::io::Write;
 use std::path::Path;
+use std::process::Command;
 
 use failure::Error;
 use git2::{Oid, Repository};
@@ -39,9 +40,9 @@ pub fn run() -> Result<(), Error> {
     };
 
     // Checkout the release commit
-    // https://github.com/apache/kafka/releases/tag/3.3.2
+    // https://github.com/apache/kafka/releases/tag/3.7.0
     // checking out a tag with git2 is annoying -- we pin to the tag's commit sha instead
-    let release_commit = "b66af662e61082cb8def576ded1fe5cee37e155f";
+    let release_commit = "2ae524ed625438c5fee89e78648bd73e64a3ada0";
     println!("Checking out release {}", release_commit);
     let oid = Oid::from_str(release_commit).unwrap();
     let commit = repo
@@ -100,26 +101,66 @@ pub fn run() -> Result<(), Error> {
         let spec = parse::parse(input_file_path)?;
         let spec_meta = (spec.type_, spec.api_key);
 
-        let (module_name, struct_name) = generate::generate(output_path, spec, &mut entity_types)?;
-
-        match spec_meta {
-            (SpecType::Request, Some(k)) => {
-                request_types.insert(k, struct_name.clone());
+        let outcome = generate::generate(output_path, spec)?;
+        if let Some(output) = outcome {
+            match spec_meta {
+                (SpecType::Request, Some(k)) => {
+                    request_types.insert(k, output);
+                }
+                (SpecType::Response, Some(k)) => {
+                    response_types.insert(k, output);
+                }
+                _ => {
+                    output.apply(&mut module_file, &mut entity_types)?;
+                }
             }
-            (SpecType::Response, Some(k)) => {
-                response_types.insert(k, struct_name.clone());
-            }
-            _ => {}
         }
-
-        writeln!(module_file, "pub mod {};", module_name)?;
-        writeln!(module_file, "pub use {}::{};", module_name, struct_name)?;
-        writeln!(module_file)?;
     }
+
+    {
+        // require that each message must have both request and answer, and ignore
+        // them if one side is missing
+        let request_keys = request_types.keys().collect::<BTreeSet<_>>();
+        let response_keys = response_types.keys().collect::<BTreeSet<_>>();
+        let difference = request_keys
+            .symmetric_difference(&response_keys)
+            .map(|k| **k)
+            .collect::<BTreeSet<_>>();
+
+        for key in difference {
+            request_types.remove(&key);
+            response_types.remove(&key);
+        }
+    }
+
+    for (_api_key, output) in request_types.iter().chain(response_types.iter()) {
+        output.apply(&mut module_file, &mut entity_types)?;
+    }
+
+    // strip away the module name which is no longer needed
+    let request_types = {
+        let mut request_types = request_types
+            .into_iter()
+            .map(|(api_key, output)| (api_key, output.struct_name))
+            .collect::<Vec<(_, _)>>();
+        request_types.sort();
+        request_types
+    };
+
+    let response_types = {
+        let mut response_types = response_types
+            .into_iter()
+            .map(|(api_key, output)| (api_key, output.struct_name))
+            .collect::<Vec<(_, _)>>();
+        response_types.sort();
+        response_types
+    };
 
     for (api_key, request_type) in request_types.iter() {
         let response_type = response_types
-            .get(api_key)
+            .iter()
+            .find(|(k, _)| k == api_key)
+            .map(|(_, v)| v)
             .expect("Every request type has a response type");
         writeln!(module_file, "impl Request for {} {{", request_type)?;
         writeln!(module_file, "    const KEY: i16 = {};", api_key)?;
@@ -153,7 +194,7 @@ pub fn run() -> Result<(), Error> {
         "    pub fn request_header_version(&self, version: i16) -> i16 {{"
     )?;
     writeln!(module_file, "        match self {{")?;
-    for request_type in request_types.values() {
+    for (_api_key, request_type) in request_types.iter() {
         writeln!(
             module_file,
             "            ApiKey::{} => {}::header_version(version),",
@@ -173,7 +214,7 @@ pub fn run() -> Result<(), Error> {
         "    pub fn response_header_version(&self, version: i16) -> i16 {{"
     )?;
     writeln!(module_file, "        match self {{")?;
-    for response_type in response_types.values() {
+    for (_api_key, response_type) in response_types.iter() {
         writeln!(
             module_file,
             "            ApiKey::{} => {}::header_version(version),",
@@ -332,6 +373,14 @@ pub fn run() -> Result<(), Error> {
         )?;
         writeln!(module_file)?;
     }
+
+    println!("Running cargo fmt...");
+    let mut process = Command::new("cargo")
+        .args(vec!["fmt"])
+        .spawn()
+        .expect("cargo fmt failed");
+
+    process.wait().expect("cargo fmt failed");
 
     Ok(())
 }

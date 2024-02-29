@@ -143,6 +143,8 @@ impl VersionRange {
 pub trait Message: Sized {
     /// The valid versions for this message.
     const VERSIONS: VersionRange;
+    /// The deprecated versions for this message.
+    const DEPRECATED_VERSIONS: Option<VersionRange>;
 }
 
 /// An encodable message.

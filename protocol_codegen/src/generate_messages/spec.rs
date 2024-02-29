@@ -10,19 +10,23 @@ use serde_plain::*;
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Spec {
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     pub api_key: Option<i16>,
+    #[serde(default)]
+    pub deprecated_versions: VersionSpec,
     #[serde(rename = "type")]
     pub type_: SpecType,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub listeners: Option<Vec<ListenerSpec>>,
+    #[serde(default)]
+    pub listeners: Vec<ListenerSpec>,
     pub name: String,
     pub valid_versions: VersionSpec,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub flexible_versions: Option<VersionSpec>,
+    #[serde(default)]
+    pub flexible_versions: VersionSpec,
     pub fields: Vec<FieldSpec>,
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    #[serde(default)]
     pub common_structs: Vec<StructSpec>,
+    #[serde(default)]
+    pub latest_version_unstable: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -34,26 +38,26 @@ pub struct FieldSpec {
     pub versions: VersionSpec,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub tag: Option<i32>,
-    #[serde(default, skip_serializing_if = "VersionSpec::is_none")]
+    #[serde(default)]
     pub tagged_versions: VersionSpec,
-    #[serde(default, skip_serializing_if = "VersionSpec::is_none")]
+    #[serde(default)]
     pub nullable_versions: VersionSpec,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub default: Option<serde_json::Value>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub ignorable: Option<bool>,
+    #[serde(default)]
+    pub ignorable: bool,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub entity_type: Option<String>,
-    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    #[serde(default)]
     pub map_key: bool,
-    #[serde(default, skip_serializing_if = "str::is_empty")]
+    #[serde(default)]
     pub about: String,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub fields: Option<Vec<FieldSpec>>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub fields: Vec<FieldSpec>,
+    #[serde(default)]
     pub flexible_versions: Option<VersionSpec>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub zero_copy: Option<bool>,
+    #[serde(default)]
+    pub zero_copy: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -125,6 +129,25 @@ impl VersionSpec {
             VersionSpec::Since(_) => None,
             VersionSpec::Exact(v) => Some(v..=v),
             VersionSpec::Range(a, b) => Some(a..=b),
+        }
+    }
+
+    /// Returns the range `[VersionSpec]` without the last version.
+    /// Only works for ranges, every other kind will return `None`.
+    pub fn without_last(&self) -> Self {
+        match self {
+            VersionSpec::None => VersionSpec::None,
+            VersionSpec::Since(_) => VersionSpec::None,
+            VersionSpec::Exact(_) => VersionSpec::None,
+            VersionSpec::Range(a, b) => {
+                if a == b {
+                    VersionSpec::None
+                } else if *a == b - 1 {
+                    VersionSpec::Exact(*a)
+                } else {
+                    VersionSpec::Range(*a, b - 1)
+                }
+            }
         }
     }
 }
@@ -232,5 +255,26 @@ derive_deserialize_from_fromstr!(TypeSpec, "valid type specification");
 impl VersionSpec {
     pub fn is_none(&self) -> bool {
         matches!(self, VersionSpec::None)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn version_spec_without_last() {
+        assert_eq!(VersionSpec::None.without_last(), VersionSpec::None);
+        assert_eq!(VersionSpec::Since(1).without_last(), VersionSpec::None);
+        assert_eq!(VersionSpec::Exact(1).without_last(), VersionSpec::None);
+        assert_eq!(VersionSpec::Range(0, 0).without_last(), VersionSpec::None);
+        assert_eq!(
+            VersionSpec::Range(0, 1).without_last(),
+            VersionSpec::Exact(0)
+        );
+        assert_eq!(
+            VersionSpec::Range(0, 2).without_last(),
+            VersionSpec::Range(0, 1)
+        );
     }
 }
