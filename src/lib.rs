@@ -19,7 +19,7 @@
 //!
 //! let mut request_header = RequestHeader::default();
 //! request_header.correlation_id = 1;
-//! request_header.client_id = Some(StrBytes::from_str("test-client"));
+//! request_header.client_id = Some(StrBytes::from_static_str("test-client"));
 //! let mut buf = BytesMut::new();
 //! request_header.encode(&mut buf, 3);
 //! assert_eq!(request_header, RequestHeader::decode(&mut buf, 3).unwrap());
@@ -46,11 +46,11 @@
 //! let mut req_header = RequestHeader::default();
 //! req_header.request_api_version = 3;
 //! req_header.request_api_key = ApiKey::ApiVersionsKey as i16;
-//! req_header.client_id = Some(StrBytes::from_str("example"));
+//! req_header.client_id = Some(StrBytes::from_static_str("example"));
 //! req_header.encode(&mut buf, ApiVersionsRequest::header_version(req_header.request_api_version)).unwrap();
 //! let mut api_versions_req = ApiVersionsRequest::default();
-//! api_versions_req.client_software_version = StrBytes::from_str("1.0");
-//! api_versions_req.client_software_name = StrBytes::from_str("example-client");
+//! api_versions_req.client_software_version = StrBytes::from_static_str("1.0");
+//! api_versions_req.client_software_name = StrBytes::from_static_str("example-client");
 //! api_versions_req.encode(&mut buf, req_header.request_api_version);
 //!
 //! # fn send_request(buf: &[u8]) -> Result<(), Box<dyn Error>> {
@@ -77,11 +77,11 @@
 //! # let mut req_header = RequestHeader::default();
 //! # req_header.request_api_version = 3;
 //! # req_header.request_api_key = ApiKey::ApiVersionsKey as i16;
-//! # req_header.client_id = Some(StrBytes::from_str("example"));
+//! # req_header.client_id = Some(StrBytes::from_static_str("example"));
 //! # req_header.encode(&mut buf, ApiVersionsRequest::header_version(req_header.request_api_version)).unwrap();
 //! # let mut api_versions_req = ApiVersionsRequest::default();
-//! # api_versions_req.client_software_version = StrBytes::from_str("1.0");
-//! # api_versions_req.client_software_name = StrBytes::from_str("example-client");
+//! # api_versions_req.client_software_version = StrBytes::from_static_str("1.0");
+//! # api_versions_req.client_software_name = StrBytes::from_static_str("example-client");
 //! # api_versions_req.encode(&mut buf, 3);
 //!
 //! let api_key = buf.peek_bytes(0..2).get_i16();

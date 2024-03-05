@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.10.0
+
+- Use `anyhow` for public error types. In general, these errors reflect non-recoverable programmer error and
+should not occur when interacting with a well-formed Kafka implementation.
+- Rename `StrBytes::from_str` to `from_static_str` to avoid overlap with the `FromStr` trait.
+- Improve codegen, including filtering out unstable messages, improving ordering of structs in generated code,
+and other misc improvements.
+- Upgrade message version to upstream `v3.7.0` Kafka.
+
 ## v0.9.0
 
 - Remove the `string` crate.
