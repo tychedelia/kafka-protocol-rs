@@ -204,7 +204,7 @@ impl PreparedDefault {
                 Self::Boolean(true) => Expr::new_atom("true"),
                 Self::Boolean(false) => Expr::new_atom("false"),
                 Self::Numeric(v) => Expr::new_unary(v),
-                Self::String(s) => Expr::new_atom(&format!("StrBytes::from_str({:?})", s)),
+                Self::String(s) => Expr::new_atom(&format!("StrBytes::from_static_str({:?})", s)),
                 Self::Uuid => Expr::new_atom("Uuid::nil()"),
             }
         }
