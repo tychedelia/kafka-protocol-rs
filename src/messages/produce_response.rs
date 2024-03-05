@@ -7,29 +7,30 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
+use anyhow::bail;
 use bytes::Bytes;
 use uuid::Uuid;
-use anyhow::bail;
 
 use crate::protocol::{
-    Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
+    buf::{ByteBuf, ByteBufMut},
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
 
-
-/// Valid versions: 0-9
+/// Valid versions: 0-10
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 #[builder(default)]
 pub struct BatchIndexAndErrorMessage {
     /// The batch index of the record that cause the batch to be dropped
-    /// 
-    /// Supported API versions: 8-9
+    ///
+    /// Supported API versions: 8-10
     pub batch_index: i32,
 
     /// The error message of the record that caused the batch to be dropped
-    /// 
-    /// Supported API versions: 8-9
+    ///
+    /// Supported API versions: 8-10
     pub batch_index_error_message: Option<StrBytes>,
 
     /// Other tagged fields
@@ -39,7 +40,7 @@ pub struct BatchIndexAndErrorMessage {
 impl Builder for BatchIndexAndErrorMessage {
     type Builder = BatchIndexAndErrorMessageBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         BatchIndexAndErrorMessageBuilder::default()
     }
 }
@@ -50,7 +51,7 @@ impl Encodable for BatchIndexAndErrorMessage {
             types::Int32.encode(buf, &self.batch_index)?;
         } else {
             if self.batch_index != 0 {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 8 {
@@ -61,13 +62,16 @@ impl Encodable for BatchIndexAndErrorMessage {
             }
         } else {
             if !self.batch_index_error_message.is_none() {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 9 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -81,7 +85,7 @@ impl Encodable for BatchIndexAndErrorMessage {
             total_size += types::Int32.compute_size(&self.batch_index)?;
         } else {
             if self.batch_index != 0 {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 8 {
@@ -92,13 +96,16 @@ impl Encodable for BatchIndexAndErrorMessage {
             }
         } else {
             if !self.batch_index_error_message.is_none() {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 9 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -153,48 +160,377 @@ impl Default for BatchIndexAndErrorMessage {
 }
 
 impl Message for BatchIndexAndErrorMessage {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 9 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 10 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-9
+/// Valid versions: 0-10
+#[non_exhaustive]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
+pub struct LeaderIdAndEpoch {
+    /// The ID of the current leader or -1 if the leader is unknown.
+    ///
+    /// Supported API versions: 10
+    pub leader_id: super::BrokerId,
+
+    /// The latest known leader epoch
+    ///
+    /// Supported API versions: 10
+    pub leader_epoch: i32,
+
+    /// Other tagged fields
+    pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
+}
+
+impl Builder for LeaderIdAndEpoch {
+    type Builder = LeaderIdAndEpochBuilder;
+
+    fn builder() -> Self::Builder {
+        LeaderIdAndEpochBuilder::default()
+    }
+}
+
+impl Encodable for LeaderIdAndEpoch {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+        if version >= 10 {
+            types::Int32.encode(buf, &self.leader_id)?;
+        } else {
+            if self.leader_id != -1 {
+                bail!("failed to encode");
+            }
+        }
+        if version >= 10 {
+            types::Int32.encode(buf, &self.leader_epoch)?;
+        } else {
+            if self.leader_epoch != -1 {
+                bail!("failed to encode");
+            }
+        }
+        if version >= 9 {
+            let num_tagged_fields = self.unknown_tagged_fields.len();
+            if num_tagged_fields > std::u32::MAX as usize {
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
+            }
+            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+
+            write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
+        }
+        Ok(())
+    }
+    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+        let mut total_size = 0;
+        if version >= 10 {
+            total_size += types::Int32.compute_size(&self.leader_id)?;
+        } else {
+            if self.leader_id != -1 {
+                bail!("failed to encode");
+            }
+        }
+        if version >= 10 {
+            total_size += types::Int32.compute_size(&self.leader_epoch)?;
+        } else {
+            if self.leader_epoch != -1 {
+                bail!("failed to encode");
+            }
+        }
+        if version >= 9 {
+            let num_tagged_fields = self.unknown_tagged_fields.len();
+            if num_tagged_fields > std::u32::MAX as usize {
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
+            }
+            total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
+
+            total_size += compute_unknown_tagged_fields_size(&self.unknown_tagged_fields)?;
+        }
+        Ok(total_size)
+    }
+}
+
+impl Decodable for LeaderIdAndEpoch {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+        let leader_id = if version >= 10 {
+            types::Int32.decode(buf)?
+        } else {
+            (-1).into()
+        };
+        let leader_epoch = if version >= 10 {
+            types::Int32.decode(buf)?
+        } else {
+            -1
+        };
+        let mut unknown_tagged_fields = BTreeMap::new();
+        if version >= 9 {
+            let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
+            for _ in 0..num_tagged_fields {
+                let tag: u32 = types::UnsignedVarInt.decode(buf)?;
+                let size: u32 = types::UnsignedVarInt.decode(buf)?;
+                let unknown_value = buf.try_get_bytes(size as usize)?;
+                unknown_tagged_fields.insert(tag as i32, unknown_value);
+            }
+        }
+        Ok(Self {
+            leader_id,
+            leader_epoch,
+            unknown_tagged_fields,
+        })
+    }
+}
+
+impl Default for LeaderIdAndEpoch {
+    fn default() -> Self {
+        Self {
+            leader_id: (-1).into(),
+            leader_epoch: -1,
+            unknown_tagged_fields: BTreeMap::new(),
+        }
+    }
+}
+
+impl Message for LeaderIdAndEpoch {
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 10 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
+}
+
+/// Valid versions: 0-10
+#[non_exhaustive]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
+pub struct NodeEndpoint {
+    /// The node's hostname.
+    ///
+    /// Supported API versions: 10
+    pub host: StrBytes,
+
+    /// The node's port.
+    ///
+    /// Supported API versions: 10
+    pub port: i32,
+
+    /// The rack of the node, or null if it has not been assigned to a rack.
+    ///
+    /// Supported API versions: 10
+    pub rack: Option<StrBytes>,
+
+    /// Other tagged fields
+    pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
+}
+
+impl Builder for NodeEndpoint {
+    type Builder = NodeEndpointBuilder;
+
+    fn builder() -> Self::Builder {
+        NodeEndpointBuilder::default()
+    }
+}
+
+impl MapEncodable for NodeEndpoint {
+    type Key = super::BrokerId;
+    fn encode<B: ByteBufMut>(
+        &self,
+        key: &Self::Key,
+        buf: &mut B,
+        version: i16,
+    ) -> Result<(), EncodeError> {
+        if version >= 10 {
+            types::Int32.encode(buf, key)?;
+        } else {
+            if *key != 0 {
+                bail!("failed to encode");
+            }
+        }
+        if version >= 10 {
+            types::CompactString.encode(buf, &self.host)?;
+        } else {
+            if !self.host.is_empty() {
+                bail!("failed to encode");
+            }
+        }
+        if version >= 10 {
+            types::Int32.encode(buf, &self.port)?;
+        } else {
+            if self.port != 0 {
+                bail!("failed to encode");
+            }
+        }
+        if version >= 10 {
+            types::CompactString.encode(buf, &self.rack)?;
+        } else {
+            if !self.rack.is_none() {
+                bail!("failed to encode");
+            }
+        }
+        if version >= 9 {
+            let num_tagged_fields = self.unknown_tagged_fields.len();
+            if num_tagged_fields > std::u32::MAX as usize {
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
+            }
+            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+
+            write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
+        }
+        Ok(())
+    }
+    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> {
+        let mut total_size = 0;
+        if version >= 10 {
+            total_size += types::Int32.compute_size(key)?;
+        } else {
+            if *key != 0 {
+                bail!("failed to encode");
+            }
+        }
+        if version >= 10 {
+            total_size += types::CompactString.compute_size(&self.host)?;
+        } else {
+            if !self.host.is_empty() {
+                bail!("failed to encode");
+            }
+        }
+        if version >= 10 {
+            total_size += types::Int32.compute_size(&self.port)?;
+        } else {
+            if self.port != 0 {
+                bail!("failed to encode");
+            }
+        }
+        if version >= 10 {
+            total_size += types::CompactString.compute_size(&self.rack)?;
+        } else {
+            if !self.rack.is_none() {
+                bail!("failed to encode");
+            }
+        }
+        if version >= 9 {
+            let num_tagged_fields = self.unknown_tagged_fields.len();
+            if num_tagged_fields > std::u32::MAX as usize {
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
+            }
+            total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
+
+            total_size += compute_unknown_tagged_fields_size(&self.unknown_tagged_fields)?;
+        }
+        Ok(total_size)
+    }
+}
+
+impl MapDecodable for NodeEndpoint {
+    type Key = super::BrokerId;
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+        let key_field = if version >= 10 {
+            types::Int32.decode(buf)?
+        } else {
+            (0).into()
+        };
+        let host = if version >= 10 {
+            types::CompactString.decode(buf)?
+        } else {
+            Default::default()
+        };
+        let port = if version >= 10 {
+            types::Int32.decode(buf)?
+        } else {
+            0
+        };
+        let rack = if version >= 10 {
+            types::CompactString.decode(buf)?
+        } else {
+            None
+        };
+        let mut unknown_tagged_fields = BTreeMap::new();
+        if version >= 9 {
+            let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
+            for _ in 0..num_tagged_fields {
+                let tag: u32 = types::UnsignedVarInt.decode(buf)?;
+                let size: u32 = types::UnsignedVarInt.decode(buf)?;
+                let unknown_value = buf.try_get_bytes(size as usize)?;
+                unknown_tagged_fields.insert(tag as i32, unknown_value);
+            }
+        }
+        Ok((
+            key_field,
+            Self {
+                host,
+                port,
+                rack,
+                unknown_tagged_fields,
+            },
+        ))
+    }
+}
+
+impl Default for NodeEndpoint {
+    fn default() -> Self {
+        Self {
+            host: Default::default(),
+            port: 0,
+            rack: None,
+            unknown_tagged_fields: BTreeMap::new(),
+        }
+    }
+}
+
+impl Message for NodeEndpoint {
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 10 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
+}
+
+/// Valid versions: 0-10
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 #[builder(default)]
 pub struct PartitionProduceResponse {
     /// The partition index.
-    /// 
-    /// Supported API versions: 0-9
+    ///
+    /// Supported API versions: 0-10
     pub index: i32,
 
     /// The error code, or 0 if there was no error.
-    /// 
-    /// Supported API versions: 0-9
+    ///
+    /// Supported API versions: 0-10
     pub error_code: i16,
 
     /// The base offset.
-    /// 
-    /// Supported API versions: 0-9
+    ///
+    /// Supported API versions: 0-10
     pub base_offset: i64,
 
     /// The timestamp returned by broker after appending the messages. If CreateTime is used for the topic, the timestamp will be -1.  If LogAppendTime is used for the topic, the timestamp will be the broker local time when the messages are appended.
-    /// 
-    /// Supported API versions: 2-9
+    ///
+    /// Supported API versions: 2-10
     pub log_append_time_ms: i64,
 
     /// The log start offset.
-    /// 
-    /// Supported API versions: 5-9
+    ///
+    /// Supported API versions: 5-10
     pub log_start_offset: i64,
 
     /// The batch indices of records that caused the batch to be dropped
-    /// 
-    /// Supported API versions: 8-9
+    ///
+    /// Supported API versions: 8-10
     pub record_errors: Vec<BatchIndexAndErrorMessage>,
 
     /// The global error message summarizing the common root cause of the records that caused the batch to be dropped
-    /// 
-    /// Supported API versions: 8-9
+    ///
+    /// Supported API versions: 8-10
     pub error_message: Option<StrBytes>,
+
+    ///
+    ///
+    /// Supported API versions: 10
+    pub current_leader: LeaderIdAndEpoch,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
@@ -203,7 +539,7 @@ pub struct PartitionProduceResponse {
 impl Builder for PartitionProduceResponse {
     type Builder = PartitionProduceResponseBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         PartitionProduceResponseBuilder::default()
     }
 }
@@ -234,13 +570,35 @@ impl Encodable for PartitionProduceResponse {
             }
         }
         if version >= 9 {
-            let num_tagged_fields = self.unknown_tagged_fields.len();
+            let mut num_tagged_fields = self.unknown_tagged_fields.len();
+            if version >= 10 {
+                if &self.current_leader != &Default::default() {
+                    num_tagged_fields += 1;
+                }
+            }
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
-
-            write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
+            if version >= 10 {
+                if &self.current_leader != &Default::default() {
+                    let computed_size =
+                        types::Struct { version }.compute_size(&self.current_leader)?;
+                    if computed_size > std::u32::MAX as usize {
+                        bail!(
+                            "Tagged field is too large to encode ({} bytes)",
+                            computed_size
+                        );
+                    }
+                    types::UnsignedVarInt.encode(buf, 0)?;
+                    types::UnsignedVarInt.encode(buf, computed_size as u32)?;
+                    types::Struct { version }.encode(buf, &self.current_leader)?;
+                }
+            }
+            write_unknown_tagged_fields(buf, 1.., &self.unknown_tagged_fields)?;
         }
         Ok(())
     }
@@ -257,9 +615,11 @@ impl Encodable for PartitionProduceResponse {
         }
         if version >= 8 {
             if version >= 9 {
-                total_size += types::CompactArray(types::Struct { version }).compute_size(&self.record_errors)?;
+                total_size += types::CompactArray(types::Struct { version })
+                    .compute_size(&self.record_errors)?;
             } else {
-                total_size += types::Array(types::Struct { version }).compute_size(&self.record_errors)?;
+                total_size +=
+                    types::Array(types::Struct { version }).compute_size(&self.record_errors)?;
             }
         }
         if version >= 8 {
@@ -270,12 +630,34 @@ impl Encodable for PartitionProduceResponse {
             }
         }
         if version >= 9 {
-            let num_tagged_fields = self.unknown_tagged_fields.len();
+            let mut num_tagged_fields = self.unknown_tagged_fields.len();
+            if version >= 10 {
+                if &self.current_leader != &Default::default() {
+                    num_tagged_fields += 1;
+                }
+            }
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
-
+            if version >= 10 {
+                if &self.current_leader != &Default::default() {
+                    let computed_size =
+                        types::Struct { version }.compute_size(&self.current_leader)?;
+                    if computed_size > std::u32::MAX as usize {
+                        bail!(
+                            "Tagged field is too large to encode ({} bytes)",
+                            computed_size
+                        );
+                    }
+                    total_size += types::UnsignedVarInt.compute_size(0)?;
+                    total_size += types::UnsignedVarInt.compute_size(computed_size as u32)?;
+                    total_size += computed_size;
+                }
+            }
             total_size += compute_unknown_tagged_fields_size(&self.unknown_tagged_fields)?;
         }
         Ok(total_size)
@@ -315,14 +697,26 @@ impl Decodable for PartitionProduceResponse {
         } else {
             None
         };
+        let mut current_leader = Default::default();
         let mut unknown_tagged_fields = BTreeMap::new();
         if version >= 9 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
             for _ in 0..num_tagged_fields {
                 let tag: u32 = types::UnsignedVarInt.decode(buf)?;
                 let size: u32 = types::UnsignedVarInt.decode(buf)?;
-                let unknown_value = buf.try_get_bytes(size as usize)?;
-                unknown_tagged_fields.insert(tag as i32, unknown_value);
+                match tag {
+                    0 => {
+                        if version >= 10 {
+                            current_leader = types::Struct { version }.decode(buf)?;
+                        } else {
+                            bail!("Tag {} is not valid for version {}", tag, version);
+                        }
+                    }
+                    _ => {
+                        let unknown_value = buf.try_get_bytes(size as usize)?;
+                        unknown_tagged_fields.insert(tag as i32, unknown_value);
+                    }
+                }
             }
         }
         Ok(Self {
@@ -333,6 +727,7 @@ impl Decodable for PartitionProduceResponse {
             log_start_offset,
             record_errors,
             error_message,
+            current_leader,
             unknown_tagged_fields,
         })
     }
@@ -348,23 +743,207 @@ impl Default for PartitionProduceResponse {
             log_start_offset: -1,
             record_errors: Default::default(),
             error_message: None,
+            current_leader: Default::default(),
             unknown_tagged_fields: BTreeMap::new(),
         }
     }
 }
 
 impl Message for PartitionProduceResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 9 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 10 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-9
+/// Valid versions: 0-10
+#[non_exhaustive]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
+pub struct ProduceResponse {
+    /// Each produce response
+    ///
+    /// Supported API versions: 0-10
+    pub responses: indexmap::IndexMap<super::TopicName, TopicProduceResponse>,
+
+    /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
+    ///
+    /// Supported API versions: 1-10
+    pub throttle_time_ms: i32,
+
+    /// Endpoints for all current-leaders enumerated in PartitionProduceResponses, with errors NOT_LEADER_OR_FOLLOWER.
+    ///
+    /// Supported API versions: 10
+    pub node_endpoints: indexmap::IndexMap<super::BrokerId, NodeEndpoint>,
+
+    /// Other tagged fields
+    pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
+}
+
+impl Builder for ProduceResponse {
+    type Builder = ProduceResponseBuilder;
+
+    fn builder() -> Self::Builder {
+        ProduceResponseBuilder::default()
+    }
+}
+
+impl Encodable for ProduceResponse {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+        if version >= 9 {
+            types::CompactArray(types::Struct { version }).encode(buf, &self.responses)?;
+        } else {
+            types::Array(types::Struct { version }).encode(buf, &self.responses)?;
+        }
+        if version >= 1 {
+            types::Int32.encode(buf, &self.throttle_time_ms)?;
+        }
+        if version >= 9 {
+            let mut num_tagged_fields = self.unknown_tagged_fields.len();
+            if version >= 10 {
+                if !self.node_endpoints.is_empty() {
+                    num_tagged_fields += 1;
+                }
+            }
+            if num_tagged_fields > std::u32::MAX as usize {
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
+            }
+            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+            if version >= 10 {
+                if !self.node_endpoints.is_empty() {
+                    let computed_size = types::CompactArray(types::Struct { version })
+                        .compute_size(&self.node_endpoints)?;
+                    if computed_size > std::u32::MAX as usize {
+                        bail!(
+                            "Tagged field is too large to encode ({} bytes)",
+                            computed_size
+                        );
+                    }
+                    types::UnsignedVarInt.encode(buf, 0)?;
+                    types::UnsignedVarInt.encode(buf, computed_size as u32)?;
+                    types::CompactArray(types::Struct { version })
+                        .encode(buf, &self.node_endpoints)?;
+                }
+            }
+            write_unknown_tagged_fields(buf, 1.., &self.unknown_tagged_fields)?;
+        }
+        Ok(())
+    }
+    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+        let mut total_size = 0;
+        if version >= 9 {
+            total_size +=
+                types::CompactArray(types::Struct { version }).compute_size(&self.responses)?;
+        } else {
+            total_size += types::Array(types::Struct { version }).compute_size(&self.responses)?;
+        }
+        if version >= 1 {
+            total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
+        }
+        if version >= 9 {
+            let mut num_tagged_fields = self.unknown_tagged_fields.len();
+            if version >= 10 {
+                if !self.node_endpoints.is_empty() {
+                    num_tagged_fields += 1;
+                }
+            }
+            if num_tagged_fields > std::u32::MAX as usize {
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
+            }
+            total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
+            if version >= 10 {
+                if !self.node_endpoints.is_empty() {
+                    let computed_size = types::CompactArray(types::Struct { version })
+                        .compute_size(&self.node_endpoints)?;
+                    if computed_size > std::u32::MAX as usize {
+                        bail!(
+                            "Tagged field is too large to encode ({} bytes)",
+                            computed_size
+                        );
+                    }
+                    total_size += types::UnsignedVarInt.compute_size(0)?;
+                    total_size += types::UnsignedVarInt.compute_size(computed_size as u32)?;
+                    total_size += computed_size;
+                }
+            }
+            total_size += compute_unknown_tagged_fields_size(&self.unknown_tagged_fields)?;
+        }
+        Ok(total_size)
+    }
+}
+
+impl Decodable for ProduceResponse {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+        let responses = if version >= 9 {
+            types::CompactArray(types::Struct { version }).decode(buf)?
+        } else {
+            types::Array(types::Struct { version }).decode(buf)?
+        };
+        let throttle_time_ms = if version >= 1 {
+            types::Int32.decode(buf)?
+        } else {
+            0
+        };
+        let mut node_endpoints = Default::default();
+        let mut unknown_tagged_fields = BTreeMap::new();
+        if version >= 9 {
+            let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
+            for _ in 0..num_tagged_fields {
+                let tag: u32 = types::UnsignedVarInt.decode(buf)?;
+                let size: u32 = types::UnsignedVarInt.decode(buf)?;
+                match tag {
+                    0 => {
+                        if version >= 10 {
+                            node_endpoints =
+                                types::CompactArray(types::Struct { version }).decode(buf)?;
+                        } else {
+                            bail!("Tag {} is not valid for version {}", tag, version);
+                        }
+                    }
+                    _ => {
+                        let unknown_value = buf.try_get_bytes(size as usize)?;
+                        unknown_tagged_fields.insert(tag as i32, unknown_value);
+                    }
+                }
+            }
+        }
+        Ok(Self {
+            responses,
+            throttle_time_ms,
+            node_endpoints,
+            unknown_tagged_fields,
+        })
+    }
+}
+
+impl Default for ProduceResponse {
+    fn default() -> Self {
+        Self {
+            responses: Default::default(),
+            throttle_time_ms: 0,
+            node_endpoints: Default::default(),
+            unknown_tagged_fields: BTreeMap::new(),
+        }
+    }
+}
+
+impl Message for ProduceResponse {
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 10 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
+}
+
+/// Valid versions: 0-10
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 #[builder(default)]
 pub struct TopicProduceResponse {
     /// Each partition that we produced to within the topic.
-    /// 
-    /// Supported API versions: 0-9
+    ///
+    /// Supported API versions: 0-10
     pub partition_responses: Vec<PartitionProduceResponse>,
 
     /// Other tagged fields
@@ -374,28 +953,37 @@ pub struct TopicProduceResponse {
 impl Builder for TopicProduceResponse {
     type Builder = TopicProduceResponseBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         TopicProduceResponseBuilder::default()
     }
 }
 
 impl MapEncodable for TopicProduceResponse {
     type Key = super::TopicName;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(
+        &self,
+        key: &Self::Key,
+        buf: &mut B,
+        version: i16,
+    ) -> Result<(), EncodeError> {
         if version >= 9 {
             types::CompactString.encode(buf, key)?;
         } else {
             types::String.encode(buf, key)?;
         }
         if version >= 9 {
-            types::CompactArray(types::Struct { version }).encode(buf, &self.partition_responses)?;
+            types::CompactArray(types::Struct { version })
+                .encode(buf, &self.partition_responses)?;
         } else {
             types::Array(types::Struct { version }).encode(buf, &self.partition_responses)?;
         }
         if version >= 9 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -411,14 +999,19 @@ impl MapEncodable for TopicProduceResponse {
             total_size += types::String.compute_size(key)?;
         }
         if version >= 9 {
-            total_size += types::CompactArray(types::Struct { version }).compute_size(&self.partition_responses)?;
+            total_size += types::CompactArray(types::Struct { version })
+                .compute_size(&self.partition_responses)?;
         } else {
-            total_size += types::Array(types::Struct { version }).compute_size(&self.partition_responses)?;
+            total_size +=
+                types::Array(types::Struct { version }).compute_size(&self.partition_responses)?;
         }
         if version >= 9 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -451,10 +1044,13 @@ impl MapDecodable for TopicProduceResponse {
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
-        Ok((key_field, Self {
-            partition_responses,
-            unknown_tagged_fields,
-        }))
+        Ok((
+            key_field,
+            Self {
+                partition_responses,
+                unknown_tagged_fields,
+            },
+        ))
     }
 }
 
@@ -468,122 +1064,8 @@ impl Default for TopicProduceResponse {
 }
 
 impl Message for TopicProduceResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 9 };
-}
-
-/// Valid versions: 0-9
-#[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
-pub struct ProduceResponse {
-    /// Each produce response
-    /// 
-    /// Supported API versions: 0-9
-    pub responses: indexmap::IndexMap<super::TopicName, TopicProduceResponse>,
-
-    /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
-    /// 
-    /// Supported API versions: 1-9
-    pub throttle_time_ms: i32,
-
-    /// Other tagged fields
-    pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
-}
-
-impl Builder for ProduceResponse {
-    type Builder = ProduceResponseBuilder;
-
-    fn builder() -> Self::Builder{
-        ProduceResponseBuilder::default()
-    }
-}
-
-impl Encodable for ProduceResponse {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version >= 9 {
-            types::CompactArray(types::Struct { version }).encode(buf, &self.responses)?;
-        } else {
-            types::Array(types::Struct { version }).encode(buf, &self.responses)?;
-        }
-        if version >= 1 {
-            types::Int32.encode(buf, &self.throttle_time_ms)?;
-        }
-        if version >= 9 {
-            let num_tagged_fields = self.unknown_tagged_fields.len();
-            if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-            }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
-
-            write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
-        }
-        Ok(())
-    }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
-        let mut total_size = 0;
-        if version >= 9 {
-            total_size += types::CompactArray(types::Struct { version }).compute_size(&self.responses)?;
-        } else {
-            total_size += types::Array(types::Struct { version }).compute_size(&self.responses)?;
-        }
-        if version >= 1 {
-            total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
-        }
-        if version >= 9 {
-            let num_tagged_fields = self.unknown_tagged_fields.len();
-            if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-            }
-            total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
-
-            total_size += compute_unknown_tagged_fields_size(&self.unknown_tagged_fields)?;
-        }
-        Ok(total_size)
-    }
-}
-
-impl Decodable for ProduceResponse {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let responses = if version >= 9 {
-            types::CompactArray(types::Struct { version }).decode(buf)?
-        } else {
-            types::Array(types::Struct { version }).decode(buf)?
-        };
-        let throttle_time_ms = if version >= 1 {
-            types::Int32.decode(buf)?
-        } else {
-            0
-        };
-        let mut unknown_tagged_fields = BTreeMap::new();
-        if version >= 9 {
-            let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
-            for _ in 0..num_tagged_fields {
-                let tag: u32 = types::UnsignedVarInt.decode(buf)?;
-                let size: u32 = types::UnsignedVarInt.decode(buf)?;
-                let unknown_value = buf.try_get_bytes(size as usize)?;
-                unknown_tagged_fields.insert(tag as i32, unknown_value);
-            }
-        }
-        Ok(Self {
-            responses,
-            throttle_time_ms,
-            unknown_tagged_fields,
-        })
-    }
-}
-
-impl Default for ProduceResponse {
-    fn default() -> Self {
-        Self {
-            responses: Default::default(),
-            throttle_time_ms: 0,
-            unknown_tagged_fields: BTreeMap::new(),
-        }
-    }
-}
-
-impl Message for ProduceResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 9 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 10 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 impl HeaderVersion for ProduceResponse {
@@ -595,4 +1077,3 @@ impl HeaderVersion for ProduceResponse {
         }
     }
 }
-

@@ -7,15 +7,16 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
+use anyhow::bail;
 use bytes::Bytes;
 use uuid::Uuid;
-use anyhow::bail;
 
 use crate::protocol::{
-    Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
+    buf::{ByteBuf, ByteBufMut},
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
-
 
 /// Valid versions: 0-3
 #[non_exhaustive]
@@ -23,57 +24,57 @@ use crate::protocol::{
 #[builder(default)]
 pub struct CreateDelegationTokenResponse {
     /// The top-level error, or zero if there was no error.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub error_code: i16,
 
     /// The principal type of the token owner.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub principal_type: StrBytes,
 
     /// The name of the token owner.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub principal_name: StrBytes,
 
     /// The principal type of the requester of the token.
-    /// 
+    ///
     /// Supported API versions: 3
     pub token_requester_principal_type: StrBytes,
 
     /// The principal type of the requester of the token.
-    /// 
+    ///
     /// Supported API versions: 3
     pub token_requester_principal_name: StrBytes,
 
     /// When this token was generated.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub issue_timestamp_ms: i64,
 
     /// When this token expires.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub expiry_timestamp_ms: i64,
 
     /// The maximum lifetime of this token.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub max_timestamp_ms: i64,
 
     /// The token UUID.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub token_id: StrBytes,
 
     /// HMAC of the delegation token.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub hmac: Bytes,
 
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub throttle_time_ms: i32,
 
@@ -84,7 +85,7 @@ pub struct CreateDelegationTokenResponse {
 impl Builder for CreateDelegationTokenResponse {
     type Builder = CreateDelegationTokenResponseBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         CreateDelegationTokenResponseBuilder::default()
     }
 }
@@ -106,14 +107,14 @@ impl Encodable for CreateDelegationTokenResponse {
             types::CompactString.encode(buf, &self.token_requester_principal_type)?;
         } else {
             if !self.token_requester_principal_type.is_empty() {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 3 {
             types::CompactString.encode(buf, &self.token_requester_principal_name)?;
         } else {
             if !self.token_requester_principal_name.is_empty() {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         types::Int64.encode(buf, &self.issue_timestamp_ms)?;
@@ -133,7 +134,10 @@ impl Encodable for CreateDelegationTokenResponse {
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -155,17 +159,19 @@ impl Encodable for CreateDelegationTokenResponse {
             total_size += types::String.compute_size(&self.principal_name)?;
         }
         if version >= 3 {
-            total_size += types::CompactString.compute_size(&self.token_requester_principal_type)?;
+            total_size +=
+                types::CompactString.compute_size(&self.token_requester_principal_type)?;
         } else {
             if !self.token_requester_principal_type.is_empty() {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 3 {
-            total_size += types::CompactString.compute_size(&self.token_requester_principal_name)?;
+            total_size +=
+                types::CompactString.compute_size(&self.token_requester_principal_name)?;
         } else {
             if !self.token_requester_principal_name.is_empty() {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         total_size += types::Int64.compute_size(&self.issue_timestamp_ms)?;
@@ -185,7 +191,10 @@ impl Encodable for CreateDelegationTokenResponse {
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -280,6 +289,7 @@ impl Default for CreateDelegationTokenResponse {
 
 impl Message for CreateDelegationTokenResponse {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 impl HeaderVersion for CreateDelegationTokenResponse {
@@ -291,4 +301,3 @@ impl HeaderVersion for CreateDelegationTokenResponse {
         }
     }
 }
-

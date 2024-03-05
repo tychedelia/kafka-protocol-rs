@@ -7,15 +7,16 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
+use anyhow::bail;
 use bytes::Bytes;
 use uuid::Uuid;
-use anyhow::bail;
 
 use crate::protocol::{
-    Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
+    buf::{ByteBuf, ByteBufMut},
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
-
 
 /// Valid versions: 0-1
 #[non_exhaustive]
@@ -23,17 +24,17 @@ use crate::protocol::{
 #[builder(default)]
 pub struct ComponentData {
     /// The entity type that the filter component applies to.
-    /// 
+    ///
     /// Supported API versions: 0-1
     pub entity_type: StrBytes,
 
     /// How to match the entity {0 = exact name, 1 = default name, 2 = any specified name}.
-    /// 
+    ///
     /// Supported API versions: 0-1
     pub match_type: i8,
 
     /// The string to match against, or null if unused for the match type.
-    /// 
+    ///
     /// Supported API versions: 0-1
     pub _match: Option<StrBytes>,
 
@@ -44,7 +45,7 @@ pub struct ComponentData {
 impl Builder for ComponentData {
     type Builder = ComponentDataBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         ComponentDataBuilder::default()
     }
 }
@@ -65,7 +66,10 @@ impl Encodable for ComponentData {
         if version >= 1 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -89,7 +93,10 @@ impl Encodable for ComponentData {
         if version >= 1 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -144,6 +151,7 @@ impl Default for ComponentData {
 
 impl Message for ComponentData {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 /// Valid versions: 0-1
@@ -152,12 +160,12 @@ impl Message for ComponentData {
 #[builder(default)]
 pub struct DescribeClientQuotasRequest {
     /// Filter components to apply to quota entities.
-    /// 
+    ///
     /// Supported API versions: 0-1
     pub components: Vec<ComponentData>,
 
     /// Whether the match is strict, i.e. should exclude entities with unspecified entity types.
-    /// 
+    ///
     /// Supported API versions: 0-1
     pub strict: bool,
 
@@ -168,7 +176,7 @@ pub struct DescribeClientQuotasRequest {
 impl Builder for DescribeClientQuotasRequest {
     type Builder = DescribeClientQuotasRequestBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         DescribeClientQuotasRequestBuilder::default()
     }
 }
@@ -184,7 +192,10 @@ impl Encodable for DescribeClientQuotasRequest {
         if version >= 1 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -195,7 +206,8 @@ impl Encodable for DescribeClientQuotasRequest {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         if version >= 1 {
-            total_size += types::CompactArray(types::Struct { version }).compute_size(&self.components)?;
+            total_size +=
+                types::CompactArray(types::Struct { version }).compute_size(&self.components)?;
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.components)?;
         }
@@ -203,7 +215,10 @@ impl Encodable for DescribeClientQuotasRequest {
         if version >= 1 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -251,6 +266,7 @@ impl Default for DescribeClientQuotasRequest {
 
 impl Message for DescribeClientQuotasRequest {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 impl HeaderVersion for DescribeClientQuotasRequest {
@@ -262,4 +278,3 @@ impl HeaderVersion for DescribeClientQuotasRequest {
         }
     }
 }
-

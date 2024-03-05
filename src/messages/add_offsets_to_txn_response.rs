@@ -7,15 +7,16 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
+use anyhow::bail;
 use bytes::Bytes;
 use uuid::Uuid;
-use anyhow::bail;
 
 use crate::protocol::{
-    Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
+    buf::{ByteBuf, ByteBufMut},
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
-
 
 /// Valid versions: 0-3
 #[non_exhaustive]
@@ -23,12 +24,12 @@ use crate::protocol::{
 #[builder(default)]
 pub struct AddOffsetsToTxnResponse {
     /// Duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub throttle_time_ms: i32,
 
     /// The response error code, or 0 if there was no error.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub error_code: i16,
 
@@ -39,7 +40,7 @@ pub struct AddOffsetsToTxnResponse {
 impl Builder for AddOffsetsToTxnResponse {
     type Builder = AddOffsetsToTxnResponseBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         AddOffsetsToTxnResponseBuilder::default()
     }
 }
@@ -51,7 +52,10 @@ impl Encodable for AddOffsetsToTxnResponse {
         if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -66,7 +70,10 @@ impl Encodable for AddOffsetsToTxnResponse {
         if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -110,6 +117,7 @@ impl Default for AddOffsetsToTxnResponse {
 
 impl Message for AddOffsetsToTxnResponse {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 impl HeaderVersion for AddOffsetsToTxnResponse {
@@ -121,4 +129,3 @@ impl HeaderVersion for AddOffsetsToTxnResponse {
         }
     }
 }
-

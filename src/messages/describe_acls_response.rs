@@ -7,15 +7,16 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
+use anyhow::bail;
 use bytes::Bytes;
 use uuid::Uuid;
-use anyhow::bail;
 
 use crate::protocol::{
-    Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
+    buf::{ByteBuf, ByteBufMut},
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
-
 
 /// Valid versions: 0-3
 #[non_exhaustive]
@@ -23,22 +24,22 @@ use crate::protocol::{
 #[builder(default)]
 pub struct AclDescription {
     /// The ACL principal.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub principal: StrBytes,
 
     /// The ACL host.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub host: StrBytes,
 
     /// The ACL operation.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub operation: i8,
 
     /// The ACL permission type.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub permission_type: i8,
 
@@ -49,7 +50,7 @@ pub struct AclDescription {
 impl Builder for AclDescription {
     type Builder = AclDescriptionBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         AclDescriptionBuilder::default()
     }
 }
@@ -71,7 +72,10 @@ impl Encodable for AclDescription {
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -96,7 +100,10 @@ impl Encodable for AclDescription {
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -154,6 +161,7 @@ impl Default for AclDescription {
 
 impl Message for AclDescription {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 /// Valid versions: 0-3
@@ -162,22 +170,22 @@ impl Message for AclDescription {
 #[builder(default)]
 pub struct DescribeAclsResource {
     /// The resource type.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub resource_type: i8,
 
     /// The resource name.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub resource_name: StrBytes,
 
     /// The resource pattern type.
-    /// 
+    ///
     /// Supported API versions: 1-3
     pub pattern_type: i8,
 
     /// The ACLs.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub acls: Vec<AclDescription>,
 
@@ -188,7 +196,7 @@ pub struct DescribeAclsResource {
 impl Builder for DescribeAclsResource {
     type Builder = DescribeAclsResourceBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         DescribeAclsResourceBuilder::default()
     }
 }
@@ -205,7 +213,7 @@ impl Encodable for DescribeAclsResource {
             types::Int8.encode(buf, &self.pattern_type)?;
         } else {
             if self.pattern_type != 3 {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 2 {
@@ -216,7 +224,10 @@ impl Encodable for DescribeAclsResource {
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -236,18 +247,22 @@ impl Encodable for DescribeAclsResource {
             total_size += types::Int8.compute_size(&self.pattern_type)?;
         } else {
             if self.pattern_type != 3 {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 2 {
-            total_size += types::CompactArray(types::Struct { version }).compute_size(&self.acls)?;
+            total_size +=
+                types::CompactArray(types::Struct { version }).compute_size(&self.acls)?;
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.acls)?;
         }
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -309,6 +324,7 @@ impl Default for DescribeAclsResource {
 
 impl Message for DescribeAclsResource {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 /// Valid versions: 0-3
@@ -317,22 +333,22 @@ impl Message for DescribeAclsResource {
 #[builder(default)]
 pub struct DescribeAclsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub throttle_time_ms: i32,
 
     /// The error code, or 0 if there was no error.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub error_code: i16,
 
     /// The error message, or null if there was no error.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub error_message: Option<StrBytes>,
 
     /// Each Resource that is referenced in an ACL.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub resources: Vec<DescribeAclsResource>,
 
@@ -343,7 +359,7 @@ pub struct DescribeAclsResponse {
 impl Builder for DescribeAclsResponse {
     type Builder = DescribeAclsResponseBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         DescribeAclsResponseBuilder::default()
     }
 }
@@ -365,7 +381,10 @@ impl Encodable for DescribeAclsResponse {
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -383,14 +402,18 @@ impl Encodable for DescribeAclsResponse {
             total_size += types::String.compute_size(&self.error_message)?;
         }
         if version >= 2 {
-            total_size += types::CompactArray(types::Struct { version }).compute_size(&self.resources)?;
+            total_size +=
+                types::CompactArray(types::Struct { version }).compute_size(&self.resources)?;
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.resources)?;
         }
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -448,6 +471,7 @@ impl Default for DescribeAclsResponse {
 
 impl Message for DescribeAclsResponse {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 impl HeaderVersion for DescribeAclsResponse {
@@ -459,4 +483,3 @@ impl HeaderVersion for DescribeAclsResponse {
         }
     }
 }
-

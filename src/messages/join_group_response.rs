@@ -7,164 +7,16 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
+use anyhow::bail;
 use bytes::Bytes;
 use uuid::Uuid;
-use anyhow::bail;
 
 use crate::protocol::{
-    Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
+    buf::{ByteBuf, ByteBufMut},
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
-
-
-/// Valid versions: 0-9
-#[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
-pub struct JoinGroupResponseMember {
-    /// The group member ID.
-    /// 
-    /// Supported API versions: 0-9
-    pub member_id: StrBytes,
-
-    /// The unique identifier of the consumer instance provided by end user.
-    /// 
-    /// Supported API versions: 5-9
-    pub group_instance_id: Option<StrBytes>,
-
-    /// The group member metadata.
-    /// 
-    /// Supported API versions: 0-9
-    pub metadata: Bytes,
-
-    /// Other tagged fields
-    pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
-}
-
-impl Builder for JoinGroupResponseMember {
-    type Builder = JoinGroupResponseMemberBuilder;
-
-    fn builder() -> Self::Builder{
-        JoinGroupResponseMemberBuilder::default()
-    }
-}
-
-impl Encodable for JoinGroupResponseMember {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        if version >= 6 {
-            types::CompactString.encode(buf, &self.member_id)?;
-        } else {
-            types::String.encode(buf, &self.member_id)?;
-        }
-        if version >= 5 {
-            if version >= 6 {
-                types::CompactString.encode(buf, &self.group_instance_id)?;
-            } else {
-                types::String.encode(buf, &self.group_instance_id)?;
-            }
-        }
-        if version >= 6 {
-            types::CompactBytes.encode(buf, &self.metadata)?;
-        } else {
-            types::Bytes.encode(buf, &self.metadata)?;
-        }
-        if version >= 6 {
-            let num_tagged_fields = self.unknown_tagged_fields.len();
-            if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-            }
-            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
-
-            write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
-        }
-        Ok(())
-    }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
-        let mut total_size = 0;
-        if version >= 6 {
-            total_size += types::CompactString.compute_size(&self.member_id)?;
-        } else {
-            total_size += types::String.compute_size(&self.member_id)?;
-        }
-        if version >= 5 {
-            if version >= 6 {
-                total_size += types::CompactString.compute_size(&self.group_instance_id)?;
-            } else {
-                total_size += types::String.compute_size(&self.group_instance_id)?;
-            }
-        }
-        if version >= 6 {
-            total_size += types::CompactBytes.compute_size(&self.metadata)?;
-        } else {
-            total_size += types::Bytes.compute_size(&self.metadata)?;
-        }
-        if version >= 6 {
-            let num_tagged_fields = self.unknown_tagged_fields.len();
-            if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-            }
-            total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
-
-            total_size += compute_unknown_tagged_fields_size(&self.unknown_tagged_fields)?;
-        }
-        Ok(total_size)
-    }
-}
-
-impl Decodable for JoinGroupResponseMember {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let member_id = if version >= 6 {
-            types::CompactString.decode(buf)?
-        } else {
-            types::String.decode(buf)?
-        };
-        let group_instance_id = if version >= 5 {
-            if version >= 6 {
-                types::CompactString.decode(buf)?
-            } else {
-                types::String.decode(buf)?
-            }
-        } else {
-            None
-        };
-        let metadata = if version >= 6 {
-            types::CompactBytes.decode(buf)?
-        } else {
-            types::Bytes.decode(buf)?
-        };
-        let mut unknown_tagged_fields = BTreeMap::new();
-        if version >= 6 {
-            let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
-            for _ in 0..num_tagged_fields {
-                let tag: u32 = types::UnsignedVarInt.decode(buf)?;
-                let size: u32 = types::UnsignedVarInt.decode(buf)?;
-                let unknown_value = buf.try_get_bytes(size as usize)?;
-                unknown_tagged_fields.insert(tag as i32, unknown_value);
-            }
-        }
-        Ok(Self {
-            member_id,
-            group_instance_id,
-            metadata,
-            unknown_tagged_fields,
-        })
-    }
-}
-
-impl Default for JoinGroupResponseMember {
-    fn default() -> Self {
-        Self {
-            member_id: Default::default(),
-            group_instance_id: None,
-            metadata: Default::default(),
-            unknown_tagged_fields: BTreeMap::new(),
-        }
-    }
-}
-
-impl Message for JoinGroupResponseMember {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 9 };
-}
 
 /// Valid versions: 0-9
 #[non_exhaustive]
@@ -172,47 +24,47 @@ impl Message for JoinGroupResponseMember {
 #[builder(default)]
 pub struct JoinGroupResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
-    /// 
+    ///
     /// Supported API versions: 2-9
     pub throttle_time_ms: i32,
 
     /// The error code, or 0 if there was no error.
-    /// 
+    ///
     /// Supported API versions: 0-9
     pub error_code: i16,
 
     /// The generation ID of the group.
-    /// 
+    ///
     /// Supported API versions: 0-9
     pub generation_id: i32,
 
     /// The group protocol name.
-    /// 
+    ///
     /// Supported API versions: 7-9
     pub protocol_type: Option<StrBytes>,
 
     /// The group protocol selected by the coordinator.
-    /// 
+    ///
     /// Supported API versions: 0-9
     pub protocol_name: Option<StrBytes>,
 
     /// The leader of the group.
-    /// 
+    ///
     /// Supported API versions: 0-9
     pub leader: StrBytes,
 
     /// True if the leader must skip running the assignment.
-    /// 
+    ///
     /// Supported API versions: 9
     pub skip_assignment: bool,
 
     /// The member ID assigned by the group coordinator.
-    /// 
+    ///
     /// Supported API versions: 0-9
     pub member_id: StrBytes,
 
-    /// 
-    /// 
+    ///
+    ///
     /// Supported API versions: 0-9
     pub members: Vec<JoinGroupResponseMember>,
 
@@ -223,7 +75,7 @@ pub struct JoinGroupResponse {
 impl Builder for JoinGroupResponse {
     type Builder = JoinGroupResponseBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         JoinGroupResponseBuilder::default()
     }
 }
@@ -252,7 +104,7 @@ impl Encodable for JoinGroupResponse {
             types::Boolean.encode(buf, &self.skip_assignment)?;
         } else {
             if self.skip_assignment {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 6 {
@@ -268,7 +120,10 @@ impl Encodable for JoinGroupResponse {
         if version >= 6 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -300,7 +155,7 @@ impl Encodable for JoinGroupResponse {
             total_size += types::Boolean.compute_size(&self.skip_assignment)?;
         } else {
             if self.skip_assignment {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 6 {
@@ -309,14 +164,18 @@ impl Encodable for JoinGroupResponse {
             total_size += types::String.compute_size(&self.member_id)?;
         }
         if version >= 6 {
-            total_size += types::CompactArray(types::Struct { version }).compute_size(&self.members)?;
+            total_size +=
+                types::CompactArray(types::Struct { version }).compute_size(&self.members)?;
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.members)?;
         }
         if version >= 6 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -409,6 +268,163 @@ impl Default for JoinGroupResponse {
 
 impl Message for JoinGroupResponse {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 9 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
+}
+
+/// Valid versions: 0-9
+#[non_exhaustive]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
+pub struct JoinGroupResponseMember {
+    /// The group member ID.
+    ///
+    /// Supported API versions: 0-9
+    pub member_id: StrBytes,
+
+    /// The unique identifier of the consumer instance provided by end user.
+    ///
+    /// Supported API versions: 5-9
+    pub group_instance_id: Option<StrBytes>,
+
+    /// The group member metadata.
+    ///
+    /// Supported API versions: 0-9
+    pub metadata: Bytes,
+
+    /// Other tagged fields
+    pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
+}
+
+impl Builder for JoinGroupResponseMember {
+    type Builder = JoinGroupResponseMemberBuilder;
+
+    fn builder() -> Self::Builder {
+        JoinGroupResponseMemberBuilder::default()
+    }
+}
+
+impl Encodable for JoinGroupResponseMember {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+        if version >= 6 {
+            types::CompactString.encode(buf, &self.member_id)?;
+        } else {
+            types::String.encode(buf, &self.member_id)?;
+        }
+        if version >= 5 {
+            if version >= 6 {
+                types::CompactString.encode(buf, &self.group_instance_id)?;
+            } else {
+                types::String.encode(buf, &self.group_instance_id)?;
+            }
+        }
+        if version >= 6 {
+            types::CompactBytes.encode(buf, &self.metadata)?;
+        } else {
+            types::Bytes.encode(buf, &self.metadata)?;
+        }
+        if version >= 6 {
+            let num_tagged_fields = self.unknown_tagged_fields.len();
+            if num_tagged_fields > std::u32::MAX as usize {
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
+            }
+            types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+
+            write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
+        }
+        Ok(())
+    }
+    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+        let mut total_size = 0;
+        if version >= 6 {
+            total_size += types::CompactString.compute_size(&self.member_id)?;
+        } else {
+            total_size += types::String.compute_size(&self.member_id)?;
+        }
+        if version >= 5 {
+            if version >= 6 {
+                total_size += types::CompactString.compute_size(&self.group_instance_id)?;
+            } else {
+                total_size += types::String.compute_size(&self.group_instance_id)?;
+            }
+        }
+        if version >= 6 {
+            total_size += types::CompactBytes.compute_size(&self.metadata)?;
+        } else {
+            total_size += types::Bytes.compute_size(&self.metadata)?;
+        }
+        if version >= 6 {
+            let num_tagged_fields = self.unknown_tagged_fields.len();
+            if num_tagged_fields > std::u32::MAX as usize {
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
+            }
+            total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
+
+            total_size += compute_unknown_tagged_fields_size(&self.unknown_tagged_fields)?;
+        }
+        Ok(total_size)
+    }
+}
+
+impl Decodable for JoinGroupResponseMember {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+        let member_id = if version >= 6 {
+            types::CompactString.decode(buf)?
+        } else {
+            types::String.decode(buf)?
+        };
+        let group_instance_id = if version >= 5 {
+            if version >= 6 {
+                types::CompactString.decode(buf)?
+            } else {
+                types::String.decode(buf)?
+            }
+        } else {
+            None
+        };
+        let metadata = if version >= 6 {
+            types::CompactBytes.decode(buf)?
+        } else {
+            types::Bytes.decode(buf)?
+        };
+        let mut unknown_tagged_fields = BTreeMap::new();
+        if version >= 6 {
+            let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
+            for _ in 0..num_tagged_fields {
+                let tag: u32 = types::UnsignedVarInt.decode(buf)?;
+                let size: u32 = types::UnsignedVarInt.decode(buf)?;
+                let unknown_value = buf.try_get_bytes(size as usize)?;
+                unknown_tagged_fields.insert(tag as i32, unknown_value);
+            }
+        }
+        Ok(Self {
+            member_id,
+            group_instance_id,
+            metadata,
+            unknown_tagged_fields,
+        })
+    }
+}
+
+impl Default for JoinGroupResponseMember {
+    fn default() -> Self {
+        Self {
+            member_id: Default::default(),
+            group_instance_id: None,
+            metadata: Default::default(),
+            unknown_tagged_fields: BTreeMap::new(),
+        }
+    }
+}
+
+impl Message for JoinGroupResponseMember {
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 9 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 impl HeaderVersion for JoinGroupResponse {
@@ -420,4 +436,3 @@ impl HeaderVersion for JoinGroupResponse {
         }
     }
 }
-

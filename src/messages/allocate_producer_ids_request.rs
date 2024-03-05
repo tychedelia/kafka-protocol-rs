@@ -7,15 +7,16 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
+use anyhow::bail;
 use bytes::Bytes;
 use uuid::Uuid;
-use anyhow::bail;
 
 use crate::protocol::{
-    Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
+    buf::{ByteBuf, ByteBufMut},
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
-
 
 /// Valid versions: 0
 #[non_exhaustive]
@@ -23,12 +24,12 @@ use crate::protocol::{
 #[builder(default)]
 pub struct AllocateProducerIdsRequest {
     /// The ID of the requesting broker
-    /// 
+    ///
     /// Supported API versions: 0
     pub broker_id: super::BrokerId,
 
     /// The epoch of the requesting broker
-    /// 
+    ///
     /// Supported API versions: 0
     pub broker_epoch: i64,
 
@@ -39,7 +40,7 @@ pub struct AllocateProducerIdsRequest {
 impl Builder for AllocateProducerIdsRequest {
     type Builder = AllocateProducerIdsRequestBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         AllocateProducerIdsRequestBuilder::default()
     }
 }
@@ -50,7 +51,10 @@ impl Encodable for AllocateProducerIdsRequest {
         types::Int64.encode(buf, &self.broker_epoch)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
-            bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+            bail!(
+                "Too many tagged fields to encode ({} fields)",
+                num_tagged_fields
+            );
         }
         types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -63,7 +67,10 @@ impl Encodable for AllocateProducerIdsRequest {
         total_size += types::Int64.compute_size(&self.broker_epoch)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
-            bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+            bail!(
+                "Too many tagged fields to encode ({} fields)",
+                num_tagged_fields
+            );
         }
         total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -104,6 +111,7 @@ impl Default for AllocateProducerIdsRequest {
 
 impl Message for AllocateProducerIdsRequest {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 0 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 impl HeaderVersion for AllocateProducerIdsRequest {
@@ -111,4 +119,3 @@ impl HeaderVersion for AllocateProducerIdsRequest {
         2
     }
 }
-

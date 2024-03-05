@@ -7,15 +7,16 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
+use anyhow::bail;
 use bytes::Bytes;
 use uuid::Uuid;
-use anyhow::bail;
 
 use crate::protocol::{
-    Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
+    buf::{ByteBuf, ByteBufMut},
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
-
 
 /// Valid versions: 0-4
 #[non_exhaustive]
@@ -23,22 +24,22 @@ use crate::protocol::{
 #[builder(default)]
 pub struct InitProducerIdRequest {
     /// The transactional id, or null if the producer is not transactional.
-    /// 
+    ///
     /// Supported API versions: 0-4
     pub transactional_id: Option<super::TransactionalId>,
 
     /// The time in ms to wait before aborting idle transactions sent by this producer. This is only relevant if a TransactionalId has been defined.
-    /// 
+    ///
     /// Supported API versions: 0-4
     pub transaction_timeout_ms: i32,
 
     /// The producer id. This is used to disambiguate requests if a transactional id is reused following its expiration.
-    /// 
+    ///
     /// Supported API versions: 3-4
     pub producer_id: super::ProducerId,
 
     /// The producer's current epoch. This will be checked against the producer epoch on the broker, and the request will return an error if they do not match.
-    /// 
+    ///
     /// Supported API versions: 3-4
     pub producer_epoch: i16,
 
@@ -49,7 +50,7 @@ pub struct InitProducerIdRequest {
 impl Builder for InitProducerIdRequest {
     type Builder = InitProducerIdRequestBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         InitProducerIdRequestBuilder::default()
     }
 }
@@ -66,20 +67,23 @@ impl Encodable for InitProducerIdRequest {
             types::Int64.encode(buf, &self.producer_id)?;
         } else {
             if self.producer_id != -1 {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 3 {
             types::Int16.encode(buf, &self.producer_epoch)?;
         } else {
             if self.producer_epoch != -1 {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -99,20 +103,23 @@ impl Encodable for InitProducerIdRequest {
             total_size += types::Int64.compute_size(&self.producer_id)?;
         } else {
             if self.producer_id != -1 {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 3 {
             total_size += types::Int16.compute_size(&self.producer_epoch)?;
         } else {
             if self.producer_epoch != -1 {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -174,6 +181,7 @@ impl Default for InitProducerIdRequest {
 
 impl Message for InitProducerIdRequest {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 impl HeaderVersion for InitProducerIdRequest {
@@ -185,4 +193,3 @@ impl HeaderVersion for InitProducerIdRequest {
         }
     }
 }
-

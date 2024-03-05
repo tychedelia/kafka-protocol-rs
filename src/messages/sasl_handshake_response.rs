@@ -7,15 +7,16 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
+use anyhow::bail;
 use bytes::Bytes;
 use uuid::Uuid;
-use anyhow::bail;
 
 use crate::protocol::{
-    Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
+    buf::{ByteBuf, ByteBufMut},
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
-
 
 /// Valid versions: 0-1
 #[non_exhaustive]
@@ -23,21 +24,20 @@ use crate::protocol::{
 #[builder(default)]
 pub struct SaslHandshakeResponse {
     /// The error code, or 0 if there was no error.
-    /// 
+    ///
     /// Supported API versions: 0-1
     pub error_code: i16,
 
     /// The mechanisms enabled in the server.
-    /// 
+    ///
     /// Supported API versions: 0-1
     pub mechanisms: Vec<StrBytes>,
-
 }
 
 impl Builder for SaslHandshakeResponse {
     type Builder = SaslHandshakeResponseBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         SaslHandshakeResponseBuilder::default()
     }
 }
@@ -80,6 +80,7 @@ impl Default for SaslHandshakeResponse {
 
 impl Message for SaslHandshakeResponse {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 impl HeaderVersion for SaslHandshakeResponse {
@@ -87,4 +88,3 @@ impl HeaderVersion for SaslHandshakeResponse {
         0
     }
 }
-

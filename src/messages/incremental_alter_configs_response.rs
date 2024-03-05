@@ -7,15 +7,16 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
+use anyhow::bail;
 use bytes::Bytes;
 use uuid::Uuid;
-use anyhow::bail;
 
 use crate::protocol::{
-    Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
+    buf::{ByteBuf, ByteBufMut},
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
-
 
 /// Valid versions: 0-1
 #[non_exhaustive]
@@ -23,22 +24,22 @@ use crate::protocol::{
 #[builder(default)]
 pub struct AlterConfigsResourceResponse {
     /// The resource error code.
-    /// 
+    ///
     /// Supported API versions: 0-1
     pub error_code: i16,
 
     /// The resource error message, or null if there was no error.
-    /// 
+    ///
     /// Supported API versions: 0-1
     pub error_message: Option<StrBytes>,
 
     /// The resource type.
-    /// 
+    ///
     /// Supported API versions: 0-1
     pub resource_type: i8,
 
     /// The resource name.
-    /// 
+    ///
     /// Supported API versions: 0-1
     pub resource_name: StrBytes,
 
@@ -49,7 +50,7 @@ pub struct AlterConfigsResourceResponse {
 impl Builder for AlterConfigsResourceResponse {
     type Builder = AlterConfigsResourceResponseBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         AlterConfigsResourceResponseBuilder::default()
     }
 }
@@ -71,7 +72,10 @@ impl Encodable for AlterConfigsResourceResponse {
         if version >= 1 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -96,7 +100,10 @@ impl Encodable for AlterConfigsResourceResponse {
         if version >= 1 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -154,6 +161,7 @@ impl Default for AlterConfigsResourceResponse {
 
 impl Message for AlterConfigsResourceResponse {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 /// Valid versions: 0-1
@@ -162,12 +170,12 @@ impl Message for AlterConfigsResourceResponse {
 #[builder(default)]
 pub struct IncrementalAlterConfigsResponse {
     /// Duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
-    /// 
+    ///
     /// Supported API versions: 0-1
     pub throttle_time_ms: i32,
 
     /// The responses for each resource.
-    /// 
+    ///
     /// Supported API versions: 0-1
     pub responses: Vec<AlterConfigsResourceResponse>,
 
@@ -178,7 +186,7 @@ pub struct IncrementalAlterConfigsResponse {
 impl Builder for IncrementalAlterConfigsResponse {
     type Builder = IncrementalAlterConfigsResponseBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         IncrementalAlterConfigsResponseBuilder::default()
     }
 }
@@ -194,7 +202,10 @@ impl Encodable for IncrementalAlterConfigsResponse {
         if version >= 1 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -206,14 +217,18 @@ impl Encodable for IncrementalAlterConfigsResponse {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
         if version >= 1 {
-            total_size += types::CompactArray(types::Struct { version }).compute_size(&self.responses)?;
+            total_size +=
+                types::CompactArray(types::Struct { version }).compute_size(&self.responses)?;
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.responses)?;
         }
         if version >= 1 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -261,6 +276,7 @@ impl Default for IncrementalAlterConfigsResponse {
 
 impl Message for IncrementalAlterConfigsResponse {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 impl HeaderVersion for IncrementalAlterConfigsResponse {
@@ -272,4 +288,3 @@ impl HeaderVersion for IncrementalAlterConfigsResponse {
         }
     }
 }
-

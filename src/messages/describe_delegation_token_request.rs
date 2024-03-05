@@ -7,15 +7,16 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
+use anyhow::bail;
 use bytes::Bytes;
 use uuid::Uuid;
-use anyhow::bail;
 
 use crate::protocol::{
-    Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
+    buf::{ByteBuf, ByteBufMut},
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
-
 
 /// Valid versions: 0-3
 #[non_exhaustive]
@@ -23,12 +24,12 @@ use crate::protocol::{
 #[builder(default)]
 pub struct DescribeDelegationTokenOwner {
     /// The owner principal type.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub principal_type: StrBytes,
 
     /// The owner principal name.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub principal_name: StrBytes,
 
@@ -39,7 +40,7 @@ pub struct DescribeDelegationTokenOwner {
 impl Builder for DescribeDelegationTokenOwner {
     type Builder = DescribeDelegationTokenOwnerBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         DescribeDelegationTokenOwnerBuilder::default()
     }
 }
@@ -59,7 +60,10 @@ impl Encodable for DescribeDelegationTokenOwner {
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -82,7 +86,10 @@ impl Encodable for DescribeDelegationTokenOwner {
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -134,6 +141,7 @@ impl Default for DescribeDelegationTokenOwner {
 
 impl Message for DescribeDelegationTokenOwner {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 0 });
 }
 
 /// Valid versions: 0-3
@@ -142,7 +150,7 @@ impl Message for DescribeDelegationTokenOwner {
 #[builder(default)]
 pub struct DescribeDelegationTokenRequest {
     /// Each owner that we want to describe delegation tokens for, or null to describe all tokens.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub owners: Option<Vec<DescribeDelegationTokenOwner>>,
 
@@ -153,7 +161,7 @@ pub struct DescribeDelegationTokenRequest {
 impl Builder for DescribeDelegationTokenRequest {
     type Builder = DescribeDelegationTokenRequestBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         DescribeDelegationTokenRequestBuilder::default()
     }
 }
@@ -168,7 +176,10 @@ impl Encodable for DescribeDelegationTokenRequest {
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -179,14 +190,18 @@ impl Encodable for DescribeDelegationTokenRequest {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         if version >= 2 {
-            total_size += types::CompactArray(types::Struct { version }).compute_size(&self.owners)?;
+            total_size +=
+                types::CompactArray(types::Struct { version }).compute_size(&self.owners)?;
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.owners)?;
         }
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -231,6 +246,7 @@ impl Default for DescribeDelegationTokenRequest {
 
 impl Message for DescribeDelegationTokenRequest {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 0 });
 }
 
 impl HeaderVersion for DescribeDelegationTokenRequest {
@@ -242,4 +258,3 @@ impl HeaderVersion for DescribeDelegationTokenRequest {
         }
     }
 }
-

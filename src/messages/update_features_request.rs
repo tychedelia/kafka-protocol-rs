@@ -7,15 +7,16 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
+use anyhow::bail;
 use bytes::Bytes;
 use uuid::Uuid;
-use anyhow::bail;
 
 use crate::protocol::{
-    Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
+    buf::{ByteBuf, ByteBufMut},
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
-
 
 /// Valid versions: 0-1
 #[non_exhaustive]
@@ -23,17 +24,17 @@ use crate::protocol::{
 #[builder(default)]
 pub struct FeatureUpdateKey {
     /// The new maximum version level for the finalized feature. A value >= 1 is valid. A value < 1, is special, and can be used to request the deletion of the finalized feature.
-    /// 
+    ///
     /// Supported API versions: 0-1
     pub max_version_level: i16,
 
     /// DEPRECATED in version 1 (see DowngradeType). When set to true, the finalized feature version level is allowed to be downgraded/deleted. The downgrade request will fail if the new maximum version level is a value that's not lower than the existing maximum finalized version level.
-    /// 
+    ///
     /// Supported API versions: 0
     pub allow_downgrade: bool,
 
     /// Determine which type of upgrade will be performed: 1 will perform an upgrade only (default), 2 is safe downgrades only (lossless), 3 is unsafe downgrades (lossy).
-    /// 
+    ///
     /// Supported API versions: 1
     pub upgrade_type: i8,
 
@@ -44,33 +45,41 @@ pub struct FeatureUpdateKey {
 impl Builder for FeatureUpdateKey {
     type Builder = FeatureUpdateKeyBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         FeatureUpdateKeyBuilder::default()
     }
 }
 
 impl MapEncodable for FeatureUpdateKey {
     type Key = StrBytes;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(
+        &self,
+        key: &Self::Key,
+        buf: &mut B,
+        version: i16,
+    ) -> Result<(), EncodeError> {
         types::CompactString.encode(buf, key)?;
         types::Int16.encode(buf, &self.max_version_level)?;
         if version == 0 {
             types::Boolean.encode(buf, &self.allow_downgrade)?;
         } else {
             if self.allow_downgrade {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 1 {
             types::Int8.encode(buf, &self.upgrade_type)?;
         } else {
             if self.upgrade_type != 1 {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
-            bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+            bail!(
+                "Too many tagged fields to encode ({} fields)",
+                num_tagged_fields
+            );
         }
         types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -85,19 +94,22 @@ impl MapEncodable for FeatureUpdateKey {
             total_size += types::Boolean.compute_size(&self.allow_downgrade)?;
         } else {
             if self.allow_downgrade {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 1 {
             total_size += types::Int8.compute_size(&self.upgrade_type)?;
         } else {
             if self.upgrade_type != 1 {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
-            bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+            bail!(
+                "Too many tagged fields to encode ({} fields)",
+                num_tagged_fields
+            );
         }
         total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -129,12 +141,15 @@ impl MapDecodable for FeatureUpdateKey {
             let unknown_value = buf.try_get_bytes(size as usize)?;
             unknown_tagged_fields.insert(tag as i32, unknown_value);
         }
-        Ok((key_field, Self {
-            max_version_level,
-            allow_downgrade,
-            upgrade_type,
-            unknown_tagged_fields,
-        }))
+        Ok((
+            key_field,
+            Self {
+                max_version_level,
+                allow_downgrade,
+                upgrade_type,
+                unknown_tagged_fields,
+            },
+        ))
     }
 }
 
@@ -151,6 +166,7 @@ impl Default for FeatureUpdateKey {
 
 impl Message for FeatureUpdateKey {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 /// Valid versions: 0-1
@@ -159,17 +175,17 @@ impl Message for FeatureUpdateKey {
 #[builder(default)]
 pub struct UpdateFeaturesRequest {
     /// How long to wait in milliseconds before timing out the request.
-    /// 
+    ///
     /// Supported API versions: 0-1
     pub timeout_ms: i32,
 
     /// The list of updates to finalized features.
-    /// 
+    ///
     /// Supported API versions: 0-1
     pub feature_updates: indexmap::IndexMap<StrBytes, FeatureUpdateKey>,
 
     /// True if we should validate the request, but not perform the upgrade or downgrade.
-    /// 
+    ///
     /// Supported API versions: 1
     pub validate_only: bool,
 
@@ -180,7 +196,7 @@ pub struct UpdateFeaturesRequest {
 impl Builder for UpdateFeaturesRequest {
     type Builder = UpdateFeaturesRequestBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         UpdateFeaturesRequestBuilder::default()
     }
 }
@@ -193,12 +209,15 @@ impl Encodable for UpdateFeaturesRequest {
             types::Boolean.encode(buf, &self.validate_only)?;
         } else {
             if self.validate_only {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
-            bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+            bail!(
+                "Too many tagged fields to encode ({} fields)",
+                num_tagged_fields
+            );
         }
         types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -208,17 +227,21 @@ impl Encodable for UpdateFeaturesRequest {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.timeout_ms)?;
-        total_size += types::CompactArray(types::Struct { version }).compute_size(&self.feature_updates)?;
+        total_size +=
+            types::CompactArray(types::Struct { version }).compute_size(&self.feature_updates)?;
         if version >= 1 {
             total_size += types::Boolean.compute_size(&self.validate_only)?;
         } else {
             if self.validate_only {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
-            bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+            bail!(
+                "Too many tagged fields to encode ({} fields)",
+                num_tagged_fields
+            );
         }
         total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -266,6 +289,7 @@ impl Default for UpdateFeaturesRequest {
 
 impl Message for UpdateFeaturesRequest {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 impl HeaderVersion for UpdateFeaturesRequest {
@@ -273,4 +297,3 @@ impl HeaderVersion for UpdateFeaturesRequest {
         2
     }
 }
-

@@ -3,86 +3,8 @@
 //! These messages are generated programmatically. See the [Kafka's protocol documentation](https://kafka.apache.org/protocol.html) for more information about a given message type.
 // WARNING: the items of this module are generated and should not be edited directly.
 
-use crate::protocol::{NewType, Request, StrBytes, HeaderVersion};
+use crate::protocol::{HeaderVersion, NewType, Request, StrBytes};
 use std::convert::TryFrom;
-
-pub mod add_offsets_to_txn_request;
-pub use add_offsets_to_txn_request::AddOffsetsToTxnRequest;
-
-pub mod add_offsets_to_txn_response;
-pub use add_offsets_to_txn_response::AddOffsetsToTxnResponse;
-
-pub mod add_partitions_to_txn_request;
-pub use add_partitions_to_txn_request::AddPartitionsToTxnRequest;
-
-pub mod add_partitions_to_txn_response;
-pub use add_partitions_to_txn_response::AddPartitionsToTxnResponse;
-
-pub mod allocate_producer_ids_request;
-pub use allocate_producer_ids_request::AllocateProducerIdsRequest;
-
-pub mod allocate_producer_ids_response;
-pub use allocate_producer_ids_response::AllocateProducerIdsResponse;
-
-pub mod alter_client_quotas_request;
-pub use alter_client_quotas_request::AlterClientQuotasRequest;
-
-pub mod alter_client_quotas_response;
-pub use alter_client_quotas_response::AlterClientQuotasResponse;
-
-pub mod alter_configs_request;
-pub use alter_configs_request::AlterConfigsRequest;
-
-pub mod alter_configs_response;
-pub use alter_configs_response::AlterConfigsResponse;
-
-pub mod alter_partition_reassignments_request;
-pub use alter_partition_reassignments_request::AlterPartitionReassignmentsRequest;
-
-pub mod alter_partition_reassignments_response;
-pub use alter_partition_reassignments_response::AlterPartitionReassignmentsResponse;
-
-pub mod alter_partition_request;
-pub use alter_partition_request::AlterPartitionRequest;
-
-pub mod alter_partition_response;
-pub use alter_partition_response::AlterPartitionResponse;
-
-pub mod alter_replica_log_dirs_request;
-pub use alter_replica_log_dirs_request::AlterReplicaLogDirsRequest;
-
-pub mod alter_replica_log_dirs_response;
-pub use alter_replica_log_dirs_response::AlterReplicaLogDirsResponse;
-
-pub mod alter_user_scram_credentials_request;
-pub use alter_user_scram_credentials_request::AlterUserScramCredentialsRequest;
-
-pub mod alter_user_scram_credentials_response;
-pub use alter_user_scram_credentials_response::AlterUserScramCredentialsResponse;
-
-pub mod api_versions_request;
-pub use api_versions_request::ApiVersionsRequest;
-
-pub mod api_versions_response;
-pub use api_versions_response::ApiVersionsResponse;
-
-pub mod begin_quorum_epoch_request;
-pub use begin_quorum_epoch_request::BeginQuorumEpochRequest;
-
-pub mod begin_quorum_epoch_response;
-pub use begin_quorum_epoch_response::BeginQuorumEpochResponse;
-
-pub mod broker_heartbeat_request;
-pub use broker_heartbeat_request::BrokerHeartbeatRequest;
-
-pub mod broker_heartbeat_response;
-pub use broker_heartbeat_response::BrokerHeartbeatResponse;
-
-pub mod broker_registration_request;
-pub use broker_registration_request::BrokerRegistrationRequest;
-
-pub mod broker_registration_response;
-pub use broker_registration_response::BrokerRegistrationResponse;
 
 pub mod consumer_protocol_assignment;
 pub use consumer_protocol_assignment::ConsumerProtocolAssignment;
@@ -90,281 +12,11 @@ pub use consumer_protocol_assignment::ConsumerProtocolAssignment;
 pub mod consumer_protocol_subscription;
 pub use consumer_protocol_subscription::ConsumerProtocolSubscription;
 
-pub mod controlled_shutdown_request;
-pub use controlled_shutdown_request::ControlledShutdownRequest;
-
-pub mod controlled_shutdown_response;
-pub use controlled_shutdown_response::ControlledShutdownResponse;
-
-pub mod create_acls_request;
-pub use create_acls_request::CreateAclsRequest;
-
-pub mod create_acls_response;
-pub use create_acls_response::CreateAclsResponse;
-
-pub mod create_delegation_token_request;
-pub use create_delegation_token_request::CreateDelegationTokenRequest;
-
-pub mod create_delegation_token_response;
-pub use create_delegation_token_response::CreateDelegationTokenResponse;
-
-pub mod create_partitions_request;
-pub use create_partitions_request::CreatePartitionsRequest;
-
-pub mod create_partitions_response;
-pub use create_partitions_response::CreatePartitionsResponse;
-
-pub mod create_topics_request;
-pub use create_topics_request::CreateTopicsRequest;
-
-pub mod create_topics_response;
-pub use create_topics_response::CreateTopicsResponse;
-
 pub mod default_principal_data;
 pub use default_principal_data::DefaultPrincipalData;
 
-pub mod delete_acls_request;
-pub use delete_acls_request::DeleteAclsRequest;
-
-pub mod delete_acls_response;
-pub use delete_acls_response::DeleteAclsResponse;
-
-pub mod delete_groups_request;
-pub use delete_groups_request::DeleteGroupsRequest;
-
-pub mod delete_groups_response;
-pub use delete_groups_response::DeleteGroupsResponse;
-
-pub mod delete_records_request;
-pub use delete_records_request::DeleteRecordsRequest;
-
-pub mod delete_records_response;
-pub use delete_records_response::DeleteRecordsResponse;
-
-pub mod delete_topics_request;
-pub use delete_topics_request::DeleteTopicsRequest;
-
-pub mod delete_topics_response;
-pub use delete_topics_response::DeleteTopicsResponse;
-
-pub mod describe_acls_request;
-pub use describe_acls_request::DescribeAclsRequest;
-
-pub mod describe_acls_response;
-pub use describe_acls_response::DescribeAclsResponse;
-
-pub mod describe_client_quotas_request;
-pub use describe_client_quotas_request::DescribeClientQuotasRequest;
-
-pub mod describe_client_quotas_response;
-pub use describe_client_quotas_response::DescribeClientQuotasResponse;
-
-pub mod describe_cluster_request;
-pub use describe_cluster_request::DescribeClusterRequest;
-
-pub mod describe_cluster_response;
-pub use describe_cluster_response::DescribeClusterResponse;
-
-pub mod describe_configs_request;
-pub use describe_configs_request::DescribeConfigsRequest;
-
-pub mod describe_configs_response;
-pub use describe_configs_response::DescribeConfigsResponse;
-
-pub mod describe_delegation_token_request;
-pub use describe_delegation_token_request::DescribeDelegationTokenRequest;
-
-pub mod describe_delegation_token_response;
-pub use describe_delegation_token_response::DescribeDelegationTokenResponse;
-
-pub mod describe_groups_request;
-pub use describe_groups_request::DescribeGroupsRequest;
-
-pub mod describe_groups_response;
-pub use describe_groups_response::DescribeGroupsResponse;
-
-pub mod describe_log_dirs_request;
-pub use describe_log_dirs_request::DescribeLogDirsRequest;
-
-pub mod describe_log_dirs_response;
-pub use describe_log_dirs_response::DescribeLogDirsResponse;
-
-pub mod describe_producers_request;
-pub use describe_producers_request::DescribeProducersRequest;
-
-pub mod describe_producers_response;
-pub use describe_producers_response::DescribeProducersResponse;
-
-pub mod describe_quorum_request;
-pub use describe_quorum_request::DescribeQuorumRequest;
-
-pub mod describe_quorum_response;
-pub use describe_quorum_response::DescribeQuorumResponse;
-
-pub mod describe_transactions_request;
-pub use describe_transactions_request::DescribeTransactionsRequest;
-
-pub mod describe_transactions_response;
-pub use describe_transactions_response::DescribeTransactionsResponse;
-
-pub mod describe_user_scram_credentials_request;
-pub use describe_user_scram_credentials_request::DescribeUserScramCredentialsRequest;
-
-pub mod describe_user_scram_credentials_response;
-pub use describe_user_scram_credentials_response::DescribeUserScramCredentialsResponse;
-
-pub mod elect_leaders_request;
-pub use elect_leaders_request::ElectLeadersRequest;
-
-pub mod elect_leaders_response;
-pub use elect_leaders_response::ElectLeadersResponse;
-
-pub mod end_quorum_epoch_request;
-pub use end_quorum_epoch_request::EndQuorumEpochRequest;
-
-pub mod end_quorum_epoch_response;
-pub use end_quorum_epoch_response::EndQuorumEpochResponse;
-
-pub mod end_txn_request;
-pub use end_txn_request::EndTxnRequest;
-
-pub mod end_txn_response;
-pub use end_txn_response::EndTxnResponse;
-
-pub mod envelope_request;
-pub use envelope_request::EnvelopeRequest;
-
-pub mod envelope_response;
-pub use envelope_response::EnvelopeResponse;
-
-pub mod expire_delegation_token_request;
-pub use expire_delegation_token_request::ExpireDelegationTokenRequest;
-
-pub mod expire_delegation_token_response;
-pub use expire_delegation_token_response::ExpireDelegationTokenResponse;
-
-pub mod fetch_request;
-pub use fetch_request::FetchRequest;
-
-pub mod fetch_response;
-pub use fetch_response::FetchResponse;
-
-pub mod fetch_snapshot_request;
-pub use fetch_snapshot_request::FetchSnapshotRequest;
-
-pub mod fetch_snapshot_response;
-pub use fetch_snapshot_response::FetchSnapshotResponse;
-
-pub mod find_coordinator_request;
-pub use find_coordinator_request::FindCoordinatorRequest;
-
-pub mod find_coordinator_response;
-pub use find_coordinator_response::FindCoordinatorResponse;
-
-pub mod heartbeat_request;
-pub use heartbeat_request::HeartbeatRequest;
-
-pub mod heartbeat_response;
-pub use heartbeat_response::HeartbeatResponse;
-
-pub mod incremental_alter_configs_request;
-pub use incremental_alter_configs_request::IncrementalAlterConfigsRequest;
-
-pub mod incremental_alter_configs_response;
-pub use incremental_alter_configs_response::IncrementalAlterConfigsResponse;
-
-pub mod init_producer_id_request;
-pub use init_producer_id_request::InitProducerIdRequest;
-
-pub mod init_producer_id_response;
-pub use init_producer_id_response::InitProducerIdResponse;
-
-pub mod join_group_request;
-pub use join_group_request::JoinGroupRequest;
-
-pub mod join_group_response;
-pub use join_group_response::JoinGroupResponse;
-
-pub mod leader_and_isr_request;
-pub use leader_and_isr_request::LeaderAndIsrRequest;
-
-pub mod leader_and_isr_response;
-pub use leader_and_isr_response::LeaderAndIsrResponse;
-
 pub mod leader_change_message;
 pub use leader_change_message::LeaderChangeMessage;
-
-pub mod leave_group_request;
-pub use leave_group_request::LeaveGroupRequest;
-
-pub mod leave_group_response;
-pub use leave_group_response::LeaveGroupResponse;
-
-pub mod list_groups_request;
-pub use list_groups_request::ListGroupsRequest;
-
-pub mod list_groups_response;
-pub use list_groups_response::ListGroupsResponse;
-
-pub mod list_offsets_request;
-pub use list_offsets_request::ListOffsetsRequest;
-
-pub mod list_offsets_response;
-pub use list_offsets_response::ListOffsetsResponse;
-
-pub mod list_partition_reassignments_request;
-pub use list_partition_reassignments_request::ListPartitionReassignmentsRequest;
-
-pub mod list_partition_reassignments_response;
-pub use list_partition_reassignments_response::ListPartitionReassignmentsResponse;
-
-pub mod list_transactions_request;
-pub use list_transactions_request::ListTransactionsRequest;
-
-pub mod list_transactions_response;
-pub use list_transactions_response::ListTransactionsResponse;
-
-pub mod metadata_request;
-pub use metadata_request::MetadataRequest;
-
-pub mod metadata_response;
-pub use metadata_response::MetadataResponse;
-
-pub mod offset_commit_request;
-pub use offset_commit_request::OffsetCommitRequest;
-
-pub mod offset_commit_response;
-pub use offset_commit_response::OffsetCommitResponse;
-
-pub mod offset_delete_request;
-pub use offset_delete_request::OffsetDeleteRequest;
-
-pub mod offset_delete_response;
-pub use offset_delete_response::OffsetDeleteResponse;
-
-pub mod offset_fetch_request;
-pub use offset_fetch_request::OffsetFetchRequest;
-
-pub mod offset_fetch_response;
-pub use offset_fetch_response::OffsetFetchResponse;
-
-pub mod offset_for_leader_epoch_request;
-pub use offset_for_leader_epoch_request::OffsetForLeaderEpochRequest;
-
-pub mod offset_for_leader_epoch_response;
-pub use offset_for_leader_epoch_response::OffsetForLeaderEpochResponse;
-
-pub mod produce_request;
-pub use produce_request::ProduceRequest;
-
-pub mod produce_response;
-pub use produce_response::ProduceResponse;
-
-pub mod renew_delegation_token_request;
-pub use renew_delegation_token_request::RenewDelegationTokenRequest;
-
-pub mod renew_delegation_token_response;
-pub use renew_delegation_token_response::RenewDelegationTokenResponse;
 
 pub mod request_header;
 pub use request_header::RequestHeader;
@@ -372,71 +24,455 @@ pub use request_header::RequestHeader;
 pub mod response_header;
 pub use response_header::ResponseHeader;
 
-pub mod sasl_authenticate_request;
-pub use sasl_authenticate_request::SaslAuthenticateRequest;
-
-pub mod sasl_authenticate_response;
-pub use sasl_authenticate_response::SaslAuthenticateResponse;
-
-pub mod sasl_handshake_request;
-pub use sasl_handshake_request::SaslHandshakeRequest;
-
-pub mod sasl_handshake_response;
-pub use sasl_handshake_response::SaslHandshakeResponse;
-
 pub mod snapshot_footer_record;
 pub use snapshot_footer_record::SnapshotFooterRecord;
 
 pub mod snapshot_header_record;
 pub use snapshot_header_record::SnapshotHeaderRecord;
 
+pub mod produce_request;
+pub use produce_request::ProduceRequest;
+
+pub mod fetch_request;
+pub use fetch_request::FetchRequest;
+
+pub mod list_offsets_request;
+pub use list_offsets_request::ListOffsetsRequest;
+
+pub mod metadata_request;
+pub use metadata_request::MetadataRequest;
+
+pub mod leader_and_isr_request;
+pub use leader_and_isr_request::LeaderAndIsrRequest;
+
 pub mod stop_replica_request;
 pub use stop_replica_request::StopReplicaRequest;
-
-pub mod stop_replica_response;
-pub use stop_replica_response::StopReplicaResponse;
-
-pub mod sync_group_request;
-pub use sync_group_request::SyncGroupRequest;
-
-pub mod sync_group_response;
-pub use sync_group_response::SyncGroupResponse;
-
-pub mod txn_offset_commit_request;
-pub use txn_offset_commit_request::TxnOffsetCommitRequest;
-
-pub mod txn_offset_commit_response;
-pub use txn_offset_commit_response::TxnOffsetCommitResponse;
-
-pub mod unregister_broker_request;
-pub use unregister_broker_request::UnregisterBrokerRequest;
-
-pub mod unregister_broker_response;
-pub use unregister_broker_response::UnregisterBrokerResponse;
-
-pub mod update_features_request;
-pub use update_features_request::UpdateFeaturesRequest;
-
-pub mod update_features_response;
-pub use update_features_response::UpdateFeaturesResponse;
 
 pub mod update_metadata_request;
 pub use update_metadata_request::UpdateMetadataRequest;
 
-pub mod update_metadata_response;
-pub use update_metadata_response::UpdateMetadataResponse;
+pub mod controlled_shutdown_request;
+pub use controlled_shutdown_request::ControlledShutdownRequest;
 
-pub mod vote_request;
-pub use vote_request::VoteRequest;
+pub mod offset_commit_request;
+pub use offset_commit_request::OffsetCommitRequest;
 
-pub mod vote_response;
-pub use vote_response::VoteResponse;
+pub mod offset_fetch_request;
+pub use offset_fetch_request::OffsetFetchRequest;
+
+pub mod find_coordinator_request;
+pub use find_coordinator_request::FindCoordinatorRequest;
+
+pub mod join_group_request;
+pub use join_group_request::JoinGroupRequest;
+
+pub mod heartbeat_request;
+pub use heartbeat_request::HeartbeatRequest;
+
+pub mod leave_group_request;
+pub use leave_group_request::LeaveGroupRequest;
+
+pub mod sync_group_request;
+pub use sync_group_request::SyncGroupRequest;
+
+pub mod describe_groups_request;
+pub use describe_groups_request::DescribeGroupsRequest;
+
+pub mod list_groups_request;
+pub use list_groups_request::ListGroupsRequest;
+
+pub mod sasl_handshake_request;
+pub use sasl_handshake_request::SaslHandshakeRequest;
+
+pub mod api_versions_request;
+pub use api_versions_request::ApiVersionsRequest;
+
+pub mod create_topics_request;
+pub use create_topics_request::CreateTopicsRequest;
+
+pub mod delete_topics_request;
+pub use delete_topics_request::DeleteTopicsRequest;
+
+pub mod delete_records_request;
+pub use delete_records_request::DeleteRecordsRequest;
+
+pub mod init_producer_id_request;
+pub use init_producer_id_request::InitProducerIdRequest;
+
+pub mod offset_for_leader_epoch_request;
+pub use offset_for_leader_epoch_request::OffsetForLeaderEpochRequest;
+
+pub mod add_partitions_to_txn_request;
+pub use add_partitions_to_txn_request::AddPartitionsToTxnRequest;
+
+pub mod add_offsets_to_txn_request;
+pub use add_offsets_to_txn_request::AddOffsetsToTxnRequest;
+
+pub mod end_txn_request;
+pub use end_txn_request::EndTxnRequest;
 
 pub mod write_txn_markers_request;
 pub use write_txn_markers_request::WriteTxnMarkersRequest;
 
+pub mod txn_offset_commit_request;
+pub use txn_offset_commit_request::TxnOffsetCommitRequest;
+
+pub mod describe_acls_request;
+pub use describe_acls_request::DescribeAclsRequest;
+
+pub mod create_acls_request;
+pub use create_acls_request::CreateAclsRequest;
+
+pub mod delete_acls_request;
+pub use delete_acls_request::DeleteAclsRequest;
+
+pub mod describe_configs_request;
+pub use describe_configs_request::DescribeConfigsRequest;
+
+pub mod alter_configs_request;
+pub use alter_configs_request::AlterConfigsRequest;
+
+pub mod alter_replica_log_dirs_request;
+pub use alter_replica_log_dirs_request::AlterReplicaLogDirsRequest;
+
+pub mod describe_log_dirs_request;
+pub use describe_log_dirs_request::DescribeLogDirsRequest;
+
+pub mod sasl_authenticate_request;
+pub use sasl_authenticate_request::SaslAuthenticateRequest;
+
+pub mod create_partitions_request;
+pub use create_partitions_request::CreatePartitionsRequest;
+
+pub mod create_delegation_token_request;
+pub use create_delegation_token_request::CreateDelegationTokenRequest;
+
+pub mod renew_delegation_token_request;
+pub use renew_delegation_token_request::RenewDelegationTokenRequest;
+
+pub mod expire_delegation_token_request;
+pub use expire_delegation_token_request::ExpireDelegationTokenRequest;
+
+pub mod describe_delegation_token_request;
+pub use describe_delegation_token_request::DescribeDelegationTokenRequest;
+
+pub mod delete_groups_request;
+pub use delete_groups_request::DeleteGroupsRequest;
+
+pub mod elect_leaders_request;
+pub use elect_leaders_request::ElectLeadersRequest;
+
+pub mod incremental_alter_configs_request;
+pub use incremental_alter_configs_request::IncrementalAlterConfigsRequest;
+
+pub mod alter_partition_reassignments_request;
+pub use alter_partition_reassignments_request::AlterPartitionReassignmentsRequest;
+
+pub mod list_partition_reassignments_request;
+pub use list_partition_reassignments_request::ListPartitionReassignmentsRequest;
+
+pub mod offset_delete_request;
+pub use offset_delete_request::OffsetDeleteRequest;
+
+pub mod describe_client_quotas_request;
+pub use describe_client_quotas_request::DescribeClientQuotasRequest;
+
+pub mod alter_client_quotas_request;
+pub use alter_client_quotas_request::AlterClientQuotasRequest;
+
+pub mod describe_user_scram_credentials_request;
+pub use describe_user_scram_credentials_request::DescribeUserScramCredentialsRequest;
+
+pub mod alter_user_scram_credentials_request;
+pub use alter_user_scram_credentials_request::AlterUserScramCredentialsRequest;
+
+pub mod vote_request;
+pub use vote_request::VoteRequest;
+
+pub mod begin_quorum_epoch_request;
+pub use begin_quorum_epoch_request::BeginQuorumEpochRequest;
+
+pub mod end_quorum_epoch_request;
+pub use end_quorum_epoch_request::EndQuorumEpochRequest;
+
+pub mod describe_quorum_request;
+pub use describe_quorum_request::DescribeQuorumRequest;
+
+pub mod alter_partition_request;
+pub use alter_partition_request::AlterPartitionRequest;
+
+pub mod update_features_request;
+pub use update_features_request::UpdateFeaturesRequest;
+
+pub mod envelope_request;
+pub use envelope_request::EnvelopeRequest;
+
+pub mod fetch_snapshot_request;
+pub use fetch_snapshot_request::FetchSnapshotRequest;
+
+pub mod describe_cluster_request;
+pub use describe_cluster_request::DescribeClusterRequest;
+
+pub mod describe_producers_request;
+pub use describe_producers_request::DescribeProducersRequest;
+
+pub mod broker_registration_request;
+pub use broker_registration_request::BrokerRegistrationRequest;
+
+pub mod broker_heartbeat_request;
+pub use broker_heartbeat_request::BrokerHeartbeatRequest;
+
+pub mod unregister_broker_request;
+pub use unregister_broker_request::UnregisterBrokerRequest;
+
+pub mod describe_transactions_request;
+pub use describe_transactions_request::DescribeTransactionsRequest;
+
+pub mod list_transactions_request;
+pub use list_transactions_request::ListTransactionsRequest;
+
+pub mod allocate_producer_ids_request;
+pub use allocate_producer_ids_request::AllocateProducerIdsRequest;
+
+pub mod consumer_group_heartbeat_request;
+pub use consumer_group_heartbeat_request::ConsumerGroupHeartbeatRequest;
+
+pub mod controller_registration_request;
+pub use controller_registration_request::ControllerRegistrationRequest;
+
+pub mod get_telemetry_subscriptions_request;
+pub use get_telemetry_subscriptions_request::GetTelemetrySubscriptionsRequest;
+
+pub mod push_telemetry_request;
+pub use push_telemetry_request::PushTelemetryRequest;
+
+pub mod assign_replicas_to_dirs_request;
+pub use assign_replicas_to_dirs_request::AssignReplicasToDirsRequest;
+
+pub mod list_client_metrics_resources_request;
+pub use list_client_metrics_resources_request::ListClientMetricsResourcesRequest;
+
+pub mod produce_response;
+pub use produce_response::ProduceResponse;
+
+pub mod fetch_response;
+pub use fetch_response::FetchResponse;
+
+pub mod list_offsets_response;
+pub use list_offsets_response::ListOffsetsResponse;
+
+pub mod metadata_response;
+pub use metadata_response::MetadataResponse;
+
+pub mod leader_and_isr_response;
+pub use leader_and_isr_response::LeaderAndIsrResponse;
+
+pub mod stop_replica_response;
+pub use stop_replica_response::StopReplicaResponse;
+
+pub mod update_metadata_response;
+pub use update_metadata_response::UpdateMetadataResponse;
+
+pub mod controlled_shutdown_response;
+pub use controlled_shutdown_response::ControlledShutdownResponse;
+
+pub mod offset_commit_response;
+pub use offset_commit_response::OffsetCommitResponse;
+
+pub mod offset_fetch_response;
+pub use offset_fetch_response::OffsetFetchResponse;
+
+pub mod find_coordinator_response;
+pub use find_coordinator_response::FindCoordinatorResponse;
+
+pub mod join_group_response;
+pub use join_group_response::JoinGroupResponse;
+
+pub mod heartbeat_response;
+pub use heartbeat_response::HeartbeatResponse;
+
+pub mod leave_group_response;
+pub use leave_group_response::LeaveGroupResponse;
+
+pub mod sync_group_response;
+pub use sync_group_response::SyncGroupResponse;
+
+pub mod describe_groups_response;
+pub use describe_groups_response::DescribeGroupsResponse;
+
+pub mod list_groups_response;
+pub use list_groups_response::ListGroupsResponse;
+
+pub mod sasl_handshake_response;
+pub use sasl_handshake_response::SaslHandshakeResponse;
+
+pub mod api_versions_response;
+pub use api_versions_response::ApiVersionsResponse;
+
+pub mod create_topics_response;
+pub use create_topics_response::CreateTopicsResponse;
+
+pub mod delete_topics_response;
+pub use delete_topics_response::DeleteTopicsResponse;
+
+pub mod delete_records_response;
+pub use delete_records_response::DeleteRecordsResponse;
+
+pub mod init_producer_id_response;
+pub use init_producer_id_response::InitProducerIdResponse;
+
+pub mod offset_for_leader_epoch_response;
+pub use offset_for_leader_epoch_response::OffsetForLeaderEpochResponse;
+
+pub mod add_partitions_to_txn_response;
+pub use add_partitions_to_txn_response::AddPartitionsToTxnResponse;
+
+pub mod add_offsets_to_txn_response;
+pub use add_offsets_to_txn_response::AddOffsetsToTxnResponse;
+
+pub mod end_txn_response;
+pub use end_txn_response::EndTxnResponse;
+
 pub mod write_txn_markers_response;
 pub use write_txn_markers_response::WriteTxnMarkersResponse;
+
+pub mod txn_offset_commit_response;
+pub use txn_offset_commit_response::TxnOffsetCommitResponse;
+
+pub mod describe_acls_response;
+pub use describe_acls_response::DescribeAclsResponse;
+
+pub mod create_acls_response;
+pub use create_acls_response::CreateAclsResponse;
+
+pub mod delete_acls_response;
+pub use delete_acls_response::DeleteAclsResponse;
+
+pub mod describe_configs_response;
+pub use describe_configs_response::DescribeConfigsResponse;
+
+pub mod alter_configs_response;
+pub use alter_configs_response::AlterConfigsResponse;
+
+pub mod alter_replica_log_dirs_response;
+pub use alter_replica_log_dirs_response::AlterReplicaLogDirsResponse;
+
+pub mod describe_log_dirs_response;
+pub use describe_log_dirs_response::DescribeLogDirsResponse;
+
+pub mod sasl_authenticate_response;
+pub use sasl_authenticate_response::SaslAuthenticateResponse;
+
+pub mod create_partitions_response;
+pub use create_partitions_response::CreatePartitionsResponse;
+
+pub mod create_delegation_token_response;
+pub use create_delegation_token_response::CreateDelegationTokenResponse;
+
+pub mod renew_delegation_token_response;
+pub use renew_delegation_token_response::RenewDelegationTokenResponse;
+
+pub mod expire_delegation_token_response;
+pub use expire_delegation_token_response::ExpireDelegationTokenResponse;
+
+pub mod describe_delegation_token_response;
+pub use describe_delegation_token_response::DescribeDelegationTokenResponse;
+
+pub mod delete_groups_response;
+pub use delete_groups_response::DeleteGroupsResponse;
+
+pub mod elect_leaders_response;
+pub use elect_leaders_response::ElectLeadersResponse;
+
+pub mod incremental_alter_configs_response;
+pub use incremental_alter_configs_response::IncrementalAlterConfigsResponse;
+
+pub mod alter_partition_reassignments_response;
+pub use alter_partition_reassignments_response::AlterPartitionReassignmentsResponse;
+
+pub mod list_partition_reassignments_response;
+pub use list_partition_reassignments_response::ListPartitionReassignmentsResponse;
+
+pub mod offset_delete_response;
+pub use offset_delete_response::OffsetDeleteResponse;
+
+pub mod describe_client_quotas_response;
+pub use describe_client_quotas_response::DescribeClientQuotasResponse;
+
+pub mod alter_client_quotas_response;
+pub use alter_client_quotas_response::AlterClientQuotasResponse;
+
+pub mod describe_user_scram_credentials_response;
+pub use describe_user_scram_credentials_response::DescribeUserScramCredentialsResponse;
+
+pub mod alter_user_scram_credentials_response;
+pub use alter_user_scram_credentials_response::AlterUserScramCredentialsResponse;
+
+pub mod vote_response;
+pub use vote_response::VoteResponse;
+
+pub mod begin_quorum_epoch_response;
+pub use begin_quorum_epoch_response::BeginQuorumEpochResponse;
+
+pub mod end_quorum_epoch_response;
+pub use end_quorum_epoch_response::EndQuorumEpochResponse;
+
+pub mod describe_quorum_response;
+pub use describe_quorum_response::DescribeQuorumResponse;
+
+pub mod alter_partition_response;
+pub use alter_partition_response::AlterPartitionResponse;
+
+pub mod update_features_response;
+pub use update_features_response::UpdateFeaturesResponse;
+
+pub mod envelope_response;
+pub use envelope_response::EnvelopeResponse;
+
+pub mod fetch_snapshot_response;
+pub use fetch_snapshot_response::FetchSnapshotResponse;
+
+pub mod describe_cluster_response;
+pub use describe_cluster_response::DescribeClusterResponse;
+
+pub mod describe_producers_response;
+pub use describe_producers_response::DescribeProducersResponse;
+
+pub mod broker_registration_response;
+pub use broker_registration_response::BrokerRegistrationResponse;
+
+pub mod broker_heartbeat_response;
+pub use broker_heartbeat_response::BrokerHeartbeatResponse;
+
+pub mod unregister_broker_response;
+pub use unregister_broker_response::UnregisterBrokerResponse;
+
+pub mod describe_transactions_response;
+pub use describe_transactions_response::DescribeTransactionsResponse;
+
+pub mod list_transactions_response;
+pub use list_transactions_response::ListTransactionsResponse;
+
+pub mod allocate_producer_ids_response;
+pub use allocate_producer_ids_response::AllocateProducerIdsResponse;
+
+pub mod consumer_group_heartbeat_response;
+pub use consumer_group_heartbeat_response::ConsumerGroupHeartbeatResponse;
+
+pub mod controller_registration_response;
+pub use controller_registration_response::ControllerRegistrationResponse;
+
+pub mod get_telemetry_subscriptions_response;
+pub use get_telemetry_subscriptions_response::GetTelemetrySubscriptionsResponse;
+
+pub mod push_telemetry_response;
+pub use push_telemetry_response::PushTelemetryResponse;
+
+pub mod assign_replicas_to_dirs_response;
+pub use assign_replicas_to_dirs_response::AssignReplicasToDirsResponse;
+
+pub mod list_client_metrics_resources_response;
+pub use list_client_metrics_resources_response::ListClientMetricsResourcesResponse;
 
 impl Request for ProduceRequest {
     const KEY: i16 = 0;
@@ -778,6 +814,36 @@ impl Request for AllocateProducerIdsRequest {
     type Response = AllocateProducerIdsResponse;
 }
 
+impl Request for ConsumerGroupHeartbeatRequest {
+    const KEY: i16 = 68;
+    type Response = ConsumerGroupHeartbeatResponse;
+}
+
+impl Request for ControllerRegistrationRequest {
+    const KEY: i16 = 70;
+    type Response = ControllerRegistrationResponse;
+}
+
+impl Request for GetTelemetrySubscriptionsRequest {
+    const KEY: i16 = 71;
+    type Response = GetTelemetrySubscriptionsResponse;
+}
+
+impl Request for PushTelemetryRequest {
+    const KEY: i16 = 72;
+    type Response = PushTelemetryResponse;
+}
+
+impl Request for AssignReplicasToDirsRequest {
+    const KEY: i16 = 73;
+    type Response = AssignReplicasToDirsResponse;
+}
+
+impl Request for ListClientMetricsResourcesRequest {
+    const KEY: i16 = 74;
+    type Response = ListClientMetricsResourcesResponse;
+}
+
 /// Valid API keys in the Kafka protocol.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ApiKey {
@@ -917,6 +983,18 @@ pub enum ApiKey {
     ListTransactionsKey = 66,
     /// API key for request AllocateProducerIdsRequest
     AllocateProducerIdsKey = 67,
+    /// API key for request ConsumerGroupHeartbeatRequest
+    ConsumerGroupHeartbeatKey = 68,
+    /// API key for request ControllerRegistrationRequest
+    ControllerRegistrationKey = 70,
+    /// API key for request GetTelemetrySubscriptionsRequest
+    GetTelemetrySubscriptionsKey = 71,
+    /// API key for request PushTelemetryRequest
+    PushTelemetryKey = 72,
+    /// API key for request AssignReplicasToDirsRequest
+    AssignReplicasToDirsKey = 73,
+    /// API key for request ListClientMetricsResourcesRequest
+    ListClientMetricsResourcesKey = 74,
 }
 
 impl ApiKey {
@@ -961,20 +1039,36 @@ impl ApiKey {
             ApiKey::DescribeLogDirsKey => DescribeLogDirsRequest::header_version(version),
             ApiKey::SaslAuthenticateKey => SaslAuthenticateRequest::header_version(version),
             ApiKey::CreatePartitionsKey => CreatePartitionsRequest::header_version(version),
-            ApiKey::CreateDelegationTokenKey => CreateDelegationTokenRequest::header_version(version),
+            ApiKey::CreateDelegationTokenKey => {
+                CreateDelegationTokenRequest::header_version(version)
+            }
             ApiKey::RenewDelegationTokenKey => RenewDelegationTokenRequest::header_version(version),
-            ApiKey::ExpireDelegationTokenKey => ExpireDelegationTokenRequest::header_version(version),
-            ApiKey::DescribeDelegationTokenKey => DescribeDelegationTokenRequest::header_version(version),
+            ApiKey::ExpireDelegationTokenKey => {
+                ExpireDelegationTokenRequest::header_version(version)
+            }
+            ApiKey::DescribeDelegationTokenKey => {
+                DescribeDelegationTokenRequest::header_version(version)
+            }
             ApiKey::DeleteGroupsKey => DeleteGroupsRequest::header_version(version),
             ApiKey::ElectLeadersKey => ElectLeadersRequest::header_version(version),
-            ApiKey::IncrementalAlterConfigsKey => IncrementalAlterConfigsRequest::header_version(version),
-            ApiKey::AlterPartitionReassignmentsKey => AlterPartitionReassignmentsRequest::header_version(version),
-            ApiKey::ListPartitionReassignmentsKey => ListPartitionReassignmentsRequest::header_version(version),
+            ApiKey::IncrementalAlterConfigsKey => {
+                IncrementalAlterConfigsRequest::header_version(version)
+            }
+            ApiKey::AlterPartitionReassignmentsKey => {
+                AlterPartitionReassignmentsRequest::header_version(version)
+            }
+            ApiKey::ListPartitionReassignmentsKey => {
+                ListPartitionReassignmentsRequest::header_version(version)
+            }
             ApiKey::OffsetDeleteKey => OffsetDeleteRequest::header_version(version),
             ApiKey::DescribeClientQuotasKey => DescribeClientQuotasRequest::header_version(version),
             ApiKey::AlterClientQuotasKey => AlterClientQuotasRequest::header_version(version),
-            ApiKey::DescribeUserScramCredentialsKey => DescribeUserScramCredentialsRequest::header_version(version),
-            ApiKey::AlterUserScramCredentialsKey => AlterUserScramCredentialsRequest::header_version(version),
+            ApiKey::DescribeUserScramCredentialsKey => {
+                DescribeUserScramCredentialsRequest::header_version(version)
+            }
+            ApiKey::AlterUserScramCredentialsKey => {
+                AlterUserScramCredentialsRequest::header_version(version)
+            }
             ApiKey::VoteKey => VoteRequest::header_version(version),
             ApiKey::BeginQuorumEpochKey => BeginQuorumEpochRequest::header_version(version),
             ApiKey::EndQuorumEpochKey => EndQuorumEpochRequest::header_version(version),
@@ -991,6 +1085,20 @@ impl ApiKey {
             ApiKey::DescribeTransactionsKey => DescribeTransactionsRequest::header_version(version),
             ApiKey::ListTransactionsKey => ListTransactionsRequest::header_version(version),
             ApiKey::AllocateProducerIdsKey => AllocateProducerIdsRequest::header_version(version),
+            ApiKey::ConsumerGroupHeartbeatKey => {
+                ConsumerGroupHeartbeatRequest::header_version(version)
+            }
+            ApiKey::ControllerRegistrationKey => {
+                ControllerRegistrationRequest::header_version(version)
+            }
+            ApiKey::GetTelemetrySubscriptionsKey => {
+                GetTelemetrySubscriptionsRequest::header_version(version)
+            }
+            ApiKey::PushTelemetryKey => PushTelemetryRequest::header_version(version),
+            ApiKey::AssignReplicasToDirsKey => AssignReplicasToDirsRequest::header_version(version),
+            ApiKey::ListClientMetricsResourcesKey => {
+                ListClientMetricsResourcesRequest::header_version(version)
+            }
         }
     }
     /// Get the version of response header that needs to be prepended to this message
@@ -1019,7 +1127,9 @@ impl ApiKey {
             ApiKey::DeleteTopicsKey => DeleteTopicsResponse::header_version(version),
             ApiKey::DeleteRecordsKey => DeleteRecordsResponse::header_version(version),
             ApiKey::InitProducerIdKey => InitProducerIdResponse::header_version(version),
-            ApiKey::OffsetForLeaderEpochKey => OffsetForLeaderEpochResponse::header_version(version),
+            ApiKey::OffsetForLeaderEpochKey => {
+                OffsetForLeaderEpochResponse::header_version(version)
+            }
             ApiKey::AddPartitionsToTxnKey => AddPartitionsToTxnResponse::header_version(version),
             ApiKey::AddOffsetsToTxnKey => AddOffsetsToTxnResponse::header_version(version),
             ApiKey::EndTxnKey => EndTxnResponse::header_version(version),
@@ -1034,20 +1144,40 @@ impl ApiKey {
             ApiKey::DescribeLogDirsKey => DescribeLogDirsResponse::header_version(version),
             ApiKey::SaslAuthenticateKey => SaslAuthenticateResponse::header_version(version),
             ApiKey::CreatePartitionsKey => CreatePartitionsResponse::header_version(version),
-            ApiKey::CreateDelegationTokenKey => CreateDelegationTokenResponse::header_version(version),
-            ApiKey::RenewDelegationTokenKey => RenewDelegationTokenResponse::header_version(version),
-            ApiKey::ExpireDelegationTokenKey => ExpireDelegationTokenResponse::header_version(version),
-            ApiKey::DescribeDelegationTokenKey => DescribeDelegationTokenResponse::header_version(version),
+            ApiKey::CreateDelegationTokenKey => {
+                CreateDelegationTokenResponse::header_version(version)
+            }
+            ApiKey::RenewDelegationTokenKey => {
+                RenewDelegationTokenResponse::header_version(version)
+            }
+            ApiKey::ExpireDelegationTokenKey => {
+                ExpireDelegationTokenResponse::header_version(version)
+            }
+            ApiKey::DescribeDelegationTokenKey => {
+                DescribeDelegationTokenResponse::header_version(version)
+            }
             ApiKey::DeleteGroupsKey => DeleteGroupsResponse::header_version(version),
             ApiKey::ElectLeadersKey => ElectLeadersResponse::header_version(version),
-            ApiKey::IncrementalAlterConfigsKey => IncrementalAlterConfigsResponse::header_version(version),
-            ApiKey::AlterPartitionReassignmentsKey => AlterPartitionReassignmentsResponse::header_version(version),
-            ApiKey::ListPartitionReassignmentsKey => ListPartitionReassignmentsResponse::header_version(version),
+            ApiKey::IncrementalAlterConfigsKey => {
+                IncrementalAlterConfigsResponse::header_version(version)
+            }
+            ApiKey::AlterPartitionReassignmentsKey => {
+                AlterPartitionReassignmentsResponse::header_version(version)
+            }
+            ApiKey::ListPartitionReassignmentsKey => {
+                ListPartitionReassignmentsResponse::header_version(version)
+            }
             ApiKey::OffsetDeleteKey => OffsetDeleteResponse::header_version(version),
-            ApiKey::DescribeClientQuotasKey => DescribeClientQuotasResponse::header_version(version),
+            ApiKey::DescribeClientQuotasKey => {
+                DescribeClientQuotasResponse::header_version(version)
+            }
             ApiKey::AlterClientQuotasKey => AlterClientQuotasResponse::header_version(version),
-            ApiKey::DescribeUserScramCredentialsKey => DescribeUserScramCredentialsResponse::header_version(version),
-            ApiKey::AlterUserScramCredentialsKey => AlterUserScramCredentialsResponse::header_version(version),
+            ApiKey::DescribeUserScramCredentialsKey => {
+                DescribeUserScramCredentialsResponse::header_version(version)
+            }
+            ApiKey::AlterUserScramCredentialsKey => {
+                AlterUserScramCredentialsResponse::header_version(version)
+            }
             ApiKey::VoteKey => VoteResponse::header_version(version),
             ApiKey::BeginQuorumEpochKey => BeginQuorumEpochResponse::header_version(version),
             ApiKey::EndQuorumEpochKey => EndQuorumEpochResponse::header_version(version),
@@ -1061,9 +1191,27 @@ impl ApiKey {
             ApiKey::BrokerRegistrationKey => BrokerRegistrationResponse::header_version(version),
             ApiKey::BrokerHeartbeatKey => BrokerHeartbeatResponse::header_version(version),
             ApiKey::UnregisterBrokerKey => UnregisterBrokerResponse::header_version(version),
-            ApiKey::DescribeTransactionsKey => DescribeTransactionsResponse::header_version(version),
+            ApiKey::DescribeTransactionsKey => {
+                DescribeTransactionsResponse::header_version(version)
+            }
             ApiKey::ListTransactionsKey => ListTransactionsResponse::header_version(version),
             ApiKey::AllocateProducerIdsKey => AllocateProducerIdsResponse::header_version(version),
+            ApiKey::ConsumerGroupHeartbeatKey => {
+                ConsumerGroupHeartbeatResponse::header_version(version)
+            }
+            ApiKey::ControllerRegistrationKey => {
+                ControllerRegistrationResponse::header_version(version)
+            }
+            ApiKey::GetTelemetrySubscriptionsKey => {
+                GetTelemetrySubscriptionsResponse::header_version(version)
+            }
+            ApiKey::PushTelemetryKey => PushTelemetryResponse::header_version(version),
+            ApiKey::AssignReplicasToDirsKey => {
+                AssignReplicasToDirsResponse::header_version(version)
+            }
+            ApiKey::ListClientMetricsResourcesKey => {
+                ListClientMetricsResourcesResponse::header_version(version)
+            }
         }
     }
 }
@@ -1110,20 +1258,36 @@ impl TryFrom<i16> for ApiKey {
             x if x == ApiKey::DescribeLogDirsKey as i16 => Ok(ApiKey::DescribeLogDirsKey),
             x if x == ApiKey::SaslAuthenticateKey as i16 => Ok(ApiKey::SaslAuthenticateKey),
             x if x == ApiKey::CreatePartitionsKey as i16 => Ok(ApiKey::CreatePartitionsKey),
-            x if x == ApiKey::CreateDelegationTokenKey as i16 => Ok(ApiKey::CreateDelegationTokenKey),
+            x if x == ApiKey::CreateDelegationTokenKey as i16 => {
+                Ok(ApiKey::CreateDelegationTokenKey)
+            }
             x if x == ApiKey::RenewDelegationTokenKey as i16 => Ok(ApiKey::RenewDelegationTokenKey),
-            x if x == ApiKey::ExpireDelegationTokenKey as i16 => Ok(ApiKey::ExpireDelegationTokenKey),
-            x if x == ApiKey::DescribeDelegationTokenKey as i16 => Ok(ApiKey::DescribeDelegationTokenKey),
+            x if x == ApiKey::ExpireDelegationTokenKey as i16 => {
+                Ok(ApiKey::ExpireDelegationTokenKey)
+            }
+            x if x == ApiKey::DescribeDelegationTokenKey as i16 => {
+                Ok(ApiKey::DescribeDelegationTokenKey)
+            }
             x if x == ApiKey::DeleteGroupsKey as i16 => Ok(ApiKey::DeleteGroupsKey),
             x if x == ApiKey::ElectLeadersKey as i16 => Ok(ApiKey::ElectLeadersKey),
-            x if x == ApiKey::IncrementalAlterConfigsKey as i16 => Ok(ApiKey::IncrementalAlterConfigsKey),
-            x if x == ApiKey::AlterPartitionReassignmentsKey as i16 => Ok(ApiKey::AlterPartitionReassignmentsKey),
-            x if x == ApiKey::ListPartitionReassignmentsKey as i16 => Ok(ApiKey::ListPartitionReassignmentsKey),
+            x if x == ApiKey::IncrementalAlterConfigsKey as i16 => {
+                Ok(ApiKey::IncrementalAlterConfigsKey)
+            }
+            x if x == ApiKey::AlterPartitionReassignmentsKey as i16 => {
+                Ok(ApiKey::AlterPartitionReassignmentsKey)
+            }
+            x if x == ApiKey::ListPartitionReassignmentsKey as i16 => {
+                Ok(ApiKey::ListPartitionReassignmentsKey)
+            }
             x if x == ApiKey::OffsetDeleteKey as i16 => Ok(ApiKey::OffsetDeleteKey),
             x if x == ApiKey::DescribeClientQuotasKey as i16 => Ok(ApiKey::DescribeClientQuotasKey),
             x if x == ApiKey::AlterClientQuotasKey as i16 => Ok(ApiKey::AlterClientQuotasKey),
-            x if x == ApiKey::DescribeUserScramCredentialsKey as i16 => Ok(ApiKey::DescribeUserScramCredentialsKey),
-            x if x == ApiKey::AlterUserScramCredentialsKey as i16 => Ok(ApiKey::AlterUserScramCredentialsKey),
+            x if x == ApiKey::DescribeUserScramCredentialsKey as i16 => {
+                Ok(ApiKey::DescribeUserScramCredentialsKey)
+            }
+            x if x == ApiKey::AlterUserScramCredentialsKey as i16 => {
+                Ok(ApiKey::AlterUserScramCredentialsKey)
+            }
             x if x == ApiKey::VoteKey as i16 => Ok(ApiKey::VoteKey),
             x if x == ApiKey::BeginQuorumEpochKey as i16 => Ok(ApiKey::BeginQuorumEpochKey),
             x if x == ApiKey::EndQuorumEpochKey as i16 => Ok(ApiKey::EndQuorumEpochKey),
@@ -1140,6 +1304,20 @@ impl TryFrom<i16> for ApiKey {
             x if x == ApiKey::DescribeTransactionsKey as i16 => Ok(ApiKey::DescribeTransactionsKey),
             x if x == ApiKey::ListTransactionsKey as i16 => Ok(ApiKey::ListTransactionsKey),
             x if x == ApiKey::AllocateProducerIdsKey as i16 => Ok(ApiKey::AllocateProducerIdsKey),
+            x if x == ApiKey::ConsumerGroupHeartbeatKey as i16 => {
+                Ok(ApiKey::ConsumerGroupHeartbeatKey)
+            }
+            x if x == ApiKey::ControllerRegistrationKey as i16 => {
+                Ok(ApiKey::ControllerRegistrationKey)
+            }
+            x if x == ApiKey::GetTelemetrySubscriptionsKey as i16 => {
+                Ok(ApiKey::GetTelemetrySubscriptionsKey)
+            }
+            x if x == ApiKey::PushTelemetryKey as i16 => Ok(ApiKey::PushTelemetryKey),
+            x if x == ApiKey::AssignReplicasToDirsKey as i16 => Ok(ApiKey::AssignReplicasToDirsKey),
+            x if x == ApiKey::ListClientMetricsResourcesKey as i16 => {
+                Ok(ApiKey::ListClientMetricsResourcesKey)
+            }
             _ => Err(()),
         }
     }
@@ -1285,6 +1463,18 @@ pub enum RequestKind {
     ListTransactionsRequest(ListTransactionsRequest),
     /// AllocateProducerIdsRequest,
     AllocateProducerIdsRequest(AllocateProducerIdsRequest),
+    /// ConsumerGroupHeartbeatRequest,
+    ConsumerGroupHeartbeatRequest(ConsumerGroupHeartbeatRequest),
+    /// ControllerRegistrationRequest,
+    ControllerRegistrationRequest(ControllerRegistrationRequest),
+    /// GetTelemetrySubscriptionsRequest,
+    GetTelemetrySubscriptionsRequest(GetTelemetrySubscriptionsRequest),
+    /// PushTelemetryRequest,
+    PushTelemetryRequest(PushTelemetryRequest),
+    /// AssignReplicasToDirsRequest,
+    AssignReplicasToDirsRequest(AssignReplicasToDirsRequest),
+    /// ListClientMetricsResourcesRequest,
+    ListClientMetricsResourcesRequest(ListClientMetricsResourcesRequest),
 }
 
 /// Wrapping enum for all responses in the Kafka protocol.
@@ -1427,130 +1617,201 @@ pub enum ResponseKind {
     ListTransactionsResponse(ListTransactionsResponse),
     /// AllocateProducerIdsResponse,
     AllocateProducerIdsResponse(AllocateProducerIdsResponse),
+    /// ConsumerGroupHeartbeatResponse,
+    ConsumerGroupHeartbeatResponse(ConsumerGroupHeartbeatResponse),
+    /// ControllerRegistrationResponse,
+    ControllerRegistrationResponse(ControllerRegistrationResponse),
+    /// GetTelemetrySubscriptionsResponse,
+    GetTelemetrySubscriptionsResponse(GetTelemetrySubscriptionsResponse),
+    /// PushTelemetryResponse,
+    PushTelemetryResponse(PushTelemetryResponse),
+    /// AssignReplicasToDirsResponse,
+    AssignReplicasToDirsResponse(AssignReplicasToDirsResponse),
+    /// ListClientMetricsResourcesResponse,
+    ListClientMetricsResourcesResponse(ListClientMetricsResourcesResponse),
 }
 
-/// The ID of the requesting broker
+/// The ID of the controller broker.
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default, Copy)]
 pub struct BrokerId(pub i32);
 
 impl From<i32> for BrokerId {
-    fn from(other: i32) -> Self { Self(other) }
+    fn from(other: i32) -> Self {
+        Self(other)
+    }
 }
 impl From<BrokerId> for i32 {
-    fn from(other: BrokerId) -> Self { other.0 }
+    fn from(other: BrokerId) -> Self {
+        other.0
+    }
 }
 impl std::borrow::Borrow<i32> for BrokerId {
-    fn borrow(&self) -> &i32 { &self.0 }
+    fn borrow(&self) -> &i32 {
+        &self.0
+    }
 }
 impl std::ops::Deref for BrokerId {
     type Target = i32;
-    fn deref(&self) -> &Self::Target { &self.0 }
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 impl std::cmp::PartialEq<i32> for BrokerId {
-    fn eq(&self, other: &i32) -> bool { &self.0 == other }
+    fn eq(&self, other: &i32) -> bool {
+        &self.0 == other
+    }
 }
 impl std::cmp::PartialEq<BrokerId> for i32 {
-    fn eq(&self, other: &BrokerId) -> bool { self == &other.0 }
+    fn eq(&self, other: &BrokerId) -> bool {
+        self == &other.0
+    }
 }
 impl NewType<i32> for BrokerId {}
 
-/// The unique group identifier.
+/// The group id
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default)]
 pub struct GroupId(pub StrBytes);
 
 impl From<StrBytes> for GroupId {
-    fn from(other: StrBytes) -> Self { Self(other) }
+    fn from(other: StrBytes) -> Self {
+        Self(other)
+    }
 }
 impl From<GroupId> for StrBytes {
-    fn from(other: GroupId) -> Self { other.0 }
+    fn from(other: GroupId) -> Self {
+        other.0
+    }
 }
 impl std::borrow::Borrow<StrBytes> for GroupId {
-    fn borrow(&self) -> &StrBytes { &self.0 }
+    fn borrow(&self) -> &StrBytes {
+        &self.0
+    }
 }
 impl std::ops::Deref for GroupId {
     type Target = StrBytes;
-    fn deref(&self) -> &Self::Target { &self.0 }
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 impl std::cmp::PartialEq<StrBytes> for GroupId {
-    fn eq(&self, other: &StrBytes) -> bool { &self.0 == other }
+    fn eq(&self, other: &StrBytes) -> bool {
+        &self.0 == other
+    }
 }
 impl std::cmp::PartialEq<GroupId> for StrBytes {
-    fn eq(&self, other: &GroupId) -> bool { self == &other.0 }
+    fn eq(&self, other: &GroupId) -> bool {
+        self == &other.0
+    }
 }
 impl NewType<StrBytes> for GroupId {}
 
-/// Current producer id in use by the transactional id.
+/// The first producer ID in this range, inclusive
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default, Copy)]
 pub struct ProducerId(pub i64);
 
 impl From<i64> for ProducerId {
-    fn from(other: i64) -> Self { Self(other) }
+    fn from(other: i64) -> Self {
+        Self(other)
+    }
 }
 impl From<ProducerId> for i64 {
-    fn from(other: ProducerId) -> Self { other.0 }
+    fn from(other: ProducerId) -> Self {
+        other.0
+    }
 }
 impl std::borrow::Borrow<i64> for ProducerId {
-    fn borrow(&self) -> &i64 { &self.0 }
+    fn borrow(&self) -> &i64 {
+        &self.0
+    }
 }
 impl std::ops::Deref for ProducerId {
     type Target = i64;
-    fn deref(&self) -> &Self::Target { &self.0 }
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 impl std::cmp::PartialEq<i64> for ProducerId {
-    fn eq(&self, other: &i64) -> bool { &self.0 == other }
+    fn eq(&self, other: &i64) -> bool {
+        &self.0 == other
+    }
 }
 impl std::cmp::PartialEq<ProducerId> for i64 {
-    fn eq(&self, other: &ProducerId) -> bool { self == &other.0 }
+    fn eq(&self, other: &ProducerId) -> bool {
+        self == &other.0
+    }
 }
 impl NewType<i64> for ProducerId {}
 
-/// The name of the topic.
+///
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default)]
 pub struct TopicName(pub StrBytes);
 
 impl From<StrBytes> for TopicName {
-    fn from(other: StrBytes) -> Self { Self(other) }
+    fn from(other: StrBytes) -> Self {
+        Self(other)
+    }
 }
 impl From<TopicName> for StrBytes {
-    fn from(other: TopicName) -> Self { other.0 }
+    fn from(other: TopicName) -> Self {
+        other.0
+    }
 }
 impl std::borrow::Borrow<StrBytes> for TopicName {
-    fn borrow(&self) -> &StrBytes { &self.0 }
+    fn borrow(&self) -> &StrBytes {
+        &self.0
+    }
 }
 impl std::ops::Deref for TopicName {
     type Target = StrBytes;
-    fn deref(&self) -> &Self::Target { &self.0 }
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 impl std::cmp::PartialEq<StrBytes> for TopicName {
-    fn eq(&self, other: &StrBytes) -> bool { &self.0 == other }
+    fn eq(&self, other: &StrBytes) -> bool {
+        &self.0 == other
+    }
 }
 impl std::cmp::PartialEq<TopicName> for StrBytes {
-    fn eq(&self, other: &TopicName) -> bool { self == &other.0 }
+    fn eq(&self, other: &TopicName) -> bool {
+        self == &other.0
+    }
 }
 impl NewType<StrBytes> for TopicName {}
 
-/// The transactional id corresponding to the transaction.
+///
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default)]
 pub struct TransactionalId(pub StrBytes);
 
 impl From<StrBytes> for TransactionalId {
-    fn from(other: StrBytes) -> Self { Self(other) }
+    fn from(other: StrBytes) -> Self {
+        Self(other)
+    }
 }
 impl From<TransactionalId> for StrBytes {
-    fn from(other: TransactionalId) -> Self { other.0 }
+    fn from(other: TransactionalId) -> Self {
+        other.0
+    }
 }
 impl std::borrow::Borrow<StrBytes> for TransactionalId {
-    fn borrow(&self) -> &StrBytes { &self.0 }
+    fn borrow(&self) -> &StrBytes {
+        &self.0
+    }
 }
 impl std::ops::Deref for TransactionalId {
     type Target = StrBytes;
-    fn deref(&self) -> &Self::Target { &self.0 }
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 impl std::cmp::PartialEq<StrBytes> for TransactionalId {
-    fn eq(&self, other: &StrBytes) -> bool { &self.0 == other }
+    fn eq(&self, other: &StrBytes) -> bool {
+        &self.0 == other
+    }
 }
 impl std::cmp::PartialEq<TransactionalId> for StrBytes {
-    fn eq(&self, other: &TransactionalId) -> bool { self == &other.0 }
+    fn eq(&self, other: &TransactionalId) -> bool {
+        self == &other.0
+    }
 }
 impl NewType<StrBytes> for TransactionalId {}
-

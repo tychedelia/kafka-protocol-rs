@@ -7,15 +7,78 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
+use anyhow::bail;
 use bytes::Bytes;
 use uuid::Uuid;
-use anyhow::bail;
 
 use crate::protocol::{
-    Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
+    buf::{ByteBuf, ByteBufMut},
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
 
+/// Valid versions: 0
+#[non_exhaustive]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
+pub struct EndQuorumEpochResponse {
+    /// The top level error code.
+    ///
+    /// Supported API versions: 0
+    pub error_code: i16,
+
+    ///
+    ///
+    /// Supported API versions: 0
+    pub topics: Vec<TopicData>,
+}
+
+impl Builder for EndQuorumEpochResponse {
+    type Builder = EndQuorumEpochResponseBuilder;
+
+    fn builder() -> Self::Builder {
+        EndQuorumEpochResponseBuilder::default()
+    }
+}
+
+impl Encodable for EndQuorumEpochResponse {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+        types::Int16.encode(buf, &self.error_code)?;
+        types::Array(types::Struct { version }).encode(buf, &self.topics)?;
+
+        Ok(())
+    }
+    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+        let mut total_size = 0;
+        total_size += types::Int16.compute_size(&self.error_code)?;
+        total_size += types::Array(types::Struct { version }).compute_size(&self.topics)?;
+
+        Ok(total_size)
+    }
+}
+
+impl Decodable for EndQuorumEpochResponse {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+        let error_code = types::Int16.decode(buf)?;
+        let topics = types::Array(types::Struct { version }).decode(buf)?;
+        Ok(Self { error_code, topics })
+    }
+}
+
+impl Default for EndQuorumEpochResponse {
+    fn default() -> Self {
+        Self {
+            error_code: 0,
+            topics: Default::default(),
+        }
+    }
+}
+
+impl Message for EndQuorumEpochResponse {
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 0 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
+}
 
 /// Valid versions: 0
 #[non_exhaustive]
@@ -23,31 +86,30 @@ use crate::protocol::{
 #[builder(default)]
 pub struct PartitionData {
     /// The partition index.
-    /// 
+    ///
     /// Supported API versions: 0
     pub partition_index: i32,
 
-    /// 
-    /// 
+    ///
+    ///
     /// Supported API versions: 0
     pub error_code: i16,
 
     /// The ID of the current leader or -1 if the leader is unknown.
-    /// 
+    ///
     /// Supported API versions: 0
     pub leader_id: super::BrokerId,
 
     /// The latest known leader epoch
-    /// 
+    ///
     /// Supported API versions: 0
     pub leader_epoch: i32,
-
 }
 
 impl Builder for PartitionData {
     type Builder = PartitionDataBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         PartitionDataBuilder::default()
     }
 }
@@ -100,6 +162,7 @@ impl Default for PartitionData {
 
 impl Message for PartitionData {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 0 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 /// Valid versions: 0
@@ -108,21 +171,20 @@ impl Message for PartitionData {
 #[builder(default)]
 pub struct TopicData {
     /// The topic name.
-    /// 
+    ///
     /// Supported API versions: 0
     pub topic_name: super::TopicName,
 
-    /// 
-    /// 
+    ///
+    ///
     /// Supported API versions: 0
     pub partitions: Vec<PartitionData>,
-
 }
 
 impl Builder for TopicData {
     type Builder = TopicDataBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         TopicDataBuilder::default()
     }
 }
@@ -165,71 +227,7 @@ impl Default for TopicData {
 
 impl Message for TopicData {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 0 };
-}
-
-/// Valid versions: 0
-#[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
-pub struct EndQuorumEpochResponse {
-    /// The top level error code.
-    /// 
-    /// Supported API versions: 0
-    pub error_code: i16,
-
-    /// 
-    /// 
-    /// Supported API versions: 0
-    pub topics: Vec<TopicData>,
-
-}
-
-impl Builder for EndQuorumEpochResponse {
-    type Builder = EndQuorumEpochResponseBuilder;
-
-    fn builder() -> Self::Builder{
-        EndQuorumEpochResponseBuilder::default()
-    }
-}
-
-impl Encodable for EndQuorumEpochResponse {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int16.encode(buf, &self.error_code)?;
-        types::Array(types::Struct { version }).encode(buf, &self.topics)?;
-
-        Ok(())
-    }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
-        let mut total_size = 0;
-        total_size += types::Int16.compute_size(&self.error_code)?;
-        total_size += types::Array(types::Struct { version }).compute_size(&self.topics)?;
-
-        Ok(total_size)
-    }
-}
-
-impl Decodable for EndQuorumEpochResponse {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let error_code = types::Int16.decode(buf)?;
-        let topics = types::Array(types::Struct { version }).decode(buf)?;
-        Ok(Self {
-            error_code,
-            topics,
-        })
-    }
-}
-
-impl Default for EndQuorumEpochResponse {
-    fn default() -> Self {
-        Self {
-            error_code: 0,
-            topics: Default::default(),
-        }
-    }
-}
-
-impl Message for EndQuorumEpochResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 0 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 impl HeaderVersion for EndQuorumEpochResponse {
@@ -237,4 +235,3 @@ impl HeaderVersion for EndQuorumEpochResponse {
         0
     }
 }
-

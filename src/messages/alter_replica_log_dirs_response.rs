@@ -7,15 +7,16 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
+use anyhow::bail;
 use bytes::Bytes;
 use uuid::Uuid;
-use anyhow::bail;
 
 use crate::protocol::{
-    Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
+    buf::{ByteBuf, ByteBufMut},
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
-
 
 /// Valid versions: 0-2
 #[non_exhaustive]
@@ -23,12 +24,12 @@ use crate::protocol::{
 #[builder(default)]
 pub struct AlterReplicaLogDirPartitionResult {
     /// The partition index.
-    /// 
+    ///
     /// Supported API versions: 0-2
     pub partition_index: i32,
 
     /// The error code, or 0 if there was no error.
-    /// 
+    ///
     /// Supported API versions: 0-2
     pub error_code: i16,
 
@@ -39,7 +40,7 @@ pub struct AlterReplicaLogDirPartitionResult {
 impl Builder for AlterReplicaLogDirPartitionResult {
     type Builder = AlterReplicaLogDirPartitionResultBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         AlterReplicaLogDirPartitionResultBuilder::default()
     }
 }
@@ -51,7 +52,10 @@ impl Encodable for AlterReplicaLogDirPartitionResult {
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -66,7 +70,10 @@ impl Encodable for AlterReplicaLogDirPartitionResult {
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -110,6 +117,7 @@ impl Default for AlterReplicaLogDirPartitionResult {
 
 impl Message for AlterReplicaLogDirPartitionResult {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 /// Valid versions: 0-2
@@ -118,12 +126,12 @@ impl Message for AlterReplicaLogDirPartitionResult {
 #[builder(default)]
 pub struct AlterReplicaLogDirTopicResult {
     /// The name of the topic.
-    /// 
+    ///
     /// Supported API versions: 0-2
     pub topic_name: super::TopicName,
 
     /// The results for each partition.
-    /// 
+    ///
     /// Supported API versions: 0-2
     pub partitions: Vec<AlterReplicaLogDirPartitionResult>,
 
@@ -134,7 +142,7 @@ pub struct AlterReplicaLogDirTopicResult {
 impl Builder for AlterReplicaLogDirTopicResult {
     type Builder = AlterReplicaLogDirTopicResultBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         AlterReplicaLogDirTopicResultBuilder::default()
     }
 }
@@ -154,7 +162,10 @@ impl Encodable for AlterReplicaLogDirTopicResult {
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -170,14 +181,18 @@ impl Encodable for AlterReplicaLogDirTopicResult {
             total_size += types::String.compute_size(&self.topic_name)?;
         }
         if version >= 2 {
-            total_size += types::CompactArray(types::Struct { version }).compute_size(&self.partitions)?;
+            total_size +=
+                types::CompactArray(types::Struct { version }).compute_size(&self.partitions)?;
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.partitions)?;
         }
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -229,6 +244,7 @@ impl Default for AlterReplicaLogDirTopicResult {
 
 impl Message for AlterReplicaLogDirTopicResult {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 /// Valid versions: 0-2
@@ -237,12 +253,12 @@ impl Message for AlterReplicaLogDirTopicResult {
 #[builder(default)]
 pub struct AlterReplicaLogDirsResponse {
     /// Duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
-    /// 
+    ///
     /// Supported API versions: 0-2
     pub throttle_time_ms: i32,
 
     /// The results for each topic.
-    /// 
+    ///
     /// Supported API versions: 0-2
     pub results: Vec<AlterReplicaLogDirTopicResult>,
 
@@ -253,7 +269,7 @@ pub struct AlterReplicaLogDirsResponse {
 impl Builder for AlterReplicaLogDirsResponse {
     type Builder = AlterReplicaLogDirsResponseBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         AlterReplicaLogDirsResponseBuilder::default()
     }
 }
@@ -269,7 +285,10 @@ impl Encodable for AlterReplicaLogDirsResponse {
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -281,14 +300,18 @@ impl Encodable for AlterReplicaLogDirsResponse {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
         if version >= 2 {
-            total_size += types::CompactArray(types::Struct { version }).compute_size(&self.results)?;
+            total_size +=
+                types::CompactArray(types::Struct { version }).compute_size(&self.results)?;
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.results)?;
         }
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -336,6 +359,7 @@ impl Default for AlterReplicaLogDirsResponse {
 
 impl Message for AlterReplicaLogDirsResponse {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 impl HeaderVersion for AlterReplicaLogDirsResponse {
@@ -347,4 +371,3 @@ impl HeaderVersion for AlterReplicaLogDirsResponse {
         }
     }
 }
-

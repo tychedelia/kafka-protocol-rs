@@ -7,15 +7,16 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
+use anyhow::bail;
 use bytes::Bytes;
 use uuid::Uuid;
-use anyhow::bail;
 
 use crate::protocol::{
-    Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
+    buf::{ByteBuf, ByteBufMut},
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
-
 
 /// Valid versions: 0-4
 #[non_exhaustive]
@@ -23,7 +24,7 @@ use crate::protocol::{
 #[builder(default)]
 pub struct ListGroupsRequest {
     /// The states of the groups we want to list. If empty all groups are returned with their state.
-    /// 
+    ///
     /// Supported API versions: 4
     pub states_filter: Vec<StrBytes>,
 
@@ -34,7 +35,7 @@ pub struct ListGroupsRequest {
 impl Builder for ListGroupsRequest {
     type Builder = ListGroupsRequestBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         ListGroupsRequestBuilder::default()
     }
 }
@@ -45,13 +46,16 @@ impl Encodable for ListGroupsRequest {
             types::CompactArray(types::CompactString).encode(buf, &self.states_filter)?;
         } else {
             if !self.states_filter.is_empty() {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -62,16 +66,20 @@ impl Encodable for ListGroupsRequest {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         if version >= 4 {
-            total_size += types::CompactArray(types::CompactString).compute_size(&self.states_filter)?;
+            total_size +=
+                types::CompactArray(types::CompactString).compute_size(&self.states_filter)?;
         } else {
             if !self.states_filter.is_empty() {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -116,6 +124,7 @@ impl Default for ListGroupsRequest {
 
 impl Message for ListGroupsRequest {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 impl HeaderVersion for ListGroupsRequest {
@@ -127,4 +136,3 @@ impl HeaderVersion for ListGroupsRequest {
         }
     }
 }
-
