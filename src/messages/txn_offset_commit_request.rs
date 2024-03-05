@@ -208,7 +208,7 @@ impl Decodable for TxnOffsetCommitRequest {
         let member_id = if version >= 3 {
             types::CompactString.decode(buf)?
         } else {
-            StrBytes::from_str("")
+            StrBytes::from_static_str("")
         };
         let group_instance_id = if version >= 3 {
             types::CompactString.decode(buf)?
@@ -252,7 +252,7 @@ impl Default for TxnOffsetCommitRequest {
             producer_id: (0).into(),
             producer_epoch: 0,
             generation_id: -1,
-            member_id: StrBytes::from_str(""),
+            member_id: StrBytes::from_static_str(""),
             group_instance_id: None,
             topics: Default::default(),
             unknown_tagged_fields: BTreeMap::new(),

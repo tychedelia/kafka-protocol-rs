@@ -515,7 +515,7 @@ impl Decodable for FetchRequest {
                 types::String.decode(buf)?
             }
         } else {
-            StrBytes::from_str("")
+            StrBytes::from_static_str("")
         };
         let mut unknown_tagged_fields = BTreeMap::new();
         if version >= 12 {
@@ -573,7 +573,7 @@ impl Default for FetchRequest {
             session_epoch: -1,
             topics: Default::default(),
             forgotten_topics_data: Default::default(),
-            rack_id: StrBytes::from_str(""),
+            rack_id: StrBytes::from_static_str(""),
             unknown_tagged_fields: BTreeMap::new(),
         }
     }
