@@ -33,9 +33,7 @@ mod str_bytes {
         }
 
         /// Construct a [StrBytes] from the provided static [str].
-        #[allow(clippy::should_implement_trait)]
-        // TODO: this should be renamed to `from_static_str` in the next breaking release.
-        pub fn from_str(s: &'static str) -> Self {
+        pub fn from_static_str(s: &'static str) -> Self {
             Self(Bytes::from_static(s.as_bytes()))
         }
 
