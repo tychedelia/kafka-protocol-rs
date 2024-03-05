@@ -7,15 +7,16 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
+use anyhow::bail;
 use bytes::Bytes;
 use uuid::Uuid;
-use anyhow::bail;
 
 use crate::protocol::{
-    Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
+    buf::{ByteBuf, ByteBufMut},
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
-
 
 /// Valid versions: 0-4
 #[non_exhaustive]
@@ -23,7 +24,7 @@ use crate::protocol::{
 #[builder(default)]
 pub struct DescribableLogDirTopic {
     /// The partition indexes.
-    /// 
+    ///
     /// Supported API versions: 0-4
     pub partitions: Vec<i32>,
 
@@ -34,14 +35,19 @@ pub struct DescribableLogDirTopic {
 impl Builder for DescribableLogDirTopic {
     type Builder = DescribableLogDirTopicBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         DescribableLogDirTopicBuilder::default()
     }
 }
 
 impl MapEncodable for DescribableLogDirTopic {
     type Key = super::TopicName;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(
+        &self,
+        key: &Self::Key,
+        buf: &mut B,
+        version: i16,
+    ) -> Result<(), EncodeError> {
         if version >= 2 {
             types::CompactString.encode(buf, key)?;
         } else {
@@ -55,7 +61,10 @@ impl MapEncodable for DescribableLogDirTopic {
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -78,7 +87,10 @@ impl MapEncodable for DescribableLogDirTopic {
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -111,10 +123,13 @@ impl MapDecodable for DescribableLogDirTopic {
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
-        Ok((key_field, Self {
-            partitions,
-            unknown_tagged_fields,
-        }))
+        Ok((
+            key_field,
+            Self {
+                partitions,
+                unknown_tagged_fields,
+            },
+        ))
     }
 }
 
@@ -129,6 +144,7 @@ impl Default for DescribableLogDirTopic {
 
 impl Message for DescribableLogDirTopic {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 0 });
 }
 
 /// Valid versions: 0-4
@@ -137,7 +153,7 @@ impl Message for DescribableLogDirTopic {
 #[builder(default)]
 pub struct DescribeLogDirsRequest {
     /// Each topic that we want to describe log directories for, or null for all topics.
-    /// 
+    ///
     /// Supported API versions: 0-4
     pub topics: Option<indexmap::IndexMap<super::TopicName, DescribableLogDirTopic>>,
 
@@ -148,7 +164,7 @@ pub struct DescribeLogDirsRequest {
 impl Builder for DescribeLogDirsRequest {
     type Builder = DescribeLogDirsRequestBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         DescribeLogDirsRequestBuilder::default()
     }
 }
@@ -163,7 +179,10 @@ impl Encodable for DescribeLogDirsRequest {
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -174,14 +193,18 @@ impl Encodable for DescribeLogDirsRequest {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         if version >= 2 {
-            total_size += types::CompactArray(types::Struct { version }).compute_size(&self.topics)?;
+            total_size +=
+                types::CompactArray(types::Struct { version }).compute_size(&self.topics)?;
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.topics)?;
         }
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -226,6 +249,7 @@ impl Default for DescribeLogDirsRequest {
 
 impl Message for DescribeLogDirsRequest {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 0 });
 }
 
 impl HeaderVersion for DescribeLogDirsRequest {
@@ -237,4 +261,3 @@ impl HeaderVersion for DescribeLogDirsRequest {
         }
     }
 }
-

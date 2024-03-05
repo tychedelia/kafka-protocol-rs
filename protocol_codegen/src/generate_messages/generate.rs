@@ -12,9 +12,13 @@ use super::spec::{FieldSpec, PrimitiveType, Spec, SpecType, TypeSpec, VersionSpe
 use std::cmp::Ordering;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-struct WrittenStruct {
+struct PreparedStruct {
     name: String,
     map_key: Option<Box<PreparedType>>,
+    prepared_fields: Vec<PreparedField>,
+    valid_versions: VersionSpec,
+    flexible_msg_versions: VersionSpec,
+    deprecated_versions: VersionSpec,
 }
 
 #[derive(Debug, Clone)]
@@ -76,7 +80,7 @@ fn parse_primitive_default(
 enum PreparedType {
     Primitive(PrimitiveType),
     Entity(EntityType),
-    Struct(WrittenStruct),
+    Struct(PreparedStruct),
     Array(Box<PreparedType>),
     Map(Box<PreparedType>, String),
 }
@@ -91,16 +95,22 @@ impl PreparedType {
             Self::Map(key, value) => format!("indexmap::IndexMap<{}, {}>", key.rust_name(), value),
         }
     }
-    fn name(&self, flexible: bool) -> String {
+    fn name(&self, flexible: bool, optional: bool) -> String {
         match self {
             Self::Primitive(prim) => prim.name(flexible).into(),
             Self::Entity(entity_type) => entity_type.inner.name(flexible).into(),
-            Self::Struct(_) => "types::Struct { version }".into(),
+            Self::Struct(_) => {
+                if optional {
+                    "types::OptionStruct { version }".into()
+                } else {
+                    "types::Struct { version }".into()
+                }
+            }
             Self::Array(inner) => {
                 if flexible {
-                    format!("types::CompactArray({})", inner.name(flexible))
+                    format!("types::CompactArray({})", inner.name(flexible, false))
                 } else {
-                    format!("types::Array({})", inner.name(flexible))
+                    format!("types::Array({})", inner.name(flexible, false))
                 }
             }
             Self::Map(_, _) => {
@@ -134,6 +144,7 @@ impl PreparedType {
     }
 }
 
+#[derive(Debug, Clone, Eq, PartialEq)]
 enum PreparedDefault {
     Null,
     Empty,
@@ -200,6 +211,7 @@ impl PreparedDefault {
     }
 }
 
+#[derive(Debug, Clone, Eq, PartialEq)]
 struct PreparedField {
     name: String,
     optional: bool,
@@ -207,7 +219,7 @@ struct PreparedField {
     versions: VersionSpec,
     tag: Option<i32>,
     tagged_versions: VersionSpec,
-    _nullable_versions: VersionSpec,
+    nullable_versions: VersionSpec,
     default: PreparedDefault,
     ignorable: bool,
     _entity_type: Option<String>,
@@ -226,6 +238,7 @@ impl PreparedField {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn prepare_field_type<W: Write>(
     w: &mut CodeWriter<W>,
     type_: &TypeSpec,
@@ -233,6 +246,9 @@ fn prepare_field_type<W: Write>(
     entity_types: &mut BTreeSet<EntityType>,
     valid_versions: VersionSpec,
     flexible_msg_versions: VersionSpec,
+    deprecated_versions: VersionSpec,
+    prepared_structs: &BTreeMap<String, PreparedStruct>,
+    prepared_structs_output: &mut Vec<PreparedStruct>,
 ) -> Result<PreparedType, Error> {
     Ok(match type_ {
         TypeSpec::Primitive(prim) => {
@@ -249,36 +265,54 @@ fn prepare_field_type<W: Write>(
             }
         }
         TypeSpec::Struct(name) => {
-            if let Some(fields) = &field.fields {
-                let written_struct = write_struct_def(
+            let prepared_struct = if field.fields.is_empty() {
+                // The struct could be better defined in the written_structs list.
+                // In particular, it could contain a map key.
+                if let Some(found) = prepared_structs.get(name) {
+                    found.clone()
+                } else {
+                    PreparedStruct {
+                        name: name.clone(),
+                        map_key: None,
+                        prepared_fields: vec![],
+                        valid_versions,
+                        flexible_msg_versions,
+                        deprecated_versions,
+                    }
+                }
+            } else {
+                prepared_struct_def(
                     w,
                     name,
-                    fields,
+                    &field.fields,
                     entity_types,
                     valid_versions,
                     flexible_msg_versions,
-                )?;
-                PreparedType::Struct(written_struct)
-            } else {
-                PreparedType::Struct(WrittenStruct {
-                    name: name.clone(),
-                    map_key: None,
-                })
-            }
+                    deprecated_versions,
+                    prepared_structs,
+                    prepared_structs_output,
+                )?
+            };
+
+            PreparedType::Struct(prepared_struct)
         }
         TypeSpec::Array(elem) => {
-            let prepared_elem = prepare_field_type(
+            let prepared_field = prepare_field_type(
                 w,
                 elem,
                 field,
                 entity_types,
                 valid_versions,
                 flexible_msg_versions,
+                deprecated_versions,
+                prepared_structs,
+                prepared_structs_output,
             )?;
-            match prepared_elem {
-                PreparedType::Struct(WrittenStruct {
+            match prepared_field {
+                PreparedType::Struct(PreparedStruct {
                     name,
                     map_key: Some(map_key),
+                    ..
                 }) => PreparedType::Map(map_key, name),
                 other => PreparedType::Array(Box::new(other)),
             }
@@ -405,17 +439,37 @@ fn write_encode_field_inner<W: Write>(
     compute_size: bool,
 ) -> Result<(), Error> {
     let var_name = field.var_name();
+    let optional = !field.nullable_versions.is_none();
 
     let valid_versions = valid_versions.intersect(field.versions);
     if !field.type_.has_compact_form() {
-        write_encode_or_compute(w, &field.type_.name(false), &var_name, compute_size)
+        write_encode_or_compute(
+            w,
+            &field.type_.name(false, optional),
+            &var_name,
+            compute_size,
+        )
     } else {
         write_version_cond(
             w,
             valid_versions,
             field.flexible_versions,
-            |w| write_encode_or_compute(w, &field.type_.name(true), &var_name, compute_size),
-            |w| write_encode_or_compute(w, &field.type_.name(false), &var_name, compute_size),
+            |w| {
+                write_encode_or_compute(
+                    w,
+                    &field.type_.name(true, optional),
+                    &var_name,
+                    compute_size,
+                )
+            },
+            |w| {
+                write_encode_or_compute(
+                    w,
+                    &field.type_.name(false, optional),
+                    &var_name,
+                    compute_size,
+                )
+            },
             false,
             false,
         )
@@ -434,7 +488,7 @@ fn write_default_check<W: Write>(
         .not();
     write!(w, "if {is_default} ")?;
     w.block(|w| {
-        write!(w, r#"bail!("failed to decode");"#)?;
+        write!(w, r#"bail!("failed to encode");"#)?;
         Ok(())
     })
 }
@@ -612,7 +666,7 @@ fn write_encode_tag_buffer_inner<W: Write>(
             write!(
                 w,
                 "{}.compute_size({})?",
-                &field.type_.name(false),
+                &field.type_.name(false, false),
                 var_name
             )?;
         } else {
@@ -621,14 +675,19 @@ fn write_encode_tag_buffer_inner<W: Write>(
                 valid_versions,
                 field.flexible_versions,
                 |w| {
-                    write!(w, "{}.compute_size({})?", &field.type_.name(true), var_name)?;
+                    write!(
+                        w,
+                        "{}.compute_size({})?",
+                        &field.type_.name(true, false),
+                        var_name
+                    )?;
                     Ok(())
                 },
                 |w| {
                     write!(
                         w,
                         "{}.compute_size({})?",
-                        &field.type_.name(false),
+                        &field.type_.name(false, false),
                         var_name
                     )?;
                     Ok(())
@@ -657,14 +716,28 @@ fn write_encode_tag_buffer_inner<W: Write>(
             writeln!(w, "total_size += computed_size;")?;
             Ok(())
         } else if !field.type_.has_compact_form() {
-            write_encode_or_compute(w, &field.type_.name(false), var_name, compute_size)
+            write_encode_or_compute(w, &field.type_.name(false, false), var_name, compute_size)
         } else {
             write_version_cond(
                 w,
                 valid_versions,
                 field.flexible_versions,
-                |w| write_encode_or_compute(w, &field.type_.name(true), var_name, compute_size),
-                |w| write_encode_or_compute(w, &field.type_.name(false), var_name, compute_size),
+                |w| {
+                    write_encode_or_compute(
+                        w,
+                        &field.type_.name(true, false),
+                        var_name,
+                        compute_size,
+                    )
+                },
+                |w| {
+                    write_encode_or_compute(
+                        w,
+                        &field.type_.name(false, false),
+                        var_name,
+                        compute_size,
+                    )
+                },
                 false,
                 false,
             )
@@ -703,6 +776,7 @@ fn write_decode_field<W: Write>(
         return Ok(());
     }
 
+    let optional = !field.nullable_versions.is_none();
     write_version_cond(
         w,
         valid_versions,
@@ -725,18 +799,18 @@ fn write_decode_field<W: Write>(
                 |w| {
                     let valid_versions = valid_versions.intersect(field.versions);
                     if !field.type_.has_compact_form() {
-                        write!(w, "{}.decode(buf)?", field.type_.name(false))?;
+                        write!(w, "{}.decode(buf)?", field.type_.name(false, optional))?;
                     } else {
                         write_version_cond(
                             w,
                             valid_versions,
                             field.flexible_versions,
                             |w| {
-                                write!(w, "{}.decode(buf)?", field.type_.name(true))?;
+                                write!(w, "{}.decode(buf)?", field.type_.name(true, optional))?;
                                 Ok(())
                             },
                             |w| {
-                                write!(w, "{}.decode(buf)?", field.type_.name(false))?;
+                                write!(w, "{}.decode(buf)?", field.type_.name(false, optional))?;
                                 Ok(())
                             },
                             false,
@@ -826,7 +900,7 @@ fn write_decode_tag_buffer<W: Write>(
                                                 w,
                                                 "{} = {}.decode(buf)?;",
                                                 var_name,
-                                                field.type_.name(false)
+                                                field.type_.name(false, false)
                                             )?;
                                         } else {
                                             write_version_cond(
@@ -838,7 +912,7 @@ fn write_decode_tag_buffer<W: Write>(
                                                         w,
                                                         "{} = {}.decode(buf)?;",
                                                         var_name,
-                                                        field.type_.name(true)
+                                                        field.type_.name(true, false)
                                                     )?;
                                                     Ok(())
                                                 },
@@ -847,7 +921,7 @@ fn write_decode_tag_buffer<W: Write>(
                                                         w,
                                                         "{} = {}.decode(buf)?;",
                                                         var_name,
-                                                        field.type_.name(false)
+                                                        field.type_.name(false, false)
                                                     )?;
                                                     Ok(())
                                                 },
@@ -892,14 +966,18 @@ fn write_decode_tag_buffer<W: Write>(
     Ok(())
 }
 
-fn write_struct_def<W: Write>(
+#[allow(clippy::too_many_arguments)]
+fn prepared_struct_def<W: Write>(
     w: &mut CodeWriter<W>,
     name: &str,
     fields: &[FieldSpec],
     entity_types: &mut BTreeSet<EntityType>,
     valid_versions: VersionSpec,
     flexible_msg_versions: VersionSpec,
-) -> Result<WrittenStruct, Error> {
+    deprecated_versions: VersionSpec,
+    prepared_structs: &BTreeMap<String, PreparedStruct>,
+    prepared_structs_output: &mut Vec<PreparedStruct>,
+) -> Result<PreparedStruct, Error> {
     let mut prepared_fields = Vec::new();
     let mut map_key = None;
 
@@ -913,6 +991,9 @@ fn write_struct_def<W: Write>(
             entity_types,
             valid_versions,
             flexible_msg_versions,
+            deprecated_versions,
+            prepared_structs,
+            prepared_structs_output,
         )?;
 
         if field.map_key && num_map_keys == 1 {
@@ -948,7 +1029,7 @@ fn write_struct_def<W: Write>(
                     PreparedDefault::Null
                 }
                 "true" | "false" => {
-                    assert!(type_ == PreparedType::Primitive(PrimitiveType::Bool));
+                    assert_eq!(type_, PreparedType::Primitive(PrimitiveType::Bool));
                     PreparedDefault::Boolean(default_str == "true")
                 }
                 _ => match &type_ {
@@ -976,9 +1057,9 @@ fn write_struct_def<W: Write>(
             versions,
             tag: field.tag,
             tagged_versions,
-            _nullable_versions: field.nullable_versions,
+            nullable_versions: field.nullable_versions,
             default,
-            ignorable: field.ignorable.unwrap_or(false),
+            ignorable: field.ignorable,
             _entity_type: field.entity_type.clone(),
             map_key: field.map_key && num_map_keys == 1,
             about: field.about.clone(),
@@ -986,205 +1067,227 @@ fn write_struct_def<W: Write>(
         });
     }
 
-    writeln!(w, "/// Valid versions: {}", valid_versions)?;
-    writeln!(w, "#[non_exhaustive]")?;
-    writeln!(
-        w,
-        "#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]"
-    )?;
-    writeln!(w, "#[builder(default)]")?;
-    write!(w, "pub struct {} ", name)?;
-    w.block(|w| {
-        for prepared_field in &prepared_fields {
-            if prepared_field.map_key {
-                continue;
-            }
-            writeln!(w, "/// {}", prepared_field.about)?;
-            writeln!(w, "/// ")?;
-            writeln!(w, "/// Supported API versions: {}", prepared_field.versions)?;
-            if prepared_field.optional {
-                writeln!(
-                    w,
-                    "pub {}: Option<{}>,",
-                    prepared_field.name,
-                    prepared_field.type_.rust_name()
-                )?;
-            } else {
-                writeln!(
-                    w,
-                    "pub {}: {},",
-                    prepared_field.name,
-                    prepared_field.type_.rust_name()
-                )?;
-            }
-            writeln!(w)?;
-        }
-
-        if !flexible_msg_versions.is_none() {
-            writeln!(w, "/// Other tagged fields")?;
-            writeln!(w, "pub unknown_tagged_fields: BTreeMap<i32, Bytes>,")?;
-        }
-
-        Ok(())
-    })?;
-    writeln!(w)?;
-    writeln!(w)?;
-
-    write!(w, "impl Builder for {} ", name)?;
-    w.block(|w| {
-        writeln!(w, "type Builder = {}Builder;", name)?;
-        writeln!(w)?;
-        write!(w, "fn builder() -> Self::Builder")?;
-        w.block(|w| {
-            writeln!(w, "{}Builder::default()", name)?;
-            Ok(())
-        })?;
-        writeln!(w)?;
-        Ok(())
-    })?;
-    writeln!(w)?;
-    writeln!(w)?;
-
-    if map_key.is_some() {
-        write!(w, "impl MapEncodable for {} ", name)?;
-    } else {
-        write!(w, "impl Encodable for {} ", name)?;
-    }
-    w.block(|w| {
-        if let Some(key) = &map_key {
-            writeln!(w, "type Key = {};", key.rust_name())?;
-            write!(w, "fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> ")?;
-        } else {
-            write!(w, "fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> ")?;
-        }
-        w.block(|w| {
-            for prepared_field in &prepared_fields {
-                write_encode_field(w, prepared_field, valid_versions, false)?;
-            }
-            write_encode_tag_buffer(w, &prepared_fields, valid_versions, flexible_msg_versions, false)?;
-            write!(w, "Ok(())")?;
-            Ok(())
-        })?;
-        writeln!(w)?;
-        if map_key.is_some() {
-            write!(w, "fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> ")?;
-        } else {
-            write!(w, "fn compute_size(&self, version: i16) -> Result<usize, EncodeError> ")?;
-        }
-        w.block(|w| {
-            writeln!(w, "let mut total_size = 0;")?;
-            for prepared_field in &prepared_fields {
-                write_encode_field(w, prepared_field, valid_versions, true)?;
-            }
-            write_encode_tag_buffer(w, &prepared_fields, valid_versions, flexible_msg_versions, true)?;
-            write!(w, "Ok(total_size)")?;
-            Ok(())
-        })?;
-        Ok(())
-    })?;
-    writeln!(w)?;
-    writeln!(w)?;
-
-    if map_key.is_some() {
-        write!(w, "impl MapDecodable for {} ", name)?;
-    } else {
-        write!(w, "impl Decodable for {} ", name)?;
-    }
-    w.block(|w| {
-        if let Some(key) = &map_key {
-            writeln!(w, "type Key = {};", key.rust_name())?;
-            write!(w, "fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> ")?;
-        } else {
-            write!(w, "fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> ")?;
-        }
-        w.block(|w| {
-            for prepared_field in &prepared_fields {
-                write_decode_field(w, prepared_field, valid_versions)?;
-            }
-            if !flexible_msg_versions.is_none() {
-                writeln!(w, "let mut unknown_tagged_fields = BTreeMap::new();")?;
-                write_decode_tag_buffer(w, &prepared_fields, valid_versions, flexible_msg_versions)?;
-            }
-            if map_key.is_some() {
-                write!(w, "Ok((key_field, Self ")?;
-            } else {
-                write!(w, "Ok(Self ")?;
-            }
-            w.block(|w| {
-                for prepared_field in &prepared_fields {
-                    if !prepared_field.map_key {
-                        writeln!(w, "{},", prepared_field.name)?;
-                    }
-                }
-
-                if !flexible_msg_versions.is_none() {
-                    writeln!(w, "unknown_tagged_fields,")?;
-                }
-
-                Ok(())
-            })?;
-            if map_key.is_some() {
-                write!(w, "))")?;
-            } else {
-                write!(w, ")")?;
-            }
-            Ok(())
-        })
-    })?;
-    writeln!(w)?;
-    writeln!(w)?;
-
-    write!(w, "impl Default for {} ", name)?;
-    w.block(|w| {
-        write!(w, "fn default() -> Self ")?;
-        w.block(|w| {
-            write!(w, "Self ")?;
-            w.block(|w| {
-                for prepared_field in &prepared_fields {
-                    if !prepared_field.map_key {
-                        writeln!(
-                            w,
-                            "{}: {},",
-                            prepared_field.name,
-                            prepared_field.default.gen_default(
-                                prepared_field.optional,
-                                prepared_field.type_.is_entity()
-                            )
-                        )?;
-                    }
-                }
-
-                if !flexible_msg_versions.is_none() {
-                    writeln!(w, "unknown_tagged_fields: BTreeMap::new(),")?;
-                }
-
-                Ok(())
-            })
-        })
-    })?;
-    writeln!(w)?;
-    writeln!(w)?;
-
-    write!(w, "impl Message for {} ", name)?;
-    w.block(|w| {
-        let range = valid_versions
-            .range()
-            .expect("Valid versions should be bounded.");
-        writeln!(
-            w,
-            "const VERSIONS: VersionRange = VersionRange {{ min: {}, max: {} }};",
-            range.start(),
-            range.end()
-        )?;
-        Ok(())
-    })?;
-    writeln!(w)?;
-    writeln!(w)?;
-
-    Ok(WrittenStruct {
+    let prepared_struct = PreparedStruct {
         name: name.into(),
         map_key,
-    })
+        prepared_fields,
+        valid_versions,
+        flexible_msg_versions,
+        deprecated_versions,
+    };
+    prepared_structs_output.push(prepared_struct.clone());
+    Ok(prepared_struct)
+}
+
+impl PreparedStruct {
+    pub fn apply<W: Write>(&self, w: &mut CodeWriter<W>) -> Result<(), Error> {
+        writeln!(w, "/// Valid versions: {}", self.valid_versions)?;
+        writeln!(w, "#[non_exhaustive]")?;
+        writeln!(
+            w,
+            "#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]"
+        )?;
+        writeln!(w, "#[builder(default)]")?;
+        write!(w, "pub struct {} ", self.name)?;
+        w.block(|w| {
+            for prepared_field in &self.prepared_fields {
+                if prepared_field.map_key {
+                    continue;
+                }
+                writeln!(w, "/// {}", prepared_field.about)?;
+                writeln!(w, "/// ")?;
+                writeln!(w, "/// Supported API versions: {}", prepared_field.versions)?;
+                if prepared_field.optional {
+                    writeln!(
+                        w,
+                        "pub {}: Option<{}>,",
+                        prepared_field.name,
+                        prepared_field.type_.rust_name()
+                    )?;
+                } else {
+                    writeln!(
+                        w,
+                        "pub {}: {},",
+                        prepared_field.name,
+                        prepared_field.type_.rust_name()
+                    )?;
+                }
+                writeln!(w)?;
+            }
+
+            if !self.flexible_msg_versions.is_none() {
+                writeln!(w, "/// Other tagged fields")?;
+                writeln!(w, "pub unknown_tagged_fields: BTreeMap<i32, Bytes>,")?;
+            }
+
+            Ok(())
+        })?;
+        writeln!(w)?;
+        writeln!(w)?;
+
+        write!(w, "impl Builder for {} ", self.name)?;
+        w.block(|w| {
+            writeln!(w, "type Builder = {}Builder;", self.name)?;
+            writeln!(w)?;
+            write!(w, "fn builder() -> Self::Builder")?;
+            w.block(|w| {
+                writeln!(w, "{}Builder::default()", self.name)?;
+                Ok(())
+            })?;
+            writeln!(w)?;
+            Ok(())
+        })?;
+        writeln!(w)?;
+        writeln!(w)?;
+
+        if self.map_key.is_some() {
+            write!(w, "impl MapEncodable for {} ", self.name)?;
+        } else {
+            write!(w, "impl Encodable for {} ", self.name)?;
+        }
+        w.block(|w| {
+            if let Some(key) = &self.map_key {
+                writeln!(w, "type Key = {};", key.rust_name())?;
+                write!(w, "fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> ")?;
+            } else {
+                write!(w, "fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> ")?;
+            }
+            w.block(|w| {
+                for prepared_field in &self.prepared_fields {
+                    write_encode_field(w, prepared_field, self.valid_versions, false)?;
+                }
+                write_encode_tag_buffer(w, &self.prepared_fields, self.valid_versions, self.flexible_msg_versions, false)?;
+                write!(w, "Ok(())")?;
+                Ok(())
+            })?;
+            writeln!(w)?;
+            if self.map_key.is_some() {
+                write!(w, "fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> ")?;
+            } else {
+                write!(w, "fn compute_size(&self, version: i16) -> Result<usize, EncodeError> ")?;
+            }
+            w.block(|w| {
+                writeln!(w, "let mut total_size = 0;")?;
+                for prepared_field in &self.prepared_fields {
+                    write_encode_field(w, prepared_field, self.valid_versions, true)?;
+                }
+                write_encode_tag_buffer(w, &self.prepared_fields, self.valid_versions, self.flexible_msg_versions, true)?;
+                write!(w, "Ok(total_size)")?;
+                Ok(())
+            })?;
+            Ok(())
+        })?;
+        writeln!(w)?;
+        writeln!(w)?;
+
+        if self.map_key.is_some() {
+            write!(w, "impl MapDecodable for {} ", self.name)?;
+        } else {
+            write!(w, "impl Decodable for {} ", self.name)?;
+        }
+        w.block(|w| {
+            if let Some(key) = &self.map_key {
+                writeln!(w, "type Key = {};", key.rust_name())?;
+                write!(w, "fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> ")?;
+            } else {
+                write!(w, "fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> ")?;
+            }
+            w.block(|w| {
+                for prepared_field in &self.prepared_fields {
+                    write_decode_field(w, prepared_field, self.valid_versions)?;
+                }
+                if !self.flexible_msg_versions.is_none() {
+                    writeln!(w, "let mut unknown_tagged_fields = BTreeMap::new();")?;
+                    write_decode_tag_buffer(w, &self.prepared_fields, self.valid_versions, self.flexible_msg_versions)?;
+                }
+                if self.map_key.is_some() {
+                    write!(w, "Ok((key_field, Self ")?;
+                } else {
+                    write!(w, "Ok(Self ")?;
+                }
+                w.block(|w| {
+                    for prepared_field in &self.prepared_fields {
+                        if !prepared_field.map_key {
+                            writeln!(w, "{},", prepared_field.name)?;
+                        }
+                    }
+
+                    if !self.flexible_msg_versions.is_none() {
+                        writeln!(w, "unknown_tagged_fields,")?;
+                    }
+
+                    Ok(())
+                })?;
+                if self.map_key.is_some() {
+                    write!(w, "))")?;
+                } else {
+                    write!(w, ")")?;
+                }
+                Ok(())
+            })
+        })?;
+        writeln!(w)?;
+        writeln!(w)?;
+
+        write!(w, "impl Default for {} ", self.name)?;
+        w.block(|w| {
+            write!(w, "fn default() -> Self ")?;
+            w.block(|w| {
+                write!(w, "Self ")?;
+                w.block(|w| {
+                    for prepared_field in &self.prepared_fields {
+                        if !prepared_field.map_key {
+                            writeln!(
+                                w,
+                                "{}: {},",
+                                prepared_field.name,
+                                prepared_field.default.gen_default(
+                                    prepared_field.optional,
+                                    prepared_field.type_.is_entity(),
+                                )
+                            )?;
+                        }
+                    }
+
+                    if !self.flexible_msg_versions.is_none() {
+                        writeln!(w, "unknown_tagged_fields: BTreeMap::new(),")?;
+                    }
+
+                    Ok(())
+                })
+            })
+        })?;
+        writeln!(w)?;
+        writeln!(w)?;
+
+        write!(w, "impl Message for {} ", self.name)?;
+        w.block(|w| {
+            let range = self.valid_versions
+                .range()
+                .expect("Valid versions should be bounded.");
+            writeln!(
+                w,
+                "const VERSIONS: VersionRange = VersionRange {{ min: {}, max: {} }};",
+                range.start(),
+                range.end()
+            )?;
+            if let Some(range) = self.deprecated_versions.range() {
+                writeln!(
+                    w,
+                    "const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange {{ min: {}, max: {} }});",
+                    range.start(),
+                    range.end()
+                )?;
+            } else {
+                writeln!(w, "const DEPRECATED_VERSIONS: Option<VersionRange> = None;")?;
+            }
+            Ok(())
+        })?;
+        writeln!(w)?;
+        writeln!(w)?;
+
+        Ok(())
+    }
 }
 
 fn write_file_header<W: Write>(w: &mut CodeWriter<W>, name: &str) -> Result<(), Error> {
@@ -1213,43 +1316,138 @@ fn write_file_header<W: Write>(w: &mut CodeWriter<W>, name: &str) -> Result<(), 
     Ok(())
 }
 
-pub fn generate(
-    output_path: &str,
-    spec: Spec,
-    entity_types: &mut BTreeSet<EntityType>,
-) -> Result<(String, String), Error> {
+pub struct GenerationOutput {
+    buffer: Vec<u8>,
+    pub file_name: String,
+    pub module_name: String,
+    pub struct_name: String,
+    pub entity_types: BTreeSet<EntityType>,
+}
+
+impl GenerationOutput {
+    fn new(
+        buffer: Vec<u8>,
+        file_name: String,
+        module_name: String,
+        struct_name: String,
+        entity_types: BTreeSet<EntityType>,
+    ) -> Self {
+        Self {
+            buffer,
+            file_name,
+            module_name,
+            struct_name,
+            entity_types,
+        }
+    }
+
+    pub fn apply<W: Write>(
+        &self,
+        writer: &mut W,
+        entity_types: &mut BTreeSet<EntityType>,
+    ) -> std::io::Result<()> {
+        let mut file = File::create(&self.file_name)?;
+        file.write_all(&self.buffer)?;
+
+        for entity in self.entity_types.iter() {
+            if let Some(previous) = entity_types.replace(entity.clone()) {
+                if previous.inner != entity.inner {
+                    panic!(
+                        "Entity type {} has conflicting definitions: {:?} and {:?}",
+                        self.struct_name, previous, self.entity_types
+                    );
+                }
+            }
+        }
+
+        writeln!(writer, "pub mod {};", self.module_name)?;
+        writeln!(
+            writer,
+            "pub use {}::{};",
+            self.module_name, self.struct_name
+        )?;
+        writeln!(writer)
+    }
+}
+
+pub fn generate(output_path: &str, spec: Spec) -> Result<Option<GenerationOutput>, Error> {
     let struct_name = spec.name.clone();
     let module_name = struct_name.to_snake_case();
+    let flexible_msg_versions = spec.flexible_versions;
+    let deprecated_versions = spec.deprecated_versions;
+    let mut entity_types: BTreeSet<EntityType> = BTreeSet::new();
+
+    let valid_versions = if spec.latest_version_unstable {
+        // skip unstable versions
+        spec.valid_versions.without_last()
+    } else {
+        spec.valid_versions
+    };
+
+    // most likely, the spec has only one unstable version
+    if valid_versions.is_none() {
+        println!("Skipping generation of {struct_name} because it has no valid versions");
+        return Ok(None);
+    }
 
     let file_name = format!("{}/{}.rs", output_path, module_name);
-    let mut file = CodeWriter::new(BufWriter::new(File::create(file_name)?));
+    let mut buffer = Vec::new();
+    let mut writer = CodeWriter::new(BufWriter::new(&mut buffer));
 
-    let valid_versions = spec.valid_versions;
-    let flexible_msg_versions = spec.flexible_versions.unwrap_or_default();
+    write_file_header(&mut writer, &struct_name)?;
 
-    write_file_header(&mut file, &struct_name)?;
-    for common_struct in &spec.common_structs {
-        write_struct_def(
-            &mut file,
-            &common_struct.name,
-            &common_struct.fields,
-            entity_types,
+    let mut prepared_structs = BTreeMap::new();
+    loop {
+        let mut changed = false;
+        let mut prepared_structs_output = Vec::new();
+
+        for common_struct in &spec.common_structs {
+            prepared_struct_def(
+                &mut writer,
+                &common_struct.name,
+                &common_struct.fields,
+                &mut entity_types,
+                valid_versions,
+                flexible_msg_versions,
+                deprecated_versions,
+                &prepared_structs,
+                &mut prepared_structs_output,
+            )?;
+        }
+
+        prepared_struct_def(
+            &mut writer,
+            &struct_name,
+            &spec.fields,
+            &mut entity_types,
             valid_versions,
             flexible_msg_versions,
+            deprecated_versions,
+            &prepared_structs,
+            &mut prepared_structs_output,
         )?;
+
+        for prepared_struct in prepared_structs_output {
+            if let Some(previous) =
+                prepared_structs.insert(prepared_struct.name.clone(), prepared_struct.clone())
+            {
+                changed |= previous != prepared_struct;
+            } else {
+                changed = true;
+            }
+        }
+
+        if !changed {
+            break;
+        }
     }
-    write_struct_def(
-        &mut file,
-        &struct_name,
-        &spec.fields,
-        entity_types,
-        valid_versions,
-        flexible_msg_versions,
-    )?;
+    for prepared_struct in prepared_structs.values() {
+        prepared_struct.apply(&mut writer)?;
+    }
 
     if let Some(api_key) = spec.api_key {
-        write!(&mut file, "impl HeaderVersion for {} ", struct_name)?;
-        file.block(|w| {
+        write!(&mut writer, "impl HeaderVersion for {} ", struct_name)?;
+        writer.block(|w| {
             write!(w, "fn header_version(version: i16) -> i16 ")?;
             w.block(|w| {
                 match (spec.type_, api_key) {
@@ -1304,11 +1502,18 @@ pub fn generate(
                 Ok(())
             })
         })?;
-        writeln!(&mut file)?;
-        writeln!(&mut file)?;
+        writeln!(&mut writer)?;
+        writeln!(&mut writer)?;
     }
 
-    Ok((module_name, struct_name))
+    drop(writer);
+    Ok(Some(GenerationOutput::new(
+        buffer,
+        file_name,
+        module_name,
+        struct_name,
+        entity_types,
+    )))
 }
 
 #[cfg(test)]

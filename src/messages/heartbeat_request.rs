@@ -7,15 +7,16 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
+use anyhow::bail;
 use bytes::Bytes;
 use uuid::Uuid;
-use anyhow::bail;
 
 use crate::protocol::{
-    Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
+    buf::{ByteBuf, ByteBufMut},
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
-
 
 /// Valid versions: 0-4
 #[non_exhaustive]
@@ -23,22 +24,22 @@ use crate::protocol::{
 #[builder(default)]
 pub struct HeartbeatRequest {
     /// The group id.
-    /// 
+    ///
     /// Supported API versions: 0-4
     pub group_id: super::GroupId,
 
     /// The generation of the group.
-    /// 
+    ///
     /// Supported API versions: 0-4
     pub generation_id: i32,
 
     /// The member ID.
-    /// 
+    ///
     /// Supported API versions: 0-4
     pub member_id: StrBytes,
 
     /// The unique identifier of the consumer instance provided by end user.
-    /// 
+    ///
     /// Supported API versions: 3-4
     pub group_instance_id: Option<StrBytes>,
 
@@ -49,7 +50,7 @@ pub struct HeartbeatRequest {
 impl Builder for HeartbeatRequest {
     type Builder = HeartbeatRequestBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         HeartbeatRequestBuilder::default()
     }
 }
@@ -75,13 +76,16 @@ impl Encodable for HeartbeatRequest {
             }
         } else {
             if !self.group_instance_id.is_none() {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -110,13 +114,16 @@ impl Encodable for HeartbeatRequest {
             }
         } else {
             if !self.group_instance_id.is_none() {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -182,6 +189,7 @@ impl Default for HeartbeatRequest {
 
 impl Message for HeartbeatRequest {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 impl HeaderVersion for HeartbeatRequest {
@@ -193,4 +201,3 @@ impl HeaderVersion for HeartbeatRequest {
         }
     }
 }
-

@@ -7,15 +7,16 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
+use anyhow::bail;
 use bytes::Bytes;
 use uuid::Uuid;
-use anyhow::bail;
 
 use crate::protocol::{
-    Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
+    buf::{ByteBuf, ByteBufMut},
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
-
 
 /// Valid versions: 0-4
 #[non_exhaustive]
@@ -23,32 +24,32 @@ use crate::protocol::{
 #[builder(default)]
 pub struct Coordinator {
     /// The coordinator key.
-    /// 
+    ///
     /// Supported API versions: 4
     pub key: StrBytes,
 
     /// The node id.
-    /// 
+    ///
     /// Supported API versions: 4
     pub node_id: super::BrokerId,
 
     /// The host name.
-    /// 
+    ///
     /// Supported API versions: 4
     pub host: StrBytes,
 
     /// The port.
-    /// 
+    ///
     /// Supported API versions: 4
     pub port: i32,
 
     /// The error code, or 0 if there was no error.
-    /// 
+    ///
     /// Supported API versions: 4
     pub error_code: i16,
 
     /// The error message, or null if there was no error.
-    /// 
+    ///
     /// Supported API versions: 4
     pub error_message: Option<StrBytes>,
 
@@ -59,7 +60,7 @@ pub struct Coordinator {
 impl Builder for Coordinator {
     type Builder = CoordinatorBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         CoordinatorBuilder::default()
     }
 }
@@ -70,35 +71,35 @@ impl Encodable for Coordinator {
             types::CompactString.encode(buf, &self.key)?;
         } else {
             if !self.key.is_empty() {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 4 {
             types::Int32.encode(buf, &self.node_id)?;
         } else {
             if self.node_id != 0 {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 4 {
             types::CompactString.encode(buf, &self.host)?;
         } else {
             if !self.host.is_empty() {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 4 {
             types::Int32.encode(buf, &self.port)?;
         } else {
             if self.port != 0 {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 4 {
             types::Int16.encode(buf, &self.error_code)?;
         } else {
             if self.error_code != 0 {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 4 {
@@ -107,7 +108,10 @@ impl Encodable for Coordinator {
         if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -121,35 +125,35 @@ impl Encodable for Coordinator {
             total_size += types::CompactString.compute_size(&self.key)?;
         } else {
             if !self.key.is_empty() {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 4 {
             total_size += types::Int32.compute_size(&self.node_id)?;
         } else {
             if self.node_id != 0 {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 4 {
             total_size += types::CompactString.compute_size(&self.host)?;
         } else {
             if !self.host.is_empty() {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 4 {
             total_size += types::Int32.compute_size(&self.port)?;
         } else {
             if self.port != 0 {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 4 {
             total_size += types::Int16.compute_size(&self.error_code)?;
         } else {
             if self.error_code != 0 {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 4 {
@@ -158,7 +162,10 @@ impl Encodable for Coordinator {
         if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -238,6 +245,7 @@ impl Default for Coordinator {
 
 impl Message for Coordinator {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 /// Valid versions: 0-4
@@ -246,37 +254,37 @@ impl Message for Coordinator {
 #[builder(default)]
 pub struct FindCoordinatorResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
-    /// 
+    ///
     /// Supported API versions: 1-4
     pub throttle_time_ms: i32,
 
     /// The error code, or 0 if there was no error.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub error_code: i16,
 
     /// The error message, or null if there was no error.
-    /// 
+    ///
     /// Supported API versions: 1-3
     pub error_message: Option<StrBytes>,
 
     /// The node id.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub node_id: super::BrokerId,
 
     /// The host name.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub host: StrBytes,
 
     /// The port.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub port: i32,
 
     /// Each coordinator result in the response
-    /// 
+    ///
     /// Supported API versions: 4
     pub coordinators: Vec<Coordinator>,
 
@@ -287,7 +295,7 @@ pub struct FindCoordinatorResponse {
 impl Builder for FindCoordinatorResponse {
     type Builder = FindCoordinatorResponseBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         FindCoordinatorResponseBuilder::default()
     }
 }
@@ -301,7 +309,7 @@ impl Encodable for FindCoordinatorResponse {
             types::Int16.encode(buf, &self.error_code)?;
         } else {
             if self.error_code != 0 {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 1 && version <= 3 {
@@ -315,7 +323,7 @@ impl Encodable for FindCoordinatorResponse {
             types::Int32.encode(buf, &self.node_id)?;
         } else {
             if self.node_id != 0 {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version <= 3 {
@@ -326,27 +334,30 @@ impl Encodable for FindCoordinatorResponse {
             }
         } else {
             if !self.host.is_empty() {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version <= 3 {
             types::Int32.encode(buf, &self.port)?;
         } else {
             if self.port != 0 {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 4 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.coordinators)?;
         } else {
             if !self.coordinators.is_empty() {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -363,7 +374,7 @@ impl Encodable for FindCoordinatorResponse {
             total_size += types::Int16.compute_size(&self.error_code)?;
         } else {
             if self.error_code != 0 {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 1 && version <= 3 {
@@ -377,7 +388,7 @@ impl Encodable for FindCoordinatorResponse {
             total_size += types::Int32.compute_size(&self.node_id)?;
         } else {
             if self.node_id != 0 {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version <= 3 {
@@ -388,27 +399,31 @@ impl Encodable for FindCoordinatorResponse {
             }
         } else {
             if !self.host.is_empty() {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version <= 3 {
             total_size += types::Int32.compute_size(&self.port)?;
         } else {
             if self.port != 0 {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 4 {
-            total_size += types::CompactArray(types::Struct { version }).compute_size(&self.coordinators)?;
+            total_size +=
+                types::CompactArray(types::Struct { version }).compute_size(&self.coordinators)?;
         } else {
             if !self.coordinators.is_empty() {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -503,6 +518,7 @@ impl Default for FindCoordinatorResponse {
 
 impl Message for FindCoordinatorResponse {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 impl HeaderVersion for FindCoordinatorResponse {
@@ -514,4 +530,3 @@ impl HeaderVersion for FindCoordinatorResponse {
         }
     }
 }
-

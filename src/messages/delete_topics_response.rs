@@ -7,15 +7,16 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
+use anyhow::bail;
 use bytes::Bytes;
 use uuid::Uuid;
-use anyhow::bail;
 
 use crate::protocol::{
-    Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
+    buf::{ByteBuf, ByteBufMut},
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
-
 
 /// Valid versions: 0-6
 #[non_exhaustive]
@@ -23,17 +24,17 @@ use crate::protocol::{
 #[builder(default)]
 pub struct DeletableTopicResult {
     /// the unique topic ID
-    /// 
+    ///
     /// Supported API versions: 6
     pub topic_id: Uuid,
 
     /// The deletion error, or 0 if the deletion succeeded.
-    /// 
+    ///
     /// Supported API versions: 0-6
     pub error_code: i16,
 
     /// The error message, or null if there was no error.
-    /// 
+    ///
     /// Supported API versions: 5-6
     pub error_message: Option<StrBytes>,
 
@@ -44,14 +45,19 @@ pub struct DeletableTopicResult {
 impl Builder for DeletableTopicResult {
     type Builder = DeletableTopicResultBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         DeletableTopicResultBuilder::default()
     }
 }
 
 impl MapEncodable for DeletableTopicResult {
     type Key = super::TopicName;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(
+        &self,
+        key: &Self::Key,
+        buf: &mut B,
+        version: i16,
+    ) -> Result<(), EncodeError> {
         if version >= 4 {
             types::CompactString.encode(buf, key)?;
         } else {
@@ -67,7 +73,10 @@ impl MapEncodable for DeletableTopicResult {
         if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -92,7 +101,10 @@ impl MapEncodable for DeletableTopicResult {
         if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -131,12 +143,15 @@ impl MapDecodable for DeletableTopicResult {
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
-        Ok((key_field, Self {
-            topic_id,
-            error_code,
-            error_message,
-            unknown_tagged_fields,
-        }))
+        Ok((
+            key_field,
+            Self {
+                topic_id,
+                error_code,
+                error_message,
+                unknown_tagged_fields,
+            },
+        ))
     }
 }
 
@@ -153,6 +168,7 @@ impl Default for DeletableTopicResult {
 
 impl Message for DeletableTopicResult {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 6 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 /// Valid versions: 0-6
@@ -161,12 +177,12 @@ impl Message for DeletableTopicResult {
 #[builder(default)]
 pub struct DeleteTopicsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
-    /// 
+    ///
     /// Supported API versions: 1-6
     pub throttle_time_ms: i32,
 
     /// The results for each topic we tried to delete.
-    /// 
+    ///
     /// Supported API versions: 0-6
     pub responses: indexmap::IndexMap<super::TopicName, DeletableTopicResult>,
 
@@ -177,7 +193,7 @@ pub struct DeleteTopicsResponse {
 impl Builder for DeleteTopicsResponse {
     type Builder = DeleteTopicsResponseBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         DeleteTopicsResponseBuilder::default()
     }
 }
@@ -195,7 +211,10 @@ impl Encodable for DeleteTopicsResponse {
         if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -209,14 +228,18 @@ impl Encodable for DeleteTopicsResponse {
             total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
         }
         if version >= 4 {
-            total_size += types::CompactArray(types::Struct { version }).compute_size(&self.responses)?;
+            total_size +=
+                types::CompactArray(types::Struct { version }).compute_size(&self.responses)?;
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.responses)?;
         }
         if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -268,6 +291,7 @@ impl Default for DeleteTopicsResponse {
 
 impl Message for DeleteTopicsResponse {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 6 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 impl HeaderVersion for DeleteTopicsResponse {
@@ -279,4 +303,3 @@ impl HeaderVersion for DeleteTopicsResponse {
         }
     }
 }
-

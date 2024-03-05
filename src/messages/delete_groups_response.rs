@@ -7,15 +7,16 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
+use anyhow::bail;
 use bytes::Bytes;
 use uuid::Uuid;
-use anyhow::bail;
 
 use crate::protocol::{
-    Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
+    buf::{ByteBuf, ByteBufMut},
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
-
 
 /// Valid versions: 0-2
 #[non_exhaustive]
@@ -23,7 +24,7 @@ use crate::protocol::{
 #[builder(default)]
 pub struct DeletableGroupResult {
     /// The deletion error, or 0 if the deletion succeeded.
-    /// 
+    ///
     /// Supported API versions: 0-2
     pub error_code: i16,
 
@@ -34,14 +35,19 @@ pub struct DeletableGroupResult {
 impl Builder for DeletableGroupResult {
     type Builder = DeletableGroupResultBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         DeletableGroupResultBuilder::default()
     }
 }
 
 impl MapEncodable for DeletableGroupResult {
     type Key = super::GroupId;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(
+        &self,
+        key: &Self::Key,
+        buf: &mut B,
+        version: i16,
+    ) -> Result<(), EncodeError> {
         if version >= 2 {
             types::CompactString.encode(buf, key)?;
         } else {
@@ -51,7 +57,10 @@ impl MapEncodable for DeletableGroupResult {
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -70,7 +79,10 @@ impl MapEncodable for DeletableGroupResult {
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -99,10 +111,13 @@ impl MapDecodable for DeletableGroupResult {
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
-        Ok((key_field, Self {
-            error_code,
-            unknown_tagged_fields,
-        }))
+        Ok((
+            key_field,
+            Self {
+                error_code,
+                unknown_tagged_fields,
+            },
+        ))
     }
 }
 
@@ -117,6 +132,7 @@ impl Default for DeletableGroupResult {
 
 impl Message for DeletableGroupResult {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 /// Valid versions: 0-2
@@ -125,12 +141,12 @@ impl Message for DeletableGroupResult {
 #[builder(default)]
 pub struct DeleteGroupsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
-    /// 
+    ///
     /// Supported API versions: 0-2
     pub throttle_time_ms: i32,
 
     /// The deletion results
-    /// 
+    ///
     /// Supported API versions: 0-2
     pub results: indexmap::IndexMap<super::GroupId, DeletableGroupResult>,
 
@@ -141,7 +157,7 @@ pub struct DeleteGroupsResponse {
 impl Builder for DeleteGroupsResponse {
     type Builder = DeleteGroupsResponseBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         DeleteGroupsResponseBuilder::default()
     }
 }
@@ -157,7 +173,10 @@ impl Encodable for DeleteGroupsResponse {
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -169,14 +188,18 @@ impl Encodable for DeleteGroupsResponse {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
         if version >= 2 {
-            total_size += types::CompactArray(types::Struct { version }).compute_size(&self.results)?;
+            total_size +=
+                types::CompactArray(types::Struct { version }).compute_size(&self.results)?;
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.results)?;
         }
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -224,6 +247,7 @@ impl Default for DeleteGroupsResponse {
 
 impl Message for DeleteGroupsResponse {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 impl HeaderVersion for DeleteGroupsResponse {
@@ -235,4 +259,3 @@ impl HeaderVersion for DeleteGroupsResponse {
         }
     }
 }
-

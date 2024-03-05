@@ -7,15 +7,16 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
+use anyhow::bail;
 use bytes::Bytes;
 use uuid::Uuid;
-use anyhow::bail;
 
 use crate::protocol::{
-    Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
+    buf::{ByteBuf, ByteBufMut},
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
-
 
 /// Valid versions: 0-4
 #[non_exhaustive]
@@ -23,17 +24,17 @@ use crate::protocol::{
 #[builder(default)]
 pub struct FindCoordinatorRequest {
     /// The coordinator key.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub key: StrBytes,
 
     /// The coordinator key type. (Group, transaction, etc.)
-    /// 
+    ///
     /// Supported API versions: 1-4
     pub key_type: i8,
 
     /// The coordinator keys.
-    /// 
+    ///
     /// Supported API versions: 4
     pub coordinator_keys: Vec<StrBytes>,
 
@@ -44,7 +45,7 @@ pub struct FindCoordinatorRequest {
 impl Builder for FindCoordinatorRequest {
     type Builder = FindCoordinatorRequestBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         FindCoordinatorRequestBuilder::default()
     }
 }
@@ -59,27 +60,30 @@ impl Encodable for FindCoordinatorRequest {
             }
         } else {
             if !self.key.is_empty() {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 1 {
             types::Int8.encode(buf, &self.key_type)?;
         } else {
             if self.key_type != 0 {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 4 {
             types::CompactArray(types::CompactString).encode(buf, &self.coordinator_keys)?;
         } else {
             if !self.coordinator_keys.is_empty() {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -97,27 +101,31 @@ impl Encodable for FindCoordinatorRequest {
             }
         } else {
             if !self.key.is_empty() {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 1 {
             total_size += types::Int8.compute_size(&self.key_type)?;
         } else {
             if self.key_type != 0 {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 4 {
-            total_size += types::CompactArray(types::CompactString).compute_size(&self.coordinator_keys)?;
+            total_size +=
+                types::CompactArray(types::CompactString).compute_size(&self.coordinator_keys)?;
         } else {
             if !self.coordinator_keys.is_empty() {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -180,6 +188,7 @@ impl Default for FindCoordinatorRequest {
 
 impl Message for FindCoordinatorRequest {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 0 });
 }
 
 impl HeaderVersion for FindCoordinatorRequest {
@@ -191,4 +200,3 @@ impl HeaderVersion for FindCoordinatorRequest {
         }
     }
 }
-

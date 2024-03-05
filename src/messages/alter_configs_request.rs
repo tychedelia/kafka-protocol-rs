@@ -7,55 +7,59 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
+use anyhow::bail;
 use bytes::Bytes;
 use uuid::Uuid;
-use anyhow::bail;
 
 use crate::protocol::{
-    Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
+    buf::{ByteBuf, ByteBufMut},
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
-
 
 /// Valid versions: 0-2
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 #[builder(default)]
-pub struct AlterableConfig {
-    /// The value to set for the configuration key.
-    /// 
+pub struct AlterConfigsRequest {
+    /// The updates for each resource.
+    ///
     /// Supported API versions: 0-2
-    pub value: Option<StrBytes>,
+    pub resources: Vec<AlterConfigsResource>,
+
+    /// True if we should validate the request, but not change the configurations.
+    ///
+    /// Supported API versions: 0-2
+    pub validate_only: bool,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for AlterableConfig {
-    type Builder = AlterableConfigBuilder;
+impl Builder for AlterConfigsRequest {
+    type Builder = AlterConfigsRequestBuilder;
 
-    fn builder() -> Self::Builder{
-        AlterableConfigBuilder::default()
+    fn builder() -> Self::Builder {
+        AlterConfigsRequestBuilder::default()
     }
 }
 
-impl MapEncodable for AlterableConfig {
-    type Key = StrBytes;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+impl Encodable for AlterConfigsRequest {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
         if version >= 2 {
-            types::CompactString.encode(buf, key)?;
+            types::CompactArray(types::Struct { version }).encode(buf, &self.resources)?;
         } else {
-            types::String.encode(buf, key)?;
+            types::Array(types::Struct { version }).encode(buf, &self.resources)?;
         }
-        if version >= 2 {
-            types::CompactString.encode(buf, &self.value)?;
-        } else {
-            types::String.encode(buf, &self.value)?;
-        }
+        types::Boolean.encode(buf, &self.validate_only)?;
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -63,22 +67,22 @@ impl MapEncodable for AlterableConfig {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         if version >= 2 {
-            total_size += types::CompactString.compute_size(key)?;
+            total_size +=
+                types::CompactArray(types::Struct { version }).compute_size(&self.resources)?;
         } else {
-            total_size += types::String.compute_size(key)?;
+            total_size += types::Array(types::Struct { version }).compute_size(&self.resources)?;
         }
-        if version >= 2 {
-            total_size += types::CompactString.compute_size(&self.value)?;
-        } else {
-            total_size += types::String.compute_size(&self.value)?;
-        }
+        total_size += types::Boolean.compute_size(&self.validate_only)?;
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -88,19 +92,14 @@ impl MapEncodable for AlterableConfig {
     }
 }
 
-impl MapDecodable for AlterableConfig {
-    type Key = StrBytes;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
-        let key_field = if version >= 2 {
-            types::CompactString.decode(buf)?
+impl Decodable for AlterConfigsRequest {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+        let resources = if version >= 2 {
+            types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
-            types::String.decode(buf)?
+            types::Array(types::Struct { version }).decode(buf)?
         };
-        let value = if version >= 2 {
-            types::CompactString.decode(buf)?
-        } else {
-            types::String.decode(buf)?
-        };
+        let validate_only = types::Boolean.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
         if version >= 2 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
@@ -111,24 +110,27 @@ impl MapDecodable for AlterableConfig {
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
-        Ok((key_field, Self {
-            value,
+        Ok(Self {
+            resources,
+            validate_only,
             unknown_tagged_fields,
-        }))
+        })
     }
 }
 
-impl Default for AlterableConfig {
+impl Default for AlterConfigsRequest {
     fn default() -> Self {
         Self {
-            value: Some(Default::default()),
+            resources: Default::default(),
+            validate_only: false,
             unknown_tagged_fields: BTreeMap::new(),
         }
     }
 }
 
-impl Message for AlterableConfig {
+impl Message for AlterConfigsRequest {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 /// Valid versions: 0-2
@@ -137,17 +139,17 @@ impl Message for AlterableConfig {
 #[builder(default)]
 pub struct AlterConfigsResource {
     /// The resource type.
-    /// 
+    ///
     /// Supported API versions: 0-2
     pub resource_type: i8,
 
     /// The resource name.
-    /// 
+    ///
     /// Supported API versions: 0-2
     pub resource_name: StrBytes,
 
     /// The configurations.
-    /// 
+    ///
     /// Supported API versions: 0-2
     pub configs: indexmap::IndexMap<StrBytes, AlterableConfig>,
 
@@ -158,7 +160,7 @@ pub struct AlterConfigsResource {
 impl Builder for AlterConfigsResource {
     type Builder = AlterConfigsResourceBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         AlterConfigsResourceBuilder::default()
     }
 }
@@ -179,7 +181,10 @@ impl Encodable for AlterConfigsResource {
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -196,14 +201,18 @@ impl Encodable for AlterConfigsResource {
             total_size += types::String.compute_size(&self.resource_name)?;
         }
         if version >= 2 {
-            total_size += types::CompactArray(types::Struct { version }).compute_size(&self.configs)?;
+            total_size +=
+                types::CompactArray(types::Struct { version }).compute_size(&self.configs)?;
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.configs)?;
         }
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -258,47 +267,56 @@ impl Default for AlterConfigsResource {
 
 impl Message for AlterConfigsResource {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 /// Valid versions: 0-2
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 #[builder(default)]
-pub struct AlterConfigsRequest {
-    /// The updates for each resource.
-    /// 
+pub struct AlterableConfig {
+    /// The value to set for the configuration key.
+    ///
     /// Supported API versions: 0-2
-    pub resources: Vec<AlterConfigsResource>,
-
-    /// True if we should validate the request, but not change the configurations.
-    /// 
-    /// Supported API versions: 0-2
-    pub validate_only: bool,
+    pub value: Option<StrBytes>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for AlterConfigsRequest {
-    type Builder = AlterConfigsRequestBuilder;
+impl Builder for AlterableConfig {
+    type Builder = AlterableConfigBuilder;
 
-    fn builder() -> Self::Builder{
-        AlterConfigsRequestBuilder::default()
+    fn builder() -> Self::Builder {
+        AlterableConfigBuilder::default()
     }
 }
 
-impl Encodable for AlterConfigsRequest {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+impl MapEncodable for AlterableConfig {
+    type Key = StrBytes;
+    fn encode<B: ByteBufMut>(
+        &self,
+        key: &Self::Key,
+        buf: &mut B,
+        version: i16,
+    ) -> Result<(), EncodeError> {
         if version >= 2 {
-            types::CompactArray(types::Struct { version }).encode(buf, &self.resources)?;
+            types::CompactString.encode(buf, key)?;
         } else {
-            types::Array(types::Struct { version }).encode(buf, &self.resources)?;
+            types::String.encode(buf, key)?;
         }
-        types::Boolean.encode(buf, &self.validate_only)?;
+        if version >= 2 {
+            types::CompactString.encode(buf, &self.value)?;
+        } else {
+            types::String.encode(buf, &self.value)?;
+        }
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -306,18 +324,25 @@ impl Encodable for AlterConfigsRequest {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         if version >= 2 {
-            total_size += types::CompactArray(types::Struct { version }).compute_size(&self.resources)?;
+            total_size += types::CompactString.compute_size(key)?;
         } else {
-            total_size += types::Array(types::Struct { version }).compute_size(&self.resources)?;
+            total_size += types::String.compute_size(key)?;
         }
-        total_size += types::Boolean.compute_size(&self.validate_only)?;
+        if version >= 2 {
+            total_size += types::CompactString.compute_size(&self.value)?;
+        } else {
+            total_size += types::String.compute_size(&self.value)?;
+        }
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -327,14 +352,19 @@ impl Encodable for AlterConfigsRequest {
     }
 }
 
-impl Decodable for AlterConfigsRequest {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let resources = if version >= 2 {
-            types::CompactArray(types::Struct { version }).decode(buf)?
+impl MapDecodable for AlterableConfig {
+    type Key = StrBytes;
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+        let key_field = if version >= 2 {
+            types::CompactString.decode(buf)?
         } else {
-            types::Array(types::Struct { version }).decode(buf)?
+            types::String.decode(buf)?
         };
-        let validate_only = types::Boolean.decode(buf)?;
+        let value = if version >= 2 {
+            types::CompactString.decode(buf)?
+        } else {
+            types::String.decode(buf)?
+        };
         let mut unknown_tagged_fields = BTreeMap::new();
         if version >= 2 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
@@ -345,26 +375,28 @@ impl Decodable for AlterConfigsRequest {
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
-        Ok(Self {
-            resources,
-            validate_only,
-            unknown_tagged_fields,
-        })
+        Ok((
+            key_field,
+            Self {
+                value,
+                unknown_tagged_fields,
+            },
+        ))
     }
 }
 
-impl Default for AlterConfigsRequest {
+impl Default for AlterableConfig {
     fn default() -> Self {
         Self {
-            resources: Default::default(),
-            validate_only: false,
+            value: Some(Default::default()),
             unknown_tagged_fields: BTreeMap::new(),
         }
     }
 }
 
-impl Message for AlterConfigsRequest {
+impl Message for AlterableConfig {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 impl HeaderVersion for AlterConfigsRequest {
@@ -376,4 +408,3 @@ impl HeaderVersion for AlterConfigsRequest {
         }
     }
 }
-

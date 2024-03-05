@@ -7,15 +7,16 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
+use anyhow::bail;
 use bytes::Bytes;
 use uuid::Uuid;
-use anyhow::bail;
 
 use crate::protocol::{
-    Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
+    buf::{ByteBuf, ByteBufMut},
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
-
 
 /// Valid versions: 0-1
 #[non_exhaustive]
@@ -23,16 +24,15 @@ use crate::protocol::{
 #[builder(default)]
 pub struct SaslHandshakeRequest {
     /// The SASL mechanism chosen by the client.
-    /// 
+    ///
     /// Supported API versions: 0-1
     pub mechanism: StrBytes,
-
 }
 
 impl Builder for SaslHandshakeRequest {
     type Builder = SaslHandshakeRequestBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         SaslHandshakeRequestBuilder::default()
     }
 }
@@ -54,9 +54,7 @@ impl Encodable for SaslHandshakeRequest {
 impl Decodable for SaslHandshakeRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
         let mechanism = types::String.decode(buf)?;
-        Ok(Self {
-            mechanism,
-        })
+        Ok(Self { mechanism })
     }
 }
 
@@ -70,6 +68,7 @@ impl Default for SaslHandshakeRequest {
 
 impl Message for SaslHandshakeRequest {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 0 });
 }
 
 impl HeaderVersion for SaslHandshakeRequest {
@@ -77,4 +76,3 @@ impl HeaderVersion for SaslHandshakeRequest {
         1
     }
 }
-

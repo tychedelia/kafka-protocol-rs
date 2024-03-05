@@ -7,15 +7,114 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
+use anyhow::bail;
 use bytes::Bytes;
 use uuid::Uuid;
-use anyhow::bail;
 
 use crate::protocol::{
-    Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
+    buf::{ByteBuf, ByteBufMut},
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
 
+/// Valid versions: 0
+#[non_exhaustive]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
+pub struct AlterUserScramCredentialsRequest {
+    /// The SCRAM credentials to remove.
+    ///
+    /// Supported API versions: 0
+    pub deletions: Vec<ScramCredentialDeletion>,
+
+    /// The SCRAM credentials to update/insert.
+    ///
+    /// Supported API versions: 0
+    pub upsertions: Vec<ScramCredentialUpsertion>,
+
+    /// Other tagged fields
+    pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
+}
+
+impl Builder for AlterUserScramCredentialsRequest {
+    type Builder = AlterUserScramCredentialsRequestBuilder;
+
+    fn builder() -> Self::Builder {
+        AlterUserScramCredentialsRequestBuilder::default()
+    }
+}
+
+impl Encodable for AlterUserScramCredentialsRequest {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+        types::CompactArray(types::Struct { version }).encode(buf, &self.deletions)?;
+        types::CompactArray(types::Struct { version }).encode(buf, &self.upsertions)?;
+        let num_tagged_fields = self.unknown_tagged_fields.len();
+        if num_tagged_fields > std::u32::MAX as usize {
+            bail!(
+                "Too many tagged fields to encode ({} fields)",
+                num_tagged_fields
+            );
+        }
+        types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+
+        write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
+        Ok(())
+    }
+    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+        let mut total_size = 0;
+        total_size +=
+            types::CompactArray(types::Struct { version }).compute_size(&self.deletions)?;
+        total_size +=
+            types::CompactArray(types::Struct { version }).compute_size(&self.upsertions)?;
+        let num_tagged_fields = self.unknown_tagged_fields.len();
+        if num_tagged_fields > std::u32::MAX as usize {
+            bail!(
+                "Too many tagged fields to encode ({} fields)",
+                num_tagged_fields
+            );
+        }
+        total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
+
+        total_size += compute_unknown_tagged_fields_size(&self.unknown_tagged_fields)?;
+        Ok(total_size)
+    }
+}
+
+impl Decodable for AlterUserScramCredentialsRequest {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+        let deletions = types::CompactArray(types::Struct { version }).decode(buf)?;
+        let upsertions = types::CompactArray(types::Struct { version }).decode(buf)?;
+        let mut unknown_tagged_fields = BTreeMap::new();
+        let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
+        for _ in 0..num_tagged_fields {
+            let tag: u32 = types::UnsignedVarInt.decode(buf)?;
+            let size: u32 = types::UnsignedVarInt.decode(buf)?;
+            let unknown_value = buf.try_get_bytes(size as usize)?;
+            unknown_tagged_fields.insert(tag as i32, unknown_value);
+        }
+        Ok(Self {
+            deletions,
+            upsertions,
+            unknown_tagged_fields,
+        })
+    }
+}
+
+impl Default for AlterUserScramCredentialsRequest {
+    fn default() -> Self {
+        Self {
+            deletions: Default::default(),
+            upsertions: Default::default(),
+            unknown_tagged_fields: BTreeMap::new(),
+        }
+    }
+}
+
+impl Message for AlterUserScramCredentialsRequest {
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 0 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
+}
 
 /// Valid versions: 0
 #[non_exhaustive]
@@ -23,12 +122,12 @@ use crate::protocol::{
 #[builder(default)]
 pub struct ScramCredentialDeletion {
     /// The user name.
-    /// 
+    ///
     /// Supported API versions: 0
     pub name: StrBytes,
 
     /// The SCRAM mechanism.
-    /// 
+    ///
     /// Supported API versions: 0
     pub mechanism: i8,
 
@@ -39,7 +138,7 @@ pub struct ScramCredentialDeletion {
 impl Builder for ScramCredentialDeletion {
     type Builder = ScramCredentialDeletionBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         ScramCredentialDeletionBuilder::default()
     }
 }
@@ -50,7 +149,10 @@ impl Encodable for ScramCredentialDeletion {
         types::Int8.encode(buf, &self.mechanism)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
-            bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+            bail!(
+                "Too many tagged fields to encode ({} fields)",
+                num_tagged_fields
+            );
         }
         types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -63,7 +165,10 @@ impl Encodable for ScramCredentialDeletion {
         total_size += types::Int8.compute_size(&self.mechanism)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
-            bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+            bail!(
+                "Too many tagged fields to encode ({} fields)",
+                num_tagged_fields
+            );
         }
         total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -104,6 +209,7 @@ impl Default for ScramCredentialDeletion {
 
 impl Message for ScramCredentialDeletion {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 0 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 /// Valid versions: 0
@@ -112,27 +218,27 @@ impl Message for ScramCredentialDeletion {
 #[builder(default)]
 pub struct ScramCredentialUpsertion {
     /// The user name.
-    /// 
+    ///
     /// Supported API versions: 0
     pub name: StrBytes,
 
     /// The SCRAM mechanism.
-    /// 
+    ///
     /// Supported API versions: 0
     pub mechanism: i8,
 
     /// The number of iterations.
-    /// 
+    ///
     /// Supported API versions: 0
     pub iterations: i32,
 
     /// A random salt generated by the client.
-    /// 
+    ///
     /// Supported API versions: 0
     pub salt: Bytes,
 
     /// The salted password.
-    /// 
+    ///
     /// Supported API versions: 0
     pub salted_password: Bytes,
 
@@ -143,7 +249,7 @@ pub struct ScramCredentialUpsertion {
 impl Builder for ScramCredentialUpsertion {
     type Builder = ScramCredentialUpsertionBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         ScramCredentialUpsertionBuilder::default()
     }
 }
@@ -157,7 +263,10 @@ impl Encodable for ScramCredentialUpsertion {
         types::CompactBytes.encode(buf, &self.salted_password)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
-            bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+            bail!(
+                "Too many tagged fields to encode ({} fields)",
+                num_tagged_fields
+            );
         }
         types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -173,7 +282,10 @@ impl Encodable for ScramCredentialUpsertion {
         total_size += types::CompactBytes.compute_size(&self.salted_password)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
-            bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+            bail!(
+                "Too many tagged fields to encode ({} fields)",
+                num_tagged_fields
+            );
         }
         total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -223,95 +335,7 @@ impl Default for ScramCredentialUpsertion {
 
 impl Message for ScramCredentialUpsertion {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 0 };
-}
-
-/// Valid versions: 0
-#[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
-pub struct AlterUserScramCredentialsRequest {
-    /// The SCRAM credentials to remove.
-    /// 
-    /// Supported API versions: 0
-    pub deletions: Vec<ScramCredentialDeletion>,
-
-    /// The SCRAM credentials to update/insert.
-    /// 
-    /// Supported API versions: 0
-    pub upsertions: Vec<ScramCredentialUpsertion>,
-
-    /// Other tagged fields
-    pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
-}
-
-impl Builder for AlterUserScramCredentialsRequest {
-    type Builder = AlterUserScramCredentialsRequestBuilder;
-
-    fn builder() -> Self::Builder{
-        AlterUserScramCredentialsRequestBuilder::default()
-    }
-}
-
-impl Encodable for AlterUserScramCredentialsRequest {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::CompactArray(types::Struct { version }).encode(buf, &self.deletions)?;
-        types::CompactArray(types::Struct { version }).encode(buf, &self.upsertions)?;
-        let num_tagged_fields = self.unknown_tagged_fields.len();
-        if num_tagged_fields > std::u32::MAX as usize {
-            bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-        }
-        types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
-
-        write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
-        Ok(())
-    }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
-        let mut total_size = 0;
-        total_size += types::CompactArray(types::Struct { version }).compute_size(&self.deletions)?;
-        total_size += types::CompactArray(types::Struct { version }).compute_size(&self.upsertions)?;
-        let num_tagged_fields = self.unknown_tagged_fields.len();
-        if num_tagged_fields > std::u32::MAX as usize {
-            bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
-        }
-        total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
-
-        total_size += compute_unknown_tagged_fields_size(&self.unknown_tagged_fields)?;
-        Ok(total_size)
-    }
-}
-
-impl Decodable for AlterUserScramCredentialsRequest {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let deletions = types::CompactArray(types::Struct { version }).decode(buf)?;
-        let upsertions = types::CompactArray(types::Struct { version }).decode(buf)?;
-        let mut unknown_tagged_fields = BTreeMap::new();
-        let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
-        for _ in 0..num_tagged_fields {
-            let tag: u32 = types::UnsignedVarInt.decode(buf)?;
-            let size: u32 = types::UnsignedVarInt.decode(buf)?;
-            let unknown_value = buf.try_get_bytes(size as usize)?;
-            unknown_tagged_fields.insert(tag as i32, unknown_value);
-        }
-        Ok(Self {
-            deletions,
-            upsertions,
-            unknown_tagged_fields,
-        })
-    }
-}
-
-impl Default for AlterUserScramCredentialsRequest {
-    fn default() -> Self {
-        Self {
-            deletions: Default::default(),
-            upsertions: Default::default(),
-            unknown_tagged_fields: BTreeMap::new(),
-        }
-    }
-}
-
-impl Message for AlterUserScramCredentialsRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 0 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 impl HeaderVersion for AlterUserScramCredentialsRequest {
@@ -319,4 +343,3 @@ impl HeaderVersion for AlterUserScramCredentialsRequest {
         2
     }
 }
-

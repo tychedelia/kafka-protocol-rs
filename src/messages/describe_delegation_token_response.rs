@@ -7,59 +7,65 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
+use anyhow::bail;
 use bytes::Bytes;
 use uuid::Uuid;
-use anyhow::bail;
 
 use crate::protocol::{
-    Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
+    buf::{ByteBuf, ByteBufMut},
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
-
 
 /// Valid versions: 0-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 #[builder(default)]
-pub struct DescribedDelegationTokenRenewer {
-    /// The renewer principal type
-    /// 
+pub struct DescribeDelegationTokenResponse {
+    /// The error code, or 0 if there was no error.
+    ///
     /// Supported API versions: 0-3
-    pub principal_type: StrBytes,
+    pub error_code: i16,
 
-    /// The renewer principal name
-    /// 
+    /// The tokens.
+    ///
     /// Supported API versions: 0-3
-    pub principal_name: StrBytes,
+    pub tokens: Vec<DescribedDelegationToken>,
+
+    /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
+    ///
+    /// Supported API versions: 0-3
+    pub throttle_time_ms: i32,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for DescribedDelegationTokenRenewer {
-    type Builder = DescribedDelegationTokenRenewerBuilder;
+impl Builder for DescribeDelegationTokenResponse {
+    type Builder = DescribeDelegationTokenResponseBuilder;
 
-    fn builder() -> Self::Builder{
-        DescribedDelegationTokenRenewerBuilder::default()
+    fn builder() -> Self::Builder {
+        DescribeDelegationTokenResponseBuilder::default()
     }
 }
 
-impl Encodable for DescribedDelegationTokenRenewer {
+impl Encodable for DescribeDelegationTokenResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+        types::Int16.encode(buf, &self.error_code)?;
         if version >= 2 {
-            types::CompactString.encode(buf, &self.principal_type)?;
+            types::CompactArray(types::Struct { version }).encode(buf, &self.tokens)?;
         } else {
-            types::String.encode(buf, &self.principal_type)?;
+            types::Array(types::Struct { version }).encode(buf, &self.tokens)?;
         }
-        if version >= 2 {
-            types::CompactString.encode(buf, &self.principal_name)?;
-        } else {
-            types::String.encode(buf, &self.principal_name)?;
-        }
+        types::Int32.encode(buf, &self.throttle_time_ms)?;
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -69,20 +75,21 @@ impl Encodable for DescribedDelegationTokenRenewer {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
+        total_size += types::Int16.compute_size(&self.error_code)?;
         if version >= 2 {
-            total_size += types::CompactString.compute_size(&self.principal_type)?;
+            total_size +=
+                types::CompactArray(types::Struct { version }).compute_size(&self.tokens)?;
         } else {
-            total_size += types::String.compute_size(&self.principal_type)?;
+            total_size += types::Array(types::Struct { version }).compute_size(&self.tokens)?;
         }
-        if version >= 2 {
-            total_size += types::CompactString.compute_size(&self.principal_name)?;
-        } else {
-            total_size += types::String.compute_size(&self.principal_name)?;
-        }
+        total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -92,18 +99,15 @@ impl Encodable for DescribedDelegationTokenRenewer {
     }
 }
 
-impl Decodable for DescribedDelegationTokenRenewer {
+impl Decodable for DescribeDelegationTokenResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let principal_type = if version >= 2 {
-            types::CompactString.decode(buf)?
+        let error_code = types::Int16.decode(buf)?;
+        let tokens = if version >= 2 {
+            types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
-            types::String.decode(buf)?
+            types::Array(types::Struct { version }).decode(buf)?
         };
-        let principal_name = if version >= 2 {
-            types::CompactString.decode(buf)?
-        } else {
-            types::String.decode(buf)?
-        };
+        let throttle_time_ms = types::Int32.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
         if version >= 2 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
@@ -115,25 +119,28 @@ impl Decodable for DescribedDelegationTokenRenewer {
             }
         }
         Ok(Self {
-            principal_type,
-            principal_name,
+            error_code,
+            tokens,
+            throttle_time_ms,
             unknown_tagged_fields,
         })
     }
 }
 
-impl Default for DescribedDelegationTokenRenewer {
+impl Default for DescribeDelegationTokenResponse {
     fn default() -> Self {
         Self {
-            principal_type: Default::default(),
-            principal_name: Default::default(),
+            error_code: 0,
+            tokens: Default::default(),
+            throttle_time_ms: 0,
             unknown_tagged_fields: BTreeMap::new(),
         }
     }
 }
 
-impl Message for DescribedDelegationTokenRenewer {
+impl Message for DescribeDelegationTokenResponse {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 /// Valid versions: 0-3
@@ -142,52 +149,52 @@ impl Message for DescribedDelegationTokenRenewer {
 #[builder(default)]
 pub struct DescribedDelegationToken {
     /// The token principal type.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub principal_type: StrBytes,
 
     /// The token principal name.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub principal_name: StrBytes,
 
     /// The principal type of the requester of the token.
-    /// 
+    ///
     /// Supported API versions: 3
     pub token_requester_principal_type: StrBytes,
 
     /// The principal type of the requester of the token.
-    /// 
+    ///
     /// Supported API versions: 3
     pub token_requester_principal_name: StrBytes,
 
     /// The token issue timestamp in milliseconds.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub issue_timestamp: i64,
 
     /// The token expiry timestamp in milliseconds.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub expiry_timestamp: i64,
 
     /// The token maximum timestamp length in milliseconds.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub max_timestamp: i64,
 
     /// The token ID.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub token_id: StrBytes,
 
     /// The token HMAC.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub hmac: Bytes,
 
     /// Those who are able to renew this token before it expires.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub renewers: Vec<DescribedDelegationTokenRenewer>,
 
@@ -198,7 +205,7 @@ pub struct DescribedDelegationToken {
 impl Builder for DescribedDelegationToken {
     type Builder = DescribedDelegationTokenBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         DescribedDelegationTokenBuilder::default()
     }
 }
@@ -219,14 +226,14 @@ impl Encodable for DescribedDelegationToken {
             types::CompactString.encode(buf, &self.token_requester_principal_type)?;
         } else {
             if !self.token_requester_principal_type.is_empty() {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 3 {
             types::CompactString.encode(buf, &self.token_requester_principal_name)?;
         } else {
             if !self.token_requester_principal_name.is_empty() {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         types::Int64.encode(buf, &self.issue_timestamp)?;
@@ -250,7 +257,10 @@ impl Encodable for DescribedDelegationToken {
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -271,17 +281,19 @@ impl Encodable for DescribedDelegationToken {
             total_size += types::String.compute_size(&self.principal_name)?;
         }
         if version >= 3 {
-            total_size += types::CompactString.compute_size(&self.token_requester_principal_type)?;
+            total_size +=
+                types::CompactString.compute_size(&self.token_requester_principal_type)?;
         } else {
             if !self.token_requester_principal_type.is_empty() {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 3 {
-            total_size += types::CompactString.compute_size(&self.token_requester_principal_name)?;
+            total_size +=
+                types::CompactString.compute_size(&self.token_requester_principal_name)?;
         } else {
             if !self.token_requester_principal_name.is_empty() {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         total_size += types::Int64.compute_size(&self.issue_timestamp)?;
@@ -298,14 +310,18 @@ impl Encodable for DescribedDelegationToken {
             total_size += types::Bytes.compute_size(&self.hmac)?;
         }
         if version >= 2 {
-            total_size += types::CompactArray(types::Struct { version }).compute_size(&self.renewers)?;
+            total_size +=
+                types::CompactArray(types::Struct { version }).compute_size(&self.renewers)?;
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.renewers)?;
         }
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -401,53 +417,55 @@ impl Default for DescribedDelegationToken {
 
 impl Message for DescribedDelegationToken {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 /// Valid versions: 0-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 #[builder(default)]
-pub struct DescribeDelegationTokenResponse {
-    /// The error code, or 0 if there was no error.
-    /// 
+pub struct DescribedDelegationTokenRenewer {
+    /// The renewer principal type
+    ///
     /// Supported API versions: 0-3
-    pub error_code: i16,
+    pub principal_type: StrBytes,
 
-    /// The tokens.
-    /// 
+    /// The renewer principal name
+    ///
     /// Supported API versions: 0-3
-    pub tokens: Vec<DescribedDelegationToken>,
-
-    /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
-    /// 
-    /// Supported API versions: 0-3
-    pub throttle_time_ms: i32,
+    pub principal_name: StrBytes,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for DescribeDelegationTokenResponse {
-    type Builder = DescribeDelegationTokenResponseBuilder;
+impl Builder for DescribedDelegationTokenRenewer {
+    type Builder = DescribedDelegationTokenRenewerBuilder;
 
-    fn builder() -> Self::Builder{
-        DescribeDelegationTokenResponseBuilder::default()
+    fn builder() -> Self::Builder {
+        DescribedDelegationTokenRenewerBuilder::default()
     }
 }
 
-impl Encodable for DescribeDelegationTokenResponse {
+impl Encodable for DescribedDelegationTokenRenewer {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
-        types::Int16.encode(buf, &self.error_code)?;
         if version >= 2 {
-            types::CompactArray(types::Struct { version }).encode(buf, &self.tokens)?;
+            types::CompactString.encode(buf, &self.principal_type)?;
         } else {
-            types::Array(types::Struct { version }).encode(buf, &self.tokens)?;
+            types::String.encode(buf, &self.principal_type)?;
         }
-        types::Int32.encode(buf, &self.throttle_time_ms)?;
+        if version >= 2 {
+            types::CompactString.encode(buf, &self.principal_name)?;
+        } else {
+            types::String.encode(buf, &self.principal_name)?;
+        }
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -457,17 +475,23 @@ impl Encodable for DescribeDelegationTokenResponse {
     }
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
-        total_size += types::Int16.compute_size(&self.error_code)?;
         if version >= 2 {
-            total_size += types::CompactArray(types::Struct { version }).compute_size(&self.tokens)?;
+            total_size += types::CompactString.compute_size(&self.principal_type)?;
         } else {
-            total_size += types::Array(types::Struct { version }).compute_size(&self.tokens)?;
+            total_size += types::String.compute_size(&self.principal_type)?;
         }
-        total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
+        if version >= 2 {
+            total_size += types::CompactString.compute_size(&self.principal_name)?;
+        } else {
+            total_size += types::String.compute_size(&self.principal_name)?;
+        }
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -477,15 +501,18 @@ impl Encodable for DescribeDelegationTokenResponse {
     }
 }
 
-impl Decodable for DescribeDelegationTokenResponse {
+impl Decodable for DescribedDelegationTokenRenewer {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
-        let error_code = types::Int16.decode(buf)?;
-        let tokens = if version >= 2 {
-            types::CompactArray(types::Struct { version }).decode(buf)?
+        let principal_type = if version >= 2 {
+            types::CompactString.decode(buf)?
         } else {
-            types::Array(types::Struct { version }).decode(buf)?
+            types::String.decode(buf)?
         };
-        let throttle_time_ms = types::Int32.decode(buf)?;
+        let principal_name = if version >= 2 {
+            types::CompactString.decode(buf)?
+        } else {
+            types::String.decode(buf)?
+        };
         let mut unknown_tagged_fields = BTreeMap::new();
         if version >= 2 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
@@ -497,27 +524,26 @@ impl Decodable for DescribeDelegationTokenResponse {
             }
         }
         Ok(Self {
-            error_code,
-            tokens,
-            throttle_time_ms,
+            principal_type,
+            principal_name,
             unknown_tagged_fields,
         })
     }
 }
 
-impl Default for DescribeDelegationTokenResponse {
+impl Default for DescribedDelegationTokenRenewer {
     fn default() -> Self {
         Self {
-            error_code: 0,
-            tokens: Default::default(),
-            throttle_time_ms: 0,
+            principal_type: Default::default(),
+            principal_name: Default::default(),
             unknown_tagged_fields: BTreeMap::new(),
         }
     }
 }
 
-impl Message for DescribeDelegationTokenResponse {
+impl Message for DescribedDelegationTokenRenewer {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 impl HeaderVersion for DescribeDelegationTokenResponse {
@@ -529,4 +555,3 @@ impl HeaderVersion for DescribeDelegationTokenResponse {
         }
     }
 }
-

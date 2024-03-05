@@ -7,34 +7,35 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
+use anyhow::bail;
 use bytes::Bytes;
 use uuid::Uuid;
-use anyhow::bail;
 
 use crate::protocol::{
-    Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
+    buf::{ByteBuf, ByteBufMut},
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
 
-
-/// Valid versions: 0
+/// Valid versions: 0-1
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 #[builder(default)]
 pub struct DescribeClusterBroker {
     /// The broker hostname.
-    /// 
-    /// Supported API versions: 0
+    ///
+    /// Supported API versions: 0-1
     pub host: StrBytes,
 
     /// The broker port.
-    /// 
-    /// Supported API versions: 0
+    ///
+    /// Supported API versions: 0-1
     pub port: i32,
 
     /// The rack of the broker, or null if it has not been assigned to a rack.
-    /// 
-    /// Supported API versions: 0
+    ///
+    /// Supported API versions: 0-1
     pub rack: Option<StrBytes>,
 
     /// Other tagged fields
@@ -44,21 +45,29 @@ pub struct DescribeClusterBroker {
 impl Builder for DescribeClusterBroker {
     type Builder = DescribeClusterBrokerBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         DescribeClusterBrokerBuilder::default()
     }
 }
 
 impl MapEncodable for DescribeClusterBroker {
     type Key = super::BrokerId;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(
+        &self,
+        key: &Self::Key,
+        buf: &mut B,
+        version: i16,
+    ) -> Result<(), EncodeError> {
         types::Int32.encode(buf, key)?;
         types::CompactString.encode(buf, &self.host)?;
         types::Int32.encode(buf, &self.port)?;
         types::CompactString.encode(buf, &self.rack)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
-            bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+            bail!(
+                "Too many tagged fields to encode ({} fields)",
+                num_tagged_fields
+            );
         }
         types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -73,7 +82,10 @@ impl MapEncodable for DescribeClusterBroker {
         total_size += types::CompactString.compute_size(&self.rack)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
-            bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+            bail!(
+                "Too many tagged fields to encode ({} fields)",
+                num_tagged_fields
+            );
         }
         total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -97,12 +109,15 @@ impl MapDecodable for DescribeClusterBroker {
             let unknown_value = buf.try_get_bytes(size as usize)?;
             unknown_tagged_fields.insert(tag as i32, unknown_value);
         }
-        Ok((key_field, Self {
-            host,
-            port,
-            rack,
-            unknown_tagged_fields,
-        }))
+        Ok((
+            key_field,
+            Self {
+                host,
+                port,
+                rack,
+                unknown_tagged_fields,
+            },
+        ))
     }
 }
 
@@ -118,47 +133,53 @@ impl Default for DescribeClusterBroker {
 }
 
 impl Message for DescribeClusterBroker {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 0 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0
+/// Valid versions: 0-1
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
 #[builder(default)]
 pub struct DescribeClusterResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
-    /// 
-    /// Supported API versions: 0
+    ///
+    /// Supported API versions: 0-1
     pub throttle_time_ms: i32,
 
     /// The top-level error code, or 0 if there was no error
-    /// 
-    /// Supported API versions: 0
+    ///
+    /// Supported API versions: 0-1
     pub error_code: i16,
 
     /// The top-level error message, or null if there was no error.
-    /// 
-    /// Supported API versions: 0
+    ///
+    /// Supported API versions: 0-1
     pub error_message: Option<StrBytes>,
 
+    /// The endpoint type that was described. 1=brokers, 2=controllers.
+    ///
+    /// Supported API versions: 1
+    pub endpoint_type: i8,
+
     /// The cluster ID that responding broker belongs to.
-    /// 
-    /// Supported API versions: 0
+    ///
+    /// Supported API versions: 0-1
     pub cluster_id: StrBytes,
 
     /// The ID of the controller broker.
-    /// 
-    /// Supported API versions: 0
+    ///
+    /// Supported API versions: 0-1
     pub controller_id: super::BrokerId,
 
     /// Each broker in the response.
-    /// 
-    /// Supported API versions: 0
+    ///
+    /// Supported API versions: 0-1
     pub brokers: indexmap::IndexMap<super::BrokerId, DescribeClusterBroker>,
 
     /// 32-bit bitfield to represent authorized operations for this cluster.
-    /// 
-    /// Supported API versions: 0
+    ///
+    /// Supported API versions: 0-1
     pub cluster_authorized_operations: i32,
 
     /// Other tagged fields
@@ -168,7 +189,7 @@ pub struct DescribeClusterResponse {
 impl Builder for DescribeClusterResponse {
     type Builder = DescribeClusterResponseBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         DescribeClusterResponseBuilder::default()
     }
 }
@@ -178,13 +199,23 @@ impl Encodable for DescribeClusterResponse {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         types::Int16.encode(buf, &self.error_code)?;
         types::CompactString.encode(buf, &self.error_message)?;
+        if version >= 1 {
+            types::Int8.encode(buf, &self.endpoint_type)?;
+        } else {
+            if self.endpoint_type != 1 {
+                bail!("failed to encode");
+            }
+        }
         types::CompactString.encode(buf, &self.cluster_id)?;
         types::Int32.encode(buf, &self.controller_id)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.brokers)?;
         types::Int32.encode(buf, &self.cluster_authorized_operations)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
-            bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+            bail!(
+                "Too many tagged fields to encode ({} fields)",
+                num_tagged_fields
+            );
         }
         types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -196,13 +227,23 @@ impl Encodable for DescribeClusterResponse {
         total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
         total_size += types::Int16.compute_size(&self.error_code)?;
         total_size += types::CompactString.compute_size(&self.error_message)?;
+        if version >= 1 {
+            total_size += types::Int8.compute_size(&self.endpoint_type)?;
+        } else {
+            if self.endpoint_type != 1 {
+                bail!("failed to encode");
+            }
+        }
         total_size += types::CompactString.compute_size(&self.cluster_id)?;
         total_size += types::Int32.compute_size(&self.controller_id)?;
         total_size += types::CompactArray(types::Struct { version }).compute_size(&self.brokers)?;
         total_size += types::Int32.compute_size(&self.cluster_authorized_operations)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
-            bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+            bail!(
+                "Too many tagged fields to encode ({} fields)",
+                num_tagged_fields
+            );
         }
         total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -216,6 +257,11 @@ impl Decodable for DescribeClusterResponse {
         let throttle_time_ms = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
         let error_message = types::CompactString.decode(buf)?;
+        let endpoint_type = if version >= 1 {
+            types::Int8.decode(buf)?
+        } else {
+            1
+        };
         let cluster_id = types::CompactString.decode(buf)?;
         let controller_id = types::Int32.decode(buf)?;
         let brokers = types::CompactArray(types::Struct { version }).decode(buf)?;
@@ -232,6 +278,7 @@ impl Decodable for DescribeClusterResponse {
             throttle_time_ms,
             error_code,
             error_message,
+            endpoint_type,
             cluster_id,
             controller_id,
             brokers,
@@ -247,6 +294,7 @@ impl Default for DescribeClusterResponse {
             throttle_time_ms: 0,
             error_code: 0,
             error_message: None,
+            endpoint_type: 1,
             cluster_id: Default::default(),
             controller_id: (-1).into(),
             brokers: Default::default(),
@@ -257,7 +305,8 @@ impl Default for DescribeClusterResponse {
 }
 
 impl Message for DescribeClusterResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 0 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 impl HeaderVersion for DescribeClusterResponse {
@@ -265,4 +314,3 @@ impl HeaderVersion for DescribeClusterResponse {
         1
     }
 }
-

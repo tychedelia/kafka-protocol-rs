@@ -7,15 +7,16 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
+use anyhow::bail;
 use bytes::Bytes;
 use uuid::Uuid;
-use anyhow::bail;
 
 use crate::protocol::{
-    Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
+    buf::{ByteBuf, ByteBufMut},
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
-
 
 /// Valid versions: 0-2
 #[non_exhaustive]
@@ -23,7 +24,7 @@ use crate::protocol::{
 #[builder(default)]
 pub struct SaslAuthenticateRequest {
     /// The SASL authentication bytes from the client, as defined by the SASL mechanism.
-    /// 
+    ///
     /// Supported API versions: 0-2
     pub auth_bytes: Bytes,
 
@@ -34,7 +35,7 @@ pub struct SaslAuthenticateRequest {
 impl Builder for SaslAuthenticateRequest {
     type Builder = SaslAuthenticateRequestBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         SaslAuthenticateRequestBuilder::default()
     }
 }
@@ -49,7 +50,10 @@ impl Encodable for SaslAuthenticateRequest {
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -67,7 +71,10 @@ impl Encodable for SaslAuthenticateRequest {
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -112,6 +119,7 @@ impl Default for SaslAuthenticateRequest {
 
 impl Message for SaslAuthenticateRequest {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 impl HeaderVersion for SaslAuthenticateRequest {
@@ -123,4 +131,3 @@ impl HeaderVersion for SaslAuthenticateRequest {
         }
     }
 }
-

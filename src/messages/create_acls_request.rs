@@ -7,15 +7,16 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
+use anyhow::bail;
 use bytes::Bytes;
 use uuid::Uuid;
-use anyhow::bail;
 
 use crate::protocol::{
-    Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,
-    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{ByteBuf, ByteBufMut}, Builder
+    buf::{ByteBuf, ByteBufMut},
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
-
 
 /// Valid versions: 0-3
 #[non_exhaustive]
@@ -23,37 +24,37 @@ use crate::protocol::{
 #[builder(default)]
 pub struct AclCreation {
     /// The type of the resource.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub resource_type: i8,
 
     /// The resource name for the ACL.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub resource_name: StrBytes,
 
     /// The pattern type for the ACL.
-    /// 
+    ///
     /// Supported API versions: 1-3
     pub resource_pattern_type: i8,
 
     /// The principal for the ACL.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub principal: StrBytes,
 
     /// The host for the ACL.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub host: StrBytes,
 
     /// The operation type for the ACL (read, write, etc.).
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub operation: i8,
 
     /// The permission type for the ACL (allow, deny, etc.).
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub permission_type: i8,
 
@@ -64,7 +65,7 @@ pub struct AclCreation {
 impl Builder for AclCreation {
     type Builder = AclCreationBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         AclCreationBuilder::default()
     }
 }
@@ -81,7 +82,7 @@ impl Encodable for AclCreation {
             types::Int8.encode(buf, &self.resource_pattern_type)?;
         } else {
             if self.resource_pattern_type != 3 {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 2 {
@@ -99,7 +100,10 @@ impl Encodable for AclCreation {
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -119,7 +123,7 @@ impl Encodable for AclCreation {
             total_size += types::Int8.compute_size(&self.resource_pattern_type)?;
         } else {
             if self.resource_pattern_type != 3 {
-                bail!("failed to decode");
+                bail!("failed to encode");
             }
         }
         if version >= 2 {
@@ -137,7 +141,10 @@ impl Encodable for AclCreation {
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -212,6 +219,7 @@ impl Default for AclCreation {
 
 impl Message for AclCreation {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 0 });
 }
 
 /// Valid versions: 0-3
@@ -220,7 +228,7 @@ impl Message for AclCreation {
 #[builder(default)]
 pub struct CreateAclsRequest {
     /// The ACLs that we want to create.
-    /// 
+    ///
     /// Supported API versions: 0-3
     pub creations: Vec<AclCreation>,
 
@@ -231,7 +239,7 @@ pub struct CreateAclsRequest {
 impl Builder for CreateAclsRequest {
     type Builder = CreateAclsRequestBuilder;
 
-    fn builder() -> Self::Builder{
+    fn builder() -> Self::Builder {
         CreateAclsRequestBuilder::default()
     }
 }
@@ -246,7 +254,10 @@ impl Encodable for CreateAclsRequest {
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -257,14 +268,18 @@ impl Encodable for CreateAclsRequest {
     fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
         let mut total_size = 0;
         if version >= 2 {
-            total_size += types::CompactArray(types::Struct { version }).compute_size(&self.creations)?;
+            total_size +=
+                types::CompactArray(types::Struct { version }).compute_size(&self.creations)?;
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.creations)?;
         }
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
-                bail!("Too many tagged fields to encode ({} fields)", num_tagged_fields);
+                bail!(
+                    "Too many tagged fields to encode ({} fields)",
+                    num_tagged_fields
+                );
             }
             total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
 
@@ -309,6 +324,7 @@ impl Default for CreateAclsRequest {
 
 impl Message for CreateAclsRequest {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 0 });
 }
 
 impl HeaderVersion for CreateAclsRequest {
@@ -320,4 +336,3 @@ impl HeaderVersion for CreateAclsRequest {
         }
     }
 }
-
