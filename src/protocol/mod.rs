@@ -16,7 +16,7 @@ pub mod types;
 mod str_bytes {
     use bytes::Bytes;
     use std::convert::TryFrom;
-    use std::fmt::{Debug, Formatter};
+    use std::fmt::{Debug, Display, Formatter};
     use std::ops::Deref;
     use std::str::Utf8Error;
 
@@ -53,6 +53,12 @@ mod str_bytes {
         /// Extract the underlying [Bytes].
         pub fn into_bytes(self) -> Bytes {
             self.0
+        }
+    }
+
+    impl Display for StrBytes {
+        fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+            write!(f, "{}", self.as_str())
         }
     }
 
