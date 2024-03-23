@@ -5,6 +5,7 @@
 
 use crate::protocol::{HeaderVersion, NewType, Request, StrBytes};
 use std::convert::TryFrom;
+use std::fmt::{Display, Formatter};
 
 pub mod consumer_protocol_assignment;
 pub use consumer_protocol_assignment::ConsumerProtocolAssignment;
@@ -1672,6 +1673,12 @@ impl NewType<i32> for BrokerId {}
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default)]
 pub struct GroupId(pub StrBytes);
 
+impl Display for GroupId {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.as_str())
+    }
+}
+
 impl From<StrBytes> for GroupId {
     fn from(other: StrBytes) -> Self {
         Self(other)
@@ -1746,6 +1753,12 @@ impl NewType<i64> for ProducerId {}
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default)]
 pub struct TopicName(pub StrBytes);
 
+impl Display for TopicName {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.as_str())
+    }
+}
+
 impl From<StrBytes> for TopicName {
     fn from(other: StrBytes) -> Self {
         Self(other)
@@ -1782,6 +1795,12 @@ impl NewType<StrBytes> for TopicName {}
 ///
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default)]
 pub struct TransactionalId(pub StrBytes);
+
+impl Display for TransactionalId {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.as_str())
+    }
+}
 
 impl From<StrBytes> for TransactionalId {
     fn from(other: StrBytes) -> Self {
