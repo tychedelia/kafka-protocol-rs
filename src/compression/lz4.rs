@@ -3,7 +3,7 @@ use crate::protocol::{DecodeError, EncodeError};
 use anyhow::Context;
 use bytes::{Buf, BufMut, Bytes, BytesMut};
 use std::io;
-
+use lz4::BlockMode;
 use lz4::{Decoder, EncoderBuilder};
 
 use super::{Compressor, Decompressor};
@@ -26,6 +26,7 @@ impl<B: ByteBufMut> Compressor<B> for Lz4 {
 
         let mut encoder = EncoderBuilder::new()
             .level(COMPRESSION_LEVEL)
+            .block_mode(BlockMode::Independent)
             .build(buf.writer())
             .context("Failed to compress lz4")?;
 
