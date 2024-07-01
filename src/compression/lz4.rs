@@ -26,6 +26,7 @@ impl<B: ByteBufMut> Compressor<B> for Lz4 {
 
         let mut encoder = EncoderBuilder::new()
             .level(COMPRESSION_LEVEL)
+            .block_mode(BlockMode::Independent)
             .build(buf.writer())
             .context("Failed to compress lz4")?;
 
