@@ -262,6 +262,18 @@ pub fn run() -> Result<(), Error> {
     writeln!(module_file, "}}")?;
     writeln!(module_file)?;
 
+    for (_, request_type) in request_types.iter() {
+        writeln!(module_file, "impl From<{request_type}> for RequestKind {{")?;
+        writeln!(
+            module_file,
+            "    fn from(value: {request_type}) -> RequestKind {{"
+        )?;
+        writeln!(module_file, "        RequestKind::{request_type}(value)")?;
+        writeln!(module_file, "    }}")?;
+        writeln!(module_file, "}}")?;
+        writeln!(module_file)?;
+    }
+
     writeln!(
         module_file,
         "/// Wrapping enum for all responses in the Kafka protocol."
@@ -275,6 +287,21 @@ pub fn run() -> Result<(), Error> {
     }
     writeln!(module_file, "}}")?;
     writeln!(module_file)?;
+
+    for (_, response_type) in response_types.iter() {
+        writeln!(
+            module_file,
+            "impl From<{response_type}> for ResponseKind {{"
+        )?;
+        writeln!(
+            module_file,
+            "    fn from(value: {response_type}) -> ResponseKind {{"
+        )?;
+        writeln!(module_file, "        ResponseKind::{response_type}(value)")?;
+        writeln!(module_file, "    }}")?;
+        writeln!(module_file, "}}")?;
+        writeln!(module_file)?;
+    }
 
     for entity_type in entity_types {
         let mut derives = vec![
