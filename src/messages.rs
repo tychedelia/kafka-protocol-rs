@@ -1477,6 +1477,450 @@ pub enum RequestKind {
     ListClientMetricsResourcesRequest(ListClientMetricsResourcesRequest),
 }
 
+impl From<ProduceRequest> for RequestKind {
+    fn from(value: ProduceRequest) -> RequestKind {
+        RequestKind::ProduceRequest(value)
+    }
+}
+
+impl From<FetchRequest> for RequestKind {
+    fn from(value: FetchRequest) -> RequestKind {
+        RequestKind::FetchRequest(value)
+    }
+}
+
+impl From<ListOffsetsRequest> for RequestKind {
+    fn from(value: ListOffsetsRequest) -> RequestKind {
+        RequestKind::ListOffsetsRequest(value)
+    }
+}
+
+impl From<MetadataRequest> for RequestKind {
+    fn from(value: MetadataRequest) -> RequestKind {
+        RequestKind::MetadataRequest(value)
+    }
+}
+
+impl From<LeaderAndIsrRequest> for RequestKind {
+    fn from(value: LeaderAndIsrRequest) -> RequestKind {
+        RequestKind::LeaderAndIsrRequest(value)
+    }
+}
+
+impl From<StopReplicaRequest> for RequestKind {
+    fn from(value: StopReplicaRequest) -> RequestKind {
+        RequestKind::StopReplicaRequest(value)
+    }
+}
+
+impl From<UpdateMetadataRequest> for RequestKind {
+    fn from(value: UpdateMetadataRequest) -> RequestKind {
+        RequestKind::UpdateMetadataRequest(value)
+    }
+}
+
+impl From<ControlledShutdownRequest> for RequestKind {
+    fn from(value: ControlledShutdownRequest) -> RequestKind {
+        RequestKind::ControlledShutdownRequest(value)
+    }
+}
+
+impl From<OffsetCommitRequest> for RequestKind {
+    fn from(value: OffsetCommitRequest) -> RequestKind {
+        RequestKind::OffsetCommitRequest(value)
+    }
+}
+
+impl From<OffsetFetchRequest> for RequestKind {
+    fn from(value: OffsetFetchRequest) -> RequestKind {
+        RequestKind::OffsetFetchRequest(value)
+    }
+}
+
+impl From<FindCoordinatorRequest> for RequestKind {
+    fn from(value: FindCoordinatorRequest) -> RequestKind {
+        RequestKind::FindCoordinatorRequest(value)
+    }
+}
+
+impl From<JoinGroupRequest> for RequestKind {
+    fn from(value: JoinGroupRequest) -> RequestKind {
+        RequestKind::JoinGroupRequest(value)
+    }
+}
+
+impl From<HeartbeatRequest> for RequestKind {
+    fn from(value: HeartbeatRequest) -> RequestKind {
+        RequestKind::HeartbeatRequest(value)
+    }
+}
+
+impl From<LeaveGroupRequest> for RequestKind {
+    fn from(value: LeaveGroupRequest) -> RequestKind {
+        RequestKind::LeaveGroupRequest(value)
+    }
+}
+
+impl From<SyncGroupRequest> for RequestKind {
+    fn from(value: SyncGroupRequest) -> RequestKind {
+        RequestKind::SyncGroupRequest(value)
+    }
+}
+
+impl From<DescribeGroupsRequest> for RequestKind {
+    fn from(value: DescribeGroupsRequest) -> RequestKind {
+        RequestKind::DescribeGroupsRequest(value)
+    }
+}
+
+impl From<ListGroupsRequest> for RequestKind {
+    fn from(value: ListGroupsRequest) -> RequestKind {
+        RequestKind::ListGroupsRequest(value)
+    }
+}
+
+impl From<SaslHandshakeRequest> for RequestKind {
+    fn from(value: SaslHandshakeRequest) -> RequestKind {
+        RequestKind::SaslHandshakeRequest(value)
+    }
+}
+
+impl From<ApiVersionsRequest> for RequestKind {
+    fn from(value: ApiVersionsRequest) -> RequestKind {
+        RequestKind::ApiVersionsRequest(value)
+    }
+}
+
+impl From<CreateTopicsRequest> for RequestKind {
+    fn from(value: CreateTopicsRequest) -> RequestKind {
+        RequestKind::CreateTopicsRequest(value)
+    }
+}
+
+impl From<DeleteTopicsRequest> for RequestKind {
+    fn from(value: DeleteTopicsRequest) -> RequestKind {
+        RequestKind::DeleteTopicsRequest(value)
+    }
+}
+
+impl From<DeleteRecordsRequest> for RequestKind {
+    fn from(value: DeleteRecordsRequest) -> RequestKind {
+        RequestKind::DeleteRecordsRequest(value)
+    }
+}
+
+impl From<InitProducerIdRequest> for RequestKind {
+    fn from(value: InitProducerIdRequest) -> RequestKind {
+        RequestKind::InitProducerIdRequest(value)
+    }
+}
+
+impl From<OffsetForLeaderEpochRequest> for RequestKind {
+    fn from(value: OffsetForLeaderEpochRequest) -> RequestKind {
+        RequestKind::OffsetForLeaderEpochRequest(value)
+    }
+}
+
+impl From<AddPartitionsToTxnRequest> for RequestKind {
+    fn from(value: AddPartitionsToTxnRequest) -> RequestKind {
+        RequestKind::AddPartitionsToTxnRequest(value)
+    }
+}
+
+impl From<AddOffsetsToTxnRequest> for RequestKind {
+    fn from(value: AddOffsetsToTxnRequest) -> RequestKind {
+        RequestKind::AddOffsetsToTxnRequest(value)
+    }
+}
+
+impl From<EndTxnRequest> for RequestKind {
+    fn from(value: EndTxnRequest) -> RequestKind {
+        RequestKind::EndTxnRequest(value)
+    }
+}
+
+impl From<WriteTxnMarkersRequest> for RequestKind {
+    fn from(value: WriteTxnMarkersRequest) -> RequestKind {
+        RequestKind::WriteTxnMarkersRequest(value)
+    }
+}
+
+impl From<TxnOffsetCommitRequest> for RequestKind {
+    fn from(value: TxnOffsetCommitRequest) -> RequestKind {
+        RequestKind::TxnOffsetCommitRequest(value)
+    }
+}
+
+impl From<DescribeAclsRequest> for RequestKind {
+    fn from(value: DescribeAclsRequest) -> RequestKind {
+        RequestKind::DescribeAclsRequest(value)
+    }
+}
+
+impl From<CreateAclsRequest> for RequestKind {
+    fn from(value: CreateAclsRequest) -> RequestKind {
+        RequestKind::CreateAclsRequest(value)
+    }
+}
+
+impl From<DeleteAclsRequest> for RequestKind {
+    fn from(value: DeleteAclsRequest) -> RequestKind {
+        RequestKind::DeleteAclsRequest(value)
+    }
+}
+
+impl From<DescribeConfigsRequest> for RequestKind {
+    fn from(value: DescribeConfigsRequest) -> RequestKind {
+        RequestKind::DescribeConfigsRequest(value)
+    }
+}
+
+impl From<AlterConfigsRequest> for RequestKind {
+    fn from(value: AlterConfigsRequest) -> RequestKind {
+        RequestKind::AlterConfigsRequest(value)
+    }
+}
+
+impl From<AlterReplicaLogDirsRequest> for RequestKind {
+    fn from(value: AlterReplicaLogDirsRequest) -> RequestKind {
+        RequestKind::AlterReplicaLogDirsRequest(value)
+    }
+}
+
+impl From<DescribeLogDirsRequest> for RequestKind {
+    fn from(value: DescribeLogDirsRequest) -> RequestKind {
+        RequestKind::DescribeLogDirsRequest(value)
+    }
+}
+
+impl From<SaslAuthenticateRequest> for RequestKind {
+    fn from(value: SaslAuthenticateRequest) -> RequestKind {
+        RequestKind::SaslAuthenticateRequest(value)
+    }
+}
+
+impl From<CreatePartitionsRequest> for RequestKind {
+    fn from(value: CreatePartitionsRequest) -> RequestKind {
+        RequestKind::CreatePartitionsRequest(value)
+    }
+}
+
+impl From<CreateDelegationTokenRequest> for RequestKind {
+    fn from(value: CreateDelegationTokenRequest) -> RequestKind {
+        RequestKind::CreateDelegationTokenRequest(value)
+    }
+}
+
+impl From<RenewDelegationTokenRequest> for RequestKind {
+    fn from(value: RenewDelegationTokenRequest) -> RequestKind {
+        RequestKind::RenewDelegationTokenRequest(value)
+    }
+}
+
+impl From<ExpireDelegationTokenRequest> for RequestKind {
+    fn from(value: ExpireDelegationTokenRequest) -> RequestKind {
+        RequestKind::ExpireDelegationTokenRequest(value)
+    }
+}
+
+impl From<DescribeDelegationTokenRequest> for RequestKind {
+    fn from(value: DescribeDelegationTokenRequest) -> RequestKind {
+        RequestKind::DescribeDelegationTokenRequest(value)
+    }
+}
+
+impl From<DeleteGroupsRequest> for RequestKind {
+    fn from(value: DeleteGroupsRequest) -> RequestKind {
+        RequestKind::DeleteGroupsRequest(value)
+    }
+}
+
+impl From<ElectLeadersRequest> for RequestKind {
+    fn from(value: ElectLeadersRequest) -> RequestKind {
+        RequestKind::ElectLeadersRequest(value)
+    }
+}
+
+impl From<IncrementalAlterConfigsRequest> for RequestKind {
+    fn from(value: IncrementalAlterConfigsRequest) -> RequestKind {
+        RequestKind::IncrementalAlterConfigsRequest(value)
+    }
+}
+
+impl From<AlterPartitionReassignmentsRequest> for RequestKind {
+    fn from(value: AlterPartitionReassignmentsRequest) -> RequestKind {
+        RequestKind::AlterPartitionReassignmentsRequest(value)
+    }
+}
+
+impl From<ListPartitionReassignmentsRequest> for RequestKind {
+    fn from(value: ListPartitionReassignmentsRequest) -> RequestKind {
+        RequestKind::ListPartitionReassignmentsRequest(value)
+    }
+}
+
+impl From<OffsetDeleteRequest> for RequestKind {
+    fn from(value: OffsetDeleteRequest) -> RequestKind {
+        RequestKind::OffsetDeleteRequest(value)
+    }
+}
+
+impl From<DescribeClientQuotasRequest> for RequestKind {
+    fn from(value: DescribeClientQuotasRequest) -> RequestKind {
+        RequestKind::DescribeClientQuotasRequest(value)
+    }
+}
+
+impl From<AlterClientQuotasRequest> for RequestKind {
+    fn from(value: AlterClientQuotasRequest) -> RequestKind {
+        RequestKind::AlterClientQuotasRequest(value)
+    }
+}
+
+impl From<DescribeUserScramCredentialsRequest> for RequestKind {
+    fn from(value: DescribeUserScramCredentialsRequest) -> RequestKind {
+        RequestKind::DescribeUserScramCredentialsRequest(value)
+    }
+}
+
+impl From<AlterUserScramCredentialsRequest> for RequestKind {
+    fn from(value: AlterUserScramCredentialsRequest) -> RequestKind {
+        RequestKind::AlterUserScramCredentialsRequest(value)
+    }
+}
+
+impl From<VoteRequest> for RequestKind {
+    fn from(value: VoteRequest) -> RequestKind {
+        RequestKind::VoteRequest(value)
+    }
+}
+
+impl From<BeginQuorumEpochRequest> for RequestKind {
+    fn from(value: BeginQuorumEpochRequest) -> RequestKind {
+        RequestKind::BeginQuorumEpochRequest(value)
+    }
+}
+
+impl From<EndQuorumEpochRequest> for RequestKind {
+    fn from(value: EndQuorumEpochRequest) -> RequestKind {
+        RequestKind::EndQuorumEpochRequest(value)
+    }
+}
+
+impl From<DescribeQuorumRequest> for RequestKind {
+    fn from(value: DescribeQuorumRequest) -> RequestKind {
+        RequestKind::DescribeQuorumRequest(value)
+    }
+}
+
+impl From<AlterPartitionRequest> for RequestKind {
+    fn from(value: AlterPartitionRequest) -> RequestKind {
+        RequestKind::AlterPartitionRequest(value)
+    }
+}
+
+impl From<UpdateFeaturesRequest> for RequestKind {
+    fn from(value: UpdateFeaturesRequest) -> RequestKind {
+        RequestKind::UpdateFeaturesRequest(value)
+    }
+}
+
+impl From<EnvelopeRequest> for RequestKind {
+    fn from(value: EnvelopeRequest) -> RequestKind {
+        RequestKind::EnvelopeRequest(value)
+    }
+}
+
+impl From<FetchSnapshotRequest> for RequestKind {
+    fn from(value: FetchSnapshotRequest) -> RequestKind {
+        RequestKind::FetchSnapshotRequest(value)
+    }
+}
+
+impl From<DescribeClusterRequest> for RequestKind {
+    fn from(value: DescribeClusterRequest) -> RequestKind {
+        RequestKind::DescribeClusterRequest(value)
+    }
+}
+
+impl From<DescribeProducersRequest> for RequestKind {
+    fn from(value: DescribeProducersRequest) -> RequestKind {
+        RequestKind::DescribeProducersRequest(value)
+    }
+}
+
+impl From<BrokerRegistrationRequest> for RequestKind {
+    fn from(value: BrokerRegistrationRequest) -> RequestKind {
+        RequestKind::BrokerRegistrationRequest(value)
+    }
+}
+
+impl From<BrokerHeartbeatRequest> for RequestKind {
+    fn from(value: BrokerHeartbeatRequest) -> RequestKind {
+        RequestKind::BrokerHeartbeatRequest(value)
+    }
+}
+
+impl From<UnregisterBrokerRequest> for RequestKind {
+    fn from(value: UnregisterBrokerRequest) -> RequestKind {
+        RequestKind::UnregisterBrokerRequest(value)
+    }
+}
+
+impl From<DescribeTransactionsRequest> for RequestKind {
+    fn from(value: DescribeTransactionsRequest) -> RequestKind {
+        RequestKind::DescribeTransactionsRequest(value)
+    }
+}
+
+impl From<ListTransactionsRequest> for RequestKind {
+    fn from(value: ListTransactionsRequest) -> RequestKind {
+        RequestKind::ListTransactionsRequest(value)
+    }
+}
+
+impl From<AllocateProducerIdsRequest> for RequestKind {
+    fn from(value: AllocateProducerIdsRequest) -> RequestKind {
+        RequestKind::AllocateProducerIdsRequest(value)
+    }
+}
+
+impl From<ConsumerGroupHeartbeatRequest> for RequestKind {
+    fn from(value: ConsumerGroupHeartbeatRequest) -> RequestKind {
+        RequestKind::ConsumerGroupHeartbeatRequest(value)
+    }
+}
+
+impl From<ControllerRegistrationRequest> for RequestKind {
+    fn from(value: ControllerRegistrationRequest) -> RequestKind {
+        RequestKind::ControllerRegistrationRequest(value)
+    }
+}
+
+impl From<GetTelemetrySubscriptionsRequest> for RequestKind {
+    fn from(value: GetTelemetrySubscriptionsRequest) -> RequestKind {
+        RequestKind::GetTelemetrySubscriptionsRequest(value)
+    }
+}
+
+impl From<PushTelemetryRequest> for RequestKind {
+    fn from(value: PushTelemetryRequest) -> RequestKind {
+        RequestKind::PushTelemetryRequest(value)
+    }
+}
+
+impl From<AssignReplicasToDirsRequest> for RequestKind {
+    fn from(value: AssignReplicasToDirsRequest) -> RequestKind {
+        RequestKind::AssignReplicasToDirsRequest(value)
+    }
+}
+
+impl From<ListClientMetricsResourcesRequest> for RequestKind {
+    fn from(value: ListClientMetricsResourcesRequest) -> RequestKind {
+        RequestKind::ListClientMetricsResourcesRequest(value)
+    }
+}
+
 /// Wrapping enum for all responses in the Kafka protocol.
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
@@ -1629,6 +2073,450 @@ pub enum ResponseKind {
     AssignReplicasToDirsResponse(AssignReplicasToDirsResponse),
     /// ListClientMetricsResourcesResponse,
     ListClientMetricsResourcesResponse(ListClientMetricsResourcesResponse),
+}
+
+impl From<ProduceResponse> for ResponseKind {
+    fn from(value: ProduceResponse) -> ResponseKind {
+        ResponseKind::ProduceResponse(value)
+    }
+}
+
+impl From<FetchResponse> for ResponseKind {
+    fn from(value: FetchResponse) -> ResponseKind {
+        ResponseKind::FetchResponse(value)
+    }
+}
+
+impl From<ListOffsetsResponse> for ResponseKind {
+    fn from(value: ListOffsetsResponse) -> ResponseKind {
+        ResponseKind::ListOffsetsResponse(value)
+    }
+}
+
+impl From<MetadataResponse> for ResponseKind {
+    fn from(value: MetadataResponse) -> ResponseKind {
+        ResponseKind::MetadataResponse(value)
+    }
+}
+
+impl From<LeaderAndIsrResponse> for ResponseKind {
+    fn from(value: LeaderAndIsrResponse) -> ResponseKind {
+        ResponseKind::LeaderAndIsrResponse(value)
+    }
+}
+
+impl From<StopReplicaResponse> for ResponseKind {
+    fn from(value: StopReplicaResponse) -> ResponseKind {
+        ResponseKind::StopReplicaResponse(value)
+    }
+}
+
+impl From<UpdateMetadataResponse> for ResponseKind {
+    fn from(value: UpdateMetadataResponse) -> ResponseKind {
+        ResponseKind::UpdateMetadataResponse(value)
+    }
+}
+
+impl From<ControlledShutdownResponse> for ResponseKind {
+    fn from(value: ControlledShutdownResponse) -> ResponseKind {
+        ResponseKind::ControlledShutdownResponse(value)
+    }
+}
+
+impl From<OffsetCommitResponse> for ResponseKind {
+    fn from(value: OffsetCommitResponse) -> ResponseKind {
+        ResponseKind::OffsetCommitResponse(value)
+    }
+}
+
+impl From<OffsetFetchResponse> for ResponseKind {
+    fn from(value: OffsetFetchResponse) -> ResponseKind {
+        ResponseKind::OffsetFetchResponse(value)
+    }
+}
+
+impl From<FindCoordinatorResponse> for ResponseKind {
+    fn from(value: FindCoordinatorResponse) -> ResponseKind {
+        ResponseKind::FindCoordinatorResponse(value)
+    }
+}
+
+impl From<JoinGroupResponse> for ResponseKind {
+    fn from(value: JoinGroupResponse) -> ResponseKind {
+        ResponseKind::JoinGroupResponse(value)
+    }
+}
+
+impl From<HeartbeatResponse> for ResponseKind {
+    fn from(value: HeartbeatResponse) -> ResponseKind {
+        ResponseKind::HeartbeatResponse(value)
+    }
+}
+
+impl From<LeaveGroupResponse> for ResponseKind {
+    fn from(value: LeaveGroupResponse) -> ResponseKind {
+        ResponseKind::LeaveGroupResponse(value)
+    }
+}
+
+impl From<SyncGroupResponse> for ResponseKind {
+    fn from(value: SyncGroupResponse) -> ResponseKind {
+        ResponseKind::SyncGroupResponse(value)
+    }
+}
+
+impl From<DescribeGroupsResponse> for ResponseKind {
+    fn from(value: DescribeGroupsResponse) -> ResponseKind {
+        ResponseKind::DescribeGroupsResponse(value)
+    }
+}
+
+impl From<ListGroupsResponse> for ResponseKind {
+    fn from(value: ListGroupsResponse) -> ResponseKind {
+        ResponseKind::ListGroupsResponse(value)
+    }
+}
+
+impl From<SaslHandshakeResponse> for ResponseKind {
+    fn from(value: SaslHandshakeResponse) -> ResponseKind {
+        ResponseKind::SaslHandshakeResponse(value)
+    }
+}
+
+impl From<ApiVersionsResponse> for ResponseKind {
+    fn from(value: ApiVersionsResponse) -> ResponseKind {
+        ResponseKind::ApiVersionsResponse(value)
+    }
+}
+
+impl From<CreateTopicsResponse> for ResponseKind {
+    fn from(value: CreateTopicsResponse) -> ResponseKind {
+        ResponseKind::CreateTopicsResponse(value)
+    }
+}
+
+impl From<DeleteTopicsResponse> for ResponseKind {
+    fn from(value: DeleteTopicsResponse) -> ResponseKind {
+        ResponseKind::DeleteTopicsResponse(value)
+    }
+}
+
+impl From<DeleteRecordsResponse> for ResponseKind {
+    fn from(value: DeleteRecordsResponse) -> ResponseKind {
+        ResponseKind::DeleteRecordsResponse(value)
+    }
+}
+
+impl From<InitProducerIdResponse> for ResponseKind {
+    fn from(value: InitProducerIdResponse) -> ResponseKind {
+        ResponseKind::InitProducerIdResponse(value)
+    }
+}
+
+impl From<OffsetForLeaderEpochResponse> for ResponseKind {
+    fn from(value: OffsetForLeaderEpochResponse) -> ResponseKind {
+        ResponseKind::OffsetForLeaderEpochResponse(value)
+    }
+}
+
+impl From<AddPartitionsToTxnResponse> for ResponseKind {
+    fn from(value: AddPartitionsToTxnResponse) -> ResponseKind {
+        ResponseKind::AddPartitionsToTxnResponse(value)
+    }
+}
+
+impl From<AddOffsetsToTxnResponse> for ResponseKind {
+    fn from(value: AddOffsetsToTxnResponse) -> ResponseKind {
+        ResponseKind::AddOffsetsToTxnResponse(value)
+    }
+}
+
+impl From<EndTxnResponse> for ResponseKind {
+    fn from(value: EndTxnResponse) -> ResponseKind {
+        ResponseKind::EndTxnResponse(value)
+    }
+}
+
+impl From<WriteTxnMarkersResponse> for ResponseKind {
+    fn from(value: WriteTxnMarkersResponse) -> ResponseKind {
+        ResponseKind::WriteTxnMarkersResponse(value)
+    }
+}
+
+impl From<TxnOffsetCommitResponse> for ResponseKind {
+    fn from(value: TxnOffsetCommitResponse) -> ResponseKind {
+        ResponseKind::TxnOffsetCommitResponse(value)
+    }
+}
+
+impl From<DescribeAclsResponse> for ResponseKind {
+    fn from(value: DescribeAclsResponse) -> ResponseKind {
+        ResponseKind::DescribeAclsResponse(value)
+    }
+}
+
+impl From<CreateAclsResponse> for ResponseKind {
+    fn from(value: CreateAclsResponse) -> ResponseKind {
+        ResponseKind::CreateAclsResponse(value)
+    }
+}
+
+impl From<DeleteAclsResponse> for ResponseKind {
+    fn from(value: DeleteAclsResponse) -> ResponseKind {
+        ResponseKind::DeleteAclsResponse(value)
+    }
+}
+
+impl From<DescribeConfigsResponse> for ResponseKind {
+    fn from(value: DescribeConfigsResponse) -> ResponseKind {
+        ResponseKind::DescribeConfigsResponse(value)
+    }
+}
+
+impl From<AlterConfigsResponse> for ResponseKind {
+    fn from(value: AlterConfigsResponse) -> ResponseKind {
+        ResponseKind::AlterConfigsResponse(value)
+    }
+}
+
+impl From<AlterReplicaLogDirsResponse> for ResponseKind {
+    fn from(value: AlterReplicaLogDirsResponse) -> ResponseKind {
+        ResponseKind::AlterReplicaLogDirsResponse(value)
+    }
+}
+
+impl From<DescribeLogDirsResponse> for ResponseKind {
+    fn from(value: DescribeLogDirsResponse) -> ResponseKind {
+        ResponseKind::DescribeLogDirsResponse(value)
+    }
+}
+
+impl From<SaslAuthenticateResponse> for ResponseKind {
+    fn from(value: SaslAuthenticateResponse) -> ResponseKind {
+        ResponseKind::SaslAuthenticateResponse(value)
+    }
+}
+
+impl From<CreatePartitionsResponse> for ResponseKind {
+    fn from(value: CreatePartitionsResponse) -> ResponseKind {
+        ResponseKind::CreatePartitionsResponse(value)
+    }
+}
+
+impl From<CreateDelegationTokenResponse> for ResponseKind {
+    fn from(value: CreateDelegationTokenResponse) -> ResponseKind {
+        ResponseKind::CreateDelegationTokenResponse(value)
+    }
+}
+
+impl From<RenewDelegationTokenResponse> for ResponseKind {
+    fn from(value: RenewDelegationTokenResponse) -> ResponseKind {
+        ResponseKind::RenewDelegationTokenResponse(value)
+    }
+}
+
+impl From<ExpireDelegationTokenResponse> for ResponseKind {
+    fn from(value: ExpireDelegationTokenResponse) -> ResponseKind {
+        ResponseKind::ExpireDelegationTokenResponse(value)
+    }
+}
+
+impl From<DescribeDelegationTokenResponse> for ResponseKind {
+    fn from(value: DescribeDelegationTokenResponse) -> ResponseKind {
+        ResponseKind::DescribeDelegationTokenResponse(value)
+    }
+}
+
+impl From<DeleteGroupsResponse> for ResponseKind {
+    fn from(value: DeleteGroupsResponse) -> ResponseKind {
+        ResponseKind::DeleteGroupsResponse(value)
+    }
+}
+
+impl From<ElectLeadersResponse> for ResponseKind {
+    fn from(value: ElectLeadersResponse) -> ResponseKind {
+        ResponseKind::ElectLeadersResponse(value)
+    }
+}
+
+impl From<IncrementalAlterConfigsResponse> for ResponseKind {
+    fn from(value: IncrementalAlterConfigsResponse) -> ResponseKind {
+        ResponseKind::IncrementalAlterConfigsResponse(value)
+    }
+}
+
+impl From<AlterPartitionReassignmentsResponse> for ResponseKind {
+    fn from(value: AlterPartitionReassignmentsResponse) -> ResponseKind {
+        ResponseKind::AlterPartitionReassignmentsResponse(value)
+    }
+}
+
+impl From<ListPartitionReassignmentsResponse> for ResponseKind {
+    fn from(value: ListPartitionReassignmentsResponse) -> ResponseKind {
+        ResponseKind::ListPartitionReassignmentsResponse(value)
+    }
+}
+
+impl From<OffsetDeleteResponse> for ResponseKind {
+    fn from(value: OffsetDeleteResponse) -> ResponseKind {
+        ResponseKind::OffsetDeleteResponse(value)
+    }
+}
+
+impl From<DescribeClientQuotasResponse> for ResponseKind {
+    fn from(value: DescribeClientQuotasResponse) -> ResponseKind {
+        ResponseKind::DescribeClientQuotasResponse(value)
+    }
+}
+
+impl From<AlterClientQuotasResponse> for ResponseKind {
+    fn from(value: AlterClientQuotasResponse) -> ResponseKind {
+        ResponseKind::AlterClientQuotasResponse(value)
+    }
+}
+
+impl From<DescribeUserScramCredentialsResponse> for ResponseKind {
+    fn from(value: DescribeUserScramCredentialsResponse) -> ResponseKind {
+        ResponseKind::DescribeUserScramCredentialsResponse(value)
+    }
+}
+
+impl From<AlterUserScramCredentialsResponse> for ResponseKind {
+    fn from(value: AlterUserScramCredentialsResponse) -> ResponseKind {
+        ResponseKind::AlterUserScramCredentialsResponse(value)
+    }
+}
+
+impl From<VoteResponse> for ResponseKind {
+    fn from(value: VoteResponse) -> ResponseKind {
+        ResponseKind::VoteResponse(value)
+    }
+}
+
+impl From<BeginQuorumEpochResponse> for ResponseKind {
+    fn from(value: BeginQuorumEpochResponse) -> ResponseKind {
+        ResponseKind::BeginQuorumEpochResponse(value)
+    }
+}
+
+impl From<EndQuorumEpochResponse> for ResponseKind {
+    fn from(value: EndQuorumEpochResponse) -> ResponseKind {
+        ResponseKind::EndQuorumEpochResponse(value)
+    }
+}
+
+impl From<DescribeQuorumResponse> for ResponseKind {
+    fn from(value: DescribeQuorumResponse) -> ResponseKind {
+        ResponseKind::DescribeQuorumResponse(value)
+    }
+}
+
+impl From<AlterPartitionResponse> for ResponseKind {
+    fn from(value: AlterPartitionResponse) -> ResponseKind {
+        ResponseKind::AlterPartitionResponse(value)
+    }
+}
+
+impl From<UpdateFeaturesResponse> for ResponseKind {
+    fn from(value: UpdateFeaturesResponse) -> ResponseKind {
+        ResponseKind::UpdateFeaturesResponse(value)
+    }
+}
+
+impl From<EnvelopeResponse> for ResponseKind {
+    fn from(value: EnvelopeResponse) -> ResponseKind {
+        ResponseKind::EnvelopeResponse(value)
+    }
+}
+
+impl From<FetchSnapshotResponse> for ResponseKind {
+    fn from(value: FetchSnapshotResponse) -> ResponseKind {
+        ResponseKind::FetchSnapshotResponse(value)
+    }
+}
+
+impl From<DescribeClusterResponse> for ResponseKind {
+    fn from(value: DescribeClusterResponse) -> ResponseKind {
+        ResponseKind::DescribeClusterResponse(value)
+    }
+}
+
+impl From<DescribeProducersResponse> for ResponseKind {
+    fn from(value: DescribeProducersResponse) -> ResponseKind {
+        ResponseKind::DescribeProducersResponse(value)
+    }
+}
+
+impl From<BrokerRegistrationResponse> for ResponseKind {
+    fn from(value: BrokerRegistrationResponse) -> ResponseKind {
+        ResponseKind::BrokerRegistrationResponse(value)
+    }
+}
+
+impl From<BrokerHeartbeatResponse> for ResponseKind {
+    fn from(value: BrokerHeartbeatResponse) -> ResponseKind {
+        ResponseKind::BrokerHeartbeatResponse(value)
+    }
+}
+
+impl From<UnregisterBrokerResponse> for ResponseKind {
+    fn from(value: UnregisterBrokerResponse) -> ResponseKind {
+        ResponseKind::UnregisterBrokerResponse(value)
+    }
+}
+
+impl From<DescribeTransactionsResponse> for ResponseKind {
+    fn from(value: DescribeTransactionsResponse) -> ResponseKind {
+        ResponseKind::DescribeTransactionsResponse(value)
+    }
+}
+
+impl From<ListTransactionsResponse> for ResponseKind {
+    fn from(value: ListTransactionsResponse) -> ResponseKind {
+        ResponseKind::ListTransactionsResponse(value)
+    }
+}
+
+impl From<AllocateProducerIdsResponse> for ResponseKind {
+    fn from(value: AllocateProducerIdsResponse) -> ResponseKind {
+        ResponseKind::AllocateProducerIdsResponse(value)
+    }
+}
+
+impl From<ConsumerGroupHeartbeatResponse> for ResponseKind {
+    fn from(value: ConsumerGroupHeartbeatResponse) -> ResponseKind {
+        ResponseKind::ConsumerGroupHeartbeatResponse(value)
+    }
+}
+
+impl From<ControllerRegistrationResponse> for ResponseKind {
+    fn from(value: ControllerRegistrationResponse) -> ResponseKind {
+        ResponseKind::ControllerRegistrationResponse(value)
+    }
+}
+
+impl From<GetTelemetrySubscriptionsResponse> for ResponseKind {
+    fn from(value: GetTelemetrySubscriptionsResponse) -> ResponseKind {
+        ResponseKind::GetTelemetrySubscriptionsResponse(value)
+    }
+}
+
+impl From<PushTelemetryResponse> for ResponseKind {
+    fn from(value: PushTelemetryResponse) -> ResponseKind {
+        ResponseKind::PushTelemetryResponse(value)
+    }
+}
+
+impl From<AssignReplicasToDirsResponse> for ResponseKind {
+    fn from(value: AssignReplicasToDirsResponse) -> ResponseKind {
+        ResponseKind::AssignReplicasToDirsResponse(value)
+    }
+}
+
+impl From<ListClientMetricsResourcesResponse> for ResponseKind {
+    fn from(value: ListClientMetricsResourcesResponse) -> ResponseKind {
+        ResponseKind::ListClientMetricsResourcesResponse(value)
+    }
 }
 
 /// The ID of the controller broker.
