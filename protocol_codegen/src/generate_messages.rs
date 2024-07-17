@@ -257,7 +257,12 @@ pub fn run() -> Result<(), Error> {
     writeln!(module_file, "pub enum RequestKind {{")?;
     for (_, request_type) in request_types.iter() {
         writeln!(module_file, "    /// {},", request_type)?;
-        writeln!(module_file, "    {}({}),", request_type, request_type)?;
+        writeln!(
+            module_file,
+            "    {}({}),",
+            request_type.trim_end_matches("Request"),
+            request_type
+        )?;
     }
     writeln!(module_file, "}}")?;
     writeln!(module_file)?;
@@ -268,7 +273,8 @@ pub fn run() -> Result<(), Error> {
             module_file,
             "    fn from(value: {request_type}) -> RequestKind {{"
         )?;
-        writeln!(module_file, "        RequestKind::{request_type}(value)")?;
+        let variant = request_type.trim_end_matches("Request");
+        writeln!(module_file, "        RequestKind::{variant}(value)")?;
         writeln!(module_file, "    }}")?;
         writeln!(module_file, "}}")?;
         writeln!(module_file)?;
@@ -283,7 +289,12 @@ pub fn run() -> Result<(), Error> {
     writeln!(module_file, "pub enum ResponseKind {{")?;
     for (_, response_type) in response_types.iter() {
         writeln!(module_file, "    /// {},", response_type)?;
-        writeln!(module_file, "    {}({}),", response_type, response_type)?;
+        writeln!(
+            module_file,
+            "    {}({}),",
+            response_type.trim_end_matches("Response"),
+            response_type
+        )?;
     }
     writeln!(module_file, "}}")?;
     writeln!(module_file)?;
@@ -297,7 +308,8 @@ pub fn run() -> Result<(), Error> {
             module_file,
             "    fn from(value: {response_type}) -> ResponseKind {{"
         )?;
-        writeln!(module_file, "        ResponseKind::{response_type}(value)")?;
+        let variant = response_type.trim_end_matches("Response");
+        writeln!(module_file, "        ResponseKind::{variant}(value)")?;
         writeln!(module_file, "    }}")?;
         writeln!(module_file, "}}")?;
         writeln!(module_file)?;
