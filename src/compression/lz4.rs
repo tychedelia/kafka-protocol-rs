@@ -2,9 +2,9 @@ use crate::protocol::buf::{ByteBuf, ByteBufMut};
 use crate::protocol::{DecodeError, EncodeError};
 use anyhow::Context;
 use bytes::{Buf, BufMut, Bytes, BytesMut};
-use std::io;
 use lz4::BlockMode;
 use lz4::{Decoder, EncoderBuilder};
+use std::io;
 
 use super::{Compressor, Decompressor};
 
