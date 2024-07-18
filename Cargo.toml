@@ -32,3 +32,6 @@ derive_builder = "0.20.0"
 paste = "1.0.7"
 crc32c = "0.6.4"
 anyhow = "1.0.80"
+
+[dev-dependencies]
+docker-compose-runner = "0.3.1"
