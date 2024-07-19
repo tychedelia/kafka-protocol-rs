@@ -34,4 +34,4 @@ crc32c = "0.6.4"
 anyhow = "1.0.80"
 
 [dev-dependencies]
-docker-compose-runner = "0.3.1"
+testcontainers = { version = "0.20.1", features = ["blocking", "watchdog"] }
