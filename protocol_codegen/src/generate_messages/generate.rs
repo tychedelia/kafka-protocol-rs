@@ -1125,6 +1125,70 @@ impl PreparedStruct {
         writeln!(w)?;
         writeln!(w)?;
 
+        write!(w, "impl {} ", self.name)?;
+        w.block(|w| {
+            for prepared_field in &self.prepared_fields {
+                if prepared_field.map_key {
+                    continue;
+                }
+
+                writeln!(w, "/// {}", prepared_field.about)?;
+                writeln!(w, "/// ")?;
+                writeln!(w, "/// Supported API versions: {}", prepared_field.versions)?;
+                if prepared_field.optional {
+                    writeln!(
+                        w,
+                        "pub fn with_{}(mut self, value: Option<{}>) -> Self",
+                        prepared_field.name.trim_start_matches('_'),
+                        prepared_field.type_.rust_name()
+                    )?;
+                } else {
+                    writeln!(
+                        w,
+                        "pub fn with_{}(mut self, value: {}) -> Self",
+                        prepared_field.name.trim_start_matches('_'),
+                        prepared_field.type_.rust_name()
+                    )?;
+                }
+
+                w.block(|w| {
+                    writeln!(w, "self.{} = value;", prepared_field.name)?;
+                    writeln!(w, "self")?;
+                    Ok(())
+                })?;
+            }
+
+            if !self.flexible_msg_versions.is_none() {
+                writeln!(w, "/// Other tagged fields")?;
+                writeln!(
+                    w,
+                    "pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self"
+                )?;
+                w.block(|w| {
+                    writeln!(w, "self.unknown_tagged_fields = value;")?;
+                    writeln!(w, "self")?;
+
+                    Ok(())
+                })?;
+
+                writeln!(w, "/// Other tagged fields")?;
+                writeln!(
+                    w,
+                    "pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self"
+                )?;
+                w.block(|w| {
+                    writeln!(w, "self.unknown_tagged_fields.insert(key, value);")?;
+                    writeln!(w, "self")?;
+
+                    Ok(())
+                })?;
+            }
+
+            Ok(())
+        })?;
+        writeln!(w)?;
+        writeln!(w)?;
+
         write!(w, "impl Builder for {} ", self.name)?;
         w.block(|w| {
             writeln!(w, "type Builder = {}Builder;", self.name)?;
