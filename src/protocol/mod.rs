@@ -97,7 +97,6 @@ mod str_bytes {
     }
 
     impl Display for StrBytes {
-        #[inline]
         fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
             std::fmt::Display::fmt(&**self, f)
         }
