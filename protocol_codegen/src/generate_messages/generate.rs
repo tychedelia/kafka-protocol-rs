@@ -1175,6 +1175,21 @@ impl PreparedStruct {
                                 writeln!(w, "self")?;
                                 Ok(())
                             })?;
+
+                            writeln!(w, "/// {}", prepared_field.about)?;
+                            writeln!(w, "/// ")?;
+                            writeln!(w, "/// Supported API versions: {}", prepared_field.versions)?;
+                            writeln!(
+                                w,
+                                "pub fn reserve_{}(mut self, additional: usize) -> Self",
+                                prepared_field.name.trim_start_matches('_'),
+                            )?;
+
+                            w.block(|w| {
+                                writeln!(w, "self.{}.reserve(additional);", prepared_field.name)?;
+                                writeln!(w, "self")?;
+                                Ok(())
+                            })?;
                         },
 
                         PreparedType::Map(key_type, value_type) => {
@@ -1191,6 +1206,21 @@ impl PreparedStruct {
 
                             w.block(|w| {
                                 writeln!(w, "self.{}.insert(key, value);", prepared_field.name)?;
+                                writeln!(w, "self")?;
+                                Ok(())
+                            })?;
+
+                            writeln!(w, "/// {}", prepared_field.about)?;
+                            writeln!(w, "/// ")?;
+                            writeln!(w, "/// Supported API versions: {}", prepared_field.versions)?;
+                            writeln!(
+                                w,
+                                "pub fn reserve_{}(mut self, additional: usize) -> Self",
+                                prepared_field.name.trim_start_matches('_'),
+                            )?;
+
+                            w.block(|w| {
+                                writeln!(w, "self.{}.reserve(additional);", prepared_field.name)?;
                                 writeln!(w, "self")?;
                                 Ok(())
                             })?;
