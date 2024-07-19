@@ -1175,6 +1175,25 @@ impl PreparedStruct {
                                 writeln!(w, "self")?;
                                 Ok(())
                             })?;
+                        },
+
+                        PreparedType::Map(key_type, value_type) => {
+                            writeln!(w, "/// {}", prepared_field.about)?;
+                            writeln!(w, "/// ")?;
+                            writeln!(w, "/// Supported API versions: {}", prepared_field.versions)?;
+                            writeln!(
+                                w,
+                                "pub fn insert_{}(mut self, key: {}, value: {}) -> Self",
+                                prepared_field.name.trim_start_matches('_'),
+                                key_type.rust_name(),
+                                value_type,
+                            )?;
+
+                            w.block(|w| {
+                                writeln!(w, "self.{}.insert(key, value);", prepared_field.name)?;
+                                writeln!(w, "self")?;
+                                Ok(())
+                            })?;
                         }
 
                         _ => {},
