@@ -64,9 +64,9 @@ mod str_bytes {
         }
     }
 
-    impl Into<Bytes> for StrBytes {
-        fn into(self) -> Bytes {
-            self.0
+    impl From<StrBytes> for Bytes {
+        fn from(value: StrBytes) -> Bytes {
+            value.0
         }
     }
 
