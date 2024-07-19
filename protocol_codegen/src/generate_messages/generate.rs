@@ -1156,6 +1156,30 @@ impl PreparedStruct {
                     writeln!(w, "self")?;
                     Ok(())
                 })?;
+
+                if !prepared_field.optional {
+                    match &prepared_field.type_ {
+                        PreparedType::Array(inner_type) => {
+                            writeln!(w, "/// {}", prepared_field.about)?;
+                            writeln!(w, "/// ")?;
+                            writeln!(w, "/// Supported API versions: {}", prepared_field.versions)?;
+                            writeln!(
+                                w,
+                                "pub fn append_{}(mut self, value: {}) -> Self",
+                                prepared_field.name.trim_start_matches('_'),
+                                inner_type.rust_name()
+                            )?;
+
+                            w.block(|w| {
+                                writeln!(w, "self.{}.push(value);", prepared_field.name)?;
+                                writeln!(w, "self")?;
+                                Ok(())
+                            })?;
+                        }
+
+                        _ => {},
+                    }
+                }
             }
 
             if !self.flexible_msg_versions.is_none() {
