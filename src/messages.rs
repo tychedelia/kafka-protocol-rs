@@ -1328,596 +1328,596 @@ impl TryFrom<i16> for ApiKey {
 #[derive(Debug, Clone, PartialEq)]
 pub enum RequestKind {
     /// ProduceRequest,
-    ProduceRequest(ProduceRequest),
+    Produce(ProduceRequest),
     /// FetchRequest,
-    FetchRequest(FetchRequest),
+    Fetch(FetchRequest),
     /// ListOffsetsRequest,
-    ListOffsetsRequest(ListOffsetsRequest),
+    ListOffsets(ListOffsetsRequest),
     /// MetadataRequest,
-    MetadataRequest(MetadataRequest),
+    Metadata(MetadataRequest),
     /// LeaderAndIsrRequest,
-    LeaderAndIsrRequest(LeaderAndIsrRequest),
+    LeaderAndIsr(LeaderAndIsrRequest),
     /// StopReplicaRequest,
-    StopReplicaRequest(StopReplicaRequest),
+    StopReplica(StopReplicaRequest),
     /// UpdateMetadataRequest,
-    UpdateMetadataRequest(UpdateMetadataRequest),
+    UpdateMetadata(UpdateMetadataRequest),
     /// ControlledShutdownRequest,
-    ControlledShutdownRequest(ControlledShutdownRequest),
+    ControlledShutdown(ControlledShutdownRequest),
     /// OffsetCommitRequest,
-    OffsetCommitRequest(OffsetCommitRequest),
+    OffsetCommit(OffsetCommitRequest),
     /// OffsetFetchRequest,
-    OffsetFetchRequest(OffsetFetchRequest),
+    OffsetFetch(OffsetFetchRequest),
     /// FindCoordinatorRequest,
-    FindCoordinatorRequest(FindCoordinatorRequest),
+    FindCoordinator(FindCoordinatorRequest),
     /// JoinGroupRequest,
-    JoinGroupRequest(JoinGroupRequest),
+    JoinGroup(JoinGroupRequest),
     /// HeartbeatRequest,
-    HeartbeatRequest(HeartbeatRequest),
+    Heartbeat(HeartbeatRequest),
     /// LeaveGroupRequest,
-    LeaveGroupRequest(LeaveGroupRequest),
+    LeaveGroup(LeaveGroupRequest),
     /// SyncGroupRequest,
-    SyncGroupRequest(SyncGroupRequest),
+    SyncGroup(SyncGroupRequest),
     /// DescribeGroupsRequest,
-    DescribeGroupsRequest(DescribeGroupsRequest),
+    DescribeGroups(DescribeGroupsRequest),
     /// ListGroupsRequest,
-    ListGroupsRequest(ListGroupsRequest),
+    ListGroups(ListGroupsRequest),
     /// SaslHandshakeRequest,
-    SaslHandshakeRequest(SaslHandshakeRequest),
+    SaslHandshake(SaslHandshakeRequest),
     /// ApiVersionsRequest,
-    ApiVersionsRequest(ApiVersionsRequest),
+    ApiVersions(ApiVersionsRequest),
     /// CreateTopicsRequest,
-    CreateTopicsRequest(CreateTopicsRequest),
+    CreateTopics(CreateTopicsRequest),
     /// DeleteTopicsRequest,
-    DeleteTopicsRequest(DeleteTopicsRequest),
+    DeleteTopics(DeleteTopicsRequest),
     /// DeleteRecordsRequest,
-    DeleteRecordsRequest(DeleteRecordsRequest),
+    DeleteRecords(DeleteRecordsRequest),
     /// InitProducerIdRequest,
-    InitProducerIdRequest(InitProducerIdRequest),
+    InitProducerId(InitProducerIdRequest),
     /// OffsetForLeaderEpochRequest,
-    OffsetForLeaderEpochRequest(OffsetForLeaderEpochRequest),
+    OffsetForLeaderEpoch(OffsetForLeaderEpochRequest),
     /// AddPartitionsToTxnRequest,
-    AddPartitionsToTxnRequest(AddPartitionsToTxnRequest),
+    AddPartitionsToTxn(AddPartitionsToTxnRequest),
     /// AddOffsetsToTxnRequest,
-    AddOffsetsToTxnRequest(AddOffsetsToTxnRequest),
+    AddOffsetsToTxn(AddOffsetsToTxnRequest),
     /// EndTxnRequest,
-    EndTxnRequest(EndTxnRequest),
+    EndTxn(EndTxnRequest),
     /// WriteTxnMarkersRequest,
-    WriteTxnMarkersRequest(WriteTxnMarkersRequest),
+    WriteTxnMarkers(WriteTxnMarkersRequest),
     /// TxnOffsetCommitRequest,
-    TxnOffsetCommitRequest(TxnOffsetCommitRequest),
+    TxnOffsetCommit(TxnOffsetCommitRequest),
     /// DescribeAclsRequest,
-    DescribeAclsRequest(DescribeAclsRequest),
+    DescribeAcls(DescribeAclsRequest),
     /// CreateAclsRequest,
-    CreateAclsRequest(CreateAclsRequest),
+    CreateAcls(CreateAclsRequest),
     /// DeleteAclsRequest,
-    DeleteAclsRequest(DeleteAclsRequest),
+    DeleteAcls(DeleteAclsRequest),
     /// DescribeConfigsRequest,
-    DescribeConfigsRequest(DescribeConfigsRequest),
+    DescribeConfigs(DescribeConfigsRequest),
     /// AlterConfigsRequest,
-    AlterConfigsRequest(AlterConfigsRequest),
+    AlterConfigs(AlterConfigsRequest),
     /// AlterReplicaLogDirsRequest,
-    AlterReplicaLogDirsRequest(AlterReplicaLogDirsRequest),
+    AlterReplicaLogDirs(AlterReplicaLogDirsRequest),
     /// DescribeLogDirsRequest,
-    DescribeLogDirsRequest(DescribeLogDirsRequest),
+    DescribeLogDirs(DescribeLogDirsRequest),
     /// SaslAuthenticateRequest,
-    SaslAuthenticateRequest(SaslAuthenticateRequest),
+    SaslAuthenticate(SaslAuthenticateRequest),
     /// CreatePartitionsRequest,
-    CreatePartitionsRequest(CreatePartitionsRequest),
+    CreatePartitions(CreatePartitionsRequest),
     /// CreateDelegationTokenRequest,
-    CreateDelegationTokenRequest(CreateDelegationTokenRequest),
+    CreateDelegationToken(CreateDelegationTokenRequest),
     /// RenewDelegationTokenRequest,
-    RenewDelegationTokenRequest(RenewDelegationTokenRequest),
+    RenewDelegationToken(RenewDelegationTokenRequest),
     /// ExpireDelegationTokenRequest,
-    ExpireDelegationTokenRequest(ExpireDelegationTokenRequest),
+    ExpireDelegationToken(ExpireDelegationTokenRequest),
     /// DescribeDelegationTokenRequest,
-    DescribeDelegationTokenRequest(DescribeDelegationTokenRequest),
+    DescribeDelegationToken(DescribeDelegationTokenRequest),
     /// DeleteGroupsRequest,
-    DeleteGroupsRequest(DeleteGroupsRequest),
+    DeleteGroups(DeleteGroupsRequest),
     /// ElectLeadersRequest,
-    ElectLeadersRequest(ElectLeadersRequest),
+    ElectLeaders(ElectLeadersRequest),
     /// IncrementalAlterConfigsRequest,
-    IncrementalAlterConfigsRequest(IncrementalAlterConfigsRequest),
+    IncrementalAlterConfigs(IncrementalAlterConfigsRequest),
     /// AlterPartitionReassignmentsRequest,
-    AlterPartitionReassignmentsRequest(AlterPartitionReassignmentsRequest),
+    AlterPartitionReassignments(AlterPartitionReassignmentsRequest),
     /// ListPartitionReassignmentsRequest,
-    ListPartitionReassignmentsRequest(ListPartitionReassignmentsRequest),
+    ListPartitionReassignments(ListPartitionReassignmentsRequest),
     /// OffsetDeleteRequest,
-    OffsetDeleteRequest(OffsetDeleteRequest),
+    OffsetDelete(OffsetDeleteRequest),
     /// DescribeClientQuotasRequest,
-    DescribeClientQuotasRequest(DescribeClientQuotasRequest),
+    DescribeClientQuotas(DescribeClientQuotasRequest),
     /// AlterClientQuotasRequest,
-    AlterClientQuotasRequest(AlterClientQuotasRequest),
+    AlterClientQuotas(AlterClientQuotasRequest),
     /// DescribeUserScramCredentialsRequest,
-    DescribeUserScramCredentialsRequest(DescribeUserScramCredentialsRequest),
+    DescribeUserScramCredentials(DescribeUserScramCredentialsRequest),
     /// AlterUserScramCredentialsRequest,
-    AlterUserScramCredentialsRequest(AlterUserScramCredentialsRequest),
+    AlterUserScramCredentials(AlterUserScramCredentialsRequest),
     /// VoteRequest,
-    VoteRequest(VoteRequest),
+    Vote(VoteRequest),
     /// BeginQuorumEpochRequest,
-    BeginQuorumEpochRequest(BeginQuorumEpochRequest),
+    BeginQuorumEpoch(BeginQuorumEpochRequest),
     /// EndQuorumEpochRequest,
-    EndQuorumEpochRequest(EndQuorumEpochRequest),
+    EndQuorumEpoch(EndQuorumEpochRequest),
     /// DescribeQuorumRequest,
-    DescribeQuorumRequest(DescribeQuorumRequest),
+    DescribeQuorum(DescribeQuorumRequest),
     /// AlterPartitionRequest,
-    AlterPartitionRequest(AlterPartitionRequest),
+    AlterPartition(AlterPartitionRequest),
     /// UpdateFeaturesRequest,
-    UpdateFeaturesRequest(UpdateFeaturesRequest),
+    UpdateFeatures(UpdateFeaturesRequest),
     /// EnvelopeRequest,
-    EnvelopeRequest(EnvelopeRequest),
+    Envelope(EnvelopeRequest),
     /// FetchSnapshotRequest,
-    FetchSnapshotRequest(FetchSnapshotRequest),
+    FetchSnapshot(FetchSnapshotRequest),
     /// DescribeClusterRequest,
-    DescribeClusterRequest(DescribeClusterRequest),
+    DescribeCluster(DescribeClusterRequest),
     /// DescribeProducersRequest,
-    DescribeProducersRequest(DescribeProducersRequest),
+    DescribeProducers(DescribeProducersRequest),
     /// BrokerRegistrationRequest,
-    BrokerRegistrationRequest(BrokerRegistrationRequest),
+    BrokerRegistration(BrokerRegistrationRequest),
     /// BrokerHeartbeatRequest,
-    BrokerHeartbeatRequest(BrokerHeartbeatRequest),
+    BrokerHeartbeat(BrokerHeartbeatRequest),
     /// UnregisterBrokerRequest,
-    UnregisterBrokerRequest(UnregisterBrokerRequest),
+    UnregisterBroker(UnregisterBrokerRequest),
     /// DescribeTransactionsRequest,
-    DescribeTransactionsRequest(DescribeTransactionsRequest),
+    DescribeTransactions(DescribeTransactionsRequest),
     /// ListTransactionsRequest,
-    ListTransactionsRequest(ListTransactionsRequest),
+    ListTransactions(ListTransactionsRequest),
     /// AllocateProducerIdsRequest,
-    AllocateProducerIdsRequest(AllocateProducerIdsRequest),
+    AllocateProducerIds(AllocateProducerIdsRequest),
     /// ConsumerGroupHeartbeatRequest,
-    ConsumerGroupHeartbeatRequest(ConsumerGroupHeartbeatRequest),
+    ConsumerGroupHeartbeat(ConsumerGroupHeartbeatRequest),
     /// ControllerRegistrationRequest,
-    ControllerRegistrationRequest(ControllerRegistrationRequest),
+    ControllerRegistration(ControllerRegistrationRequest),
     /// GetTelemetrySubscriptionsRequest,
-    GetTelemetrySubscriptionsRequest(GetTelemetrySubscriptionsRequest),
+    GetTelemetrySubscriptions(GetTelemetrySubscriptionsRequest),
     /// PushTelemetryRequest,
-    PushTelemetryRequest(PushTelemetryRequest),
+    PushTelemetry(PushTelemetryRequest),
     /// AssignReplicasToDirsRequest,
-    AssignReplicasToDirsRequest(AssignReplicasToDirsRequest),
+    AssignReplicasToDirs(AssignReplicasToDirsRequest),
     /// ListClientMetricsResourcesRequest,
-    ListClientMetricsResourcesRequest(ListClientMetricsResourcesRequest),
+    ListClientMetricsResources(ListClientMetricsResourcesRequest),
 }
 
 impl From<ProduceRequest> for RequestKind {
     fn from(value: ProduceRequest) -> RequestKind {
-        RequestKind::ProduceRequest(value)
+        RequestKind::Produce(value)
     }
 }
 
 impl From<FetchRequest> for RequestKind {
     fn from(value: FetchRequest) -> RequestKind {
-        RequestKind::FetchRequest(value)
+        RequestKind::Fetch(value)
     }
 }
 
 impl From<ListOffsetsRequest> for RequestKind {
     fn from(value: ListOffsetsRequest) -> RequestKind {
-        RequestKind::ListOffsetsRequest(value)
+        RequestKind::ListOffsets(value)
     }
 }
 
 impl From<MetadataRequest> for RequestKind {
     fn from(value: MetadataRequest) -> RequestKind {
-        RequestKind::MetadataRequest(value)
+        RequestKind::Metadata(value)
     }
 }
 
 impl From<LeaderAndIsrRequest> for RequestKind {
     fn from(value: LeaderAndIsrRequest) -> RequestKind {
-        RequestKind::LeaderAndIsrRequest(value)
+        RequestKind::LeaderAndIsr(value)
     }
 }
 
 impl From<StopReplicaRequest> for RequestKind {
     fn from(value: StopReplicaRequest) -> RequestKind {
-        RequestKind::StopReplicaRequest(value)
+        RequestKind::StopReplica(value)
     }
 }
 
 impl From<UpdateMetadataRequest> for RequestKind {
     fn from(value: UpdateMetadataRequest) -> RequestKind {
-        RequestKind::UpdateMetadataRequest(value)
+        RequestKind::UpdateMetadata(value)
     }
 }
 
 impl From<ControlledShutdownRequest> for RequestKind {
     fn from(value: ControlledShutdownRequest) -> RequestKind {
-        RequestKind::ControlledShutdownRequest(value)
+        RequestKind::ControlledShutdown(value)
     }
 }
 
 impl From<OffsetCommitRequest> for RequestKind {
     fn from(value: OffsetCommitRequest) -> RequestKind {
-        RequestKind::OffsetCommitRequest(value)
+        RequestKind::OffsetCommit(value)
     }
 }
 
 impl From<OffsetFetchRequest> for RequestKind {
     fn from(value: OffsetFetchRequest) -> RequestKind {
-        RequestKind::OffsetFetchRequest(value)
+        RequestKind::OffsetFetch(value)
     }
 }
 
 impl From<FindCoordinatorRequest> for RequestKind {
     fn from(value: FindCoordinatorRequest) -> RequestKind {
-        RequestKind::FindCoordinatorRequest(value)
+        RequestKind::FindCoordinator(value)
     }
 }
 
 impl From<JoinGroupRequest> for RequestKind {
     fn from(value: JoinGroupRequest) -> RequestKind {
-        RequestKind::JoinGroupRequest(value)
+        RequestKind::JoinGroup(value)
     }
 }
 
 impl From<HeartbeatRequest> for RequestKind {
     fn from(value: HeartbeatRequest) -> RequestKind {
-        RequestKind::HeartbeatRequest(value)
+        RequestKind::Heartbeat(value)
     }
 }
 
 impl From<LeaveGroupRequest> for RequestKind {
     fn from(value: LeaveGroupRequest) -> RequestKind {
-        RequestKind::LeaveGroupRequest(value)
+        RequestKind::LeaveGroup(value)
     }
 }
 
 impl From<SyncGroupRequest> for RequestKind {
     fn from(value: SyncGroupRequest) -> RequestKind {
-        RequestKind::SyncGroupRequest(value)
+        RequestKind::SyncGroup(value)
     }
 }
 
 impl From<DescribeGroupsRequest> for RequestKind {
     fn from(value: DescribeGroupsRequest) -> RequestKind {
-        RequestKind::DescribeGroupsRequest(value)
+        RequestKind::DescribeGroups(value)
     }
 }
 
 impl From<ListGroupsRequest> for RequestKind {
     fn from(value: ListGroupsRequest) -> RequestKind {
-        RequestKind::ListGroupsRequest(value)
+        RequestKind::ListGroups(value)
     }
 }
 
 impl From<SaslHandshakeRequest> for RequestKind {
     fn from(value: SaslHandshakeRequest) -> RequestKind {
-        RequestKind::SaslHandshakeRequest(value)
+        RequestKind::SaslHandshake(value)
     }
 }
 
 impl From<ApiVersionsRequest> for RequestKind {
     fn from(value: ApiVersionsRequest) -> RequestKind {
-        RequestKind::ApiVersionsRequest(value)
+        RequestKind::ApiVersions(value)
     }
 }
 
 impl From<CreateTopicsRequest> for RequestKind {
     fn from(value: CreateTopicsRequest) -> RequestKind {
-        RequestKind::CreateTopicsRequest(value)
+        RequestKind::CreateTopics(value)
     }
 }
 
 impl From<DeleteTopicsRequest> for RequestKind {
     fn from(value: DeleteTopicsRequest) -> RequestKind {
-        RequestKind::DeleteTopicsRequest(value)
+        RequestKind::DeleteTopics(value)
     }
 }
 
 impl From<DeleteRecordsRequest> for RequestKind {
     fn from(value: DeleteRecordsRequest) -> RequestKind {
-        RequestKind::DeleteRecordsRequest(value)
+        RequestKind::DeleteRecords(value)
     }
 }
 
 impl From<InitProducerIdRequest> for RequestKind {
     fn from(value: InitProducerIdRequest) -> RequestKind {
-        RequestKind::InitProducerIdRequest(value)
+        RequestKind::InitProducerId(value)
     }
 }
 
 impl From<OffsetForLeaderEpochRequest> for RequestKind {
     fn from(value: OffsetForLeaderEpochRequest) -> RequestKind {
-        RequestKind::OffsetForLeaderEpochRequest(value)
+        RequestKind::OffsetForLeaderEpoch(value)
     }
 }
 
 impl From<AddPartitionsToTxnRequest> for RequestKind {
     fn from(value: AddPartitionsToTxnRequest) -> RequestKind {
-        RequestKind::AddPartitionsToTxnRequest(value)
+        RequestKind::AddPartitionsToTxn(value)
     }
 }
 
 impl From<AddOffsetsToTxnRequest> for RequestKind {
     fn from(value: AddOffsetsToTxnRequest) -> RequestKind {
-        RequestKind::AddOffsetsToTxnRequest(value)
+        RequestKind::AddOffsetsToTxn(value)
     }
 }
 
 impl From<EndTxnRequest> for RequestKind {
     fn from(value: EndTxnRequest) -> RequestKind {
-        RequestKind::EndTxnRequest(value)
+        RequestKind::EndTxn(value)
     }
 }
 
 impl From<WriteTxnMarkersRequest> for RequestKind {
     fn from(value: WriteTxnMarkersRequest) -> RequestKind {
-        RequestKind::WriteTxnMarkersRequest(value)
+        RequestKind::WriteTxnMarkers(value)
     }
 }
 
 impl From<TxnOffsetCommitRequest> for RequestKind {
     fn from(value: TxnOffsetCommitRequest) -> RequestKind {
-        RequestKind::TxnOffsetCommitRequest(value)
+        RequestKind::TxnOffsetCommit(value)
     }
 }
 
 impl From<DescribeAclsRequest> for RequestKind {
     fn from(value: DescribeAclsRequest) -> RequestKind {
-        RequestKind::DescribeAclsRequest(value)
+        RequestKind::DescribeAcls(value)
     }
 }
 
 impl From<CreateAclsRequest> for RequestKind {
     fn from(value: CreateAclsRequest) -> RequestKind {
-        RequestKind::CreateAclsRequest(value)
+        RequestKind::CreateAcls(value)
     }
 }
 
 impl From<DeleteAclsRequest> for RequestKind {
     fn from(value: DeleteAclsRequest) -> RequestKind {
-        RequestKind::DeleteAclsRequest(value)
+        RequestKind::DeleteAcls(value)
     }
 }
 
 impl From<DescribeConfigsRequest> for RequestKind {
     fn from(value: DescribeConfigsRequest) -> RequestKind {
-        RequestKind::DescribeConfigsRequest(value)
+        RequestKind::DescribeConfigs(value)
     }
 }
 
 impl From<AlterConfigsRequest> for RequestKind {
     fn from(value: AlterConfigsRequest) -> RequestKind {
-        RequestKind::AlterConfigsRequest(value)
+        RequestKind::AlterConfigs(value)
     }
 }
 
 impl From<AlterReplicaLogDirsRequest> for RequestKind {
     fn from(value: AlterReplicaLogDirsRequest) -> RequestKind {
-        RequestKind::AlterReplicaLogDirsRequest(value)
+        RequestKind::AlterReplicaLogDirs(value)
     }
 }
 
 impl From<DescribeLogDirsRequest> for RequestKind {
     fn from(value: DescribeLogDirsRequest) -> RequestKind {
-        RequestKind::DescribeLogDirsRequest(value)
+        RequestKind::DescribeLogDirs(value)
     }
 }
 
 impl From<SaslAuthenticateRequest> for RequestKind {
     fn from(value: SaslAuthenticateRequest) -> RequestKind {
-        RequestKind::SaslAuthenticateRequest(value)
+        RequestKind::SaslAuthenticate(value)
     }
 }
 
 impl From<CreatePartitionsRequest> for RequestKind {
     fn from(value: CreatePartitionsRequest) -> RequestKind {
-        RequestKind::CreatePartitionsRequest(value)
+        RequestKind::CreatePartitions(value)
     }
 }
 
 impl From<CreateDelegationTokenRequest> for RequestKind {
     fn from(value: CreateDelegationTokenRequest) -> RequestKind {
-        RequestKind::CreateDelegationTokenRequest(value)
+        RequestKind::CreateDelegationToken(value)
     }
 }
 
 impl From<RenewDelegationTokenRequest> for RequestKind {
     fn from(value: RenewDelegationTokenRequest) -> RequestKind {
-        RequestKind::RenewDelegationTokenRequest(value)
+        RequestKind::RenewDelegationToken(value)
     }
 }
 
 impl From<ExpireDelegationTokenRequest> for RequestKind {
     fn from(value: ExpireDelegationTokenRequest) -> RequestKind {
-        RequestKind::ExpireDelegationTokenRequest(value)
+        RequestKind::ExpireDelegationToken(value)
     }
 }
 
 impl From<DescribeDelegationTokenRequest> for RequestKind {
     fn from(value: DescribeDelegationTokenRequest) -> RequestKind {
-        RequestKind::DescribeDelegationTokenRequest(value)
+        RequestKind::DescribeDelegationToken(value)
     }
 }
 
 impl From<DeleteGroupsRequest> for RequestKind {
     fn from(value: DeleteGroupsRequest) -> RequestKind {
-        RequestKind::DeleteGroupsRequest(value)
+        RequestKind::DeleteGroups(value)
     }
 }
 
 impl From<ElectLeadersRequest> for RequestKind {
     fn from(value: ElectLeadersRequest) -> RequestKind {
-        RequestKind::ElectLeadersRequest(value)
+        RequestKind::ElectLeaders(value)
     }
 }
 
 impl From<IncrementalAlterConfigsRequest> for RequestKind {
     fn from(value: IncrementalAlterConfigsRequest) -> RequestKind {
-        RequestKind::IncrementalAlterConfigsRequest(value)
+        RequestKind::IncrementalAlterConfigs(value)
     }
 }
 
 impl From<AlterPartitionReassignmentsRequest> for RequestKind {
     fn from(value: AlterPartitionReassignmentsRequest) -> RequestKind {
-        RequestKind::AlterPartitionReassignmentsRequest(value)
+        RequestKind::AlterPartitionReassignments(value)
     }
 }
 
 impl From<ListPartitionReassignmentsRequest> for RequestKind {
     fn from(value: ListPartitionReassignmentsRequest) -> RequestKind {
-        RequestKind::ListPartitionReassignmentsRequest(value)
+        RequestKind::ListPartitionReassignments(value)
     }
 }
 
 impl From<OffsetDeleteRequest> for RequestKind {
     fn from(value: OffsetDeleteRequest) -> RequestKind {
-        RequestKind::OffsetDeleteRequest(value)
+        RequestKind::OffsetDelete(value)
     }
 }
 
 impl From<DescribeClientQuotasRequest> for RequestKind {
     fn from(value: DescribeClientQuotasRequest) -> RequestKind {
-        RequestKind::DescribeClientQuotasRequest(value)
+        RequestKind::DescribeClientQuotas(value)
     }
 }
 
 impl From<AlterClientQuotasRequest> for RequestKind {
     fn from(value: AlterClientQuotasRequest) -> RequestKind {
-        RequestKind::AlterClientQuotasRequest(value)
+        RequestKind::AlterClientQuotas(value)
     }
 }
 
 impl From<DescribeUserScramCredentialsRequest> for RequestKind {
     fn from(value: DescribeUserScramCredentialsRequest) -> RequestKind {
-        RequestKind::DescribeUserScramCredentialsRequest(value)
+        RequestKind::DescribeUserScramCredentials(value)
     }
 }
 
 impl From<AlterUserScramCredentialsRequest> for RequestKind {
     fn from(value: AlterUserScramCredentialsRequest) -> RequestKind {
-        RequestKind::AlterUserScramCredentialsRequest(value)
+        RequestKind::AlterUserScramCredentials(value)
     }
 }
 
 impl From<VoteRequest> for RequestKind {
     fn from(value: VoteRequest) -> RequestKind {
-        RequestKind::VoteRequest(value)
+        RequestKind::Vote(value)
     }
 }
 
 impl From<BeginQuorumEpochRequest> for RequestKind {
     fn from(value: BeginQuorumEpochRequest) -> RequestKind {
-        RequestKind::BeginQuorumEpochRequest(value)
+        RequestKind::BeginQuorumEpoch(value)
     }
 }
 
 impl From<EndQuorumEpochRequest> for RequestKind {
     fn from(value: EndQuorumEpochRequest) -> RequestKind {
-        RequestKind::EndQuorumEpochRequest(value)
+        RequestKind::EndQuorumEpoch(value)
     }
 }
 
 impl From<DescribeQuorumRequest> for RequestKind {
     fn from(value: DescribeQuorumRequest) -> RequestKind {
-        RequestKind::DescribeQuorumRequest(value)
+        RequestKind::DescribeQuorum(value)
     }
 }
 
 impl From<AlterPartitionRequest> for RequestKind {
     fn from(value: AlterPartitionRequest) -> RequestKind {
-        RequestKind::AlterPartitionRequest(value)
+        RequestKind::AlterPartition(value)
     }
 }
 
 impl From<UpdateFeaturesRequest> for RequestKind {
     fn from(value: UpdateFeaturesRequest) -> RequestKind {
-        RequestKind::UpdateFeaturesRequest(value)
+        RequestKind::UpdateFeatures(value)
     }
 }
 
 impl From<EnvelopeRequest> for RequestKind {
     fn from(value: EnvelopeRequest) -> RequestKind {
-        RequestKind::EnvelopeRequest(value)
+        RequestKind::Envelope(value)
     }
 }
 
 impl From<FetchSnapshotRequest> for RequestKind {
     fn from(value: FetchSnapshotRequest) -> RequestKind {
-        RequestKind::FetchSnapshotRequest(value)
+        RequestKind::FetchSnapshot(value)
     }
 }
 
 impl From<DescribeClusterRequest> for RequestKind {
     fn from(value: DescribeClusterRequest) -> RequestKind {
-        RequestKind::DescribeClusterRequest(value)
+        RequestKind::DescribeCluster(value)
     }
 }
 
 impl From<DescribeProducersRequest> for RequestKind {
     fn from(value: DescribeProducersRequest) -> RequestKind {
-        RequestKind::DescribeProducersRequest(value)
+        RequestKind::DescribeProducers(value)
     }
 }
 
 impl From<BrokerRegistrationRequest> for RequestKind {
     fn from(value: BrokerRegistrationRequest) -> RequestKind {
-        RequestKind::BrokerRegistrationRequest(value)
+        RequestKind::BrokerRegistration(value)
     }
 }
 
 impl From<BrokerHeartbeatRequest> for RequestKind {
     fn from(value: BrokerHeartbeatRequest) -> RequestKind {
-        RequestKind::BrokerHeartbeatRequest(value)
+        RequestKind::BrokerHeartbeat(value)
     }
 }
 
 impl From<UnregisterBrokerRequest> for RequestKind {
     fn from(value: UnregisterBrokerRequest) -> RequestKind {
-        RequestKind::UnregisterBrokerRequest(value)
+        RequestKind::UnregisterBroker(value)
     }
 }
 
 impl From<DescribeTransactionsRequest> for RequestKind {
     fn from(value: DescribeTransactionsRequest) -> RequestKind {
-        RequestKind::DescribeTransactionsRequest(value)
+        RequestKind::DescribeTransactions(value)
     }
 }
 
 impl From<ListTransactionsRequest> for RequestKind {
     fn from(value: ListTransactionsRequest) -> RequestKind {
-        RequestKind::ListTransactionsRequest(value)
+        RequestKind::ListTransactions(value)
     }
 }
 
 impl From<AllocateProducerIdsRequest> for RequestKind {
     fn from(value: AllocateProducerIdsRequest) -> RequestKind {
-        RequestKind::AllocateProducerIdsRequest(value)
+        RequestKind::AllocateProducerIds(value)
     }
 }
 
 impl From<ConsumerGroupHeartbeatRequest> for RequestKind {
     fn from(value: ConsumerGroupHeartbeatRequest) -> RequestKind {
-        RequestKind::ConsumerGroupHeartbeatRequest(value)
+        RequestKind::ConsumerGroupHeartbeat(value)
     }
 }
 
 impl From<ControllerRegistrationRequest> for RequestKind {
     fn from(value: ControllerRegistrationRequest) -> RequestKind {
-        RequestKind::ControllerRegistrationRequest(value)
+        RequestKind::ControllerRegistration(value)
     }
 }
 
 impl From<GetTelemetrySubscriptionsRequest> for RequestKind {
     fn from(value: GetTelemetrySubscriptionsRequest) -> RequestKind {
-        RequestKind::GetTelemetrySubscriptionsRequest(value)
+        RequestKind::GetTelemetrySubscriptions(value)
     }
 }
 
 impl From<PushTelemetryRequest> for RequestKind {
     fn from(value: PushTelemetryRequest) -> RequestKind {
-        RequestKind::PushTelemetryRequest(value)
+        RequestKind::PushTelemetry(value)
     }
 }
 
 impl From<AssignReplicasToDirsRequest> for RequestKind {
     fn from(value: AssignReplicasToDirsRequest) -> RequestKind {
-        RequestKind::AssignReplicasToDirsRequest(value)
+        RequestKind::AssignReplicasToDirs(value)
     }
 }
 
 impl From<ListClientMetricsResourcesRequest> for RequestKind {
     fn from(value: ListClientMetricsResourcesRequest) -> RequestKind {
-        RequestKind::ListClientMetricsResourcesRequest(value)
+        RequestKind::ListClientMetricsResources(value)
     }
 }
 
@@ -1926,596 +1926,596 @@ impl From<ListClientMetricsResourcesRequest> for RequestKind {
 #[derive(Debug, Clone, PartialEq)]
 pub enum ResponseKind {
     /// ProduceResponse,
-    ProduceResponse(ProduceResponse),
+    Produce(ProduceResponse),
     /// FetchResponse,
-    FetchResponse(FetchResponse),
+    Fetch(FetchResponse),
     /// ListOffsetsResponse,
-    ListOffsetsResponse(ListOffsetsResponse),
+    ListOffsets(ListOffsetsResponse),
     /// MetadataResponse,
-    MetadataResponse(MetadataResponse),
+    Metadata(MetadataResponse),
     /// LeaderAndIsrResponse,
-    LeaderAndIsrResponse(LeaderAndIsrResponse),
+    LeaderAndIsr(LeaderAndIsrResponse),
     /// StopReplicaResponse,
-    StopReplicaResponse(StopReplicaResponse),
+    StopReplica(StopReplicaResponse),
     /// UpdateMetadataResponse,
-    UpdateMetadataResponse(UpdateMetadataResponse),
+    UpdateMetadata(UpdateMetadataResponse),
     /// ControlledShutdownResponse,
-    ControlledShutdownResponse(ControlledShutdownResponse),
+    ControlledShutdown(ControlledShutdownResponse),
     /// OffsetCommitResponse,
-    OffsetCommitResponse(OffsetCommitResponse),
+    OffsetCommit(OffsetCommitResponse),
     /// OffsetFetchResponse,
-    OffsetFetchResponse(OffsetFetchResponse),
+    OffsetFetch(OffsetFetchResponse),
     /// FindCoordinatorResponse,
-    FindCoordinatorResponse(FindCoordinatorResponse),
+    FindCoordinator(FindCoordinatorResponse),
     /// JoinGroupResponse,
-    JoinGroupResponse(JoinGroupResponse),
+    JoinGroup(JoinGroupResponse),
     /// HeartbeatResponse,
-    HeartbeatResponse(HeartbeatResponse),
+    Heartbeat(HeartbeatResponse),
     /// LeaveGroupResponse,
-    LeaveGroupResponse(LeaveGroupResponse),
+    LeaveGroup(LeaveGroupResponse),
     /// SyncGroupResponse,
-    SyncGroupResponse(SyncGroupResponse),
+    SyncGroup(SyncGroupResponse),
     /// DescribeGroupsResponse,
-    DescribeGroupsResponse(DescribeGroupsResponse),
+    DescribeGroups(DescribeGroupsResponse),
     /// ListGroupsResponse,
-    ListGroupsResponse(ListGroupsResponse),
+    ListGroups(ListGroupsResponse),
     /// SaslHandshakeResponse,
-    SaslHandshakeResponse(SaslHandshakeResponse),
+    SaslHandshake(SaslHandshakeResponse),
     /// ApiVersionsResponse,
-    ApiVersionsResponse(ApiVersionsResponse),
+    ApiVersions(ApiVersionsResponse),
     /// CreateTopicsResponse,
-    CreateTopicsResponse(CreateTopicsResponse),
+    CreateTopics(CreateTopicsResponse),
     /// DeleteTopicsResponse,
-    DeleteTopicsResponse(DeleteTopicsResponse),
+    DeleteTopics(DeleteTopicsResponse),
     /// DeleteRecordsResponse,
-    DeleteRecordsResponse(DeleteRecordsResponse),
+    DeleteRecords(DeleteRecordsResponse),
     /// InitProducerIdResponse,
-    InitProducerIdResponse(InitProducerIdResponse),
+    InitProducerId(InitProducerIdResponse),
     /// OffsetForLeaderEpochResponse,
-    OffsetForLeaderEpochResponse(OffsetForLeaderEpochResponse),
+    OffsetForLeaderEpoch(OffsetForLeaderEpochResponse),
     /// AddPartitionsToTxnResponse,
-    AddPartitionsToTxnResponse(AddPartitionsToTxnResponse),
+    AddPartitionsToTxn(AddPartitionsToTxnResponse),
     /// AddOffsetsToTxnResponse,
-    AddOffsetsToTxnResponse(AddOffsetsToTxnResponse),
+    AddOffsetsToTxn(AddOffsetsToTxnResponse),
     /// EndTxnResponse,
-    EndTxnResponse(EndTxnResponse),
+    EndTxn(EndTxnResponse),
     /// WriteTxnMarkersResponse,
-    WriteTxnMarkersResponse(WriteTxnMarkersResponse),
+    WriteTxnMarkers(WriteTxnMarkersResponse),
     /// TxnOffsetCommitResponse,
-    TxnOffsetCommitResponse(TxnOffsetCommitResponse),
+    TxnOffsetCommit(TxnOffsetCommitResponse),
     /// DescribeAclsResponse,
-    DescribeAclsResponse(DescribeAclsResponse),
+    DescribeAcls(DescribeAclsResponse),
     /// CreateAclsResponse,
-    CreateAclsResponse(CreateAclsResponse),
+    CreateAcls(CreateAclsResponse),
     /// DeleteAclsResponse,
-    DeleteAclsResponse(DeleteAclsResponse),
+    DeleteAcls(DeleteAclsResponse),
     /// DescribeConfigsResponse,
-    DescribeConfigsResponse(DescribeConfigsResponse),
+    DescribeConfigs(DescribeConfigsResponse),
     /// AlterConfigsResponse,
-    AlterConfigsResponse(AlterConfigsResponse),
+    AlterConfigs(AlterConfigsResponse),
     /// AlterReplicaLogDirsResponse,
-    AlterReplicaLogDirsResponse(AlterReplicaLogDirsResponse),
+    AlterReplicaLogDirs(AlterReplicaLogDirsResponse),
     /// DescribeLogDirsResponse,
-    DescribeLogDirsResponse(DescribeLogDirsResponse),
+    DescribeLogDirs(DescribeLogDirsResponse),
     /// SaslAuthenticateResponse,
-    SaslAuthenticateResponse(SaslAuthenticateResponse),
+    SaslAuthenticate(SaslAuthenticateResponse),
     /// CreatePartitionsResponse,
-    CreatePartitionsResponse(CreatePartitionsResponse),
+    CreatePartitions(CreatePartitionsResponse),
     /// CreateDelegationTokenResponse,
-    CreateDelegationTokenResponse(CreateDelegationTokenResponse),
+    CreateDelegationToken(CreateDelegationTokenResponse),
     /// RenewDelegationTokenResponse,
-    RenewDelegationTokenResponse(RenewDelegationTokenResponse),
+    RenewDelegationToken(RenewDelegationTokenResponse),
     /// ExpireDelegationTokenResponse,
-    ExpireDelegationTokenResponse(ExpireDelegationTokenResponse),
+    ExpireDelegationToken(ExpireDelegationTokenResponse),
     /// DescribeDelegationTokenResponse,
-    DescribeDelegationTokenResponse(DescribeDelegationTokenResponse),
+    DescribeDelegationToken(DescribeDelegationTokenResponse),
     /// DeleteGroupsResponse,
-    DeleteGroupsResponse(DeleteGroupsResponse),
+    DeleteGroups(DeleteGroupsResponse),
     /// ElectLeadersResponse,
-    ElectLeadersResponse(ElectLeadersResponse),
+    ElectLeaders(ElectLeadersResponse),
     /// IncrementalAlterConfigsResponse,
-    IncrementalAlterConfigsResponse(IncrementalAlterConfigsResponse),
+    IncrementalAlterConfigs(IncrementalAlterConfigsResponse),
     /// AlterPartitionReassignmentsResponse,
-    AlterPartitionReassignmentsResponse(AlterPartitionReassignmentsResponse),
+    AlterPartitionReassignments(AlterPartitionReassignmentsResponse),
     /// ListPartitionReassignmentsResponse,
-    ListPartitionReassignmentsResponse(ListPartitionReassignmentsResponse),
+    ListPartitionReassignments(ListPartitionReassignmentsResponse),
     /// OffsetDeleteResponse,
-    OffsetDeleteResponse(OffsetDeleteResponse),
+    OffsetDelete(OffsetDeleteResponse),
     /// DescribeClientQuotasResponse,
-    DescribeClientQuotasResponse(DescribeClientQuotasResponse),
+    DescribeClientQuotas(DescribeClientQuotasResponse),
     /// AlterClientQuotasResponse,
-    AlterClientQuotasResponse(AlterClientQuotasResponse),
+    AlterClientQuotas(AlterClientQuotasResponse),
     /// DescribeUserScramCredentialsResponse,
-    DescribeUserScramCredentialsResponse(DescribeUserScramCredentialsResponse),
+    DescribeUserScramCredentials(DescribeUserScramCredentialsResponse),
     /// AlterUserScramCredentialsResponse,
-    AlterUserScramCredentialsResponse(AlterUserScramCredentialsResponse),
+    AlterUserScramCredentials(AlterUserScramCredentialsResponse),
     /// VoteResponse,
-    VoteResponse(VoteResponse),
+    Vote(VoteResponse),
     /// BeginQuorumEpochResponse,
-    BeginQuorumEpochResponse(BeginQuorumEpochResponse),
+    BeginQuorumEpoch(BeginQuorumEpochResponse),
     /// EndQuorumEpochResponse,
-    EndQuorumEpochResponse(EndQuorumEpochResponse),
+    EndQuorumEpoch(EndQuorumEpochResponse),
     /// DescribeQuorumResponse,
-    DescribeQuorumResponse(DescribeQuorumResponse),
+    DescribeQuorum(DescribeQuorumResponse),
     /// AlterPartitionResponse,
-    AlterPartitionResponse(AlterPartitionResponse),
+    AlterPartition(AlterPartitionResponse),
     /// UpdateFeaturesResponse,
-    UpdateFeaturesResponse(UpdateFeaturesResponse),
+    UpdateFeatures(UpdateFeaturesResponse),
     /// EnvelopeResponse,
-    EnvelopeResponse(EnvelopeResponse),
+    Envelope(EnvelopeResponse),
     /// FetchSnapshotResponse,
-    FetchSnapshotResponse(FetchSnapshotResponse),
+    FetchSnapshot(FetchSnapshotResponse),
     /// DescribeClusterResponse,
-    DescribeClusterResponse(DescribeClusterResponse),
+    DescribeCluster(DescribeClusterResponse),
     /// DescribeProducersResponse,
-    DescribeProducersResponse(DescribeProducersResponse),
+    DescribeProducers(DescribeProducersResponse),
     /// BrokerRegistrationResponse,
-    BrokerRegistrationResponse(BrokerRegistrationResponse),
+    BrokerRegistration(BrokerRegistrationResponse),
     /// BrokerHeartbeatResponse,
-    BrokerHeartbeatResponse(BrokerHeartbeatResponse),
+    BrokerHeartbeat(BrokerHeartbeatResponse),
     /// UnregisterBrokerResponse,
-    UnregisterBrokerResponse(UnregisterBrokerResponse),
+    UnregisterBroker(UnregisterBrokerResponse),
     /// DescribeTransactionsResponse,
-    DescribeTransactionsResponse(DescribeTransactionsResponse),
+    DescribeTransactions(DescribeTransactionsResponse),
     /// ListTransactionsResponse,
-    ListTransactionsResponse(ListTransactionsResponse),
+    ListTransactions(ListTransactionsResponse),
     /// AllocateProducerIdsResponse,
-    AllocateProducerIdsResponse(AllocateProducerIdsResponse),
+    AllocateProducerIds(AllocateProducerIdsResponse),
     /// ConsumerGroupHeartbeatResponse,
-    ConsumerGroupHeartbeatResponse(ConsumerGroupHeartbeatResponse),
+    ConsumerGroupHeartbeat(ConsumerGroupHeartbeatResponse),
     /// ControllerRegistrationResponse,
-    ControllerRegistrationResponse(ControllerRegistrationResponse),
+    ControllerRegistration(ControllerRegistrationResponse),
     /// GetTelemetrySubscriptionsResponse,
-    GetTelemetrySubscriptionsResponse(GetTelemetrySubscriptionsResponse),
+    GetTelemetrySubscriptions(GetTelemetrySubscriptionsResponse),
     /// PushTelemetryResponse,
-    PushTelemetryResponse(PushTelemetryResponse),
+    PushTelemetry(PushTelemetryResponse),
     /// AssignReplicasToDirsResponse,
-    AssignReplicasToDirsResponse(AssignReplicasToDirsResponse),
+    AssignReplicasToDirs(AssignReplicasToDirsResponse),
     /// ListClientMetricsResourcesResponse,
-    ListClientMetricsResourcesResponse(ListClientMetricsResourcesResponse),
+    ListClientMetricsResources(ListClientMetricsResourcesResponse),
 }
 
 impl From<ProduceResponse> for ResponseKind {
     fn from(value: ProduceResponse) -> ResponseKind {
-        ResponseKind::ProduceResponse(value)
+        ResponseKind::Produce(value)
     }
 }
 
 impl From<FetchResponse> for ResponseKind {
     fn from(value: FetchResponse) -> ResponseKind {
-        ResponseKind::FetchResponse(value)
+        ResponseKind::Fetch(value)
     }
 }
 
 impl From<ListOffsetsResponse> for ResponseKind {
     fn from(value: ListOffsetsResponse) -> ResponseKind {
-        ResponseKind::ListOffsetsResponse(value)
+        ResponseKind::ListOffsets(value)
     }
 }
 
 impl From<MetadataResponse> for ResponseKind {
     fn from(value: MetadataResponse) -> ResponseKind {
-        ResponseKind::MetadataResponse(value)
+        ResponseKind::Metadata(value)
     }
 }
 
 impl From<LeaderAndIsrResponse> for ResponseKind {
     fn from(value: LeaderAndIsrResponse) -> ResponseKind {
-        ResponseKind::LeaderAndIsrResponse(value)
+        ResponseKind::LeaderAndIsr(value)
     }
 }
 
 impl From<StopReplicaResponse> for ResponseKind {
     fn from(value: StopReplicaResponse) -> ResponseKind {
-        ResponseKind::StopReplicaResponse(value)
+        ResponseKind::StopReplica(value)
     }
 }
 
 impl From<UpdateMetadataResponse> for ResponseKind {
     fn from(value: UpdateMetadataResponse) -> ResponseKind {
-        ResponseKind::UpdateMetadataResponse(value)
+        ResponseKind::UpdateMetadata(value)
     }
 }
 
 impl From<ControlledShutdownResponse> for ResponseKind {
     fn from(value: ControlledShutdownResponse) -> ResponseKind {
-        ResponseKind::ControlledShutdownResponse(value)
+        ResponseKind::ControlledShutdown(value)
     }
 }
 
 impl From<OffsetCommitResponse> for ResponseKind {
     fn from(value: OffsetCommitResponse) -> ResponseKind {
-        ResponseKind::OffsetCommitResponse(value)
+        ResponseKind::OffsetCommit(value)
     }
 }
 
 impl From<OffsetFetchResponse> for ResponseKind {
     fn from(value: OffsetFetchResponse) -> ResponseKind {
-        ResponseKind::OffsetFetchResponse(value)
+        ResponseKind::OffsetFetch(value)
     }
 }
 
 impl From<FindCoordinatorResponse> for ResponseKind {
     fn from(value: FindCoordinatorResponse) -> ResponseKind {
-        ResponseKind::FindCoordinatorResponse(value)
+        ResponseKind::FindCoordinator(value)
     }
 }
 
 impl From<JoinGroupResponse> for ResponseKind {
     fn from(value: JoinGroupResponse) -> ResponseKind {
-        ResponseKind::JoinGroupResponse(value)
+        ResponseKind::JoinGroup(value)
     }
 }
 
 impl From<HeartbeatResponse> for ResponseKind {
     fn from(value: HeartbeatResponse) -> ResponseKind {
-        ResponseKind::HeartbeatResponse(value)
+        ResponseKind::Heartbeat(value)
     }
 }
 
 impl From<LeaveGroupResponse> for ResponseKind {
     fn from(value: LeaveGroupResponse) -> ResponseKind {
-        ResponseKind::LeaveGroupResponse(value)
+        ResponseKind::LeaveGroup(value)
     }
 }
 
 impl From<SyncGroupResponse> for ResponseKind {
     fn from(value: SyncGroupResponse) -> ResponseKind {
-        ResponseKind::SyncGroupResponse(value)
+        ResponseKind::SyncGroup(value)
     }
 }
 
 impl From<DescribeGroupsResponse> for ResponseKind {
     fn from(value: DescribeGroupsResponse) -> ResponseKind {
-        ResponseKind::DescribeGroupsResponse(value)
+        ResponseKind::DescribeGroups(value)
     }
 }
 
 impl From<ListGroupsResponse> for ResponseKind {
     fn from(value: ListGroupsResponse) -> ResponseKind {
-        ResponseKind::ListGroupsResponse(value)
+        ResponseKind::ListGroups(value)
     }
 }
 
 impl From<SaslHandshakeResponse> for ResponseKind {
     fn from(value: SaslHandshakeResponse) -> ResponseKind {
-        ResponseKind::SaslHandshakeResponse(value)
+        ResponseKind::SaslHandshake(value)
     }
 }
 
 impl From<ApiVersionsResponse> for ResponseKind {
     fn from(value: ApiVersionsResponse) -> ResponseKind {
-        ResponseKind::ApiVersionsResponse(value)
+        ResponseKind::ApiVersions(value)
     }
 }
 
 impl From<CreateTopicsResponse> for ResponseKind {
     fn from(value: CreateTopicsResponse) -> ResponseKind {
-        ResponseKind::CreateTopicsResponse(value)
+        ResponseKind::CreateTopics(value)
     }
 }
 
 impl From<DeleteTopicsResponse> for ResponseKind {
     fn from(value: DeleteTopicsResponse) -> ResponseKind {
-        ResponseKind::DeleteTopicsResponse(value)
+        ResponseKind::DeleteTopics(value)
     }
 }
 
 impl From<DeleteRecordsResponse> for ResponseKind {
     fn from(value: DeleteRecordsResponse) -> ResponseKind {
-        ResponseKind::DeleteRecordsResponse(value)
+        ResponseKind::DeleteRecords(value)
     }
 }
 
 impl From<InitProducerIdResponse> for ResponseKind {
     fn from(value: InitProducerIdResponse) -> ResponseKind {
-        ResponseKind::InitProducerIdResponse(value)
+        ResponseKind::InitProducerId(value)
     }
 }
 
 impl From<OffsetForLeaderEpochResponse> for ResponseKind {
     fn from(value: OffsetForLeaderEpochResponse) -> ResponseKind {
-        ResponseKind::OffsetForLeaderEpochResponse(value)
+        ResponseKind::OffsetForLeaderEpoch(value)
     }
 }
 
 impl From<AddPartitionsToTxnResponse> for ResponseKind {
     fn from(value: AddPartitionsToTxnResponse) -> ResponseKind {
-        ResponseKind::AddPartitionsToTxnResponse(value)
+        ResponseKind::AddPartitionsToTxn(value)
     }
 }
 
 impl From<AddOffsetsToTxnResponse> for ResponseKind {
     fn from(value: AddOffsetsToTxnResponse) -> ResponseKind {
-        ResponseKind::AddOffsetsToTxnResponse(value)
+        ResponseKind::AddOffsetsToTxn(value)
     }
 }
 
 impl From<EndTxnResponse> for ResponseKind {
     fn from(value: EndTxnResponse) -> ResponseKind {
-        ResponseKind::EndTxnResponse(value)
+        ResponseKind::EndTxn(value)
     }
 }
 
 impl From<WriteTxnMarkersResponse> for ResponseKind {
     fn from(value: WriteTxnMarkersResponse) -> ResponseKind {
-        ResponseKind::WriteTxnMarkersResponse(value)
+        ResponseKind::WriteTxnMarkers(value)
     }
 }
 
 impl From<TxnOffsetCommitResponse> for ResponseKind {
     fn from(value: TxnOffsetCommitResponse) -> ResponseKind {
-        ResponseKind::TxnOffsetCommitResponse(value)
+        ResponseKind::TxnOffsetCommit(value)
     }
 }
 
 impl From<DescribeAclsResponse> for ResponseKind {
     fn from(value: DescribeAclsResponse) -> ResponseKind {
-        ResponseKind::DescribeAclsResponse(value)
+        ResponseKind::DescribeAcls(value)
     }
 }
 
 impl From<CreateAclsResponse> for ResponseKind {
     fn from(value: CreateAclsResponse) -> ResponseKind {
-        ResponseKind::CreateAclsResponse(value)
+        ResponseKind::CreateAcls(value)
     }
 }
 
 impl From<DeleteAclsResponse> for ResponseKind {
     fn from(value: DeleteAclsResponse) -> ResponseKind {
-        ResponseKind::DeleteAclsResponse(value)
+        ResponseKind::DeleteAcls(value)
     }
 }
 
 impl From<DescribeConfigsResponse> for ResponseKind {
     fn from(value: DescribeConfigsResponse) -> ResponseKind {
-        ResponseKind::DescribeConfigsResponse(value)
+        ResponseKind::DescribeConfigs(value)
     }
 }
 
 impl From<AlterConfigsResponse> for ResponseKind {
     fn from(value: AlterConfigsResponse) -> ResponseKind {
-        ResponseKind::AlterConfigsResponse(value)
+        ResponseKind::AlterConfigs(value)
     }
 }
 
 impl From<AlterReplicaLogDirsResponse> for ResponseKind {
     fn from(value: AlterReplicaLogDirsResponse) -> ResponseKind {
-        ResponseKind::AlterReplicaLogDirsResponse(value)
+        ResponseKind::AlterReplicaLogDirs(value)
     }
 }
 
 impl From<DescribeLogDirsResponse> for ResponseKind {
     fn from(value: DescribeLogDirsResponse) -> ResponseKind {
-        ResponseKind::DescribeLogDirsResponse(value)
+        ResponseKind::DescribeLogDirs(value)
     }
 }
 
 impl From<SaslAuthenticateResponse> for ResponseKind {
     fn from(value: SaslAuthenticateResponse) -> ResponseKind {
-        ResponseKind::SaslAuthenticateResponse(value)
+        ResponseKind::SaslAuthenticate(value)
     }
 }
 
 impl From<CreatePartitionsResponse> for ResponseKind {
     fn from(value: CreatePartitionsResponse) -> ResponseKind {
-        ResponseKind::CreatePartitionsResponse(value)
+        ResponseKind::CreatePartitions(value)
     }
 }
 
 impl From<CreateDelegationTokenResponse> for ResponseKind {
     fn from(value: CreateDelegationTokenResponse) -> ResponseKind {
-        ResponseKind::CreateDelegationTokenResponse(value)
+        ResponseKind::CreateDelegationToken(value)
     }
 }
 
 impl From<RenewDelegationTokenResponse> for ResponseKind {
     fn from(value: RenewDelegationTokenResponse) -> ResponseKind {
-        ResponseKind::RenewDelegationTokenResponse(value)
+        ResponseKind::RenewDelegationToken(value)
     }
 }
 
 impl From<ExpireDelegationTokenResponse> for ResponseKind {
     fn from(value: ExpireDelegationTokenResponse) -> ResponseKind {
-        ResponseKind::ExpireDelegationTokenResponse(value)
+        ResponseKind::ExpireDelegationToken(value)
     }
 }
 
 impl From<DescribeDelegationTokenResponse> for ResponseKind {
     fn from(value: DescribeDelegationTokenResponse) -> ResponseKind {
-        ResponseKind::DescribeDelegationTokenResponse(value)
+        ResponseKind::DescribeDelegationToken(value)
     }
 }
 
 impl From<DeleteGroupsResponse> for ResponseKind {
     fn from(value: DeleteGroupsResponse) -> ResponseKind {
-        ResponseKind::DeleteGroupsResponse(value)
+        ResponseKind::DeleteGroups(value)
     }
 }
 
 impl From<ElectLeadersResponse> for ResponseKind {
     fn from(value: ElectLeadersResponse) -> ResponseKind {
-        ResponseKind::ElectLeadersResponse(value)
+        ResponseKind::ElectLeaders(value)
     }
 }
 
 impl From<IncrementalAlterConfigsResponse> for ResponseKind {
     fn from(value: IncrementalAlterConfigsResponse) -> ResponseKind {
-        ResponseKind::IncrementalAlterConfigsResponse(value)
+        ResponseKind::IncrementalAlterConfigs(value)
     }
 }
 
 impl From<AlterPartitionReassignmentsResponse> for ResponseKind {
     fn from(value: AlterPartitionReassignmentsResponse) -> ResponseKind {
-        ResponseKind::AlterPartitionReassignmentsResponse(value)
+        ResponseKind::AlterPartitionReassignments(value)
     }
 }
 
 impl From<ListPartitionReassignmentsResponse> for ResponseKind {
     fn from(value: ListPartitionReassignmentsResponse) -> ResponseKind {
-        ResponseKind::ListPartitionReassignmentsResponse(value)
+        ResponseKind::ListPartitionReassignments(value)
     }
 }
 
 impl From<OffsetDeleteResponse> for ResponseKind {
     fn from(value: OffsetDeleteResponse) -> ResponseKind {
-        ResponseKind::OffsetDeleteResponse(value)
+        ResponseKind::OffsetDelete(value)
     }
 }
 
 impl From<DescribeClientQuotasResponse> for ResponseKind {
     fn from(value: DescribeClientQuotasResponse) -> ResponseKind {
-        ResponseKind::DescribeClientQuotasResponse(value)
+        ResponseKind::DescribeClientQuotas(value)
     }
 }
 
 impl From<AlterClientQuotasResponse> for ResponseKind {
     fn from(value: AlterClientQuotasResponse) -> ResponseKind {
-        ResponseKind::AlterClientQuotasResponse(value)
+        ResponseKind::AlterClientQuotas(value)
     }
 }
 
 impl From<DescribeUserScramCredentialsResponse> for ResponseKind {
     fn from(value: DescribeUserScramCredentialsResponse) -> ResponseKind {
-        ResponseKind::DescribeUserScramCredentialsResponse(value)
+        ResponseKind::DescribeUserScramCredentials(value)
     }
 }
 
 impl From<AlterUserScramCredentialsResponse> for ResponseKind {
     fn from(value: AlterUserScramCredentialsResponse) -> ResponseKind {
-        ResponseKind::AlterUserScramCredentialsResponse(value)
+        ResponseKind::AlterUserScramCredentials(value)
     }
 }
 
 impl From<VoteResponse> for ResponseKind {
     fn from(value: VoteResponse) -> ResponseKind {
-        ResponseKind::VoteResponse(value)
+        ResponseKind::Vote(value)
     }
 }
 
 impl From<BeginQuorumEpochResponse> for ResponseKind {
     fn from(value: BeginQuorumEpochResponse) -> ResponseKind {
-        ResponseKind::BeginQuorumEpochResponse(value)
+        ResponseKind::BeginQuorumEpoch(value)
     }
 }
 
 impl From<EndQuorumEpochResponse> for ResponseKind {
     fn from(value: EndQuorumEpochResponse) -> ResponseKind {
-        ResponseKind::EndQuorumEpochResponse(value)
+        ResponseKind::EndQuorumEpoch(value)
     }
 }
 
 impl From<DescribeQuorumResponse> for ResponseKind {
     fn from(value: DescribeQuorumResponse) -> ResponseKind {
-        ResponseKind::DescribeQuorumResponse(value)
+        ResponseKind::DescribeQuorum(value)
     }
 }
 
 impl From<AlterPartitionResponse> for ResponseKind {
     fn from(value: AlterPartitionResponse) -> ResponseKind {
-        ResponseKind::AlterPartitionResponse(value)
+        ResponseKind::AlterPartition(value)
     }
 }
 
 impl From<UpdateFeaturesResponse> for ResponseKind {
     fn from(value: UpdateFeaturesResponse) -> ResponseKind {
-        ResponseKind::UpdateFeaturesResponse(value)
+        ResponseKind::UpdateFeatures(value)
     }
 }
 
 impl From<EnvelopeResponse> for ResponseKind {
     fn from(value: EnvelopeResponse) -> ResponseKind {
-        ResponseKind::EnvelopeResponse(value)
+        ResponseKind::Envelope(value)
     }
 }
 
 impl From<FetchSnapshotResponse> for ResponseKind {
     fn from(value: FetchSnapshotResponse) -> ResponseKind {
-        ResponseKind::FetchSnapshotResponse(value)
+        ResponseKind::FetchSnapshot(value)
     }
 }
 
 impl From<DescribeClusterResponse> for ResponseKind {
     fn from(value: DescribeClusterResponse) -> ResponseKind {
-        ResponseKind::DescribeClusterResponse(value)
+        ResponseKind::DescribeCluster(value)
     }
 }
 
 impl From<DescribeProducersResponse> for ResponseKind {
     fn from(value: DescribeProducersResponse) -> ResponseKind {
-        ResponseKind::DescribeProducersResponse(value)
+        ResponseKind::DescribeProducers(value)
     }
 }
 
 impl From<BrokerRegistrationResponse> for ResponseKind {
     fn from(value: BrokerRegistrationResponse) -> ResponseKind {
-        ResponseKind::BrokerRegistrationResponse(value)
+        ResponseKind::BrokerRegistration(value)
     }
 }
 
 impl From<BrokerHeartbeatResponse> for ResponseKind {
     fn from(value: BrokerHeartbeatResponse) -> ResponseKind {
-        ResponseKind::BrokerHeartbeatResponse(value)
+        ResponseKind::BrokerHeartbeat(value)
     }
 }
 
 impl From<UnregisterBrokerResponse> for ResponseKind {
     fn from(value: UnregisterBrokerResponse) -> ResponseKind {
-        ResponseKind::UnregisterBrokerResponse(value)
+        ResponseKind::UnregisterBroker(value)
     }
 }
 
 impl From<DescribeTransactionsResponse> for ResponseKind {
     fn from(value: DescribeTransactionsResponse) -> ResponseKind {
-        ResponseKind::DescribeTransactionsResponse(value)
+        ResponseKind::DescribeTransactions(value)
     }
 }
 
 impl From<ListTransactionsResponse> for ResponseKind {
     fn from(value: ListTransactionsResponse) -> ResponseKind {
-        ResponseKind::ListTransactionsResponse(value)
+        ResponseKind::ListTransactions(value)
     }
 }
 
 impl From<AllocateProducerIdsResponse> for ResponseKind {
     fn from(value: AllocateProducerIdsResponse) -> ResponseKind {
-        ResponseKind::AllocateProducerIdsResponse(value)
+        ResponseKind::AllocateProducerIds(value)
     }
 }
 
 impl From<ConsumerGroupHeartbeatResponse> for ResponseKind {
     fn from(value: ConsumerGroupHeartbeatResponse) -> ResponseKind {
-        ResponseKind::ConsumerGroupHeartbeatResponse(value)
+        ResponseKind::ConsumerGroupHeartbeat(value)
     }
 }
 
 impl From<ControllerRegistrationResponse> for ResponseKind {
     fn from(value: ControllerRegistrationResponse) -> ResponseKind {
-        ResponseKind::ControllerRegistrationResponse(value)
+        ResponseKind::ControllerRegistration(value)
     }
 }
 
 impl From<GetTelemetrySubscriptionsResponse> for ResponseKind {
     fn from(value: GetTelemetrySubscriptionsResponse) -> ResponseKind {
-        ResponseKind::GetTelemetrySubscriptionsResponse(value)
+        ResponseKind::GetTelemetrySubscriptions(value)
     }
 }
 
 impl From<PushTelemetryResponse> for ResponseKind {
     fn from(value: PushTelemetryResponse) -> ResponseKind {
-        ResponseKind::PushTelemetryResponse(value)
+        ResponseKind::PushTelemetry(value)
     }
 }
 
 impl From<AssignReplicasToDirsResponse> for ResponseKind {
     fn from(value: AssignReplicasToDirsResponse) -> ResponseKind {
-        ResponseKind::AssignReplicasToDirsResponse(value)
+        ResponseKind::AssignReplicasToDirs(value)
     }
 }
 
 impl From<ListClientMetricsResourcesResponse> for ResponseKind {
     fn from(value: ListClientMetricsResourcesResponse) -> ResponseKind {
-        ResponseKind::ListClientMetricsResourcesResponse(value)
+        ResponseKind::ListClientMetricsResources(value)
     }
 }
 

@@ -91,12 +91,12 @@
 //! let header = RequestHeader::decode(&mut buf, header_version).unwrap();
 //! let api_key = ApiKey::try_from(header.request_api_version);
 //! let req = match api_key {
-//!     ApiVersionsKey => RequestKind::ApiVersionsRequest(ApiVersionsRequest::decode(&mut buf, header.request_api_version).unwrap()),
+//!     ApiVersionsKey => RequestKind::ApiVersions(ApiVersionsRequest::decode(&mut buf, header.request_api_version).unwrap()),
 //! };
 //!
 //! // match on enum elsewhere and do work
 //! match req {
-//!     RequestKind::ApiVersionsRequest(req) => {
+//!     RequestKind::ApiVersions(req) => {
 //!         assert_eq!(req.client_software_name.to_string(), "example-client".to_string());
 //!     }
 //!     _ => panic!()
