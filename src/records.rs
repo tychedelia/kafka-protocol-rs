@@ -64,7 +64,7 @@ pub enum Compression {
 }
 
 /// Indicates the meaning of the timestamp field on a record.
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum TimestampType {
     /// The timestamp represents when the record was created by the client.
     Creation = 0,
@@ -115,7 +115,7 @@ struct BatchDecodeInfo {
 }
 
 /// A Kafka message containing key, payload value, and all associated metadata.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Record {
     // Batch properties
     /// Whether this record is transactional.
