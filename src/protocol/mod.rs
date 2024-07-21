@@ -16,7 +16,7 @@ pub mod types;
 mod str_bytes {
     use bytes::Bytes;
     use std::convert::TryFrom;
-    use std::fmt::{Debug, Formatter};
+    use std::fmt::{Debug, Display, Formatter};
     use std::ops::Deref;
     use std::str::Utf8Error;
 
@@ -64,6 +64,24 @@ mod str_bytes {
         }
     }
 
+    impl From<StrBytes> for Bytes {
+        fn from(value: StrBytes) -> Bytes {
+            value.0
+        }
+    }
+
+    impl From<String> for StrBytes {
+        fn from(value: String) -> Self {
+            Self::from_string(value)
+        }
+    }
+
+    impl From<&'static str> for StrBytes {
+        fn from(value: &'static str) -> Self {
+            Self::from_static_str(value)
+        }
+    }
+
     impl Deref for StrBytes {
         type Target = str;
 
@@ -75,6 +93,12 @@ mod str_bytes {
     impl Debug for StrBytes {
         fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
             Debug::fmt(self.as_str(), f)
+        }
+    }
+
+    impl Display for StrBytes {
+        fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+            std::fmt::Display::fmt(&**self, f)
         }
     }
 
