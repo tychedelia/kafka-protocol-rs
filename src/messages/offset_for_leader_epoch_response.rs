@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0-4
@@ -56,7 +56,7 @@ impl Builder for EpochEndOffset {
 }
 
 impl Encodable for EpochEndOffset {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int16.encode(buf, &self.error_code)?;
         types::Int32.encode(buf, &self.partition)?;
         if version >= 1 {
@@ -77,7 +77,7 @@ impl Encodable for EpochEndOffset {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int16.compute_size(&self.error_code)?;
         total_size += types::Int32.compute_size(&self.partition)?;
@@ -102,7 +102,7 @@ impl Encodable for EpochEndOffset {
 }
 
 impl Decodable for EpochEndOffset {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let error_code = types::Int16.decode(buf)?;
         let partition = types::Int32.decode(buf)?;
         let leader_epoch = if version >= 1 {
@@ -176,7 +176,7 @@ impl Builder for OffsetForLeaderEpochResponse {
 }
 
 impl Encodable for OffsetForLeaderEpochResponse {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 2 {
             types::Int32.encode(buf, &self.throttle_time_ms)?;
         }
@@ -199,7 +199,7 @@ impl Encodable for OffsetForLeaderEpochResponse {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 2 {
             total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
@@ -227,7 +227,7 @@ impl Encodable for OffsetForLeaderEpochResponse {
 }
 
 impl Decodable for OffsetForLeaderEpochResponse {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = if version >= 2 {
             types::Int32.decode(buf)?
         } else {
@@ -295,12 +295,7 @@ impl Builder for OffsetForLeaderTopicResult {
 
 impl MapEncodable for OffsetForLeaderTopicResult {
     type Key = super::TopicName;
-    fn encode<B: ByteBufMut>(
-        &self,
-        key: &Self::Key,
-        buf: &mut B,
-        version: i16,
-    ) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
         if version >= 4 {
             types::CompactString.encode(buf, key)?;
         } else {
@@ -325,7 +320,7 @@ impl MapEncodable for OffsetForLeaderTopicResult {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 4 {
             total_size += types::CompactString.compute_size(key)?;
@@ -356,7 +351,7 @@ impl MapEncodable for OffsetForLeaderTopicResult {
 
 impl MapDecodable for OffsetForLeaderTopicResult {
     type Key = super::TopicName;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
         let key_field = if version >= 4 {
             types::CompactString.decode(buf)?
         } else {

@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0
@@ -51,7 +51,7 @@ impl Builder for EnvelopeRequest {
 }
 
 impl Encodable for EnvelopeRequest {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::CompactBytes.encode(buf, &self.request_data)?;
         types::CompactBytes.encode(buf, &self.request_principal)?;
         types::CompactBytes.encode(buf, &self.client_host_address)?;
@@ -67,7 +67,7 @@ impl Encodable for EnvelopeRequest {
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::CompactBytes.compute_size(&self.request_data)?;
         total_size += types::CompactBytes.compute_size(&self.request_principal)?;
@@ -87,7 +87,7 @@ impl Encodable for EnvelopeRequest {
 }
 
 impl Decodable for EnvelopeRequest {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let request_data = types::CompactBytes.decode(buf)?;
         let request_principal = types::CompactBytes.decode(buf)?;
         let client_host_address = types::CompactBytes.decode(buf)?;

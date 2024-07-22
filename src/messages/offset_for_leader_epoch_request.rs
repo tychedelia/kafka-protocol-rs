@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0-4
@@ -46,7 +46,7 @@ impl Builder for OffsetForLeaderEpochRequest {
 }
 
 impl Encodable for OffsetForLeaderEpochRequest {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 3 {
             types::Int32.encode(buf, &self.replica_id)?;
         }
@@ -69,7 +69,7 @@ impl Encodable for OffsetForLeaderEpochRequest {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 3 {
             total_size += types::Int32.compute_size(&self.replica_id)?;
@@ -97,7 +97,7 @@ impl Encodable for OffsetForLeaderEpochRequest {
 }
 
 impl Decodable for OffsetForLeaderEpochRequest {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let replica_id = if version >= 3 {
             types::Int32.decode(buf)?
         } else {
@@ -174,7 +174,7 @@ impl Builder for OffsetForLeaderPartition {
 }
 
 impl Encodable for OffsetForLeaderPartition {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.partition)?;
         if version >= 2 {
             types::Int32.encode(buf, &self.current_leader_epoch)?;
@@ -194,7 +194,7 @@ impl Encodable for OffsetForLeaderPartition {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.partition)?;
         if version >= 2 {
@@ -218,7 +218,7 @@ impl Encodable for OffsetForLeaderPartition {
 }
 
 impl Decodable for OffsetForLeaderPartition {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let partition = types::Int32.decode(buf)?;
         let current_leader_epoch = if version >= 2 {
             types::Int32.decode(buf)?
@@ -285,12 +285,7 @@ impl Builder for OffsetForLeaderTopic {
 
 impl MapEncodable for OffsetForLeaderTopic {
     type Key = super::TopicName;
-    fn encode<B: ByteBufMut>(
-        &self,
-        key: &Self::Key,
-        buf: &mut B,
-        version: i16,
-    ) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
         if version >= 4 {
             types::CompactString.encode(buf, key)?;
         } else {
@@ -315,7 +310,7 @@ impl MapEncodable for OffsetForLeaderTopic {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 4 {
             total_size += types::CompactString.compute_size(key)?;
@@ -346,7 +341,7 @@ impl MapEncodable for OffsetForLeaderTopic {
 
 impl MapDecodable for OffsetForLeaderTopic {
     type Key = super::TopicName;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
         let key_field = if version >= 4 {
             types::CompactString.decode(buf)?
         } else {

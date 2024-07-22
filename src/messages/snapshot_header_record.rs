@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0
@@ -46,7 +46,7 @@ impl Builder for SnapshotHeaderRecord {
 }
 
 impl Encodable for SnapshotHeaderRecord {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int16.encode(buf, &self.version)?;
         types::Int64.encode(buf, &self.last_contained_log_timestamp)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -61,7 +61,7 @@ impl Encodable for SnapshotHeaderRecord {
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int16.compute_size(&self.version)?;
         total_size += types::Int64.compute_size(&self.last_contained_log_timestamp)?;
@@ -80,7 +80,7 @@ impl Encodable for SnapshotHeaderRecord {
 }
 
 impl Decodable for SnapshotHeaderRecord {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let version = types::Int16.decode(buf)?;
         let last_contained_log_timestamp = types::Int64.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();

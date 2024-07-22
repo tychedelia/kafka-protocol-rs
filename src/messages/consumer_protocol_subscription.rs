@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0-3
@@ -58,7 +58,7 @@ impl Builder for ConsumerProtocolSubscription {
 }
 
 impl Encodable for ConsumerProtocolSubscription {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Array(types::String).encode(buf, &self.topics)?;
         types::Bytes.encode(buf, &self.user_data)?;
         if version >= 1 {
@@ -73,7 +73,7 @@ impl Encodable for ConsumerProtocolSubscription {
 
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Array(types::String).compute_size(&self.topics)?;
         total_size += types::Bytes.compute_size(&self.user_data)?;
@@ -93,7 +93,7 @@ impl Encodable for ConsumerProtocolSubscription {
 }
 
 impl Decodable for ConsumerProtocolSubscription {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let topics = types::Array(types::String).decode(buf)?;
         let user_data = types::Bytes.decode(buf)?;
         let owned_partitions = if version >= 1 {
@@ -159,12 +159,7 @@ impl Builder for TopicPartition {
 
 impl MapEncodable for TopicPartition {
     type Key = super::TopicName;
-    fn encode<B: ByteBufMut>(
-        &self,
-        key: &Self::Key,
-        buf: &mut B,
-        version: i16,
-    ) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
         if version >= 1 {
             types::String.encode(buf, key)?;
         } else {
@@ -182,7 +177,7 @@ impl MapEncodable for TopicPartition {
 
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 1 {
             total_size += types::String.compute_size(key)?;
@@ -205,7 +200,7 @@ impl MapEncodable for TopicPartition {
 
 impl MapDecodable for TopicPartition {
     type Key = super::TopicName;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
         let key_field = if version >= 1 {
             types::String.decode(buf)?
         } else {

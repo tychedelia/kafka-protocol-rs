@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0-1
@@ -46,7 +46,7 @@ impl Builder for AlterClientQuotasRequest {
 }
 
 impl Encodable for AlterClientQuotasRequest {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 1 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.entries)?;
         } else {
@@ -67,7 +67,7 @@ impl Encodable for AlterClientQuotasRequest {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 1 {
             total_size +=
@@ -93,7 +93,7 @@ impl Encodable for AlterClientQuotasRequest {
 }
 
 impl Decodable for AlterClientQuotasRequest {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let entries = if version >= 1 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
@@ -161,7 +161,7 @@ impl Builder for EntityData {
 }
 
 impl Encodable for EntityData {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 1 {
             types::CompactString.encode(buf, &self.entity_type)?;
         } else {
@@ -186,7 +186,7 @@ impl Encodable for EntityData {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 1 {
             total_size += types::CompactString.compute_size(&self.entity_type)?;
@@ -215,7 +215,7 @@ impl Encodable for EntityData {
 }
 
 impl Decodable for EntityData {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let entity_type = if version >= 1 {
             types::CompactString.decode(buf)?
         } else {
@@ -287,7 +287,7 @@ impl Builder for EntryData {
 }
 
 impl Encodable for EntryData {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 1 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.entity)?;
         } else {
@@ -312,7 +312,7 @@ impl Encodable for EntryData {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 1 {
             total_size +=
@@ -342,7 +342,7 @@ impl Encodable for EntryData {
 }
 
 impl Decodable for EntryData {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let entity = if version >= 1 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
@@ -419,7 +419,7 @@ impl Builder for OpData {
 }
 
 impl Encodable for OpData {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 1 {
             types::CompactString.encode(buf, &self.key)?;
         } else {
@@ -441,7 +441,7 @@ impl Encodable for OpData {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 1 {
             total_size += types::CompactString.compute_size(&self.key)?;
@@ -467,7 +467,7 @@ impl Encodable for OpData {
 }
 
 impl Decodable for OpData {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let key = if version >= 1 {
             types::CompactString.decode(buf)?
         } else {

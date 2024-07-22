@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0-7
@@ -42,12 +42,7 @@ impl Builder for CreatableReplicaAssignment {
 
 impl MapEncodable for CreatableReplicaAssignment {
     type Key = i32;
-    fn encode<B: ByteBufMut>(
-        &self,
-        key: &Self::Key,
-        buf: &mut B,
-        version: i16,
-    ) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, key)?;
         if version >= 5 {
             types::CompactArray(types::Int32).encode(buf, &self.broker_ids)?;
@@ -68,7 +63,7 @@ impl MapEncodable for CreatableReplicaAssignment {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(key)?;
         if version >= 5 {
@@ -94,7 +89,7 @@ impl MapEncodable for CreatableReplicaAssignment {
 
 impl MapDecodable for CreatableReplicaAssignment {
     type Key = i32;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
         let key_field = types::Int32.decode(buf)?;
         let broker_ids = if version >= 5 {
             types::CompactArray(types::Int32).decode(buf)?
@@ -174,12 +169,7 @@ impl Builder for CreatableTopic {
 
 impl MapEncodable for CreatableTopic {
     type Key = super::TopicName;
-    fn encode<B: ByteBufMut>(
-        &self,
-        key: &Self::Key,
-        buf: &mut B,
-        version: i16,
-    ) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
         if version >= 5 {
             types::CompactString.encode(buf, key)?;
         } else {
@@ -211,7 +201,7 @@ impl MapEncodable for CreatableTopic {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 5 {
             total_size += types::CompactString.compute_size(key)?;
@@ -251,7 +241,7 @@ impl MapEncodable for CreatableTopic {
 
 impl MapDecodable for CreatableTopic {
     type Key = super::TopicName;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
         let key_field = if version >= 5 {
             types::CompactString.decode(buf)?
         } else {
@@ -342,7 +332,7 @@ impl Builder for CreateTopicsRequest {
 }
 
 impl Encodable for CreateTopicsRequest {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 5 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
         } else {
@@ -370,7 +360,7 @@ impl Encodable for CreateTopicsRequest {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 5 {
             total_size +=
@@ -403,7 +393,7 @@ impl Encodable for CreateTopicsRequest {
 }
 
 impl Decodable for CreateTopicsRequest {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let topics = if version >= 5 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
@@ -474,12 +464,7 @@ impl Builder for CreateableTopicConfig {
 
 impl MapEncodable for CreateableTopicConfig {
     type Key = StrBytes;
-    fn encode<B: ByteBufMut>(
-        &self,
-        key: &Self::Key,
-        buf: &mut B,
-        version: i16,
-    ) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
         if version >= 5 {
             types::CompactString.encode(buf, key)?;
         } else {
@@ -504,7 +489,7 @@ impl MapEncodable for CreateableTopicConfig {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 5 {
             total_size += types::CompactString.compute_size(key)?;
@@ -534,7 +519,7 @@ impl MapEncodable for CreateableTopicConfig {
 
 impl MapDecodable for CreateableTopicConfig {
     type Key = StrBytes;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
         let key_field = if version >= 5 {
             types::CompactString.decode(buf)?
         } else {

@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0-4
@@ -56,7 +56,7 @@ impl Builder for DescribeLogDirsPartition {
 }
 
 impl Encodable for DescribeLogDirsPartition {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.partition_index)?;
         types::Int64.encode(buf, &self.partition_size)?;
         types::Int64.encode(buf, &self.offset_lag)?;
@@ -75,7 +75,7 @@ impl Encodable for DescribeLogDirsPartition {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.partition_index)?;
         total_size += types::Int64.compute_size(&self.partition_size)?;
@@ -98,7 +98,7 @@ impl Encodable for DescribeLogDirsPartition {
 }
 
 impl Decodable for DescribeLogDirsPartition {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let partition_index = types::Int32.decode(buf)?;
         let partition_size = types::Int64.decode(buf)?;
         let offset_lag = types::Int64.decode(buf)?;
@@ -173,7 +173,7 @@ impl Builder for DescribeLogDirsResponse {
 }
 
 impl Encodable for DescribeLogDirsResponse {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         if version >= 3 {
             types::Int16.encode(buf, &self.error_code)?;
@@ -197,7 +197,7 @@ impl Encodable for DescribeLogDirsResponse {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
         if version >= 3 {
@@ -226,7 +226,7 @@ impl Encodable for DescribeLogDirsResponse {
 }
 
 impl Decodable for DescribeLogDirsResponse {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = types::Int32.decode(buf)?;
         let error_code = if version >= 3 {
             types::Int16.decode(buf)?
@@ -316,7 +316,7 @@ impl Builder for DescribeLogDirsResult {
 }
 
 impl Encodable for DescribeLogDirsResult {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int16.encode(buf, &self.error_code)?;
         if version >= 2 {
             types::CompactString.encode(buf, &self.log_dir)?;
@@ -348,7 +348,7 @@ impl Encodable for DescribeLogDirsResult {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int16.compute_size(&self.error_code)?;
         if version >= 2 {
@@ -385,7 +385,7 @@ impl Encodable for DescribeLogDirsResult {
 }
 
 impl Decodable for DescribeLogDirsResult {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let error_code = types::Int16.decode(buf)?;
         let log_dir = if version >= 2 {
             types::CompactString.decode(buf)?
@@ -474,7 +474,7 @@ impl Builder for DescribeLogDirsTopic {
 }
 
 impl Encodable for DescribeLogDirsTopic {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 2 {
             types::CompactString.encode(buf, &self.name)?;
         } else {
@@ -499,7 +499,7 @@ impl Encodable for DescribeLogDirsTopic {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 2 {
             total_size += types::CompactString.compute_size(&self.name)?;
@@ -529,7 +529,7 @@ impl Encodable for DescribeLogDirsTopic {
 }
 
 impl Decodable for DescribeLogDirsTopic {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {

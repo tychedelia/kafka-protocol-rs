@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0-8
@@ -66,7 +66,7 @@ impl Builder for ListOffsetsPartitionResponse {
 }
 
 impl Encodable for ListOffsetsPartitionResponse {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.partition_index)?;
         types::Int16.encode(buf, &self.error_code)?;
         if version == 0 {
@@ -111,7 +111,7 @@ impl Encodable for ListOffsetsPartitionResponse {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.partition_index)?;
         total_size += types::Int16.compute_size(&self.error_code)?;
@@ -160,7 +160,7 @@ impl Encodable for ListOffsetsPartitionResponse {
 }
 
 impl Decodable for ListOffsetsPartitionResponse {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let partition_index = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
         let old_style_offsets = if version == 0 {
@@ -252,7 +252,7 @@ impl Builder for ListOffsetsResponse {
 }
 
 impl Encodable for ListOffsetsResponse {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 2 {
             types::Int32.encode(buf, &self.throttle_time_ms)?;
         }
@@ -275,7 +275,7 @@ impl Encodable for ListOffsetsResponse {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 2 {
             total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
@@ -303,7 +303,7 @@ impl Encodable for ListOffsetsResponse {
 }
 
 impl Decodable for ListOffsetsResponse {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = if version >= 2 {
             types::Int32.decode(buf)?
         } else {
@@ -375,7 +375,7 @@ impl Builder for ListOffsetsTopicResponse {
 }
 
 impl Encodable for ListOffsetsTopicResponse {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 6 {
             types::CompactString.encode(buf, &self.name)?;
         } else {
@@ -400,7 +400,7 @@ impl Encodable for ListOffsetsTopicResponse {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 6 {
             total_size += types::CompactString.compute_size(&self.name)?;
@@ -430,7 +430,7 @@ impl Encodable for ListOffsetsTopicResponse {
 }
 
 impl Decodable for ListOffsetsTopicResponse {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = if version >= 6 {
             types::CompactString.decode(buf)?
         } else {

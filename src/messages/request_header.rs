@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0-2
@@ -56,7 +56,7 @@ impl Builder for RequestHeader {
 }
 
 impl Encodable for RequestHeader {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int16.encode(buf, &self.request_api_key)?;
         types::Int16.encode(buf, &self.request_api_version)?;
         types::Int32.encode(buf, &self.correlation_id)?;
@@ -77,7 +77,7 @@ impl Encodable for RequestHeader {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int16.compute_size(&self.request_api_key)?;
         total_size += types::Int16.compute_size(&self.request_api_version)?;
@@ -102,7 +102,7 @@ impl Encodable for RequestHeader {
 }
 
 impl Decodable for RequestHeader {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let request_api_key = types::Int16.decode(buf)?;
         let request_api_version = types::Int16.decode(buf)?;
         let correlation_id = types::Int32.decode(buf)?;

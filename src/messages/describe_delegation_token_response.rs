@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0-3
@@ -51,7 +51,7 @@ impl Builder for DescribeDelegationTokenResponse {
 }
 
 impl Encodable for DescribeDelegationTokenResponse {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int16.encode(buf, &self.error_code)?;
         if version >= 2 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.tokens)?;
@@ -73,7 +73,7 @@ impl Encodable for DescribeDelegationTokenResponse {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int16.compute_size(&self.error_code)?;
         if version >= 2 {
@@ -100,7 +100,7 @@ impl Encodable for DescribeDelegationTokenResponse {
 }
 
 impl Decodable for DescribeDelegationTokenResponse {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let error_code = types::Int16.decode(buf)?;
         let tokens = if version >= 2 {
             types::CompactArray(types::Struct { version }).decode(buf)?
@@ -211,7 +211,7 @@ impl Builder for DescribedDelegationToken {
 }
 
 impl Encodable for DescribedDelegationToken {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 2 {
             types::CompactString.encode(buf, &self.principal_type)?;
         } else {
@@ -268,7 +268,7 @@ impl Encodable for DescribedDelegationToken {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 2 {
             total_size += types::CompactString.compute_size(&self.principal_type)?;
@@ -332,7 +332,7 @@ impl Encodable for DescribedDelegationToken {
 }
 
 impl Decodable for DescribedDelegationToken {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let principal_type = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
@@ -448,7 +448,7 @@ impl Builder for DescribedDelegationTokenRenewer {
 }
 
 impl Encodable for DescribedDelegationTokenRenewer {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 2 {
             types::CompactString.encode(buf, &self.principal_type)?;
         } else {
@@ -473,7 +473,7 @@ impl Encodable for DescribedDelegationTokenRenewer {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 2 {
             total_size += types::CompactString.compute_size(&self.principal_type)?;
@@ -502,7 +502,7 @@ impl Encodable for DescribedDelegationTokenRenewer {
 }
 
 impl Decodable for DescribedDelegationTokenRenewer {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let principal_type = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {

@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0-12
@@ -66,7 +66,7 @@ impl Builder for MetadataResponse {
 }
 
 impl Encodable for MetadataResponse {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 3 {
             types::Int32.encode(buf, &self.throttle_time_ms)?;
         }
@@ -111,7 +111,7 @@ impl Encodable for MetadataResponse {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 3 {
             total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
@@ -162,7 +162,7 @@ impl Encodable for MetadataResponse {
 }
 
 impl Decodable for MetadataResponse {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = if version >= 3 {
             types::Int32.decode(buf)?
         } else {
@@ -272,12 +272,7 @@ impl Builder for MetadataResponseBroker {
 
 impl MapEncodable for MetadataResponseBroker {
     type Key = super::BrokerId;
-    fn encode<B: ByteBufMut>(
-        &self,
-        key: &Self::Key,
-        buf: &mut B,
-        version: i16,
-    ) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, key)?;
         if version >= 9 {
             types::CompactString.encode(buf, &self.host)?;
@@ -306,7 +301,7 @@ impl MapEncodable for MetadataResponseBroker {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(key)?;
         if version >= 9 {
@@ -340,7 +335,7 @@ impl MapEncodable for MetadataResponseBroker {
 
 impl MapDecodable for MetadataResponseBroker {
     type Key = super::BrokerId;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
         let key_field = types::Int32.decode(buf)?;
         let host = if version >= 9 {
             types::CompactString.decode(buf)?
@@ -448,7 +443,7 @@ impl Builder for MetadataResponsePartition {
 }
 
 impl Encodable for MetadataResponsePartition {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int16.encode(buf, &self.error_code)?;
         types::Int32.encode(buf, &self.partition_index)?;
         types::Int32.encode(buf, &self.leader_id)?;
@@ -486,7 +481,7 @@ impl Encodable for MetadataResponsePartition {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int16.compute_size(&self.error_code)?;
         total_size += types::Int32.compute_size(&self.partition_index)?;
@@ -529,7 +524,7 @@ impl Encodable for MetadataResponsePartition {
 }
 
 impl Decodable for MetadataResponsePartition {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let error_code = types::Int16.decode(buf)?;
         let partition_index = types::Int32.decode(buf)?;
         let leader_id = types::Int32.decode(buf)?;
@@ -644,12 +639,7 @@ impl Builder for MetadataResponseTopic {
 
 impl MapEncodable for MetadataResponseTopic {
     type Key = super::TopicName;
-    fn encode<B: ByteBufMut>(
-        &self,
-        key: &Self::Key,
-        buf: &mut B,
-        version: i16,
-    ) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
         types::Int16.encode(buf, &self.error_code)?;
         if version >= 9 {
             types::CompactString.encode(buf, key)?;
@@ -688,7 +678,7 @@ impl MapEncodable for MetadataResponseTopic {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int16.compute_size(&self.error_code)?;
         if version >= 9 {
@@ -733,7 +723,7 @@ impl MapEncodable for MetadataResponseTopic {
 
 impl MapDecodable for MetadataResponseTopic {
     type Key = super::TopicName;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
         let error_code = types::Int16.decode(buf)?;
         let key_field = if version >= 9 {
             types::CompactString.decode(buf)?

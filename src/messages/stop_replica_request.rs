@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0-4
@@ -51,7 +51,7 @@ impl Builder for StopReplicaPartitionState {
 }
 
 impl Encodable for StopReplicaPartitionState {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 3 {
             types::Int32.encode(buf, &self.partition_index)?;
         } else {
@@ -87,7 +87,7 @@ impl Encodable for StopReplicaPartitionState {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 3 {
             total_size += types::Int32.compute_size(&self.partition_index)?;
@@ -127,7 +127,7 @@ impl Encodable for StopReplicaPartitionState {
 }
 
 impl Decodable for StopReplicaPartitionState {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let partition_index = if version >= 3 {
             types::Int32.decode(buf)?
         } else {
@@ -206,7 +206,7 @@ impl Builder for StopReplicaPartitionV0 {
 }
 
 impl Encodable for StopReplicaPartitionV0 {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version == 0 {
             types::String.encode(buf, &self.topic_name)?;
         } else {
@@ -235,7 +235,7 @@ impl Encodable for StopReplicaPartitionV0 {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version == 0 {
             total_size += types::String.compute_size(&self.topic_name)?;
@@ -268,7 +268,7 @@ impl Encodable for StopReplicaPartitionV0 {
 }
 
 impl Decodable for StopReplicaPartitionV0 {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let topic_name = if version == 0 {
             types::String.decode(buf)?
         } else {
@@ -370,7 +370,7 @@ impl Builder for StopReplicaRequest {
 }
 
 impl Encodable for StopReplicaRequest {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.controller_id)?;
         if version >= 4 {
             types::Boolean.encode(buf, &self.is_k_raft_controller)?;
@@ -429,7 +429,7 @@ impl Encodable for StopReplicaRequest {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.controller_id)?;
         if version >= 4 {
@@ -495,7 +495,7 @@ impl Encodable for StopReplicaRequest {
 }
 
 impl Decodable for StopReplicaRequest {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let controller_id = types::Int32.decode(buf)?;
         let is_k_raft_controller = if version >= 4 {
             types::Boolean.decode(buf)?
@@ -605,7 +605,7 @@ impl Builder for StopReplicaTopicState {
 }
 
 impl Encodable for StopReplicaTopicState {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 3 {
             types::CompactString.encode(buf, &self.topic_name)?;
         } else {
@@ -634,7 +634,7 @@ impl Encodable for StopReplicaTopicState {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 3 {
             total_size += types::CompactString.compute_size(&self.topic_name)?;
@@ -668,7 +668,7 @@ impl Encodable for StopReplicaTopicState {
 }
 
 impl Decodable for StopReplicaTopicState {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let topic_name = if version >= 3 {
             types::CompactString.decode(buf)?
         } else {
@@ -740,7 +740,7 @@ impl Builder for StopReplicaTopicV1 {
 }
 
 impl Encodable for StopReplicaTopicV1 {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 1 && version <= 2 {
             if version >= 2 {
                 types::CompactString.encode(buf, &self.name)?;
@@ -777,7 +777,7 @@ impl Encodable for StopReplicaTopicV1 {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 1 && version <= 2 {
             if version >= 2 {
@@ -819,7 +819,7 @@ impl Encodable for StopReplicaTopicV1 {
 }
 
 impl Decodable for StopReplicaTopicV1 {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = if version >= 1 && version <= 2 {
             if version >= 2 {
                 types::CompactString.decode(buf)?

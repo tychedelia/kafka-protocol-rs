@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0-16
@@ -66,7 +66,7 @@ impl Builder for FetchPartition {
 }
 
 impl Encodable for FetchPartition {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.partition)?;
         if version >= 9 {
             types::Int32.encode(buf, &self.current_leader_epoch)?;
@@ -97,7 +97,7 @@ impl Encodable for FetchPartition {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.partition)?;
         if version >= 9 {
@@ -132,7 +132,7 @@ impl Encodable for FetchPartition {
 }
 
 impl Decodable for FetchPartition {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let partition = types::Int32.decode(buf)?;
         let current_leader_epoch = if version >= 9 {
             types::Int32.decode(buf)?
@@ -270,7 +270,7 @@ impl Builder for FetchRequest {
 }
 
 impl Encodable for FetchRequest {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version <= 14 {
             types::Int32.encode(buf, &self.replica_id)?;
         } else {
@@ -364,7 +364,7 @@ impl Encodable for FetchRequest {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version <= 14 {
             total_size += types::Int32.compute_size(&self.replica_id)?;
@@ -464,7 +464,7 @@ impl Encodable for FetchRequest {
 }
 
 impl Decodable for FetchRequest {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let mut cluster_id = None;
         let replica_id = if version <= 14 {
             types::Int32.decode(buf)?
@@ -617,7 +617,7 @@ impl Builder for FetchTopic {
 }
 
 impl Encodable for FetchTopic {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version <= 12 {
             if version >= 12 {
                 types::CompactString.encode(buf, &self.topic)?;
@@ -647,7 +647,7 @@ impl Encodable for FetchTopic {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version <= 12 {
             if version >= 12 {
@@ -682,7 +682,7 @@ impl Encodable for FetchTopic {
 }
 
 impl Decodable for FetchTopic {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let topic = if version <= 12 {
             if version >= 12 {
                 types::CompactString.decode(buf)?
@@ -770,7 +770,7 @@ impl Builder for ForgottenTopic {
 }
 
 impl Encodable for ForgottenTopic {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 7 && version <= 12 {
             if version >= 12 {
                 types::CompactString.encode(buf, &self.topic)?;
@@ -806,7 +806,7 @@ impl Encodable for ForgottenTopic {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 7 && version <= 12 {
             if version >= 12 {
@@ -846,7 +846,7 @@ impl Encodable for ForgottenTopic {
 }
 
 impl Decodable for ForgottenTopic {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let topic = if version >= 7 && version <= 12 {
             if version >= 12 {
                 types::CompactString.decode(buf)?
@@ -933,7 +933,7 @@ impl Builder for ReplicaState {
 }
 
 impl Encodable for ReplicaState {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 15 {
             types::Int32.encode(buf, &self.replica_id)?;
         } else {
@@ -962,7 +962,7 @@ impl Encodable for ReplicaState {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 15 {
             total_size += types::Int32.compute_size(&self.replica_id)?;
@@ -995,7 +995,7 @@ impl Encodable for ReplicaState {
 }
 
 impl Decodable for ReplicaState {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let replica_id = if version >= 15 {
             types::Int32.decode(buf)?
         } else {

@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0
@@ -46,7 +46,7 @@ impl Builder for AlterUserScramCredentialsRequest {
 }
 
 impl Encodable for AlterUserScramCredentialsRequest {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::CompactArray(types::Struct { version }).encode(buf, &self.deletions)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.upsertions)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -61,7 +61,7 @@ impl Encodable for AlterUserScramCredentialsRequest {
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size +=
             types::CompactArray(types::Struct { version }).compute_size(&self.deletions)?;
@@ -82,7 +82,7 @@ impl Encodable for AlterUserScramCredentialsRequest {
 }
 
 impl Decodable for AlterUserScramCredentialsRequest {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let deletions = types::CompactArray(types::Struct { version }).decode(buf)?;
         let upsertions = types::CompactArray(types::Struct { version }).decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
@@ -144,7 +144,7 @@ impl Builder for ScramCredentialDeletion {
 }
 
 impl Encodable for ScramCredentialDeletion {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::CompactString.encode(buf, &self.name)?;
         types::Int8.encode(buf, &self.mechanism)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -159,7 +159,7 @@ impl Encodable for ScramCredentialDeletion {
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::CompactString.compute_size(&self.name)?;
         total_size += types::Int8.compute_size(&self.mechanism)?;
@@ -178,7 +178,7 @@ impl Encodable for ScramCredentialDeletion {
 }
 
 impl Decodable for ScramCredentialDeletion {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = types::CompactString.decode(buf)?;
         let mechanism = types::Int8.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
@@ -255,7 +255,7 @@ impl Builder for ScramCredentialUpsertion {
 }
 
 impl Encodable for ScramCredentialUpsertion {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::CompactString.encode(buf, &self.name)?;
         types::Int8.encode(buf, &self.mechanism)?;
         types::Int32.encode(buf, &self.iterations)?;
@@ -273,7 +273,7 @@ impl Encodable for ScramCredentialUpsertion {
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::CompactString.compute_size(&self.name)?;
         total_size += types::Int8.compute_size(&self.mechanism)?;
@@ -295,7 +295,7 @@ impl Encodable for ScramCredentialUpsertion {
 }
 
 impl Decodable for ScramCredentialUpsertion {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = types::CompactString.decode(buf)?;
         let mechanism = types::Int8.decode(buf)?;
         let iterations = types::Int32.decode(buf)?;
