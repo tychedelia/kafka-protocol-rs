@@ -35,7 +35,7 @@ fn record_batch_produce_fetch() {
     let mut encoded = BytesMut::new();
     RecordBatchEncoder::encode(
         &mut encoded,
-        records.iter(),
+        &records,
         &RecordEncodeOptions {
             version: 2,
             compression: Compression::None,
@@ -69,7 +69,7 @@ fn message_set_v1_produce_fetch() {
     let mut encoded = BytesMut::new();
     RecordBatchEncoder::encode(
         &mut encoded,
-        records.iter(),
+        &records,
         &RecordEncodeOptions {
             version: 1,
             compression: Compression::None,
