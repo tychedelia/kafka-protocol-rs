@@ -154,12 +154,14 @@ impl RecordBatchEncoder {
     pub fn encode<'a, B, I>(buf: &mut B, records: I, options: &RecordEncodeOptions) -> Result<()>
     where
         B: ByteBufMut,
-        I: Iterator<Item = &'a Record> + Clone,
+        I: IntoIterator<Item = &'a Record>,
+        I::IntoIter: Clone,
     {
+        let records = records.into_iter();
         match options.version {
             0..=1 => Self::encode_legacy(buf, records, options),
             2 => Self::encode_new(buf, records, options),
-            _ => panic!("Unknown record batch version"),
+            _ => bail!("Unknown record batch version"),
         }
     }
     fn encode_legacy_records<'a, B, I>(
