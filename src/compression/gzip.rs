@@ -1,13 +1,12 @@
 use std::io::Write;
 
-use anyhow::Context;
+use anyhow::{Context, Result};
 use bytes::buf::BufMut;
 use bytes::{Bytes, BytesMut};
 use flate2::write::{GzDecoder, GzEncoder};
 use flate2::Compression;
 
 use crate::protocol::buf::{ByteBuf, ByteBufMut};
-use crate::protocol::{DecodeError, EncodeError};
 
 use super::{Compressor, Decompressor};
 
@@ -17,9 +16,9 @@ pub struct Gzip;
 
 impl<B: ByteBufMut> Compressor<B> for Gzip {
     type BufMut = BytesMut;
-    fn compress<R, F>(buf: &mut B, f: F) -> Result<R, EncodeError>
+    fn compress<R, F>(buf: &mut B, f: F) -> Result<R>
     where
-        F: FnOnce(&mut Self::BufMut) -> Result<R, EncodeError>,
+        F: FnOnce(&mut Self::BufMut) -> Result<R>,
     {
         // Write uncompressed bytes into a temporary buffer
         let mut tmp = BytesMut::new();
@@ -36,9 +35,9 @@ impl<B: ByteBufMut> Compressor<B> for Gzip {
 
 impl<B: ByteBuf> Decompressor<B> for Gzip {
     type Buf = Bytes;
-    fn decompress<R, F>(buf: &mut B, f: F) -> Result<R, DecodeError>
+    fn decompress<R, F>(buf: &mut B, f: F) -> Result<R>
     where
-        F: FnOnce(&mut Self::Buf) -> Result<R, DecodeError>,
+        F: FnOnce(&mut Self::Buf) -> Result<R>,
     {
         let mut tmp = BytesMut::new();
 

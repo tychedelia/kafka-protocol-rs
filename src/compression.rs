@@ -4,7 +4,7 @@
 //! allows encoding and decoding records into a [`Record`](crate::records::Record).
 
 use crate::protocol::buf::{ByteBuf, ByteBufMut};
-use crate::protocol::{DecodeError, EncodeError};
+use anyhow::Result;
 
 mod gzip;
 mod lz4;
@@ -23,9 +23,9 @@ pub trait Compressor<B: ByteBufMut> {
     /// Target buffer type for compression.
     type BufMut: ByteBufMut;
     /// Compresses into provided [`ByteBufMut`], with records encoded by `F` into `R`.
-    fn compress<R, F>(buf: &mut B, f: F) -> Result<R, EncodeError>
+    fn compress<R, F>(buf: &mut B, f: F) -> Result<R>
     where
-        F: FnOnce(&mut Self::BufMut) -> Result<R, EncodeError>;
+        F: FnOnce(&mut Self::BufMut) -> Result<R>;
 }
 
 /// A trait for record decompression algorithms.
@@ -33,7 +33,7 @@ pub trait Decompressor<B: ByteBuf> {
     /// Target buffer type for decompression.
     type Buf: ByteBuf;
     /// Decompress records from `B` mapped using `F` into `R`.
-    fn decompress<R, F>(buf: &mut B, f: F) -> Result<R, DecodeError>
+    fn decompress<R, F>(buf: &mut B, f: F) -> Result<R>
     where
-        F: FnOnce(&mut Self::Buf) -> Result<R, DecodeError>;
+        F: FnOnce(&mut Self::Buf) -> Result<R>;
 }
