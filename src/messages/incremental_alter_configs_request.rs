@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0-1
@@ -51,7 +51,7 @@ impl Builder for AlterConfigsResource {
 }
 
 impl Encodable for AlterConfigsResource {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int8.encode(buf, &self.resource_type)?;
         if version >= 1 {
             types::CompactString.encode(buf, &self.resource_name)?;
@@ -77,7 +77,7 @@ impl Encodable for AlterConfigsResource {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int8.compute_size(&self.resource_type)?;
         if version >= 1 {
@@ -108,7 +108,7 @@ impl Encodable for AlterConfigsResource {
 }
 
 impl Decodable for AlterConfigsResource {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let resource_type = types::Int8.decode(buf)?;
         let resource_name = if version >= 1 {
             types::CompactString.decode(buf)?
@@ -188,7 +188,7 @@ impl Builder for AlterableConfig {
 }
 
 impl Encodable for AlterableConfig {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 1 {
             types::CompactString.encode(buf, &self.name)?;
         } else {
@@ -214,7 +214,7 @@ impl Encodable for AlterableConfig {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 1 {
             total_size += types::CompactString.compute_size(&self.name)?;
@@ -244,7 +244,7 @@ impl Encodable for AlterableConfig {
 }
 
 impl Decodable for AlterableConfig {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = if version >= 1 {
             types::CompactString.decode(buf)?
         } else {
@@ -319,7 +319,7 @@ impl Builder for IncrementalAlterConfigsRequest {
 }
 
 impl Encodable for IncrementalAlterConfigsRequest {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 1 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.resources)?;
         } else {
@@ -340,7 +340,7 @@ impl Encodable for IncrementalAlterConfigsRequest {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 1 {
             total_size +=
@@ -366,7 +366,7 @@ impl Encodable for IncrementalAlterConfigsRequest {
 }
 
 impl Decodable for IncrementalAlterConfigsRequest {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let resources = if version >= 1 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {

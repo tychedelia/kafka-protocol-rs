@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0-3
@@ -76,7 +76,7 @@ impl Builder for TxnOffsetCommitRequest {
 }
 
 impl Encodable for TxnOffsetCommitRequest {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 3 {
             types::CompactString.encode(buf, &self.transactional_id)?;
         } else {
@@ -129,7 +129,7 @@ impl Encodable for TxnOffsetCommitRequest {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 3 {
             total_size += types::CompactString.compute_size(&self.transactional_id)?;
@@ -187,7 +187,7 @@ impl Encodable for TxnOffsetCommitRequest {
 }
 
 impl Decodable for TxnOffsetCommitRequest {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let transactional_id = if version >= 3 {
             types::CompactString.decode(buf)?
         } else {
@@ -303,7 +303,7 @@ impl Builder for TxnOffsetCommitRequestPartition {
 }
 
 impl Encodable for TxnOffsetCommitRequestPartition {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.partition_index)?;
         types::Int64.encode(buf, &self.committed_offset)?;
         if version >= 2 {
@@ -328,7 +328,7 @@ impl Encodable for TxnOffsetCommitRequestPartition {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.partition_index)?;
         total_size += types::Int64.compute_size(&self.committed_offset)?;
@@ -357,7 +357,7 @@ impl Encodable for TxnOffsetCommitRequestPartition {
 }
 
 impl Decodable for TxnOffsetCommitRequestPartition {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let partition_index = types::Int32.decode(buf)?;
         let committed_offset = types::Int64.decode(buf)?;
         let committed_leader_epoch = if version >= 2 {
@@ -435,7 +435,7 @@ impl Builder for TxnOffsetCommitRequestTopic {
 }
 
 impl Encodable for TxnOffsetCommitRequestTopic {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 3 {
             types::CompactString.encode(buf, &self.name)?;
         } else {
@@ -460,7 +460,7 @@ impl Encodable for TxnOffsetCommitRequestTopic {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 3 {
             total_size += types::CompactString.compute_size(&self.name)?;
@@ -490,7 +490,7 @@ impl Encodable for TxnOffsetCommitRequestTopic {
 }
 
 impl Decodable for TxnOffsetCommitRequestTopic {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = if version >= 3 {
             types::CompactString.decode(buf)?
         } else {

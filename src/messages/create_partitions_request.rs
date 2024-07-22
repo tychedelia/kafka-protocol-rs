@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0-3
@@ -41,7 +41,7 @@ impl Builder for CreatePartitionsAssignment {
 }
 
 impl Encodable for CreatePartitionsAssignment {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 2 {
             types::CompactArray(types::Int32).encode(buf, &self.broker_ids)?;
         } else {
@@ -61,7 +61,7 @@ impl Encodable for CreatePartitionsAssignment {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 2 {
             total_size += types::CompactArray(types::Int32).compute_size(&self.broker_ids)?;
@@ -85,7 +85,7 @@ impl Encodable for CreatePartitionsAssignment {
 }
 
 impl Decodable for CreatePartitionsAssignment {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let broker_ids = if version >= 2 {
             types::CompactArray(types::Int32).decode(buf)?
         } else {
@@ -155,7 +155,7 @@ impl Builder for CreatePartitionsRequest {
 }
 
 impl Encodable for CreatePartitionsRequest {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 2 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
         } else {
@@ -177,7 +177,7 @@ impl Encodable for CreatePartitionsRequest {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 2 {
             total_size +=
@@ -204,7 +204,7 @@ impl Encodable for CreatePartitionsRequest {
 }
 
 impl Decodable for CreatePartitionsRequest {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let topics = if version >= 2 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
@@ -276,12 +276,7 @@ impl Builder for CreatePartitionsTopic {
 
 impl MapEncodable for CreatePartitionsTopic {
     type Key = super::TopicName;
-    fn encode<B: ByteBufMut>(
-        &self,
-        key: &Self::Key,
-        buf: &mut B,
-        version: i16,
-    ) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
         if version >= 2 {
             types::CompactString.encode(buf, key)?;
         } else {
@@ -307,7 +302,7 @@ impl MapEncodable for CreatePartitionsTopic {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 2 {
             total_size += types::CompactString.compute_size(key)?;
@@ -340,7 +335,7 @@ impl MapEncodable for CreatePartitionsTopic {
 
 impl MapDecodable for CreatePartitionsTopic {
     type Key = super::TopicName;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
         let key_field = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {

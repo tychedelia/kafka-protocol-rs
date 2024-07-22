@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0-1
@@ -47,12 +47,7 @@ impl Builder for UpdatableFeatureResult {
 
 impl MapEncodable for UpdatableFeatureResult {
     type Key = StrBytes;
-    fn encode<B: ByteBufMut>(
-        &self,
-        key: &Self::Key,
-        buf: &mut B,
-        version: i16,
-    ) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
         types::CompactString.encode(buf, key)?;
         types::Int16.encode(buf, &self.error_code)?;
         types::CompactString.encode(buf, &self.error_message)?;
@@ -68,7 +63,7 @@ impl MapEncodable for UpdatableFeatureResult {
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::CompactString.compute_size(key)?;
         total_size += types::Int16.compute_size(&self.error_code)?;
@@ -89,7 +84,7 @@ impl MapEncodable for UpdatableFeatureResult {
 
 impl MapDecodable for UpdatableFeatureResult {
     type Key = StrBytes;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
         let key_field = types::CompactString.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
         let error_message = types::CompactString.decode(buf)?;
@@ -165,7 +160,7 @@ impl Builder for UpdateFeaturesResponse {
 }
 
 impl Encodable for UpdateFeaturesResponse {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         types::Int16.encode(buf, &self.error_code)?;
         types::CompactString.encode(buf, &self.error_message)?;
@@ -182,7 +177,7 @@ impl Encodable for UpdateFeaturesResponse {
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
         total_size += types::Int16.compute_size(&self.error_code)?;
@@ -203,7 +198,7 @@ impl Encodable for UpdateFeaturesResponse {
 }
 
 impl Decodable for UpdateFeaturesResponse {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
         let error_message = types::CompactString.decode(buf)?;

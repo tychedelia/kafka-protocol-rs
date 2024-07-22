@@ -1,6 +1,5 @@
 use crate::protocol::buf::{ByteBuf, ByteBufMut};
-use crate::protocol::{DecodeError, EncodeError};
-use anyhow::Context;
+use anyhow::{Context, Result};
 use bytes::{Buf, BufMut, Bytes, BytesMut};
 use lz4::BlockMode;
 use lz4::{Decoder, EncoderBuilder};
@@ -16,9 +15,9 @@ const COMPRESSION_LEVEL: u32 = 4;
 
 impl<B: ByteBufMut> Compressor<B> for Lz4 {
     type BufMut = BytesMut;
-    fn compress<R, F>(buf: &mut B, f: F) -> Result<R, EncodeError>
+    fn compress<R, F>(buf: &mut B, f: F) -> Result<R>
     where
-        F: FnOnce(&mut Self::BufMut) -> Result<R, EncodeError>,
+        F: FnOnce(&mut Self::BufMut) -> Result<R>,
     {
         // Write uncompressed bytes into a temporary buffer
         let mut tmp = BytesMut::new();
@@ -39,9 +38,9 @@ impl<B: ByteBufMut> Compressor<B> for Lz4 {
 
 impl<B: ByteBuf> Decompressor<B> for Lz4 {
     type Buf = Bytes;
-    fn decompress<R, F>(buf: &mut B, f: F) -> Result<R, DecodeError>
+    fn decompress<R, F>(buf: &mut B, f: F) -> Result<R>
     where
-        F: FnOnce(&mut Self::Buf) -> Result<R, DecodeError>,
+        F: FnOnce(&mut Self::Buf) -> Result<R>,
     {
         let mut tmp = BytesMut::new().writer();
 
@@ -59,7 +58,7 @@ impl<B: ByteBuf> Decompressor<B> for Lz4 {
 mod test {
     use crate::compression::Lz4;
     use crate::compression::{Compressor, Decompressor};
-    use crate::protocol::{DecodeError, EncodeError};
+    use anyhow::Result;
     use bytes::BytesMut;
     use std::fmt::Write;
     use std::str;
@@ -68,13 +67,13 @@ mod test {
     #[test]
     fn test_lz4() {
         let mut compressed = BytesMut::new();
-        Lz4::compress(&mut compressed, |buf| -> Result<(), EncodeError> {
+        Lz4::compress(&mut compressed, |buf| -> Result<()> {
             buf.write_str("hello lz4").unwrap();
             Ok(())
         })
         .unwrap();
 
-        Lz4::decompress(&mut compressed, |buf| -> Result<(), DecodeError> {
+        Lz4::decompress(&mut compressed, |buf| -> Result<()> {
             let decompressed_str = str::from_utf8(buf.as_slice()).unwrap();
             assert_eq!(decompressed_str, "hello lz4");
             Ok(())

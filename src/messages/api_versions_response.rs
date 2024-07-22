@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0-3
@@ -47,12 +47,7 @@ impl Builder for ApiVersion {
 
 impl MapEncodable for ApiVersion {
     type Key = i16;
-    fn encode<B: ByteBufMut>(
-        &self,
-        key: &Self::Key,
-        buf: &mut B,
-        version: i16,
-    ) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
         types::Int16.encode(buf, key)?;
         types::Int16.encode(buf, &self.min_version)?;
         types::Int16.encode(buf, &self.max_version)?;
@@ -70,7 +65,7 @@ impl MapEncodable for ApiVersion {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int16.compute_size(key)?;
         total_size += types::Int16.compute_size(&self.min_version)?;
@@ -93,7 +88,7 @@ impl MapEncodable for ApiVersion {
 
 impl MapDecodable for ApiVersion {
     type Key = i16;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
         let key_field = types::Int16.decode(buf)?;
         let min_version = types::Int16.decode(buf)?;
         let max_version = types::Int16.decode(buf)?;
@@ -186,7 +181,7 @@ impl Builder for ApiVersionsResponse {
 }
 
 impl Encodable for ApiVersionsResponse {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int16.encode(buf, &self.error_code)?;
         if version >= 3 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.api_keys)?;
@@ -274,7 +269,7 @@ impl Encodable for ApiVersionsResponse {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int16.compute_size(&self.error_code)?;
         if version >= 3 {
@@ -365,7 +360,7 @@ impl Encodable for ApiVersionsResponse {
 }
 
 impl Decodable for ApiVersionsResponse {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let error_code = types::Int16.decode(buf)?;
         let api_keys = if version >= 3 {
             types::CompactArray(types::Struct { version }).decode(buf)?
@@ -471,12 +466,7 @@ impl Builder for FinalizedFeatureKey {
 
 impl MapEncodable for FinalizedFeatureKey {
     type Key = StrBytes;
-    fn encode<B: ByteBufMut>(
-        &self,
-        key: &Self::Key,
-        buf: &mut B,
-        version: i16,
-    ) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
         if version >= 3 {
             types::CompactString.encode(buf, key)?;
         } else {
@@ -512,7 +502,7 @@ impl MapEncodable for FinalizedFeatureKey {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 3 {
             total_size += types::CompactString.compute_size(key)?;
@@ -553,7 +543,7 @@ impl MapEncodable for FinalizedFeatureKey {
 
 impl MapDecodable for FinalizedFeatureKey {
     type Key = StrBytes;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
         let key_field = if version >= 3 {
             types::CompactString.decode(buf)?
         } else {
@@ -634,12 +624,7 @@ impl Builder for SupportedFeatureKey {
 
 impl MapEncodable for SupportedFeatureKey {
     type Key = StrBytes;
-    fn encode<B: ByteBufMut>(
-        &self,
-        key: &Self::Key,
-        buf: &mut B,
-        version: i16,
-    ) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
         if version >= 3 {
             types::CompactString.encode(buf, key)?;
         } else {
@@ -675,7 +660,7 @@ impl MapEncodable for SupportedFeatureKey {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 3 {
             total_size += types::CompactString.compute_size(key)?;
@@ -716,7 +701,7 @@ impl MapEncodable for SupportedFeatureKey {
 
 impl MapDecodable for SupportedFeatureKey {
     type Key = StrBytes;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
         let key_field = if version >= 3 {
             types::CompactString.decode(buf)?
         } else {

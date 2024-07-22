@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0-3
@@ -71,7 +71,7 @@ impl Builder for DescribeAclsRequest {
 }
 
 impl Encodable for DescribeAclsRequest {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int8.encode(buf, &self.resource_type_filter)?;
         if version >= 2 {
             types::CompactString.encode(buf, &self.resource_name_filter)?;
@@ -111,7 +111,7 @@ impl Encodable for DescribeAclsRequest {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int8.compute_size(&self.resource_type_filter)?;
         if version >= 2 {
@@ -155,7 +155,7 @@ impl Encodable for DescribeAclsRequest {
 }
 
 impl Decodable for DescribeAclsRequest {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let resource_type_filter = types::Int8.decode(buf)?;
         let resource_name_filter = if version >= 2 {
             types::CompactString.decode(buf)?

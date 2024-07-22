@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0-10
@@ -46,7 +46,7 @@ impl Builder for BatchIndexAndErrorMessage {
 }
 
 impl Encodable for BatchIndexAndErrorMessage {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 8 {
             types::Int32.encode(buf, &self.batch_index)?;
         } else {
@@ -79,7 +79,7 @@ impl Encodable for BatchIndexAndErrorMessage {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 8 {
             total_size += types::Int32.compute_size(&self.batch_index)?;
@@ -116,7 +116,7 @@ impl Encodable for BatchIndexAndErrorMessage {
 }
 
 impl Decodable for BatchIndexAndErrorMessage {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let batch_index = if version >= 8 {
             types::Int32.decode(buf)?
         } else {
@@ -192,7 +192,7 @@ impl Builder for LeaderIdAndEpoch {
 }
 
 impl Encodable for LeaderIdAndEpoch {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 10 {
             types::Int32.encode(buf, &self.leader_id)?;
         } else {
@@ -221,7 +221,7 @@ impl Encodable for LeaderIdAndEpoch {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 10 {
             total_size += types::Int32.compute_size(&self.leader_id)?;
@@ -254,7 +254,7 @@ impl Encodable for LeaderIdAndEpoch {
 }
 
 impl Decodable for LeaderIdAndEpoch {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let leader_id = if version >= 10 {
             types::Int32.decode(buf)?
         } else {
@@ -332,12 +332,7 @@ impl Builder for NodeEndpoint {
 
 impl MapEncodable for NodeEndpoint {
     type Key = super::BrokerId;
-    fn encode<B: ByteBufMut>(
-        &self,
-        key: &Self::Key,
-        buf: &mut B,
-        version: i16,
-    ) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
         if version >= 10 {
             types::Int32.encode(buf, key)?;
         } else {
@@ -380,7 +375,7 @@ impl MapEncodable for NodeEndpoint {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 10 {
             total_size += types::Int32.compute_size(key)?;
@@ -428,7 +423,7 @@ impl MapEncodable for NodeEndpoint {
 
 impl MapDecodable for NodeEndpoint {
     type Key = super::BrokerId;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
         let key_field = if version >= 10 {
             types::Int32.decode(buf)?
         } else {
@@ -545,7 +540,7 @@ impl Builder for PartitionProduceResponse {
 }
 
 impl Encodable for PartitionProduceResponse {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.index)?;
         types::Int16.encode(buf, &self.error_code)?;
         types::Int64.encode(buf, &self.base_offset)?;
@@ -602,7 +597,7 @@ impl Encodable for PartitionProduceResponse {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.index)?;
         total_size += types::Int16.compute_size(&self.error_code)?;
@@ -665,7 +660,7 @@ impl Encodable for PartitionProduceResponse {
 }
 
 impl Decodable for PartitionProduceResponse {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let index = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
         let base_offset = types::Int64.decode(buf)?;
@@ -787,7 +782,7 @@ impl Builder for ProduceResponse {
 }
 
 impl Encodable for ProduceResponse {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 9 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.responses)?;
         } else {
@@ -830,7 +825,7 @@ impl Encodable for ProduceResponse {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 9 {
             total_size +=
@@ -877,7 +872,7 @@ impl Encodable for ProduceResponse {
 }
 
 impl Decodable for ProduceResponse {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let responses = if version >= 9 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
@@ -960,12 +955,7 @@ impl Builder for TopicProduceResponse {
 
 impl MapEncodable for TopicProduceResponse {
     type Key = super::TopicName;
-    fn encode<B: ByteBufMut>(
-        &self,
-        key: &Self::Key,
-        buf: &mut B,
-        version: i16,
-    ) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
         if version >= 9 {
             types::CompactString.encode(buf, key)?;
         } else {
@@ -991,7 +981,7 @@ impl MapEncodable for TopicProduceResponse {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 9 {
             total_size += types::CompactString.compute_size(key)?;
@@ -1023,7 +1013,7 @@ impl MapEncodable for TopicProduceResponse {
 
 impl MapDecodable for TopicProduceResponse {
     type Key = super::TopicName;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
         let key_field = if version >= 9 {
             types::CompactString.decode(buf)?
         } else {

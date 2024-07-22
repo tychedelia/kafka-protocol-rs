@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0-5
@@ -51,7 +51,7 @@ impl Builder for LeaveGroupRequest {
 }
 
 impl Encodable for LeaveGroupRequest {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 4 {
             types::CompactString.encode(buf, &self.group_id)?;
         } else {
@@ -89,7 +89,7 @@ impl Encodable for LeaveGroupRequest {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 4 {
             total_size += types::CompactString.compute_size(&self.group_id)?;
@@ -133,7 +133,7 @@ impl Encodable for LeaveGroupRequest {
 }
 
 impl Decodable for LeaveGroupRequest {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let group_id = if version >= 4 {
             types::CompactString.decode(buf)?
         } else {
@@ -221,7 +221,7 @@ impl Builder for MemberIdentity {
 }
 
 impl Encodable for MemberIdentity {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 3 {
             if version >= 4 {
                 types::CompactString.encode(buf, &self.member_id)?;
@@ -261,7 +261,7 @@ impl Encodable for MemberIdentity {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 3 {
             if version >= 4 {
@@ -305,7 +305,7 @@ impl Encodable for MemberIdentity {
 }
 
 impl Decodable for MemberIdentity {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let member_id = if version >= 3 {
             if version >= 4 {
                 types::CompactString.decode(buf)?

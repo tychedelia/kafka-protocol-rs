@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0-1
@@ -46,7 +46,7 @@ impl Builder for DescribeClusterRequest {
 }
 
 impl Encodable for DescribeClusterRequest {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Boolean.encode(buf, &self.include_cluster_authorized_operations)?;
         if version >= 1 {
             types::Int8.encode(buf, &self.endpoint_type)?;
@@ -67,7 +67,7 @@ impl Encodable for DescribeClusterRequest {
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Boolean.compute_size(&self.include_cluster_authorized_operations)?;
         if version >= 1 {
@@ -92,7 +92,7 @@ impl Encodable for DescribeClusterRequest {
 }
 
 impl Decodable for DescribeClusterRequest {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let include_cluster_authorized_operations = types::Boolean.decode(buf)?;
         let endpoint_type = if version >= 1 {
             types::Int8.decode(buf)?

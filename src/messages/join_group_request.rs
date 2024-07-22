@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0-9
@@ -76,7 +76,7 @@ impl Builder for JoinGroupRequest {
 }
 
 impl Encodable for JoinGroupRequest {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 6 {
             types::CompactString.encode(buf, &self.group_id)?;
         } else {
@@ -129,7 +129,7 @@ impl Encodable for JoinGroupRequest {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 6 {
             total_size += types::CompactString.compute_size(&self.group_id)?;
@@ -187,7 +187,7 @@ impl Encodable for JoinGroupRequest {
 }
 
 impl Decodable for JoinGroupRequest {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let group_id = if version >= 6 {
             types::CompactString.decode(buf)?
         } else {
@@ -297,12 +297,7 @@ impl Builder for JoinGroupRequestProtocol {
 
 impl MapEncodable for JoinGroupRequestProtocol {
     type Key = StrBytes;
-    fn encode<B: ByteBufMut>(
-        &self,
-        key: &Self::Key,
-        buf: &mut B,
-        version: i16,
-    ) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
         if version >= 6 {
             types::CompactString.encode(buf, key)?;
         } else {
@@ -327,7 +322,7 @@ impl MapEncodable for JoinGroupRequestProtocol {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 6 {
             total_size += types::CompactString.compute_size(key)?;
@@ -357,7 +352,7 @@ impl MapEncodable for JoinGroupRequestProtocol {
 
 impl MapDecodable for JoinGroupRequestProtocol {
     type Key = StrBytes;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
         let key_field = if version >= 6 {
             types::CompactString.decode(buf)?
         } else {

@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0-4
@@ -42,12 +42,7 @@ impl Builder for DescribableLogDirTopic {
 
 impl MapEncodable for DescribableLogDirTopic {
     type Key = super::TopicName;
-    fn encode<B: ByteBufMut>(
-        &self,
-        key: &Self::Key,
-        buf: &mut B,
-        version: i16,
-    ) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
         if version >= 2 {
             types::CompactString.encode(buf, key)?;
         } else {
@@ -72,7 +67,7 @@ impl MapEncodable for DescribableLogDirTopic {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 2 {
             total_size += types::CompactString.compute_size(key)?;
@@ -102,7 +97,7 @@ impl MapEncodable for DescribableLogDirTopic {
 
 impl MapDecodable for DescribableLogDirTopic {
     type Key = super::TopicName;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
         let key_field = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
@@ -170,7 +165,7 @@ impl Builder for DescribeLogDirsRequest {
 }
 
 impl Encodable for DescribeLogDirsRequest {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 2 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
         } else {
@@ -190,7 +185,7 @@ impl Encodable for DescribeLogDirsRequest {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 2 {
             total_size +=
@@ -215,7 +210,7 @@ impl Encodable for DescribeLogDirsRequest {
 }
 
 impl Decodable for DescribeLogDirsRequest {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let topics = if version >= 2 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {

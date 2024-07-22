@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0-9
@@ -66,7 +66,7 @@ impl Builder for OffsetCommitRequest {
 }
 
 impl Encodable for OffsetCommitRequest {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 8 {
             types::CompactString.encode(buf, &self.group_id)?;
         } else {
@@ -115,7 +115,7 @@ impl Encodable for OffsetCommitRequest {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 8 {
             total_size += types::CompactString.compute_size(&self.group_id)?;
@@ -169,7 +169,7 @@ impl Encodable for OffsetCommitRequest {
 }
 
 impl Decodable for OffsetCommitRequest {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let group_id = if version >= 8 {
             types::CompactString.decode(buf)?
         } else {
@@ -292,7 +292,7 @@ impl Builder for OffsetCommitRequestPartition {
 }
 
 impl Encodable for OffsetCommitRequestPartition {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.partition_index)?;
         types::Int64.encode(buf, &self.committed_offset)?;
         if version >= 6 {
@@ -324,7 +324,7 @@ impl Encodable for OffsetCommitRequestPartition {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.partition_index)?;
         total_size += types::Int64.compute_size(&self.committed_offset)?;
@@ -360,7 +360,7 @@ impl Encodable for OffsetCommitRequestPartition {
 }
 
 impl Decodable for OffsetCommitRequestPartition {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let partition_index = types::Int32.decode(buf)?;
         let committed_offset = types::Int64.decode(buf)?;
         let committed_leader_epoch = if version >= 6 {
@@ -445,7 +445,7 @@ impl Builder for OffsetCommitRequestTopic {
 }
 
 impl Encodable for OffsetCommitRequestTopic {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 8 {
             types::CompactString.encode(buf, &self.name)?;
         } else {
@@ -470,7 +470,7 @@ impl Encodable for OffsetCommitRequestTopic {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 8 {
             total_size += types::CompactString.compute_size(&self.name)?;
@@ -500,7 +500,7 @@ impl Encodable for OffsetCommitRequestTopic {
 }
 
 impl Decodable for OffsetCommitRequestTopic {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = if version >= 8 {
             types::CompactString.decode(buf)?
         } else {

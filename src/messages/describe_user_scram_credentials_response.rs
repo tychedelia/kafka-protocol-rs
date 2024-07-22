@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0
@@ -46,7 +46,7 @@ impl Builder for CredentialInfo {
 }
 
 impl Encodable for CredentialInfo {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int8.encode(buf, &self.mechanism)?;
         types::Int32.encode(buf, &self.iterations)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -61,7 +61,7 @@ impl Encodable for CredentialInfo {
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int8.compute_size(&self.mechanism)?;
         total_size += types::Int32.compute_size(&self.iterations)?;
@@ -80,7 +80,7 @@ impl Encodable for CredentialInfo {
 }
 
 impl Decodable for CredentialInfo {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let mechanism = types::Int8.decode(buf)?;
         let iterations = types::Int32.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
@@ -152,7 +152,7 @@ impl Builder for DescribeUserScramCredentialsResponse {
 }
 
 impl Encodable for DescribeUserScramCredentialsResponse {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         types::Int16.encode(buf, &self.error_code)?;
         types::CompactString.encode(buf, &self.error_message)?;
@@ -169,7 +169,7 @@ impl Encodable for DescribeUserScramCredentialsResponse {
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
         total_size += types::Int16.compute_size(&self.error_code)?;
@@ -190,7 +190,7 @@ impl Encodable for DescribeUserScramCredentialsResponse {
 }
 
 impl Decodable for DescribeUserScramCredentialsResponse {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
         let error_message = types::CompactString.decode(buf)?;
@@ -268,7 +268,7 @@ impl Builder for DescribeUserScramCredentialsResult {
 }
 
 impl Encodable for DescribeUserScramCredentialsResult {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::CompactString.encode(buf, &self.user)?;
         types::Int16.encode(buf, &self.error_code)?;
         types::CompactString.encode(buf, &self.error_message)?;
@@ -285,7 +285,7 @@ impl Encodable for DescribeUserScramCredentialsResult {
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::CompactString.compute_size(&self.user)?;
         total_size += types::Int16.compute_size(&self.error_code)?;
@@ -307,7 +307,7 @@ impl Encodable for DescribeUserScramCredentialsResult {
 }
 
 impl Decodable for DescribeUserScramCredentialsResult {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let user = types::CompactString.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
         let error_message = types::CompactString.decode(buf)?;

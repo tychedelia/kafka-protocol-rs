@@ -6,7 +6,7 @@ use std::cmp;
 use std::collections::BTreeMap;
 use std::ops::RangeBounds;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use buf::{ByteBuf, ByteBufMut};
 use bytes::Bytes;
 
@@ -111,28 +111,20 @@ mod str_bytes {
 
 pub use str_bytes::StrBytes;
 
-/// An error representing any fault while decoding a message, usually when the buffer is incorrectly
-/// sized or otherwise invalid for the decoded message.
-pub use anyhow::Error as DecodeError;
-
-/// An error representing any fault while encoding a message, usually when a message in an invalid
-/// state is attempted to be encoded.
-pub use anyhow::Error as EncodeError;
-
 pub(crate) trait NewType<Inner>: From<Inner> + Into<Inner> + Borrow<Inner> {}
 
 impl<T> NewType<T> for T {}
 
 pub(crate) trait Encoder<Value> {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, value: Value) -> Result<(), EncodeError>;
-    fn compute_size(&self, value: Value) -> Result<usize, EncodeError>;
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, value: Value) -> Result<()>;
+    fn compute_size(&self, value: Value) -> Result<usize>;
     fn fixed_size(&self) -> Option<usize> {
         None
     }
 }
 
 pub(crate) trait Decoder<Value> {
-    fn decode<B: ByteBuf>(&self, buf: &mut B) -> Result<Value, DecodeError>;
+    fn decode<B: ByteBuf>(&self, buf: &mut B) -> Result<Value>;
 }
 
 /// The range of versions (min, max) allowed for agiven message.
@@ -172,31 +164,26 @@ pub trait Message: Sized {
 /// An encodable message.
 pub trait Encodable: Sized {
     /// Encode the message into the target buffer.
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError>;
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()>;
     /// Compute the total size of the message when encoded.
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError>;
+    fn compute_size(&self, version: i16) -> Result<usize>;
 }
 
 /// A decodable message.
 pub trait Decodable: Sized {
     /// Decode the message from the provided buffer and version.
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError>;
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self>;
 }
 
 pub(crate) trait MapEncodable: Sized {
     type Key;
-    fn encode<B: ByteBufMut>(
-        &self,
-        key: &Self::Key,
-        buf: &mut B,
-        version: i16,
-    ) -> Result<(), EncodeError>;
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError>;
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()>;
+    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize>;
 }
 
 pub(crate) trait MapDecodable: Sized {
     type Key;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError>;
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)>;
 }
 
 /// Every message has a set of versions valid for a given header version.
@@ -221,7 +208,7 @@ pub(crate) fn write_unknown_tagged_fields<B: ByteBufMut, R: RangeBounds<i32>>(
     buf: &mut B,
     range: R,
     unknown_tagged_fields: &BTreeMap<i32, Bytes>,
-) -> Result<(), EncodeError> {
+) -> Result<()> {
     for (&k, v) in unknown_tagged_fields.range(range) {
         if v.len() > std::u32::MAX as usize {
             bail!("Tagged field is too long to encode ({} bytes)", v.len());
@@ -235,7 +222,7 @@ pub(crate) fn write_unknown_tagged_fields<B: ByteBufMut, R: RangeBounds<i32>>(
 
 pub(crate) fn compute_unknown_tagged_fields_size(
     unknown_tagged_fields: &BTreeMap<i32, Bytes>,
-) -> Result<usize, EncodeError> {
+) -> Result<usize> {
     let mut total_size = 0;
     for (&k, v) in unknown_tagged_fields {
         if v.len() > std::u32::MAX as usize {

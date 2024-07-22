@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0-9
@@ -56,7 +56,7 @@ impl Builder for OffsetFetchResponse {
 }
 
 impl Encodable for OffsetFetchResponse {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 3 {
             types::Int32.encode(buf, &self.throttle_time_ms)?;
         }
@@ -95,7 +95,7 @@ impl Encodable for OffsetFetchResponse {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 3 {
             total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
@@ -140,7 +140,7 @@ impl Encodable for OffsetFetchResponse {
 }
 
 impl Decodable for OffsetFetchResponse {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = if version >= 3 {
             types::Int32.decode(buf)?
         } else {
@@ -235,7 +235,7 @@ impl Builder for OffsetFetchResponseGroup {
 }
 
 impl Encodable for OffsetFetchResponseGroup {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 8 {
             types::CompactString.encode(buf, &self.group_id)?;
         } else {
@@ -271,7 +271,7 @@ impl Encodable for OffsetFetchResponseGroup {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 8 {
             total_size += types::CompactString.compute_size(&self.group_id)?;
@@ -312,7 +312,7 @@ impl Encodable for OffsetFetchResponseGroup {
 }
 
 impl Decodable for OffsetFetchResponseGroup {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let group_id = if version >= 8 {
             types::CompactString.decode(buf)?
         } else {
@@ -406,7 +406,7 @@ impl Builder for OffsetFetchResponsePartition {
 }
 
 impl Encodable for OffsetFetchResponsePartition {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version <= 7 {
             types::Int32.encode(buf, &self.partition_index)?;
         } else {
@@ -461,7 +461,7 @@ impl Encodable for OffsetFetchResponsePartition {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version <= 7 {
             total_size += types::Int32.compute_size(&self.partition_index)?;
@@ -520,7 +520,7 @@ impl Encodable for OffsetFetchResponsePartition {
 }
 
 impl Decodable for OffsetFetchResponsePartition {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let partition_index = if version <= 7 {
             types::Int32.decode(buf)?
         } else {
@@ -632,7 +632,7 @@ impl Builder for OffsetFetchResponsePartitions {
 }
 
 impl Encodable for OffsetFetchResponsePartitions {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 8 {
             types::Int32.encode(buf, &self.partition_index)?;
         } else {
@@ -683,7 +683,7 @@ impl Encodable for OffsetFetchResponsePartitions {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 8 {
             total_size += types::Int32.compute_size(&self.partition_index)?;
@@ -738,7 +738,7 @@ impl Encodable for OffsetFetchResponsePartitions {
 }
 
 impl Decodable for OffsetFetchResponsePartitions {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let partition_index = if version >= 8 {
             types::Int32.decode(buf)?
         } else {
@@ -831,7 +831,7 @@ impl Builder for OffsetFetchResponseTopic {
 }
 
 impl Encodable for OffsetFetchResponseTopic {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version <= 7 {
             if version >= 6 {
                 types::CompactString.encode(buf, &self.name)?;
@@ -868,7 +868,7 @@ impl Encodable for OffsetFetchResponseTopic {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version <= 7 {
             if version >= 6 {
@@ -911,7 +911,7 @@ impl Encodable for OffsetFetchResponseTopic {
 }
 
 impl Decodable for OffsetFetchResponseTopic {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = if version <= 7 {
             if version >= 6 {
                 types::CompactString.decode(buf)?
@@ -991,7 +991,7 @@ impl Builder for OffsetFetchResponseTopics {
 }
 
 impl Encodable for OffsetFetchResponseTopics {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 8 {
             types::CompactString.encode(buf, &self.name)?;
         } else {
@@ -1020,7 +1020,7 @@ impl Encodable for OffsetFetchResponseTopics {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 8 {
             total_size += types::CompactString.compute_size(&self.name)?;
@@ -1054,7 +1054,7 @@ impl Encodable for OffsetFetchResponseTopics {
 }
 
 impl Decodable for OffsetFetchResponseTopics {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = if version >= 8 {
             types::CompactString.decode(buf)?
         } else {

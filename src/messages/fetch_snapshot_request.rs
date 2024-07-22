@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0
@@ -56,7 +56,7 @@ impl Builder for FetchSnapshotRequest {
 }
 
 impl Encodable for FetchSnapshotRequest {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.replica_id)?;
         types::Int32.encode(buf, &self.max_bytes)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
@@ -87,7 +87,7 @@ impl Encodable for FetchSnapshotRequest {
         write_unknown_tagged_fields(buf, 1.., &self.unknown_tagged_fields)?;
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.replica_id)?;
         total_size += types::Int32.compute_size(&self.max_bytes)?;
@@ -122,7 +122,7 @@ impl Encodable for FetchSnapshotRequest {
 }
 
 impl Decodable for FetchSnapshotRequest {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let mut cluster_id = None;
         let replica_id = types::Int32.decode(buf)?;
         let max_bytes = types::Int32.decode(buf)?;
@@ -207,7 +207,7 @@ impl Builder for PartitionSnapshot {
 }
 
 impl Encodable for PartitionSnapshot {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.partition)?;
         types::Int32.encode(buf, &self.current_leader_epoch)?;
         types::Struct { version }.encode(buf, &self.snapshot_id)?;
@@ -224,7 +224,7 @@ impl Encodable for PartitionSnapshot {
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.partition)?;
         total_size += types::Int32.compute_size(&self.current_leader_epoch)?;
@@ -245,7 +245,7 @@ impl Encodable for PartitionSnapshot {
 }
 
 impl Decodable for PartitionSnapshot {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let partition = types::Int32.decode(buf)?;
         let current_leader_epoch = types::Int32.decode(buf)?;
         let snapshot_id = types::Struct { version }.decode(buf)?;
@@ -313,7 +313,7 @@ impl Builder for SnapshotId {
 }
 
 impl Encodable for SnapshotId {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int64.encode(buf, &self.end_offset)?;
         types::Int32.encode(buf, &self.epoch)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -328,7 +328,7 @@ impl Encodable for SnapshotId {
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int64.compute_size(&self.end_offset)?;
         total_size += types::Int32.compute_size(&self.epoch)?;
@@ -347,7 +347,7 @@ impl Encodable for SnapshotId {
 }
 
 impl Decodable for SnapshotId {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let end_offset = types::Int64.decode(buf)?;
         let epoch = types::Int32.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
@@ -409,7 +409,7 @@ impl Builder for TopicSnapshot {
 }
 
 impl Encodable for TopicSnapshot {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::CompactString.encode(buf, &self.name)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.partitions)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -424,7 +424,7 @@ impl Encodable for TopicSnapshot {
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::CompactString.compute_size(&self.name)?;
         total_size +=
@@ -444,7 +444,7 @@ impl Encodable for TopicSnapshot {
 }
 
 impl Decodable for TopicSnapshot {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = types::CompactString.decode(buf)?;
         let partitions = types::CompactArray(types::Struct { version }).decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();

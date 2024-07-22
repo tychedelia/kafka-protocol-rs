@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0-4
@@ -81,7 +81,7 @@ impl Builder for DescribeConfigsResourceResult {
 }
 
 impl Encodable for DescribeConfigsResourceResult {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 4 {
             types::CompactString.encode(buf, &self.name)?;
         } else {
@@ -135,7 +135,7 @@ impl Encodable for DescribeConfigsResourceResult {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 4 {
             total_size += types::CompactString.compute_size(&self.name)?;
@@ -195,7 +195,7 @@ impl Encodable for DescribeConfigsResourceResult {
 }
 
 impl Decodable for DescribeConfigsResourceResult {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = if version >= 4 {
             types::CompactString.decode(buf)?
         } else {
@@ -316,7 +316,7 @@ impl Builder for DescribeConfigsResponse {
 }
 
 impl Encodable for DescribeConfigsResponse {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         if version >= 4 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.results)?;
@@ -337,7 +337,7 @@ impl Encodable for DescribeConfigsResponse {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
         if version >= 4 {
@@ -363,7 +363,7 @@ impl Encodable for DescribeConfigsResponse {
 }
 
 impl Decodable for DescribeConfigsResponse {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = types::Int32.decode(buf)?;
         let results = if version >= 4 {
             types::CompactArray(types::Struct { version }).decode(buf)?
@@ -446,7 +446,7 @@ impl Builder for DescribeConfigsResult {
 }
 
 impl Encodable for DescribeConfigsResult {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int16.encode(buf, &self.error_code)?;
         if version >= 4 {
             types::CompactString.encode(buf, &self.error_message)?;
@@ -478,7 +478,7 @@ impl Encodable for DescribeConfigsResult {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int16.compute_size(&self.error_code)?;
         if version >= 4 {
@@ -515,7 +515,7 @@ impl Encodable for DescribeConfigsResult {
 }
 
 impl Decodable for DescribeConfigsResult {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let error_code = types::Int16.decode(buf)?;
         let error_message = if version >= 4 {
             types::CompactString.decode(buf)?
@@ -605,7 +605,7 @@ impl Builder for DescribeConfigsSynonym {
 }
 
 impl Encodable for DescribeConfigsSynonym {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 1 {
             if version >= 4 {
                 types::CompactString.encode(buf, &self.name)?;
@@ -654,7 +654,7 @@ impl Encodable for DescribeConfigsSynonym {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 1 {
             if version >= 4 {
@@ -707,7 +707,7 @@ impl Encodable for DescribeConfigsSynonym {
 }
 
 impl Decodable for DescribeConfigsSynonym {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = if version >= 1 {
             if version >= 4 {
                 types::CompactString.decode(buf)?

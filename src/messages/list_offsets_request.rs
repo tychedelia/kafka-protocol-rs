@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0-8
@@ -56,7 +56,7 @@ impl Builder for ListOffsetsPartition {
 }
 
 impl Encodable for ListOffsetsPartition {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.partition_index)?;
         if version >= 4 {
             types::Int32.encode(buf, &self.current_leader_epoch)?;
@@ -83,7 +83,7 @@ impl Encodable for ListOffsetsPartition {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.partition_index)?;
         if version >= 4 {
@@ -114,7 +114,7 @@ impl Encodable for ListOffsetsPartition {
 }
 
 impl Decodable for ListOffsetsPartition {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let partition_index = types::Int32.decode(buf)?;
         let current_leader_epoch = if version >= 4 {
             types::Int32.decode(buf)?
@@ -197,7 +197,7 @@ impl Builder for ListOffsetsRequest {
 }
 
 impl Encodable for ListOffsetsRequest {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.replica_id)?;
         if version >= 2 {
             types::Int8.encode(buf, &self.isolation_level)?;
@@ -225,7 +225,7 @@ impl Encodable for ListOffsetsRequest {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.replica_id)?;
         if version >= 2 {
@@ -258,7 +258,7 @@ impl Encodable for ListOffsetsRequest {
 }
 
 impl Decodable for ListOffsetsRequest {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let replica_id = types::Int32.decode(buf)?;
         let isolation_level = if version >= 2 {
             types::Int8.decode(buf)?
@@ -333,7 +333,7 @@ impl Builder for ListOffsetsTopic {
 }
 
 impl Encodable for ListOffsetsTopic {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 6 {
             types::CompactString.encode(buf, &self.name)?;
         } else {
@@ -358,7 +358,7 @@ impl Encodable for ListOffsetsTopic {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 6 {
             total_size += types::CompactString.compute_size(&self.name)?;
@@ -388,7 +388,7 @@ impl Encodable for ListOffsetsTopic {
 }
 
 impl Decodable for ListOffsetsTopic {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = if version >= 6 {
             types::CompactString.decode(buf)?
         } else {

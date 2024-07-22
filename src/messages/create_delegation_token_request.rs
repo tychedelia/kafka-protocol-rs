@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0-3
@@ -46,7 +46,7 @@ impl Builder for CreatableRenewers {
 }
 
 impl Encodable for CreatableRenewers {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 2 {
             types::CompactString.encode(buf, &self.principal_type)?;
         } else {
@@ -71,7 +71,7 @@ impl Encodable for CreatableRenewers {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 2 {
             total_size += types::CompactString.compute_size(&self.principal_type)?;
@@ -100,7 +100,7 @@ impl Encodable for CreatableRenewers {
 }
 
 impl Decodable for CreatableRenewers {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let principal_type = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
@@ -182,7 +182,7 @@ impl Builder for CreateDelegationTokenRequest {
 }
 
 impl Encodable for CreateDelegationTokenRequest {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 3 {
             types::CompactString.encode(buf, &self.owner_principal_type)?;
         } else {
@@ -227,7 +227,7 @@ impl Encodable for CreateDelegationTokenRequest {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 3 {
             total_size += types::CompactString.compute_size(&self.owner_principal_type)?;
@@ -277,7 +277,7 @@ impl Encodable for CreateDelegationTokenRequest {
 }
 
 impl Decodable for CreateDelegationTokenRequest {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let owner_principal_type = if version >= 3 {
             types::CompactString.decode(buf)?
         } else {
