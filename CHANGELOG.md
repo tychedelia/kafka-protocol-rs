@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.10.2
+
+- Implement From<T> for RequestKind and ResponseKind.
+
+## v0.10.1
+
+- Fix lz4 compression.
+
 ## v0.10.0
 
 - Use `anyhow` for public error types. In general, these errors reflect non-recoverable programmer error and
