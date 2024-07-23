@@ -13,14 +13,15 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
-    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
-    StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-1
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct WritableTxnMarkerPartitionResult {
     /// The partition index.
     ///
@@ -36,34 +37,11 @@ pub struct WritableTxnMarkerPartitionResult {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl WritableTxnMarkerPartitionResult {
-    /// Sets `partition_index` to the passed value.
-    ///
-    /// The partition index.
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_partition_index(mut self, value: i32) -> Self {
-        self.partition_index = value;
-        self
-    }
-    /// Sets `error_code` to the passed value.
-    ///
-    /// The error code, or 0 if there was no error.
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_error_code(mut self, value: i16) -> Self {
-        self.error_code = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for WritableTxnMarkerPartitionResult {
+    type Builder = WritableTxnMarkerPartitionResultBuilder;
+
+    fn builder() -> Self::Builder {
+        WritableTxnMarkerPartitionResultBuilder::default()
     }
 }
 
@@ -144,7 +122,8 @@ impl Message for WritableTxnMarkerPartitionResult {
 
 /// Valid versions: 0-1
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct WritableTxnMarkerResult {
     /// The current producer ID in use by the transactional ID.
     ///
@@ -160,34 +139,11 @@ pub struct WritableTxnMarkerResult {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl WritableTxnMarkerResult {
-    /// Sets `producer_id` to the passed value.
-    ///
-    /// The current producer ID in use by the transactional ID.
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_producer_id(mut self, value: super::ProducerId) -> Self {
-        self.producer_id = value;
-        self
-    }
-    /// Sets `topics` to the passed value.
-    ///
-    /// The results by topic.
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_topics(mut self, value: Vec<WritableTxnMarkerTopicResult>) -> Self {
-        self.topics = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for WritableTxnMarkerResult {
+    type Builder = WritableTxnMarkerResultBuilder;
+
+    fn builder() -> Self::Builder {
+        WritableTxnMarkerResultBuilder::default()
     }
 }
 
@@ -281,7 +237,8 @@ impl Message for WritableTxnMarkerResult {
 
 /// Valid versions: 0-1
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct WritableTxnMarkerTopicResult {
     /// The topic name.
     ///
@@ -297,34 +254,11 @@ pub struct WritableTxnMarkerTopicResult {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl WritableTxnMarkerTopicResult {
-    /// Sets `name` to the passed value.
-    ///
-    /// The topic name.
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_name(mut self, value: super::TopicName) -> Self {
-        self.name = value;
-        self
-    }
-    /// Sets `partitions` to the passed value.
-    ///
-    /// The results by partition.
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_partitions(mut self, value: Vec<WritableTxnMarkerPartitionResult>) -> Self {
-        self.partitions = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for WritableTxnMarkerTopicResult {
+    type Builder = WritableTxnMarkerTopicResultBuilder;
+
+    fn builder() -> Self::Builder {
+        WritableTxnMarkerTopicResultBuilder::default()
     }
 }
 
@@ -430,7 +364,8 @@ impl Message for WritableTxnMarkerTopicResult {
 
 /// Valid versions: 0-1
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct WriteTxnMarkersResponse {
     /// The results for writing makers.
     ///
@@ -441,25 +376,11 @@ pub struct WriteTxnMarkersResponse {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl WriteTxnMarkersResponse {
-    /// Sets `markers` to the passed value.
-    ///
-    /// The results for writing makers.
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_markers(mut self, value: Vec<WritableTxnMarkerResult>) -> Self {
-        self.markers = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for WriteTxnMarkersResponse {
+    type Builder = WriteTxnMarkersResponseBuilder;
+
+    fn builder() -> Self::Builder {
+        WriteTxnMarkersResponseBuilder::default()
     }
 }
 

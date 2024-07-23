@@ -13,14 +13,15 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
-    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
-    StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-4
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct HeartbeatRequest {
     /// The group id.
     ///
@@ -46,52 +47,11 @@ pub struct HeartbeatRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl HeartbeatRequest {
-    /// Sets `group_id` to the passed value.
-    ///
-    /// The group id.
-    ///
-    /// Supported API versions: 0-4
-    pub fn with_group_id(mut self, value: super::GroupId) -> Self {
-        self.group_id = value;
-        self
-    }
-    /// Sets `generation_id` to the passed value.
-    ///
-    /// The generation of the group.
-    ///
-    /// Supported API versions: 0-4
-    pub fn with_generation_id(mut self, value: i32) -> Self {
-        self.generation_id = value;
-        self
-    }
-    /// Sets `member_id` to the passed value.
-    ///
-    /// The member ID.
-    ///
-    /// Supported API versions: 0-4
-    pub fn with_member_id(mut self, value: StrBytes) -> Self {
-        self.member_id = value;
-        self
-    }
-    /// Sets `group_instance_id` to the passed value.
-    ///
-    /// The unique identifier of the consumer instance provided by end user.
-    ///
-    /// Supported API versions: 3-4
-    pub fn with_group_instance_id(mut self, value: Option<StrBytes>) -> Self {
-        self.group_instance_id = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for HeartbeatRequest {
+    type Builder = HeartbeatRequestBuilder;
+
+    fn builder() -> Self::Builder {
+        HeartbeatRequestBuilder::default()
     }
 }
 

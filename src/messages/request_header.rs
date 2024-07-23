@@ -13,14 +13,15 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
-    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
-    StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-2
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct RequestHeader {
     /// The API key of this request.
     ///
@@ -46,52 +47,11 @@ pub struct RequestHeader {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl RequestHeader {
-    /// Sets `request_api_key` to the passed value.
-    ///
-    /// The API key of this request.
-    ///
-    /// Supported API versions: 0-2
-    pub fn with_request_api_key(mut self, value: i16) -> Self {
-        self.request_api_key = value;
-        self
-    }
-    /// Sets `request_api_version` to the passed value.
-    ///
-    /// The API version of this request.
-    ///
-    /// Supported API versions: 0-2
-    pub fn with_request_api_version(mut self, value: i16) -> Self {
-        self.request_api_version = value;
-        self
-    }
-    /// Sets `correlation_id` to the passed value.
-    ///
-    /// The correlation ID of this request.
-    ///
-    /// Supported API versions: 0-2
-    pub fn with_correlation_id(mut self, value: i32) -> Self {
-        self.correlation_id = value;
-        self
-    }
-    /// Sets `client_id` to the passed value.
-    ///
-    /// The client ID string.
-    ///
-    /// Supported API versions: 1-2
-    pub fn with_client_id(mut self, value: Option<StrBytes>) -> Self {
-        self.client_id = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for RequestHeader {
+    type Builder = RequestHeaderBuilder;
+
+    fn builder() -> Self::Builder {
+        RequestHeaderBuilder::default()
     }
 }
 

@@ -13,14 +13,15 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
-    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
-    StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-3
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct ControlledShutdownRequest {
     /// The id of the broker for which controlled shutdown has been requested.
     ///
@@ -36,34 +37,11 @@ pub struct ControlledShutdownRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl ControlledShutdownRequest {
-    /// Sets `broker_id` to the passed value.
-    ///
-    /// The id of the broker for which controlled shutdown has been requested.
-    ///
-    /// Supported API versions: 0-3
-    pub fn with_broker_id(mut self, value: super::BrokerId) -> Self {
-        self.broker_id = value;
-        self
-    }
-    /// Sets `broker_epoch` to the passed value.
-    ///
-    /// The broker epoch.
-    ///
-    /// Supported API versions: 2-3
-    pub fn with_broker_epoch(mut self, value: i64) -> Self {
-        self.broker_epoch = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for ControlledShutdownRequest {
+    type Builder = ControlledShutdownRequestBuilder;
+
+    fn builder() -> Self::Builder {
+        ControlledShutdownRequestBuilder::default()
     }
 }
 

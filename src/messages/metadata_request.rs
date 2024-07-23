@@ -13,14 +13,15 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
-    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
-    StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-12
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct MetadataRequest {
     /// The topics to fetch metadata for.
     ///
@@ -46,52 +47,11 @@ pub struct MetadataRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl MetadataRequest {
-    /// Sets `topics` to the passed value.
-    ///
-    /// The topics to fetch metadata for.
-    ///
-    /// Supported API versions: 0-12
-    pub fn with_topics(mut self, value: Option<Vec<MetadataRequestTopic>>) -> Self {
-        self.topics = value;
-        self
-    }
-    /// Sets `allow_auto_topic_creation` to the passed value.
-    ///
-    /// If this is true, the broker may auto-create topics that we requested which do not already exist, if it is configured to do so.
-    ///
-    /// Supported API versions: 4-12
-    pub fn with_allow_auto_topic_creation(mut self, value: bool) -> Self {
-        self.allow_auto_topic_creation = value;
-        self
-    }
-    /// Sets `include_cluster_authorized_operations` to the passed value.
-    ///
-    /// Whether to include cluster authorized operations.
-    ///
-    /// Supported API versions: 8-10
-    pub fn with_include_cluster_authorized_operations(mut self, value: bool) -> Self {
-        self.include_cluster_authorized_operations = value;
-        self
-    }
-    /// Sets `include_topic_authorized_operations` to the passed value.
-    ///
-    /// Whether to include topic authorized operations.
-    ///
-    /// Supported API versions: 8-12
-    pub fn with_include_topic_authorized_operations(mut self, value: bool) -> Self {
-        self.include_topic_authorized_operations = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for MetadataRequest {
+    type Builder = MetadataRequestBuilder;
+
+    fn builder() -> Self::Builder {
+        MetadataRequestBuilder::default()
     }
 }
 
@@ -244,7 +204,8 @@ impl Message for MetadataRequest {
 
 /// Valid versions: 0-12
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct MetadataRequestTopic {
     /// The topic id.
     ///
@@ -260,34 +221,11 @@ pub struct MetadataRequestTopic {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl MetadataRequestTopic {
-    /// Sets `topic_id` to the passed value.
-    ///
-    /// The topic id.
-    ///
-    /// Supported API versions: 10-12
-    pub fn with_topic_id(mut self, value: Uuid) -> Self {
-        self.topic_id = value;
-        self
-    }
-    /// Sets `name` to the passed value.
-    ///
-    /// The topic name.
-    ///
-    /// Supported API versions: 0-12
-    pub fn with_name(mut self, value: Option<super::TopicName>) -> Self {
-        self.name = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for MetadataRequestTopic {
+    type Builder = MetadataRequestTopicBuilder;
+
+    fn builder() -> Self::Builder {
+        MetadataRequestTopicBuilder::default()
     }
 }
 

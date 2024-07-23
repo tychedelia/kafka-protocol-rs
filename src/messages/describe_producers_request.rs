@@ -13,14 +13,15 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
-    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
-    StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct DescribeProducersRequest {
     ///
     ///
@@ -31,25 +32,11 @@ pub struct DescribeProducersRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl DescribeProducersRequest {
-    /// Sets `topics` to the passed value.
-    ///
-    ///
-    ///
-    /// Supported API versions: 0
-    pub fn with_topics(mut self, value: Vec<TopicRequest>) -> Self {
-        self.topics = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for DescribeProducersRequest {
+    type Builder = DescribeProducersRequestBuilder;
+
+    fn builder() -> Self::Builder {
+        DescribeProducersRequestBuilder::default()
     }
 }
 
@@ -119,7 +106,8 @@ impl Message for DescribeProducersRequest {
 
 /// Valid versions: 0
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct TopicRequest {
     /// The topic name.
     ///
@@ -135,34 +123,11 @@ pub struct TopicRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl TopicRequest {
-    /// Sets `name` to the passed value.
-    ///
-    /// The topic name.
-    ///
-    /// Supported API versions: 0
-    pub fn with_name(mut self, value: super::TopicName) -> Self {
-        self.name = value;
-        self
-    }
-    /// Sets `partition_indexes` to the passed value.
-    ///
-    /// The indexes of the partitions to list producers for.
-    ///
-    /// Supported API versions: 0
-    pub fn with_partition_indexes(mut self, value: Vec<i32>) -> Self {
-        self.partition_indexes = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for TopicRequest {
+    type Builder = TopicRequestBuilder;
+
+    fn builder() -> Self::Builder {
+        TopicRequestBuilder::default()
     }
 }
 

@@ -13,14 +13,15 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
-    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
-    StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-1
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct BrokerHeartbeatRequest {
     /// The broker ID.
     ///
@@ -56,70 +57,11 @@ pub struct BrokerHeartbeatRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl BrokerHeartbeatRequest {
-    /// Sets `broker_id` to the passed value.
-    ///
-    /// The broker ID.
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_broker_id(mut self, value: super::BrokerId) -> Self {
-        self.broker_id = value;
-        self
-    }
-    /// Sets `broker_epoch` to the passed value.
-    ///
-    /// The broker epoch.
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_broker_epoch(mut self, value: i64) -> Self {
-        self.broker_epoch = value;
-        self
-    }
-    /// Sets `current_metadata_offset` to the passed value.
-    ///
-    /// The highest metadata offset which the broker has reached.
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_current_metadata_offset(mut self, value: i64) -> Self {
-        self.current_metadata_offset = value;
-        self
-    }
-    /// Sets `want_fence` to the passed value.
-    ///
-    /// True if the broker wants to be fenced, false otherwise.
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_want_fence(mut self, value: bool) -> Self {
-        self.want_fence = value;
-        self
-    }
-    /// Sets `want_shut_down` to the passed value.
-    ///
-    /// True if the broker wants to be shut down, false otherwise.
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_want_shut_down(mut self, value: bool) -> Self {
-        self.want_shut_down = value;
-        self
-    }
-    /// Sets `offline_log_dirs` to the passed value.
-    ///
-    /// Log directories that failed and went offline.
-    ///
-    /// Supported API versions: 1
-    pub fn with_offline_log_dirs(mut self, value: Vec<Uuid>) -> Self {
-        self.offline_log_dirs = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for BrokerHeartbeatRequest {
+    type Builder = BrokerHeartbeatRequestBuilder;
+
+    fn builder() -> Self::Builder {
+        BrokerHeartbeatRequestBuilder::default()
     }
 }
 

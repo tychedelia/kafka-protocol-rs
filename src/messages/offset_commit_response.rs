@@ -13,14 +13,15 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
-    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
-    StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-9
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct OffsetCommitResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
@@ -36,34 +37,11 @@ pub struct OffsetCommitResponse {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl OffsetCommitResponse {
-    /// Sets `throttle_time_ms` to the passed value.
-    ///
-    /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
-    ///
-    /// Supported API versions: 3-9
-    pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
-        self.throttle_time_ms = value;
-        self
-    }
-    /// Sets `topics` to the passed value.
-    ///
-    /// The responses for each topic.
-    ///
-    /// Supported API versions: 0-9
-    pub fn with_topics(mut self, value: Vec<OffsetCommitResponseTopic>) -> Self {
-        self.topics = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for OffsetCommitResponse {
+    type Builder = OffsetCommitResponseBuilder;
+
+    fn builder() -> Self::Builder {
+        OffsetCommitResponseBuilder::default()
     }
 }
 
@@ -165,7 +143,8 @@ impl Message for OffsetCommitResponse {
 
 /// Valid versions: 0-9
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct OffsetCommitResponsePartition {
     /// The partition index.
     ///
@@ -181,34 +160,11 @@ pub struct OffsetCommitResponsePartition {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl OffsetCommitResponsePartition {
-    /// Sets `partition_index` to the passed value.
-    ///
-    /// The partition index.
-    ///
-    /// Supported API versions: 0-9
-    pub fn with_partition_index(mut self, value: i32) -> Self {
-        self.partition_index = value;
-        self
-    }
-    /// Sets `error_code` to the passed value.
-    ///
-    /// The error code, or 0 if there was no error.
-    ///
-    /// Supported API versions: 0-9
-    pub fn with_error_code(mut self, value: i16) -> Self {
-        self.error_code = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for OffsetCommitResponsePartition {
+    type Builder = OffsetCommitResponsePartitionBuilder;
+
+    fn builder() -> Self::Builder {
+        OffsetCommitResponsePartitionBuilder::default()
     }
 }
 
@@ -289,7 +245,8 @@ impl Message for OffsetCommitResponsePartition {
 
 /// Valid versions: 0-9
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct OffsetCommitResponseTopic {
     /// The topic name.
     ///
@@ -305,34 +262,11 @@ pub struct OffsetCommitResponseTopic {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl OffsetCommitResponseTopic {
-    /// Sets `name` to the passed value.
-    ///
-    /// The topic name.
-    ///
-    /// Supported API versions: 0-9
-    pub fn with_name(mut self, value: super::TopicName) -> Self {
-        self.name = value;
-        self
-    }
-    /// Sets `partitions` to the passed value.
-    ///
-    /// The responses for each partition in the topic.
-    ///
-    /// Supported API versions: 0-9
-    pub fn with_partitions(mut self, value: Vec<OffsetCommitResponsePartition>) -> Self {
-        self.partitions = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for OffsetCommitResponseTopic {
+    type Builder = OffsetCommitResponseTopicBuilder;
+
+    fn builder() -> Self::Builder {
+        OffsetCommitResponseTopicBuilder::default()
     }
 }
 

@@ -13,14 +13,15 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
-    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
-    StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct DescribeUserScramCredentialsRequest {
     /// The users to describe, or null/empty to describe all users.
     ///
@@ -31,25 +32,11 @@ pub struct DescribeUserScramCredentialsRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl DescribeUserScramCredentialsRequest {
-    /// Sets `users` to the passed value.
-    ///
-    /// The users to describe, or null/empty to describe all users.
-    ///
-    /// Supported API versions: 0
-    pub fn with_users(mut self, value: Option<Vec<UserName>>) -> Self {
-        self.users = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for DescribeUserScramCredentialsRequest {
+    type Builder = DescribeUserScramCredentialsRequestBuilder;
+
+    fn builder() -> Self::Builder {
+        DescribeUserScramCredentialsRequestBuilder::default()
     }
 }
 
@@ -119,7 +106,8 @@ impl Message for DescribeUserScramCredentialsRequest {
 
 /// Valid versions: 0
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct UserName {
     /// The user name.
     ///
@@ -130,25 +118,11 @@ pub struct UserName {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl UserName {
-    /// Sets `name` to the passed value.
-    ///
-    /// The user name.
-    ///
-    /// Supported API versions: 0
-    pub fn with_name(mut self, value: StrBytes) -> Self {
-        self.name = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for UserName {
+    type Builder = UserNameBuilder;
+
+    fn builder() -> Self::Builder {
+        UserNameBuilder::default()
     }
 }
 

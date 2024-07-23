@@ -13,14 +13,15 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
-    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
-    StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-4
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct AddPartitionsToTxnRequest {
     /// List of transactions to add partitions to.
     ///
@@ -51,67 +52,11 @@ pub struct AddPartitionsToTxnRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl AddPartitionsToTxnRequest {
-    /// Sets `transactions` to the passed value.
-    ///
-    /// List of transactions to add partitions to.
-    ///
-    /// Supported API versions: 4
-    pub fn with_transactions(
-        mut self,
-        value: indexmap::IndexMap<super::TransactionalId, AddPartitionsToTxnTransaction>,
-    ) -> Self {
-        self.transactions = value;
-        self
-    }
-    /// Sets `v3_and_below_transactional_id` to the passed value.
-    ///
-    /// The transactional id corresponding to the transaction.
-    ///
-    /// Supported API versions: 0-3
-    pub fn with_v3_and_below_transactional_id(mut self, value: super::TransactionalId) -> Self {
-        self.v3_and_below_transactional_id = value;
-        self
-    }
-    /// Sets `v3_and_below_producer_id` to the passed value.
-    ///
-    /// Current producer id in use by the transactional id.
-    ///
-    /// Supported API versions: 0-3
-    pub fn with_v3_and_below_producer_id(mut self, value: super::ProducerId) -> Self {
-        self.v3_and_below_producer_id = value;
-        self
-    }
-    /// Sets `v3_and_below_producer_epoch` to the passed value.
-    ///
-    /// Current epoch associated with the producer id.
-    ///
-    /// Supported API versions: 0-3
-    pub fn with_v3_and_below_producer_epoch(mut self, value: i16) -> Self {
-        self.v3_and_below_producer_epoch = value;
-        self
-    }
-    /// Sets `v3_and_below_topics` to the passed value.
-    ///
-    /// The partitions to add to the transaction.
-    ///
-    /// Supported API versions: 0-3
-    pub fn with_v3_and_below_topics(
-        mut self,
-        value: indexmap::IndexMap<super::TopicName, AddPartitionsToTxnTopic>,
-    ) -> Self {
-        self.v3_and_below_topics = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for AddPartitionsToTxnRequest {
+    type Builder = AddPartitionsToTxnRequestBuilder;
+
+    fn builder() -> Self::Builder {
+        AddPartitionsToTxnRequestBuilder::default()
     }
 }
 
@@ -316,7 +261,8 @@ impl Message for AddPartitionsToTxnRequest {
 
 /// Valid versions: 0-4
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct AddPartitionsToTxnTopic {
     /// The partition indexes to add to the transaction
     ///
@@ -327,25 +273,11 @@ pub struct AddPartitionsToTxnTopic {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl AddPartitionsToTxnTopic {
-    /// Sets `partitions` to the passed value.
-    ///
-    /// The partition indexes to add to the transaction
-    ///
-    /// Supported API versions: 0-4
-    pub fn with_partitions(mut self, value: Vec<i32>) -> Self {
-        self.partitions = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for AddPartitionsToTxnTopic {
+    type Builder = AddPartitionsToTxnTopicBuilder;
+
+    fn builder() -> Self::Builder {
+        AddPartitionsToTxnTopicBuilder::default()
     }
 }
 
@@ -458,7 +390,8 @@ impl Message for AddPartitionsToTxnTopic {
 
 /// Valid versions: 0-4
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct AddPartitionsToTxnTransaction {
     /// Current producer id in use by the transactional id.
     ///
@@ -484,55 +417,11 @@ pub struct AddPartitionsToTxnTransaction {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl AddPartitionsToTxnTransaction {
-    /// Sets `producer_id` to the passed value.
-    ///
-    /// Current producer id in use by the transactional id.
-    ///
-    /// Supported API versions: 4
-    pub fn with_producer_id(mut self, value: super::ProducerId) -> Self {
-        self.producer_id = value;
-        self
-    }
-    /// Sets `producer_epoch` to the passed value.
-    ///
-    /// Current epoch associated with the producer id.
-    ///
-    /// Supported API versions: 4
-    pub fn with_producer_epoch(mut self, value: i16) -> Self {
-        self.producer_epoch = value;
-        self
-    }
-    /// Sets `verify_only` to the passed value.
-    ///
-    /// Boolean to signify if we want to check if the partition is in the transaction rather than add it.
-    ///
-    /// Supported API versions: 4
-    pub fn with_verify_only(mut self, value: bool) -> Self {
-        self.verify_only = value;
-        self
-    }
-    /// Sets `topics` to the passed value.
-    ///
-    /// The partitions to add to the transaction.
-    ///
-    /// Supported API versions: 4
-    pub fn with_topics(
-        mut self,
-        value: indexmap::IndexMap<super::TopicName, AddPartitionsToTxnTopic>,
-    ) -> Self {
-        self.topics = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for AddPartitionsToTxnTransaction {
+    type Builder = AddPartitionsToTxnTransactionBuilder;
+
+    fn builder() -> Self::Builder {
+        AddPartitionsToTxnTransactionBuilder::default()
     }
 }
 

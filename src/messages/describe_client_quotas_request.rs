@@ -13,14 +13,15 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
-    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
-    StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-1
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct ComponentData {
     /// The entity type that the filter component applies to.
     ///
@@ -41,43 +42,11 @@ pub struct ComponentData {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl ComponentData {
-    /// Sets `entity_type` to the passed value.
-    ///
-    /// The entity type that the filter component applies to.
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_entity_type(mut self, value: StrBytes) -> Self {
-        self.entity_type = value;
-        self
-    }
-    /// Sets `match_type` to the passed value.
-    ///
-    /// How to match the entity {0 = exact name, 1 = default name, 2 = any specified name}.
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_match_type(mut self, value: i8) -> Self {
-        self.match_type = value;
-        self
-    }
-    /// Sets `_match` to the passed value.
-    ///
-    /// The string to match against, or null if unused for the match type.
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_match(mut self, value: Option<StrBytes>) -> Self {
-        self._match = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for ComponentData {
+    type Builder = ComponentDataBuilder;
+
+    fn builder() -> Self::Builder {
+        ComponentDataBuilder::default()
     }
 }
 
@@ -187,7 +156,8 @@ impl Message for ComponentData {
 
 /// Valid versions: 0-1
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct DescribeClientQuotasRequest {
     /// Filter components to apply to quota entities.
     ///
@@ -203,34 +173,11 @@ pub struct DescribeClientQuotasRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl DescribeClientQuotasRequest {
-    /// Sets `components` to the passed value.
-    ///
-    /// Filter components to apply to quota entities.
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_components(mut self, value: Vec<ComponentData>) -> Self {
-        self.components = value;
-        self
-    }
-    /// Sets `strict` to the passed value.
-    ///
-    /// Whether the match is strict, i.e. should exclude entities with unspecified entity types.
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_strict(mut self, value: bool) -> Self {
-        self.strict = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for DescribeClientQuotasRequest {
+    type Builder = DescribeClientQuotasRequestBuilder;
+
+    fn builder() -> Self::Builder {
+        DescribeClientQuotasRequestBuilder::default()
     }
 }
 

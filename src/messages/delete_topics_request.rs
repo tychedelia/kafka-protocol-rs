@@ -13,14 +13,15 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
-    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
-    StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-6
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct DeleteTopicState {
     /// The topic name
     ///
@@ -36,34 +37,11 @@ pub struct DeleteTopicState {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl DeleteTopicState {
-    /// Sets `name` to the passed value.
-    ///
-    /// The topic name
-    ///
-    /// Supported API versions: 6
-    pub fn with_name(mut self, value: Option<super::TopicName>) -> Self {
-        self.name = value;
-        self
-    }
-    /// Sets `topic_id` to the passed value.
-    ///
-    /// The unique topic ID
-    ///
-    /// Supported API versions: 6
-    pub fn with_topic_id(mut self, value: Uuid) -> Self {
-        self.topic_id = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for DeleteTopicState {
+    type Builder = DeleteTopicStateBuilder;
+
+    fn builder() -> Self::Builder {
+        DeleteTopicStateBuilder::default()
     }
 }
 
@@ -176,7 +154,8 @@ impl Message for DeleteTopicState {
 
 /// Valid versions: 0-6
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct DeleteTopicsRequest {
     /// The name or topic ID of the topic
     ///
@@ -197,43 +176,11 @@ pub struct DeleteTopicsRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl DeleteTopicsRequest {
-    /// Sets `topics` to the passed value.
-    ///
-    /// The name or topic ID of the topic
-    ///
-    /// Supported API versions: 6
-    pub fn with_topics(mut self, value: Vec<DeleteTopicState>) -> Self {
-        self.topics = value;
-        self
-    }
-    /// Sets `topic_names` to the passed value.
-    ///
-    /// The names of the topics to delete
-    ///
-    /// Supported API versions: 0-5
-    pub fn with_topic_names(mut self, value: Vec<super::TopicName>) -> Self {
-        self.topic_names = value;
-        self
-    }
-    /// Sets `timeout_ms` to the passed value.
-    ///
-    /// The length of time in milliseconds to wait for the deletions to complete.
-    ///
-    /// Supported API versions: 0-6
-    pub fn with_timeout_ms(mut self, value: i32) -> Self {
-        self.timeout_ms = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for DeleteTopicsRequest {
+    type Builder = DeleteTopicsRequestBuilder;
+
+    fn builder() -> Self::Builder {
+        DeleteTopicsRequestBuilder::default()
     }
 }
 

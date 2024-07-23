@@ -13,14 +13,15 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
-    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
-    StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-1
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct ResponseHeader {
     /// The correlation ID of this response.
     ///
@@ -31,25 +32,11 @@ pub struct ResponseHeader {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl ResponseHeader {
-    /// Sets `correlation_id` to the passed value.
-    ///
-    /// The correlation ID of this response.
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_correlation_id(mut self, value: i32) -> Self {
-        self.correlation_id = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for ResponseHeader {
+    type Builder = ResponseHeaderBuilder;
+
+    fn builder() -> Self::Builder {
+        ResponseHeaderBuilder::default()
     }
 }
 

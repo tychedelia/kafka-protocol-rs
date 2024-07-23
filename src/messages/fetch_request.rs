@@ -13,14 +13,15 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
-    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
-    StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-16
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct FetchPartition {
     /// The partition index.
     ///
@@ -56,70 +57,11 @@ pub struct FetchPartition {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl FetchPartition {
-    /// Sets `partition` to the passed value.
-    ///
-    /// The partition index.
-    ///
-    /// Supported API versions: 0-16
-    pub fn with_partition(mut self, value: i32) -> Self {
-        self.partition = value;
-        self
-    }
-    /// Sets `current_leader_epoch` to the passed value.
-    ///
-    /// The current leader epoch of the partition.
-    ///
-    /// Supported API versions: 9-16
-    pub fn with_current_leader_epoch(mut self, value: i32) -> Self {
-        self.current_leader_epoch = value;
-        self
-    }
-    /// Sets `fetch_offset` to the passed value.
-    ///
-    /// The message offset.
-    ///
-    /// Supported API versions: 0-16
-    pub fn with_fetch_offset(mut self, value: i64) -> Self {
-        self.fetch_offset = value;
-        self
-    }
-    /// Sets `last_fetched_epoch` to the passed value.
-    ///
-    /// The epoch of the last fetched record or -1 if there is none
-    ///
-    /// Supported API versions: 12-16
-    pub fn with_last_fetched_epoch(mut self, value: i32) -> Self {
-        self.last_fetched_epoch = value;
-        self
-    }
-    /// Sets `log_start_offset` to the passed value.
-    ///
-    /// The earliest available offset of the follower replica.  The field is only used when the request is sent by the follower.
-    ///
-    /// Supported API versions: 5-16
-    pub fn with_log_start_offset(mut self, value: i64) -> Self {
-        self.log_start_offset = value;
-        self
-    }
-    /// Sets `partition_max_bytes` to the passed value.
-    ///
-    /// The maximum bytes to fetch from this partition.  See KIP-74 for cases where this limit may not be honored.
-    ///
-    /// Supported API versions: 0-16
-    pub fn with_partition_max_bytes(mut self, value: i32) -> Self {
-        self.partition_max_bytes = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for FetchPartition {
+    type Builder = FetchPartitionBuilder;
+
+    fn builder() -> Self::Builder {
+        FetchPartitionBuilder::default()
     }
 }
 
@@ -252,7 +194,8 @@ impl Message for FetchPartition {
 
 /// Valid versions: 0-16
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct FetchRequest {
     /// The clusterId if known. This is used to validate metadata fetches prior to broker registration.
     ///
@@ -318,124 +261,11 @@ pub struct FetchRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl FetchRequest {
-    /// Sets `cluster_id` to the passed value.
-    ///
-    /// The clusterId if known. This is used to validate metadata fetches prior to broker registration.
-    ///
-    /// Supported API versions: 12-16
-    pub fn with_cluster_id(mut self, value: Option<StrBytes>) -> Self {
-        self.cluster_id = value;
-        self
-    }
-    /// Sets `replica_id` to the passed value.
-    ///
-    /// The broker ID of the follower, of -1 if this request is from a consumer.
-    ///
-    /// Supported API versions: 0-14
-    pub fn with_replica_id(mut self, value: super::BrokerId) -> Self {
-        self.replica_id = value;
-        self
-    }
-    /// Sets `replica_state` to the passed value.
-    ///
-    ///
-    ///
-    /// Supported API versions: 15-16
-    pub fn with_replica_state(mut self, value: ReplicaState) -> Self {
-        self.replica_state = value;
-        self
-    }
-    /// Sets `max_wait_ms` to the passed value.
-    ///
-    /// The maximum time in milliseconds to wait for the response.
-    ///
-    /// Supported API versions: 0-16
-    pub fn with_max_wait_ms(mut self, value: i32) -> Self {
-        self.max_wait_ms = value;
-        self
-    }
-    /// Sets `min_bytes` to the passed value.
-    ///
-    /// The minimum bytes to accumulate in the response.
-    ///
-    /// Supported API versions: 0-16
-    pub fn with_min_bytes(mut self, value: i32) -> Self {
-        self.min_bytes = value;
-        self
-    }
-    /// Sets `max_bytes` to the passed value.
-    ///
-    /// The maximum bytes to fetch.  See KIP-74 for cases where this limit may not be honored.
-    ///
-    /// Supported API versions: 3-16
-    pub fn with_max_bytes(mut self, value: i32) -> Self {
-        self.max_bytes = value;
-        self
-    }
-    /// Sets `isolation_level` to the passed value.
-    ///
-    /// This setting controls the visibility of transactional records. Using READ_UNCOMMITTED (isolation_level = 0) makes all records visible. With READ_COMMITTED (isolation_level = 1), non-transactional and COMMITTED transactional records are visible. To be more concrete, READ_COMMITTED returns all data from offsets smaller than the current LSO (last stable offset), and enables the inclusion of the list of aborted transactions in the result, which allows consumers to discard ABORTED transactional records
-    ///
-    /// Supported API versions: 4-16
-    pub fn with_isolation_level(mut self, value: i8) -> Self {
-        self.isolation_level = value;
-        self
-    }
-    /// Sets `session_id` to the passed value.
-    ///
-    /// The fetch session ID.
-    ///
-    /// Supported API versions: 7-16
-    pub fn with_session_id(mut self, value: i32) -> Self {
-        self.session_id = value;
-        self
-    }
-    /// Sets `session_epoch` to the passed value.
-    ///
-    /// The fetch session epoch, which is used for ordering requests in a session.
-    ///
-    /// Supported API versions: 7-16
-    pub fn with_session_epoch(mut self, value: i32) -> Self {
-        self.session_epoch = value;
-        self
-    }
-    /// Sets `topics` to the passed value.
-    ///
-    /// The topics to fetch.
-    ///
-    /// Supported API versions: 0-16
-    pub fn with_topics(mut self, value: Vec<FetchTopic>) -> Self {
-        self.topics = value;
-        self
-    }
-    /// Sets `forgotten_topics_data` to the passed value.
-    ///
-    /// In an incremental fetch request, the partitions to remove.
-    ///
-    /// Supported API versions: 7-16
-    pub fn with_forgotten_topics_data(mut self, value: Vec<ForgottenTopic>) -> Self {
-        self.forgotten_topics_data = value;
-        self
-    }
-    /// Sets `rack_id` to the passed value.
-    ///
-    /// Rack ID of the consumer making this request
-    ///
-    /// Supported API versions: 11-16
-    pub fn with_rack_id(mut self, value: StrBytes) -> Self {
-        self.rack_id = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for FetchRequest {
+    type Builder = FetchRequestBuilder;
+
+    fn builder() -> Self::Builder {
+        FetchRequestBuilder::default()
     }
 }
 
@@ -756,7 +586,8 @@ impl Message for FetchRequest {
 
 /// Valid versions: 0-16
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct FetchTopic {
     /// The name of the topic to fetch.
     ///
@@ -777,43 +608,11 @@ pub struct FetchTopic {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl FetchTopic {
-    /// Sets `topic` to the passed value.
-    ///
-    /// The name of the topic to fetch.
-    ///
-    /// Supported API versions: 0-12
-    pub fn with_topic(mut self, value: super::TopicName) -> Self {
-        self.topic = value;
-        self
-    }
-    /// Sets `topic_id` to the passed value.
-    ///
-    /// The unique topic ID
-    ///
-    /// Supported API versions: 13-16
-    pub fn with_topic_id(mut self, value: Uuid) -> Self {
-        self.topic_id = value;
-        self
-    }
-    /// Sets `partitions` to the passed value.
-    ///
-    /// The partitions to fetch.
-    ///
-    /// Supported API versions: 0-16
-    pub fn with_partitions(mut self, value: Vec<FetchPartition>) -> Self {
-        self.partitions = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for FetchTopic {
+    type Builder = FetchTopicBuilder;
+
+    fn builder() -> Self::Builder {
+        FetchTopicBuilder::default()
     }
 }
 
@@ -940,7 +739,8 @@ impl Message for FetchTopic {
 
 /// Valid versions: 0-16
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct ForgottenTopic {
     /// The topic name.
     ///
@@ -961,43 +761,11 @@ pub struct ForgottenTopic {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl ForgottenTopic {
-    /// Sets `topic` to the passed value.
-    ///
-    /// The topic name.
-    ///
-    /// Supported API versions: 7-12
-    pub fn with_topic(mut self, value: super::TopicName) -> Self {
-        self.topic = value;
-        self
-    }
-    /// Sets `topic_id` to the passed value.
-    ///
-    /// The unique topic ID
-    ///
-    /// Supported API versions: 13-16
-    pub fn with_topic_id(mut self, value: Uuid) -> Self {
-        self.topic_id = value;
-        self
-    }
-    /// Sets `partitions` to the passed value.
-    ///
-    /// The partitions indexes to forget.
-    ///
-    /// Supported API versions: 7-16
-    pub fn with_partitions(mut self, value: Vec<i32>) -> Self {
-        self.partitions = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for ForgottenTopic {
+    type Builder = ForgottenTopicBuilder;
+
+    fn builder() -> Self::Builder {
+        ForgottenTopicBuilder::default()
     }
 }
 
@@ -1139,7 +907,8 @@ impl Message for ForgottenTopic {
 
 /// Valid versions: 0-16
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct ReplicaState {
     /// The replica ID of the follower, or -1 if this request is from a consumer.
     ///
@@ -1155,34 +924,11 @@ pub struct ReplicaState {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl ReplicaState {
-    /// Sets `replica_id` to the passed value.
-    ///
-    /// The replica ID of the follower, or -1 if this request is from a consumer.
-    ///
-    /// Supported API versions: 15-16
-    pub fn with_replica_id(mut self, value: super::BrokerId) -> Self {
-        self.replica_id = value;
-        self
-    }
-    /// Sets `replica_epoch` to the passed value.
-    ///
-    /// The epoch of this follower, or -1 if not available.
-    ///
-    /// Supported API versions: 15-16
-    pub fn with_replica_epoch(mut self, value: i64) -> Self {
-        self.replica_epoch = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for ReplicaState {
+    type Builder = ReplicaStateBuilder;
+
+    fn builder() -> Self::Builder {
+        ReplicaStateBuilder::default()
     }
 }
 

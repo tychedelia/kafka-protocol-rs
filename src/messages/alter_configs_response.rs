@@ -13,14 +13,15 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
-    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
-    StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-2
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct AlterConfigsResourceResponse {
     /// The resource error code.
     ///
@@ -46,52 +47,11 @@ pub struct AlterConfigsResourceResponse {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl AlterConfigsResourceResponse {
-    /// Sets `error_code` to the passed value.
-    ///
-    /// The resource error code.
-    ///
-    /// Supported API versions: 0-2
-    pub fn with_error_code(mut self, value: i16) -> Self {
-        self.error_code = value;
-        self
-    }
-    /// Sets `error_message` to the passed value.
-    ///
-    /// The resource error message, or null if there was no error.
-    ///
-    /// Supported API versions: 0-2
-    pub fn with_error_message(mut self, value: Option<StrBytes>) -> Self {
-        self.error_message = value;
-        self
-    }
-    /// Sets `resource_type` to the passed value.
-    ///
-    /// The resource type.
-    ///
-    /// Supported API versions: 0-2
-    pub fn with_resource_type(mut self, value: i8) -> Self {
-        self.resource_type = value;
-        self
-    }
-    /// Sets `resource_name` to the passed value.
-    ///
-    /// The resource name.
-    ///
-    /// Supported API versions: 0-2
-    pub fn with_resource_name(mut self, value: StrBytes) -> Self {
-        self.resource_name = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for AlterConfigsResourceResponse {
+    type Builder = AlterConfigsResourceResponseBuilder;
+
+    fn builder() -> Self::Builder {
+        AlterConfigsResourceResponseBuilder::default()
     }
 }
 
@@ -206,7 +166,8 @@ impl Message for AlterConfigsResourceResponse {
 
 /// Valid versions: 0-2
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct AlterConfigsResponse {
     /// Duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
@@ -222,34 +183,11 @@ pub struct AlterConfigsResponse {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl AlterConfigsResponse {
-    /// Sets `throttle_time_ms` to the passed value.
-    ///
-    /// Duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
-    ///
-    /// Supported API versions: 0-2
-    pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
-        self.throttle_time_ms = value;
-        self
-    }
-    /// Sets `responses` to the passed value.
-    ///
-    /// The responses for each resource.
-    ///
-    /// Supported API versions: 0-2
-    pub fn with_responses(mut self, value: Vec<AlterConfigsResourceResponse>) -> Self {
-        self.responses = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for AlterConfigsResponse {
+    type Builder = AlterConfigsResponseBuilder;
+
+    fn builder() -> Self::Builder {
+        AlterConfigsResponseBuilder::default()
     }
 }
 

@@ -13,14 +13,15 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
-    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
-    StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-1
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct DescribeClusterRequest {
     /// Whether to include cluster authorized operations.
     ///
@@ -36,34 +37,11 @@ pub struct DescribeClusterRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl DescribeClusterRequest {
-    /// Sets `include_cluster_authorized_operations` to the passed value.
-    ///
-    /// Whether to include cluster authorized operations.
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_include_cluster_authorized_operations(mut self, value: bool) -> Self {
-        self.include_cluster_authorized_operations = value;
-        self
-    }
-    /// Sets `endpoint_type` to the passed value.
-    ///
-    /// The endpoint type to describe. 1=brokers, 2=controllers.
-    ///
-    /// Supported API versions: 1
-    pub fn with_endpoint_type(mut self, value: i8) -> Self {
-        self.endpoint_type = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for DescribeClusterRequest {
+    type Builder = DescribeClusterRequestBuilder;
+
+    fn builder() -> Self::Builder {
+        DescribeClusterRequestBuilder::default()
     }
 }
 

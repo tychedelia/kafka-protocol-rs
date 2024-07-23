@@ -13,14 +13,15 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
-    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
-    StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-10
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct PartitionProduceData {
     /// The partition index.
     ///
@@ -36,34 +37,11 @@ pub struct PartitionProduceData {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl PartitionProduceData {
-    /// Sets `index` to the passed value.
-    ///
-    /// The partition index.
-    ///
-    /// Supported API versions: 0-10
-    pub fn with_index(mut self, value: i32) -> Self {
-        self.index = value;
-        self
-    }
-    /// Sets `records` to the passed value.
-    ///
-    /// The record data to be produced.
-    ///
-    /// Supported API versions: 0-10
-    pub fn with_records(mut self, value: Option<Bytes>) -> Self {
-        self.records = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for PartitionProduceData {
+    type Builder = PartitionProduceDataBuilder;
+
+    fn builder() -> Self::Builder {
+        PartitionProduceDataBuilder::default()
     }
 }
 
@@ -156,7 +134,8 @@ impl Message for PartitionProduceData {
 
 /// Valid versions: 0-10
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct ProduceRequest {
     /// The transactional ID, or null if the producer is not transactional.
     ///
@@ -182,55 +161,11 @@ pub struct ProduceRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl ProduceRequest {
-    /// Sets `transactional_id` to the passed value.
-    ///
-    /// The transactional ID, or null if the producer is not transactional.
-    ///
-    /// Supported API versions: 3-10
-    pub fn with_transactional_id(mut self, value: Option<super::TransactionalId>) -> Self {
-        self.transactional_id = value;
-        self
-    }
-    /// Sets `acks` to the passed value.
-    ///
-    /// The number of acknowledgments the producer requires the leader to have received before considering a request complete. Allowed values: 0 for no acknowledgments, 1 for only the leader and -1 for the full ISR.
-    ///
-    /// Supported API versions: 0-10
-    pub fn with_acks(mut self, value: i16) -> Self {
-        self.acks = value;
-        self
-    }
-    /// Sets `timeout_ms` to the passed value.
-    ///
-    /// The timeout to await a response in milliseconds.
-    ///
-    /// Supported API versions: 0-10
-    pub fn with_timeout_ms(mut self, value: i32) -> Self {
-        self.timeout_ms = value;
-        self
-    }
-    /// Sets `topic_data` to the passed value.
-    ///
-    /// Each topic to produce to.
-    ///
-    /// Supported API versions: 0-10
-    pub fn with_topic_data(
-        mut self,
-        value: indexmap::IndexMap<super::TopicName, TopicProduceData>,
-    ) -> Self {
-        self.topic_data = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for ProduceRequest {
+    type Builder = ProduceRequestBuilder;
+
+    fn builder() -> Self::Builder {
+        ProduceRequestBuilder::default()
     }
 }
 
@@ -362,7 +297,8 @@ impl Message for ProduceRequest {
 
 /// Valid versions: 0-10
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct TopicProduceData {
     /// Each partition to produce to.
     ///
@@ -373,25 +309,11 @@ pub struct TopicProduceData {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl TopicProduceData {
-    /// Sets `partition_data` to the passed value.
-    ///
-    /// Each partition to produce to.
-    ///
-    /// Supported API versions: 0-10
-    pub fn with_partition_data(mut self, value: Vec<PartitionProduceData>) -> Self {
-        self.partition_data = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for TopicProduceData {
+    type Builder = TopicProduceDataBuilder;
+
+    fn builder() -> Self::Builder {
+        TopicProduceDataBuilder::default()
     }
 }
 

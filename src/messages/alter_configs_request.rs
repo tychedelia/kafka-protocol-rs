@@ -13,14 +13,15 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
-    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
-    StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-2
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct AlterConfigsRequest {
     /// The updates for each resource.
     ///
@@ -36,34 +37,11 @@ pub struct AlterConfigsRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl AlterConfigsRequest {
-    /// Sets `resources` to the passed value.
-    ///
-    /// The updates for each resource.
-    ///
-    /// Supported API versions: 0-2
-    pub fn with_resources(mut self, value: Vec<AlterConfigsResource>) -> Self {
-        self.resources = value;
-        self
-    }
-    /// Sets `validate_only` to the passed value.
-    ///
-    /// True if we should validate the request, but not change the configurations.
-    ///
-    /// Supported API versions: 0-2
-    pub fn with_validate_only(mut self, value: bool) -> Self {
-        self.validate_only = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for AlterConfigsRequest {
+    type Builder = AlterConfigsRequestBuilder;
+
+    fn builder() -> Self::Builder {
+        AlterConfigsRequestBuilder::default()
     }
 }
 
@@ -157,7 +135,8 @@ impl Message for AlterConfigsRequest {
 
 /// Valid versions: 0-2
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct AlterConfigsResource {
     /// The resource type.
     ///
@@ -178,43 +157,11 @@ pub struct AlterConfigsResource {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl AlterConfigsResource {
-    /// Sets `resource_type` to the passed value.
-    ///
-    /// The resource type.
-    ///
-    /// Supported API versions: 0-2
-    pub fn with_resource_type(mut self, value: i8) -> Self {
-        self.resource_type = value;
-        self
-    }
-    /// Sets `resource_name` to the passed value.
-    ///
-    /// The resource name.
-    ///
-    /// Supported API versions: 0-2
-    pub fn with_resource_name(mut self, value: StrBytes) -> Self {
-        self.resource_name = value;
-        self
-    }
-    /// Sets `configs` to the passed value.
-    ///
-    /// The configurations.
-    ///
-    /// Supported API versions: 0-2
-    pub fn with_configs(mut self, value: indexmap::IndexMap<StrBytes, AlterableConfig>) -> Self {
-        self.configs = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for AlterConfigsResource {
+    type Builder = AlterConfigsResourceBuilder;
+
+    fn builder() -> Self::Builder {
+        AlterConfigsResourceBuilder::default()
     }
 }
 
@@ -325,7 +272,8 @@ impl Message for AlterConfigsResource {
 
 /// Valid versions: 0-2
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct AlterableConfig {
     /// The value to set for the configuration key.
     ///
@@ -336,25 +284,11 @@ pub struct AlterableConfig {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl AlterableConfig {
-    /// Sets `value` to the passed value.
-    ///
-    /// The value to set for the configuration key.
-    ///
-    /// Supported API versions: 0-2
-    pub fn with_value(mut self, value: Option<StrBytes>) -> Self {
-        self.value = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for AlterableConfig {
+    type Builder = AlterableConfigBuilder;
+
+    fn builder() -> Self::Builder {
+        AlterableConfigBuilder::default()
     }
 }
 

@@ -13,14 +13,15 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
-    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
-    StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-1
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct SaslHandshakeRequest {
     /// The SASL mechanism chosen by the client.
     ///
@@ -28,15 +29,11 @@ pub struct SaslHandshakeRequest {
     pub mechanism: StrBytes,
 }
 
-impl SaslHandshakeRequest {
-    /// Sets `mechanism` to the passed value.
-    ///
-    /// The SASL mechanism chosen by the client.
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_mechanism(mut self, value: StrBytes) -> Self {
-        self.mechanism = value;
-        self
+impl Builder for SaslHandshakeRequest {
+    type Builder = SaslHandshakeRequestBuilder;
+
+    fn builder() -> Self::Builder {
+        SaslHandshakeRequestBuilder::default()
     }
 }
 

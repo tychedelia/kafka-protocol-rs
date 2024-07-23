@@ -13,14 +13,15 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
-    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
-    StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-7
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct CreatableTopicConfigs {
     /// The configuration name.
     ///
@@ -51,61 +52,11 @@ pub struct CreatableTopicConfigs {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl CreatableTopicConfigs {
-    /// Sets `name` to the passed value.
-    ///
-    /// The configuration name.
-    ///
-    /// Supported API versions: 5-7
-    pub fn with_name(mut self, value: StrBytes) -> Self {
-        self.name = value;
-        self
-    }
-    /// Sets `value` to the passed value.
-    ///
-    /// The configuration value.
-    ///
-    /// Supported API versions: 5-7
-    pub fn with_value(mut self, value: Option<StrBytes>) -> Self {
-        self.value = value;
-        self
-    }
-    /// Sets `read_only` to the passed value.
-    ///
-    /// True if the configuration is read-only.
-    ///
-    /// Supported API versions: 5-7
-    pub fn with_read_only(mut self, value: bool) -> Self {
-        self.read_only = value;
-        self
-    }
-    /// Sets `config_source` to the passed value.
-    ///
-    /// The configuration source.
-    ///
-    /// Supported API versions: 5-7
-    pub fn with_config_source(mut self, value: i8) -> Self {
-        self.config_source = value;
-        self
-    }
-    /// Sets `is_sensitive` to the passed value.
-    ///
-    /// True if this configuration is sensitive.
-    ///
-    /// Supported API versions: 5-7
-    pub fn with_is_sensitive(mut self, value: bool) -> Self {
-        self.is_sensitive = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for CreatableTopicConfigs {
+    type Builder = CreatableTopicConfigsBuilder;
+
+    fn builder() -> Self::Builder {
+        CreatableTopicConfigsBuilder::default()
     }
 }
 
@@ -283,7 +234,8 @@ impl Message for CreatableTopicConfigs {
 
 /// Valid versions: 0-7
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct CreatableTopicResult {
     /// The unique topic ID
     ///
@@ -324,79 +276,11 @@ pub struct CreatableTopicResult {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl CreatableTopicResult {
-    /// Sets `topic_id` to the passed value.
-    ///
-    /// The unique topic ID
-    ///
-    /// Supported API versions: 7
-    pub fn with_topic_id(mut self, value: Uuid) -> Self {
-        self.topic_id = value;
-        self
-    }
-    /// Sets `error_code` to the passed value.
-    ///
-    /// The error code, or 0 if there was no error.
-    ///
-    /// Supported API versions: 0-7
-    pub fn with_error_code(mut self, value: i16) -> Self {
-        self.error_code = value;
-        self
-    }
-    /// Sets `error_message` to the passed value.
-    ///
-    /// The error message, or null if there was no error.
-    ///
-    /// Supported API versions: 1-7
-    pub fn with_error_message(mut self, value: Option<StrBytes>) -> Self {
-        self.error_message = value;
-        self
-    }
-    /// Sets `topic_config_error_code` to the passed value.
-    ///
-    /// Optional topic config error returned if configs are not returned in the response.
-    ///
-    /// Supported API versions: 5-7
-    pub fn with_topic_config_error_code(mut self, value: i16) -> Self {
-        self.topic_config_error_code = value;
-        self
-    }
-    /// Sets `num_partitions` to the passed value.
-    ///
-    /// Number of partitions of the topic.
-    ///
-    /// Supported API versions: 5-7
-    pub fn with_num_partitions(mut self, value: i32) -> Self {
-        self.num_partitions = value;
-        self
-    }
-    /// Sets `replication_factor` to the passed value.
-    ///
-    /// Replication factor of the topic.
-    ///
-    /// Supported API versions: 5-7
-    pub fn with_replication_factor(mut self, value: i16) -> Self {
-        self.replication_factor = value;
-        self
-    }
-    /// Sets `configs` to the passed value.
-    ///
-    /// Configuration of the topic.
-    ///
-    /// Supported API versions: 5-7
-    pub fn with_configs(mut self, value: Option<Vec<CreatableTopicConfigs>>) -> Self {
-        self.configs = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for CreatableTopicResult {
+    type Builder = CreatableTopicResultBuilder;
+
+    fn builder() -> Self::Builder {
+        CreatableTopicResultBuilder::default()
     }
 }
 
@@ -615,7 +499,8 @@ impl Message for CreatableTopicResult {
 
 /// Valid versions: 0-7
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct CreateTopicsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
@@ -631,37 +516,11 @@ pub struct CreateTopicsResponse {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl CreateTopicsResponse {
-    /// Sets `throttle_time_ms` to the passed value.
-    ///
-    /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
-    ///
-    /// Supported API versions: 2-7
-    pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
-        self.throttle_time_ms = value;
-        self
-    }
-    /// Sets `topics` to the passed value.
-    ///
-    /// Results for each topic we tried to create.
-    ///
-    /// Supported API versions: 0-7
-    pub fn with_topics(
-        mut self,
-        value: indexmap::IndexMap<super::TopicName, CreatableTopicResult>,
-    ) -> Self {
-        self.topics = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for CreateTopicsResponse {
+    type Builder = CreateTopicsResponseBuilder;
+
+    fn builder() -> Self::Builder {
+        CreateTopicsResponseBuilder::default()
     }
 }
 

@@ -13,14 +13,15 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
-    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
-    StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-4
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct FindCoordinatorRequest {
     /// The coordinator key.
     ///
@@ -41,43 +42,11 @@ pub struct FindCoordinatorRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl FindCoordinatorRequest {
-    /// Sets `key` to the passed value.
-    ///
-    /// The coordinator key.
-    ///
-    /// Supported API versions: 0-3
-    pub fn with_key(mut self, value: StrBytes) -> Self {
-        self.key = value;
-        self
-    }
-    /// Sets `key_type` to the passed value.
-    ///
-    /// The coordinator key type. (Group, transaction, etc.)
-    ///
-    /// Supported API versions: 1-4
-    pub fn with_key_type(mut self, value: i8) -> Self {
-        self.key_type = value;
-        self
-    }
-    /// Sets `coordinator_keys` to the passed value.
-    ///
-    /// The coordinator keys.
-    ///
-    /// Supported API versions: 4
-    pub fn with_coordinator_keys(mut self, value: Vec<StrBytes>) -> Self {
-        self.coordinator_keys = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for FindCoordinatorRequest {
+    type Builder = FindCoordinatorRequestBuilder;
+
+    fn builder() -> Self::Builder {
+        FindCoordinatorRequestBuilder::default()
     }
 }
 

@@ -13,14 +13,15 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
-    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
-    StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-2
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct AlterReplicaLogDirPartitionResult {
     /// The partition index.
     ///
@@ -36,34 +37,11 @@ pub struct AlterReplicaLogDirPartitionResult {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl AlterReplicaLogDirPartitionResult {
-    /// Sets `partition_index` to the passed value.
-    ///
-    /// The partition index.
-    ///
-    /// Supported API versions: 0-2
-    pub fn with_partition_index(mut self, value: i32) -> Self {
-        self.partition_index = value;
-        self
-    }
-    /// Sets `error_code` to the passed value.
-    ///
-    /// The error code, or 0 if there was no error.
-    ///
-    /// Supported API versions: 0-2
-    pub fn with_error_code(mut self, value: i16) -> Self {
-        self.error_code = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for AlterReplicaLogDirPartitionResult {
+    type Builder = AlterReplicaLogDirPartitionResultBuilder;
+
+    fn builder() -> Self::Builder {
+        AlterReplicaLogDirPartitionResultBuilder::default()
     }
 }
 
@@ -144,7 +122,8 @@ impl Message for AlterReplicaLogDirPartitionResult {
 
 /// Valid versions: 0-2
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct AlterReplicaLogDirTopicResult {
     /// The name of the topic.
     ///
@@ -160,34 +139,11 @@ pub struct AlterReplicaLogDirTopicResult {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl AlterReplicaLogDirTopicResult {
-    /// Sets `topic_name` to the passed value.
-    ///
-    /// The name of the topic.
-    ///
-    /// Supported API versions: 0-2
-    pub fn with_topic_name(mut self, value: super::TopicName) -> Self {
-        self.topic_name = value;
-        self
-    }
-    /// Sets `partitions` to the passed value.
-    ///
-    /// The results for each partition.
-    ///
-    /// Supported API versions: 0-2
-    pub fn with_partitions(mut self, value: Vec<AlterReplicaLogDirPartitionResult>) -> Self {
-        self.partitions = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for AlterReplicaLogDirTopicResult {
+    type Builder = AlterReplicaLogDirTopicResultBuilder;
+
+    fn builder() -> Self::Builder {
+        AlterReplicaLogDirTopicResultBuilder::default()
     }
 }
 
@@ -293,7 +249,8 @@ impl Message for AlterReplicaLogDirTopicResult {
 
 /// Valid versions: 0-2
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct AlterReplicaLogDirsResponse {
     /// Duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
@@ -309,34 +266,11 @@ pub struct AlterReplicaLogDirsResponse {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl AlterReplicaLogDirsResponse {
-    /// Sets `throttle_time_ms` to the passed value.
-    ///
-    /// Duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
-    ///
-    /// Supported API versions: 0-2
-    pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
-        self.throttle_time_ms = value;
-        self
-    }
-    /// Sets `results` to the passed value.
-    ///
-    /// The results for each topic.
-    ///
-    /// Supported API versions: 0-2
-    pub fn with_results(mut self, value: Vec<AlterReplicaLogDirTopicResult>) -> Self {
-        self.results = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for AlterReplicaLogDirsResponse {
+    type Builder = AlterReplicaLogDirsResponseBuilder;
+
+    fn builder() -> Self::Builder {
+        AlterReplicaLogDirsResponseBuilder::default()
     }
 }
 

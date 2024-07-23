@@ -13,14 +13,15 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
-    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
-    StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-2
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct ElectLeadersResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
@@ -41,43 +42,11 @@ pub struct ElectLeadersResponse {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl ElectLeadersResponse {
-    /// Sets `throttle_time_ms` to the passed value.
-    ///
-    /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
-    ///
-    /// Supported API versions: 0-2
-    pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
-        self.throttle_time_ms = value;
-        self
-    }
-    /// Sets `error_code` to the passed value.
-    ///
-    /// The top level response error code.
-    ///
-    /// Supported API versions: 1-2
-    pub fn with_error_code(mut self, value: i16) -> Self {
-        self.error_code = value;
-        self
-    }
-    /// Sets `replica_election_results` to the passed value.
-    ///
-    /// The election results, or an empty array if the requester did not have permission and the request asks for all partitions.
-    ///
-    /// Supported API versions: 0-2
-    pub fn with_replica_election_results(mut self, value: Vec<ReplicaElectionResult>) -> Self {
-        self.replica_election_results = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for ElectLeadersResponse {
+    type Builder = ElectLeadersResponseBuilder;
+
+    fn builder() -> Self::Builder {
+        ElectLeadersResponseBuilder::default()
     }
 }
 
@@ -194,7 +163,8 @@ impl Message for ElectLeadersResponse {
 
 /// Valid versions: 0-2
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct PartitionResult {
     /// The partition id
     ///
@@ -215,43 +185,11 @@ pub struct PartitionResult {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl PartitionResult {
-    /// Sets `partition_id` to the passed value.
-    ///
-    /// The partition id
-    ///
-    /// Supported API versions: 0-2
-    pub fn with_partition_id(mut self, value: i32) -> Self {
-        self.partition_id = value;
-        self
-    }
-    /// Sets `error_code` to the passed value.
-    ///
-    /// The result error, or zero if there was no error.
-    ///
-    /// Supported API versions: 0-2
-    pub fn with_error_code(mut self, value: i16) -> Self {
-        self.error_code = value;
-        self
-    }
-    /// Sets `error_message` to the passed value.
-    ///
-    /// The result message, or null if there was no error.
-    ///
-    /// Supported API versions: 0-2
-    pub fn with_error_message(mut self, value: Option<StrBytes>) -> Self {
-        self.error_message = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for PartitionResult {
+    type Builder = PartitionResultBuilder;
+
+    fn builder() -> Self::Builder {
+        PartitionResultBuilder::default()
     }
 }
 
@@ -349,7 +287,8 @@ impl Message for PartitionResult {
 
 /// Valid versions: 0-2
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct ReplicaElectionResult {
     /// The topic name
     ///
@@ -365,34 +304,11 @@ pub struct ReplicaElectionResult {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl ReplicaElectionResult {
-    /// Sets `topic` to the passed value.
-    ///
-    /// The topic name
-    ///
-    /// Supported API versions: 0-2
-    pub fn with_topic(mut self, value: super::TopicName) -> Self {
-        self.topic = value;
-        self
-    }
-    /// Sets `partition_result` to the passed value.
-    ///
-    /// The results for each partition
-    ///
-    /// Supported API versions: 0-2
-    pub fn with_partition_result(mut self, value: Vec<PartitionResult>) -> Self {
-        self.partition_result = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for ReplicaElectionResult {
+    type Builder = ReplicaElectionResultBuilder;
+
+    fn builder() -> Self::Builder {
+        ReplicaElectionResultBuilder::default()
     }
 }
 

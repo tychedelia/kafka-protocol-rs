@@ -13,14 +13,15 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
-    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
-    StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-3
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct ApiVersion {
     /// The minimum supported version, inclusive.
     ///
@@ -36,34 +37,11 @@ pub struct ApiVersion {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl ApiVersion {
-    /// Sets `min_version` to the passed value.
-    ///
-    /// The minimum supported version, inclusive.
-    ///
-    /// Supported API versions: 0-3
-    pub fn with_min_version(mut self, value: i16) -> Self {
-        self.min_version = value;
-        self
-    }
-    /// Sets `max_version` to the passed value.
-    ///
-    /// The maximum supported version, inclusive.
-    ///
-    /// Supported API versions: 0-3
-    pub fn with_max_version(mut self, value: i16) -> Self {
-        self.max_version = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for ApiVersion {
+    type Builder = ApiVersionBuilder;
+
+    fn builder() -> Self::Builder {
+        ApiVersionBuilder::default()
     }
 }
 
@@ -157,7 +135,8 @@ impl Message for ApiVersion {
 
 /// Valid versions: 0-3
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct ApiVersionsResponse {
     /// The top-level error code.
     ///
@@ -198,85 +177,11 @@ pub struct ApiVersionsResponse {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl ApiVersionsResponse {
-    /// Sets `error_code` to the passed value.
-    ///
-    /// The top-level error code.
-    ///
-    /// Supported API versions: 0-3
-    pub fn with_error_code(mut self, value: i16) -> Self {
-        self.error_code = value;
-        self
-    }
-    /// Sets `api_keys` to the passed value.
-    ///
-    /// The APIs supported by the broker.
-    ///
-    /// Supported API versions: 0-3
-    pub fn with_api_keys(mut self, value: indexmap::IndexMap<i16, ApiVersion>) -> Self {
-        self.api_keys = value;
-        self
-    }
-    /// Sets `throttle_time_ms` to the passed value.
-    ///
-    /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
-    ///
-    /// Supported API versions: 1-3
-    pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
-        self.throttle_time_ms = value;
-        self
-    }
-    /// Sets `supported_features` to the passed value.
-    ///
-    /// Features supported by the broker.
-    ///
-    /// Supported API versions: 3
-    pub fn with_supported_features(
-        mut self,
-        value: indexmap::IndexMap<StrBytes, SupportedFeatureKey>,
-    ) -> Self {
-        self.supported_features = value;
-        self
-    }
-    /// Sets `finalized_features_epoch` to the passed value.
-    ///
-    /// The monotonically increasing epoch for the finalized features information. Valid values are >= 0. A value of -1 is special and represents unknown epoch.
-    ///
-    /// Supported API versions: 3
-    pub fn with_finalized_features_epoch(mut self, value: i64) -> Self {
-        self.finalized_features_epoch = value;
-        self
-    }
-    /// Sets `finalized_features` to the passed value.
-    ///
-    /// List of cluster-wide finalized features. The information is valid only if FinalizedFeaturesEpoch >= 0.
-    ///
-    /// Supported API versions: 3
-    pub fn with_finalized_features(
-        mut self,
-        value: indexmap::IndexMap<StrBytes, FinalizedFeatureKey>,
-    ) -> Self {
-        self.finalized_features = value;
-        self
-    }
-    /// Sets `zk_migration_ready` to the passed value.
-    ///
-    /// Set by a KRaft controller if the required configurations for ZK migration are present
-    ///
-    /// Supported API versions: 3
-    pub fn with_zk_migration_ready(mut self, value: bool) -> Self {
-        self.zk_migration_ready = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for ApiVersionsResponse {
+    type Builder = ApiVersionsResponseBuilder;
+
+    fn builder() -> Self::Builder {
+        ApiVersionsResponseBuilder::default()
     }
 }
 
@@ -539,7 +444,8 @@ impl Message for ApiVersionsResponse {
 
 /// Valid versions: 0-3
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct FinalizedFeatureKey {
     /// The cluster-wide finalized max version level for the feature.
     ///
@@ -555,34 +461,11 @@ pub struct FinalizedFeatureKey {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl FinalizedFeatureKey {
-    /// Sets `max_version_level` to the passed value.
-    ///
-    /// The cluster-wide finalized max version level for the feature.
-    ///
-    /// Supported API versions: 3
-    pub fn with_max_version_level(mut self, value: i16) -> Self {
-        self.max_version_level = value;
-        self
-    }
-    /// Sets `min_version_level` to the passed value.
-    ///
-    /// The cluster-wide finalized min version level for the feature.
-    ///
-    /// Supported API versions: 3
-    pub fn with_min_version_level(mut self, value: i16) -> Self {
-        self.min_version_level = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for FinalizedFeatureKey {
+    type Builder = FinalizedFeatureKeyBuilder;
+
+    fn builder() -> Self::Builder {
+        FinalizedFeatureKeyBuilder::default()
     }
 }
 
@@ -724,7 +607,8 @@ impl Message for FinalizedFeatureKey {
 
 /// Valid versions: 0-3
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct SupportedFeatureKey {
     /// The minimum supported version for the feature.
     ///
@@ -740,34 +624,11 @@ pub struct SupportedFeatureKey {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl SupportedFeatureKey {
-    /// Sets `min_version` to the passed value.
-    ///
-    /// The minimum supported version for the feature.
-    ///
-    /// Supported API versions: 3
-    pub fn with_min_version(mut self, value: i16) -> Self {
-        self.min_version = value;
-        self
-    }
-    /// Sets `max_version` to the passed value.
-    ///
-    /// The maximum supported version for the feature.
-    ///
-    /// Supported API versions: 3
-    pub fn with_max_version(mut self, value: i16) -> Self {
-        self.max_version = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for SupportedFeatureKey {
+    type Builder = SupportedFeatureKeyBuilder;
+
+    fn builder() -> Self::Builder {
+        SupportedFeatureKeyBuilder::default()
     }
 }
 

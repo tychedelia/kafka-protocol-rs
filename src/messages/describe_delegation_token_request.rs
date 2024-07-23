@@ -13,14 +13,15 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
-    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
-    StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-3
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct DescribeDelegationTokenOwner {
     /// The owner principal type.
     ///
@@ -36,34 +37,11 @@ pub struct DescribeDelegationTokenOwner {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl DescribeDelegationTokenOwner {
-    /// Sets `principal_type` to the passed value.
-    ///
-    /// The owner principal type.
-    ///
-    /// Supported API versions: 0-3
-    pub fn with_principal_type(mut self, value: StrBytes) -> Self {
-        self.principal_type = value;
-        self
-    }
-    /// Sets `principal_name` to the passed value.
-    ///
-    /// The owner principal name.
-    ///
-    /// Supported API versions: 0-3
-    pub fn with_principal_name(mut self, value: StrBytes) -> Self {
-        self.principal_name = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for DescribeDelegationTokenOwner {
+    type Builder = DescribeDelegationTokenOwnerBuilder;
+
+    fn builder() -> Self::Builder {
+        DescribeDelegationTokenOwnerBuilder::default()
     }
 }
 
@@ -168,7 +146,8 @@ impl Message for DescribeDelegationTokenOwner {
 
 /// Valid versions: 0-3
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct DescribeDelegationTokenRequest {
     /// Each owner that we want to describe delegation tokens for, or null to describe all tokens.
     ///
@@ -179,25 +158,11 @@ pub struct DescribeDelegationTokenRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl DescribeDelegationTokenRequest {
-    /// Sets `owners` to the passed value.
-    ///
-    /// Each owner that we want to describe delegation tokens for, or null to describe all tokens.
-    ///
-    /// Supported API versions: 0-3
-    pub fn with_owners(mut self, value: Option<Vec<DescribeDelegationTokenOwner>>) -> Self {
-        self.owners = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for DescribeDelegationTokenRequest {
+    type Builder = DescribeDelegationTokenRequestBuilder;
+
+    fn builder() -> Self::Builder {
+        DescribeDelegationTokenRequestBuilder::default()
     }
 }
 

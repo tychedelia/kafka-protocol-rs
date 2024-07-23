@@ -13,14 +13,15 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
-    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
-    StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct ControllerRegistrationRequest {
     /// The ID of the controller to register.
     ///
@@ -51,61 +52,11 @@ pub struct ControllerRegistrationRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl ControllerRegistrationRequest {
-    /// Sets `controller_id` to the passed value.
-    ///
-    /// The ID of the controller to register.
-    ///
-    /// Supported API versions: 0
-    pub fn with_controller_id(mut self, value: i32) -> Self {
-        self.controller_id = value;
-        self
-    }
-    /// Sets `incarnation_id` to the passed value.
-    ///
-    /// The controller incarnation ID, which is unique to each process run.
-    ///
-    /// Supported API versions: 0
-    pub fn with_incarnation_id(mut self, value: Uuid) -> Self {
-        self.incarnation_id = value;
-        self
-    }
-    /// Sets `zk_migration_ready` to the passed value.
-    ///
-    /// Set if the required configurations for ZK migration are present.
-    ///
-    /// Supported API versions: 0
-    pub fn with_zk_migration_ready(mut self, value: bool) -> Self {
-        self.zk_migration_ready = value;
-        self
-    }
-    /// Sets `listeners` to the passed value.
-    ///
-    /// The listeners of this controller
-    ///
-    /// Supported API versions: 0
-    pub fn with_listeners(mut self, value: indexmap::IndexMap<StrBytes, Listener>) -> Self {
-        self.listeners = value;
-        self
-    }
-    /// Sets `features` to the passed value.
-    ///
-    /// The features on this controller
-    ///
-    /// Supported API versions: 0
-    pub fn with_features(mut self, value: indexmap::IndexMap<StrBytes, Feature>) -> Self {
-        self.features = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for ControllerRegistrationRequest {
+    type Builder = ControllerRegistrationRequestBuilder;
+
+    fn builder() -> Self::Builder {
+        ControllerRegistrationRequestBuilder::default()
     }
 }
 
@@ -197,7 +148,8 @@ impl Message for ControllerRegistrationRequest {
 
 /// Valid versions: 0
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct Feature {
     /// The minimum supported feature level.
     ///
@@ -213,34 +165,11 @@ pub struct Feature {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Feature {
-    /// Sets `min_supported_version` to the passed value.
-    ///
-    /// The minimum supported feature level.
-    ///
-    /// Supported API versions: 0
-    pub fn with_min_supported_version(mut self, value: i16) -> Self {
-        self.min_supported_version = value;
-        self
-    }
-    /// Sets `max_supported_version` to the passed value.
-    ///
-    /// The maximum supported feature level.
-    ///
-    /// Supported API versions: 0
-    pub fn with_max_supported_version(mut self, value: i16) -> Self {
-        self.max_supported_version = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for Feature {
+    type Builder = FeatureBuilder;
+
+    fn builder() -> Self::Builder {
+        FeatureBuilder::default()
     }
 }
 
@@ -328,7 +257,8 @@ impl Message for Feature {
 
 /// Valid versions: 0
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct Listener {
     /// The hostname.
     ///
@@ -349,43 +279,11 @@ pub struct Listener {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Listener {
-    /// Sets `host` to the passed value.
-    ///
-    /// The hostname.
-    ///
-    /// Supported API versions: 0
-    pub fn with_host(mut self, value: StrBytes) -> Self {
-        self.host = value;
-        self
-    }
-    /// Sets `port` to the passed value.
-    ///
-    /// The port.
-    ///
-    /// Supported API versions: 0
-    pub fn with_port(mut self, value: u16) -> Self {
-        self.port = value;
-        self
-    }
-    /// Sets `security_protocol` to the passed value.
-    ///
-    /// The security protocol.
-    ///
-    /// Supported API versions: 0
-    pub fn with_security_protocol(mut self, value: i16) -> Self {
-        self.security_protocol = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for Listener {
+    type Builder = ListenerBuilder;
+
+    fn builder() -> Self::Builder {
+        ListenerBuilder::default()
     }
 }
 

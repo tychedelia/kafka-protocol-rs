@@ -13,14 +13,15 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
-    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
-    StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-3
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct ConsumerProtocolAssignment {
     ///
     ///
@@ -33,27 +34,11 @@ pub struct ConsumerProtocolAssignment {
     pub user_data: Option<Bytes>,
 }
 
-impl ConsumerProtocolAssignment {
-    /// Sets `assigned_partitions` to the passed value.
-    ///
-    ///
-    ///
-    /// Supported API versions: 0-3
-    pub fn with_assigned_partitions(
-        mut self,
-        value: indexmap::IndexMap<super::TopicName, TopicPartition>,
-    ) -> Self {
-        self.assigned_partitions = value;
-        self
-    }
-    /// Sets `user_data` to the passed value.
-    ///
-    ///
-    ///
-    /// Supported API versions: 0-3
-    pub fn with_user_data(mut self, value: Option<Bytes>) -> Self {
-        self.user_data = value;
-        self
+impl Builder for ConsumerProtocolAssignment {
+    type Builder = ConsumerProtocolAssignmentBuilder;
+
+    fn builder() -> Self::Builder {
+        ConsumerProtocolAssignmentBuilder::default()
     }
 }
 
@@ -101,7 +86,8 @@ impl Message for ConsumerProtocolAssignment {
 
 /// Valid versions: 0-3
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct TopicPartition {
     ///
     ///
@@ -109,15 +95,11 @@ pub struct TopicPartition {
     pub partitions: Vec<i32>,
 }
 
-impl TopicPartition {
-    /// Sets `partitions` to the passed value.
-    ///
-    ///
-    ///
-    /// Supported API versions: 0-3
-    pub fn with_partitions(mut self, value: Vec<i32>) -> Self {
-        self.partitions = value;
-        self
+impl Builder for TopicPartition {
+    type Builder = TopicPartitionBuilder;
+
+    fn builder() -> Self::Builder {
+        TopicPartitionBuilder::default()
     }
 }
 

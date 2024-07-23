@@ -13,14 +13,15 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
-    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
-    StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-4
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct DescribeConfigsRequest {
     /// The resources whose configurations we want to describe.
     ///
@@ -41,43 +42,11 @@ pub struct DescribeConfigsRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl DescribeConfigsRequest {
-    /// Sets `resources` to the passed value.
-    ///
-    /// The resources whose configurations we want to describe.
-    ///
-    /// Supported API versions: 0-4
-    pub fn with_resources(mut self, value: Vec<DescribeConfigsResource>) -> Self {
-        self.resources = value;
-        self
-    }
-    /// Sets `include_synonyms` to the passed value.
-    ///
-    /// True if we should include all synonyms.
-    ///
-    /// Supported API versions: 1-4
-    pub fn with_include_synonyms(mut self, value: bool) -> Self {
-        self.include_synonyms = value;
-        self
-    }
-    /// Sets `include_documentation` to the passed value.
-    ///
-    /// True if we should include configuration documentation.
-    ///
-    /// Supported API versions: 3-4
-    pub fn with_include_documentation(mut self, value: bool) -> Self {
-        self.include_documentation = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for DescribeConfigsRequest {
+    type Builder = DescribeConfigsRequestBuilder;
+
+    fn builder() -> Self::Builder {
+        DescribeConfigsRequestBuilder::default()
     }
 }
 
@@ -208,7 +177,8 @@ impl Message for DescribeConfigsRequest {
 
 /// Valid versions: 0-4
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct DescribeConfigsResource {
     /// The resource type.
     ///
@@ -229,43 +199,11 @@ pub struct DescribeConfigsResource {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl DescribeConfigsResource {
-    /// Sets `resource_type` to the passed value.
-    ///
-    /// The resource type.
-    ///
-    /// Supported API versions: 0-4
-    pub fn with_resource_type(mut self, value: i8) -> Self {
-        self.resource_type = value;
-        self
-    }
-    /// Sets `resource_name` to the passed value.
-    ///
-    /// The resource name.
-    ///
-    /// Supported API versions: 0-4
-    pub fn with_resource_name(mut self, value: StrBytes) -> Self {
-        self.resource_name = value;
-        self
-    }
-    /// Sets `configuration_keys` to the passed value.
-    ///
-    /// The configuration keys to list, or null to list all configuration keys.
-    ///
-    /// Supported API versions: 0-4
-    pub fn with_configuration_keys(mut self, value: Option<Vec<StrBytes>>) -> Self {
-        self.configuration_keys = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for DescribeConfigsResource {
+    type Builder = DescribeConfigsResourceBuilder;
+
+    fn builder() -> Self::Builder {
+        DescribeConfigsResourceBuilder::default()
     }
 }
 

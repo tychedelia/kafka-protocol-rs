@@ -13,14 +13,15 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
-    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
-    StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-1
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct BrokerHeartbeatResponse {
     /// Duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
@@ -51,61 +52,11 @@ pub struct BrokerHeartbeatResponse {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl BrokerHeartbeatResponse {
-    /// Sets `throttle_time_ms` to the passed value.
-    ///
-    /// Duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
-        self.throttle_time_ms = value;
-        self
-    }
-    /// Sets `error_code` to the passed value.
-    ///
-    /// The error code, or 0 if there was no error.
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_error_code(mut self, value: i16) -> Self {
-        self.error_code = value;
-        self
-    }
-    /// Sets `is_caught_up` to the passed value.
-    ///
-    /// True if the broker has approximately caught up with the latest metadata.
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_is_caught_up(mut self, value: bool) -> Self {
-        self.is_caught_up = value;
-        self
-    }
-    /// Sets `is_fenced` to the passed value.
-    ///
-    /// True if the broker is fenced.
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_is_fenced(mut self, value: bool) -> Self {
-        self.is_fenced = value;
-        self
-    }
-    /// Sets `should_shut_down` to the passed value.
-    ///
-    /// True if the broker should proceed with its shutdown.
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_should_shut_down(mut self, value: bool) -> Self {
-        self.should_shut_down = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for BrokerHeartbeatResponse {
+    type Builder = BrokerHeartbeatResponseBuilder;
+
+    fn builder() -> Self::Builder {
+        BrokerHeartbeatResponseBuilder::default()
     }
 }
 

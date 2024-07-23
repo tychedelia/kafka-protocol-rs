@@ -13,14 +13,15 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
-    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
-    StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-8
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct ListOffsetsPartitionResponse {
     /// The partition index.
     ///
@@ -56,70 +57,11 @@ pub struct ListOffsetsPartitionResponse {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl ListOffsetsPartitionResponse {
-    /// Sets `partition_index` to the passed value.
-    ///
-    /// The partition index.
-    ///
-    /// Supported API versions: 0-8
-    pub fn with_partition_index(mut self, value: i32) -> Self {
-        self.partition_index = value;
-        self
-    }
-    /// Sets `error_code` to the passed value.
-    ///
-    /// The partition error code, or 0 if there was no error.
-    ///
-    /// Supported API versions: 0-8
-    pub fn with_error_code(mut self, value: i16) -> Self {
-        self.error_code = value;
-        self
-    }
-    /// Sets `old_style_offsets` to the passed value.
-    ///
-    /// The result offsets.
-    ///
-    /// Supported API versions: 0
-    pub fn with_old_style_offsets(mut self, value: Vec<i64>) -> Self {
-        self.old_style_offsets = value;
-        self
-    }
-    /// Sets `timestamp` to the passed value.
-    ///
-    /// The timestamp associated with the returned offset.
-    ///
-    /// Supported API versions: 1-8
-    pub fn with_timestamp(mut self, value: i64) -> Self {
-        self.timestamp = value;
-        self
-    }
-    /// Sets `offset` to the passed value.
-    ///
-    /// The returned offset.
-    ///
-    /// Supported API versions: 1-8
-    pub fn with_offset(mut self, value: i64) -> Self {
-        self.offset = value;
-        self
-    }
-    /// Sets `leader_epoch` to the passed value.
-    ///
-    ///
-    ///
-    /// Supported API versions: 4-8
-    pub fn with_leader_epoch(mut self, value: i32) -> Self {
-        self.leader_epoch = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for ListOffsetsPartitionResponse {
+    type Builder = ListOffsetsPartitionResponseBuilder;
+
+    fn builder() -> Self::Builder {
+        ListOffsetsPartitionResponseBuilder::default()
     }
 }
 
@@ -284,7 +226,8 @@ impl Message for ListOffsetsPartitionResponse {
 
 /// Valid versions: 0-8
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct ListOffsetsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
@@ -300,34 +243,11 @@ pub struct ListOffsetsResponse {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl ListOffsetsResponse {
-    /// Sets `throttle_time_ms` to the passed value.
-    ///
-    /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
-    ///
-    /// Supported API versions: 2-8
-    pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
-        self.throttle_time_ms = value;
-        self
-    }
-    /// Sets `topics` to the passed value.
-    ///
-    /// Each topic in the response.
-    ///
-    /// Supported API versions: 0-8
-    pub fn with_topics(mut self, value: Vec<ListOffsetsTopicResponse>) -> Self {
-        self.topics = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for ListOffsetsResponse {
+    type Builder = ListOffsetsResponseBuilder;
+
+    fn builder() -> Self::Builder {
+        ListOffsetsResponseBuilder::default()
     }
 }
 
@@ -429,7 +349,8 @@ impl Message for ListOffsetsResponse {
 
 /// Valid versions: 0-8
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct ListOffsetsTopicResponse {
     /// The topic name
     ///
@@ -445,34 +366,11 @@ pub struct ListOffsetsTopicResponse {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl ListOffsetsTopicResponse {
-    /// Sets `name` to the passed value.
-    ///
-    /// The topic name
-    ///
-    /// Supported API versions: 0-8
-    pub fn with_name(mut self, value: super::TopicName) -> Self {
-        self.name = value;
-        self
-    }
-    /// Sets `partitions` to the passed value.
-    ///
-    /// Each partition in the response.
-    ///
-    /// Supported API versions: 0-8
-    pub fn with_partitions(mut self, value: Vec<ListOffsetsPartitionResponse>) -> Self {
-        self.partitions = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for ListOffsetsTopicResponse {
+    type Builder = ListOffsetsTopicResponseBuilder;
+
+    fn builder() -> Self::Builder {
+        ListOffsetsTopicResponseBuilder::default()
     }
 }
 

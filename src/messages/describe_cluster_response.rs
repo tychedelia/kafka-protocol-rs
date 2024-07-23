@@ -13,14 +13,15 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
-    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
-    StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-1
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct DescribeClusterBroker {
     /// The broker hostname.
     ///
@@ -41,43 +42,11 @@ pub struct DescribeClusterBroker {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl DescribeClusterBroker {
-    /// Sets `host` to the passed value.
-    ///
-    /// The broker hostname.
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_host(mut self, value: StrBytes) -> Self {
-        self.host = value;
-        self
-    }
-    /// Sets `port` to the passed value.
-    ///
-    /// The broker port.
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_port(mut self, value: i32) -> Self {
-        self.port = value;
-        self
-    }
-    /// Sets `rack` to the passed value.
-    ///
-    /// The rack of the broker, or null if it has not been assigned to a rack.
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_rack(mut self, value: Option<StrBytes>) -> Self {
-        self.rack = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for DescribeClusterBroker {
+    type Builder = DescribeClusterBrokerBuilder;
+
+    fn builder() -> Self::Builder {
+        DescribeClusterBrokerBuilder::default()
     }
 }
 
@@ -170,7 +139,8 @@ impl Message for DescribeClusterBroker {
 
 /// Valid versions: 0-1
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct DescribeClusterResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
@@ -216,91 +186,11 @@ pub struct DescribeClusterResponse {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl DescribeClusterResponse {
-    /// Sets `throttle_time_ms` to the passed value.
-    ///
-    /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
-        self.throttle_time_ms = value;
-        self
-    }
-    /// Sets `error_code` to the passed value.
-    ///
-    /// The top-level error code, or 0 if there was no error
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_error_code(mut self, value: i16) -> Self {
-        self.error_code = value;
-        self
-    }
-    /// Sets `error_message` to the passed value.
-    ///
-    /// The top-level error message, or null if there was no error.
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_error_message(mut self, value: Option<StrBytes>) -> Self {
-        self.error_message = value;
-        self
-    }
-    /// Sets `endpoint_type` to the passed value.
-    ///
-    /// The endpoint type that was described. 1=brokers, 2=controllers.
-    ///
-    /// Supported API versions: 1
-    pub fn with_endpoint_type(mut self, value: i8) -> Self {
-        self.endpoint_type = value;
-        self
-    }
-    /// Sets `cluster_id` to the passed value.
-    ///
-    /// The cluster ID that responding broker belongs to.
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_cluster_id(mut self, value: StrBytes) -> Self {
-        self.cluster_id = value;
-        self
-    }
-    /// Sets `controller_id` to the passed value.
-    ///
-    /// The ID of the controller broker.
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_controller_id(mut self, value: super::BrokerId) -> Self {
-        self.controller_id = value;
-        self
-    }
-    /// Sets `brokers` to the passed value.
-    ///
-    /// Each broker in the response.
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_brokers(
-        mut self,
-        value: indexmap::IndexMap<super::BrokerId, DescribeClusterBroker>,
-    ) -> Self {
-        self.brokers = value;
-        self
-    }
-    /// Sets `cluster_authorized_operations` to the passed value.
-    ///
-    /// 32-bit bitfield to represent authorized operations for this cluster.
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_cluster_authorized_operations(mut self, value: i32) -> Self {
-        self.cluster_authorized_operations = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for DescribeClusterResponse {
+    type Builder = DescribeClusterResponseBuilder;
+
+    fn builder() -> Self::Builder {
+        DescribeClusterResponseBuilder::default()
     }
 }
 

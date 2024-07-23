@@ -13,14 +13,15 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
-    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
-    StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct BeginQuorumEpochRequest {
     ///
     ///
@@ -33,24 +34,11 @@ pub struct BeginQuorumEpochRequest {
     pub topics: Vec<TopicData>,
 }
 
-impl BeginQuorumEpochRequest {
-    /// Sets `cluster_id` to the passed value.
-    ///
-    ///
-    ///
-    /// Supported API versions: 0
-    pub fn with_cluster_id(mut self, value: Option<StrBytes>) -> Self {
-        self.cluster_id = value;
-        self
-    }
-    /// Sets `topics` to the passed value.
-    ///
-    ///
-    ///
-    /// Supported API versions: 0
-    pub fn with_topics(mut self, value: Vec<TopicData>) -> Self {
-        self.topics = value;
-        self
+impl Builder for BeginQuorumEpochRequest {
+    type Builder = BeginQuorumEpochRequestBuilder;
+
+    fn builder() -> Self::Builder {
+        BeginQuorumEpochRequestBuilder::default()
     }
 }
 
@@ -94,7 +82,8 @@ impl Message for BeginQuorumEpochRequest {
 
 /// Valid versions: 0
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct PartitionData {
     /// The partition index.
     ///
@@ -112,33 +101,11 @@ pub struct PartitionData {
     pub leader_epoch: i32,
 }
 
-impl PartitionData {
-    /// Sets `partition_index` to the passed value.
-    ///
-    /// The partition index.
-    ///
-    /// Supported API versions: 0
-    pub fn with_partition_index(mut self, value: i32) -> Self {
-        self.partition_index = value;
-        self
-    }
-    /// Sets `leader_id` to the passed value.
-    ///
-    /// The ID of the newly elected leader
-    ///
-    /// Supported API versions: 0
-    pub fn with_leader_id(mut self, value: super::BrokerId) -> Self {
-        self.leader_id = value;
-        self
-    }
-    /// Sets `leader_epoch` to the passed value.
-    ///
-    /// The epoch of the newly elected leader
-    ///
-    /// Supported API versions: 0
-    pub fn with_leader_epoch(mut self, value: i32) -> Self {
-        self.leader_epoch = value;
-        self
+impl Builder for PartitionData {
+    type Builder = PartitionDataBuilder;
+
+    fn builder() -> Self::Builder {
+        PartitionDataBuilder::default()
     }
 }
 
@@ -190,7 +157,8 @@ impl Message for PartitionData {
 
 /// Valid versions: 0
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct TopicData {
     /// The topic name.
     ///
@@ -203,24 +171,11 @@ pub struct TopicData {
     pub partitions: Vec<PartitionData>,
 }
 
-impl TopicData {
-    /// Sets `topic_name` to the passed value.
-    ///
-    /// The topic name.
-    ///
-    /// Supported API versions: 0
-    pub fn with_topic_name(mut self, value: super::TopicName) -> Self {
-        self.topic_name = value;
-        self
-    }
-    /// Sets `partitions` to the passed value.
-    ///
-    ///
-    ///
-    /// Supported API versions: 0
-    pub fn with_partitions(mut self, value: Vec<PartitionData>) -> Self {
-        self.partitions = value;
-        self
+impl Builder for TopicData {
+    type Builder = TopicDataBuilder;
+
+    fn builder() -> Self::Builder {
+        TopicDataBuilder::default()
     }
 }
 

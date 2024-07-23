@@ -13,14 +13,15 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
-    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
-    StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-3
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct AlterPartitionRequest {
     /// The ID of the requesting broker
     ///
@@ -41,43 +42,11 @@ pub struct AlterPartitionRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl AlterPartitionRequest {
-    /// Sets `broker_id` to the passed value.
-    ///
-    /// The ID of the requesting broker
-    ///
-    /// Supported API versions: 0-3
-    pub fn with_broker_id(mut self, value: super::BrokerId) -> Self {
-        self.broker_id = value;
-        self
-    }
-    /// Sets `broker_epoch` to the passed value.
-    ///
-    /// The epoch of the requesting broker
-    ///
-    /// Supported API versions: 0-3
-    pub fn with_broker_epoch(mut self, value: i64) -> Self {
-        self.broker_epoch = value;
-        self
-    }
-    /// Sets `topics` to the passed value.
-    ///
-    ///
-    ///
-    /// Supported API versions: 0-3
-    pub fn with_topics(mut self, value: Vec<TopicData>) -> Self {
-        self.topics = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for AlterPartitionRequest {
+    type Builder = AlterPartitionRequestBuilder;
+
+    fn builder() -> Self::Builder {
+        AlterPartitionRequestBuilder::default()
     }
 }
 
@@ -157,7 +126,8 @@ impl Message for AlterPartitionRequest {
 
 /// Valid versions: 0-3
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct BrokerState {
     /// The ID of the broker.
     ///
@@ -173,34 +143,11 @@ pub struct BrokerState {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl BrokerState {
-    /// Sets `broker_id` to the passed value.
-    ///
-    /// The ID of the broker.
-    ///
-    /// Supported API versions: 3
-    pub fn with_broker_id(mut self, value: super::BrokerId) -> Self {
-        self.broker_id = value;
-        self
-    }
-    /// Sets `broker_epoch` to the passed value.
-    ///
-    /// The epoch of the broker. It will be -1 if the epoch check is not supported.
-    ///
-    /// Supported API versions: 3
-    pub fn with_broker_epoch(mut self, value: i64) -> Self {
-        self.broker_epoch = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for BrokerState {
+    type Builder = BrokerStateBuilder;
+
+    fn builder() -> Self::Builder {
+        BrokerStateBuilder::default()
     }
 }
 
@@ -307,7 +254,8 @@ impl Message for BrokerState {
 
 /// Valid versions: 0-3
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct PartitionData {
     /// The partition index
     ///
@@ -343,70 +291,11 @@ pub struct PartitionData {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl PartitionData {
-    /// Sets `partition_index` to the passed value.
-    ///
-    /// The partition index
-    ///
-    /// Supported API versions: 0-3
-    pub fn with_partition_index(mut self, value: i32) -> Self {
-        self.partition_index = value;
-        self
-    }
-    /// Sets `leader_epoch` to the passed value.
-    ///
-    /// The leader epoch of this partition
-    ///
-    /// Supported API versions: 0-3
-    pub fn with_leader_epoch(mut self, value: i32) -> Self {
-        self.leader_epoch = value;
-        self
-    }
-    /// Sets `new_isr` to the passed value.
-    ///
-    /// The ISR for this partition. Deprecated since version 3.
-    ///
-    /// Supported API versions: 0-2
-    pub fn with_new_isr(mut self, value: Vec<super::BrokerId>) -> Self {
-        self.new_isr = value;
-        self
-    }
-    /// Sets `new_isr_with_epochs` to the passed value.
-    ///
-    ///
-    ///
-    /// Supported API versions: 3
-    pub fn with_new_isr_with_epochs(mut self, value: Vec<BrokerState>) -> Self {
-        self.new_isr_with_epochs = value;
-        self
-    }
-    /// Sets `leader_recovery_state` to the passed value.
-    ///
-    /// 1 if the partition is recovering from an unclean leader election; 0 otherwise.
-    ///
-    /// Supported API versions: 1-3
-    pub fn with_leader_recovery_state(mut self, value: i8) -> Self {
-        self.leader_recovery_state = value;
-        self
-    }
-    /// Sets `partition_epoch` to the passed value.
-    ///
-    /// The expected epoch of the partition which is being updated. For legacy cluster this is the ZkVersion in the LeaderAndIsr request.
-    ///
-    /// Supported API versions: 0-3
-    pub fn with_partition_epoch(mut self, value: i32) -> Self {
-        self.partition_epoch = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for PartitionData {
+    type Builder = PartitionDataBuilder;
+
+    fn builder() -> Self::Builder {
+        PartitionDataBuilder::default()
     }
 }
 
@@ -551,7 +440,8 @@ impl Message for PartitionData {
 
 /// Valid versions: 0-3
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct TopicData {
     /// The name of the topic to alter ISRs for
     ///
@@ -572,43 +462,11 @@ pub struct TopicData {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl TopicData {
-    /// Sets `topic_name` to the passed value.
-    ///
-    /// The name of the topic to alter ISRs for
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_topic_name(mut self, value: super::TopicName) -> Self {
-        self.topic_name = value;
-        self
-    }
-    /// Sets `topic_id` to the passed value.
-    ///
-    /// The ID of the topic to alter ISRs for
-    ///
-    /// Supported API versions: 2-3
-    pub fn with_topic_id(mut self, value: Uuid) -> Self {
-        self.topic_id = value;
-        self
-    }
-    /// Sets `partitions` to the passed value.
-    ///
-    ///
-    ///
-    /// Supported API versions: 0-3
-    pub fn with_partitions(mut self, value: Vec<PartitionData>) -> Self {
-        self.partitions = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for TopicData {
+    type Builder = TopicDataBuilder;
+
+    fn builder() -> Self::Builder {
+        TopicDataBuilder::default()
     }
 }
 

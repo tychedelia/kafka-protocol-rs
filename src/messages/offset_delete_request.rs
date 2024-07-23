@@ -13,14 +13,15 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
-    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
-    StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct OffsetDeleteRequest {
     /// The unique group identifier.
     ///
@@ -33,27 +34,11 @@ pub struct OffsetDeleteRequest {
     pub topics: indexmap::IndexMap<super::TopicName, OffsetDeleteRequestTopic>,
 }
 
-impl OffsetDeleteRequest {
-    /// Sets `group_id` to the passed value.
-    ///
-    /// The unique group identifier.
-    ///
-    /// Supported API versions: 0
-    pub fn with_group_id(mut self, value: super::GroupId) -> Self {
-        self.group_id = value;
-        self
-    }
-    /// Sets `topics` to the passed value.
-    ///
-    /// The topics to delete offsets for
-    ///
-    /// Supported API versions: 0
-    pub fn with_topics(
-        mut self,
-        value: indexmap::IndexMap<super::TopicName, OffsetDeleteRequestTopic>,
-    ) -> Self {
-        self.topics = value;
-        self
+impl Builder for OffsetDeleteRequest {
+    type Builder = OffsetDeleteRequestBuilder;
+
+    fn builder() -> Self::Builder {
+        OffsetDeleteRequestBuilder::default()
     }
 }
 
@@ -97,7 +82,8 @@ impl Message for OffsetDeleteRequest {
 
 /// Valid versions: 0
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct OffsetDeleteRequestPartition {
     /// The partition index.
     ///
@@ -105,15 +91,11 @@ pub struct OffsetDeleteRequestPartition {
     pub partition_index: i32,
 }
 
-impl OffsetDeleteRequestPartition {
-    /// Sets `partition_index` to the passed value.
-    ///
-    /// The partition index.
-    ///
-    /// Supported API versions: 0
-    pub fn with_partition_index(mut self, value: i32) -> Self {
-        self.partition_index = value;
-        self
+impl Builder for OffsetDeleteRequestPartition {
+    type Builder = OffsetDeleteRequestPartitionBuilder;
+
+    fn builder() -> Self::Builder {
+        OffsetDeleteRequestPartitionBuilder::default()
     }
 }
 
@@ -151,7 +133,8 @@ impl Message for OffsetDeleteRequestPartition {
 
 /// Valid versions: 0
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct OffsetDeleteRequestTopic {
     /// Each partition to delete offsets for.
     ///
@@ -159,15 +142,11 @@ pub struct OffsetDeleteRequestTopic {
     pub partitions: Vec<OffsetDeleteRequestPartition>,
 }
 
-impl OffsetDeleteRequestTopic {
-    /// Sets `partitions` to the passed value.
-    ///
-    /// Each partition to delete offsets for.
-    ///
-    /// Supported API versions: 0
-    pub fn with_partitions(mut self, value: Vec<OffsetDeleteRequestPartition>) -> Self {
-        self.partitions = value;
-        self
+impl Builder for OffsetDeleteRequestTopic {
+    type Builder = OffsetDeleteRequestTopicBuilder;
+
+    fn builder() -> Self::Builder {
+        OffsetDeleteRequestTopicBuilder::default()
     }
 }
 

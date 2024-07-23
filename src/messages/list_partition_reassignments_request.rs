@@ -13,14 +13,15 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
-    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
-    StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
+    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
+    MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct ListPartitionReassignmentsRequest {
     /// The time in ms to wait for the request to complete.
     ///
@@ -36,34 +37,11 @@ pub struct ListPartitionReassignmentsRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl ListPartitionReassignmentsRequest {
-    /// Sets `timeout_ms` to the passed value.
-    ///
-    /// The time in ms to wait for the request to complete.
-    ///
-    /// Supported API versions: 0
-    pub fn with_timeout_ms(mut self, value: i32) -> Self {
-        self.timeout_ms = value;
-        self
-    }
-    /// Sets `topics` to the passed value.
-    ///
-    /// The topics to list partition reassignments for, or null to list everything.
-    ///
-    /// Supported API versions: 0
-    pub fn with_topics(mut self, value: Option<Vec<ListPartitionReassignmentsTopics>>) -> Self {
-        self.topics = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for ListPartitionReassignmentsRequest {
+    type Builder = ListPartitionReassignmentsRequestBuilder;
+
+    fn builder() -> Self::Builder {
+        ListPartitionReassignmentsRequestBuilder::default()
     }
 }
 
@@ -138,7 +116,8 @@ impl Message for ListPartitionReassignmentsRequest {
 
 /// Valid versions: 0
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
+#[builder(default)]
 pub struct ListPartitionReassignmentsTopics {
     /// The topic name
     ///
@@ -154,34 +133,11 @@ pub struct ListPartitionReassignmentsTopics {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl ListPartitionReassignmentsTopics {
-    /// Sets `name` to the passed value.
-    ///
-    /// The topic name
-    ///
-    /// Supported API versions: 0
-    pub fn with_name(mut self, value: super::TopicName) -> Self {
-        self.name = value;
-        self
-    }
-    /// Sets `partition_indexes` to the passed value.
-    ///
-    /// The partitions to list partition reassignments for.
-    ///
-    /// Supported API versions: 0
-    pub fn with_partition_indexes(mut self, value: Vec<i32>) -> Self {
-        self.partition_indexes = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
+impl Builder for ListPartitionReassignmentsTopics {
+    type Builder = ListPartitionReassignmentsTopicsBuilder;
+
+    fn builder() -> Self::Builder {
+        ListPartitionReassignmentsTopicsBuilder::default()
     }
 }
 
