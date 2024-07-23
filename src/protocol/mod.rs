@@ -223,13 +223,3 @@ pub(crate) fn compute_unknown_tagged_fields_size(
     }
     Ok(total_size)
 }
-
-/// Every protocol item implements [`derive_builder::Builder`], which can be
-/// created using [`Default::default`] or retrieved via this trait.
-pub trait Builder {
-    /// The [`derive_builder::Builder`] type for this protocol item.
-    type Builder: Default;
-
-    /// Retrieve the builder for this protocol item.
-    fn builder() -> Self::Builder;
-}
