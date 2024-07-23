@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0
@@ -46,7 +46,7 @@ impl Builder for AlterPartitionReassignmentsRequest {
 }
 
 impl Encodable for AlterPartitionReassignmentsRequest {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.timeout_ms)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -61,7 +61,7 @@ impl Encodable for AlterPartitionReassignmentsRequest {
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.timeout_ms)?;
         total_size += types::CompactArray(types::Struct { version }).compute_size(&self.topics)?;
@@ -80,7 +80,7 @@ impl Encodable for AlterPartitionReassignmentsRequest {
 }
 
 impl Decodable for AlterPartitionReassignmentsRequest {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let timeout_ms = types::Int32.decode(buf)?;
         let topics = types::CompactArray(types::Struct { version }).decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
@@ -142,7 +142,7 @@ impl Builder for ReassignablePartition {
 }
 
 impl Encodable for ReassignablePartition {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.partition_index)?;
         types::CompactArray(types::Int32).encode(buf, &self.replicas)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -157,7 +157,7 @@ impl Encodable for ReassignablePartition {
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.partition_index)?;
         total_size += types::CompactArray(types::Int32).compute_size(&self.replicas)?;
@@ -176,7 +176,7 @@ impl Encodable for ReassignablePartition {
 }
 
 impl Decodable for ReassignablePartition {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let partition_index = types::Int32.decode(buf)?;
         let replicas = types::CompactArray(types::Int32).decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
@@ -238,7 +238,7 @@ impl Builder for ReassignableTopic {
 }
 
 impl Encodable for ReassignableTopic {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::CompactString.encode(buf, &self.name)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.partitions)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -253,7 +253,7 @@ impl Encodable for ReassignableTopic {
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::CompactString.compute_size(&self.name)?;
         total_size +=
@@ -273,7 +273,7 @@ impl Encodable for ReassignableTopic {
 }
 
 impl Decodable for ReassignableTopic {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = types::CompactString.decode(buf)?;
         let partitions = types::CompactArray(types::Struct { version }).decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();

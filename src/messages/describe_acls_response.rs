@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0-3
@@ -56,7 +56,7 @@ impl Builder for AclDescription {
 }
 
 impl Encodable for AclDescription {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 2 {
             types::CompactString.encode(buf, &self.principal)?;
         } else {
@@ -83,7 +83,7 @@ impl Encodable for AclDescription {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 2 {
             total_size += types::CompactString.compute_size(&self.principal)?;
@@ -114,7 +114,7 @@ impl Encodable for AclDescription {
 }
 
 impl Decodable for AclDescription {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let principal = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
@@ -202,7 +202,7 @@ impl Builder for DescribeAclsResource {
 }
 
 impl Encodable for DescribeAclsResource {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int8.encode(buf, &self.resource_type)?;
         if version >= 2 {
             types::CompactString.encode(buf, &self.resource_name)?;
@@ -235,7 +235,7 @@ impl Encodable for DescribeAclsResource {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int8.compute_size(&self.resource_type)?;
         if version >= 2 {
@@ -273,7 +273,7 @@ impl Encodable for DescribeAclsResource {
 }
 
 impl Decodable for DescribeAclsResource {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let resource_type = types::Int8.decode(buf)?;
         let resource_name = if version >= 2 {
             types::CompactString.decode(buf)?
@@ -365,7 +365,7 @@ impl Builder for DescribeAclsResponse {
 }
 
 impl Encodable for DescribeAclsResponse {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         types::Int16.encode(buf, &self.error_code)?;
         if version >= 2 {
@@ -392,7 +392,7 @@ impl Encodable for DescribeAclsResponse {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
         total_size += types::Int16.compute_size(&self.error_code)?;
@@ -424,7 +424,7 @@ impl Encodable for DescribeAclsResponse {
 }
 
 impl Decodable for DescribeAclsResponse {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
         let error_message = if version >= 2 {

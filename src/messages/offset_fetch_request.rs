@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0-9
@@ -56,7 +56,7 @@ impl Builder for OffsetFetchRequest {
 }
 
 impl Encodable for OffsetFetchRequest {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version <= 7 {
             if version >= 6 {
                 types::CompactString.encode(buf, &self.group_id)?;
@@ -112,7 +112,7 @@ impl Encodable for OffsetFetchRequest {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version <= 7 {
             if version >= 6 {
@@ -174,7 +174,7 @@ impl Encodable for OffsetFetchRequest {
 }
 
 impl Decodable for OffsetFetchRequest {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let group_id = if version <= 7 {
             if version >= 6 {
                 types::CompactString.decode(buf)?
@@ -278,7 +278,7 @@ impl Builder for OffsetFetchRequestGroup {
 }
 
 impl Encodable for OffsetFetchRequestGroup {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 8 {
             types::CompactString.encode(buf, &self.group_id)?;
         } else {
@@ -318,7 +318,7 @@ impl Encodable for OffsetFetchRequestGroup {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 8 {
             total_size += types::CompactString.compute_size(&self.group_id)?;
@@ -363,7 +363,7 @@ impl Encodable for OffsetFetchRequestGroup {
 }
 
 impl Decodable for OffsetFetchRequestGroup {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let group_id = if version >= 8 {
             types::CompactString.decode(buf)?
         } else {
@@ -449,7 +449,7 @@ impl Builder for OffsetFetchRequestTopic {
 }
 
 impl Encodable for OffsetFetchRequestTopic {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version <= 7 {
             if version >= 6 {
                 types::CompactString.encode(buf, &self.name)?;
@@ -486,7 +486,7 @@ impl Encodable for OffsetFetchRequestTopic {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version <= 7 {
             if version >= 6 {
@@ -528,7 +528,7 @@ impl Encodable for OffsetFetchRequestTopic {
 }
 
 impl Decodable for OffsetFetchRequestTopic {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = if version <= 7 {
             if version >= 6 {
                 types::CompactString.decode(buf)?
@@ -608,7 +608,7 @@ impl Builder for OffsetFetchRequestTopics {
 }
 
 impl Encodable for OffsetFetchRequestTopics {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 8 {
             types::CompactString.encode(buf, &self.name)?;
         } else {
@@ -637,7 +637,7 @@ impl Encodable for OffsetFetchRequestTopics {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 8 {
             total_size += types::CompactString.compute_size(&self.name)?;
@@ -671,7 +671,7 @@ impl Encodable for OffsetFetchRequestTopics {
 }
 
 impl Decodable for OffsetFetchRequestTopics {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = if version >= 8 {
             types::CompactString.decode(buf)?
         } else {

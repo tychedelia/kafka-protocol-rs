@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0-1
@@ -66,7 +66,7 @@ impl Builder for BrokerHeartbeatRequest {
 }
 
 impl Encodable for BrokerHeartbeatRequest {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.broker_id)?;
         types::Int64.encode(buf, &self.broker_epoch)?;
         types::Int64.encode(buf, &self.current_metadata_offset)?;
@@ -103,7 +103,7 @@ impl Encodable for BrokerHeartbeatRequest {
         write_unknown_tagged_fields(buf, 1.., &self.unknown_tagged_fields)?;
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.broker_id)?;
         total_size += types::Int64.compute_size(&self.broker_epoch)?;
@@ -144,7 +144,7 @@ impl Encodable for BrokerHeartbeatRequest {
 }
 
 impl Decodable for BrokerHeartbeatRequest {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let broker_id = types::Int32.decode(buf)?;
         let broker_epoch = types::Int64.decode(buf)?;
         let current_metadata_offset = types::Int64.decode(buf)?;

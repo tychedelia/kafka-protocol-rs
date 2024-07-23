@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0-3
@@ -46,7 +46,7 @@ impl Builder for ControlledShutdownRequest {
 }
 
 impl Encodable for ControlledShutdownRequest {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.broker_id)?;
         if version >= 2 {
             types::Int64.encode(buf, &self.broker_epoch)?;
@@ -65,7 +65,7 @@ impl Encodable for ControlledShutdownRequest {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.broker_id)?;
         if version >= 2 {
@@ -88,7 +88,7 @@ impl Encodable for ControlledShutdownRequest {
 }
 
 impl Decodable for ControlledShutdownRequest {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let broker_id = types::Int32.decode(buf)?;
         let broker_epoch = if version >= 2 {
             types::Int64.decode(buf)?

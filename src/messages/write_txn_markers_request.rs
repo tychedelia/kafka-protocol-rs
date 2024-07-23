@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0-1
@@ -61,7 +61,7 @@ impl Builder for WritableTxnMarker {
 }
 
 impl Encodable for WritableTxnMarker {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int64.encode(buf, &self.producer_id)?;
         types::Int16.encode(buf, &self.producer_epoch)?;
         types::Boolean.encode(buf, &self.transaction_result)?;
@@ -85,7 +85,7 @@ impl Encodable for WritableTxnMarker {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int64.compute_size(&self.producer_id)?;
         total_size += types::Int16.compute_size(&self.producer_epoch)?;
@@ -114,7 +114,7 @@ impl Encodable for WritableTxnMarker {
 }
 
 impl Decodable for WritableTxnMarker {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let producer_id = types::Int64.decode(buf)?;
         let producer_epoch = types::Int16.decode(buf)?;
         let transaction_result = types::Boolean.decode(buf)?;
@@ -191,7 +191,7 @@ impl Builder for WritableTxnMarkerTopic {
 }
 
 impl Encodable for WritableTxnMarkerTopic {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 1 {
             types::CompactString.encode(buf, &self.name)?;
         } else {
@@ -216,7 +216,7 @@ impl Encodable for WritableTxnMarkerTopic {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 1 {
             total_size += types::CompactString.compute_size(&self.name)?;
@@ -246,7 +246,7 @@ impl Encodable for WritableTxnMarkerTopic {
 }
 
 impl Decodable for WritableTxnMarkerTopic {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = if version >= 1 {
             types::CompactString.decode(buf)?
         } else {
@@ -313,7 +313,7 @@ impl Builder for WriteTxnMarkersRequest {
 }
 
 impl Encodable for WriteTxnMarkersRequest {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 1 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.markers)?;
         } else {
@@ -333,7 +333,7 @@ impl Encodable for WriteTxnMarkersRequest {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 1 {
             total_size +=
@@ -358,7 +358,7 @@ impl Encodable for WriteTxnMarkersRequest {
 }
 
 impl Decodable for WriteTxnMarkersRequest {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let markers = if version >= 1 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {

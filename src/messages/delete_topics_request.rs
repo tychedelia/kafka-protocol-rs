@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0-6
@@ -46,7 +46,7 @@ impl Builder for DeleteTopicState {
 }
 
 impl Encodable for DeleteTopicState {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 6 {
             types::CompactString.encode(buf, &self.name)?;
         } else {
@@ -75,7 +75,7 @@ impl Encodable for DeleteTopicState {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 6 {
             total_size += types::CompactString.compute_size(&self.name)?;
@@ -108,7 +108,7 @@ impl Encodable for DeleteTopicState {
 }
 
 impl Decodable for DeleteTopicState {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = if version >= 6 {
             types::CompactString.decode(buf)?
         } else {
@@ -185,7 +185,7 @@ impl Builder for DeleteTopicsRequest {
 }
 
 impl Encodable for DeleteTopicsRequest {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 6 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
         } else {
@@ -215,7 +215,7 @@ impl Encodable for DeleteTopicsRequest {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 6 {
             total_size +=
@@ -251,7 +251,7 @@ impl Encodable for DeleteTopicsRequest {
 }
 
 impl Decodable for DeleteTopicsRequest {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let topics = if version >= 6 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {

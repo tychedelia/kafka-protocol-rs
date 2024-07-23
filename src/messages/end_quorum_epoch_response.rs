@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0
@@ -43,13 +43,13 @@ impl Builder for EndQuorumEpochResponse {
 }
 
 impl Encodable for EndQuorumEpochResponse {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int16.encode(buf, &self.error_code)?;
         types::Array(types::Struct { version }).encode(buf, &self.topics)?;
 
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int16.compute_size(&self.error_code)?;
         total_size += types::Array(types::Struct { version }).compute_size(&self.topics)?;
@@ -59,7 +59,7 @@ impl Encodable for EndQuorumEpochResponse {
 }
 
 impl Decodable for EndQuorumEpochResponse {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let error_code = types::Int16.decode(buf)?;
         let topics = types::Array(types::Struct { version }).decode(buf)?;
         Ok(Self { error_code, topics })
@@ -115,7 +115,7 @@ impl Builder for PartitionData {
 }
 
 impl Encodable for PartitionData {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.partition_index)?;
         types::Int16.encode(buf, &self.error_code)?;
         types::Int32.encode(buf, &self.leader_id)?;
@@ -123,7 +123,7 @@ impl Encodable for PartitionData {
 
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.partition_index)?;
         total_size += types::Int16.compute_size(&self.error_code)?;
@@ -135,7 +135,7 @@ impl Encodable for PartitionData {
 }
 
 impl Decodable for PartitionData {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let partition_index = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
         let leader_id = types::Int32.decode(buf)?;
@@ -190,13 +190,13 @@ impl Builder for TopicData {
 }
 
 impl Encodable for TopicData {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::String.encode(buf, &self.topic_name)?;
         types::Array(types::Struct { version }).encode(buf, &self.partitions)?;
 
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::String.compute_size(&self.topic_name)?;
         total_size += types::Array(types::Struct { version }).compute_size(&self.partitions)?;
@@ -206,7 +206,7 @@ impl Encodable for TopicData {
 }
 
 impl Decodable for TopicData {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let topic_name = types::String.decode(buf)?;
         let partitions = types::Array(types::Struct { version }).decode(buf)?;
         Ok(Self {

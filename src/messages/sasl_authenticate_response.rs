@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0-2
@@ -56,7 +56,7 @@ impl Builder for SaslAuthenticateResponse {
 }
 
 impl Encodable for SaslAuthenticateResponse {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int16.encode(buf, &self.error_code)?;
         if version >= 2 {
             types::CompactString.encode(buf, &self.error_message)?;
@@ -85,7 +85,7 @@ impl Encodable for SaslAuthenticateResponse {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int16.compute_size(&self.error_code)?;
         if version >= 2 {
@@ -118,7 +118,7 @@ impl Encodable for SaslAuthenticateResponse {
 }
 
 impl Decodable for SaslAuthenticateResponse {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let error_code = types::Int16.decode(buf)?;
         let error_message = if version >= 2 {
             types::CompactString.decode(buf)?

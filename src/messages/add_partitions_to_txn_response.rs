@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0-4
@@ -42,12 +42,7 @@ impl Builder for AddPartitionsToTxnPartitionResult {
 
 impl MapEncodable for AddPartitionsToTxnPartitionResult {
     type Key = i32;
-    fn encode<B: ByteBufMut>(
-        &self,
-        key: &Self::Key,
-        buf: &mut B,
-        version: i16,
-    ) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, key)?;
         types::Int16.encode(buf, &self.partition_error_code)?;
         if version >= 3 {
@@ -64,7 +59,7 @@ impl MapEncodable for AddPartitionsToTxnPartitionResult {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(key)?;
         total_size += types::Int16.compute_size(&self.partition_error_code)?;
@@ -86,7 +81,7 @@ impl MapEncodable for AddPartitionsToTxnPartitionResult {
 
 impl MapDecodable for AddPartitionsToTxnPartitionResult {
     type Key = i32;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
         let key_field = types::Int32.decode(buf)?;
         let partition_error_code = types::Int16.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
@@ -163,7 +158,7 @@ impl Builder for AddPartitionsToTxnResponse {
 }
 
 impl Encodable for AddPartitionsToTxnResponse {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         if version >= 4 {
             types::Int16.encode(buf, &self.error_code)?;
@@ -203,7 +198,7 @@ impl Encodable for AddPartitionsToTxnResponse {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
         if version >= 4 {
@@ -247,7 +242,7 @@ impl Encodable for AddPartitionsToTxnResponse {
 }
 
 impl Decodable for AddPartitionsToTxnResponse {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = types::Int32.decode(buf)?;
         let error_code = if version >= 4 {
             types::Int16.decode(buf)?
@@ -329,12 +324,7 @@ impl Builder for AddPartitionsToTxnResult {
 
 impl MapEncodable for AddPartitionsToTxnResult {
     type Key = super::TransactionalId;
-    fn encode<B: ByteBufMut>(
-        &self,
-        key: &Self::Key,
-        buf: &mut B,
-        version: i16,
-    ) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
         if version >= 4 {
             types::CompactString.encode(buf, key)?;
         } else {
@@ -363,7 +353,7 @@ impl MapEncodable for AddPartitionsToTxnResult {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 4 {
             total_size += types::CompactString.compute_size(key)?;
@@ -398,7 +388,7 @@ impl MapEncodable for AddPartitionsToTxnResult {
 
 impl MapDecodable for AddPartitionsToTxnResult {
     type Key = super::TransactionalId;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
         let key_field = if version >= 4 {
             types::CompactString.decode(buf)?
         } else {
@@ -467,12 +457,7 @@ impl Builder for AddPartitionsToTxnTopicResult {
 
 impl MapEncodable for AddPartitionsToTxnTopicResult {
     type Key = super::TopicName;
-    fn encode<B: ByteBufMut>(
-        &self,
-        key: &Self::Key,
-        buf: &mut B,
-        version: i16,
-    ) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
         if version >= 3 {
             types::CompactString.encode(buf, key)?;
         } else {
@@ -498,7 +483,7 @@ impl MapEncodable for AddPartitionsToTxnTopicResult {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 3 {
             total_size += types::CompactString.compute_size(key)?;
@@ -530,7 +515,7 @@ impl MapEncodable for AddPartitionsToTxnTopicResult {
 
 impl MapDecodable for AddPartitionsToTxnTopicResult {
     type Key = super::TopicName;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
         let key_field = if version >= 3 {
             types::CompactString.decode(buf)?
         } else {

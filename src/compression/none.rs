@@ -1,5 +1,5 @@
 use crate::protocol::buf::{ByteBuf, ByteBufMut};
-use crate::protocol::{DecodeError, EncodeError};
+use anyhow::Result;
 
 use super::{Compressor, Decompressor};
 
@@ -8,9 +8,9 @@ pub struct None;
 
 impl<B: ByteBufMut> Compressor<B> for None {
     type BufMut = B;
-    fn compress<R, F>(buf: &mut B, f: F) -> Result<R, EncodeError>
+    fn compress<R, F>(buf: &mut B, f: F) -> Result<R>
     where
-        F: FnOnce(&mut Self::BufMut) -> Result<R, EncodeError>,
+        F: FnOnce(&mut Self::BufMut) -> Result<R>,
     {
         f(buf)
     }
@@ -18,9 +18,9 @@ impl<B: ByteBufMut> Compressor<B> for None {
 
 impl<B: ByteBuf> Decompressor<B> for None {
     type Buf = B;
-    fn decompress<R, F>(buf: &mut B, f: F) -> Result<R, DecodeError>
+    fn decompress<R, F>(buf: &mut B, f: F) -> Result<R>
     where
-        F: FnOnce(&mut Self::Buf) -> Result<R, DecodeError>,
+        F: FnOnce(&mut Self::Buf) -> Result<R>,
     {
         f(buf)
     }

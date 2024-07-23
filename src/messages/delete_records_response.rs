@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0-2
@@ -47,12 +47,7 @@ impl Builder for DeleteRecordsPartitionResult {
 
 impl MapEncodable for DeleteRecordsPartitionResult {
     type Key = i32;
-    fn encode<B: ByteBufMut>(
-        &self,
-        key: &Self::Key,
-        buf: &mut B,
-        version: i16,
-    ) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, key)?;
         types::Int64.encode(buf, &self.low_watermark)?;
         types::Int16.encode(buf, &self.error_code)?;
@@ -70,7 +65,7 @@ impl MapEncodable for DeleteRecordsPartitionResult {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(key)?;
         total_size += types::Int64.compute_size(&self.low_watermark)?;
@@ -93,7 +88,7 @@ impl MapEncodable for DeleteRecordsPartitionResult {
 
 impl MapDecodable for DeleteRecordsPartitionResult {
     type Key = i32;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
         let key_field = types::Int32.decode(buf)?;
         let low_watermark = types::Int64.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
@@ -161,7 +156,7 @@ impl Builder for DeleteRecordsResponse {
 }
 
 impl Encodable for DeleteRecordsResponse {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         if version >= 2 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
@@ -182,7 +177,7 @@ impl Encodable for DeleteRecordsResponse {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
         if version >= 2 {
@@ -208,7 +203,7 @@ impl Encodable for DeleteRecordsResponse {
 }
 
 impl Decodable for DeleteRecordsResponse {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = types::Int32.decode(buf)?;
         let topics = if version >= 2 {
             types::CompactArray(types::Struct { version }).decode(buf)?
@@ -272,12 +267,7 @@ impl Builder for DeleteRecordsTopicResult {
 
 impl MapEncodable for DeleteRecordsTopicResult {
     type Key = super::TopicName;
-    fn encode<B: ByteBufMut>(
-        &self,
-        key: &Self::Key,
-        buf: &mut B,
-        version: i16,
-    ) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
         if version >= 2 {
             types::CompactString.encode(buf, key)?;
         } else {
@@ -302,7 +292,7 @@ impl MapEncodable for DeleteRecordsTopicResult {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 2 {
             total_size += types::CompactString.compute_size(key)?;
@@ -333,7 +323,7 @@ impl MapEncodable for DeleteRecordsTopicResult {
 
 impl MapDecodable for DeleteRecordsTopicResult {
     type Key = super::TopicName;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
         let key_field = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {

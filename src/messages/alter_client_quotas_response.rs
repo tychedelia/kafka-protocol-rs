@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0-1
@@ -46,7 +46,7 @@ impl Builder for AlterClientQuotasResponse {
 }
 
 impl Encodable for AlterClientQuotasResponse {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         if version >= 1 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.entries)?;
@@ -67,7 +67,7 @@ impl Encodable for AlterClientQuotasResponse {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
         if version >= 1 {
@@ -93,7 +93,7 @@ impl Encodable for AlterClientQuotasResponse {
 }
 
 impl Decodable for AlterClientQuotasResponse {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = types::Int32.decode(buf)?;
         let entries = if version >= 1 {
             types::CompactArray(types::Struct { version }).decode(buf)?
@@ -161,7 +161,7 @@ impl Builder for EntityData {
 }
 
 impl Encodable for EntityData {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 1 {
             types::CompactString.encode(buf, &self.entity_type)?;
         } else {
@@ -186,7 +186,7 @@ impl Encodable for EntityData {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 1 {
             total_size += types::CompactString.compute_size(&self.entity_type)?;
@@ -215,7 +215,7 @@ impl Encodable for EntityData {
 }
 
 impl Decodable for EntityData {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let entity_type = if version >= 1 {
             types::CompactString.decode(buf)?
         } else {
@@ -292,7 +292,7 @@ impl Builder for EntryData {
 }
 
 impl Encodable for EntryData {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int16.encode(buf, &self.error_code)?;
         if version >= 1 {
             types::CompactString.encode(buf, &self.error_message)?;
@@ -318,7 +318,7 @@ impl Encodable for EntryData {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int16.compute_size(&self.error_code)?;
         if version >= 1 {
@@ -349,7 +349,7 @@ impl Encodable for EntryData {
 }
 
 impl Decodable for EntryData {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let error_code = types::Int16.decode(buf)?;
         let error_message = if version >= 1 {
             types::CompactString.decode(buf)?

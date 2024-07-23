@@ -1195,9 +1195,9 @@ impl PreparedStruct {
         w.block(|w| {
             if let Some(key) = &self.map_key {
                 writeln!(w, "type Key = {};", key.rust_name())?;
-                write!(w, "fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<(), EncodeError> ")?;
+                write!(w, "fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> ")?;
             } else {
-                write!(w, "fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> ")?;
+                write!(w, "fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> ")?;
             }
             w.block(|w| {
                 for prepared_field in &self.prepared_fields {
@@ -1209,9 +1209,9 @@ impl PreparedStruct {
             })?;
             writeln!(w)?;
             if self.map_key.is_some() {
-                write!(w, "fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> ")?;
+                write!(w, "fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> ")?;
             } else {
-                write!(w, "fn compute_size(&self, version: i16) -> Result<usize, EncodeError> ")?;
+                write!(w, "fn compute_size(&self, version: i16) -> Result<usize> ")?;
             }
             w.block(|w| {
                 writeln!(w, "let mut total_size = 0;")?;
@@ -1235,9 +1235,9 @@ impl PreparedStruct {
         w.block(|w| {
             if let Some(key) = &self.map_key {
                 writeln!(w, "type Key = {};", key.rust_name())?;
-                write!(w, "fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> ")?;
+                write!(w, "fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> ")?;
             } else {
-                write!(w, "fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> ")?;
+                write!(w, "fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> ")?;
             }
             w.block(|w| {
                 for prepared_field in &self.prepared_fields {
@@ -1352,10 +1352,10 @@ fn write_file_header<W: Write>(w: &mut CodeWriter<W>, name: &str) -> Result<(), 
     writeln!(w)?;
     writeln!(w, "use bytes::Bytes;")?;
     writeln!(w, "use uuid::Uuid;")?;
-    writeln!(w, "use anyhow::bail;")?;
+    writeln!(w, "use anyhow::{{bail, Result}};")?;
     writeln!(w)?;
     writeln!(w, "use crate::protocol::{{")?;
-    writeln!(w, "    Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,")?;
+    writeln!(w, "    Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, Message, HeaderVersion, VersionRange,")?;
     writeln!(w, "    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{{ByteBuf, ByteBufMut}}")?;
     writeln!(w, "}};")?;
     writeln!(w)?;

@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0-7
@@ -51,7 +51,7 @@ impl Builder for LeaderAndIsrLiveLeader {
 }
 
 impl Encodable for LeaderAndIsrLiveLeader {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.broker_id)?;
         if version >= 4 {
             types::CompactString.encode(buf, &self.host_name)?;
@@ -73,7 +73,7 @@ impl Encodable for LeaderAndIsrLiveLeader {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.broker_id)?;
         if version >= 4 {
@@ -99,7 +99,7 @@ impl Encodable for LeaderAndIsrLiveLeader {
 }
 
 impl Decodable for LeaderAndIsrLiveLeader {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let broker_id = types::Int32.decode(buf)?;
         let host_name = if version >= 4 {
             types::CompactString.decode(buf)?
@@ -220,7 +220,7 @@ impl Builder for LeaderAndIsrPartitionState {
 }
 
 impl Encodable for LeaderAndIsrPartitionState {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version <= 1 {
             types::String.encode(buf, &self.topic_name)?;
         }
@@ -277,7 +277,7 @@ impl Encodable for LeaderAndIsrPartitionState {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version <= 1 {
             total_size += types::String.compute_size(&self.topic_name)?;
@@ -340,7 +340,7 @@ impl Encodable for LeaderAndIsrPartitionState {
 }
 
 impl Decodable for LeaderAndIsrPartitionState {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let topic_name = if version <= 1 {
             types::String.decode(buf)?
         } else {
@@ -500,7 +500,7 @@ impl Builder for LeaderAndIsrRequest {
 }
 
 impl Encodable for LeaderAndIsrRequest {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.controller_id)?;
         if version >= 7 {
             types::Boolean.encode(buf, &self.is_k_raft_controller)?;
@@ -558,7 +558,7 @@ impl Encodable for LeaderAndIsrRequest {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.controller_id)?;
         if version >= 7 {
@@ -624,7 +624,7 @@ impl Encodable for LeaderAndIsrRequest {
 }
 
 impl Decodable for LeaderAndIsrRequest {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let controller_id = types::Int32.decode(buf)?;
         let is_k_raft_controller = if version >= 7 {
             types::Boolean.decode(buf)?
@@ -739,7 +739,7 @@ impl Builder for LeaderAndIsrTopicState {
 }
 
 impl Encodable for LeaderAndIsrTopicState {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 2 {
             if version >= 4 {
                 types::CompactString.encode(buf, &self.topic_name)?;
@@ -780,7 +780,7 @@ impl Encodable for LeaderAndIsrTopicState {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 2 {
             if version >= 4 {
@@ -826,7 +826,7 @@ impl Encodable for LeaderAndIsrTopicState {
 }
 
 impl Decodable for LeaderAndIsrTopicState {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let topic_name = if version >= 2 {
             if version >= 4 {
                 types::CompactString.decode(buf)?

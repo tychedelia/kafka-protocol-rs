@@ -30,7 +30,7 @@
 //!     }
 //! }
 //! ```
-use anyhow::{anyhow, bail};
+use anyhow::{anyhow, bail, Result};
 use bytes::Bytes;
 use crc::{Crc, CRC_32_ISO_HDLC};
 use crc32c::crc32c;
@@ -38,7 +38,7 @@ use indexmap::IndexMap;
 
 use crate::protocol::{
     buf::{gap, ByteBuf, ByteBufMut},
-    types, DecodeError, Decoder, EncodeError, Encoder, StrBytes,
+    types, Decoder, Encoder, StrBytes,
 };
 
 use super::compression::{self as cmpr, Compressor, Decompressor};
@@ -151,26 +151,24 @@ const MAGIC_BYTE_OFFSET: usize = 16;
 impl RecordBatchEncoder {
     /// Encode records into given buffer, using provided encoding options that select the encoding
     /// strategy based on version.
-    pub fn encode<'a, B, I>(
-        buf: &mut B,
-        records: I,
-        options: &RecordEncodeOptions,
-    ) -> Result<(), EncodeError>
+    pub fn encode<'a, B, I>(buf: &mut B, records: I, options: &RecordEncodeOptions) -> Result<()>
     where
         B: ByteBufMut,
-        I: Iterator<Item = &'a Record> + Clone,
+        I: IntoIterator<Item = &'a Record>,
+        I::IntoIter: Clone,
     {
+        let records = records.into_iter();
         match options.version {
             0..=1 => Self::encode_legacy(buf, records, options),
             2 => Self::encode_new(buf, records, options),
-            _ => panic!("Unknown record batch version"),
+            _ => bail!("Unknown record batch version"),
         }
     }
     fn encode_legacy_records<'a, B, I>(
         buf: &mut B,
         records: I,
         options: &RecordEncodeOptions,
-    ) -> Result<(), EncodeError>
+    ) -> Result<()>
     where
         B: ByteBufMut,
         I: Iterator<Item = &'a Record> + Clone,
@@ -180,11 +178,7 @@ impl RecordBatchEncoder {
         }
         Ok(())
     }
-    fn encode_legacy<'a, B, I>(
-        buf: &mut B,
-        records: I,
-        options: &RecordEncodeOptions,
-    ) -> Result<(), EncodeError>
+    fn encode_legacy<'a, B, I>(buf: &mut B, records: I, options: &RecordEncodeOptions) -> Result<()>
     where
         B: ByteBufMut,
         I: Iterator<Item = &'a Record> + Clone,
@@ -254,7 +248,7 @@ impl RecordBatchEncoder {
         min_offset: i64,
         min_timestamp: i64,
         options: &RecordEncodeOptions,
-    ) -> Result<(), EncodeError>
+    ) -> Result<()>
     where
         B: ByteBufMut,
         I: Iterator<Item = &'a Record>,
@@ -269,7 +263,7 @@ impl RecordBatchEncoder {
         buf: &mut B,
         records: &mut I,
         options: &RecordEncodeOptions,
-    ) -> Result<bool, EncodeError>
+    ) -> Result<bool>
     where
         B: ByteBufMut,
         I: Iterator<Item = &'a Record> + Clone,
@@ -423,7 +417,7 @@ impl RecordBatchEncoder {
         buf: &mut B,
         mut records: I,
         options: &RecordEncodeOptions,
-    ) -> Result<(), EncodeError>
+    ) -> Result<()>
     where
         B: ByteBufMut,
         I: Iterator<Item = &'a Record> + Clone,
@@ -435,14 +429,14 @@ impl RecordBatchEncoder {
 
 impl RecordBatchDecoder {
     /// Decode the provided buffer into a vec of records.
-    pub fn decode<B: ByteBuf>(buf: &mut B) -> Result<Vec<Record>, DecodeError> {
+    pub fn decode<B: ByteBuf>(buf: &mut B) -> Result<Vec<Record>> {
         let mut records = Vec::new();
         while buf.has_remaining() {
             Self::decode_batch(buf, &mut records)?;
         }
         Ok(records)
     }
-    fn decode_batch<B: ByteBuf>(buf: &mut B, records: &mut Vec<Record>) -> Result<(), DecodeError> {
+    fn decode_batch<B: ByteBuf>(buf: &mut B, records: &mut Vec<Record>) -> Result<()> {
         let version = buf.try_peek_bytes(MAGIC_BYTE_OFFSET..(MAGIC_BYTE_OFFSET + 1))?[0] as i8;
         match version {
             0..=1 => Record::decode_legacy(buf, version, records),
@@ -457,7 +451,7 @@ impl RecordBatchDecoder {
         batch_decode_info: &BatchDecodeInfo,
         version: i8,
         records: &mut Vec<Record>,
-    ) -> Result<(), DecodeError> {
+    ) -> Result<()> {
         records.reserve(batch_decode_info.record_count);
         for _ in 0..batch_decode_info.record_count {
             records.push(Record::decode_new(buf, batch_decode_info, version)?);
@@ -468,7 +462,7 @@ impl RecordBatchDecoder {
         buf: &mut B,
         version: i8,
         records: &mut Vec<Record>,
-    ) -> Result<(), DecodeError> {
+    ) -> Result<()> {
         // Base offset
         let min_offset = types::Int64.decode(buf)?;
 
@@ -588,10 +582,10 @@ impl Record {
         buf: &mut B,
         options: &RecordEncodeOptions,
         content_writer: F,
-    ) -> Result<(), EncodeError>
+    ) -> Result<()>
     where
         B: ByteBufMut,
-        F: FnOnce(&mut B) -> Result<(), EncodeError>,
+        F: FnOnce(&mut B) -> Result<()>,
     {
         types::Int64.encode(buf, 0)?;
         let size_gap = buf.put_typed_gap(gap::I32);
@@ -631,7 +625,7 @@ impl Record {
         &self,
         buf: &mut B,
         options: &RecordEncodeOptions,
-    ) -> Result<(), EncodeError> {
+    ) -> Result<()> {
         if self.transactional || self.control {
             bail!("Transactional and control records are not supported in this version of the protocol!");
         }
@@ -656,7 +650,7 @@ impl Record {
         min_offset: i64,
         min_timestamp: i64,
         options: &RecordEncodeOptions,
-    ) -> Result<(), EncodeError> {
+    ) -> Result<()> {
         // Size
         let size = self.compute_size_new(min_offset, min_timestamp, options)?;
         if size > i32::MAX as usize {
@@ -751,7 +745,7 @@ impl Record {
         min_offset: i64,
         min_timestamp: i64,
         _options: &RecordEncodeOptions,
-    ) -> Result<usize, EncodeError> {
+    ) -> Result<usize> {
         let mut total_size = 0;
 
         // Attributes
@@ -840,7 +834,7 @@ impl Record {
         buf: &mut B,
         version: i8,
         records: &mut Vec<Record>,
-    ) -> Result<(), DecodeError> {
+    ) -> Result<()> {
         let offset = types::Int64.decode(buf)?;
         let size: i32 = types::Int32.decode(buf)?;
         if size < 0 {
@@ -926,7 +920,7 @@ impl Record {
         buf: &mut B,
         batch_decode_info: &BatchDecodeInfo,
         _version: i8,
-    ) -> Result<Self, DecodeError> {
+    ) -> Result<Self> {
         // Size
         let size: i32 = types::VarInt.decode(buf)?;
         if size < 0 {

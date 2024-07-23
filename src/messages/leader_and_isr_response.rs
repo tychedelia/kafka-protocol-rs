@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0-7
@@ -51,7 +51,7 @@ impl Builder for LeaderAndIsrPartitionError {
 }
 
 impl Encodable for LeaderAndIsrPartitionError {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version <= 4 {
             if version >= 4 {
                 types::CompactString.encode(buf, &self.topic_name)?;
@@ -75,7 +75,7 @@ impl Encodable for LeaderAndIsrPartitionError {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version <= 4 {
             if version >= 4 {
@@ -103,7 +103,7 @@ impl Encodable for LeaderAndIsrPartitionError {
 }
 
 impl Decodable for LeaderAndIsrPartitionError {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let topic_name = if version <= 4 {
             if version >= 4 {
                 types::CompactString.decode(buf)?
@@ -183,7 +183,7 @@ impl Builder for LeaderAndIsrResponse {
 }
 
 impl Encodable for LeaderAndIsrResponse {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int16.encode(buf, &self.error_code)?;
         if version <= 4 {
             if version >= 4 {
@@ -218,7 +218,7 @@ impl Encodable for LeaderAndIsrResponse {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int16.compute_size(&self.error_code)?;
         if version <= 4 {
@@ -259,7 +259,7 @@ impl Encodable for LeaderAndIsrResponse {
 }
 
 impl Decodable for LeaderAndIsrResponse {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let error_code = types::Int16.decode(buf)?;
         let partition_errors = if version <= 4 {
             if version >= 4 {
@@ -334,12 +334,7 @@ impl Builder for LeaderAndIsrTopicError {
 
 impl MapEncodable for LeaderAndIsrTopicError {
     type Key = Uuid;
-    fn encode<B: ByteBufMut>(
-        &self,
-        key: &Self::Key,
-        buf: &mut B,
-        version: i16,
-    ) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
         if version >= 5 {
             types::Uuid.encode(buf, key)?;
         } else {
@@ -368,7 +363,7 @@ impl MapEncodable for LeaderAndIsrTopicError {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 5 {
             total_size += types::Uuid.compute_size(key)?;
@@ -403,7 +398,7 @@ impl MapEncodable for LeaderAndIsrTopicError {
 
 impl MapDecodable for LeaderAndIsrTopicError {
     type Key = Uuid;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
         let key_field = if version >= 5 {
             types::Uuid.decode(buf)?
         } else {

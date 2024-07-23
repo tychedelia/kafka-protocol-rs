@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0-3
@@ -46,7 +46,7 @@ impl Builder for ControlledShutdownResponse {
 }
 
 impl Encodable for ControlledShutdownResponse {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int16.encode(buf, &self.error_code)?;
         if version >= 3 {
             types::CompactArray(types::Struct { version })
@@ -68,7 +68,7 @@ impl Encodable for ControlledShutdownResponse {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int16.compute_size(&self.error_code)?;
         if version >= 3 {
@@ -95,7 +95,7 @@ impl Encodable for ControlledShutdownResponse {
 }
 
 impl Decodable for ControlledShutdownResponse {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let error_code = types::Int16.decode(buf)?;
         let remaining_partitions = if version >= 3 {
             types::CompactArray(types::Struct { version }).decode(buf)?
@@ -163,7 +163,7 @@ impl Builder for RemainingPartition {
 }
 
 impl Encodable for RemainingPartition {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 3 {
             types::CompactString.encode(buf, &self.topic_name)?;
         } else {
@@ -184,7 +184,7 @@ impl Encodable for RemainingPartition {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 3 {
             total_size += types::CompactString.compute_size(&self.topic_name)?;
@@ -209,7 +209,7 @@ impl Encodable for RemainingPartition {
 }
 
 impl Decodable for RemainingPartition {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let topic_name = if version >= 3 {
             types::CompactString.decode(buf)?
         } else {

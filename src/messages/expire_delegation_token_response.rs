@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0-2
@@ -51,7 +51,7 @@ impl Builder for ExpireDelegationTokenResponse {
 }
 
 impl Encodable for ExpireDelegationTokenResponse {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int16.encode(buf, &self.error_code)?;
         types::Int64.encode(buf, &self.expiry_timestamp_ms)?;
         types::Int32.encode(buf, &self.throttle_time_ms)?;
@@ -69,7 +69,7 @@ impl Encodable for ExpireDelegationTokenResponse {
         }
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int16.compute_size(&self.error_code)?;
         total_size += types::Int64.compute_size(&self.expiry_timestamp_ms)?;
@@ -91,7 +91,7 @@ impl Encodable for ExpireDelegationTokenResponse {
 }
 
 impl Decodable for ExpireDelegationTokenResponse {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let error_code = types::Int16.decode(buf)?;
         let expiry_timestamp_ms = types::Int64.decode(buf)?;
         let throttle_time_ms = types::Int32.decode(buf)?;

@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0
@@ -48,14 +48,14 @@ impl Builder for OffsetDeleteResponse {
 }
 
 impl Encodable for OffsetDeleteResponse {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int16.encode(buf, &self.error_code)?;
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         types::Array(types::Struct { version }).encode(buf, &self.topics)?;
 
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int16.compute_size(&self.error_code)?;
         total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
@@ -66,7 +66,7 @@ impl Encodable for OffsetDeleteResponse {
 }
 
 impl Decodable for OffsetDeleteResponse {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let error_code = types::Int16.decode(buf)?;
         let throttle_time_ms = types::Int32.decode(buf)?;
         let topics = types::Array(types::Struct { version }).decode(buf)?;
@@ -114,18 +114,13 @@ impl Builder for OffsetDeleteResponsePartition {
 
 impl MapEncodable for OffsetDeleteResponsePartition {
     type Key = i32;
-    fn encode<B: ByteBufMut>(
-        &self,
-        key: &Self::Key,
-        buf: &mut B,
-        version: i16,
-    ) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, key)?;
         types::Int16.encode(buf, &self.error_code)?;
 
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(key)?;
         total_size += types::Int16.compute_size(&self.error_code)?;
@@ -136,7 +131,7 @@ impl MapEncodable for OffsetDeleteResponsePartition {
 
 impl MapDecodable for OffsetDeleteResponsePartition {
     type Key = i32;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
         let key_field = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
         Ok((key_field, Self { error_code }))
@@ -175,18 +170,13 @@ impl Builder for OffsetDeleteResponseTopic {
 
 impl MapEncodable for OffsetDeleteResponseTopic {
     type Key = super::TopicName;
-    fn encode<B: ByteBufMut>(
-        &self,
-        key: &Self::Key,
-        buf: &mut B,
-        version: i16,
-    ) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
         types::String.encode(buf, key)?;
         types::Array(types::Struct { version }).encode(buf, &self.partitions)?;
 
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::String.compute_size(key)?;
         total_size += types::Array(types::Struct { version }).compute_size(&self.partitions)?;
@@ -197,7 +187,7 @@ impl MapEncodable for OffsetDeleteResponseTopic {
 
 impl MapDecodable for OffsetDeleteResponseTopic {
     type Key = super::TopicName;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self), DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
         let key_field = types::String.decode(buf)?;
         let partitions = types::Array(types::Struct { version }).decode(buf)?;
         Ok((key_field, Self { partitions }))

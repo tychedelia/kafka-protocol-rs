@@ -7,15 +7,15 @@
 use std::borrow::Borrow;
 use std::collections::BTreeMap;
 
-use anyhow::bail;
+use anyhow::{bail, Result};
 use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
+    VersionRange,
 };
 
 /// Valid versions: 0
@@ -41,7 +41,7 @@ impl Builder for DescribeTransactionsRequest {
 }
 
 impl Encodable for DescribeTransactionsRequest {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<(), EncodeError> {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::CompactArray(types::CompactString).encode(buf, &self.transactional_ids)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
@@ -55,7 +55,7 @@ impl Encodable for DescribeTransactionsRequest {
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
     }
-    fn compute_size(&self, version: i16) -> Result<usize, EncodeError> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size +=
             types::CompactArray(types::CompactString).compute_size(&self.transactional_ids)?;
@@ -74,7 +74,7 @@ impl Encodable for DescribeTransactionsRequest {
 }
 
 impl Decodable for DescribeTransactionsRequest {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self, DecodeError> {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let transactional_ids = types::CompactArray(types::CompactString).decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
         let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
