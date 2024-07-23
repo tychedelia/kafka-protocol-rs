@@ -13,15 +13,14 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
+    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
+    StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-4
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct InitProducerIdRequest {
     /// The transactional id, or null if the producer is not transactional.
     ///
@@ -47,11 +46,52 @@ pub struct InitProducerIdRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for InitProducerIdRequest {
-    type Builder = InitProducerIdRequestBuilder;
-
-    fn builder() -> Self::Builder {
-        InitProducerIdRequestBuilder::default()
+impl InitProducerIdRequest {
+    /// Sets `transactional_id` to the passed value.
+    ///
+    /// The transactional id, or null if the producer is not transactional.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_transactional_id(mut self, value: Option<super::TransactionalId>) -> Self {
+        self.transactional_id = value;
+        self
+    }
+    /// Sets `transaction_timeout_ms` to the passed value.
+    ///
+    /// The time in ms to wait before aborting idle transactions sent by this producer. This is only relevant if a TransactionalId has been defined.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_transaction_timeout_ms(mut self, value: i32) -> Self {
+        self.transaction_timeout_ms = value;
+        self
+    }
+    /// Sets `producer_id` to the passed value.
+    ///
+    /// The producer id. This is used to disambiguate requests if a transactional id is reused following its expiration.
+    ///
+    /// Supported API versions: 3-4
+    pub fn with_producer_id(mut self, value: super::ProducerId) -> Self {
+        self.producer_id = value;
+        self
+    }
+    /// Sets `producer_epoch` to the passed value.
+    ///
+    /// The producer's current epoch. This will be checked against the producer epoch on the broker, and the request will return an error if they do not match.
+    ///
+    /// Supported API versions: 3-4
+    pub fn with_producer_epoch(mut self, value: i16) -> Self {
+        self.producer_epoch = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

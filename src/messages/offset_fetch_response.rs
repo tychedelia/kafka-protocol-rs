@@ -13,15 +13,14 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
+    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
+    StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-9
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct OffsetFetchResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
@@ -47,11 +46,52 @@ pub struct OffsetFetchResponse {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for OffsetFetchResponse {
-    type Builder = OffsetFetchResponseBuilder;
-
-    fn builder() -> Self::Builder {
-        OffsetFetchResponseBuilder::default()
+impl OffsetFetchResponse {
+    /// Sets `throttle_time_ms` to the passed value.
+    ///
+    /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
+    ///
+    /// Supported API versions: 3-9
+    pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
+        self.throttle_time_ms = value;
+        self
+    }
+    /// Sets `topics` to the passed value.
+    ///
+    /// The responses per topic.
+    ///
+    /// Supported API versions: 0-7
+    pub fn with_topics(mut self, value: Vec<OffsetFetchResponseTopic>) -> Self {
+        self.topics = value;
+        self
+    }
+    /// Sets `error_code` to the passed value.
+    ///
+    /// The top-level error code, or 0 if there was no error.
+    ///
+    /// Supported API versions: 2-7
+    pub fn with_error_code(mut self, value: i16) -> Self {
+        self.error_code = value;
+        self
+    }
+    /// Sets `groups` to the passed value.
+    ///
+    /// The responses per group id.
+    ///
+    /// Supported API versions: 8-9
+    pub fn with_groups(mut self, value: Vec<OffsetFetchResponseGroup>) -> Self {
+        self.groups = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -204,8 +244,7 @@ impl Message for OffsetFetchResponse {
 
 /// Valid versions: 0-9
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct OffsetFetchResponseGroup {
     /// The group ID.
     ///
@@ -226,11 +265,43 @@ pub struct OffsetFetchResponseGroup {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for OffsetFetchResponseGroup {
-    type Builder = OffsetFetchResponseGroupBuilder;
-
-    fn builder() -> Self::Builder {
-        OffsetFetchResponseGroupBuilder::default()
+impl OffsetFetchResponseGroup {
+    /// Sets `group_id` to the passed value.
+    ///
+    /// The group ID.
+    ///
+    /// Supported API versions: 8-9
+    pub fn with_group_id(mut self, value: super::GroupId) -> Self {
+        self.group_id = value;
+        self
+    }
+    /// Sets `topics` to the passed value.
+    ///
+    /// The responses per topic.
+    ///
+    /// Supported API versions: 8-9
+    pub fn with_topics(mut self, value: Vec<OffsetFetchResponseTopics>) -> Self {
+        self.topics = value;
+        self
+    }
+    /// Sets `error_code` to the passed value.
+    ///
+    /// The group-level error code, or 0 if there was no error.
+    ///
+    /// Supported API versions: 8-9
+    pub fn with_error_code(mut self, value: i16) -> Self {
+        self.error_code = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -365,8 +436,7 @@ impl Message for OffsetFetchResponseGroup {
 
 /// Valid versions: 0-9
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct OffsetFetchResponsePartition {
     /// The partition index.
     ///
@@ -397,11 +467,61 @@ pub struct OffsetFetchResponsePartition {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for OffsetFetchResponsePartition {
-    type Builder = OffsetFetchResponsePartitionBuilder;
-
-    fn builder() -> Self::Builder {
-        OffsetFetchResponsePartitionBuilder::default()
+impl OffsetFetchResponsePartition {
+    /// Sets `partition_index` to the passed value.
+    ///
+    /// The partition index.
+    ///
+    /// Supported API versions: 0-7
+    pub fn with_partition_index(mut self, value: i32) -> Self {
+        self.partition_index = value;
+        self
+    }
+    /// Sets `committed_offset` to the passed value.
+    ///
+    /// The committed message offset.
+    ///
+    /// Supported API versions: 0-7
+    pub fn with_committed_offset(mut self, value: i64) -> Self {
+        self.committed_offset = value;
+        self
+    }
+    /// Sets `committed_leader_epoch` to the passed value.
+    ///
+    /// The leader epoch.
+    ///
+    /// Supported API versions: 5-7
+    pub fn with_committed_leader_epoch(mut self, value: i32) -> Self {
+        self.committed_leader_epoch = value;
+        self
+    }
+    /// Sets `metadata` to the passed value.
+    ///
+    /// The partition metadata.
+    ///
+    /// Supported API versions: 0-7
+    pub fn with_metadata(mut self, value: Option<StrBytes>) -> Self {
+        self.metadata = value;
+        self
+    }
+    /// Sets `error_code` to the passed value.
+    ///
+    /// The error code, or 0 if there was no error.
+    ///
+    /// Supported API versions: 0-7
+    pub fn with_error_code(mut self, value: i16) -> Self {
+        self.error_code = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -591,8 +711,7 @@ impl Message for OffsetFetchResponsePartition {
 
 /// Valid versions: 0-9
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct OffsetFetchResponsePartitions {
     /// The partition index.
     ///
@@ -623,11 +742,61 @@ pub struct OffsetFetchResponsePartitions {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for OffsetFetchResponsePartitions {
-    type Builder = OffsetFetchResponsePartitionsBuilder;
-
-    fn builder() -> Self::Builder {
-        OffsetFetchResponsePartitionsBuilder::default()
+impl OffsetFetchResponsePartitions {
+    /// Sets `partition_index` to the passed value.
+    ///
+    /// The partition index.
+    ///
+    /// Supported API versions: 8-9
+    pub fn with_partition_index(mut self, value: i32) -> Self {
+        self.partition_index = value;
+        self
+    }
+    /// Sets `committed_offset` to the passed value.
+    ///
+    /// The committed message offset.
+    ///
+    /// Supported API versions: 8-9
+    pub fn with_committed_offset(mut self, value: i64) -> Self {
+        self.committed_offset = value;
+        self
+    }
+    /// Sets `committed_leader_epoch` to the passed value.
+    ///
+    /// The leader epoch.
+    ///
+    /// Supported API versions: 8-9
+    pub fn with_committed_leader_epoch(mut self, value: i32) -> Self {
+        self.committed_leader_epoch = value;
+        self
+    }
+    /// Sets `metadata` to the passed value.
+    ///
+    /// The partition metadata.
+    ///
+    /// Supported API versions: 8-9
+    pub fn with_metadata(mut self, value: Option<StrBytes>) -> Self {
+        self.metadata = value;
+        self
+    }
+    /// Sets `error_code` to the passed value.
+    ///
+    /// The partition-level error code, or 0 if there was no error.
+    ///
+    /// Supported API versions: 8-9
+    pub fn with_error_code(mut self, value: i16) -> Self {
+        self.error_code = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -805,8 +974,7 @@ impl Message for OffsetFetchResponsePartitions {
 
 /// Valid versions: 0-9
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct OffsetFetchResponseTopic {
     /// The topic name.
     ///
@@ -822,11 +990,34 @@ pub struct OffsetFetchResponseTopic {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for OffsetFetchResponseTopic {
-    type Builder = OffsetFetchResponseTopicBuilder;
-
-    fn builder() -> Self::Builder {
-        OffsetFetchResponseTopicBuilder::default()
+impl OffsetFetchResponseTopic {
+    /// Sets `name` to the passed value.
+    ///
+    /// The topic name.
+    ///
+    /// Supported API versions: 0-7
+    pub fn with_name(mut self, value: super::TopicName) -> Self {
+        self.name = value;
+        self
+    }
+    /// Sets `partitions` to the passed value.
+    ///
+    /// The responses per partition
+    ///
+    /// Supported API versions: 0-7
+    pub fn with_partitions(mut self, value: Vec<OffsetFetchResponsePartition>) -> Self {
+        self.partitions = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -965,8 +1156,7 @@ impl Message for OffsetFetchResponseTopic {
 
 /// Valid versions: 0-9
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct OffsetFetchResponseTopics {
     /// The topic name.
     ///
@@ -982,11 +1172,34 @@ pub struct OffsetFetchResponseTopics {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for OffsetFetchResponseTopics {
-    type Builder = OffsetFetchResponseTopicsBuilder;
-
-    fn builder() -> Self::Builder {
-        OffsetFetchResponseTopicsBuilder::default()
+impl OffsetFetchResponseTopics {
+    /// Sets `name` to the passed value.
+    ///
+    /// The topic name.
+    ///
+    /// Supported API versions: 8-9
+    pub fn with_name(mut self, value: super::TopicName) -> Self {
+        self.name = value;
+        self
+    }
+    /// Sets `partitions` to the passed value.
+    ///
+    /// The responses per partition
+    ///
+    /// Supported API versions: 8-9
+    pub fn with_partitions(mut self, value: Vec<OffsetFetchResponsePartitions>) -> Self {
+        self.partitions = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

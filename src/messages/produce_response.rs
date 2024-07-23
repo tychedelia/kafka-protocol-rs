@@ -13,15 +13,14 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
+    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
+    StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-10
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct BatchIndexAndErrorMessage {
     /// The batch index of the record that cause the batch to be dropped
     ///
@@ -37,11 +36,34 @@ pub struct BatchIndexAndErrorMessage {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for BatchIndexAndErrorMessage {
-    type Builder = BatchIndexAndErrorMessageBuilder;
-
-    fn builder() -> Self::Builder {
-        BatchIndexAndErrorMessageBuilder::default()
+impl BatchIndexAndErrorMessage {
+    /// Sets `batch_index` to the passed value.
+    ///
+    /// The batch index of the record that cause the batch to be dropped
+    ///
+    /// Supported API versions: 8-10
+    pub fn with_batch_index(mut self, value: i32) -> Self {
+        self.batch_index = value;
+        self
+    }
+    /// Sets `batch_index_error_message` to the passed value.
+    ///
+    /// The error message of the record that caused the batch to be dropped
+    ///
+    /// Supported API versions: 8-10
+    pub fn with_batch_index_error_message(mut self, value: Option<StrBytes>) -> Self {
+        self.batch_index_error_message = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -166,8 +188,7 @@ impl Message for BatchIndexAndErrorMessage {
 
 /// Valid versions: 0-10
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct LeaderIdAndEpoch {
     /// The ID of the current leader or -1 if the leader is unknown.
     ///
@@ -183,11 +204,34 @@ pub struct LeaderIdAndEpoch {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for LeaderIdAndEpoch {
-    type Builder = LeaderIdAndEpochBuilder;
-
-    fn builder() -> Self::Builder {
-        LeaderIdAndEpochBuilder::default()
+impl LeaderIdAndEpoch {
+    /// Sets `leader_id` to the passed value.
+    ///
+    /// The ID of the current leader or -1 if the leader is unknown.
+    ///
+    /// Supported API versions: 10
+    pub fn with_leader_id(mut self, value: super::BrokerId) -> Self {
+        self.leader_id = value;
+        self
+    }
+    /// Sets `leader_epoch` to the passed value.
+    ///
+    /// The latest known leader epoch
+    ///
+    /// Supported API versions: 10
+    pub fn with_leader_epoch(mut self, value: i32) -> Self {
+        self.leader_epoch = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -300,8 +344,7 @@ impl Message for LeaderIdAndEpoch {
 
 /// Valid versions: 0-10
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct NodeEndpoint {
     /// The node's hostname.
     ///
@@ -322,11 +365,43 @@ pub struct NodeEndpoint {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for NodeEndpoint {
-    type Builder = NodeEndpointBuilder;
-
-    fn builder() -> Self::Builder {
-        NodeEndpointBuilder::default()
+impl NodeEndpoint {
+    /// Sets `host` to the passed value.
+    ///
+    /// The node's hostname.
+    ///
+    /// Supported API versions: 10
+    pub fn with_host(mut self, value: StrBytes) -> Self {
+        self.host = value;
+        self
+    }
+    /// Sets `port` to the passed value.
+    ///
+    /// The node's port.
+    ///
+    /// Supported API versions: 10
+    pub fn with_port(mut self, value: i32) -> Self {
+        self.port = value;
+        self
+    }
+    /// Sets `rack` to the passed value.
+    ///
+    /// The rack of the node, or null if it has not been assigned to a rack.
+    ///
+    /// Supported API versions: 10
+    pub fn with_rack(mut self, value: Option<StrBytes>) -> Self {
+        self.rack = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -489,8 +564,7 @@ impl Message for NodeEndpoint {
 
 /// Valid versions: 0-10
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct PartitionProduceResponse {
     /// The partition index.
     ///
@@ -536,11 +610,88 @@ pub struct PartitionProduceResponse {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for PartitionProduceResponse {
-    type Builder = PartitionProduceResponseBuilder;
-
-    fn builder() -> Self::Builder {
-        PartitionProduceResponseBuilder::default()
+impl PartitionProduceResponse {
+    /// Sets `index` to the passed value.
+    ///
+    /// The partition index.
+    ///
+    /// Supported API versions: 0-10
+    pub fn with_index(mut self, value: i32) -> Self {
+        self.index = value;
+        self
+    }
+    /// Sets `error_code` to the passed value.
+    ///
+    /// The error code, or 0 if there was no error.
+    ///
+    /// Supported API versions: 0-10
+    pub fn with_error_code(mut self, value: i16) -> Self {
+        self.error_code = value;
+        self
+    }
+    /// Sets `base_offset` to the passed value.
+    ///
+    /// The base offset.
+    ///
+    /// Supported API versions: 0-10
+    pub fn with_base_offset(mut self, value: i64) -> Self {
+        self.base_offset = value;
+        self
+    }
+    /// Sets `log_append_time_ms` to the passed value.
+    ///
+    /// The timestamp returned by broker after appending the messages. If CreateTime is used for the topic, the timestamp will be -1.  If LogAppendTime is used for the topic, the timestamp will be the broker local time when the messages are appended.
+    ///
+    /// Supported API versions: 2-10
+    pub fn with_log_append_time_ms(mut self, value: i64) -> Self {
+        self.log_append_time_ms = value;
+        self
+    }
+    /// Sets `log_start_offset` to the passed value.
+    ///
+    /// The log start offset.
+    ///
+    /// Supported API versions: 5-10
+    pub fn with_log_start_offset(mut self, value: i64) -> Self {
+        self.log_start_offset = value;
+        self
+    }
+    /// Sets `record_errors` to the passed value.
+    ///
+    /// The batch indices of records that caused the batch to be dropped
+    ///
+    /// Supported API versions: 8-10
+    pub fn with_record_errors(mut self, value: Vec<BatchIndexAndErrorMessage>) -> Self {
+        self.record_errors = value;
+        self
+    }
+    /// Sets `error_message` to the passed value.
+    ///
+    /// The global error message summarizing the common root cause of the records that caused the batch to be dropped
+    ///
+    /// Supported API versions: 8-10
+    pub fn with_error_message(mut self, value: Option<StrBytes>) -> Self {
+        self.error_message = value;
+        self
+    }
+    /// Sets `current_leader` to the passed value.
+    ///
+    ///
+    ///
+    /// Supported API versions: 10
+    pub fn with_current_leader(mut self, value: LeaderIdAndEpoch) -> Self {
+        self.current_leader = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -756,8 +907,7 @@ impl Message for PartitionProduceResponse {
 
 /// Valid versions: 0-10
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ProduceResponse {
     /// Each produce response
     ///
@@ -778,11 +928,49 @@ pub struct ProduceResponse {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for ProduceResponse {
-    type Builder = ProduceResponseBuilder;
-
-    fn builder() -> Self::Builder {
-        ProduceResponseBuilder::default()
+impl ProduceResponse {
+    /// Sets `responses` to the passed value.
+    ///
+    /// Each produce response
+    ///
+    /// Supported API versions: 0-10
+    pub fn with_responses(
+        mut self,
+        value: indexmap::IndexMap<super::TopicName, TopicProduceResponse>,
+    ) -> Self {
+        self.responses = value;
+        self
+    }
+    /// Sets `throttle_time_ms` to the passed value.
+    ///
+    /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
+    ///
+    /// Supported API versions: 1-10
+    pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
+        self.throttle_time_ms = value;
+        self
+    }
+    /// Sets `node_endpoints` to the passed value.
+    ///
+    /// Endpoints for all current-leaders enumerated in PartitionProduceResponses, with errors NOT_LEADER_OR_FOLLOWER.
+    ///
+    /// Supported API versions: 10
+    pub fn with_node_endpoints(
+        mut self,
+        value: indexmap::IndexMap<super::BrokerId, NodeEndpoint>,
+    ) -> Self {
+        self.node_endpoints = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -938,8 +1126,7 @@ impl Message for ProduceResponse {
 
 /// Valid versions: 0-10
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct TopicProduceResponse {
     /// Each partition that we produced to within the topic.
     ///
@@ -950,11 +1137,25 @@ pub struct TopicProduceResponse {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for TopicProduceResponse {
-    type Builder = TopicProduceResponseBuilder;
-
-    fn builder() -> Self::Builder {
-        TopicProduceResponseBuilder::default()
+impl TopicProduceResponse {
+    /// Sets `partition_responses` to the passed value.
+    ///
+    /// Each partition that we produced to within the topic.
+    ///
+    /// Supported API versions: 0-10
+    pub fn with_partition_responses(mut self, value: Vec<PartitionProduceResponse>) -> Self {
+        self.partition_responses = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

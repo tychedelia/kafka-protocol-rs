@@ -13,15 +13,14 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
+    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
+    StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-4
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct StopReplicaPartitionError {
     /// The topic name.
     ///
@@ -42,11 +41,43 @@ pub struct StopReplicaPartitionError {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for StopReplicaPartitionError {
-    type Builder = StopReplicaPartitionErrorBuilder;
-
-    fn builder() -> Self::Builder {
-        StopReplicaPartitionErrorBuilder::default()
+impl StopReplicaPartitionError {
+    /// Sets `topic_name` to the passed value.
+    ///
+    /// The topic name.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_topic_name(mut self, value: super::TopicName) -> Self {
+        self.topic_name = value;
+        self
+    }
+    /// Sets `partition_index` to the passed value.
+    ///
+    /// The partition index.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_partition_index(mut self, value: i32) -> Self {
+        self.partition_index = value;
+        self
+    }
+    /// Sets `error_code` to the passed value.
+    ///
+    /// The partition error code, or 0 if there was no partition error.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_error_code(mut self, value: i16) -> Self {
+        self.error_code = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -144,8 +175,7 @@ impl Message for StopReplicaPartitionError {
 
 /// Valid versions: 0-4
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct StopReplicaResponse {
     /// The top-level error code, or 0 if there was no top-level error.
     ///
@@ -161,11 +191,34 @@ pub struct StopReplicaResponse {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for StopReplicaResponse {
-    type Builder = StopReplicaResponseBuilder;
-
-    fn builder() -> Self::Builder {
-        StopReplicaResponseBuilder::default()
+impl StopReplicaResponse {
+    /// Sets `error_code` to the passed value.
+    ///
+    /// The top-level error code, or 0 if there was no top-level error.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_error_code(mut self, value: i16) -> Self {
+        self.error_code = value;
+        self
+    }
+    /// Sets `partition_errors` to the passed value.
+    ///
+    /// The responses for each partition.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_partition_errors(mut self, value: Vec<StopReplicaPartitionError>) -> Self {
+        self.partition_errors = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

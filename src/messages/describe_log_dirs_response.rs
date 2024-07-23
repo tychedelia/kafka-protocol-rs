@@ -13,15 +13,14 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
+    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
+    StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-4
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DescribeLogDirsPartition {
     /// The partition index.
     ///
@@ -47,11 +46,52 @@ pub struct DescribeLogDirsPartition {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for DescribeLogDirsPartition {
-    type Builder = DescribeLogDirsPartitionBuilder;
-
-    fn builder() -> Self::Builder {
-        DescribeLogDirsPartitionBuilder::default()
+impl DescribeLogDirsPartition {
+    /// Sets `partition_index` to the passed value.
+    ///
+    /// The partition index.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_partition_index(mut self, value: i32) -> Self {
+        self.partition_index = value;
+        self
+    }
+    /// Sets `partition_size` to the passed value.
+    ///
+    /// The size of the log segments in this partition in bytes.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_partition_size(mut self, value: i64) -> Self {
+        self.partition_size = value;
+        self
+    }
+    /// Sets `offset_lag` to the passed value.
+    ///
+    /// The lag of the log's LEO w.r.t. partition's HW (if it is the current log for the partition) or current replica's LEO (if it is the future log for the partition)
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_offset_lag(mut self, value: i64) -> Self {
+        self.offset_lag = value;
+        self
+    }
+    /// Sets `is_future_key` to the passed value.
+    ///
+    /// True if this log is created by AlterReplicaLogDirsRequest and will replace the current log of the replica in the future.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_is_future_key(mut self, value: bool) -> Self {
+        self.is_future_key = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -142,8 +182,7 @@ impl Message for DescribeLogDirsPartition {
 
 /// Valid versions: 0-4
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DescribeLogDirsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
@@ -164,11 +203,43 @@ pub struct DescribeLogDirsResponse {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for DescribeLogDirsResponse {
-    type Builder = DescribeLogDirsResponseBuilder;
-
-    fn builder() -> Self::Builder {
-        DescribeLogDirsResponseBuilder::default()
+impl DescribeLogDirsResponse {
+    /// Sets `throttle_time_ms` to the passed value.
+    ///
+    /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
+        self.throttle_time_ms = value;
+        self
+    }
+    /// Sets `error_code` to the passed value.
+    ///
+    /// The error code, or 0 if there was no error.
+    ///
+    /// Supported API versions: 3-4
+    pub fn with_error_code(mut self, value: i16) -> Self {
+        self.error_code = value;
+        self
+    }
+    /// Sets `results` to the passed value.
+    ///
+    /// The log directories.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_results(mut self, value: Vec<DescribeLogDirsResult>) -> Self {
+        self.results = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -275,8 +346,7 @@ impl Message for DescribeLogDirsResponse {
 
 /// Valid versions: 0-4
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DescribeLogDirsResult {
     /// The error code, or 0 if there was no error.
     ///
@@ -307,11 +377,61 @@ pub struct DescribeLogDirsResult {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for DescribeLogDirsResult {
-    type Builder = DescribeLogDirsResultBuilder;
-
-    fn builder() -> Self::Builder {
-        DescribeLogDirsResultBuilder::default()
+impl DescribeLogDirsResult {
+    /// Sets `error_code` to the passed value.
+    ///
+    /// The error code, or 0 if there was no error.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_error_code(mut self, value: i16) -> Self {
+        self.error_code = value;
+        self
+    }
+    /// Sets `log_dir` to the passed value.
+    ///
+    /// The absolute log directory path.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_log_dir(mut self, value: StrBytes) -> Self {
+        self.log_dir = value;
+        self
+    }
+    /// Sets `topics` to the passed value.
+    ///
+    /// Each topic.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_topics(mut self, value: Vec<DescribeLogDirsTopic>) -> Self {
+        self.topics = value;
+        self
+    }
+    /// Sets `total_bytes` to the passed value.
+    ///
+    /// The total size in bytes of the volume the log directory is in.
+    ///
+    /// Supported API versions: 4
+    pub fn with_total_bytes(mut self, value: i64) -> Self {
+        self.total_bytes = value;
+        self
+    }
+    /// Sets `usable_bytes` to the passed value.
+    ///
+    /// The usable size in bytes of the volume the log directory is in.
+    ///
+    /// Supported API versions: 4
+    pub fn with_usable_bytes(mut self, value: i64) -> Self {
+        self.usable_bytes = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -448,8 +568,7 @@ impl Message for DescribeLogDirsResult {
 
 /// Valid versions: 0-4
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DescribeLogDirsTopic {
     /// The topic name.
     ///
@@ -465,11 +584,34 @@ pub struct DescribeLogDirsTopic {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for DescribeLogDirsTopic {
-    type Builder = DescribeLogDirsTopicBuilder;
-
-    fn builder() -> Self::Builder {
-        DescribeLogDirsTopicBuilder::default()
+impl DescribeLogDirsTopic {
+    /// Sets `name` to the passed value.
+    ///
+    /// The topic name.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_name(mut self, value: super::TopicName) -> Self {
+        self.name = value;
+        self
+    }
+    /// Sets `partitions` to the passed value.
+    ///
+    ///
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_partitions(mut self, value: Vec<DescribeLogDirsPartition>) -> Self {
+        self.partitions = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

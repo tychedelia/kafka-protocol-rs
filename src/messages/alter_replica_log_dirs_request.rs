@@ -13,15 +13,14 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
+    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
+    StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-2
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct AlterReplicaLogDir {
     /// The topics to add to the directory.
     ///
@@ -32,11 +31,28 @@ pub struct AlterReplicaLogDir {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for AlterReplicaLogDir {
-    type Builder = AlterReplicaLogDirBuilder;
-
-    fn builder() -> Self::Builder {
-        AlterReplicaLogDirBuilder::default()
+impl AlterReplicaLogDir {
+    /// Sets `topics` to the passed value.
+    ///
+    /// The topics to add to the directory.
+    ///
+    /// Supported API versions: 0-2
+    pub fn with_topics(
+        mut self,
+        value: indexmap::IndexMap<super::TopicName, AlterReplicaLogDirTopic>,
+    ) -> Self {
+        self.topics = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -150,8 +166,7 @@ impl Message for AlterReplicaLogDir {
 
 /// Valid versions: 0-2
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct AlterReplicaLogDirTopic {
     /// The partition indexes.
     ///
@@ -162,11 +177,25 @@ pub struct AlterReplicaLogDirTopic {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for AlterReplicaLogDirTopic {
-    type Builder = AlterReplicaLogDirTopicBuilder;
-
-    fn builder() -> Self::Builder {
-        AlterReplicaLogDirTopicBuilder::default()
+impl AlterReplicaLogDirTopic {
+    /// Sets `partitions` to the passed value.
+    ///
+    /// The partition indexes.
+    ///
+    /// Supported API versions: 0-2
+    pub fn with_partitions(mut self, value: Vec<i32>) -> Self {
+        self.partitions = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -279,8 +308,7 @@ impl Message for AlterReplicaLogDirTopic {
 
 /// Valid versions: 0-2
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct AlterReplicaLogDirsRequest {
     /// The alterations to make for each directory.
     ///
@@ -291,11 +319,25 @@ pub struct AlterReplicaLogDirsRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for AlterReplicaLogDirsRequest {
-    type Builder = AlterReplicaLogDirsRequestBuilder;
-
-    fn builder() -> Self::Builder {
-        AlterReplicaLogDirsRequestBuilder::default()
+impl AlterReplicaLogDirsRequest {
+    /// Sets `dirs` to the passed value.
+    ///
+    /// The alterations to make for each directory.
+    ///
+    /// Supported API versions: 0-2
+    pub fn with_dirs(mut self, value: indexmap::IndexMap<StrBytes, AlterReplicaLogDir>) -> Self {
+        self.dirs = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

@@ -13,15 +13,14 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
+    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
+    StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-1
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct UpdatableFeatureResult {
     /// The feature update error code or `0` if the feature update succeeded.
     ///
@@ -37,11 +36,34 @@ pub struct UpdatableFeatureResult {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for UpdatableFeatureResult {
-    type Builder = UpdatableFeatureResultBuilder;
-
-    fn builder() -> Self::Builder {
-        UpdatableFeatureResultBuilder::default()
+impl UpdatableFeatureResult {
+    /// Sets `error_code` to the passed value.
+    ///
+    /// The feature update error code or `0` if the feature update succeeded.
+    ///
+    /// Supported API versions: 0-1
+    pub fn with_error_code(mut self, value: i16) -> Self {
+        self.error_code = value;
+        self
+    }
+    /// Sets `error_message` to the passed value.
+    ///
+    /// The feature update error, or `null` if the feature update succeeded.
+    ///
+    /// Supported API versions: 0-1
+    pub fn with_error_message(mut self, value: Option<StrBytes>) -> Self {
+        self.error_message = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -129,8 +151,7 @@ impl Message for UpdatableFeatureResult {
 
 /// Valid versions: 0-1
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct UpdateFeaturesResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
@@ -156,11 +177,55 @@ pub struct UpdateFeaturesResponse {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for UpdateFeaturesResponse {
-    type Builder = UpdateFeaturesResponseBuilder;
-
-    fn builder() -> Self::Builder {
-        UpdateFeaturesResponseBuilder::default()
+impl UpdateFeaturesResponse {
+    /// Sets `throttle_time_ms` to the passed value.
+    ///
+    /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
+    ///
+    /// Supported API versions: 0-1
+    pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
+        self.throttle_time_ms = value;
+        self
+    }
+    /// Sets `error_code` to the passed value.
+    ///
+    /// The top-level error code, or `0` if there was no top-level error.
+    ///
+    /// Supported API versions: 0-1
+    pub fn with_error_code(mut self, value: i16) -> Self {
+        self.error_code = value;
+        self
+    }
+    /// Sets `error_message` to the passed value.
+    ///
+    /// The top-level error message, or `null` if there was no top-level error.
+    ///
+    /// Supported API versions: 0-1
+    pub fn with_error_message(mut self, value: Option<StrBytes>) -> Self {
+        self.error_message = value;
+        self
+    }
+    /// Sets `results` to the passed value.
+    ///
+    /// Results for each feature update.
+    ///
+    /// Supported API versions: 0-1
+    pub fn with_results(
+        mut self,
+        value: indexmap::IndexMap<StrBytes, UpdatableFeatureResult>,
+    ) -> Self {
+        self.results = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

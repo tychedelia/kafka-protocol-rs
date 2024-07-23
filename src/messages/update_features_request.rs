@@ -13,15 +13,14 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
+    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
+    StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-1
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct FeatureUpdateKey {
     /// The new maximum version level for the finalized feature. A value >= 1 is valid. A value < 1, is special, and can be used to request the deletion of the finalized feature.
     ///
@@ -42,11 +41,43 @@ pub struct FeatureUpdateKey {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for FeatureUpdateKey {
-    type Builder = FeatureUpdateKeyBuilder;
-
-    fn builder() -> Self::Builder {
-        FeatureUpdateKeyBuilder::default()
+impl FeatureUpdateKey {
+    /// Sets `max_version_level` to the passed value.
+    ///
+    /// The new maximum version level for the finalized feature. A value >= 1 is valid. A value < 1, is special, and can be used to request the deletion of the finalized feature.
+    ///
+    /// Supported API versions: 0-1
+    pub fn with_max_version_level(mut self, value: i16) -> Self {
+        self.max_version_level = value;
+        self
+    }
+    /// Sets `allow_downgrade` to the passed value.
+    ///
+    /// DEPRECATED in version 1 (see DowngradeType). When set to true, the finalized feature version level is allowed to be downgraded/deleted. The downgrade request will fail if the new maximum version level is a value that's not lower than the existing maximum finalized version level.
+    ///
+    /// Supported API versions: 0
+    pub fn with_allow_downgrade(mut self, value: bool) -> Self {
+        self.allow_downgrade = value;
+        self
+    }
+    /// Sets `upgrade_type` to the passed value.
+    ///
+    /// Determine which type of upgrade will be performed: 1 will perform an upgrade only (default), 2 is safe downgrades only (lossless), 3 is unsafe downgrades (lossy).
+    ///
+    /// Supported API versions: 1
+    pub fn with_upgrade_type(mut self, value: i8) -> Self {
+        self.upgrade_type = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -171,8 +202,7 @@ impl Message for FeatureUpdateKey {
 
 /// Valid versions: 0-1
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct UpdateFeaturesRequest {
     /// How long to wait in milliseconds before timing out the request.
     ///
@@ -193,11 +223,46 @@ pub struct UpdateFeaturesRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for UpdateFeaturesRequest {
-    type Builder = UpdateFeaturesRequestBuilder;
-
-    fn builder() -> Self::Builder {
-        UpdateFeaturesRequestBuilder::default()
+impl UpdateFeaturesRequest {
+    /// Sets `timeout_ms` to the passed value.
+    ///
+    /// How long to wait in milliseconds before timing out the request.
+    ///
+    /// Supported API versions: 0-1
+    pub fn with_timeout_ms(mut self, value: i32) -> Self {
+        self.timeout_ms = value;
+        self
+    }
+    /// Sets `feature_updates` to the passed value.
+    ///
+    /// The list of updates to finalized features.
+    ///
+    /// Supported API versions: 0-1
+    pub fn with_feature_updates(
+        mut self,
+        value: indexmap::IndexMap<StrBytes, FeatureUpdateKey>,
+    ) -> Self {
+        self.feature_updates = value;
+        self
+    }
+    /// Sets `validate_only` to the passed value.
+    ///
+    /// True if we should validate the request, but not perform the upgrade or downgrade.
+    ///
+    /// Supported API versions: 1
+    pub fn with_validate_only(mut self, value: bool) -> Self {
+        self.validate_only = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

@@ -13,15 +13,14 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
+    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
+    StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-9
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct JoinGroupRequest {
     /// The group identifier.
     ///
@@ -67,11 +66,91 @@ pub struct JoinGroupRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for JoinGroupRequest {
-    type Builder = JoinGroupRequestBuilder;
-
-    fn builder() -> Self::Builder {
-        JoinGroupRequestBuilder::default()
+impl JoinGroupRequest {
+    /// Sets `group_id` to the passed value.
+    ///
+    /// The group identifier.
+    ///
+    /// Supported API versions: 0-9
+    pub fn with_group_id(mut self, value: super::GroupId) -> Self {
+        self.group_id = value;
+        self
+    }
+    /// Sets `session_timeout_ms` to the passed value.
+    ///
+    /// The coordinator considers the consumer dead if it receives no heartbeat after this timeout in milliseconds.
+    ///
+    /// Supported API versions: 0-9
+    pub fn with_session_timeout_ms(mut self, value: i32) -> Self {
+        self.session_timeout_ms = value;
+        self
+    }
+    /// Sets `rebalance_timeout_ms` to the passed value.
+    ///
+    /// The maximum time in milliseconds that the coordinator will wait for each member to rejoin when rebalancing the group.
+    ///
+    /// Supported API versions: 1-9
+    pub fn with_rebalance_timeout_ms(mut self, value: i32) -> Self {
+        self.rebalance_timeout_ms = value;
+        self
+    }
+    /// Sets `member_id` to the passed value.
+    ///
+    /// The member id assigned by the group coordinator.
+    ///
+    /// Supported API versions: 0-9
+    pub fn with_member_id(mut self, value: StrBytes) -> Self {
+        self.member_id = value;
+        self
+    }
+    /// Sets `group_instance_id` to the passed value.
+    ///
+    /// The unique identifier of the consumer instance provided by end user.
+    ///
+    /// Supported API versions: 5-9
+    pub fn with_group_instance_id(mut self, value: Option<StrBytes>) -> Self {
+        self.group_instance_id = value;
+        self
+    }
+    /// Sets `protocol_type` to the passed value.
+    ///
+    /// The unique name the for class of protocols implemented by the group we want to join.
+    ///
+    /// Supported API versions: 0-9
+    pub fn with_protocol_type(mut self, value: StrBytes) -> Self {
+        self.protocol_type = value;
+        self
+    }
+    /// Sets `protocols` to the passed value.
+    ///
+    /// The list of protocols that the member supports.
+    ///
+    /// Supported API versions: 0-9
+    pub fn with_protocols(
+        mut self,
+        value: indexmap::IndexMap<StrBytes, JoinGroupRequestProtocol>,
+    ) -> Self {
+        self.protocols = value;
+        self
+    }
+    /// Sets `reason` to the passed value.
+    ///
+    /// The reason why the member (re-)joins the group.
+    ///
+    /// Supported API versions: 8-9
+    pub fn with_reason(mut self, value: Option<StrBytes>) -> Self {
+        self.reason = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -275,8 +354,7 @@ impl Message for JoinGroupRequest {
 
 /// Valid versions: 0-9
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct JoinGroupRequestProtocol {
     /// The protocol metadata.
     ///
@@ -287,11 +365,25 @@ pub struct JoinGroupRequestProtocol {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for JoinGroupRequestProtocol {
-    type Builder = JoinGroupRequestProtocolBuilder;
-
-    fn builder() -> Self::Builder {
-        JoinGroupRequestProtocolBuilder::default()
+impl JoinGroupRequestProtocol {
+    /// Sets `metadata` to the passed value.
+    ///
+    /// The protocol metadata.
+    ///
+    /// Supported API versions: 0-9
+    pub fn with_metadata(mut self, value: Bytes) -> Self {
+        self.metadata = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

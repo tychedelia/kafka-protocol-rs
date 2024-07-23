@@ -13,15 +13,14 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
+    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
+    StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-3
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DescribeDelegationTokenResponse {
     /// The error code, or 0 if there was no error.
     ///
@@ -42,11 +41,43 @@ pub struct DescribeDelegationTokenResponse {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for DescribeDelegationTokenResponse {
-    type Builder = DescribeDelegationTokenResponseBuilder;
-
-    fn builder() -> Self::Builder {
-        DescribeDelegationTokenResponseBuilder::default()
+impl DescribeDelegationTokenResponse {
+    /// Sets `error_code` to the passed value.
+    ///
+    /// The error code, or 0 if there was no error.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_error_code(mut self, value: i16) -> Self {
+        self.error_code = value;
+        self
+    }
+    /// Sets `tokens` to the passed value.
+    ///
+    /// The tokens.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_tokens(mut self, value: Vec<DescribedDelegationToken>) -> Self {
+        self.tokens = value;
+        self
+    }
+    /// Sets `throttle_time_ms` to the passed value.
+    ///
+    /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
+        self.throttle_time_ms = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -145,8 +176,7 @@ impl Message for DescribeDelegationTokenResponse {
 
 /// Valid versions: 0-3
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DescribedDelegationToken {
     /// The token principal type.
     ///
@@ -202,11 +232,106 @@ pub struct DescribedDelegationToken {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for DescribedDelegationToken {
-    type Builder = DescribedDelegationTokenBuilder;
-
-    fn builder() -> Self::Builder {
-        DescribedDelegationTokenBuilder::default()
+impl DescribedDelegationToken {
+    /// Sets `principal_type` to the passed value.
+    ///
+    /// The token principal type.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_principal_type(mut self, value: StrBytes) -> Self {
+        self.principal_type = value;
+        self
+    }
+    /// Sets `principal_name` to the passed value.
+    ///
+    /// The token principal name.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_principal_name(mut self, value: StrBytes) -> Self {
+        self.principal_name = value;
+        self
+    }
+    /// Sets `token_requester_principal_type` to the passed value.
+    ///
+    /// The principal type of the requester of the token.
+    ///
+    /// Supported API versions: 3
+    pub fn with_token_requester_principal_type(mut self, value: StrBytes) -> Self {
+        self.token_requester_principal_type = value;
+        self
+    }
+    /// Sets `token_requester_principal_name` to the passed value.
+    ///
+    /// The principal type of the requester of the token.
+    ///
+    /// Supported API versions: 3
+    pub fn with_token_requester_principal_name(mut self, value: StrBytes) -> Self {
+        self.token_requester_principal_name = value;
+        self
+    }
+    /// Sets `issue_timestamp` to the passed value.
+    ///
+    /// The token issue timestamp in milliseconds.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_issue_timestamp(mut self, value: i64) -> Self {
+        self.issue_timestamp = value;
+        self
+    }
+    /// Sets `expiry_timestamp` to the passed value.
+    ///
+    /// The token expiry timestamp in milliseconds.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_expiry_timestamp(mut self, value: i64) -> Self {
+        self.expiry_timestamp = value;
+        self
+    }
+    /// Sets `max_timestamp` to the passed value.
+    ///
+    /// The token maximum timestamp length in milliseconds.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_max_timestamp(mut self, value: i64) -> Self {
+        self.max_timestamp = value;
+        self
+    }
+    /// Sets `token_id` to the passed value.
+    ///
+    /// The token ID.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_token_id(mut self, value: StrBytes) -> Self {
+        self.token_id = value;
+        self
+    }
+    /// Sets `hmac` to the passed value.
+    ///
+    /// The token HMAC.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_hmac(mut self, value: Bytes) -> Self {
+        self.hmac = value;
+        self
+    }
+    /// Sets `renewers` to the passed value.
+    ///
+    /// Those who are able to renew this token before it expires.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_renewers(mut self, value: Vec<DescribedDelegationTokenRenewer>) -> Self {
+        self.renewers = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -422,8 +547,7 @@ impl Message for DescribedDelegationToken {
 
 /// Valid versions: 0-3
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DescribedDelegationTokenRenewer {
     /// The renewer principal type
     ///
@@ -439,11 +563,34 @@ pub struct DescribedDelegationTokenRenewer {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for DescribedDelegationTokenRenewer {
-    type Builder = DescribedDelegationTokenRenewerBuilder;
-
-    fn builder() -> Self::Builder {
-        DescribedDelegationTokenRenewerBuilder::default()
+impl DescribedDelegationTokenRenewer {
+    /// Sets `principal_type` to the passed value.
+    ///
+    /// The renewer principal type
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_principal_type(mut self, value: StrBytes) -> Self {
+        self.principal_type = value;
+        self
+    }
+    /// Sets `principal_name` to the passed value.
+    ///
+    /// The renewer principal name
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_principal_name(mut self, value: StrBytes) -> Self {
+        self.principal_name = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

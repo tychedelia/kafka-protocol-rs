@@ -13,15 +13,14 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
+    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
+    StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-16
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct AbortedTransaction {
     /// The producer id associated with the aborted transaction.
     ///
@@ -37,11 +36,34 @@ pub struct AbortedTransaction {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for AbortedTransaction {
-    type Builder = AbortedTransactionBuilder;
-
-    fn builder() -> Self::Builder {
-        AbortedTransactionBuilder::default()
+impl AbortedTransaction {
+    /// Sets `producer_id` to the passed value.
+    ///
+    /// The producer id associated with the aborted transaction.
+    ///
+    /// Supported API versions: 4-16
+    pub fn with_producer_id(mut self, value: super::ProducerId) -> Self {
+        self.producer_id = value;
+        self
+    }
+    /// Sets `first_offset` to the passed value.
+    ///
+    /// The first offset in the aborted transaction.
+    ///
+    /// Supported API versions: 4-16
+    pub fn with_first_offset(mut self, value: i64) -> Self {
+        self.first_offset = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -154,8 +176,7 @@ impl Message for AbortedTransaction {
 
 /// Valid versions: 0-16
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct EpochEndOffset {
     ///
     ///
@@ -171,11 +192,34 @@ pub struct EpochEndOffset {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for EpochEndOffset {
-    type Builder = EpochEndOffsetBuilder;
-
-    fn builder() -> Self::Builder {
-        EpochEndOffsetBuilder::default()
+impl EpochEndOffset {
+    /// Sets `epoch` to the passed value.
+    ///
+    ///
+    ///
+    /// Supported API versions: 12-16
+    pub fn with_epoch(mut self, value: i32) -> Self {
+        self.epoch = value;
+        self
+    }
+    /// Sets `end_offset` to the passed value.
+    ///
+    ///
+    ///
+    /// Supported API versions: 12-16
+    pub fn with_end_offset(mut self, value: i64) -> Self {
+        self.end_offset = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -288,8 +332,7 @@ impl Message for EpochEndOffset {
 
 /// Valid versions: 0-16
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct FetchResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
@@ -320,11 +363,64 @@ pub struct FetchResponse {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for FetchResponse {
-    type Builder = FetchResponseBuilder;
-
-    fn builder() -> Self::Builder {
-        FetchResponseBuilder::default()
+impl FetchResponse {
+    /// Sets `throttle_time_ms` to the passed value.
+    ///
+    /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
+    ///
+    /// Supported API versions: 1-16
+    pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
+        self.throttle_time_ms = value;
+        self
+    }
+    /// Sets `error_code` to the passed value.
+    ///
+    /// The top level response error code.
+    ///
+    /// Supported API versions: 7-16
+    pub fn with_error_code(mut self, value: i16) -> Self {
+        self.error_code = value;
+        self
+    }
+    /// Sets `session_id` to the passed value.
+    ///
+    /// The fetch session ID, or 0 if this is not part of a fetch session.
+    ///
+    /// Supported API versions: 7-16
+    pub fn with_session_id(mut self, value: i32) -> Self {
+        self.session_id = value;
+        self
+    }
+    /// Sets `responses` to the passed value.
+    ///
+    /// The response topics.
+    ///
+    /// Supported API versions: 0-16
+    pub fn with_responses(mut self, value: Vec<FetchableTopicResponse>) -> Self {
+        self.responses = value;
+        self
+    }
+    /// Sets `node_endpoints` to the passed value.
+    ///
+    /// Endpoints for all current-leaders enumerated in PartitionData, with errors NOT_LEADER_OR_FOLLOWER & FENCED_LEADER_EPOCH.
+    ///
+    /// Supported API versions: 16
+    pub fn with_node_endpoints(
+        mut self,
+        value: indexmap::IndexMap<super::BrokerId, NodeEndpoint>,
+    ) -> Self {
+        self.node_endpoints = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -514,8 +610,7 @@ impl Message for FetchResponse {
 
 /// Valid versions: 0-16
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct FetchableTopicResponse {
     /// The topic name.
     ///
@@ -536,11 +631,43 @@ pub struct FetchableTopicResponse {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for FetchableTopicResponse {
-    type Builder = FetchableTopicResponseBuilder;
-
-    fn builder() -> Self::Builder {
-        FetchableTopicResponseBuilder::default()
+impl FetchableTopicResponse {
+    /// Sets `topic` to the passed value.
+    ///
+    /// The topic name.
+    ///
+    /// Supported API versions: 0-12
+    pub fn with_topic(mut self, value: super::TopicName) -> Self {
+        self.topic = value;
+        self
+    }
+    /// Sets `topic_id` to the passed value.
+    ///
+    /// The unique topic ID
+    ///
+    /// Supported API versions: 13-16
+    pub fn with_topic_id(mut self, value: Uuid) -> Self {
+        self.topic_id = value;
+        self
+    }
+    /// Sets `partitions` to the passed value.
+    ///
+    /// The topic partitions.
+    ///
+    /// Supported API versions: 0-16
+    pub fn with_partitions(mut self, value: Vec<PartitionData>) -> Self {
+        self.partitions = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -667,8 +794,7 @@ impl Message for FetchableTopicResponse {
 
 /// Valid versions: 0-16
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct LeaderIdAndEpoch {
     /// The ID of the current leader or -1 if the leader is unknown.
     ///
@@ -684,11 +810,34 @@ pub struct LeaderIdAndEpoch {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for LeaderIdAndEpoch {
-    type Builder = LeaderIdAndEpochBuilder;
-
-    fn builder() -> Self::Builder {
-        LeaderIdAndEpochBuilder::default()
+impl LeaderIdAndEpoch {
+    /// Sets `leader_id` to the passed value.
+    ///
+    /// The ID of the current leader or -1 if the leader is unknown.
+    ///
+    /// Supported API versions: 12-16
+    pub fn with_leader_id(mut self, value: super::BrokerId) -> Self {
+        self.leader_id = value;
+        self
+    }
+    /// Sets `leader_epoch` to the passed value.
+    ///
+    /// The latest known leader epoch
+    ///
+    /// Supported API versions: 12-16
+    pub fn with_leader_epoch(mut self, value: i32) -> Self {
+        self.leader_epoch = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -801,8 +950,7 @@ impl Message for LeaderIdAndEpoch {
 
 /// Valid versions: 0-16
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct NodeEndpoint {
     /// The node's hostname.
     ///
@@ -823,11 +971,43 @@ pub struct NodeEndpoint {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for NodeEndpoint {
-    type Builder = NodeEndpointBuilder;
-
-    fn builder() -> Self::Builder {
-        NodeEndpointBuilder::default()
+impl NodeEndpoint {
+    /// Sets `host` to the passed value.
+    ///
+    /// The node's hostname.
+    ///
+    /// Supported API versions: 16
+    pub fn with_host(mut self, value: StrBytes) -> Self {
+        self.host = value;
+        self
+    }
+    /// Sets `port` to the passed value.
+    ///
+    /// The node's port.
+    ///
+    /// Supported API versions: 16
+    pub fn with_port(mut self, value: i32) -> Self {
+        self.port = value;
+        self
+    }
+    /// Sets `rack` to the passed value.
+    ///
+    /// The rack of the node, or null if it has not been assigned to a rack.
+    ///
+    /// Supported API versions: 16
+    pub fn with_rack(mut self, value: Option<StrBytes>) -> Self {
+        self.rack = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -990,8 +1170,7 @@ impl Message for NodeEndpoint {
 
 /// Valid versions: 0-16
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct PartitionData {
     /// The partition index.
     ///
@@ -1052,11 +1231,115 @@ pub struct PartitionData {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for PartitionData {
-    type Builder = PartitionDataBuilder;
-
-    fn builder() -> Self::Builder {
-        PartitionDataBuilder::default()
+impl PartitionData {
+    /// Sets `partition_index` to the passed value.
+    ///
+    /// The partition index.
+    ///
+    /// Supported API versions: 0-16
+    pub fn with_partition_index(mut self, value: i32) -> Self {
+        self.partition_index = value;
+        self
+    }
+    /// Sets `error_code` to the passed value.
+    ///
+    /// The error code, or 0 if there was no fetch error.
+    ///
+    /// Supported API versions: 0-16
+    pub fn with_error_code(mut self, value: i16) -> Self {
+        self.error_code = value;
+        self
+    }
+    /// Sets `high_watermark` to the passed value.
+    ///
+    /// The current high water mark.
+    ///
+    /// Supported API versions: 0-16
+    pub fn with_high_watermark(mut self, value: i64) -> Self {
+        self.high_watermark = value;
+        self
+    }
+    /// Sets `last_stable_offset` to the passed value.
+    ///
+    /// The last stable offset (or LSO) of the partition. This is the last offset such that the state of all transactional records prior to this offset have been decided (ABORTED or COMMITTED)
+    ///
+    /// Supported API versions: 4-16
+    pub fn with_last_stable_offset(mut self, value: i64) -> Self {
+        self.last_stable_offset = value;
+        self
+    }
+    /// Sets `log_start_offset` to the passed value.
+    ///
+    /// The current log start offset.
+    ///
+    /// Supported API versions: 5-16
+    pub fn with_log_start_offset(mut self, value: i64) -> Self {
+        self.log_start_offset = value;
+        self
+    }
+    /// Sets `diverging_epoch` to the passed value.
+    ///
+    /// In case divergence is detected based on the `LastFetchedEpoch` and `FetchOffset` in the request, this field indicates the largest epoch and its end offset such that subsequent records are known to diverge
+    ///
+    /// Supported API versions: 12-16
+    pub fn with_diverging_epoch(mut self, value: EpochEndOffset) -> Self {
+        self.diverging_epoch = value;
+        self
+    }
+    /// Sets `current_leader` to the passed value.
+    ///
+    ///
+    ///
+    /// Supported API versions: 12-16
+    pub fn with_current_leader(mut self, value: LeaderIdAndEpoch) -> Self {
+        self.current_leader = value;
+        self
+    }
+    /// Sets `snapshot_id` to the passed value.
+    ///
+    /// In the case of fetching an offset less than the LogStartOffset, this is the end offset and epoch that should be used in the FetchSnapshot request.
+    ///
+    /// Supported API versions: 12-16
+    pub fn with_snapshot_id(mut self, value: SnapshotId) -> Self {
+        self.snapshot_id = value;
+        self
+    }
+    /// Sets `aborted_transactions` to the passed value.
+    ///
+    /// The aborted transactions.
+    ///
+    /// Supported API versions: 4-16
+    pub fn with_aborted_transactions(mut self, value: Option<Vec<AbortedTransaction>>) -> Self {
+        self.aborted_transactions = value;
+        self
+    }
+    /// Sets `preferred_read_replica` to the passed value.
+    ///
+    /// The preferred read replica for the consumer to use on its next fetch request
+    ///
+    /// Supported API versions: 11-16
+    pub fn with_preferred_read_replica(mut self, value: super::BrokerId) -> Self {
+        self.preferred_read_replica = value;
+        self
+    }
+    /// Sets `records` to the passed value.
+    ///
+    /// The record data.
+    ///
+    /// Supported API versions: 0-16
+    pub fn with_records(mut self, value: Option<Bytes>) -> Self {
+        self.records = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -1348,8 +1631,7 @@ impl Message for PartitionData {
 
 /// Valid versions: 0-16
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct SnapshotId {
     ///
     ///
@@ -1365,11 +1647,34 @@ pub struct SnapshotId {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for SnapshotId {
-    type Builder = SnapshotIdBuilder;
-
-    fn builder() -> Self::Builder {
-        SnapshotIdBuilder::default()
+impl SnapshotId {
+    /// Sets `end_offset` to the passed value.
+    ///
+    ///
+    ///
+    /// Supported API versions: 0-16
+    pub fn with_end_offset(mut self, value: i64) -> Self {
+        self.end_offset = value;
+        self
+    }
+    /// Sets `epoch` to the passed value.
+    ///
+    ///
+    ///
+    /// Supported API versions: 0-16
+    pub fn with_epoch(mut self, value: i32) -> Self {
+        self.epoch = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

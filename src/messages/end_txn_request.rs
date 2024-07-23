@@ -13,15 +13,14 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
+    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
+    StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-3
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct EndTxnRequest {
     /// The ID of the transaction to end.
     ///
@@ -47,11 +46,52 @@ pub struct EndTxnRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for EndTxnRequest {
-    type Builder = EndTxnRequestBuilder;
-
-    fn builder() -> Self::Builder {
-        EndTxnRequestBuilder::default()
+impl EndTxnRequest {
+    /// Sets `transactional_id` to the passed value.
+    ///
+    /// The ID of the transaction to end.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_transactional_id(mut self, value: super::TransactionalId) -> Self {
+        self.transactional_id = value;
+        self
+    }
+    /// Sets `producer_id` to the passed value.
+    ///
+    /// The producer ID.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_producer_id(mut self, value: super::ProducerId) -> Self {
+        self.producer_id = value;
+        self
+    }
+    /// Sets `producer_epoch` to the passed value.
+    ///
+    /// The current epoch associated with the producer.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_producer_epoch(mut self, value: i16) -> Self {
+        self.producer_epoch = value;
+        self
+    }
+    /// Sets `committed` to the passed value.
+    ///
+    /// True if the transaction was committed, false if it was aborted.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_committed(mut self, value: bool) -> Self {
+        self.committed = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

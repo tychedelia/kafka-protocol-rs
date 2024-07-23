@@ -13,15 +13,14 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
+    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
+    StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-7
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct CreatableReplicaAssignment {
     /// The brokers to place the partition on.
     ///
@@ -32,11 +31,25 @@ pub struct CreatableReplicaAssignment {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for CreatableReplicaAssignment {
-    type Builder = CreatableReplicaAssignmentBuilder;
-
-    fn builder() -> Self::Builder {
-        CreatableReplicaAssignmentBuilder::default()
+impl CreatableReplicaAssignment {
+    /// Sets `broker_ids` to the passed value.
+    ///
+    /// The brokers to place the partition on.
+    ///
+    /// Supported API versions: 0-7
+    pub fn with_broker_ids(mut self, value: Vec<super::BrokerId>) -> Self {
+        self.broker_ids = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -137,8 +150,7 @@ impl Message for CreatableReplicaAssignment {
 
 /// Valid versions: 0-7
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct CreatableTopic {
     /// The number of partitions to create in the topic, or -1 if we are either specifying a manual partition assignment or using the default partitions.
     ///
@@ -164,11 +176,58 @@ pub struct CreatableTopic {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for CreatableTopic {
-    type Builder = CreatableTopicBuilder;
-
-    fn builder() -> Self::Builder {
-        CreatableTopicBuilder::default()
+impl CreatableTopic {
+    /// Sets `num_partitions` to the passed value.
+    ///
+    /// The number of partitions to create in the topic, or -1 if we are either specifying a manual partition assignment or using the default partitions.
+    ///
+    /// Supported API versions: 0-7
+    pub fn with_num_partitions(mut self, value: i32) -> Self {
+        self.num_partitions = value;
+        self
+    }
+    /// Sets `replication_factor` to the passed value.
+    ///
+    /// The number of replicas to create for each partition in the topic, or -1 if we are either specifying a manual partition assignment or using the default replication factor.
+    ///
+    /// Supported API versions: 0-7
+    pub fn with_replication_factor(mut self, value: i16) -> Self {
+        self.replication_factor = value;
+        self
+    }
+    /// Sets `assignments` to the passed value.
+    ///
+    /// The manual partition assignment, or the empty array if we are using automatic assignment.
+    ///
+    /// Supported API versions: 0-7
+    pub fn with_assignments(
+        mut self,
+        value: indexmap::IndexMap<i32, CreatableReplicaAssignment>,
+    ) -> Self {
+        self.assignments = value;
+        self
+    }
+    /// Sets `configs` to the passed value.
+    ///
+    /// The custom topic configurations to set.
+    ///
+    /// Supported API versions: 0-7
+    pub fn with_configs(
+        mut self,
+        value: indexmap::IndexMap<StrBytes, CreateableTopicConfig>,
+    ) -> Self {
+        self.configs = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -311,8 +370,7 @@ impl Message for CreatableTopic {
 
 /// Valid versions: 0-7
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct CreateTopicsRequest {
     /// The topics to create.
     ///
@@ -333,11 +391,46 @@ pub struct CreateTopicsRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for CreateTopicsRequest {
-    type Builder = CreateTopicsRequestBuilder;
-
-    fn builder() -> Self::Builder {
-        CreateTopicsRequestBuilder::default()
+impl CreateTopicsRequest {
+    /// Sets `topics` to the passed value.
+    ///
+    /// The topics to create.
+    ///
+    /// Supported API versions: 0-7
+    pub fn with_topics(
+        mut self,
+        value: indexmap::IndexMap<super::TopicName, CreatableTopic>,
+    ) -> Self {
+        self.topics = value;
+        self
+    }
+    /// Sets `timeout_ms` to the passed value.
+    ///
+    /// How long to wait in milliseconds before timing out the request.
+    ///
+    /// Supported API versions: 0-7
+    pub fn with_timeout_ms(mut self, value: i32) -> Self {
+        self.timeout_ms = value;
+        self
+    }
+    /// Sets `validate_only` to the passed value.
+    ///
+    /// If true, check that the topics can be created as specified, but don't create anything.
+    ///
+    /// Supported API versions: 1-7
+    pub fn with_validate_only(mut self, value: bool) -> Self {
+        self.validate_only = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -452,8 +545,7 @@ impl Message for CreateTopicsRequest {
 
 /// Valid versions: 0-7
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct CreateableTopicConfig {
     /// The configuration value.
     ///
@@ -464,11 +556,25 @@ pub struct CreateableTopicConfig {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for CreateableTopicConfig {
-    type Builder = CreateableTopicConfigBuilder;
-
-    fn builder() -> Self::Builder {
-        CreateableTopicConfigBuilder::default()
+impl CreateableTopicConfig {
+    /// Sets `value` to the passed value.
+    ///
+    /// The configuration value.
+    ///
+    /// Supported API versions: 0-7
+    pub fn with_value(mut self, value: Option<StrBytes>) -> Self {
+        self.value = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

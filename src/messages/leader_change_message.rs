@@ -13,15 +13,14 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
+    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
+    StrBytes, VersionRange,
 };
 
 /// Valid versions: 0
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct LeaderChangeMessage {
     /// The version of the leader change message
     ///
@@ -47,11 +46,52 @@ pub struct LeaderChangeMessage {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for LeaderChangeMessage {
-    type Builder = LeaderChangeMessageBuilder;
-
-    fn builder() -> Self::Builder {
-        LeaderChangeMessageBuilder::default()
+impl LeaderChangeMessage {
+    /// Sets `version` to the passed value.
+    ///
+    /// The version of the leader change message
+    ///
+    /// Supported API versions: 0
+    pub fn with_version(mut self, value: i16) -> Self {
+        self.version = value;
+        self
+    }
+    /// Sets `leader_id` to the passed value.
+    ///
+    /// The ID of the newly elected leader
+    ///
+    /// Supported API versions: 0
+    pub fn with_leader_id(mut self, value: super::BrokerId) -> Self {
+        self.leader_id = value;
+        self
+    }
+    /// Sets `voters` to the passed value.
+    ///
+    /// The set of voters in the quorum for this epoch
+    ///
+    /// Supported API versions: 0
+    pub fn with_voters(mut self, value: Vec<Voter>) -> Self {
+        self.voters = value;
+        self
+    }
+    /// Sets `granting_voters` to the passed value.
+    ///
+    /// The voters who voted for the leader at the time of election
+    ///
+    /// Supported API versions: 0
+    pub fn with_granting_voters(mut self, value: Vec<Voter>) -> Self {
+        self.granting_voters = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -137,8 +177,7 @@ impl Message for LeaderChangeMessage {
 
 /// Valid versions: 0
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Voter {
     ///
     ///
@@ -149,11 +188,25 @@ pub struct Voter {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for Voter {
-    type Builder = VoterBuilder;
-
-    fn builder() -> Self::Builder {
-        VoterBuilder::default()
+impl Voter {
+    /// Sets `voter_id` to the passed value.
+    ///
+    ///
+    ///
+    /// Supported API versions: 0
+    pub fn with_voter_id(mut self, value: i32) -> Self {
+        self.voter_id = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

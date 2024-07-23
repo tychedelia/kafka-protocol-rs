@@ -13,15 +13,14 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
+    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
+    StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-8
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ListOffsetsPartition {
     /// The partition index.
     ///
@@ -47,11 +46,52 @@ pub struct ListOffsetsPartition {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for ListOffsetsPartition {
-    type Builder = ListOffsetsPartitionBuilder;
-
-    fn builder() -> Self::Builder {
-        ListOffsetsPartitionBuilder::default()
+impl ListOffsetsPartition {
+    /// Sets `partition_index` to the passed value.
+    ///
+    /// The partition index.
+    ///
+    /// Supported API versions: 0-8
+    pub fn with_partition_index(mut self, value: i32) -> Self {
+        self.partition_index = value;
+        self
+    }
+    /// Sets `current_leader_epoch` to the passed value.
+    ///
+    /// The current leader epoch.
+    ///
+    /// Supported API versions: 4-8
+    pub fn with_current_leader_epoch(mut self, value: i32) -> Self {
+        self.current_leader_epoch = value;
+        self
+    }
+    /// Sets `timestamp` to the passed value.
+    ///
+    /// The current timestamp.
+    ///
+    /// Supported API versions: 0-8
+    pub fn with_timestamp(mut self, value: i64) -> Self {
+        self.timestamp = value;
+        self
+    }
+    /// Sets `max_num_offsets` to the passed value.
+    ///
+    /// The maximum number of offsets to report.
+    ///
+    /// Supported API versions: 0
+    pub fn with_max_num_offsets(mut self, value: i32) -> Self {
+        self.max_num_offsets = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -166,8 +206,7 @@ impl Message for ListOffsetsPartition {
 
 /// Valid versions: 0-8
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ListOffsetsRequest {
     /// The broker ID of the requester, or -1 if this request is being made by a normal consumer.
     ///
@@ -188,11 +227,43 @@ pub struct ListOffsetsRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for ListOffsetsRequest {
-    type Builder = ListOffsetsRequestBuilder;
-
-    fn builder() -> Self::Builder {
-        ListOffsetsRequestBuilder::default()
+impl ListOffsetsRequest {
+    /// Sets `replica_id` to the passed value.
+    ///
+    /// The broker ID of the requester, or -1 if this request is being made by a normal consumer.
+    ///
+    /// Supported API versions: 0-8
+    pub fn with_replica_id(mut self, value: super::BrokerId) -> Self {
+        self.replica_id = value;
+        self
+    }
+    /// Sets `isolation_level` to the passed value.
+    ///
+    /// This setting controls the visibility of transactional records. Using READ_UNCOMMITTED (isolation_level = 0) makes all records visible. With READ_COMMITTED (isolation_level = 1), non-transactional and COMMITTED transactional records are visible. To be more concrete, READ_COMMITTED returns all data from offsets smaller than the current LSO (last stable offset), and enables the inclusion of the list of aborted transactions in the result, which allows consumers to discard ABORTED transactional records
+    ///
+    /// Supported API versions: 2-8
+    pub fn with_isolation_level(mut self, value: i8) -> Self {
+        self.isolation_level = value;
+        self
+    }
+    /// Sets `topics` to the passed value.
+    ///
+    /// Each topic in the request.
+    ///
+    /// Supported API versions: 0-8
+    pub fn with_topics(mut self, value: Vec<ListOffsetsTopic>) -> Self {
+        self.topics = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -307,8 +378,7 @@ impl Message for ListOffsetsRequest {
 
 /// Valid versions: 0-8
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ListOffsetsTopic {
     /// The topic name.
     ///
@@ -324,11 +394,34 @@ pub struct ListOffsetsTopic {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for ListOffsetsTopic {
-    type Builder = ListOffsetsTopicBuilder;
-
-    fn builder() -> Self::Builder {
-        ListOffsetsTopicBuilder::default()
+impl ListOffsetsTopic {
+    /// Sets `name` to the passed value.
+    ///
+    /// The topic name.
+    ///
+    /// Supported API versions: 0-8
+    pub fn with_name(mut self, value: super::TopicName) -> Self {
+        self.name = value;
+        self
+    }
+    /// Sets `partitions` to the passed value.
+    ///
+    /// Each partition in the request.
+    ///
+    /// Supported API versions: 0-8
+    pub fn with_partitions(mut self, value: Vec<ListOffsetsPartition>) -> Self {
+        self.partitions = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

@@ -13,15 +13,14 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
+    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
+    StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-3
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct BrokerRegistrationRequest {
     /// The broker ID.
     ///
@@ -72,11 +71,97 @@ pub struct BrokerRegistrationRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for BrokerRegistrationRequest {
-    type Builder = BrokerRegistrationRequestBuilder;
-
-    fn builder() -> Self::Builder {
-        BrokerRegistrationRequestBuilder::default()
+impl BrokerRegistrationRequest {
+    /// Sets `broker_id` to the passed value.
+    ///
+    /// The broker ID.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_broker_id(mut self, value: super::BrokerId) -> Self {
+        self.broker_id = value;
+        self
+    }
+    /// Sets `cluster_id` to the passed value.
+    ///
+    /// The cluster id of the broker process.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_cluster_id(mut self, value: StrBytes) -> Self {
+        self.cluster_id = value;
+        self
+    }
+    /// Sets `incarnation_id` to the passed value.
+    ///
+    /// The incarnation id of the broker process.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_incarnation_id(mut self, value: Uuid) -> Self {
+        self.incarnation_id = value;
+        self
+    }
+    /// Sets `listeners` to the passed value.
+    ///
+    /// The listeners of this broker
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_listeners(mut self, value: indexmap::IndexMap<StrBytes, Listener>) -> Self {
+        self.listeners = value;
+        self
+    }
+    /// Sets `features` to the passed value.
+    ///
+    /// The features on this broker
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_features(mut self, value: indexmap::IndexMap<StrBytes, Feature>) -> Self {
+        self.features = value;
+        self
+    }
+    /// Sets `rack` to the passed value.
+    ///
+    /// The rack which this broker is in.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_rack(mut self, value: Option<StrBytes>) -> Self {
+        self.rack = value;
+        self
+    }
+    /// Sets `is_migrating_zk_broker` to the passed value.
+    ///
+    /// If the required configurations for ZK migration are present, this value is set to true
+    ///
+    /// Supported API versions: 1-3
+    pub fn with_is_migrating_zk_broker(mut self, value: bool) -> Self {
+        self.is_migrating_zk_broker = value;
+        self
+    }
+    /// Sets `log_dirs` to the passed value.
+    ///
+    /// Log directories configured in this broker which are available.
+    ///
+    /// Supported API versions: 2-3
+    pub fn with_log_dirs(mut self, value: Vec<Uuid>) -> Self {
+        self.log_dirs = value;
+        self
+    }
+    /// Sets `previous_broker_epoch` to the passed value.
+    ///
+    /// The epoch before a clean shutdown.
+    ///
+    /// Supported API versions: 3
+    pub fn with_previous_broker_epoch(mut self, value: i64) -> Self {
+        self.previous_broker_epoch = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -220,8 +305,7 @@ impl Message for BrokerRegistrationRequest {
 
 /// Valid versions: 0-3
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Feature {
     /// The minimum supported feature level.
     ///
@@ -237,11 +321,34 @@ pub struct Feature {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for Feature {
-    type Builder = FeatureBuilder;
-
-    fn builder() -> Self::Builder {
-        FeatureBuilder::default()
+impl Feature {
+    /// Sets `min_supported_version` to the passed value.
+    ///
+    /// The minimum supported feature level.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_min_supported_version(mut self, value: i16) -> Self {
+        self.min_supported_version = value;
+        self
+    }
+    /// Sets `max_supported_version` to the passed value.
+    ///
+    /// The maximum supported feature level.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_max_supported_version(mut self, value: i16) -> Self {
+        self.max_supported_version = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -329,8 +436,7 @@ impl Message for Feature {
 
 /// Valid versions: 0-3
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Listener {
     /// The hostname.
     ///
@@ -351,11 +457,43 @@ pub struct Listener {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for Listener {
-    type Builder = ListenerBuilder;
-
-    fn builder() -> Self::Builder {
-        ListenerBuilder::default()
+impl Listener {
+    /// Sets `host` to the passed value.
+    ///
+    /// The hostname.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_host(mut self, value: StrBytes) -> Self {
+        self.host = value;
+        self
+    }
+    /// Sets `port` to the passed value.
+    ///
+    /// The port.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_port(mut self, value: u16) -> Self {
+        self.port = value;
+        self
+    }
+    /// Sets `security_protocol` to the passed value.
+    ///
+    /// The security protocol.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_security_protocol(mut self, value: i16) -> Self {
+        self.security_protocol = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

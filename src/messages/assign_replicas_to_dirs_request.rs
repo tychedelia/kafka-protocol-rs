@@ -13,15 +13,14 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
+    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
+    StrBytes, VersionRange,
 };
 
 /// Valid versions: 0
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct AssignReplicasToDirsRequest {
     /// The ID of the requesting broker
     ///
@@ -42,11 +41,43 @@ pub struct AssignReplicasToDirsRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for AssignReplicasToDirsRequest {
-    type Builder = AssignReplicasToDirsRequestBuilder;
-
-    fn builder() -> Self::Builder {
-        AssignReplicasToDirsRequestBuilder::default()
+impl AssignReplicasToDirsRequest {
+    /// Sets `broker_id` to the passed value.
+    ///
+    /// The ID of the requesting broker
+    ///
+    /// Supported API versions: 0
+    pub fn with_broker_id(mut self, value: super::BrokerId) -> Self {
+        self.broker_id = value;
+        self
+    }
+    /// Sets `broker_epoch` to the passed value.
+    ///
+    /// The epoch of the requesting broker
+    ///
+    /// Supported API versions: 0
+    pub fn with_broker_epoch(mut self, value: i64) -> Self {
+        self.broker_epoch = value;
+        self
+    }
+    /// Sets `directories` to the passed value.
+    ///
+    ///
+    ///
+    /// Supported API versions: 0
+    pub fn with_directories(mut self, value: Vec<DirectoryData>) -> Self {
+        self.directories = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -127,8 +158,7 @@ impl Message for AssignReplicasToDirsRequest {
 
 /// Valid versions: 0
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DirectoryData {
     /// The ID of the directory
     ///
@@ -144,11 +174,34 @@ pub struct DirectoryData {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for DirectoryData {
-    type Builder = DirectoryDataBuilder;
-
-    fn builder() -> Self::Builder {
-        DirectoryDataBuilder::default()
+impl DirectoryData {
+    /// Sets `id` to the passed value.
+    ///
+    /// The ID of the directory
+    ///
+    /// Supported API versions: 0
+    pub fn with_id(mut self, value: Uuid) -> Self {
+        self.id = value;
+        self
+    }
+    /// Sets `topics` to the passed value.
+    ///
+    ///
+    ///
+    /// Supported API versions: 0
+    pub fn with_topics(mut self, value: Vec<TopicData>) -> Self {
+        self.topics = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -223,8 +276,7 @@ impl Message for DirectoryData {
 
 /// Valid versions: 0
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct PartitionData {
     /// The partition index
     ///
@@ -235,11 +287,25 @@ pub struct PartitionData {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for PartitionData {
-    type Builder = PartitionDataBuilder;
-
-    fn builder() -> Self::Builder {
-        PartitionDataBuilder::default()
+impl PartitionData {
+    /// Sets `partition_index` to the passed value.
+    ///
+    /// The partition index
+    ///
+    /// Supported API versions: 0
+    pub fn with_partition_index(mut self, value: i32) -> Self {
+        self.partition_index = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -309,8 +375,7 @@ impl Message for PartitionData {
 
 /// Valid versions: 0
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct TopicData {
     /// The ID of the assigned topic
     ///
@@ -326,11 +391,34 @@ pub struct TopicData {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for TopicData {
-    type Builder = TopicDataBuilder;
-
-    fn builder() -> Self::Builder {
-        TopicDataBuilder::default()
+impl TopicData {
+    /// Sets `topic_id` to the passed value.
+    ///
+    /// The ID of the assigned topic
+    ///
+    /// Supported API versions: 0
+    pub fn with_topic_id(mut self, value: Uuid) -> Self {
+        self.topic_id = value;
+        self
+    }
+    /// Sets `partitions` to the passed value.
+    ///
+    ///
+    ///
+    /// Supported API versions: 0
+    pub fn with_partitions(mut self, value: Vec<PartitionData>) -> Self {
+        self.partitions = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

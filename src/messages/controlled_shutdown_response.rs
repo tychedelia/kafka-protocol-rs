@@ -13,15 +13,14 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
+    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
+    StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-3
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ControlledShutdownResponse {
     /// The top-level error code.
     ///
@@ -37,11 +36,34 @@ pub struct ControlledShutdownResponse {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for ControlledShutdownResponse {
-    type Builder = ControlledShutdownResponseBuilder;
-
-    fn builder() -> Self::Builder {
-        ControlledShutdownResponseBuilder::default()
+impl ControlledShutdownResponse {
+    /// Sets `error_code` to the passed value.
+    ///
+    /// The top-level error code.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_error_code(mut self, value: i16) -> Self {
+        self.error_code = value;
+        self
+    }
+    /// Sets `remaining_partitions` to the passed value.
+    ///
+    /// The partitions that the broker still leads.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_remaining_partitions(mut self, value: Vec<RemainingPartition>) -> Self {
+        self.remaining_partitions = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -137,8 +159,7 @@ impl Message for ControlledShutdownResponse {
 
 /// Valid versions: 0-3
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct RemainingPartition {
     /// The name of the topic.
     ///
@@ -154,11 +175,34 @@ pub struct RemainingPartition {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for RemainingPartition {
-    type Builder = RemainingPartitionBuilder;
-
-    fn builder() -> Self::Builder {
-        RemainingPartitionBuilder::default()
+impl RemainingPartition {
+    /// Sets `topic_name` to the passed value.
+    ///
+    /// The name of the topic.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_topic_name(mut self, value: super::TopicName) -> Self {
+        self.topic_name = value;
+        self
+    }
+    /// Sets `partition_index` to the passed value.
+    ///
+    /// The index of the partition.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_partition_index(mut self, value: i32) -> Self {
+        self.partition_index = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

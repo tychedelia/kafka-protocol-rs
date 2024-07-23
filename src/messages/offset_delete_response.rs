@@ -13,15 +13,14 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
+    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
+    StrBytes, VersionRange,
 };
 
 /// Valid versions: 0
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct OffsetDeleteResponse {
     /// The top-level error code, or 0 if there was no error.
     ///
@@ -39,11 +38,36 @@ pub struct OffsetDeleteResponse {
     pub topics: indexmap::IndexMap<super::TopicName, OffsetDeleteResponseTopic>,
 }
 
-impl Builder for OffsetDeleteResponse {
-    type Builder = OffsetDeleteResponseBuilder;
-
-    fn builder() -> Self::Builder {
-        OffsetDeleteResponseBuilder::default()
+impl OffsetDeleteResponse {
+    /// Sets `error_code` to the passed value.
+    ///
+    /// The top-level error code, or 0 if there was no error.
+    ///
+    /// Supported API versions: 0
+    pub fn with_error_code(mut self, value: i16) -> Self {
+        self.error_code = value;
+        self
+    }
+    /// Sets `throttle_time_ms` to the passed value.
+    ///
+    /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
+    ///
+    /// Supported API versions: 0
+    pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
+        self.throttle_time_ms = value;
+        self
+    }
+    /// Sets `topics` to the passed value.
+    ///
+    /// The responses for each topic.
+    ///
+    /// Supported API versions: 0
+    pub fn with_topics(
+        mut self,
+        value: indexmap::IndexMap<super::TopicName, OffsetDeleteResponseTopic>,
+    ) -> Self {
+        self.topics = value;
+        self
     }
 }
 
@@ -95,8 +119,7 @@ impl Message for OffsetDeleteResponse {
 
 /// Valid versions: 0
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct OffsetDeleteResponsePartition {
     /// The error code, or 0 if there was no error.
     ///
@@ -104,11 +127,15 @@ pub struct OffsetDeleteResponsePartition {
     pub error_code: i16,
 }
 
-impl Builder for OffsetDeleteResponsePartition {
-    type Builder = OffsetDeleteResponsePartitionBuilder;
-
-    fn builder() -> Self::Builder {
-        OffsetDeleteResponsePartitionBuilder::default()
+impl OffsetDeleteResponsePartition {
+    /// Sets `error_code` to the passed value.
+    ///
+    /// The error code, or 0 if there was no error.
+    ///
+    /// Supported API versions: 0
+    pub fn with_error_code(mut self, value: i16) -> Self {
+        self.error_code = value;
+        self
     }
 }
 
@@ -156,8 +183,7 @@ impl Message for OffsetDeleteResponsePartition {
 
 /// Valid versions: 0
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct OffsetDeleteResponseTopic {
     /// The responses for each partition in the topic.
     ///
@@ -165,11 +191,18 @@ pub struct OffsetDeleteResponseTopic {
     pub partitions: indexmap::IndexMap<i32, OffsetDeleteResponsePartition>,
 }
 
-impl Builder for OffsetDeleteResponseTopic {
-    type Builder = OffsetDeleteResponseTopicBuilder;
-
-    fn builder() -> Self::Builder {
-        OffsetDeleteResponseTopicBuilder::default()
+impl OffsetDeleteResponseTopic {
+    /// Sets `partitions` to the passed value.
+    ///
+    /// The responses for each partition in the topic.
+    ///
+    /// Supported API versions: 0
+    pub fn with_partitions(
+        mut self,
+        value: indexmap::IndexMap<i32, OffsetDeleteResponsePartition>,
+    ) -> Self {
+        self.partitions = value;
+        self
     }
 }
 

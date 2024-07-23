@@ -13,15 +13,14 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
+    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
+    StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-7
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct LeaderAndIsrLiveLeader {
     /// The leader's broker ID.
     ///
@@ -42,11 +41,43 @@ pub struct LeaderAndIsrLiveLeader {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for LeaderAndIsrLiveLeader {
-    type Builder = LeaderAndIsrLiveLeaderBuilder;
-
-    fn builder() -> Self::Builder {
-        LeaderAndIsrLiveLeaderBuilder::default()
+impl LeaderAndIsrLiveLeader {
+    /// Sets `broker_id` to the passed value.
+    ///
+    /// The leader's broker ID.
+    ///
+    /// Supported API versions: 0-7
+    pub fn with_broker_id(mut self, value: super::BrokerId) -> Self {
+        self.broker_id = value;
+        self
+    }
+    /// Sets `host_name` to the passed value.
+    ///
+    /// The leader's hostname.
+    ///
+    /// Supported API versions: 0-7
+    pub fn with_host_name(mut self, value: StrBytes) -> Self {
+        self.host_name = value;
+        self
+    }
+    /// Sets `port` to the passed value.
+    ///
+    /// The leader's port.
+    ///
+    /// Supported API versions: 0-7
+    pub fn with_port(mut self, value: i32) -> Self {
+        self.port = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -144,8 +175,7 @@ impl Message for LeaderAndIsrLiveLeader {
 
 /// Valid versions: 0-7
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct LeaderAndIsrPartitionState {
     /// The topic name.  This is only present in v0 or v1.
     ///
@@ -211,11 +241,124 @@ pub struct LeaderAndIsrPartitionState {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for LeaderAndIsrPartitionState {
-    type Builder = LeaderAndIsrPartitionStateBuilder;
-
-    fn builder() -> Self::Builder {
-        LeaderAndIsrPartitionStateBuilder::default()
+impl LeaderAndIsrPartitionState {
+    /// Sets `topic_name` to the passed value.
+    ///
+    /// The topic name.  This is only present in v0 or v1.
+    ///
+    /// Supported API versions: 0-1
+    pub fn with_topic_name(mut self, value: super::TopicName) -> Self {
+        self.topic_name = value;
+        self
+    }
+    /// Sets `partition_index` to the passed value.
+    ///
+    /// The partition index.
+    ///
+    /// Supported API versions: 0-7
+    pub fn with_partition_index(mut self, value: i32) -> Self {
+        self.partition_index = value;
+        self
+    }
+    /// Sets `controller_epoch` to the passed value.
+    ///
+    /// The controller epoch.
+    ///
+    /// Supported API versions: 0-7
+    pub fn with_controller_epoch(mut self, value: i32) -> Self {
+        self.controller_epoch = value;
+        self
+    }
+    /// Sets `leader` to the passed value.
+    ///
+    /// The broker ID of the leader.
+    ///
+    /// Supported API versions: 0-7
+    pub fn with_leader(mut self, value: super::BrokerId) -> Self {
+        self.leader = value;
+        self
+    }
+    /// Sets `leader_epoch` to the passed value.
+    ///
+    /// The leader epoch.
+    ///
+    /// Supported API versions: 0-7
+    pub fn with_leader_epoch(mut self, value: i32) -> Self {
+        self.leader_epoch = value;
+        self
+    }
+    /// Sets `isr` to the passed value.
+    ///
+    /// The in-sync replica IDs.
+    ///
+    /// Supported API versions: 0-7
+    pub fn with_isr(mut self, value: Vec<super::BrokerId>) -> Self {
+        self.isr = value;
+        self
+    }
+    /// Sets `partition_epoch` to the passed value.
+    ///
+    /// The current epoch for the partition. The epoch is a monotonically increasing value which is incremented after every partition change. (Since the LeaderAndIsr request is only used by the legacy controller, this corresponds to the zkVersion)
+    ///
+    /// Supported API versions: 0-7
+    pub fn with_partition_epoch(mut self, value: i32) -> Self {
+        self.partition_epoch = value;
+        self
+    }
+    /// Sets `replicas` to the passed value.
+    ///
+    /// The replica IDs.
+    ///
+    /// Supported API versions: 0-7
+    pub fn with_replicas(mut self, value: Vec<super::BrokerId>) -> Self {
+        self.replicas = value;
+        self
+    }
+    /// Sets `adding_replicas` to the passed value.
+    ///
+    /// The replica IDs that we are adding this partition to, or null if no replicas are being added.
+    ///
+    /// Supported API versions: 3-7
+    pub fn with_adding_replicas(mut self, value: Vec<super::BrokerId>) -> Self {
+        self.adding_replicas = value;
+        self
+    }
+    /// Sets `removing_replicas` to the passed value.
+    ///
+    /// The replica IDs that we are removing this partition from, or null if no replicas are being removed.
+    ///
+    /// Supported API versions: 3-7
+    pub fn with_removing_replicas(mut self, value: Vec<super::BrokerId>) -> Self {
+        self.removing_replicas = value;
+        self
+    }
+    /// Sets `is_new` to the passed value.
+    ///
+    /// Whether the replica should have existed on the broker or not.
+    ///
+    /// Supported API versions: 1-7
+    pub fn with_is_new(mut self, value: bool) -> Self {
+        self.is_new = value;
+        self
+    }
+    /// Sets `leader_recovery_state` to the passed value.
+    ///
+    /// 1 if the partition is recovering from an unclean leader election; 0 otherwise.
+    ///
+    /// Supported API versions: 6-7
+    pub fn with_leader_recovery_state(mut self, value: i8) -> Self {
+        self.leader_recovery_state = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -444,8 +587,7 @@ impl Message for LeaderAndIsrPartitionState {
 
 /// Valid versions: 0-7
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct LeaderAndIsrRequest {
     /// The current controller ID.
     ///
@@ -491,11 +633,91 @@ pub struct LeaderAndIsrRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for LeaderAndIsrRequest {
-    type Builder = LeaderAndIsrRequestBuilder;
-
-    fn builder() -> Self::Builder {
-        LeaderAndIsrRequestBuilder::default()
+impl LeaderAndIsrRequest {
+    /// Sets `controller_id` to the passed value.
+    ///
+    /// The current controller ID.
+    ///
+    /// Supported API versions: 0-7
+    pub fn with_controller_id(mut self, value: super::BrokerId) -> Self {
+        self.controller_id = value;
+        self
+    }
+    /// Sets `is_k_raft_controller` to the passed value.
+    ///
+    /// If KRaft controller id is used during migration. See KIP-866
+    ///
+    /// Supported API versions: 7
+    pub fn with_is_k_raft_controller(mut self, value: bool) -> Self {
+        self.is_k_raft_controller = value;
+        self
+    }
+    /// Sets `controller_epoch` to the passed value.
+    ///
+    /// The current controller epoch.
+    ///
+    /// Supported API versions: 0-7
+    pub fn with_controller_epoch(mut self, value: i32) -> Self {
+        self.controller_epoch = value;
+        self
+    }
+    /// Sets `broker_epoch` to the passed value.
+    ///
+    /// The current broker epoch.
+    ///
+    /// Supported API versions: 2-7
+    pub fn with_broker_epoch(mut self, value: i64) -> Self {
+        self.broker_epoch = value;
+        self
+    }
+    /// Sets `_type` to the passed value.
+    ///
+    /// The type that indicates whether all topics are included in the request
+    ///
+    /// Supported API versions: 5-7
+    pub fn with_type(mut self, value: i8) -> Self {
+        self._type = value;
+        self
+    }
+    /// Sets `ungrouped_partition_states` to the passed value.
+    ///
+    /// The state of each partition, in a v0 or v1 message.
+    ///
+    /// Supported API versions: 0-1
+    pub fn with_ungrouped_partition_states(
+        mut self,
+        value: Vec<LeaderAndIsrPartitionState>,
+    ) -> Self {
+        self.ungrouped_partition_states = value;
+        self
+    }
+    /// Sets `topic_states` to the passed value.
+    ///
+    /// Each topic.
+    ///
+    /// Supported API versions: 2-7
+    pub fn with_topic_states(mut self, value: Vec<LeaderAndIsrTopicState>) -> Self {
+        self.topic_states = value;
+        self
+    }
+    /// Sets `live_leaders` to the passed value.
+    ///
+    /// The current live leaders.
+    ///
+    /// Supported API versions: 0-7
+    pub fn with_live_leaders(mut self, value: Vec<LeaderAndIsrLiveLeader>) -> Self {
+        self.live_leaders = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -708,8 +930,7 @@ impl Message for LeaderAndIsrRequest {
 
 /// Valid versions: 0-7
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct LeaderAndIsrTopicState {
     /// The topic name.
     ///
@@ -730,11 +951,43 @@ pub struct LeaderAndIsrTopicState {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for LeaderAndIsrTopicState {
-    type Builder = LeaderAndIsrTopicStateBuilder;
-
-    fn builder() -> Self::Builder {
-        LeaderAndIsrTopicStateBuilder::default()
+impl LeaderAndIsrTopicState {
+    /// Sets `topic_name` to the passed value.
+    ///
+    /// The topic name.
+    ///
+    /// Supported API versions: 2-7
+    pub fn with_topic_name(mut self, value: super::TopicName) -> Self {
+        self.topic_name = value;
+        self
+    }
+    /// Sets `topic_id` to the passed value.
+    ///
+    /// The unique topic ID.
+    ///
+    /// Supported API versions: 5-7
+    pub fn with_topic_id(mut self, value: Uuid) -> Self {
+        self.topic_id = value;
+        self
+    }
+    /// Sets `partition_states` to the passed value.
+    ///
+    /// The state of each partition
+    ///
+    /// Supported API versions: 2-7
+    pub fn with_partition_states(mut self, value: Vec<LeaderAndIsrPartitionState>) -> Self {
+        self.partition_states = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

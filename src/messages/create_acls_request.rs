@@ -13,15 +13,14 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
+    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
+    StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-3
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct AclCreation {
     /// The type of the resource.
     ///
@@ -62,11 +61,79 @@ pub struct AclCreation {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for AclCreation {
-    type Builder = AclCreationBuilder;
-
-    fn builder() -> Self::Builder {
-        AclCreationBuilder::default()
+impl AclCreation {
+    /// Sets `resource_type` to the passed value.
+    ///
+    /// The type of the resource.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_resource_type(mut self, value: i8) -> Self {
+        self.resource_type = value;
+        self
+    }
+    /// Sets `resource_name` to the passed value.
+    ///
+    /// The resource name for the ACL.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_resource_name(mut self, value: StrBytes) -> Self {
+        self.resource_name = value;
+        self
+    }
+    /// Sets `resource_pattern_type` to the passed value.
+    ///
+    /// The pattern type for the ACL.
+    ///
+    /// Supported API versions: 1-3
+    pub fn with_resource_pattern_type(mut self, value: i8) -> Self {
+        self.resource_pattern_type = value;
+        self
+    }
+    /// Sets `principal` to the passed value.
+    ///
+    /// The principal for the ACL.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_principal(mut self, value: StrBytes) -> Self {
+        self.principal = value;
+        self
+    }
+    /// Sets `host` to the passed value.
+    ///
+    /// The host for the ACL.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_host(mut self, value: StrBytes) -> Self {
+        self.host = value;
+        self
+    }
+    /// Sets `operation` to the passed value.
+    ///
+    /// The operation type for the ACL (read, write, etc.).
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_operation(mut self, value: i8) -> Self {
+        self.operation = value;
+        self
+    }
+    /// Sets `permission_type` to the passed value.
+    ///
+    /// The permission type for the ACL (allow, deny, etc.).
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_permission_type(mut self, value: i8) -> Self {
+        self.permission_type = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -224,8 +291,7 @@ impl Message for AclCreation {
 
 /// Valid versions: 0-3
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct CreateAclsRequest {
     /// The ACLs that we want to create.
     ///
@@ -236,11 +302,25 @@ pub struct CreateAclsRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for CreateAclsRequest {
-    type Builder = CreateAclsRequestBuilder;
-
-    fn builder() -> Self::Builder {
-        CreateAclsRequestBuilder::default()
+impl CreateAclsRequest {
+    /// Sets `creations` to the passed value.
+    ///
+    /// The ACLs that we want to create.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_creations(mut self, value: Vec<AclCreation>) -> Self {
+        self.creations = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

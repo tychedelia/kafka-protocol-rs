@@ -13,15 +13,14 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
+    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
+    StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-4
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DescribeConfigsResourceResult {
     /// The configuration name.
     ///
@@ -72,11 +71,97 @@ pub struct DescribeConfigsResourceResult {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for DescribeConfigsResourceResult {
-    type Builder = DescribeConfigsResourceResultBuilder;
-
-    fn builder() -> Self::Builder {
-        DescribeConfigsResourceResultBuilder::default()
+impl DescribeConfigsResourceResult {
+    /// Sets `name` to the passed value.
+    ///
+    /// The configuration name.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_name(mut self, value: StrBytes) -> Self {
+        self.name = value;
+        self
+    }
+    /// Sets `value` to the passed value.
+    ///
+    /// The configuration value.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_value(mut self, value: Option<StrBytes>) -> Self {
+        self.value = value;
+        self
+    }
+    /// Sets `read_only` to the passed value.
+    ///
+    /// True if the configuration is read-only.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_read_only(mut self, value: bool) -> Self {
+        self.read_only = value;
+        self
+    }
+    /// Sets `is_default` to the passed value.
+    ///
+    /// True if the configuration is not set.
+    ///
+    /// Supported API versions: 0
+    pub fn with_is_default(mut self, value: bool) -> Self {
+        self.is_default = value;
+        self
+    }
+    /// Sets `config_source` to the passed value.
+    ///
+    /// The configuration source.
+    ///
+    /// Supported API versions: 1-4
+    pub fn with_config_source(mut self, value: i8) -> Self {
+        self.config_source = value;
+        self
+    }
+    /// Sets `is_sensitive` to the passed value.
+    ///
+    /// True if this configuration is sensitive.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_is_sensitive(mut self, value: bool) -> Self {
+        self.is_sensitive = value;
+        self
+    }
+    /// Sets `synonyms` to the passed value.
+    ///
+    /// The synonyms for this configuration key.
+    ///
+    /// Supported API versions: 1-4
+    pub fn with_synonyms(mut self, value: Vec<DescribeConfigsSynonym>) -> Self {
+        self.synonyms = value;
+        self
+    }
+    /// Sets `config_type` to the passed value.
+    ///
+    /// The configuration data type. Type can be one of the following values - BOOLEAN, STRING, INT, SHORT, LONG, DOUBLE, LIST, CLASS, PASSWORD
+    ///
+    /// Supported API versions: 3-4
+    pub fn with_config_type(mut self, value: i8) -> Self {
+        self.config_type = value;
+        self
+    }
+    /// Sets `documentation` to the passed value.
+    ///
+    /// The configuration documentation.
+    ///
+    /// Supported API versions: 3-4
+    pub fn with_documentation(mut self, value: Option<StrBytes>) -> Self {
+        self.documentation = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -290,8 +375,7 @@ impl Message for DescribeConfigsResourceResult {
 
 /// Valid versions: 0-4
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DescribeConfigsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
@@ -307,11 +391,34 @@ pub struct DescribeConfigsResponse {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for DescribeConfigsResponse {
-    type Builder = DescribeConfigsResponseBuilder;
-
-    fn builder() -> Self::Builder {
-        DescribeConfigsResponseBuilder::default()
+impl DescribeConfigsResponse {
+    /// Sets `throttle_time_ms` to the passed value.
+    ///
+    /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
+        self.throttle_time_ms = value;
+        self
+    }
+    /// Sets `results` to the passed value.
+    ///
+    /// The results for each resource.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_results(mut self, value: Vec<DescribeConfigsResult>) -> Self {
+        self.results = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -405,8 +512,7 @@ impl Message for DescribeConfigsResponse {
 
 /// Valid versions: 0-4
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DescribeConfigsResult {
     /// The error code, or 0 if we were able to successfully describe the configurations.
     ///
@@ -437,11 +543,61 @@ pub struct DescribeConfigsResult {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for DescribeConfigsResult {
-    type Builder = DescribeConfigsResultBuilder;
-
-    fn builder() -> Self::Builder {
-        DescribeConfigsResultBuilder::default()
+impl DescribeConfigsResult {
+    /// Sets `error_code` to the passed value.
+    ///
+    /// The error code, or 0 if we were able to successfully describe the configurations.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_error_code(mut self, value: i16) -> Self {
+        self.error_code = value;
+        self
+    }
+    /// Sets `error_message` to the passed value.
+    ///
+    /// The error message, or null if we were able to successfully describe the configurations.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_error_message(mut self, value: Option<StrBytes>) -> Self {
+        self.error_message = value;
+        self
+    }
+    /// Sets `resource_type` to the passed value.
+    ///
+    /// The resource type.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_resource_type(mut self, value: i8) -> Self {
+        self.resource_type = value;
+        self
+    }
+    /// Sets `resource_name` to the passed value.
+    ///
+    /// The resource name.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_resource_name(mut self, value: StrBytes) -> Self {
+        self.resource_name = value;
+        self
+    }
+    /// Sets `configs` to the passed value.
+    ///
+    /// Each listed configuration.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_configs(mut self, value: Vec<DescribeConfigsResourceResult>) -> Self {
+        self.configs = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -574,8 +730,7 @@ impl Message for DescribeConfigsResult {
 
 /// Valid versions: 0-4
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DescribeConfigsSynonym {
     /// The synonym name.
     ///
@@ -596,11 +751,43 @@ pub struct DescribeConfigsSynonym {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for DescribeConfigsSynonym {
-    type Builder = DescribeConfigsSynonymBuilder;
-
-    fn builder() -> Self::Builder {
-        DescribeConfigsSynonymBuilder::default()
+impl DescribeConfigsSynonym {
+    /// Sets `name` to the passed value.
+    ///
+    /// The synonym name.
+    ///
+    /// Supported API versions: 1-4
+    pub fn with_name(mut self, value: StrBytes) -> Self {
+        self.name = value;
+        self
+    }
+    /// Sets `value` to the passed value.
+    ///
+    /// The synonym value.
+    ///
+    /// Supported API versions: 1-4
+    pub fn with_value(mut self, value: Option<StrBytes>) -> Self {
+        self.value = value;
+        self
+    }
+    /// Sets `source` to the passed value.
+    ///
+    /// The synonym source.
+    ///
+    /// Supported API versions: 1-4
+    pub fn with_source(mut self, value: i8) -> Self {
+        self.source = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

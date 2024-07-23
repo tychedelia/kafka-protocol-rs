@@ -13,15 +13,14 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
+    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
+    StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-3
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct CreatePartitionsAssignment {
     /// The assigned broker IDs.
     ///
@@ -32,11 +31,25 @@ pub struct CreatePartitionsAssignment {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for CreatePartitionsAssignment {
-    type Builder = CreatePartitionsAssignmentBuilder;
-
-    fn builder() -> Self::Builder {
-        CreatePartitionsAssignmentBuilder::default()
+impl CreatePartitionsAssignment {
+    /// Sets `broker_ids` to the passed value.
+    ///
+    /// The assigned broker IDs.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_broker_ids(mut self, value: Vec<super::BrokerId>) -> Self {
+        self.broker_ids = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -124,8 +137,7 @@ impl Message for CreatePartitionsAssignment {
 
 /// Valid versions: 0-3
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct CreatePartitionsRequest {
     /// Each topic that we want to create new partitions inside.
     ///
@@ -146,11 +158,46 @@ pub struct CreatePartitionsRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for CreatePartitionsRequest {
-    type Builder = CreatePartitionsRequestBuilder;
-
-    fn builder() -> Self::Builder {
-        CreatePartitionsRequestBuilder::default()
+impl CreatePartitionsRequest {
+    /// Sets `topics` to the passed value.
+    ///
+    /// Each topic that we want to create new partitions inside.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_topics(
+        mut self,
+        value: indexmap::IndexMap<super::TopicName, CreatePartitionsTopic>,
+    ) -> Self {
+        self.topics = value;
+        self
+    }
+    /// Sets `timeout_ms` to the passed value.
+    ///
+    /// The time in ms to wait for the partitions to be created.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_timeout_ms(mut self, value: i32) -> Self {
+        self.timeout_ms = value;
+        self
+    }
+    /// Sets `validate_only` to the passed value.
+    ///
+    /// If true, then validate the request, but don't actually increase the number of partitions.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_validate_only(mut self, value: bool) -> Self {
+        self.validate_only = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -249,8 +296,7 @@ impl Message for CreatePartitionsRequest {
 
 /// Valid versions: 0-3
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct CreatePartitionsTopic {
     /// The new partition count.
     ///
@@ -266,11 +312,34 @@ pub struct CreatePartitionsTopic {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for CreatePartitionsTopic {
-    type Builder = CreatePartitionsTopicBuilder;
-
-    fn builder() -> Self::Builder {
-        CreatePartitionsTopicBuilder::default()
+impl CreatePartitionsTopic {
+    /// Sets `count` to the passed value.
+    ///
+    /// The new partition count.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_count(mut self, value: i32) -> Self {
+        self.count = value;
+        self
+    }
+    /// Sets `assignments` to the passed value.
+    ///
+    /// The new partition assignments.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_assignments(mut self, value: Option<Vec<CreatePartitionsAssignment>>) -> Self {
+        self.assignments = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

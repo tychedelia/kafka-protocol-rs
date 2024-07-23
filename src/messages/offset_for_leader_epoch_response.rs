@@ -13,15 +13,14 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
+    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
+    StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-4
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct EpochEndOffset {
     /// The error code 0, or if there was no error.
     ///
@@ -47,11 +46,52 @@ pub struct EpochEndOffset {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for EpochEndOffset {
-    type Builder = EpochEndOffsetBuilder;
-
-    fn builder() -> Self::Builder {
-        EpochEndOffsetBuilder::default()
+impl EpochEndOffset {
+    /// Sets `error_code` to the passed value.
+    ///
+    /// The error code 0, or if there was no error.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_error_code(mut self, value: i16) -> Self {
+        self.error_code = value;
+        self
+    }
+    /// Sets `partition` to the passed value.
+    ///
+    /// The partition index.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_partition(mut self, value: i32) -> Self {
+        self.partition = value;
+        self
+    }
+    /// Sets `leader_epoch` to the passed value.
+    ///
+    /// The leader epoch of the partition.
+    ///
+    /// Supported API versions: 1-4
+    pub fn with_leader_epoch(mut self, value: i32) -> Self {
+        self.leader_epoch = value;
+        self
+    }
+    /// Sets `end_offset` to the passed value.
+    ///
+    /// The end offset of the epoch.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_end_offset(mut self, value: i64) -> Self {
+        self.end_offset = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -150,8 +190,7 @@ impl Message for EpochEndOffset {
 
 /// Valid versions: 0-4
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct OffsetForLeaderEpochResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
@@ -167,11 +206,37 @@ pub struct OffsetForLeaderEpochResponse {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for OffsetForLeaderEpochResponse {
-    type Builder = OffsetForLeaderEpochResponseBuilder;
-
-    fn builder() -> Self::Builder {
-        OffsetForLeaderEpochResponseBuilder::default()
+impl OffsetForLeaderEpochResponse {
+    /// Sets `throttle_time_ms` to the passed value.
+    ///
+    /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
+    ///
+    /// Supported API versions: 2-4
+    pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
+        self.throttle_time_ms = value;
+        self
+    }
+    /// Sets `topics` to the passed value.
+    ///
+    /// Each topic we fetched offsets for.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_topics(
+        mut self,
+        value: indexmap::IndexMap<super::TopicName, OffsetForLeaderTopicResult>,
+    ) -> Self {
+        self.topics = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -273,8 +338,7 @@ impl Message for OffsetForLeaderEpochResponse {
 
 /// Valid versions: 0-4
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct OffsetForLeaderTopicResult {
     /// Each partition in the topic we fetched offsets for.
     ///
@@ -285,11 +349,25 @@ pub struct OffsetForLeaderTopicResult {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for OffsetForLeaderTopicResult {
-    type Builder = OffsetForLeaderTopicResultBuilder;
-
-    fn builder() -> Self::Builder {
-        OffsetForLeaderTopicResultBuilder::default()
+impl OffsetForLeaderTopicResult {
+    /// Sets `partitions` to the passed value.
+    ///
+    /// Each partition in the topic we fetched offsets for.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_partitions(mut self, value: Vec<EpochEndOffset>) -> Self {
+        self.partitions = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

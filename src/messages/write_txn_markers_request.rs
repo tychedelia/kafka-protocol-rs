@@ -13,15 +13,14 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
+    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
+    StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-1
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct WritableTxnMarker {
     /// The current producer ID.
     ///
@@ -52,11 +51,61 @@ pub struct WritableTxnMarker {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for WritableTxnMarker {
-    type Builder = WritableTxnMarkerBuilder;
-
-    fn builder() -> Self::Builder {
-        WritableTxnMarkerBuilder::default()
+impl WritableTxnMarker {
+    /// Sets `producer_id` to the passed value.
+    ///
+    /// The current producer ID.
+    ///
+    /// Supported API versions: 0-1
+    pub fn with_producer_id(mut self, value: super::ProducerId) -> Self {
+        self.producer_id = value;
+        self
+    }
+    /// Sets `producer_epoch` to the passed value.
+    ///
+    /// The current epoch associated with the producer ID.
+    ///
+    /// Supported API versions: 0-1
+    pub fn with_producer_epoch(mut self, value: i16) -> Self {
+        self.producer_epoch = value;
+        self
+    }
+    /// Sets `transaction_result` to the passed value.
+    ///
+    /// The result of the transaction to write to the partitions (false = ABORT, true = COMMIT).
+    ///
+    /// Supported API versions: 0-1
+    pub fn with_transaction_result(mut self, value: bool) -> Self {
+        self.transaction_result = value;
+        self
+    }
+    /// Sets `topics` to the passed value.
+    ///
+    /// Each topic that we want to write transaction marker(s) for.
+    ///
+    /// Supported API versions: 0-1
+    pub fn with_topics(mut self, value: Vec<WritableTxnMarkerTopic>) -> Self {
+        self.topics = value;
+        self
+    }
+    /// Sets `coordinator_epoch` to the passed value.
+    ///
+    /// Epoch associated with the transaction state partition hosted by this transaction coordinator
+    ///
+    /// Supported API versions: 0-1
+    pub fn with_coordinator_epoch(mut self, value: i32) -> Self {
+        self.coordinator_epoch = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -165,8 +214,7 @@ impl Message for WritableTxnMarker {
 
 /// Valid versions: 0-1
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct WritableTxnMarkerTopic {
     /// The topic name.
     ///
@@ -182,11 +230,34 @@ pub struct WritableTxnMarkerTopic {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for WritableTxnMarkerTopic {
-    type Builder = WritableTxnMarkerTopicBuilder;
-
-    fn builder() -> Self::Builder {
-        WritableTxnMarkerTopicBuilder::default()
+impl WritableTxnMarkerTopic {
+    /// Sets `name` to the passed value.
+    ///
+    /// The topic name.
+    ///
+    /// Supported API versions: 0-1
+    pub fn with_name(mut self, value: super::TopicName) -> Self {
+        self.name = value;
+        self
+    }
+    /// Sets `partition_indexes` to the passed value.
+    ///
+    /// The indexes of the partitions to write transaction markers for.
+    ///
+    /// Supported API versions: 0-1
+    pub fn with_partition_indexes(mut self, value: Vec<i32>) -> Self {
+        self.partition_indexes = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -292,8 +363,7 @@ impl Message for WritableTxnMarkerTopic {
 
 /// Valid versions: 0-1
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct WriteTxnMarkersRequest {
     /// The transaction markers to be written.
     ///
@@ -304,11 +374,25 @@ pub struct WriteTxnMarkersRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for WriteTxnMarkersRequest {
-    type Builder = WriteTxnMarkersRequestBuilder;
-
-    fn builder() -> Self::Builder {
-        WriteTxnMarkersRequestBuilder::default()
+impl WriteTxnMarkersRequest {
+    /// Sets `markers` to the passed value.
+    ///
+    /// The transaction markers to be written.
+    ///
+    /// Supported API versions: 0-1
+    pub fn with_markers(mut self, value: Vec<WritableTxnMarker>) -> Self {
+        self.markers = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

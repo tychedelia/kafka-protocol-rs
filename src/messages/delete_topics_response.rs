@@ -13,15 +13,14 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
+    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
+    StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-6
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DeletableTopicResult {
     /// the unique topic ID
     ///
@@ -42,11 +41,43 @@ pub struct DeletableTopicResult {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for DeletableTopicResult {
-    type Builder = DeletableTopicResultBuilder;
-
-    fn builder() -> Self::Builder {
-        DeletableTopicResultBuilder::default()
+impl DeletableTopicResult {
+    /// Sets `topic_id` to the passed value.
+    ///
+    /// the unique topic ID
+    ///
+    /// Supported API versions: 6
+    pub fn with_topic_id(mut self, value: Uuid) -> Self {
+        self.topic_id = value;
+        self
+    }
+    /// Sets `error_code` to the passed value.
+    ///
+    /// The deletion error, or 0 if the deletion succeeded.
+    ///
+    /// Supported API versions: 0-6
+    pub fn with_error_code(mut self, value: i16) -> Self {
+        self.error_code = value;
+        self
+    }
+    /// Sets `error_message` to the passed value.
+    ///
+    /// The error message, or null if there was no error.
+    ///
+    /// Supported API versions: 5-6
+    pub fn with_error_message(mut self, value: Option<StrBytes>) -> Self {
+        self.error_message = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -173,8 +204,7 @@ impl Message for DeletableTopicResult {
 
 /// Valid versions: 0-6
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DeleteTopicsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
@@ -190,11 +220,37 @@ pub struct DeleteTopicsResponse {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for DeleteTopicsResponse {
-    type Builder = DeleteTopicsResponseBuilder;
-
-    fn builder() -> Self::Builder {
-        DeleteTopicsResponseBuilder::default()
+impl DeleteTopicsResponse {
+    /// Sets `throttle_time_ms` to the passed value.
+    ///
+    /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
+    ///
+    /// Supported API versions: 1-6
+    pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
+        self.throttle_time_ms = value;
+        self
+    }
+    /// Sets `responses` to the passed value.
+    ///
+    /// The results for each topic we tried to delete.
+    ///
+    /// Supported API versions: 0-6
+    pub fn with_responses(
+        mut self,
+        value: indexmap::IndexMap<super::TopicName, DeletableTopicResult>,
+    ) -> Self {
+        self.responses = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

@@ -13,15 +13,14 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    DecodeError, Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable,
-    MapEncodable, Message, StrBytes, VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, DecodeError,
+    Decoder, Encodable, EncodeError, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message,
+    StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-3
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct CreateDelegationTokenResponse {
     /// The top-level error, or zero if there was no error.
     ///
@@ -82,11 +81,115 @@ pub struct CreateDelegationTokenResponse {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for CreateDelegationTokenResponse {
-    type Builder = CreateDelegationTokenResponseBuilder;
-
-    fn builder() -> Self::Builder {
-        CreateDelegationTokenResponseBuilder::default()
+impl CreateDelegationTokenResponse {
+    /// Sets `error_code` to the passed value.
+    ///
+    /// The top-level error, or zero if there was no error.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_error_code(mut self, value: i16) -> Self {
+        self.error_code = value;
+        self
+    }
+    /// Sets `principal_type` to the passed value.
+    ///
+    /// The principal type of the token owner.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_principal_type(mut self, value: StrBytes) -> Self {
+        self.principal_type = value;
+        self
+    }
+    /// Sets `principal_name` to the passed value.
+    ///
+    /// The name of the token owner.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_principal_name(mut self, value: StrBytes) -> Self {
+        self.principal_name = value;
+        self
+    }
+    /// Sets `token_requester_principal_type` to the passed value.
+    ///
+    /// The principal type of the requester of the token.
+    ///
+    /// Supported API versions: 3
+    pub fn with_token_requester_principal_type(mut self, value: StrBytes) -> Self {
+        self.token_requester_principal_type = value;
+        self
+    }
+    /// Sets `token_requester_principal_name` to the passed value.
+    ///
+    /// The principal type of the requester of the token.
+    ///
+    /// Supported API versions: 3
+    pub fn with_token_requester_principal_name(mut self, value: StrBytes) -> Self {
+        self.token_requester_principal_name = value;
+        self
+    }
+    /// Sets `issue_timestamp_ms` to the passed value.
+    ///
+    /// When this token was generated.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_issue_timestamp_ms(mut self, value: i64) -> Self {
+        self.issue_timestamp_ms = value;
+        self
+    }
+    /// Sets `expiry_timestamp_ms` to the passed value.
+    ///
+    /// When this token expires.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_expiry_timestamp_ms(mut self, value: i64) -> Self {
+        self.expiry_timestamp_ms = value;
+        self
+    }
+    /// Sets `max_timestamp_ms` to the passed value.
+    ///
+    /// The maximum lifetime of this token.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_max_timestamp_ms(mut self, value: i64) -> Self {
+        self.max_timestamp_ms = value;
+        self
+    }
+    /// Sets `token_id` to the passed value.
+    ///
+    /// The token UUID.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_token_id(mut self, value: StrBytes) -> Self {
+        self.token_id = value;
+        self
+    }
+    /// Sets `hmac` to the passed value.
+    ///
+    /// HMAC of the delegation token.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_hmac(mut self, value: Bytes) -> Self {
+        self.hmac = value;
+        self
+    }
+    /// Sets `throttle_time_ms` to the passed value.
+    ///
+    /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
+        self.throttle_time_ms = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
