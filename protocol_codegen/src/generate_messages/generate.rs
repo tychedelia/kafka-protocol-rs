@@ -1133,6 +1133,7 @@ impl PreparedStruct {
                 }
 
                 writeln!(w, "/// Sets `{}` to the passed value.", prepared_field.name)?;
+                writeln!(w, "/// ")?;
                 writeln!(w, "/// {}", prepared_field.about)?;
                 writeln!(w, "/// ")?;
                 writeln!(w, "/// Supported API versions: {}", prepared_field.versions)?;
