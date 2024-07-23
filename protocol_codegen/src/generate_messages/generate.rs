@@ -1132,6 +1132,7 @@ impl PreparedStruct {
                     continue;
                 }
 
+                writeln!(w, "/// Sets `{}` to the passed value.", prepared_field.name)?;
                 writeln!(w, "/// {}", prepared_field.about)?;
                 writeln!(w, "/// ")?;
                 writeln!(w, "/// Supported API versions: {}", prepared_field.versions)?;
@@ -1159,7 +1160,7 @@ impl PreparedStruct {
             }
 
             if !self.flexible_msg_versions.is_none() {
-                writeln!(w, "/// Other tagged fields")?;
+                writeln!(w, "/// Sets unknown_tagged_fields to the passed value.")?;
                 writeln!(
                     w,
                     "pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self"
@@ -1171,7 +1172,7 @@ impl PreparedStruct {
                     Ok(())
                 })?;
 
-                writeln!(w, "/// Other tagged fields")?;
+                writeln!(w, "/// Inserts an entry into unknown_tagged_fields.")?;
                 writeln!(
                     w,
                     "pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self"
