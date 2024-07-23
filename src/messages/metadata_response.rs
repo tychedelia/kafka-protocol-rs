@@ -13,15 +13,13 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
-    VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
+    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-12
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct MetadataResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
@@ -57,11 +55,76 @@ pub struct MetadataResponse {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for MetadataResponse {
-    type Builder = MetadataResponseBuilder;
-
-    fn builder() -> Self::Builder {
-        MetadataResponseBuilder::default()
+impl MetadataResponse {
+    /// Sets `throttle_time_ms` to the passed value.
+    ///
+    /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
+    ///
+    /// Supported API versions: 3-12
+    pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
+        self.throttle_time_ms = value;
+        self
+    }
+    /// Sets `brokers` to the passed value.
+    ///
+    /// Each broker in the response.
+    ///
+    /// Supported API versions: 0-12
+    pub fn with_brokers(
+        mut self,
+        value: indexmap::IndexMap<super::BrokerId, MetadataResponseBroker>,
+    ) -> Self {
+        self.brokers = value;
+        self
+    }
+    /// Sets `cluster_id` to the passed value.
+    ///
+    /// The cluster ID that responding broker belongs to.
+    ///
+    /// Supported API versions: 2-12
+    pub fn with_cluster_id(mut self, value: Option<StrBytes>) -> Self {
+        self.cluster_id = value;
+        self
+    }
+    /// Sets `controller_id` to the passed value.
+    ///
+    /// The ID of the controller broker.
+    ///
+    /// Supported API versions: 1-12
+    pub fn with_controller_id(mut self, value: super::BrokerId) -> Self {
+        self.controller_id = value;
+        self
+    }
+    /// Sets `topics` to the passed value.
+    ///
+    /// Each topic in the response.
+    ///
+    /// Supported API versions: 0-12
+    pub fn with_topics(
+        mut self,
+        value: indexmap::IndexMap<super::TopicName, MetadataResponseTopic>,
+    ) -> Self {
+        self.topics = value;
+        self
+    }
+    /// Sets `cluster_authorized_operations` to the passed value.
+    ///
+    /// 32-bit bitfield to represent authorized operations for this cluster.
+    ///
+    /// Supported API versions: 8-10
+    pub fn with_cluster_authorized_operations(mut self, value: i32) -> Self {
+        self.cluster_authorized_operations = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -240,8 +303,7 @@ impl Message for MetadataResponse {
 
 /// Valid versions: 0-12
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct MetadataResponseBroker {
     /// The broker hostname.
     ///
@@ -262,11 +324,43 @@ pub struct MetadataResponseBroker {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for MetadataResponseBroker {
-    type Builder = MetadataResponseBrokerBuilder;
-
-    fn builder() -> Self::Builder {
-        MetadataResponseBrokerBuilder::default()
+impl MetadataResponseBroker {
+    /// Sets `host` to the passed value.
+    ///
+    /// The broker hostname.
+    ///
+    /// Supported API versions: 0-12
+    pub fn with_host(mut self, value: StrBytes) -> Self {
+        self.host = value;
+        self
+    }
+    /// Sets `port` to the passed value.
+    ///
+    /// The broker port.
+    ///
+    /// Supported API versions: 0-12
+    pub fn with_port(mut self, value: i32) -> Self {
+        self.port = value;
+        self
+    }
+    /// Sets `rack` to the passed value.
+    ///
+    /// The rack of the broker, or null if it has not been assigned to a rack.
+    ///
+    /// Supported API versions: 1-12
+    pub fn with_rack(mut self, value: Option<StrBytes>) -> Self {
+        self.rack = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -392,8 +486,7 @@ impl Message for MetadataResponseBroker {
 
 /// Valid versions: 0-12
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct MetadataResponsePartition {
     /// The partition error, or 0 if there was no error.
     ///
@@ -434,11 +527,79 @@ pub struct MetadataResponsePartition {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for MetadataResponsePartition {
-    type Builder = MetadataResponsePartitionBuilder;
-
-    fn builder() -> Self::Builder {
-        MetadataResponsePartitionBuilder::default()
+impl MetadataResponsePartition {
+    /// Sets `error_code` to the passed value.
+    ///
+    /// The partition error, or 0 if there was no error.
+    ///
+    /// Supported API versions: 0-12
+    pub fn with_error_code(mut self, value: i16) -> Self {
+        self.error_code = value;
+        self
+    }
+    /// Sets `partition_index` to the passed value.
+    ///
+    /// The partition index.
+    ///
+    /// Supported API versions: 0-12
+    pub fn with_partition_index(mut self, value: i32) -> Self {
+        self.partition_index = value;
+        self
+    }
+    /// Sets `leader_id` to the passed value.
+    ///
+    /// The ID of the leader broker.
+    ///
+    /// Supported API versions: 0-12
+    pub fn with_leader_id(mut self, value: super::BrokerId) -> Self {
+        self.leader_id = value;
+        self
+    }
+    /// Sets `leader_epoch` to the passed value.
+    ///
+    /// The leader epoch of this partition.
+    ///
+    /// Supported API versions: 7-12
+    pub fn with_leader_epoch(mut self, value: i32) -> Self {
+        self.leader_epoch = value;
+        self
+    }
+    /// Sets `replica_nodes` to the passed value.
+    ///
+    /// The set of all nodes that host this partition.
+    ///
+    /// Supported API versions: 0-12
+    pub fn with_replica_nodes(mut self, value: Vec<super::BrokerId>) -> Self {
+        self.replica_nodes = value;
+        self
+    }
+    /// Sets `isr_nodes` to the passed value.
+    ///
+    /// The set of nodes that are in sync with the leader for this partition.
+    ///
+    /// Supported API versions: 0-12
+    pub fn with_isr_nodes(mut self, value: Vec<super::BrokerId>) -> Self {
+        self.isr_nodes = value;
+        self
+    }
+    /// Sets `offline_replicas` to the passed value.
+    ///
+    /// The set of offline replicas of this partition.
+    ///
+    /// Supported API versions: 5-12
+    pub fn with_offline_replicas(mut self, value: Vec<super::BrokerId>) -> Self {
+        self.offline_replicas = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -597,8 +758,7 @@ impl Message for MetadataResponsePartition {
 
 /// Valid versions: 0-12
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct MetadataResponseTopic {
     /// The topic error, or 0 if there was no error.
     ///
@@ -629,11 +789,61 @@ pub struct MetadataResponseTopic {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for MetadataResponseTopic {
-    type Builder = MetadataResponseTopicBuilder;
-
-    fn builder() -> Self::Builder {
-        MetadataResponseTopicBuilder::default()
+impl MetadataResponseTopic {
+    /// Sets `error_code` to the passed value.
+    ///
+    /// The topic error, or 0 if there was no error.
+    ///
+    /// Supported API versions: 0-12
+    pub fn with_error_code(mut self, value: i16) -> Self {
+        self.error_code = value;
+        self
+    }
+    /// Sets `topic_id` to the passed value.
+    ///
+    /// The topic id.
+    ///
+    /// Supported API versions: 10-12
+    pub fn with_topic_id(mut self, value: Uuid) -> Self {
+        self.topic_id = value;
+        self
+    }
+    /// Sets `is_internal` to the passed value.
+    ///
+    /// True if the topic is internal.
+    ///
+    /// Supported API versions: 1-12
+    pub fn with_is_internal(mut self, value: bool) -> Self {
+        self.is_internal = value;
+        self
+    }
+    /// Sets `partitions` to the passed value.
+    ///
+    /// Each partition in the topic.
+    ///
+    /// Supported API versions: 0-12
+    pub fn with_partitions(mut self, value: Vec<MetadataResponsePartition>) -> Self {
+        self.partitions = value;
+        self
+    }
+    /// Sets `topic_authorized_operations` to the passed value.
+    ///
+    /// 32-bit bitfield to represent authorized operations for this topic.
+    ///
+    /// Supported API versions: 8-12
+    pub fn with_topic_authorized_operations(mut self, value: i32) -> Self {
+        self.topic_authorized_operations = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

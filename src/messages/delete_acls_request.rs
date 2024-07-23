@@ -13,15 +13,13 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
-    VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
+    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-3
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DeleteAclsFilter {
     /// The resource type.
     ///
@@ -62,11 +60,79 @@ pub struct DeleteAclsFilter {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for DeleteAclsFilter {
-    type Builder = DeleteAclsFilterBuilder;
-
-    fn builder() -> Self::Builder {
-        DeleteAclsFilterBuilder::default()
+impl DeleteAclsFilter {
+    /// Sets `resource_type_filter` to the passed value.
+    ///
+    /// The resource type.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_resource_type_filter(mut self, value: i8) -> Self {
+        self.resource_type_filter = value;
+        self
+    }
+    /// Sets `resource_name_filter` to the passed value.
+    ///
+    /// The resource name.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_resource_name_filter(mut self, value: Option<StrBytes>) -> Self {
+        self.resource_name_filter = value;
+        self
+    }
+    /// Sets `pattern_type_filter` to the passed value.
+    ///
+    /// The pattern type.
+    ///
+    /// Supported API versions: 1-3
+    pub fn with_pattern_type_filter(mut self, value: i8) -> Self {
+        self.pattern_type_filter = value;
+        self
+    }
+    /// Sets `principal_filter` to the passed value.
+    ///
+    /// The principal filter, or null to accept all principals.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_principal_filter(mut self, value: Option<StrBytes>) -> Self {
+        self.principal_filter = value;
+        self
+    }
+    /// Sets `host_filter` to the passed value.
+    ///
+    /// The host filter, or null to accept all hosts.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_host_filter(mut self, value: Option<StrBytes>) -> Self {
+        self.host_filter = value;
+        self
+    }
+    /// Sets `operation` to the passed value.
+    ///
+    /// The ACL operation.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_operation(mut self, value: i8) -> Self {
+        self.operation = value;
+        self
+    }
+    /// Sets `permission_type` to the passed value.
+    ///
+    /// The permission type.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_permission_type(mut self, value: i8) -> Self {
+        self.permission_type = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -224,8 +290,7 @@ impl Message for DeleteAclsFilter {
 
 /// Valid versions: 0-3
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DeleteAclsRequest {
     /// The filters to use when deleting ACLs.
     ///
@@ -236,11 +301,25 @@ pub struct DeleteAclsRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for DeleteAclsRequest {
-    type Builder = DeleteAclsRequestBuilder;
-
-    fn builder() -> Self::Builder {
-        DeleteAclsRequestBuilder::default()
+impl DeleteAclsRequest {
+    /// Sets `filters` to the passed value.
+    ///
+    /// The filters to use when deleting ACLs.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_filters(mut self, value: Vec<DeleteAclsFilter>) -> Self {
+        self.filters = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

@@ -13,15 +13,13 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
-    VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
+    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-9
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct OffsetFetchRequest {
     /// The group to fetch offsets for.
     ///
@@ -47,11 +45,52 @@ pub struct OffsetFetchRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for OffsetFetchRequest {
-    type Builder = OffsetFetchRequestBuilder;
-
-    fn builder() -> Self::Builder {
-        OffsetFetchRequestBuilder::default()
+impl OffsetFetchRequest {
+    /// Sets `group_id` to the passed value.
+    ///
+    /// The group to fetch offsets for.
+    ///
+    /// Supported API versions: 0-7
+    pub fn with_group_id(mut self, value: super::GroupId) -> Self {
+        self.group_id = value;
+        self
+    }
+    /// Sets `topics` to the passed value.
+    ///
+    /// Each topic we would like to fetch offsets for, or null to fetch offsets for all topics.
+    ///
+    /// Supported API versions: 0-7
+    pub fn with_topics(mut self, value: Option<Vec<OffsetFetchRequestTopic>>) -> Self {
+        self.topics = value;
+        self
+    }
+    /// Sets `groups` to the passed value.
+    ///
+    /// Each group we would like to fetch offsets for
+    ///
+    /// Supported API versions: 8-9
+    pub fn with_groups(mut self, value: Vec<OffsetFetchRequestGroup>) -> Self {
+        self.groups = value;
+        self
+    }
+    /// Sets `require_stable` to the passed value.
+    ///
+    /// Whether broker should hold on returning unstable offsets but set a retriable error code for the partitions.
+    ///
+    /// Supported API versions: 7-9
+    pub fn with_require_stable(mut self, value: bool) -> Self {
+        self.require_stable = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -242,8 +281,7 @@ impl Message for OffsetFetchRequest {
 
 /// Valid versions: 0-9
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct OffsetFetchRequestGroup {
     /// The group ID.
     ///
@@ -269,11 +307,52 @@ pub struct OffsetFetchRequestGroup {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for OffsetFetchRequestGroup {
-    type Builder = OffsetFetchRequestGroupBuilder;
-
-    fn builder() -> Self::Builder {
-        OffsetFetchRequestGroupBuilder::default()
+impl OffsetFetchRequestGroup {
+    /// Sets `group_id` to the passed value.
+    ///
+    /// The group ID.
+    ///
+    /// Supported API versions: 8-9
+    pub fn with_group_id(mut self, value: super::GroupId) -> Self {
+        self.group_id = value;
+        self
+    }
+    /// Sets `member_id` to the passed value.
+    ///
+    /// The member ID assigned by the group coordinator if using the new consumer protocol (KIP-848).
+    ///
+    /// Supported API versions: 9
+    pub fn with_member_id(mut self, value: Option<StrBytes>) -> Self {
+        self.member_id = value;
+        self
+    }
+    /// Sets `member_epoch` to the passed value.
+    ///
+    /// The member epoch if using the new consumer protocol (KIP-848).
+    ///
+    /// Supported API versions: 9
+    pub fn with_member_epoch(mut self, value: i32) -> Self {
+        self.member_epoch = value;
+        self
+    }
+    /// Sets `topics` to the passed value.
+    ///
+    /// Each topic we would like to fetch offsets for, or null to fetch offsets for all topics.
+    ///
+    /// Supported API versions: 8-9
+    pub fn with_topics(mut self, value: Option<Vec<OffsetFetchRequestTopics>>) -> Self {
+        self.topics = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -423,8 +502,7 @@ impl Message for OffsetFetchRequestGroup {
 
 /// Valid versions: 0-9
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct OffsetFetchRequestTopic {
     /// The topic name.
     ///
@@ -440,11 +518,34 @@ pub struct OffsetFetchRequestTopic {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for OffsetFetchRequestTopic {
-    type Builder = OffsetFetchRequestTopicBuilder;
-
-    fn builder() -> Self::Builder {
-        OffsetFetchRequestTopicBuilder::default()
+impl OffsetFetchRequestTopic {
+    /// Sets `name` to the passed value.
+    ///
+    /// The topic name.
+    ///
+    /// Supported API versions: 0-7
+    pub fn with_name(mut self, value: super::TopicName) -> Self {
+        self.name = value;
+        self
+    }
+    /// Sets `partition_indexes` to the passed value.
+    ///
+    /// The partition indexes we would like to fetch offsets for.
+    ///
+    /// Supported API versions: 0-7
+    pub fn with_partition_indexes(mut self, value: Vec<i32>) -> Self {
+        self.partition_indexes = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -582,8 +683,7 @@ impl Message for OffsetFetchRequestTopic {
 
 /// Valid versions: 0-9
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct OffsetFetchRequestTopics {
     /// The topic name.
     ///
@@ -599,11 +699,34 @@ pub struct OffsetFetchRequestTopics {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for OffsetFetchRequestTopics {
-    type Builder = OffsetFetchRequestTopicsBuilder;
-
-    fn builder() -> Self::Builder {
-        OffsetFetchRequestTopicsBuilder::default()
+impl OffsetFetchRequestTopics {
+    /// Sets `name` to the passed value.
+    ///
+    /// The topic name.
+    ///
+    /// Supported API versions: 8-9
+    pub fn with_name(mut self, value: super::TopicName) -> Self {
+        self.name = value;
+        self
+    }
+    /// Sets `partition_indexes` to the passed value.
+    ///
+    /// The partition indexes we would like to fetch offsets for.
+    ///
+    /// Supported API versions: 8-9
+    pub fn with_partition_indexes(mut self, value: Vec<i32>) -> Self {
+        self.partition_indexes = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

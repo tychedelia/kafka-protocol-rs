@@ -13,15 +13,13 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
-    VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
+    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-1
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct AlterClientQuotasRequest {
     /// The quota configuration entries to alter.
     ///
@@ -37,11 +35,34 @@ pub struct AlterClientQuotasRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for AlterClientQuotasRequest {
-    type Builder = AlterClientQuotasRequestBuilder;
-
-    fn builder() -> Self::Builder {
-        AlterClientQuotasRequestBuilder::default()
+impl AlterClientQuotasRequest {
+    /// Sets `entries` to the passed value.
+    ///
+    /// The quota configuration entries to alter.
+    ///
+    /// Supported API versions: 0-1
+    pub fn with_entries(mut self, value: Vec<EntryData>) -> Self {
+        self.entries = value;
+        self
+    }
+    /// Sets `validate_only` to the passed value.
+    ///
+    /// Whether the alteration should be validated, but not performed.
+    ///
+    /// Supported API versions: 0-1
+    pub fn with_validate_only(mut self, value: bool) -> Self {
+        self.validate_only = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -135,8 +156,7 @@ impl Message for AlterClientQuotasRequest {
 
 /// Valid versions: 0-1
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct EntityData {
     /// The entity type.
     ///
@@ -152,11 +172,34 @@ pub struct EntityData {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for EntityData {
-    type Builder = EntityDataBuilder;
-
-    fn builder() -> Self::Builder {
-        EntityDataBuilder::default()
+impl EntityData {
+    /// Sets `entity_type` to the passed value.
+    ///
+    /// The entity type.
+    ///
+    /// Supported API versions: 0-1
+    pub fn with_entity_type(mut self, value: StrBytes) -> Self {
+        self.entity_type = value;
+        self
+    }
+    /// Sets `entity_name` to the passed value.
+    ///
+    /// The name of the entity, or null if the default.
+    ///
+    /// Supported API versions: 0-1
+    pub fn with_entity_name(mut self, value: Option<StrBytes>) -> Self {
+        self.entity_name = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -261,8 +304,7 @@ impl Message for EntityData {
 
 /// Valid versions: 0-1
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct EntryData {
     /// The quota entity to alter.
     ///
@@ -278,11 +320,34 @@ pub struct EntryData {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for EntryData {
-    type Builder = EntryDataBuilder;
-
-    fn builder() -> Self::Builder {
-        EntryDataBuilder::default()
+impl EntryData {
+    /// Sets `entity` to the passed value.
+    ///
+    /// The quota entity to alter.
+    ///
+    /// Supported API versions: 0-1
+    pub fn with_entity(mut self, value: Vec<EntityData>) -> Self {
+        self.entity = value;
+        self
+    }
+    /// Sets `ops` to the passed value.
+    ///
+    /// An individual quota configuration entry to alter.
+    ///
+    /// Supported API versions: 0-1
+    pub fn with_ops(mut self, value: Vec<OpData>) -> Self {
+        self.ops = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -388,8 +453,7 @@ impl Message for EntryData {
 
 /// Valid versions: 0-1
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct OpData {
     /// The quota configuration key.
     ///
@@ -410,11 +474,43 @@ pub struct OpData {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for OpData {
-    type Builder = OpDataBuilder;
-
-    fn builder() -> Self::Builder {
-        OpDataBuilder::default()
+impl OpData {
+    /// Sets `key` to the passed value.
+    ///
+    /// The quota configuration key.
+    ///
+    /// Supported API versions: 0-1
+    pub fn with_key(mut self, value: StrBytes) -> Self {
+        self.key = value;
+        self
+    }
+    /// Sets `value` to the passed value.
+    ///
+    /// The value to set, otherwise ignored if the value is to be removed.
+    ///
+    /// Supported API versions: 0-1
+    pub fn with_value(mut self, value: f64) -> Self {
+        self.value = value;
+        self
+    }
+    /// Sets `remove` to the passed value.
+    ///
+    /// Whether the quota configuration value should be removed, otherwise set.
+    ///
+    /// Supported API versions: 0-1
+    pub fn with_remove(mut self, value: bool) -> Self {
+        self.remove = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

@@ -13,15 +13,13 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
-    VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
+    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-3
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DeleteAclsFilterResult {
     /// The error code, or 0 if the filter succeeded.
     ///
@@ -42,11 +40,43 @@ pub struct DeleteAclsFilterResult {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for DeleteAclsFilterResult {
-    type Builder = DeleteAclsFilterResultBuilder;
-
-    fn builder() -> Self::Builder {
-        DeleteAclsFilterResultBuilder::default()
+impl DeleteAclsFilterResult {
+    /// Sets `error_code` to the passed value.
+    ///
+    /// The error code, or 0 if the filter succeeded.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_error_code(mut self, value: i16) -> Self {
+        self.error_code = value;
+        self
+    }
+    /// Sets `error_message` to the passed value.
+    ///
+    /// The error message, or null if the filter succeeded.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_error_message(mut self, value: Option<StrBytes>) -> Self {
+        self.error_message = value;
+        self
+    }
+    /// Sets `matching_acls` to the passed value.
+    ///
+    /// The ACLs which matched this filter.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_matching_acls(mut self, value: Vec<DeleteAclsMatchingAcl>) -> Self {
+        self.matching_acls = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -158,8 +188,7 @@ impl Message for DeleteAclsFilterResult {
 
 /// Valid versions: 0-3
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DeleteAclsMatchingAcl {
     /// The deletion error code, or 0 if the deletion succeeded.
     ///
@@ -210,11 +239,97 @@ pub struct DeleteAclsMatchingAcl {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for DeleteAclsMatchingAcl {
-    type Builder = DeleteAclsMatchingAclBuilder;
-
-    fn builder() -> Self::Builder {
-        DeleteAclsMatchingAclBuilder::default()
+impl DeleteAclsMatchingAcl {
+    /// Sets `error_code` to the passed value.
+    ///
+    /// The deletion error code, or 0 if the deletion succeeded.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_error_code(mut self, value: i16) -> Self {
+        self.error_code = value;
+        self
+    }
+    /// Sets `error_message` to the passed value.
+    ///
+    /// The deletion error message, or null if the deletion succeeded.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_error_message(mut self, value: Option<StrBytes>) -> Self {
+        self.error_message = value;
+        self
+    }
+    /// Sets `resource_type` to the passed value.
+    ///
+    /// The ACL resource type.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_resource_type(mut self, value: i8) -> Self {
+        self.resource_type = value;
+        self
+    }
+    /// Sets `resource_name` to the passed value.
+    ///
+    /// The ACL resource name.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_resource_name(mut self, value: StrBytes) -> Self {
+        self.resource_name = value;
+        self
+    }
+    /// Sets `pattern_type` to the passed value.
+    ///
+    /// The ACL resource pattern type.
+    ///
+    /// Supported API versions: 1-3
+    pub fn with_pattern_type(mut self, value: i8) -> Self {
+        self.pattern_type = value;
+        self
+    }
+    /// Sets `principal` to the passed value.
+    ///
+    /// The ACL principal.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_principal(mut self, value: StrBytes) -> Self {
+        self.principal = value;
+        self
+    }
+    /// Sets `host` to the passed value.
+    ///
+    /// The ACL host.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_host(mut self, value: StrBytes) -> Self {
+        self.host = value;
+        self
+    }
+    /// Sets `operation` to the passed value.
+    ///
+    /// The ACL operation.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_operation(mut self, value: i8) -> Self {
+        self.operation = value;
+        self
+    }
+    /// Sets `permission_type` to the passed value.
+    ///
+    /// The ACL permission type.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_permission_type(mut self, value: i8) -> Self {
+        self.permission_type = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -394,8 +509,7 @@ impl Message for DeleteAclsMatchingAcl {
 
 /// Valid versions: 0-3
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DeleteAclsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
@@ -411,11 +525,34 @@ pub struct DeleteAclsResponse {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for DeleteAclsResponse {
-    type Builder = DeleteAclsResponseBuilder;
-
-    fn builder() -> Self::Builder {
-        DeleteAclsResponseBuilder::default()
+impl DeleteAclsResponse {
+    /// Sets `throttle_time_ms` to the passed value.
+    ///
+    /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
+        self.throttle_time_ms = value;
+        self
+    }
+    /// Sets `filter_results` to the passed value.
+    ///
+    /// The results for each filter.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_filter_results(mut self, value: Vec<DeleteAclsFilterResult>) -> Self {
+        self.filter_results = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

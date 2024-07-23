@@ -13,15 +13,13 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
-    VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
+    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct AlterUserScramCredentialsRequest {
     /// The SCRAM credentials to remove.
     ///
@@ -37,11 +35,34 @@ pub struct AlterUserScramCredentialsRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for AlterUserScramCredentialsRequest {
-    type Builder = AlterUserScramCredentialsRequestBuilder;
-
-    fn builder() -> Self::Builder {
-        AlterUserScramCredentialsRequestBuilder::default()
+impl AlterUserScramCredentialsRequest {
+    /// Sets `deletions` to the passed value.
+    ///
+    /// The SCRAM credentials to remove.
+    ///
+    /// Supported API versions: 0
+    pub fn with_deletions(mut self, value: Vec<ScramCredentialDeletion>) -> Self {
+        self.deletions = value;
+        self
+    }
+    /// Sets `upsertions` to the passed value.
+    ///
+    /// The SCRAM credentials to update/insert.
+    ///
+    /// Supported API versions: 0
+    pub fn with_upsertions(mut self, value: Vec<ScramCredentialUpsertion>) -> Self {
+        self.upsertions = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -118,8 +139,7 @@ impl Message for AlterUserScramCredentialsRequest {
 
 /// Valid versions: 0
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ScramCredentialDeletion {
     /// The user name.
     ///
@@ -135,11 +155,34 @@ pub struct ScramCredentialDeletion {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for ScramCredentialDeletion {
-    type Builder = ScramCredentialDeletionBuilder;
-
-    fn builder() -> Self::Builder {
-        ScramCredentialDeletionBuilder::default()
+impl ScramCredentialDeletion {
+    /// Sets `name` to the passed value.
+    ///
+    /// The user name.
+    ///
+    /// Supported API versions: 0
+    pub fn with_name(mut self, value: StrBytes) -> Self {
+        self.name = value;
+        self
+    }
+    /// Sets `mechanism` to the passed value.
+    ///
+    /// The SCRAM mechanism.
+    ///
+    /// Supported API versions: 0
+    pub fn with_mechanism(mut self, value: i8) -> Self {
+        self.mechanism = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -214,8 +257,7 @@ impl Message for ScramCredentialDeletion {
 
 /// Valid versions: 0
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ScramCredentialUpsertion {
     /// The user name.
     ///
@@ -246,11 +288,61 @@ pub struct ScramCredentialUpsertion {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for ScramCredentialUpsertion {
-    type Builder = ScramCredentialUpsertionBuilder;
-
-    fn builder() -> Self::Builder {
-        ScramCredentialUpsertionBuilder::default()
+impl ScramCredentialUpsertion {
+    /// Sets `name` to the passed value.
+    ///
+    /// The user name.
+    ///
+    /// Supported API versions: 0
+    pub fn with_name(mut self, value: StrBytes) -> Self {
+        self.name = value;
+        self
+    }
+    /// Sets `mechanism` to the passed value.
+    ///
+    /// The SCRAM mechanism.
+    ///
+    /// Supported API versions: 0
+    pub fn with_mechanism(mut self, value: i8) -> Self {
+        self.mechanism = value;
+        self
+    }
+    /// Sets `iterations` to the passed value.
+    ///
+    /// The number of iterations.
+    ///
+    /// Supported API versions: 0
+    pub fn with_iterations(mut self, value: i32) -> Self {
+        self.iterations = value;
+        self
+    }
+    /// Sets `salt` to the passed value.
+    ///
+    /// A random salt generated by the client.
+    ///
+    /// Supported API versions: 0
+    pub fn with_salt(mut self, value: Bytes) -> Self {
+        self.salt = value;
+        self
+    }
+    /// Sets `salted_password` to the passed value.
+    ///
+    /// The salted password.
+    ///
+    /// Supported API versions: 0
+    pub fn with_salted_password(mut self, value: Bytes) -> Self {
+        self.salted_password = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

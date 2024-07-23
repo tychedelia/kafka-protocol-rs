@@ -13,15 +13,13 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
-    VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
+    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-4
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct OffsetForLeaderEpochRequest {
     /// The broker ID of the follower, of -1 if this request is from a consumer.
     ///
@@ -37,11 +35,37 @@ pub struct OffsetForLeaderEpochRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for OffsetForLeaderEpochRequest {
-    type Builder = OffsetForLeaderEpochRequestBuilder;
-
-    fn builder() -> Self::Builder {
-        OffsetForLeaderEpochRequestBuilder::default()
+impl OffsetForLeaderEpochRequest {
+    /// Sets `replica_id` to the passed value.
+    ///
+    /// The broker ID of the follower, of -1 if this request is from a consumer.
+    ///
+    /// Supported API versions: 3-4
+    pub fn with_replica_id(mut self, value: super::BrokerId) -> Self {
+        self.replica_id = value;
+        self
+    }
+    /// Sets `topics` to the passed value.
+    ///
+    /// Each topic to get offsets for.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_topics(
+        mut self,
+        value: indexmap::IndexMap<super::TopicName, OffsetForLeaderTopic>,
+    ) -> Self {
+        self.topics = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -143,8 +167,7 @@ impl Message for OffsetForLeaderEpochRequest {
 
 /// Valid versions: 0-4
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct OffsetForLeaderPartition {
     /// The partition index.
     ///
@@ -165,11 +188,43 @@ pub struct OffsetForLeaderPartition {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for OffsetForLeaderPartition {
-    type Builder = OffsetForLeaderPartitionBuilder;
-
-    fn builder() -> Self::Builder {
-        OffsetForLeaderPartitionBuilder::default()
+impl OffsetForLeaderPartition {
+    /// Sets `partition` to the passed value.
+    ///
+    /// The partition index.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_partition(mut self, value: i32) -> Self {
+        self.partition = value;
+        self
+    }
+    /// Sets `current_leader_epoch` to the passed value.
+    ///
+    /// An epoch used to fence consumers/replicas with old metadata. If the epoch provided by the client is larger than the current epoch known to the broker, then the UNKNOWN_LEADER_EPOCH error code will be returned. If the provided epoch is smaller, then the FENCED_LEADER_EPOCH error code will be returned.
+    ///
+    /// Supported API versions: 2-4
+    pub fn with_current_leader_epoch(mut self, value: i32) -> Self {
+        self.current_leader_epoch = value;
+        self
+    }
+    /// Sets `leader_epoch` to the passed value.
+    ///
+    /// The epoch to look up an offset for.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_leader_epoch(mut self, value: i32) -> Self {
+        self.leader_epoch = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -263,8 +318,7 @@ impl Message for OffsetForLeaderPartition {
 
 /// Valid versions: 0-4
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct OffsetForLeaderTopic {
     /// Each partition to get offsets for.
     ///
@@ -275,11 +329,25 @@ pub struct OffsetForLeaderTopic {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for OffsetForLeaderTopic {
-    type Builder = OffsetForLeaderTopicBuilder;
-
-    fn builder() -> Self::Builder {
-        OffsetForLeaderTopicBuilder::default()
+impl OffsetForLeaderTopic {
+    /// Sets `partitions` to the passed value.
+    ///
+    /// Each partition to get offsets for.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_partitions(mut self, value: Vec<OffsetForLeaderPartition>) -> Self {
+        self.partitions = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

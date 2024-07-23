@@ -13,15 +13,13 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
-    VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
+    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-3
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ApiVersionsRequest {
     /// The name of the client.
     ///
@@ -37,11 +35,34 @@ pub struct ApiVersionsRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for ApiVersionsRequest {
-    type Builder = ApiVersionsRequestBuilder;
-
-    fn builder() -> Self::Builder {
-        ApiVersionsRequestBuilder::default()
+impl ApiVersionsRequest {
+    /// Sets `client_software_name` to the passed value.
+    ///
+    /// The name of the client.
+    ///
+    /// Supported API versions: 3
+    pub fn with_client_software_name(mut self, value: StrBytes) -> Self {
+        self.client_software_name = value;
+        self
+    }
+    /// Sets `client_software_version` to the passed value.
+    ///
+    /// The version of the client.
+    ///
+    /// Supported API versions: 3
+    pub fn with_client_software_version(mut self, value: StrBytes) -> Self {
+        self.client_software_version = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

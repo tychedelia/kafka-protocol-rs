@@ -13,15 +13,13 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
-    VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
+    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct CredentialInfo {
     /// The SCRAM mechanism.
     ///
@@ -37,11 +35,34 @@ pub struct CredentialInfo {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for CredentialInfo {
-    type Builder = CredentialInfoBuilder;
-
-    fn builder() -> Self::Builder {
-        CredentialInfoBuilder::default()
+impl CredentialInfo {
+    /// Sets `mechanism` to the passed value.
+    ///
+    /// The SCRAM mechanism.
+    ///
+    /// Supported API versions: 0
+    pub fn with_mechanism(mut self, value: i8) -> Self {
+        self.mechanism = value;
+        self
+    }
+    /// Sets `iterations` to the passed value.
+    ///
+    /// The number of iterations used in the SCRAM credential.
+    ///
+    /// Supported API versions: 0
+    pub fn with_iterations(mut self, value: i32) -> Self {
+        self.iterations = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -116,8 +137,7 @@ impl Message for CredentialInfo {
 
 /// Valid versions: 0
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DescribeUserScramCredentialsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
@@ -143,11 +163,52 @@ pub struct DescribeUserScramCredentialsResponse {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for DescribeUserScramCredentialsResponse {
-    type Builder = DescribeUserScramCredentialsResponseBuilder;
-
-    fn builder() -> Self::Builder {
-        DescribeUserScramCredentialsResponseBuilder::default()
+impl DescribeUserScramCredentialsResponse {
+    /// Sets `throttle_time_ms` to the passed value.
+    ///
+    /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
+    ///
+    /// Supported API versions: 0
+    pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
+        self.throttle_time_ms = value;
+        self
+    }
+    /// Sets `error_code` to the passed value.
+    ///
+    /// The message-level error code, 0 except for user authorization or infrastructure issues.
+    ///
+    /// Supported API versions: 0
+    pub fn with_error_code(mut self, value: i16) -> Self {
+        self.error_code = value;
+        self
+    }
+    /// Sets `error_message` to the passed value.
+    ///
+    /// The message-level error message, if any.
+    ///
+    /// Supported API versions: 0
+    pub fn with_error_message(mut self, value: Option<StrBytes>) -> Self {
+        self.error_message = value;
+        self
+    }
+    /// Sets `results` to the passed value.
+    ///
+    /// The results for descriptions, one per user.
+    ///
+    /// Supported API versions: 0
+    pub fn with_results(mut self, value: Vec<DescribeUserScramCredentialsResult>) -> Self {
+        self.results = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -232,8 +293,7 @@ impl Message for DescribeUserScramCredentialsResponse {
 
 /// Valid versions: 0
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DescribeUserScramCredentialsResult {
     /// The user name.
     ///
@@ -259,11 +319,52 @@ pub struct DescribeUserScramCredentialsResult {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for DescribeUserScramCredentialsResult {
-    type Builder = DescribeUserScramCredentialsResultBuilder;
-
-    fn builder() -> Self::Builder {
-        DescribeUserScramCredentialsResultBuilder::default()
+impl DescribeUserScramCredentialsResult {
+    /// Sets `user` to the passed value.
+    ///
+    /// The user name.
+    ///
+    /// Supported API versions: 0
+    pub fn with_user(mut self, value: StrBytes) -> Self {
+        self.user = value;
+        self
+    }
+    /// Sets `error_code` to the passed value.
+    ///
+    /// The user-level error code.
+    ///
+    /// Supported API versions: 0
+    pub fn with_error_code(mut self, value: i16) -> Self {
+        self.error_code = value;
+        self
+    }
+    /// Sets `error_message` to the passed value.
+    ///
+    /// The user-level error message, if any.
+    ///
+    /// Supported API versions: 0
+    pub fn with_error_message(mut self, value: Option<StrBytes>) -> Self {
+        self.error_message = value;
+        self
+    }
+    /// Sets `credential_infos` to the passed value.
+    ///
+    /// The mechanism and related information associated with the user's SCRAM credentials.
+    ///
+    /// Supported API versions: 0
+    pub fn with_credential_infos(mut self, value: Vec<CredentialInfo>) -> Self {
+        self.credential_infos = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

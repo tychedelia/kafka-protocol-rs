@@ -13,15 +13,13 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
-    VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
+    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-4
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct StopReplicaPartitionState {
     /// The partition index.
     ///
@@ -42,11 +40,43 @@ pub struct StopReplicaPartitionState {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for StopReplicaPartitionState {
-    type Builder = StopReplicaPartitionStateBuilder;
-
-    fn builder() -> Self::Builder {
-        StopReplicaPartitionStateBuilder::default()
+impl StopReplicaPartitionState {
+    /// Sets `partition_index` to the passed value.
+    ///
+    /// The partition index.
+    ///
+    /// Supported API versions: 3-4
+    pub fn with_partition_index(mut self, value: i32) -> Self {
+        self.partition_index = value;
+        self
+    }
+    /// Sets `leader_epoch` to the passed value.
+    ///
+    /// The leader epoch.
+    ///
+    /// Supported API versions: 3-4
+    pub fn with_leader_epoch(mut self, value: i32) -> Self {
+        self.leader_epoch = value;
+        self
+    }
+    /// Sets `delete_partition` to the passed value.
+    ///
+    /// Whether this partition should be deleted.
+    ///
+    /// Supported API versions: 3-4
+    pub fn with_delete_partition(mut self, value: bool) -> Self {
+        self.delete_partition = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -180,8 +210,7 @@ impl Message for StopReplicaPartitionState {
 
 /// Valid versions: 0-4
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct StopReplicaPartitionV0 {
     /// The topic name.
     ///
@@ -197,11 +226,34 @@ pub struct StopReplicaPartitionV0 {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for StopReplicaPartitionV0 {
-    type Builder = StopReplicaPartitionV0Builder;
-
-    fn builder() -> Self::Builder {
-        StopReplicaPartitionV0Builder::default()
+impl StopReplicaPartitionV0 {
+    /// Sets `topic_name` to the passed value.
+    ///
+    /// The topic name.
+    ///
+    /// Supported API versions: 0
+    pub fn with_topic_name(mut self, value: super::TopicName) -> Self {
+        self.topic_name = value;
+        self
+    }
+    /// Sets `partition_index` to the passed value.
+    ///
+    /// The partition index.
+    ///
+    /// Supported API versions: 0
+    pub fn with_partition_index(mut self, value: i32) -> Self {
+        self.partition_index = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -314,8 +366,7 @@ impl Message for StopReplicaPartitionV0 {
 
 /// Valid versions: 0-4
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct StopReplicaRequest {
     /// The controller id.
     ///
@@ -361,11 +412,88 @@ pub struct StopReplicaRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for StopReplicaRequest {
-    type Builder = StopReplicaRequestBuilder;
-
-    fn builder() -> Self::Builder {
-        StopReplicaRequestBuilder::default()
+impl StopReplicaRequest {
+    /// Sets `controller_id` to the passed value.
+    ///
+    /// The controller id.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_controller_id(mut self, value: super::BrokerId) -> Self {
+        self.controller_id = value;
+        self
+    }
+    /// Sets `is_k_raft_controller` to the passed value.
+    ///
+    /// If KRaft controller id is used during migration. See KIP-866
+    ///
+    /// Supported API versions: 4
+    pub fn with_is_k_raft_controller(mut self, value: bool) -> Self {
+        self.is_k_raft_controller = value;
+        self
+    }
+    /// Sets `controller_epoch` to the passed value.
+    ///
+    /// The controller epoch.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_controller_epoch(mut self, value: i32) -> Self {
+        self.controller_epoch = value;
+        self
+    }
+    /// Sets `broker_epoch` to the passed value.
+    ///
+    /// The broker epoch.
+    ///
+    /// Supported API versions: 1-4
+    pub fn with_broker_epoch(mut self, value: i64) -> Self {
+        self.broker_epoch = value;
+        self
+    }
+    /// Sets `delete_partitions` to the passed value.
+    ///
+    /// Whether these partitions should be deleted.
+    ///
+    /// Supported API versions: 0-2
+    pub fn with_delete_partitions(mut self, value: bool) -> Self {
+        self.delete_partitions = value;
+        self
+    }
+    /// Sets `ungrouped_partitions` to the passed value.
+    ///
+    /// The partitions to stop.
+    ///
+    /// Supported API versions: 0
+    pub fn with_ungrouped_partitions(mut self, value: Vec<StopReplicaPartitionV0>) -> Self {
+        self.ungrouped_partitions = value;
+        self
+    }
+    /// Sets `topics` to the passed value.
+    ///
+    /// The topics to stop.
+    ///
+    /// Supported API versions: 1-2
+    pub fn with_topics(mut self, value: Vec<StopReplicaTopicV1>) -> Self {
+        self.topics = value;
+        self
+    }
+    /// Sets `topic_states` to the passed value.
+    ///
+    /// Each topic.
+    ///
+    /// Supported API versions: 3-4
+    pub fn with_topic_states(mut self, value: Vec<StopReplicaTopicState>) -> Self {
+        self.topic_states = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -579,8 +707,7 @@ impl Message for StopReplicaRequest {
 
 /// Valid versions: 0-4
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct StopReplicaTopicState {
     /// The topic name.
     ///
@@ -596,11 +723,34 @@ pub struct StopReplicaTopicState {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for StopReplicaTopicState {
-    type Builder = StopReplicaTopicStateBuilder;
-
-    fn builder() -> Self::Builder {
-        StopReplicaTopicStateBuilder::default()
+impl StopReplicaTopicState {
+    /// Sets `topic_name` to the passed value.
+    ///
+    /// The topic name.
+    ///
+    /// Supported API versions: 3-4
+    pub fn with_topic_name(mut self, value: super::TopicName) -> Self {
+        self.topic_name = value;
+        self
+    }
+    /// Sets `partition_states` to the passed value.
+    ///
+    /// The state of each partition
+    ///
+    /// Supported API versions: 3-4
+    pub fn with_partition_states(mut self, value: Vec<StopReplicaPartitionState>) -> Self {
+        self.partition_states = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -714,8 +864,7 @@ impl Message for StopReplicaTopicState {
 
 /// Valid versions: 0-4
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct StopReplicaTopicV1 {
     /// The topic name.
     ///
@@ -731,11 +880,34 @@ pub struct StopReplicaTopicV1 {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for StopReplicaTopicV1 {
-    type Builder = StopReplicaTopicV1Builder;
-
-    fn builder() -> Self::Builder {
-        StopReplicaTopicV1Builder::default()
+impl StopReplicaTopicV1 {
+    /// Sets `name` to the passed value.
+    ///
+    /// The topic name.
+    ///
+    /// Supported API versions: 1-2
+    pub fn with_name(mut self, value: super::TopicName) -> Self {
+        self.name = value;
+        self
+    }
+    /// Sets `partition_indexes` to the passed value.
+    ///
+    /// The partition indexes.
+    ///
+    /// Supported API versions: 1-2
+    pub fn with_partition_indexes(mut self, value: Vec<i32>) -> Self {
+        self.partition_indexes = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

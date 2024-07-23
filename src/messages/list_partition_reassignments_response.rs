@@ -13,15 +13,13 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
-    VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
+    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ListPartitionReassignmentsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
@@ -47,11 +45,52 @@ pub struct ListPartitionReassignmentsResponse {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for ListPartitionReassignmentsResponse {
-    type Builder = ListPartitionReassignmentsResponseBuilder;
-
-    fn builder() -> Self::Builder {
-        ListPartitionReassignmentsResponseBuilder::default()
+impl ListPartitionReassignmentsResponse {
+    /// Sets `throttle_time_ms` to the passed value.
+    ///
+    /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
+    ///
+    /// Supported API versions: 0
+    pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
+        self.throttle_time_ms = value;
+        self
+    }
+    /// Sets `error_code` to the passed value.
+    ///
+    /// The top-level error code, or 0 if there was no error
+    ///
+    /// Supported API versions: 0
+    pub fn with_error_code(mut self, value: i16) -> Self {
+        self.error_code = value;
+        self
+    }
+    /// Sets `error_message` to the passed value.
+    ///
+    /// The top-level error message, or null if there was no error.
+    ///
+    /// Supported API versions: 0
+    pub fn with_error_message(mut self, value: Option<StrBytes>) -> Self {
+        self.error_message = value;
+        self
+    }
+    /// Sets `topics` to the passed value.
+    ///
+    /// The ongoing reassignments for each topic.
+    ///
+    /// Supported API versions: 0
+    pub fn with_topics(mut self, value: Vec<OngoingTopicReassignment>) -> Self {
+        self.topics = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -136,8 +175,7 @@ impl Message for ListPartitionReassignmentsResponse {
 
 /// Valid versions: 0
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct OngoingPartitionReassignment {
     /// The index of the partition.
     ///
@@ -163,11 +201,52 @@ pub struct OngoingPartitionReassignment {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for OngoingPartitionReassignment {
-    type Builder = OngoingPartitionReassignmentBuilder;
-
-    fn builder() -> Self::Builder {
-        OngoingPartitionReassignmentBuilder::default()
+impl OngoingPartitionReassignment {
+    /// Sets `partition_index` to the passed value.
+    ///
+    /// The index of the partition.
+    ///
+    /// Supported API versions: 0
+    pub fn with_partition_index(mut self, value: i32) -> Self {
+        self.partition_index = value;
+        self
+    }
+    /// Sets `replicas` to the passed value.
+    ///
+    /// The current replica set.
+    ///
+    /// Supported API versions: 0
+    pub fn with_replicas(mut self, value: Vec<super::BrokerId>) -> Self {
+        self.replicas = value;
+        self
+    }
+    /// Sets `adding_replicas` to the passed value.
+    ///
+    /// The set of replicas we are currently adding.
+    ///
+    /// Supported API versions: 0
+    pub fn with_adding_replicas(mut self, value: Vec<super::BrokerId>) -> Self {
+        self.adding_replicas = value;
+        self
+    }
+    /// Sets `removing_replicas` to the passed value.
+    ///
+    /// The set of replicas we are currently removing.
+    ///
+    /// Supported API versions: 0
+    pub fn with_removing_replicas(mut self, value: Vec<super::BrokerId>) -> Self {
+        self.removing_replicas = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -252,8 +331,7 @@ impl Message for OngoingPartitionReassignment {
 
 /// Valid versions: 0
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct OngoingTopicReassignment {
     /// The topic name.
     ///
@@ -269,11 +347,34 @@ pub struct OngoingTopicReassignment {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for OngoingTopicReassignment {
-    type Builder = OngoingTopicReassignmentBuilder;
-
-    fn builder() -> Self::Builder {
-        OngoingTopicReassignmentBuilder::default()
+impl OngoingTopicReassignment {
+    /// Sets `name` to the passed value.
+    ///
+    /// The topic name.
+    ///
+    /// Supported API versions: 0
+    pub fn with_name(mut self, value: super::TopicName) -> Self {
+        self.name = value;
+        self
+    }
+    /// Sets `partitions` to the passed value.
+    ///
+    /// The ongoing reassignments for each partition.
+    ///
+    /// Supported API versions: 0
+    pub fn with_partitions(mut self, value: Vec<OngoingPartitionReassignment>) -> Self {
+        self.partitions = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

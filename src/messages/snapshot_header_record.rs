@@ -13,15 +13,13 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
-    VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
+    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct SnapshotHeaderRecord {
     /// The version of the snapshot header record
     ///
@@ -37,11 +35,34 @@ pub struct SnapshotHeaderRecord {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for SnapshotHeaderRecord {
-    type Builder = SnapshotHeaderRecordBuilder;
-
-    fn builder() -> Self::Builder {
-        SnapshotHeaderRecordBuilder::default()
+impl SnapshotHeaderRecord {
+    /// Sets `version` to the passed value.
+    ///
+    /// The version of the snapshot header record
+    ///
+    /// Supported API versions: 0
+    pub fn with_version(mut self, value: i16) -> Self {
+        self.version = value;
+        self
+    }
+    /// Sets `last_contained_log_timestamp` to the passed value.
+    ///
+    /// The append time of the last record from the log contained in this snapshot
+    ///
+    /// Supported API versions: 0
+    pub fn with_last_contained_log_timestamp(mut self, value: i64) -> Self {
+        self.last_contained_log_timestamp = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

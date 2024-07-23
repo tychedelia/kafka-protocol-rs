@@ -13,15 +13,13 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
-    VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
+    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-3
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ConsumerProtocolSubscription {
     ///
     ///
@@ -49,11 +47,54 @@ pub struct ConsumerProtocolSubscription {
     pub rack_id: Option<StrBytes>,
 }
 
-impl Builder for ConsumerProtocolSubscription {
-    type Builder = ConsumerProtocolSubscriptionBuilder;
-
-    fn builder() -> Self::Builder {
-        ConsumerProtocolSubscriptionBuilder::default()
+impl ConsumerProtocolSubscription {
+    /// Sets `topics` to the passed value.
+    ///
+    ///
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_topics(mut self, value: Vec<StrBytes>) -> Self {
+        self.topics = value;
+        self
+    }
+    /// Sets `user_data` to the passed value.
+    ///
+    ///
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_user_data(mut self, value: Option<Bytes>) -> Self {
+        self.user_data = value;
+        self
+    }
+    /// Sets `owned_partitions` to the passed value.
+    ///
+    ///
+    ///
+    /// Supported API versions: 1-3
+    pub fn with_owned_partitions(
+        mut self,
+        value: indexmap::IndexMap<super::TopicName, TopicPartition>,
+    ) -> Self {
+        self.owned_partitions = value;
+        self
+    }
+    /// Sets `generation_id` to the passed value.
+    ///
+    ///
+    ///
+    /// Supported API versions: 2-3
+    pub fn with_generation_id(mut self, value: i32) -> Self {
+        self.generation_id = value;
+        self
+    }
+    /// Sets `rack_id` to the passed value.
+    ///
+    ///
+    ///
+    /// Supported API versions: 3
+    pub fn with_rack_id(mut self, value: Option<StrBytes>) -> Self {
+        self.rack_id = value;
+        self
     }
 }
 
@@ -140,8 +181,7 @@ impl Message for ConsumerProtocolSubscription {
 
 /// Valid versions: 0-3
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct TopicPartition {
     ///
     ///
@@ -149,11 +189,15 @@ pub struct TopicPartition {
     pub partitions: Vec<i32>,
 }
 
-impl Builder for TopicPartition {
-    type Builder = TopicPartitionBuilder;
-
-    fn builder() -> Self::Builder {
-        TopicPartitionBuilder::default()
+impl TopicPartition {
+    /// Sets `partitions` to the passed value.
+    ///
+    ///
+    ///
+    /// Supported API versions: 1-3
+    pub fn with_partitions(mut self, value: Vec<i32>) -> Self {
+        self.partitions = value;
+        self
     }
 }
 

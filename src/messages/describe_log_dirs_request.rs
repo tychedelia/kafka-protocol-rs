@@ -13,15 +13,13 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
-    VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
+    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-4
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DescribableLogDirTopic {
     /// The partition indexes.
     ///
@@ -32,11 +30,25 @@ pub struct DescribableLogDirTopic {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for DescribableLogDirTopic {
-    type Builder = DescribableLogDirTopicBuilder;
-
-    fn builder() -> Self::Builder {
-        DescribableLogDirTopicBuilder::default()
+impl DescribableLogDirTopic {
+    /// Sets `partitions` to the passed value.
+    ///
+    /// The partition indexes.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_partitions(mut self, value: Vec<i32>) -> Self {
+        self.partitions = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -144,8 +156,7 @@ impl Message for DescribableLogDirTopic {
 
 /// Valid versions: 0-4
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DescribeLogDirsRequest {
     /// Each topic that we want to describe log directories for, or null for all topics.
     ///
@@ -156,11 +167,28 @@ pub struct DescribeLogDirsRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for DescribeLogDirsRequest {
-    type Builder = DescribeLogDirsRequestBuilder;
-
-    fn builder() -> Self::Builder {
-        DescribeLogDirsRequestBuilder::default()
+impl DescribeLogDirsRequest {
+    /// Sets `topics` to the passed value.
+    ///
+    /// Each topic that we want to describe log directories for, or null for all topics.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_topics(
+        mut self,
+        value: Option<indexmap::IndexMap<super::TopicName, DescribableLogDirTopic>>,
+    ) -> Self {
+        self.topics = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

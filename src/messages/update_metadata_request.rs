@@ -13,15 +13,13 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
-    VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
+    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-8
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct UpdateMetadataBroker {
     /// The broker id.
     ///
@@ -52,11 +50,61 @@ pub struct UpdateMetadataBroker {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for UpdateMetadataBroker {
-    type Builder = UpdateMetadataBrokerBuilder;
-
-    fn builder() -> Self::Builder {
-        UpdateMetadataBrokerBuilder::default()
+impl UpdateMetadataBroker {
+    /// Sets `id` to the passed value.
+    ///
+    /// The broker id.
+    ///
+    /// Supported API versions: 0-8
+    pub fn with_id(mut self, value: super::BrokerId) -> Self {
+        self.id = value;
+        self
+    }
+    /// Sets `v0_host` to the passed value.
+    ///
+    /// The broker hostname.
+    ///
+    /// Supported API versions: 0
+    pub fn with_v0_host(mut self, value: StrBytes) -> Self {
+        self.v0_host = value;
+        self
+    }
+    /// Sets `v0_port` to the passed value.
+    ///
+    /// The broker port.
+    ///
+    /// Supported API versions: 0
+    pub fn with_v0_port(mut self, value: i32) -> Self {
+        self.v0_port = value;
+        self
+    }
+    /// Sets `endpoints` to the passed value.
+    ///
+    /// The broker endpoints.
+    ///
+    /// Supported API versions: 1-8
+    pub fn with_endpoints(mut self, value: Vec<UpdateMetadataEndpoint>) -> Self {
+        self.endpoints = value;
+        self
+    }
+    /// Sets `rack` to the passed value.
+    ///
+    /// The rack which this broker belongs to.
+    ///
+    /// Supported API versions: 2-8
+    pub fn with_rack(mut self, value: Option<StrBytes>) -> Self {
+        self.rack = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -210,8 +258,7 @@ impl Message for UpdateMetadataBroker {
 
 /// Valid versions: 0-8
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct UpdateMetadataEndpoint {
     /// The port of this endpoint
     ///
@@ -237,11 +284,52 @@ pub struct UpdateMetadataEndpoint {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for UpdateMetadataEndpoint {
-    type Builder = UpdateMetadataEndpointBuilder;
-
-    fn builder() -> Self::Builder {
-        UpdateMetadataEndpointBuilder::default()
+impl UpdateMetadataEndpoint {
+    /// Sets `port` to the passed value.
+    ///
+    /// The port of this endpoint
+    ///
+    /// Supported API versions: 1-8
+    pub fn with_port(mut self, value: i32) -> Self {
+        self.port = value;
+        self
+    }
+    /// Sets `host` to the passed value.
+    ///
+    /// The hostname of this endpoint
+    ///
+    /// Supported API versions: 1-8
+    pub fn with_host(mut self, value: StrBytes) -> Self {
+        self.host = value;
+        self
+    }
+    /// Sets `listener` to the passed value.
+    ///
+    /// The listener name.
+    ///
+    /// Supported API versions: 3-8
+    pub fn with_listener(mut self, value: StrBytes) -> Self {
+        self.listener = value;
+        self
+    }
+    /// Sets `security_protocol` to the passed value.
+    ///
+    /// The security protocol type.
+    ///
+    /// Supported API versions: 1-8
+    pub fn with_security_protocol(mut self, value: i16) -> Self {
+        self.security_protocol = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -412,8 +500,7 @@ impl Message for UpdateMetadataEndpoint {
 
 /// Valid versions: 0-8
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct UpdateMetadataPartitionState {
     /// In older versions of this RPC, the topic name.
     ///
@@ -464,11 +551,97 @@ pub struct UpdateMetadataPartitionState {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for UpdateMetadataPartitionState {
-    type Builder = UpdateMetadataPartitionStateBuilder;
-
-    fn builder() -> Self::Builder {
-        UpdateMetadataPartitionStateBuilder::default()
+impl UpdateMetadataPartitionState {
+    /// Sets `topic_name` to the passed value.
+    ///
+    /// In older versions of this RPC, the topic name.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_topic_name(mut self, value: super::TopicName) -> Self {
+        self.topic_name = value;
+        self
+    }
+    /// Sets `partition_index` to the passed value.
+    ///
+    /// The partition index.
+    ///
+    /// Supported API versions: 0-8
+    pub fn with_partition_index(mut self, value: i32) -> Self {
+        self.partition_index = value;
+        self
+    }
+    /// Sets `controller_epoch` to the passed value.
+    ///
+    /// The controller epoch.
+    ///
+    /// Supported API versions: 0-8
+    pub fn with_controller_epoch(mut self, value: i32) -> Self {
+        self.controller_epoch = value;
+        self
+    }
+    /// Sets `leader` to the passed value.
+    ///
+    /// The ID of the broker which is the current partition leader.
+    ///
+    /// Supported API versions: 0-8
+    pub fn with_leader(mut self, value: super::BrokerId) -> Self {
+        self.leader = value;
+        self
+    }
+    /// Sets `leader_epoch` to the passed value.
+    ///
+    /// The leader epoch of this partition.
+    ///
+    /// Supported API versions: 0-8
+    pub fn with_leader_epoch(mut self, value: i32) -> Self {
+        self.leader_epoch = value;
+        self
+    }
+    /// Sets `isr` to the passed value.
+    ///
+    /// The brokers which are in the ISR for this partition.
+    ///
+    /// Supported API versions: 0-8
+    pub fn with_isr(mut self, value: Vec<super::BrokerId>) -> Self {
+        self.isr = value;
+        self
+    }
+    /// Sets `zk_version` to the passed value.
+    ///
+    /// The Zookeeper version.
+    ///
+    /// Supported API versions: 0-8
+    pub fn with_zk_version(mut self, value: i32) -> Self {
+        self.zk_version = value;
+        self
+    }
+    /// Sets `replicas` to the passed value.
+    ///
+    /// All the replicas of this partition.
+    ///
+    /// Supported API versions: 0-8
+    pub fn with_replicas(mut self, value: Vec<super::BrokerId>) -> Self {
+        self.replicas = value;
+        self
+    }
+    /// Sets `offline_replicas` to the passed value.
+    ///
+    /// The replicas of this partition which are offline.
+    ///
+    /// Supported API versions: 4-8
+    pub fn with_offline_replicas(mut self, value: Vec<super::BrokerId>) -> Self {
+        self.offline_replicas = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -637,8 +810,7 @@ impl Message for UpdateMetadataPartitionState {
 
 /// Valid versions: 0-8
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct UpdateMetadataRequest {
     /// The controller id.
     ///
@@ -684,11 +856,91 @@ pub struct UpdateMetadataRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for UpdateMetadataRequest {
-    type Builder = UpdateMetadataRequestBuilder;
-
-    fn builder() -> Self::Builder {
-        UpdateMetadataRequestBuilder::default()
+impl UpdateMetadataRequest {
+    /// Sets `controller_id` to the passed value.
+    ///
+    /// The controller id.
+    ///
+    /// Supported API versions: 0-8
+    pub fn with_controller_id(mut self, value: super::BrokerId) -> Self {
+        self.controller_id = value;
+        self
+    }
+    /// Sets `is_k_raft_controller` to the passed value.
+    ///
+    /// If KRaft controller id is used during migration. See KIP-866
+    ///
+    /// Supported API versions: 8
+    pub fn with_is_k_raft_controller(mut self, value: bool) -> Self {
+        self.is_k_raft_controller = value;
+        self
+    }
+    /// Sets `_type` to the passed value.
+    ///
+    /// Indicates if this request is a Full metadata snapshot (2), Incremental (1), or Unknown (0). Using during ZK migration, see KIP-866
+    ///
+    /// Supported API versions: 8
+    pub fn with_type(mut self, value: i8) -> Self {
+        self._type = value;
+        self
+    }
+    /// Sets `controller_epoch` to the passed value.
+    ///
+    /// The controller epoch.
+    ///
+    /// Supported API versions: 0-8
+    pub fn with_controller_epoch(mut self, value: i32) -> Self {
+        self.controller_epoch = value;
+        self
+    }
+    /// Sets `broker_epoch` to the passed value.
+    ///
+    /// The broker epoch.
+    ///
+    /// Supported API versions: 5-8
+    pub fn with_broker_epoch(mut self, value: i64) -> Self {
+        self.broker_epoch = value;
+        self
+    }
+    /// Sets `ungrouped_partition_states` to the passed value.
+    ///
+    /// In older versions of this RPC, each partition that we would like to update.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_ungrouped_partition_states(
+        mut self,
+        value: Vec<UpdateMetadataPartitionState>,
+    ) -> Self {
+        self.ungrouped_partition_states = value;
+        self
+    }
+    /// Sets `topic_states` to the passed value.
+    ///
+    /// In newer versions of this RPC, each topic that we would like to update.
+    ///
+    /// Supported API versions: 5-8
+    pub fn with_topic_states(mut self, value: Vec<UpdateMetadataTopicState>) -> Self {
+        self.topic_states = value;
+        self
+    }
+    /// Sets `live_brokers` to the passed value.
+    ///
+    ///
+    ///
+    /// Supported API versions: 0-8
+    pub fn with_live_brokers(mut self, value: Vec<UpdateMetadataBroker>) -> Self {
+        self.live_brokers = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -930,8 +1182,7 @@ impl Message for UpdateMetadataRequest {
 
 /// Valid versions: 0-8
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct UpdateMetadataTopicState {
     /// The topic name.
     ///
@@ -952,11 +1203,43 @@ pub struct UpdateMetadataTopicState {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for UpdateMetadataTopicState {
-    type Builder = UpdateMetadataTopicStateBuilder;
-
-    fn builder() -> Self::Builder {
-        UpdateMetadataTopicStateBuilder::default()
+impl UpdateMetadataTopicState {
+    /// Sets `topic_name` to the passed value.
+    ///
+    /// The topic name.
+    ///
+    /// Supported API versions: 5-8
+    pub fn with_topic_name(mut self, value: super::TopicName) -> Self {
+        self.topic_name = value;
+        self
+    }
+    /// Sets `topic_id` to the passed value.
+    ///
+    /// The topic id.
+    ///
+    /// Supported API versions: 7-8
+    pub fn with_topic_id(mut self, value: Uuid) -> Self {
+        self.topic_id = value;
+        self
+    }
+    /// Sets `partition_states` to the passed value.
+    ///
+    /// The partition that we would like to update.
+    ///
+    /// Supported API versions: 5-8
+    pub fn with_partition_states(mut self, value: Vec<UpdateMetadataPartitionState>) -> Self {
+        self.partition_states = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

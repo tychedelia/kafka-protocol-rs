@@ -13,15 +13,13 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
-    VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
+    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DescribeProducersResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
@@ -37,11 +35,34 @@ pub struct DescribeProducersResponse {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for DescribeProducersResponse {
-    type Builder = DescribeProducersResponseBuilder;
-
-    fn builder() -> Self::Builder {
-        DescribeProducersResponseBuilder::default()
+impl DescribeProducersResponse {
+    /// Sets `throttle_time_ms` to the passed value.
+    ///
+    /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
+    ///
+    /// Supported API versions: 0
+    pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
+        self.throttle_time_ms = value;
+        self
+    }
+    /// Sets `topics` to the passed value.
+    ///
+    /// Each topic in the response.
+    ///
+    /// Supported API versions: 0
+    pub fn with_topics(mut self, value: Vec<TopicResponse>) -> Self {
+        self.topics = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -116,8 +137,7 @@ impl Message for DescribeProducersResponse {
 
 /// Valid versions: 0
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct PartitionResponse {
     /// The partition index.
     ///
@@ -143,11 +163,52 @@ pub struct PartitionResponse {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for PartitionResponse {
-    type Builder = PartitionResponseBuilder;
-
-    fn builder() -> Self::Builder {
-        PartitionResponseBuilder::default()
+impl PartitionResponse {
+    /// Sets `partition_index` to the passed value.
+    ///
+    /// The partition index.
+    ///
+    /// Supported API versions: 0
+    pub fn with_partition_index(mut self, value: i32) -> Self {
+        self.partition_index = value;
+        self
+    }
+    /// Sets `error_code` to the passed value.
+    ///
+    /// The partition error code, or 0 if there was no error.
+    ///
+    /// Supported API versions: 0
+    pub fn with_error_code(mut self, value: i16) -> Self {
+        self.error_code = value;
+        self
+    }
+    /// Sets `error_message` to the passed value.
+    ///
+    /// The partition error message, which may be null if no additional details are available
+    ///
+    /// Supported API versions: 0
+    pub fn with_error_message(mut self, value: Option<StrBytes>) -> Self {
+        self.error_message = value;
+        self
+    }
+    /// Sets `active_producers` to the passed value.
+    ///
+    ///
+    ///
+    /// Supported API versions: 0
+    pub fn with_active_producers(mut self, value: Vec<ProducerState>) -> Self {
+        self.active_producers = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -233,8 +294,7 @@ impl Message for PartitionResponse {
 
 /// Valid versions: 0
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ProducerState {
     ///
     ///
@@ -270,11 +330,70 @@ pub struct ProducerState {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for ProducerState {
-    type Builder = ProducerStateBuilder;
-
-    fn builder() -> Self::Builder {
-        ProducerStateBuilder::default()
+impl ProducerState {
+    /// Sets `producer_id` to the passed value.
+    ///
+    ///
+    ///
+    /// Supported API versions: 0
+    pub fn with_producer_id(mut self, value: super::ProducerId) -> Self {
+        self.producer_id = value;
+        self
+    }
+    /// Sets `producer_epoch` to the passed value.
+    ///
+    ///
+    ///
+    /// Supported API versions: 0
+    pub fn with_producer_epoch(mut self, value: i32) -> Self {
+        self.producer_epoch = value;
+        self
+    }
+    /// Sets `last_sequence` to the passed value.
+    ///
+    ///
+    ///
+    /// Supported API versions: 0
+    pub fn with_last_sequence(mut self, value: i32) -> Self {
+        self.last_sequence = value;
+        self
+    }
+    /// Sets `last_timestamp` to the passed value.
+    ///
+    ///
+    ///
+    /// Supported API versions: 0
+    pub fn with_last_timestamp(mut self, value: i64) -> Self {
+        self.last_timestamp = value;
+        self
+    }
+    /// Sets `coordinator_epoch` to the passed value.
+    ///
+    ///
+    ///
+    /// Supported API versions: 0
+    pub fn with_coordinator_epoch(mut self, value: i32) -> Self {
+        self.coordinator_epoch = value;
+        self
+    }
+    /// Sets `current_txn_start_offset` to the passed value.
+    ///
+    ///
+    ///
+    /// Supported API versions: 0
+    pub fn with_current_txn_start_offset(mut self, value: i64) -> Self {
+        self.current_txn_start_offset = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -369,8 +488,7 @@ impl Message for ProducerState {
 
 /// Valid versions: 0
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct TopicResponse {
     /// The topic name
     ///
@@ -386,11 +504,34 @@ pub struct TopicResponse {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for TopicResponse {
-    type Builder = TopicResponseBuilder;
-
-    fn builder() -> Self::Builder {
-        TopicResponseBuilder::default()
+impl TopicResponse {
+    /// Sets `name` to the passed value.
+    ///
+    /// The topic name
+    ///
+    /// Supported API versions: 0
+    pub fn with_name(mut self, value: super::TopicName) -> Self {
+        self.name = value;
+        self
+    }
+    /// Sets `partitions` to the passed value.
+    ///
+    /// Each partition in the response.
+    ///
+    /// Supported API versions: 0
+    pub fn with_partitions(mut self, value: Vec<PartitionResponse>) -> Self {
+        self.partitions = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
