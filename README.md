@@ -12,7 +12,7 @@ Protocol messages are generated against a recent stable Kafka release, currently
 
 Although the Kafka protocol remains relatively stable and strives to be backwards compatible, new fields are occasionally 
 added. In order to ensure forward compatibility with the protocol, this crate marks all exported items as `#[non-exhaustive]`.
-Protocol messages can be constructed using `Default::default` updated with builder style methods. 
+Protocol messages can be constructed using `Default::default` and updated with builder style methods. 
 
 ## Working with messages
 
