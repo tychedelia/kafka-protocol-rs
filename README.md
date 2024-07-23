@@ -31,21 +31,19 @@ request.topics = None;
 request.allow_auto_topic_creation = true;
 ```
 
-Using `kafka_protocol::protocol::Builder`:
+Using builder style methods:
 ```rust
 use kafka_protocol::messages::{ApiKey, MetadataRequest, RequestHeader};
-use kafka_protocol::protocol::{Builder, StrBytes};
+use kafka_protocol::protocol::StrBytes;
 
-let header = RequestHeader::builder()
-    .client_id(Some(StrBytes::from_static_str("my-client")))
-    .request_api_key(ApiKey::MetadataKey as i16)
-    .request_api_version(12)
-    .build();
-!
-let request = MetadataRequest::builder()
-    .topics(None)
-    .allow_auto_topic_creation(true)
-    .build();
+let header = RequestHeader::default()
+    .with_client_id(Some(StrBytes::from_static_str("my-client")))
+    .with_request_api_key(ApiKey::MetadataKey as i16)
+    .with_request_api_version(12);
+
+let request = MetadataRequest::default()
+    .with_topics(None)
+    .with_allow_auto_topic_creation(true);
 ```
 ### Serialization
 
