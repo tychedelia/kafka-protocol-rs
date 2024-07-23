@@ -1083,11 +1083,7 @@ impl PreparedStruct {
     pub fn apply<W: Write>(&self, w: &mut CodeWriter<W>) -> Result<(), Error> {
         writeln!(w, "/// Valid versions: {}", self.valid_versions)?;
         writeln!(w, "#[non_exhaustive]")?;
-        writeln!(
-            w,
-            "#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]"
-        )?;
-        writeln!(w, "#[builder(default)]")?;
+        writeln!(w, "#[derive(Debug, Clone, PartialEq)]")?;
         write!(w, "pub struct {} ", self.name)?;
         w.block(|w| {
             for prepared_field in &self.prepared_fields {
@@ -1186,21 +1182,6 @@ impl PreparedStruct {
                 })?;
             }
 
-            Ok(())
-        })?;
-        writeln!(w)?;
-        writeln!(w)?;
-
-        write!(w, "impl Builder for {} ", self.name)?;
-        w.block(|w| {
-            writeln!(w, "type Builder = {}Builder;", self.name)?;
-            writeln!(w)?;
-            write!(w, "fn builder() -> Self::Builder")?;
-            w.block(|w| {
-                writeln!(w, "{}Builder::default()", self.name)?;
-                Ok(())
-            })?;
-            writeln!(w)?;
             Ok(())
         })?;
         writeln!(w)?;
@@ -1375,7 +1356,7 @@ fn write_file_header<W: Write>(w: &mut CodeWriter<W>, name: &str) -> Result<(), 
     writeln!(w)?;
     writeln!(w, "use crate::protocol::{{")?;
     writeln!(w, "    Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, EncodeError, DecodeError, Message, HeaderVersion, VersionRange,")?;
-    writeln!(w, "    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{{ByteBuf, ByteBufMut}}, Builder")?;
+    writeln!(w, "    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{{ByteBuf, ByteBufMut}}")?;
     writeln!(w, "}};")?;
     writeln!(w)?;
     writeln!(w)?;
