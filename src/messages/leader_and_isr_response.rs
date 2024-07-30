@@ -13,15 +13,13 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
-    VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
+    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-7
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct LeaderAndIsrPartitionError {
     /// The topic name.
     ///
@@ -42,11 +40,43 @@ pub struct LeaderAndIsrPartitionError {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for LeaderAndIsrPartitionError {
-    type Builder = LeaderAndIsrPartitionErrorBuilder;
-
-    fn builder() -> Self::Builder {
-        LeaderAndIsrPartitionErrorBuilder::default()
+impl LeaderAndIsrPartitionError {
+    /// Sets `topic_name` to the passed value.
+    ///
+    /// The topic name.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_topic_name(mut self, value: super::TopicName) -> Self {
+        self.topic_name = value;
+        self
+    }
+    /// Sets `partition_index` to the passed value.
+    ///
+    /// The partition index.
+    ///
+    /// Supported API versions: 0-7
+    pub fn with_partition_index(mut self, value: i32) -> Self {
+        self.partition_index = value;
+        self
+    }
+    /// Sets `error_code` to the passed value.
+    ///
+    /// The partition error code, or 0 if there was no error.
+    ///
+    /// Supported API versions: 0-7
+    pub fn with_error_code(mut self, value: i16) -> Self {
+        self.error_code = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -152,8 +182,7 @@ impl Message for LeaderAndIsrPartitionError {
 
 /// Valid versions: 0-7
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct LeaderAndIsrResponse {
     /// The error code, or 0 if there was no error.
     ///
@@ -174,11 +203,43 @@ pub struct LeaderAndIsrResponse {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for LeaderAndIsrResponse {
-    type Builder = LeaderAndIsrResponseBuilder;
-
-    fn builder() -> Self::Builder {
-        LeaderAndIsrResponseBuilder::default()
+impl LeaderAndIsrResponse {
+    /// Sets `error_code` to the passed value.
+    ///
+    /// The error code, or 0 if there was no error.
+    ///
+    /// Supported API versions: 0-7
+    pub fn with_error_code(mut self, value: i16) -> Self {
+        self.error_code = value;
+        self
+    }
+    /// Sets `partition_errors` to the passed value.
+    ///
+    /// Each partition in v0 to v4 message.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_partition_errors(mut self, value: Vec<LeaderAndIsrPartitionError>) -> Self {
+        self.partition_errors = value;
+        self
+    }
+    /// Sets `topics` to the passed value.
+    ///
+    /// Each topic
+    ///
+    /// Supported API versions: 5-7
+    pub fn with_topics(mut self, value: indexmap::IndexMap<Uuid, LeaderAndIsrTopicError>) -> Self {
+        self.topics = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -312,8 +373,7 @@ impl Message for LeaderAndIsrResponse {
 
 /// Valid versions: 0-7
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct LeaderAndIsrTopicError {
     /// Each partition.
     ///
@@ -324,11 +384,25 @@ pub struct LeaderAndIsrTopicError {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for LeaderAndIsrTopicError {
-    type Builder = LeaderAndIsrTopicErrorBuilder;
-
-    fn builder() -> Self::Builder {
-        LeaderAndIsrTopicErrorBuilder::default()
+impl LeaderAndIsrTopicError {
+    /// Sets `partition_errors` to the passed value.
+    ///
+    /// Each partition.
+    ///
+    /// Supported API versions: 5-7
+    pub fn with_partition_errors(mut self, value: Vec<LeaderAndIsrPartitionError>) -> Self {
+        self.partition_errors = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

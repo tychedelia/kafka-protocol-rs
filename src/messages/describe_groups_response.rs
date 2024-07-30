@@ -13,15 +13,13 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
-    VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
+    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-5
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DescribeGroupsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
@@ -37,11 +35,34 @@ pub struct DescribeGroupsResponse {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for DescribeGroupsResponse {
-    type Builder = DescribeGroupsResponseBuilder;
-
-    fn builder() -> Self::Builder {
-        DescribeGroupsResponseBuilder::default()
+impl DescribeGroupsResponse {
+    /// Sets `throttle_time_ms` to the passed value.
+    ///
+    /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
+    ///
+    /// Supported API versions: 1-5
+    pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
+        self.throttle_time_ms = value;
+        self
+    }
+    /// Sets `groups` to the passed value.
+    ///
+    /// Each described group.
+    ///
+    /// Supported API versions: 0-5
+    pub fn with_groups(mut self, value: Vec<DescribedGroup>) -> Self {
+        self.groups = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -143,8 +164,7 @@ impl Message for DescribeGroupsResponse {
 
 /// Valid versions: 0-5
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DescribedGroup {
     /// The describe error, or 0 if there was no error.
     ///
@@ -185,11 +205,79 @@ pub struct DescribedGroup {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for DescribedGroup {
-    type Builder = DescribedGroupBuilder;
-
-    fn builder() -> Self::Builder {
-        DescribedGroupBuilder::default()
+impl DescribedGroup {
+    /// Sets `error_code` to the passed value.
+    ///
+    /// The describe error, or 0 if there was no error.
+    ///
+    /// Supported API versions: 0-5
+    pub fn with_error_code(mut self, value: i16) -> Self {
+        self.error_code = value;
+        self
+    }
+    /// Sets `group_id` to the passed value.
+    ///
+    /// The group ID string.
+    ///
+    /// Supported API versions: 0-5
+    pub fn with_group_id(mut self, value: super::GroupId) -> Self {
+        self.group_id = value;
+        self
+    }
+    /// Sets `group_state` to the passed value.
+    ///
+    /// The group state string, or the empty string.
+    ///
+    /// Supported API versions: 0-5
+    pub fn with_group_state(mut self, value: StrBytes) -> Self {
+        self.group_state = value;
+        self
+    }
+    /// Sets `protocol_type` to the passed value.
+    ///
+    /// The group protocol type, or the empty string.
+    ///
+    /// Supported API versions: 0-5
+    pub fn with_protocol_type(mut self, value: StrBytes) -> Self {
+        self.protocol_type = value;
+        self
+    }
+    /// Sets `protocol_data` to the passed value.
+    ///
+    /// The group protocol data, or the empty string.
+    ///
+    /// Supported API versions: 0-5
+    pub fn with_protocol_data(mut self, value: StrBytes) -> Self {
+        self.protocol_data = value;
+        self
+    }
+    /// Sets `members` to the passed value.
+    ///
+    /// The group members.
+    ///
+    /// Supported API versions: 0-5
+    pub fn with_members(mut self, value: Vec<DescribedGroupMember>) -> Self {
+        self.members = value;
+        self
+    }
+    /// Sets `authorized_operations` to the passed value.
+    ///
+    /// 32-bit bitfield to represent authorized operations for this group.
+    ///
+    /// Supported API versions: 3-5
+    pub fn with_authorized_operations(mut self, value: i32) -> Self {
+        self.authorized_operations = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -372,8 +460,7 @@ impl Message for DescribedGroup {
 
 /// Valid versions: 0-5
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DescribedGroupMember {
     /// The member ID assigned by the group coordinator.
     ///
@@ -409,11 +496,70 @@ pub struct DescribedGroupMember {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for DescribedGroupMember {
-    type Builder = DescribedGroupMemberBuilder;
-
-    fn builder() -> Self::Builder {
-        DescribedGroupMemberBuilder::default()
+impl DescribedGroupMember {
+    /// Sets `member_id` to the passed value.
+    ///
+    /// The member ID assigned by the group coordinator.
+    ///
+    /// Supported API versions: 0-5
+    pub fn with_member_id(mut self, value: StrBytes) -> Self {
+        self.member_id = value;
+        self
+    }
+    /// Sets `group_instance_id` to the passed value.
+    ///
+    /// The unique identifier of the consumer instance provided by end user.
+    ///
+    /// Supported API versions: 4-5
+    pub fn with_group_instance_id(mut self, value: Option<StrBytes>) -> Self {
+        self.group_instance_id = value;
+        self
+    }
+    /// Sets `client_id` to the passed value.
+    ///
+    /// The client ID used in the member's latest join group request.
+    ///
+    /// Supported API versions: 0-5
+    pub fn with_client_id(mut self, value: StrBytes) -> Self {
+        self.client_id = value;
+        self
+    }
+    /// Sets `client_host` to the passed value.
+    ///
+    /// The client host.
+    ///
+    /// Supported API versions: 0-5
+    pub fn with_client_host(mut self, value: StrBytes) -> Self {
+        self.client_host = value;
+        self
+    }
+    /// Sets `member_metadata` to the passed value.
+    ///
+    /// The metadata corresponding to the current group protocol in use.
+    ///
+    /// Supported API versions: 0-5
+    pub fn with_member_metadata(mut self, value: Bytes) -> Self {
+        self.member_metadata = value;
+        self
+    }
+    /// Sets `member_assignment` to the passed value.
+    ///
+    /// The current assignment provided by the group leader.
+    ///
+    /// Supported API versions: 0-5
+    pub fn with_member_assignment(mut self, value: Bytes) -> Self {
+        self.member_assignment = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

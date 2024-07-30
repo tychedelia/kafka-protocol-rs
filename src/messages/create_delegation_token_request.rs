@@ -13,15 +13,13 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
-    VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
+    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-3
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct CreatableRenewers {
     /// The type of the Kafka principal.
     ///
@@ -37,11 +35,34 @@ pub struct CreatableRenewers {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for CreatableRenewers {
-    type Builder = CreatableRenewersBuilder;
-
-    fn builder() -> Self::Builder {
-        CreatableRenewersBuilder::default()
+impl CreatableRenewers {
+    /// Sets `principal_type` to the passed value.
+    ///
+    /// The type of the Kafka principal.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_principal_type(mut self, value: StrBytes) -> Self {
+        self.principal_type = value;
+        self
+    }
+    /// Sets `principal_name` to the passed value.
+    ///
+    /// The name of the Kafka principal.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_principal_name(mut self, value: StrBytes) -> Self {
+        self.principal_name = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -146,8 +167,7 @@ impl Message for CreatableRenewers {
 
 /// Valid versions: 0-3
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct CreateDelegationTokenRequest {
     /// The principal type of the owner of the token. If it's null it defaults to the token request principal.
     ///
@@ -173,11 +193,52 @@ pub struct CreateDelegationTokenRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for CreateDelegationTokenRequest {
-    type Builder = CreateDelegationTokenRequestBuilder;
-
-    fn builder() -> Self::Builder {
-        CreateDelegationTokenRequestBuilder::default()
+impl CreateDelegationTokenRequest {
+    /// Sets `owner_principal_type` to the passed value.
+    ///
+    /// The principal type of the owner of the token. If it's null it defaults to the token request principal.
+    ///
+    /// Supported API versions: 3
+    pub fn with_owner_principal_type(mut self, value: Option<StrBytes>) -> Self {
+        self.owner_principal_type = value;
+        self
+    }
+    /// Sets `owner_principal_name` to the passed value.
+    ///
+    /// The principal name of the owner of the token. If it's null it defaults to the token request principal.
+    ///
+    /// Supported API versions: 3
+    pub fn with_owner_principal_name(mut self, value: Option<StrBytes>) -> Self {
+        self.owner_principal_name = value;
+        self
+    }
+    /// Sets `renewers` to the passed value.
+    ///
+    /// A list of those who are allowed to renew this token before it expires.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_renewers(mut self, value: Vec<CreatableRenewers>) -> Self {
+        self.renewers = value;
+        self
+    }
+    /// Sets `max_lifetime_ms` to the passed value.
+    ///
+    /// The maximum lifetime of the token in milliseconds, or -1 to use the server side default.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_max_lifetime_ms(mut self, value: i64) -> Self {
+        self.max_lifetime_ms = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

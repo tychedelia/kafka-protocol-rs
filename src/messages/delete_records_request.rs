@@ -13,15 +13,13 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
-    VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
+    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-2
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DeleteRecordsPartition {
     /// The partition index.
     ///
@@ -37,11 +35,34 @@ pub struct DeleteRecordsPartition {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for DeleteRecordsPartition {
-    type Builder = DeleteRecordsPartitionBuilder;
-
-    fn builder() -> Self::Builder {
-        DeleteRecordsPartitionBuilder::default()
+impl DeleteRecordsPartition {
+    /// Sets `partition_index` to the passed value.
+    ///
+    /// The partition index.
+    ///
+    /// Supported API versions: 0-2
+    pub fn with_partition_index(mut self, value: i32) -> Self {
+        self.partition_index = value;
+        self
+    }
+    /// Sets `offset` to the passed value.
+    ///
+    /// The deletion offset.
+    ///
+    /// Supported API versions: 0-2
+    pub fn with_offset(mut self, value: i64) -> Self {
+        self.offset = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -122,8 +143,7 @@ impl Message for DeleteRecordsPartition {
 
 /// Valid versions: 0-2
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DeleteRecordsRequest {
     /// Each topic that we want to delete records from.
     ///
@@ -139,11 +159,34 @@ pub struct DeleteRecordsRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for DeleteRecordsRequest {
-    type Builder = DeleteRecordsRequestBuilder;
-
-    fn builder() -> Self::Builder {
-        DeleteRecordsRequestBuilder::default()
+impl DeleteRecordsRequest {
+    /// Sets `topics` to the passed value.
+    ///
+    /// Each topic that we want to delete records from.
+    ///
+    /// Supported API versions: 0-2
+    pub fn with_topics(mut self, value: Vec<DeleteRecordsTopic>) -> Self {
+        self.topics = value;
+        self
+    }
+    /// Sets `timeout_ms` to the passed value.
+    ///
+    /// How long to wait for the deletion to complete, in milliseconds.
+    ///
+    /// Supported API versions: 0-2
+    pub fn with_timeout_ms(mut self, value: i32) -> Self {
+        self.timeout_ms = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -237,8 +280,7 @@ impl Message for DeleteRecordsRequest {
 
 /// Valid versions: 0-2
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DeleteRecordsTopic {
     /// The topic name.
     ///
@@ -254,11 +296,34 @@ pub struct DeleteRecordsTopic {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for DeleteRecordsTopic {
-    type Builder = DeleteRecordsTopicBuilder;
-
-    fn builder() -> Self::Builder {
-        DeleteRecordsTopicBuilder::default()
+impl DeleteRecordsTopic {
+    /// Sets `name` to the passed value.
+    ///
+    /// The topic name.
+    ///
+    /// Supported API versions: 0-2
+    pub fn with_name(mut self, value: super::TopicName) -> Self {
+        self.name = value;
+        self
+    }
+    /// Sets `partitions` to the passed value.
+    ///
+    /// Each partition that we want to delete records from.
+    ///
+    /// Supported API versions: 0-2
+    pub fn with_partitions(mut self, value: Vec<DeleteRecordsPartition>) -> Self {
+        self.partitions = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

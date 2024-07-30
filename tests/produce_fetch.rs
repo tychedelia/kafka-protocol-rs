@@ -9,7 +9,7 @@ use kafka_protocol::{
         ApiKey, CreateTopicsRequest, CreateTopicsResponse, FetchRequest, FetchResponse,
         ProduceRequest, ProduceResponse, RequestHeader, TopicName,
     },
-    protocol::{Builder, StrBytes},
+    protocol::StrBytes,
     records::{
         Compression, Record, RecordBatchDecoder, RecordBatchEncoder, RecordEncodeOptions,
         TimestampType,
@@ -89,27 +89,21 @@ fn message_set_v1_produce_fetch() {
 
 fn create_topic(topic_name: TopicName, socket: &mut TcpStream) {
     let version = 7;
-    let header = RequestHeader::builder()
-        .request_api_key(ApiKey::CreateTopicsKey as i16)
-        .request_api_version(version)
-        .build()
-        .unwrap();
+    let header = RequestHeader::default()
+        .with_request_api_key(ApiKey::CreateTopicsKey as i16)
+        .with_request_api_version(version);
 
-    let request = CreateTopicsRequest::builder()
-        .timeout_ms(5000)
-        .topics(
+    let request = CreateTopicsRequest::default()
+        .with_timeout_ms(5000)
+        .with_topics(
             [(
                 topic_name.clone(),
-                CreatableTopic::builder()
-                    .num_partitions(1)
-                    .replication_factor(1)
-                    .build()
-                    .unwrap(),
+                CreatableTopic::default()
+                    .with_num_partitions(1)
+                    .with_replication_factor(1),
             )]
             .into(),
-        )
-        .build()
-        .unwrap();
+        );
 
     send_request(socket, header, request);
     let result: CreateTopicsResponse = receive_response(socket, version).1;
@@ -123,31 +117,24 @@ fn create_topic(topic_name: TopicName, socket: &mut TcpStream) {
 }
 
 fn produce_records(topic_name: TopicName, version: i16, records: Bytes, socket: &mut TcpStream) {
-    let header = RequestHeader::builder()
-        .request_api_key(ApiKey::ProduceKey as i16)
-        .request_api_version(version)
-        .build()
-        .unwrap();
+    let header = RequestHeader::default()
+        .with_request_api_key(ApiKey::ProduceKey as i16)
+        .with_request_api_version(version);
 
-    let request = ProduceRequest::builder()
-        .acks(1)
-        .timeout_ms(5000)
-        .topic_data(
+    let request = ProduceRequest::default()
+        .with_acks(1)
+        .with_timeout_ms(5000)
+        .with_topic_data(
             [(
                 topic_name.clone(),
-                TopicProduceData::builder()
-                    .partition_data(vec![PartitionProduceData::builder()
-                        .index(0)
-                        .records(Some(records))
-                        .build()
-                        .unwrap()])
-                    .build()
-                    .unwrap(),
+                TopicProduceData::default().with_partition_data(vec![
+                    PartitionProduceData::default()
+                        .with_index(0)
+                        .with_records(Some(records)),
+                ]),
             )]
             .into(),
-        )
-        .build()
-        .unwrap();
+        );
 
     send_request(socket, header, request);
 
@@ -178,24 +165,15 @@ fn fetch_records(
     expected: Vec<Record>,
     socket: &mut TcpStream,
 ) {
-    let header = RequestHeader::builder()
-        .request_api_key(ApiKey::FetchKey as i16)
-        .request_api_version(version)
-        .build()
-        .unwrap();
+    let header = RequestHeader::default()
+        .with_request_api_key(ApiKey::FetchKey as i16)
+        .with_request_api_version(version);
 
-    let request = FetchRequest::builder()
-        .topics(vec![FetchTopic::builder()
-            .topic(topic_name.clone())
-            .partitions(vec![FetchPartition::builder()
-                .partition(0)
-                .fetch_offset(0)
-                .build()
-                .unwrap()])
-            .build()
-            .unwrap()])
-        .build()
-        .unwrap();
+    let request = FetchRequest::default().with_topics(vec![FetchTopic::default()
+        .with_topic(topic_name.clone())
+        .with_partitions(vec![FetchPartition::default()
+            .with_partition(0)
+            .with_fetch_offset(0)])]);
 
     send_request(socket, header, request);
 

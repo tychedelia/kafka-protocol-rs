@@ -1,7 +1,4 @@
-use kafka_protocol::{
-    messages::{ApiKey, ApiVersionsRequest, ApiVersionsResponse, RequestHeader},
-    protocol::Builder,
-};
+use kafka_protocol::messages::{ApiKey, ApiVersionsRequest, ApiVersionsResponse, RequestHeader};
 
 mod common;
 use common::*;
@@ -12,12 +9,11 @@ fn get_api_versions() {
     let mut socket = connect_to_kafka(&container);
 
     let version = 2;
-    let header = RequestHeader::builder()
-        .request_api_key(ApiKey::ApiVersionsKey as i16)
-        .request_api_version(version)
-        .build()
-        .unwrap();
-    let request = ApiVersionsRequest::builder().build().unwrap();
+    let header = RequestHeader::default()
+        .with_request_api_key(ApiKey::ApiVersionsKey as i16)
+        .with_request_api_version(version);
+
+    let request = ApiVersionsRequest::default();
     send_request(&mut socket, header, request);
 
     let result: ApiVersionsResponse = receive_response(&mut socket, version).1;

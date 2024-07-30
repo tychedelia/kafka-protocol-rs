@@ -13,15 +13,13 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
-    VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
+    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-5
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct LeaveGroupRequest {
     /// The ID of the group to leave.
     ///
@@ -42,11 +40,43 @@ pub struct LeaveGroupRequest {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for LeaveGroupRequest {
-    type Builder = LeaveGroupRequestBuilder;
-
-    fn builder() -> Self::Builder {
-        LeaveGroupRequestBuilder::default()
+impl LeaveGroupRequest {
+    /// Sets `group_id` to the passed value.
+    ///
+    /// The ID of the group to leave.
+    ///
+    /// Supported API versions: 0-5
+    pub fn with_group_id(mut self, value: super::GroupId) -> Self {
+        self.group_id = value;
+        self
+    }
+    /// Sets `member_id` to the passed value.
+    ///
+    /// The member ID to remove from the group.
+    ///
+    /// Supported API versions: 0-2
+    pub fn with_member_id(mut self, value: StrBytes) -> Self {
+        self.member_id = value;
+        self
+    }
+    /// Sets `members` to the passed value.
+    ///
+    /// List of leaving member identities.
+    ///
+    /// Supported API versions: 3-5
+    pub fn with_members(mut self, value: Vec<MemberIdentity>) -> Self {
+        self.members = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 
@@ -190,8 +220,7 @@ impl Message for LeaveGroupRequest {
 
 /// Valid versions: 0-5
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct MemberIdentity {
     /// The member ID to remove from the group.
     ///
@@ -212,11 +241,43 @@ pub struct MemberIdentity {
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl Builder for MemberIdentity {
-    type Builder = MemberIdentityBuilder;
-
-    fn builder() -> Self::Builder {
-        MemberIdentityBuilder::default()
+impl MemberIdentity {
+    /// Sets `member_id` to the passed value.
+    ///
+    /// The member ID to remove from the group.
+    ///
+    /// Supported API versions: 3-5
+    pub fn with_member_id(mut self, value: StrBytes) -> Self {
+        self.member_id = value;
+        self
+    }
+    /// Sets `group_instance_id` to the passed value.
+    ///
+    /// The group instance ID to remove from the group.
+    ///
+    /// Supported API versions: 3-5
+    pub fn with_group_instance_id(mut self, value: Option<StrBytes>) -> Self {
+        self.group_instance_id = value;
+        self
+    }
+    /// Sets `reason` to the passed value.
+    ///
+    /// The reason why the member left the group.
+    ///
+    /// Supported API versions: 5
+    pub fn with_reason(mut self, value: Option<StrBytes>) -> Self {
+        self.reason = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
     }
 }
 

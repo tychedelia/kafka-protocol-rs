@@ -1083,11 +1083,7 @@ impl PreparedStruct {
     pub fn apply<W: Write>(&self, w: &mut CodeWriter<W>) -> Result<(), Error> {
         writeln!(w, "/// Valid versions: {}", self.valid_versions)?;
         writeln!(w, "#[non_exhaustive]")?;
-        writeln!(
-            w,
-            "#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]"
-        )?;
-        writeln!(w, "#[builder(default)]")?;
+        writeln!(w, "#[derive(Debug, Clone, PartialEq)]")?;
         write!(w, "pub struct {} ", self.name)?;
         w.block(|w| {
             for prepared_field in &self.prepared_fields {
@@ -1125,16 +1121,67 @@ impl PreparedStruct {
         writeln!(w)?;
         writeln!(w)?;
 
-        write!(w, "impl Builder for {} ", self.name)?;
+        write!(w, "impl {} ", self.name)?;
         w.block(|w| {
-            writeln!(w, "type Builder = {}Builder;", self.name)?;
-            writeln!(w)?;
-            write!(w, "fn builder() -> Self::Builder")?;
-            w.block(|w| {
-                writeln!(w, "{}Builder::default()", self.name)?;
-                Ok(())
-            })?;
-            writeln!(w)?;
+            for prepared_field in &self.prepared_fields {
+                if prepared_field.map_key {
+                    continue;
+                }
+
+                writeln!(w, "/// Sets `{}` to the passed value.", prepared_field.name)?;
+                writeln!(w, "/// ")?;
+                writeln!(w, "/// {}", prepared_field.about)?;
+                writeln!(w, "/// ")?;
+                writeln!(w, "/// Supported API versions: {}", prepared_field.versions)?;
+                if prepared_field.optional {
+                    writeln!(
+                        w,
+                        "pub fn with_{}(mut self, value: Option<{}>) -> Self",
+                        prepared_field.name.trim_start_matches('_'),
+                        prepared_field.type_.rust_name()
+                    )?;
+                } else {
+                    writeln!(
+                        w,
+                        "pub fn with_{}(mut self, value: {}) -> Self",
+                        prepared_field.name.trim_start_matches('_'),
+                        prepared_field.type_.rust_name()
+                    )?;
+                }
+
+                w.block(|w| {
+                    writeln!(w, "self.{} = value;", prepared_field.name)?;
+                    writeln!(w, "self")?;
+                    Ok(())
+                })?;
+            }
+
+            if !self.flexible_msg_versions.is_none() {
+                writeln!(w, "/// Sets unknown_tagged_fields to the passed value.")?;
+                writeln!(
+                    w,
+                    "pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self"
+                )?;
+                w.block(|w| {
+                    writeln!(w, "self.unknown_tagged_fields = value;")?;
+                    writeln!(w, "self")?;
+
+                    Ok(())
+                })?;
+
+                writeln!(w, "/// Inserts an entry into unknown_tagged_fields.")?;
+                writeln!(
+                    w,
+                    "pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self"
+                )?;
+                w.block(|w| {
+                    writeln!(w, "self.unknown_tagged_fields.insert(key, value);")?;
+                    writeln!(w, "self")?;
+
+                    Ok(())
+                })?;
+            }
+
             Ok(())
         })?;
         writeln!(w)?;
@@ -1308,8 +1355,8 @@ fn write_file_header<W: Write>(w: &mut CodeWriter<W>, name: &str) -> Result<(), 
     writeln!(w, "use anyhow::{{bail, Result}};")?;
     writeln!(w)?;
     writeln!(w, "use crate::protocol::{{")?;
-    writeln!(w, "    Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder,  Message, HeaderVersion, VersionRange,")?;
-    writeln!(w, "    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{{ByteBuf, ByteBufMut}}, Builder")?;
+    writeln!(w, "    Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, Message, HeaderVersion, VersionRange,")?;
+    writeln!(w, "    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{{ByteBuf, ByteBufMut}}")?;
     writeln!(w, "}};")?;
     writeln!(w)?;
     writeln!(w)?;

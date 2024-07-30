@@ -13,15 +13,13 @@ use uuid::Uuid;
 
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
-    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Builder, Decodable,
-    Decoder, Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes,
-    VersionRange,
+    compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
+    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-1
 #[non_exhaustive]
-#[derive(Debug, Clone, PartialEq, derive_builder::Builder)]
-#[builder(default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct SaslHandshakeResponse {
     /// The error code, or 0 if there was no error.
     ///
@@ -34,11 +32,24 @@ pub struct SaslHandshakeResponse {
     pub mechanisms: Vec<StrBytes>,
 }
 
-impl Builder for SaslHandshakeResponse {
-    type Builder = SaslHandshakeResponseBuilder;
-
-    fn builder() -> Self::Builder {
-        SaslHandshakeResponseBuilder::default()
+impl SaslHandshakeResponse {
+    /// Sets `error_code` to the passed value.
+    ///
+    /// The error code, or 0 if there was no error.
+    ///
+    /// Supported API versions: 0-1
+    pub fn with_error_code(mut self, value: i16) -> Self {
+        self.error_code = value;
+        self
+    }
+    /// Sets `mechanisms` to the passed value.
+    ///
+    /// The mechanisms enabled in the server.
+    ///
+    /// Supported API versions: 0-1
+    pub fn with_mechanisms(mut self, value: Vec<StrBytes>) -> Self {
+        self.mechanisms = value;
+        self
     }
 }
 
