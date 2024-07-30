@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.11.0
+
+- Replace `derive_builder` with custom impl.
+- Remove `EncodeError`/`DecodeError` aliases
+- Remove panic from `RecordBatchEncoder::encode`
+- Use `IntoIterator` instead of `Iterator` for `RecordBatchEncoder::encode`
+- Use CRC-32 ISO/HDLC instead of CRC-32 CKSUM.
+- Add `Display` and more `From<T>` implementations for `StrBytes`.
+- Avoid redunand variant names in RequestKind/ResponseKind.
+
 ## v0.10.2
 
 - Implement From<T> for RequestKind and ResponseKind.
