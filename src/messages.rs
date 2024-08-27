@@ -3,7 +3,11 @@
 //! These messages are generated programmatically. See the [Kafka's protocol documentation](https://kafka.apache.org/protocol.html) for more information about a given message type.
 // WARNING: the items of this module are generated and should not be edited directly.
 
+use crate::protocol::Decodable;
+use crate::protocol::Encodable;
 use crate::protocol::{HeaderVersion, NewType, Request, StrBytes};
+use anyhow::Context;
+use anyhow::Result;
 use std::convert::TryFrom;
 
 pub mod consumer_protocol_assignment;
@@ -1477,6 +1481,573 @@ pub enum RequestKind {
     ListClientMetricsResources(ListClientMetricsResourcesRequest),
 }
 
+impl RequestKind {
+    /// Encode the message into the target buffer
+    pub fn encode(&self, bytes: &mut bytes::BytesMut, version: i16) -> anyhow::Result<()> {
+        match self {
+            RequestKind::Produce(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode ProduceRequest v{version} body")),
+            RequestKind::Fetch(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode FetchRequest v{version} body")),
+            RequestKind::ListOffsets(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode ListOffsetsRequest v{version} body")),
+            RequestKind::Metadata(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode MetadataRequest v{version} body")),
+            RequestKind::LeaderAndIsr(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode LeaderAndIsrRequest v{version} body")),
+            RequestKind::StopReplica(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode StopReplicaRequest v{version} body")),
+            RequestKind::UpdateMetadata(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode UpdateMetadataRequest v{version} body")),
+            RequestKind::ControlledShutdown(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode ControlledShutdownRequest v{version} body")
+            }),
+            RequestKind::OffsetCommit(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode OffsetCommitRequest v{version} body")),
+            RequestKind::OffsetFetch(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode OffsetFetchRequest v{version} body")),
+            RequestKind::FindCoordinator(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode FindCoordinatorRequest v{version} body")
+            }),
+            RequestKind::JoinGroup(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode JoinGroupRequest v{version} body")),
+            RequestKind::Heartbeat(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode HeartbeatRequest v{version} body")),
+            RequestKind::LeaveGroup(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode LeaveGroupRequest v{version} body")),
+            RequestKind::SyncGroup(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode SyncGroupRequest v{version} body")),
+            RequestKind::DescribeGroups(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode DescribeGroupsRequest v{version} body")),
+            RequestKind::ListGroups(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode ListGroupsRequest v{version} body")),
+            RequestKind::SaslHandshake(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode SaslHandshakeRequest v{version} body")),
+            RequestKind::ApiVersions(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode ApiVersionsRequest v{version} body")),
+            RequestKind::CreateTopics(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode CreateTopicsRequest v{version} body")),
+            RequestKind::DeleteTopics(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode DeleteTopicsRequest v{version} body")),
+            RequestKind::DeleteRecords(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode DeleteRecordsRequest v{version} body")),
+            RequestKind::InitProducerId(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode InitProducerIdRequest v{version} body")),
+            RequestKind::OffsetForLeaderEpoch(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode OffsetForLeaderEpochRequest v{version} body")
+            }),
+            RequestKind::AddPartitionsToTxn(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode AddPartitionsToTxnRequest v{version} body")
+            }),
+            RequestKind::AddOffsetsToTxn(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode AddOffsetsToTxnRequest v{version} body")
+            }),
+            RequestKind::EndTxn(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode EndTxnRequest v{version} body")),
+            RequestKind::WriteTxnMarkers(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode WriteTxnMarkersRequest v{version} body")
+            }),
+            RequestKind::TxnOffsetCommit(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode TxnOffsetCommitRequest v{version} body")
+            }),
+            RequestKind::DescribeAcls(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode DescribeAclsRequest v{version} body")),
+            RequestKind::CreateAcls(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode CreateAclsRequest v{version} body")),
+            RequestKind::DeleteAcls(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode DeleteAclsRequest v{version} body")),
+            RequestKind::DescribeConfigs(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode DescribeConfigsRequest v{version} body")
+            }),
+            RequestKind::AlterConfigs(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode AlterConfigsRequest v{version} body")),
+            RequestKind::AlterReplicaLogDirs(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode AlterReplicaLogDirsRequest v{version} body")
+            }),
+            RequestKind::DescribeLogDirs(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode DescribeLogDirsRequest v{version} body")
+            }),
+            RequestKind::SaslAuthenticate(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode SaslAuthenticateRequest v{version} body")
+            }),
+            RequestKind::CreatePartitions(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode CreatePartitionsRequest v{version} body")
+            }),
+            RequestKind::CreateDelegationToken(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode CreateDelegationTokenRequest v{version} body")
+            }),
+            RequestKind::RenewDelegationToken(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode RenewDelegationTokenRequest v{version} body")
+            }),
+            RequestKind::ExpireDelegationToken(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode ExpireDelegationTokenRequest v{version} body")
+            }),
+            RequestKind::DescribeDelegationToken(x) => {
+                x.encode(bytes, version).with_context(|| {
+                    format!("Failed to encode DescribeDelegationTokenRequest v{version} body")
+                })
+            }
+            RequestKind::DeleteGroups(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode DeleteGroupsRequest v{version} body")),
+            RequestKind::ElectLeaders(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode ElectLeadersRequest v{version} body")),
+            RequestKind::IncrementalAlterConfigs(x) => {
+                x.encode(bytes, version).with_context(|| {
+                    format!("Failed to encode IncrementalAlterConfigsRequest v{version} body")
+                })
+            }
+            RequestKind::AlterPartitionReassignments(x) => {
+                x.encode(bytes, version).with_context(|| {
+                    format!("Failed to encode AlterPartitionReassignmentsRequest v{version} body")
+                })
+            }
+            RequestKind::ListPartitionReassignments(x) => {
+                x.encode(bytes, version).with_context(|| {
+                    format!("Failed to encode ListPartitionReassignmentsRequest v{version} body")
+                })
+            }
+            RequestKind::OffsetDelete(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode OffsetDeleteRequest v{version} body")),
+            RequestKind::DescribeClientQuotas(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode DescribeClientQuotasRequest v{version} body")
+            }),
+            RequestKind::AlterClientQuotas(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode AlterClientQuotasRequest v{version} body")
+            }),
+            RequestKind::DescribeUserScramCredentials(x) => {
+                x.encode(bytes, version).with_context(|| {
+                    format!("Failed to encode DescribeUserScramCredentialsRequest v{version} body")
+                })
+            }
+            RequestKind::AlterUserScramCredentials(x) => {
+                x.encode(bytes, version).with_context(|| {
+                    format!("Failed to encode AlterUserScramCredentialsRequest v{version} body")
+                })
+            }
+            RequestKind::Vote(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode VoteRequest v{version} body")),
+            RequestKind::BeginQuorumEpoch(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode BeginQuorumEpochRequest v{version} body")
+            }),
+            RequestKind::EndQuorumEpoch(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode EndQuorumEpochRequest v{version} body")),
+            RequestKind::DescribeQuorum(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode DescribeQuorumRequest v{version} body")),
+            RequestKind::AlterPartition(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode AlterPartitionRequest v{version} body")),
+            RequestKind::UpdateFeatures(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode UpdateFeaturesRequest v{version} body")),
+            RequestKind::Envelope(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode EnvelopeRequest v{version} body")),
+            RequestKind::FetchSnapshot(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode FetchSnapshotRequest v{version} body")),
+            RequestKind::DescribeCluster(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode DescribeClusterRequest v{version} body")
+            }),
+            RequestKind::DescribeProducers(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode DescribeProducersRequest v{version} body")
+            }),
+            RequestKind::BrokerRegistration(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode BrokerRegistrationRequest v{version} body")
+            }),
+            RequestKind::BrokerHeartbeat(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode BrokerHeartbeatRequest v{version} body")
+            }),
+            RequestKind::UnregisterBroker(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode UnregisterBrokerRequest v{version} body")
+            }),
+            RequestKind::DescribeTransactions(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode DescribeTransactionsRequest v{version} body")
+            }),
+            RequestKind::ListTransactions(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode ListTransactionsRequest v{version} body")
+            }),
+            RequestKind::AllocateProducerIds(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode AllocateProducerIdsRequest v{version} body")
+            }),
+            RequestKind::ConsumerGroupHeartbeat(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode ConsumerGroupHeartbeatRequest v{version} body")
+            }),
+            RequestKind::ControllerRegistration(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode ControllerRegistrationRequest v{version} body")
+            }),
+            RequestKind::GetTelemetrySubscriptions(x) => {
+                x.encode(bytes, version).with_context(|| {
+                    format!("Failed to encode GetTelemetrySubscriptionsRequest v{version} body")
+                })
+            }
+            RequestKind::PushTelemetry(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode PushTelemetryRequest v{version} body")),
+            RequestKind::AssignReplicasToDirs(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode AssignReplicasToDirsRequest v{version} body")
+            }),
+            RequestKind::ListClientMetricsResources(x) => {
+                x.encode(bytes, version).with_context(|| {
+                    format!("Failed to encode ListClientMetricsResourcesRequest v{version} body")
+                })
+            }
+        }
+    }
+
+    /// Decode the message from the provided buffer and version
+    pub fn decode(
+        api_key: ApiKey,
+        bytes: &mut bytes::Bytes,
+        version: i16,
+    ) -> anyhow::Result<RequestKind> {
+        match api_key {
+            ApiKey::ProduceKey => ProduceRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode ProduceRequest v{version} body"))
+                .map(RequestKind::Produce),
+            ApiKey::FetchKey => FetchRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode FetchRequest v{version} body"))
+                .map(RequestKind::Fetch),
+            ApiKey::ListOffsetsKey => ListOffsetsRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode ListOffsetsRequest v{version} body"))
+                .map(RequestKind::ListOffsets),
+            ApiKey::MetadataKey => MetadataRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode MetadataRequest v{version} body"))
+                .map(RequestKind::Metadata),
+            ApiKey::LeaderAndIsrKey => LeaderAndIsrRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode LeaderAndIsrRequest v{version} body"))
+                .map(RequestKind::LeaderAndIsr),
+            ApiKey::StopReplicaKey => StopReplicaRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode StopReplicaRequest v{version} body"))
+                .map(RequestKind::StopReplica),
+            ApiKey::UpdateMetadataKey => UpdateMetadataRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode UpdateMetadataRequest v{version} body"))
+                .map(RequestKind::UpdateMetadata),
+            ApiKey::ControlledShutdownKey => ControlledShutdownRequest::decode(bytes, version)
+                .with_context(|| {
+                    format!("Failed to decode ControlledShutdownRequest v{version} body")
+                })
+                .map(RequestKind::ControlledShutdown),
+            ApiKey::OffsetCommitKey => OffsetCommitRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode OffsetCommitRequest v{version} body"))
+                .map(RequestKind::OffsetCommit),
+            ApiKey::OffsetFetchKey => OffsetFetchRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode OffsetFetchRequest v{version} body"))
+                .map(RequestKind::OffsetFetch),
+            ApiKey::FindCoordinatorKey => FindCoordinatorRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode FindCoordinatorRequest v{version} body"))
+                .map(RequestKind::FindCoordinator),
+            ApiKey::JoinGroupKey => JoinGroupRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode JoinGroupRequest v{version} body"))
+                .map(RequestKind::JoinGroup),
+            ApiKey::HeartbeatKey => HeartbeatRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode HeartbeatRequest v{version} body"))
+                .map(RequestKind::Heartbeat),
+            ApiKey::LeaveGroupKey => LeaveGroupRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode LeaveGroupRequest v{version} body"))
+                .map(RequestKind::LeaveGroup),
+            ApiKey::SyncGroupKey => SyncGroupRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode SyncGroupRequest v{version} body"))
+                .map(RequestKind::SyncGroup),
+            ApiKey::DescribeGroupsKey => DescribeGroupsRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode DescribeGroupsRequest v{version} body"))
+                .map(RequestKind::DescribeGroups),
+            ApiKey::ListGroupsKey => ListGroupsRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode ListGroupsRequest v{version} body"))
+                .map(RequestKind::ListGroups),
+            ApiKey::SaslHandshakeKey => SaslHandshakeRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode SaslHandshakeRequest v{version} body"))
+                .map(RequestKind::SaslHandshake),
+            ApiKey::ApiVersionsKey => ApiVersionsRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode ApiVersionsRequest v{version} body"))
+                .map(RequestKind::ApiVersions),
+            ApiKey::CreateTopicsKey => CreateTopicsRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode CreateTopicsRequest v{version} body"))
+                .map(RequestKind::CreateTopics),
+            ApiKey::DeleteTopicsKey => DeleteTopicsRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode DeleteTopicsRequest v{version} body"))
+                .map(RequestKind::DeleteTopics),
+            ApiKey::DeleteRecordsKey => DeleteRecordsRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode DeleteRecordsRequest v{version} body"))
+                .map(RequestKind::DeleteRecords),
+            ApiKey::InitProducerIdKey => InitProducerIdRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode InitProducerIdRequest v{version} body"))
+                .map(RequestKind::InitProducerId),
+            ApiKey::OffsetForLeaderEpochKey => OffsetForLeaderEpochRequest::decode(bytes, version)
+                .with_context(|| {
+                    format!("Failed to decode OffsetForLeaderEpochRequest v{version} body")
+                })
+                .map(RequestKind::OffsetForLeaderEpoch),
+            ApiKey::AddPartitionsToTxnKey => AddPartitionsToTxnRequest::decode(bytes, version)
+                .with_context(|| {
+                    format!("Failed to decode AddPartitionsToTxnRequest v{version} body")
+                })
+                .map(RequestKind::AddPartitionsToTxn),
+            ApiKey::AddOffsetsToTxnKey => AddOffsetsToTxnRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode AddOffsetsToTxnRequest v{version} body"))
+                .map(RequestKind::AddOffsetsToTxn),
+            ApiKey::EndTxnKey => EndTxnRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode EndTxnRequest v{version} body"))
+                .map(RequestKind::EndTxn),
+            ApiKey::WriteTxnMarkersKey => WriteTxnMarkersRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode WriteTxnMarkersRequest v{version} body"))
+                .map(RequestKind::WriteTxnMarkers),
+            ApiKey::TxnOffsetCommitKey => TxnOffsetCommitRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode TxnOffsetCommitRequest v{version} body"))
+                .map(RequestKind::TxnOffsetCommit),
+            ApiKey::DescribeAclsKey => DescribeAclsRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode DescribeAclsRequest v{version} body"))
+                .map(RequestKind::DescribeAcls),
+            ApiKey::CreateAclsKey => CreateAclsRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode CreateAclsRequest v{version} body"))
+                .map(RequestKind::CreateAcls),
+            ApiKey::DeleteAclsKey => DeleteAclsRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode DeleteAclsRequest v{version} body"))
+                .map(RequestKind::DeleteAcls),
+            ApiKey::DescribeConfigsKey => DescribeConfigsRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode DescribeConfigsRequest v{version} body"))
+                .map(RequestKind::DescribeConfigs),
+            ApiKey::AlterConfigsKey => AlterConfigsRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode AlterConfigsRequest v{version} body"))
+                .map(RequestKind::AlterConfigs),
+            ApiKey::AlterReplicaLogDirsKey => AlterReplicaLogDirsRequest::decode(bytes, version)
+                .with_context(|| {
+                    format!("Failed to decode AlterReplicaLogDirsRequest v{version} body")
+                })
+                .map(RequestKind::AlterReplicaLogDirs),
+            ApiKey::DescribeLogDirsKey => DescribeLogDirsRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode DescribeLogDirsRequest v{version} body"))
+                .map(RequestKind::DescribeLogDirs),
+            ApiKey::SaslAuthenticateKey => SaslAuthenticateRequest::decode(bytes, version)
+                .with_context(|| {
+                    format!("Failed to decode SaslAuthenticateRequest v{version} body")
+                })
+                .map(RequestKind::SaslAuthenticate),
+            ApiKey::CreatePartitionsKey => CreatePartitionsRequest::decode(bytes, version)
+                .with_context(|| {
+                    format!("Failed to decode CreatePartitionsRequest v{version} body")
+                })
+                .map(RequestKind::CreatePartitions),
+            ApiKey::CreateDelegationTokenKey => {
+                CreateDelegationTokenRequest::decode(bytes, version)
+                    .with_context(|| {
+                        format!("Failed to decode CreateDelegationTokenRequest v{version} body")
+                    })
+                    .map(RequestKind::CreateDelegationToken)
+            }
+            ApiKey::RenewDelegationTokenKey => RenewDelegationTokenRequest::decode(bytes, version)
+                .with_context(|| {
+                    format!("Failed to decode RenewDelegationTokenRequest v{version} body")
+                })
+                .map(RequestKind::RenewDelegationToken),
+            ApiKey::ExpireDelegationTokenKey => {
+                ExpireDelegationTokenRequest::decode(bytes, version)
+                    .with_context(|| {
+                        format!("Failed to decode ExpireDelegationTokenRequest v{version} body")
+                    })
+                    .map(RequestKind::ExpireDelegationToken)
+            }
+            ApiKey::DescribeDelegationTokenKey => {
+                DescribeDelegationTokenRequest::decode(bytes, version)
+                    .with_context(|| {
+                        format!("Failed to decode DescribeDelegationTokenRequest v{version} body")
+                    })
+                    .map(RequestKind::DescribeDelegationToken)
+            }
+            ApiKey::DeleteGroupsKey => DeleteGroupsRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode DeleteGroupsRequest v{version} body"))
+                .map(RequestKind::DeleteGroups),
+            ApiKey::ElectLeadersKey => ElectLeadersRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode ElectLeadersRequest v{version} body"))
+                .map(RequestKind::ElectLeaders),
+            ApiKey::IncrementalAlterConfigsKey => {
+                IncrementalAlterConfigsRequest::decode(bytes, version)
+                    .with_context(|| {
+                        format!("Failed to decode IncrementalAlterConfigsRequest v{version} body")
+                    })
+                    .map(RequestKind::IncrementalAlterConfigs)
+            }
+            ApiKey::AlterPartitionReassignmentsKey => {
+                AlterPartitionReassignmentsRequest::decode(bytes, version)
+                    .with_context(|| {
+                        format!(
+                            "Failed to decode AlterPartitionReassignmentsRequest v{version} body"
+                        )
+                    })
+                    .map(RequestKind::AlterPartitionReassignments)
+            }
+            ApiKey::ListPartitionReassignmentsKey => {
+                ListPartitionReassignmentsRequest::decode(bytes, version)
+                    .with_context(|| {
+                        format!(
+                            "Failed to decode ListPartitionReassignmentsRequest v{version} body"
+                        )
+                    })
+                    .map(RequestKind::ListPartitionReassignments)
+            }
+            ApiKey::OffsetDeleteKey => OffsetDeleteRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode OffsetDeleteRequest v{version} body"))
+                .map(RequestKind::OffsetDelete),
+            ApiKey::DescribeClientQuotasKey => DescribeClientQuotasRequest::decode(bytes, version)
+                .with_context(|| {
+                    format!("Failed to decode DescribeClientQuotasRequest v{version} body")
+                })
+                .map(RequestKind::DescribeClientQuotas),
+            ApiKey::AlterClientQuotasKey => AlterClientQuotasRequest::decode(bytes, version)
+                .with_context(|| {
+                    format!("Failed to decode AlterClientQuotasRequest v{version} body")
+                })
+                .map(RequestKind::AlterClientQuotas),
+            ApiKey::DescribeUserScramCredentialsKey => {
+                DescribeUserScramCredentialsRequest::decode(bytes, version)
+                    .with_context(|| {
+                        format!(
+                            "Failed to decode DescribeUserScramCredentialsRequest v{version} body"
+                        )
+                    })
+                    .map(RequestKind::DescribeUserScramCredentials)
+            }
+            ApiKey::AlterUserScramCredentialsKey => {
+                AlterUserScramCredentialsRequest::decode(bytes, version)
+                    .with_context(|| {
+                        format!("Failed to decode AlterUserScramCredentialsRequest v{version} body")
+                    })
+                    .map(RequestKind::AlterUserScramCredentials)
+            }
+            ApiKey::VoteKey => VoteRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode VoteRequest v{version} body"))
+                .map(RequestKind::Vote),
+            ApiKey::BeginQuorumEpochKey => BeginQuorumEpochRequest::decode(bytes, version)
+                .with_context(|| {
+                    format!("Failed to decode BeginQuorumEpochRequest v{version} body")
+                })
+                .map(RequestKind::BeginQuorumEpoch),
+            ApiKey::EndQuorumEpochKey => EndQuorumEpochRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode EndQuorumEpochRequest v{version} body"))
+                .map(RequestKind::EndQuorumEpoch),
+            ApiKey::DescribeQuorumKey => DescribeQuorumRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode DescribeQuorumRequest v{version} body"))
+                .map(RequestKind::DescribeQuorum),
+            ApiKey::AlterPartitionKey => AlterPartitionRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode AlterPartitionRequest v{version} body"))
+                .map(RequestKind::AlterPartition),
+            ApiKey::UpdateFeaturesKey => UpdateFeaturesRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode UpdateFeaturesRequest v{version} body"))
+                .map(RequestKind::UpdateFeatures),
+            ApiKey::EnvelopeKey => EnvelopeRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode EnvelopeRequest v{version} body"))
+                .map(RequestKind::Envelope),
+            ApiKey::FetchSnapshotKey => FetchSnapshotRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode FetchSnapshotRequest v{version} body"))
+                .map(RequestKind::FetchSnapshot),
+            ApiKey::DescribeClusterKey => DescribeClusterRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode DescribeClusterRequest v{version} body"))
+                .map(RequestKind::DescribeCluster),
+            ApiKey::DescribeProducersKey => DescribeProducersRequest::decode(bytes, version)
+                .with_context(|| {
+                    format!("Failed to decode DescribeProducersRequest v{version} body")
+                })
+                .map(RequestKind::DescribeProducers),
+            ApiKey::BrokerRegistrationKey => BrokerRegistrationRequest::decode(bytes, version)
+                .with_context(|| {
+                    format!("Failed to decode BrokerRegistrationRequest v{version} body")
+                })
+                .map(RequestKind::BrokerRegistration),
+            ApiKey::BrokerHeartbeatKey => BrokerHeartbeatRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode BrokerHeartbeatRequest v{version} body"))
+                .map(RequestKind::BrokerHeartbeat),
+            ApiKey::UnregisterBrokerKey => UnregisterBrokerRequest::decode(bytes, version)
+                .with_context(|| {
+                    format!("Failed to decode UnregisterBrokerRequest v{version} body")
+                })
+                .map(RequestKind::UnregisterBroker),
+            ApiKey::DescribeTransactionsKey => DescribeTransactionsRequest::decode(bytes, version)
+                .with_context(|| {
+                    format!("Failed to decode DescribeTransactionsRequest v{version} body")
+                })
+                .map(RequestKind::DescribeTransactions),
+            ApiKey::ListTransactionsKey => ListTransactionsRequest::decode(bytes, version)
+                .with_context(|| {
+                    format!("Failed to decode ListTransactionsRequest v{version} body")
+                })
+                .map(RequestKind::ListTransactions),
+            ApiKey::AllocateProducerIdsKey => AllocateProducerIdsRequest::decode(bytes, version)
+                .with_context(|| {
+                    format!("Failed to decode AllocateProducerIdsRequest v{version} body")
+                })
+                .map(RequestKind::AllocateProducerIds),
+            ApiKey::ConsumerGroupHeartbeatKey => {
+                ConsumerGroupHeartbeatRequest::decode(bytes, version)
+                    .with_context(|| {
+                        format!("Failed to decode ConsumerGroupHeartbeatRequest v{version} body")
+                    })
+                    .map(RequestKind::ConsumerGroupHeartbeat)
+            }
+            ApiKey::ControllerRegistrationKey => {
+                ControllerRegistrationRequest::decode(bytes, version)
+                    .with_context(|| {
+                        format!("Failed to decode ControllerRegistrationRequest v{version} body")
+                    })
+                    .map(RequestKind::ControllerRegistration)
+            }
+            ApiKey::GetTelemetrySubscriptionsKey => {
+                GetTelemetrySubscriptionsRequest::decode(bytes, version)
+                    .with_context(|| {
+                        format!("Failed to decode GetTelemetrySubscriptionsRequest v{version} body")
+                    })
+                    .map(RequestKind::GetTelemetrySubscriptions)
+            }
+            ApiKey::PushTelemetryKey => PushTelemetryRequest::decode(bytes, version)
+                .with_context(|| format!("Failed to decode PushTelemetryRequest v{version} body"))
+                .map(RequestKind::PushTelemetry),
+            ApiKey::AssignReplicasToDirsKey => AssignReplicasToDirsRequest::decode(bytes, version)
+                .with_context(|| {
+                    format!("Failed to decode AssignReplicasToDirsRequest v{version} body")
+                })
+                .map(RequestKind::AssignReplicasToDirs),
+            ApiKey::ListClientMetricsResourcesKey => {
+                ListClientMetricsResourcesRequest::decode(bytes, version)
+                    .with_context(|| {
+                        format!(
+                            "Failed to decode ListClientMetricsResourcesRequest v{version} body"
+                        )
+                    })
+                    .map(RequestKind::ListClientMetricsResources)
+            }
+        }
+    }
+}
 impl From<ProduceRequest> for RequestKind {
     fn from(value: ProduceRequest) -> RequestKind {
         RequestKind::Produce(value)
@@ -2073,6 +2644,724 @@ pub enum ResponseKind {
     AssignReplicasToDirs(AssignReplicasToDirsResponse),
     /// ListClientMetricsResourcesResponse,
     ListClientMetricsResources(ListClientMetricsResourcesResponse),
+}
+
+impl ResponseKind {
+    /// Encode the message into the target buffer
+    pub fn encode(&self, bytes: &mut bytes::BytesMut, version: i16) -> anyhow::Result<()> {
+        match self {
+            ResponseKind::Produce(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode ProduceResponse v{version} body")),
+            ResponseKind::Fetch(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode FetchResponse v{version} body")),
+            ResponseKind::ListOffsets(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode ListOffsetsResponse v{version} body")),
+            ResponseKind::Metadata(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode MetadataResponse v{version} body")),
+            ResponseKind::LeaderAndIsr(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode LeaderAndIsrResponse v{version} body")),
+            ResponseKind::StopReplica(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode StopReplicaResponse v{version} body")),
+            ResponseKind::UpdateMetadata(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode UpdateMetadataResponse v{version} body")
+            }),
+            ResponseKind::ControlledShutdown(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode ControlledShutdownResponse v{version} body")
+            }),
+            ResponseKind::OffsetCommit(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode OffsetCommitResponse v{version} body")),
+            ResponseKind::OffsetFetch(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode OffsetFetchResponse v{version} body")),
+            ResponseKind::FindCoordinator(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode FindCoordinatorResponse v{version} body")
+            }),
+            ResponseKind::JoinGroup(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode JoinGroupResponse v{version} body")),
+            ResponseKind::Heartbeat(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode HeartbeatResponse v{version} body")),
+            ResponseKind::LeaveGroup(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode LeaveGroupResponse v{version} body")),
+            ResponseKind::SyncGroup(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode SyncGroupResponse v{version} body")),
+            ResponseKind::DescribeGroups(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode DescribeGroupsResponse v{version} body")
+            }),
+            ResponseKind::ListGroups(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode ListGroupsResponse v{version} body")),
+            ResponseKind::SaslHandshake(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode SaslHandshakeResponse v{version} body")),
+            ResponseKind::ApiVersions(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode ApiVersionsResponse v{version} body")),
+            ResponseKind::CreateTopics(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode CreateTopicsResponse v{version} body")),
+            ResponseKind::DeleteTopics(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode DeleteTopicsResponse v{version} body")),
+            ResponseKind::DeleteRecords(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode DeleteRecordsResponse v{version} body")),
+            ResponseKind::InitProducerId(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode InitProducerIdResponse v{version} body")
+            }),
+            ResponseKind::OffsetForLeaderEpoch(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode OffsetForLeaderEpochResponse v{version} body")
+            }),
+            ResponseKind::AddPartitionsToTxn(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode AddPartitionsToTxnResponse v{version} body")
+            }),
+            ResponseKind::AddOffsetsToTxn(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode AddOffsetsToTxnResponse v{version} body")
+            }),
+            ResponseKind::EndTxn(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode EndTxnResponse v{version} body")),
+            ResponseKind::WriteTxnMarkers(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode WriteTxnMarkersResponse v{version} body")
+            }),
+            ResponseKind::TxnOffsetCommit(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode TxnOffsetCommitResponse v{version} body")
+            }),
+            ResponseKind::DescribeAcls(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode DescribeAclsResponse v{version} body")),
+            ResponseKind::CreateAcls(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode CreateAclsResponse v{version} body")),
+            ResponseKind::DeleteAcls(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode DeleteAclsResponse v{version} body")),
+            ResponseKind::DescribeConfigs(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode DescribeConfigsResponse v{version} body")
+            }),
+            ResponseKind::AlterConfigs(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode AlterConfigsResponse v{version} body")),
+            ResponseKind::AlterReplicaLogDirs(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode AlterReplicaLogDirsResponse v{version} body")
+            }),
+            ResponseKind::DescribeLogDirs(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode DescribeLogDirsResponse v{version} body")
+            }),
+            ResponseKind::SaslAuthenticate(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode SaslAuthenticateResponse v{version} body")
+            }),
+            ResponseKind::CreatePartitions(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode CreatePartitionsResponse v{version} body")
+            }),
+            ResponseKind::CreateDelegationToken(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode CreateDelegationTokenResponse v{version} body")
+            }),
+            ResponseKind::RenewDelegationToken(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode RenewDelegationTokenResponse v{version} body")
+            }),
+            ResponseKind::ExpireDelegationToken(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode ExpireDelegationTokenResponse v{version} body")
+            }),
+            ResponseKind::DescribeDelegationToken(x) => {
+                x.encode(bytes, version).with_context(|| {
+                    format!("Failed to encode DescribeDelegationTokenResponse v{version} body")
+                })
+            }
+            ResponseKind::DeleteGroups(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode DeleteGroupsResponse v{version} body")),
+            ResponseKind::ElectLeaders(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode ElectLeadersResponse v{version} body")),
+            ResponseKind::IncrementalAlterConfigs(x) => {
+                x.encode(bytes, version).with_context(|| {
+                    format!("Failed to encode IncrementalAlterConfigsResponse v{version} body")
+                })
+            }
+            ResponseKind::AlterPartitionReassignments(x) => {
+                x.encode(bytes, version).with_context(|| {
+                    format!("Failed to encode AlterPartitionReassignmentsResponse v{version} body")
+                })
+            }
+            ResponseKind::ListPartitionReassignments(x) => {
+                x.encode(bytes, version).with_context(|| {
+                    format!("Failed to encode ListPartitionReassignmentsResponse v{version} body")
+                })
+            }
+            ResponseKind::OffsetDelete(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode OffsetDeleteResponse v{version} body")),
+            ResponseKind::DescribeClientQuotas(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode DescribeClientQuotasResponse v{version} body")
+            }),
+            ResponseKind::AlterClientQuotas(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode AlterClientQuotasResponse v{version} body")
+            }),
+            ResponseKind::DescribeUserScramCredentials(x) => {
+                x.encode(bytes, version).with_context(|| {
+                    format!("Failed to encode DescribeUserScramCredentialsResponse v{version} body")
+                })
+            }
+            ResponseKind::AlterUserScramCredentials(x) => {
+                x.encode(bytes, version).with_context(|| {
+                    format!("Failed to encode AlterUserScramCredentialsResponse v{version} body")
+                })
+            }
+            ResponseKind::Vote(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode VoteResponse v{version} body")),
+            ResponseKind::BeginQuorumEpoch(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode BeginQuorumEpochResponse v{version} body")
+            }),
+            ResponseKind::EndQuorumEpoch(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode EndQuorumEpochResponse v{version} body")
+            }),
+            ResponseKind::DescribeQuorum(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode DescribeQuorumResponse v{version} body")
+            }),
+            ResponseKind::AlterPartition(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode AlterPartitionResponse v{version} body")
+            }),
+            ResponseKind::UpdateFeatures(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode UpdateFeaturesResponse v{version} body")
+            }),
+            ResponseKind::Envelope(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode EnvelopeResponse v{version} body")),
+            ResponseKind::FetchSnapshot(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode FetchSnapshotResponse v{version} body")),
+            ResponseKind::DescribeCluster(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode DescribeClusterResponse v{version} body")
+            }),
+            ResponseKind::DescribeProducers(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode DescribeProducersResponse v{version} body")
+            }),
+            ResponseKind::BrokerRegistration(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode BrokerRegistrationResponse v{version} body")
+            }),
+            ResponseKind::BrokerHeartbeat(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode BrokerHeartbeatResponse v{version} body")
+            }),
+            ResponseKind::UnregisterBroker(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode UnregisterBrokerResponse v{version} body")
+            }),
+            ResponseKind::DescribeTransactions(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode DescribeTransactionsResponse v{version} body")
+            }),
+            ResponseKind::ListTransactions(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode ListTransactionsResponse v{version} body")
+            }),
+            ResponseKind::AllocateProducerIds(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode AllocateProducerIdsResponse v{version} body")
+            }),
+            ResponseKind::ConsumerGroupHeartbeat(x) => {
+                x.encode(bytes, version).with_context(|| {
+                    format!("Failed to encode ConsumerGroupHeartbeatResponse v{version} body")
+                })
+            }
+            ResponseKind::ControllerRegistration(x) => {
+                x.encode(bytes, version).with_context(|| {
+                    format!("Failed to encode ControllerRegistrationResponse v{version} body")
+                })
+            }
+            ResponseKind::GetTelemetrySubscriptions(x) => {
+                x.encode(bytes, version).with_context(|| {
+                    format!("Failed to encode GetTelemetrySubscriptionsResponse v{version} body")
+                })
+            }
+            ResponseKind::PushTelemetry(x) => x
+                .encode(bytes, version)
+                .with_context(|| format!("Failed to encode PushTelemetryResponse v{version} body")),
+            ResponseKind::AssignReplicasToDirs(x) => x.encode(bytes, version).with_context(|| {
+                format!("Failed to encode AssignReplicasToDirsResponse v{version} body")
+            }),
+            ResponseKind::ListClientMetricsResources(x) => {
+                x.encode(bytes, version).with_context(|| {
+                    format!("Failed to encode ListClientMetricsResourcesResponse v{version} body")
+                })
+            }
+        }
+    }
+    /// Decode the message from the provided buffer and version
+    pub fn decode(
+        api_key: ApiKey,
+        bytes: &mut bytes::Bytes,
+        version: i16,
+    ) -> anyhow::Result<ResponseKind> {
+        match api_key {
+            ApiKey::ProduceKey => ProduceResponse::decode(bytes, version)
+                .with_context(|| format!("Failed to decode ProduceResponse v{version} body"))
+                .map(ResponseKind::Produce),
+            ApiKey::FetchKey => FetchResponse::decode(bytes, version)
+                .with_context(|| format!("Failed to decode FetchResponse v{version} body"))
+                .map(ResponseKind::Fetch),
+            ApiKey::ListOffsetsKey => ListOffsetsResponse::decode(bytes, version)
+                .with_context(|| format!("Failed to decode ListOffsetsResponse v{version} body"))
+                .map(ResponseKind::ListOffsets),
+            ApiKey::MetadataKey => MetadataResponse::decode(bytes, version)
+                .with_context(|| format!("Failed to decode MetadataResponse v{version} body"))
+                .map(ResponseKind::Metadata),
+            ApiKey::LeaderAndIsrKey => LeaderAndIsrResponse::decode(bytes, version)
+                .with_context(|| format!("Failed to decode LeaderAndIsrResponse v{version} body"))
+                .map(ResponseKind::LeaderAndIsr),
+            ApiKey::StopReplicaKey => StopReplicaResponse::decode(bytes, version)
+                .with_context(|| format!("Failed to decode StopReplicaResponse v{version} body"))
+                .map(ResponseKind::StopReplica),
+            ApiKey::UpdateMetadataKey => UpdateMetadataResponse::decode(bytes, version)
+                .with_context(|| format!("Failed to decode UpdateMetadataResponse v{version} body"))
+                .map(ResponseKind::UpdateMetadata),
+            ApiKey::ControlledShutdownKey => ControlledShutdownResponse::decode(bytes, version)
+                .with_context(|| {
+                    format!("Failed to decode ControlledShutdownResponse v{version} body")
+                })
+                .map(ResponseKind::ControlledShutdown),
+            ApiKey::OffsetCommitKey => OffsetCommitResponse::decode(bytes, version)
+                .with_context(|| format!("Failed to decode OffsetCommitResponse v{version} body"))
+                .map(ResponseKind::OffsetCommit),
+            ApiKey::OffsetFetchKey => OffsetFetchResponse::decode(bytes, version)
+                .with_context(|| format!("Failed to decode OffsetFetchResponse v{version} body"))
+                .map(ResponseKind::OffsetFetch),
+            ApiKey::FindCoordinatorKey => FindCoordinatorResponse::decode(bytes, version)
+                .with_context(|| {
+                    format!("Failed to decode FindCoordinatorResponse v{version} body")
+                })
+                .map(ResponseKind::FindCoordinator),
+            ApiKey::JoinGroupKey => JoinGroupResponse::decode(bytes, version)
+                .with_context(|| format!("Failed to decode JoinGroupResponse v{version} body"))
+                .map(ResponseKind::JoinGroup),
+            ApiKey::HeartbeatKey => HeartbeatResponse::decode(bytes, version)
+                .with_context(|| format!("Failed to decode HeartbeatResponse v{version} body"))
+                .map(ResponseKind::Heartbeat),
+            ApiKey::LeaveGroupKey => LeaveGroupResponse::decode(bytes, version)
+                .with_context(|| format!("Failed to decode LeaveGroupResponse v{version} body"))
+                .map(ResponseKind::LeaveGroup),
+            ApiKey::SyncGroupKey => SyncGroupResponse::decode(bytes, version)
+                .with_context(|| format!("Failed to decode SyncGroupResponse v{version} body"))
+                .map(ResponseKind::SyncGroup),
+            ApiKey::DescribeGroupsKey => DescribeGroupsResponse::decode(bytes, version)
+                .with_context(|| format!("Failed to decode DescribeGroupsResponse v{version} body"))
+                .map(ResponseKind::DescribeGroups),
+            ApiKey::ListGroupsKey => ListGroupsResponse::decode(bytes, version)
+                .with_context(|| format!("Failed to decode ListGroupsResponse v{version} body"))
+                .map(ResponseKind::ListGroups),
+            ApiKey::SaslHandshakeKey => SaslHandshakeResponse::decode(bytes, version)
+                .with_context(|| format!("Failed to decode SaslHandshakeResponse v{version} body"))
+                .map(ResponseKind::SaslHandshake),
+            ApiKey::ApiVersionsKey => ApiVersionsResponse::decode(bytes, version)
+                .with_context(|| format!("Failed to decode ApiVersionsResponse v{version} body"))
+                .map(ResponseKind::ApiVersions),
+            ApiKey::CreateTopicsKey => CreateTopicsResponse::decode(bytes, version)
+                .with_context(|| format!("Failed to decode CreateTopicsResponse v{version} body"))
+                .map(ResponseKind::CreateTopics),
+            ApiKey::DeleteTopicsKey => DeleteTopicsResponse::decode(bytes, version)
+                .with_context(|| format!("Failed to decode DeleteTopicsResponse v{version} body"))
+                .map(ResponseKind::DeleteTopics),
+            ApiKey::DeleteRecordsKey => DeleteRecordsResponse::decode(bytes, version)
+                .with_context(|| format!("Failed to decode DeleteRecordsResponse v{version} body"))
+                .map(ResponseKind::DeleteRecords),
+            ApiKey::InitProducerIdKey => InitProducerIdResponse::decode(bytes, version)
+                .with_context(|| format!("Failed to decode InitProducerIdResponse v{version} body"))
+                .map(ResponseKind::InitProducerId),
+            ApiKey::OffsetForLeaderEpochKey => OffsetForLeaderEpochResponse::decode(bytes, version)
+                .with_context(|| {
+                    format!("Failed to decode OffsetForLeaderEpochResponse v{version} body")
+                })
+                .map(ResponseKind::OffsetForLeaderEpoch),
+            ApiKey::AddPartitionsToTxnKey => AddPartitionsToTxnResponse::decode(bytes, version)
+                .with_context(|| {
+                    format!("Failed to decode AddPartitionsToTxnResponse v{version} body")
+                })
+                .map(ResponseKind::AddPartitionsToTxn),
+            ApiKey::AddOffsetsToTxnKey => AddOffsetsToTxnResponse::decode(bytes, version)
+                .with_context(|| {
+                    format!("Failed to decode AddOffsetsToTxnResponse v{version} body")
+                })
+                .map(ResponseKind::AddOffsetsToTxn),
+            ApiKey::EndTxnKey => EndTxnResponse::decode(bytes, version)
+                .with_context(|| format!("Failed to decode EndTxnResponse v{version} body"))
+                .map(ResponseKind::EndTxn),
+            ApiKey::WriteTxnMarkersKey => WriteTxnMarkersResponse::decode(bytes, version)
+                .with_context(|| {
+                    format!("Failed to decode WriteTxnMarkersResponse v{version} body")
+                })
+                .map(ResponseKind::WriteTxnMarkers),
+            ApiKey::TxnOffsetCommitKey => TxnOffsetCommitResponse::decode(bytes, version)
+                .with_context(|| {
+                    format!("Failed to decode TxnOffsetCommitResponse v{version} body")
+                })
+                .map(ResponseKind::TxnOffsetCommit),
+            ApiKey::DescribeAclsKey => DescribeAclsResponse::decode(bytes, version)
+                .with_context(|| format!("Failed to decode DescribeAclsResponse v{version} body"))
+                .map(ResponseKind::DescribeAcls),
+            ApiKey::CreateAclsKey => CreateAclsResponse::decode(bytes, version)
+                .with_context(|| format!("Failed to decode CreateAclsResponse v{version} body"))
+                .map(ResponseKind::CreateAcls),
+            ApiKey::DeleteAclsKey => DeleteAclsResponse::decode(bytes, version)
+                .with_context(|| format!("Failed to decode DeleteAclsResponse v{version} body"))
+                .map(ResponseKind::DeleteAcls),
+            ApiKey::DescribeConfigsKey => DescribeConfigsResponse::decode(bytes, version)
+                .with_context(|| {
+                    format!("Failed to decode DescribeConfigsResponse v{version} body")
+                })
+                .map(ResponseKind::DescribeConfigs),
+            ApiKey::AlterConfigsKey => AlterConfigsResponse::decode(bytes, version)
+                .with_context(|| format!("Failed to decode AlterConfigsResponse v{version} body"))
+                .map(ResponseKind::AlterConfigs),
+            ApiKey::AlterReplicaLogDirsKey => AlterReplicaLogDirsResponse::decode(bytes, version)
+                .with_context(|| {
+                    format!("Failed to decode AlterReplicaLogDirsResponse v{version} body")
+                })
+                .map(ResponseKind::AlterReplicaLogDirs),
+            ApiKey::DescribeLogDirsKey => DescribeLogDirsResponse::decode(bytes, version)
+                .with_context(|| {
+                    format!("Failed to decode DescribeLogDirsResponse v{version} body")
+                })
+                .map(ResponseKind::DescribeLogDirs),
+            ApiKey::SaslAuthenticateKey => SaslAuthenticateResponse::decode(bytes, version)
+                .with_context(|| {
+                    format!("Failed to decode SaslAuthenticateResponse v{version} body")
+                })
+                .map(ResponseKind::SaslAuthenticate),
+            ApiKey::CreatePartitionsKey => CreatePartitionsResponse::decode(bytes, version)
+                .with_context(|| {
+                    format!("Failed to decode CreatePartitionsResponse v{version} body")
+                })
+                .map(ResponseKind::CreatePartitions),
+            ApiKey::CreateDelegationTokenKey => {
+                CreateDelegationTokenResponse::decode(bytes, version)
+                    .with_context(|| {
+                        format!("Failed to decode CreateDelegationTokenResponse v{version} body")
+                    })
+                    .map(ResponseKind::CreateDelegationToken)
+            }
+            ApiKey::RenewDelegationTokenKey => RenewDelegationTokenResponse::decode(bytes, version)
+                .with_context(|| {
+                    format!("Failed to decode RenewDelegationTokenResponse v{version} body")
+                })
+                .map(ResponseKind::RenewDelegationToken),
+            ApiKey::ExpireDelegationTokenKey => {
+                ExpireDelegationTokenResponse::decode(bytes, version)
+                    .with_context(|| {
+                        format!("Failed to decode ExpireDelegationTokenResponse v{version} body")
+                    })
+                    .map(ResponseKind::ExpireDelegationToken)
+            }
+            ApiKey::DescribeDelegationTokenKey => {
+                DescribeDelegationTokenResponse::decode(bytes, version)
+                    .with_context(|| {
+                        format!("Failed to decode DescribeDelegationTokenResponse v{version} body")
+                    })
+                    .map(ResponseKind::DescribeDelegationToken)
+            }
+            ApiKey::DeleteGroupsKey => DeleteGroupsResponse::decode(bytes, version)
+                .with_context(|| format!("Failed to decode DeleteGroupsResponse v{version} body"))
+                .map(ResponseKind::DeleteGroups),
+            ApiKey::ElectLeadersKey => ElectLeadersResponse::decode(bytes, version)
+                .with_context(|| format!("Failed to decode ElectLeadersResponse v{version} body"))
+                .map(ResponseKind::ElectLeaders),
+            ApiKey::IncrementalAlterConfigsKey => {
+                IncrementalAlterConfigsResponse::decode(bytes, version)
+                    .with_context(|| {
+                        format!("Failed to decode IncrementalAlterConfigsResponse v{version} body")
+                    })
+                    .map(ResponseKind::IncrementalAlterConfigs)
+            }
+            ApiKey::AlterPartitionReassignmentsKey => {
+                AlterPartitionReassignmentsResponse::decode(bytes, version)
+                    .with_context(|| {
+                        format!(
+                            "Failed to decode AlterPartitionReassignmentsResponse v{version} body"
+                        )
+                    })
+                    .map(ResponseKind::AlterPartitionReassignments)
+            }
+            ApiKey::ListPartitionReassignmentsKey => {
+                ListPartitionReassignmentsResponse::decode(bytes, version)
+                    .with_context(|| {
+                        format!(
+                            "Failed to decode ListPartitionReassignmentsResponse v{version} body"
+                        )
+                    })
+                    .map(ResponseKind::ListPartitionReassignments)
+            }
+            ApiKey::OffsetDeleteKey => OffsetDeleteResponse::decode(bytes, version)
+                .with_context(|| format!("Failed to decode OffsetDeleteResponse v{version} body"))
+                .map(ResponseKind::OffsetDelete),
+            ApiKey::DescribeClientQuotasKey => DescribeClientQuotasResponse::decode(bytes, version)
+                .with_context(|| {
+                    format!("Failed to decode DescribeClientQuotasResponse v{version} body")
+                })
+                .map(ResponseKind::DescribeClientQuotas),
+            ApiKey::AlterClientQuotasKey => AlterClientQuotasResponse::decode(bytes, version)
+                .with_context(|| {
+                    format!("Failed to decode AlterClientQuotasResponse v{version} body")
+                })
+                .map(ResponseKind::AlterClientQuotas),
+            ApiKey::DescribeUserScramCredentialsKey => {
+                DescribeUserScramCredentialsResponse::decode(bytes, version)
+                    .with_context(|| {
+                        format!(
+                            "Failed to decode DescribeUserScramCredentialsResponse v{version} body"
+                        )
+                    })
+                    .map(ResponseKind::DescribeUserScramCredentials)
+            }
+            ApiKey::AlterUserScramCredentialsKey => {
+                AlterUserScramCredentialsResponse::decode(bytes, version)
+                    .with_context(|| {
+                        format!(
+                            "Failed to decode AlterUserScramCredentialsResponse v{version} body"
+                        )
+                    })
+                    .map(ResponseKind::AlterUserScramCredentials)
+            }
+            ApiKey::VoteKey => VoteResponse::decode(bytes, version)
+                .with_context(|| format!("Failed to decode VoteResponse v{version} body"))
+                .map(ResponseKind::Vote),
+            ApiKey::BeginQuorumEpochKey => BeginQuorumEpochResponse::decode(bytes, version)
+                .with_context(|| {
+                    format!("Failed to decode BeginQuorumEpochResponse v{version} body")
+                })
+                .map(ResponseKind::BeginQuorumEpoch),
+            ApiKey::EndQuorumEpochKey => EndQuorumEpochResponse::decode(bytes, version)
+                .with_context(|| format!("Failed to decode EndQuorumEpochResponse v{version} body"))
+                .map(ResponseKind::EndQuorumEpoch),
+            ApiKey::DescribeQuorumKey => DescribeQuorumResponse::decode(bytes, version)
+                .with_context(|| format!("Failed to decode DescribeQuorumResponse v{version} body"))
+                .map(ResponseKind::DescribeQuorum),
+            ApiKey::AlterPartitionKey => AlterPartitionResponse::decode(bytes, version)
+                .with_context(|| format!("Failed to decode AlterPartitionResponse v{version} body"))
+                .map(ResponseKind::AlterPartition),
+            ApiKey::UpdateFeaturesKey => UpdateFeaturesResponse::decode(bytes, version)
+                .with_context(|| format!("Failed to decode UpdateFeaturesResponse v{version} body"))
+                .map(ResponseKind::UpdateFeatures),
+            ApiKey::EnvelopeKey => EnvelopeResponse::decode(bytes, version)
+                .with_context(|| format!("Failed to decode EnvelopeResponse v{version} body"))
+                .map(ResponseKind::Envelope),
+            ApiKey::FetchSnapshotKey => FetchSnapshotResponse::decode(bytes, version)
+                .with_context(|| format!("Failed to decode FetchSnapshotResponse v{version} body"))
+                .map(ResponseKind::FetchSnapshot),
+            ApiKey::DescribeClusterKey => DescribeClusterResponse::decode(bytes, version)
+                .with_context(|| {
+                    format!("Failed to decode DescribeClusterResponse v{version} body")
+                })
+                .map(ResponseKind::DescribeCluster),
+            ApiKey::DescribeProducersKey => DescribeProducersResponse::decode(bytes, version)
+                .with_context(|| {
+                    format!("Failed to decode DescribeProducersResponse v{version} body")
+                })
+                .map(ResponseKind::DescribeProducers),
+            ApiKey::BrokerRegistrationKey => BrokerRegistrationResponse::decode(bytes, version)
+                .with_context(|| {
+                    format!("Failed to decode BrokerRegistrationResponse v{version} body")
+                })
+                .map(ResponseKind::BrokerRegistration),
+            ApiKey::BrokerHeartbeatKey => BrokerHeartbeatResponse::decode(bytes, version)
+                .with_context(|| {
+                    format!("Failed to decode BrokerHeartbeatResponse v{version} body")
+                })
+                .map(ResponseKind::BrokerHeartbeat),
+            ApiKey::UnregisterBrokerKey => UnregisterBrokerResponse::decode(bytes, version)
+                .with_context(|| {
+                    format!("Failed to decode UnregisterBrokerResponse v{version} body")
+                })
+                .map(ResponseKind::UnregisterBroker),
+            ApiKey::DescribeTransactionsKey => DescribeTransactionsResponse::decode(bytes, version)
+                .with_context(|| {
+                    format!("Failed to decode DescribeTransactionsResponse v{version} body")
+                })
+                .map(ResponseKind::DescribeTransactions),
+            ApiKey::ListTransactionsKey => ListTransactionsResponse::decode(bytes, version)
+                .with_context(|| {
+                    format!("Failed to decode ListTransactionsResponse v{version} body")
+                })
+                .map(ResponseKind::ListTransactions),
+            ApiKey::AllocateProducerIdsKey => AllocateProducerIdsResponse::decode(bytes, version)
+                .with_context(|| {
+                    format!("Failed to decode AllocateProducerIdsResponse v{version} body")
+                })
+                .map(ResponseKind::AllocateProducerIds),
+            ApiKey::ConsumerGroupHeartbeatKey => {
+                ConsumerGroupHeartbeatResponse::decode(bytes, version)
+                    .with_context(|| {
+                        format!("Failed to decode ConsumerGroupHeartbeatResponse v{version} body")
+                    })
+                    .map(ResponseKind::ConsumerGroupHeartbeat)
+            }
+            ApiKey::ControllerRegistrationKey => {
+                ControllerRegistrationResponse::decode(bytes, version)
+                    .with_context(|| {
+                        format!("Failed to decode ControllerRegistrationResponse v{version} body")
+                    })
+                    .map(ResponseKind::ControllerRegistration)
+            }
+            ApiKey::GetTelemetrySubscriptionsKey => {
+                GetTelemetrySubscriptionsResponse::decode(bytes, version)
+                    .with_context(|| {
+                        format!(
+                            "Failed to decode GetTelemetrySubscriptionsResponse v{version} body"
+                        )
+                    })
+                    .map(ResponseKind::GetTelemetrySubscriptions)
+            }
+            ApiKey::PushTelemetryKey => PushTelemetryResponse::decode(bytes, version)
+                .with_context(|| format!("Failed to decode PushTelemetryResponse v{version} body"))
+                .map(ResponseKind::PushTelemetry),
+            ApiKey::AssignReplicasToDirsKey => AssignReplicasToDirsResponse::decode(bytes, version)
+                .with_context(|| {
+                    format!("Failed to decode AssignReplicasToDirsResponse v{version} body")
+                })
+                .map(ResponseKind::AssignReplicasToDirs),
+            ApiKey::ListClientMetricsResourcesKey => {
+                ListClientMetricsResourcesResponse::decode(bytes, version)
+                    .with_context(|| {
+                        format!(
+                            "Failed to decode ListClientMetricsResourcesResponse v{version} body"
+                        )
+                    })
+                    .map(ResponseKind::ListClientMetricsResources)
+            }
+        }
+    }
+    /// Get the version of request header that needs to be prepended to this message
+    pub fn header_version(&self, version: i16) -> i16 {
+        match self {
+            ResponseKind::Produce(_) => ProduceResponse::header_version(version),
+            ResponseKind::Fetch(_) => FetchResponse::header_version(version),
+            ResponseKind::ListOffsets(_) => ListOffsetsResponse::header_version(version),
+            ResponseKind::Metadata(_) => MetadataResponse::header_version(version),
+            ResponseKind::LeaderAndIsr(_) => LeaderAndIsrResponse::header_version(version),
+            ResponseKind::StopReplica(_) => StopReplicaResponse::header_version(version),
+            ResponseKind::UpdateMetadata(_) => UpdateMetadataResponse::header_version(version),
+            ResponseKind::ControlledShutdown(_) => {
+                ControlledShutdownResponse::header_version(version)
+            }
+            ResponseKind::OffsetCommit(_) => OffsetCommitResponse::header_version(version),
+            ResponseKind::OffsetFetch(_) => OffsetFetchResponse::header_version(version),
+            ResponseKind::FindCoordinator(_) => FindCoordinatorResponse::header_version(version),
+            ResponseKind::JoinGroup(_) => JoinGroupResponse::header_version(version),
+            ResponseKind::Heartbeat(_) => HeartbeatResponse::header_version(version),
+            ResponseKind::LeaveGroup(_) => LeaveGroupResponse::header_version(version),
+            ResponseKind::SyncGroup(_) => SyncGroupResponse::header_version(version),
+            ResponseKind::DescribeGroups(_) => DescribeGroupsResponse::header_version(version),
+            ResponseKind::ListGroups(_) => ListGroupsResponse::header_version(version),
+            ResponseKind::SaslHandshake(_) => SaslHandshakeResponse::header_version(version),
+            ResponseKind::ApiVersions(_) => ApiVersionsResponse::header_version(version),
+            ResponseKind::CreateTopics(_) => CreateTopicsResponse::header_version(version),
+            ResponseKind::DeleteTopics(_) => DeleteTopicsResponse::header_version(version),
+            ResponseKind::DeleteRecords(_) => DeleteRecordsResponse::header_version(version),
+            ResponseKind::InitProducerId(_) => InitProducerIdResponse::header_version(version),
+            ResponseKind::OffsetForLeaderEpoch(_) => {
+                OffsetForLeaderEpochResponse::header_version(version)
+            }
+            ResponseKind::AddPartitionsToTxn(_) => {
+                AddPartitionsToTxnResponse::header_version(version)
+            }
+            ResponseKind::AddOffsetsToTxn(_) => AddOffsetsToTxnResponse::header_version(version),
+            ResponseKind::EndTxn(_) => EndTxnResponse::header_version(version),
+            ResponseKind::WriteTxnMarkers(_) => WriteTxnMarkersResponse::header_version(version),
+            ResponseKind::TxnOffsetCommit(_) => TxnOffsetCommitResponse::header_version(version),
+            ResponseKind::DescribeAcls(_) => DescribeAclsResponse::header_version(version),
+            ResponseKind::CreateAcls(_) => CreateAclsResponse::header_version(version),
+            ResponseKind::DeleteAcls(_) => DeleteAclsResponse::header_version(version),
+            ResponseKind::DescribeConfigs(_) => DescribeConfigsResponse::header_version(version),
+            ResponseKind::AlterConfigs(_) => AlterConfigsResponse::header_version(version),
+            ResponseKind::AlterReplicaLogDirs(_) => {
+                AlterReplicaLogDirsResponse::header_version(version)
+            }
+            ResponseKind::DescribeLogDirs(_) => DescribeLogDirsResponse::header_version(version),
+            ResponseKind::SaslAuthenticate(_) => SaslAuthenticateResponse::header_version(version),
+            ResponseKind::CreatePartitions(_) => CreatePartitionsResponse::header_version(version),
+            ResponseKind::CreateDelegationToken(_) => {
+                CreateDelegationTokenResponse::header_version(version)
+            }
+            ResponseKind::RenewDelegationToken(_) => {
+                RenewDelegationTokenResponse::header_version(version)
+            }
+            ResponseKind::ExpireDelegationToken(_) => {
+                ExpireDelegationTokenResponse::header_version(version)
+            }
+            ResponseKind::DescribeDelegationToken(_) => {
+                DescribeDelegationTokenResponse::header_version(version)
+            }
+            ResponseKind::DeleteGroups(_) => DeleteGroupsResponse::header_version(version),
+            ResponseKind::ElectLeaders(_) => ElectLeadersResponse::header_version(version),
+            ResponseKind::IncrementalAlterConfigs(_) => {
+                IncrementalAlterConfigsResponse::header_version(version)
+            }
+            ResponseKind::AlterPartitionReassignments(_) => {
+                AlterPartitionReassignmentsResponse::header_version(version)
+            }
+            ResponseKind::ListPartitionReassignments(_) => {
+                ListPartitionReassignmentsResponse::header_version(version)
+            }
+            ResponseKind::OffsetDelete(_) => OffsetDeleteResponse::header_version(version),
+            ResponseKind::DescribeClientQuotas(_) => {
+                DescribeClientQuotasResponse::header_version(version)
+            }
+            ResponseKind::AlterClientQuotas(_) => {
+                AlterClientQuotasResponse::header_version(version)
+            }
+            ResponseKind::DescribeUserScramCredentials(_) => {
+                DescribeUserScramCredentialsResponse::header_version(version)
+            }
+            ResponseKind::AlterUserScramCredentials(_) => {
+                AlterUserScramCredentialsResponse::header_version(version)
+            }
+            ResponseKind::Vote(_) => VoteResponse::header_version(version),
+            ResponseKind::BeginQuorumEpoch(_) => BeginQuorumEpochResponse::header_version(version),
+            ResponseKind::EndQuorumEpoch(_) => EndQuorumEpochResponse::header_version(version),
+            ResponseKind::DescribeQuorum(_) => DescribeQuorumResponse::header_version(version),
+            ResponseKind::AlterPartition(_) => AlterPartitionResponse::header_version(version),
+            ResponseKind::UpdateFeatures(_) => UpdateFeaturesResponse::header_version(version),
+            ResponseKind::Envelope(_) => EnvelopeResponse::header_version(version),
+            ResponseKind::FetchSnapshot(_) => FetchSnapshotResponse::header_version(version),
+            ResponseKind::DescribeCluster(_) => DescribeClusterResponse::header_version(version),
+            ResponseKind::DescribeProducers(_) => {
+                DescribeProducersResponse::header_version(version)
+            }
+            ResponseKind::BrokerRegistration(_) => {
+                BrokerRegistrationResponse::header_version(version)
+            }
+            ResponseKind::BrokerHeartbeat(_) => BrokerHeartbeatResponse::header_version(version),
+            ResponseKind::UnregisterBroker(_) => UnregisterBrokerResponse::header_version(version),
+            ResponseKind::DescribeTransactions(_) => {
+                DescribeTransactionsResponse::header_version(version)
+            }
+            ResponseKind::ListTransactions(_) => ListTransactionsResponse::header_version(version),
+            ResponseKind::AllocateProducerIds(_) => {
+                AllocateProducerIdsResponse::header_version(version)
+            }
+            ResponseKind::ConsumerGroupHeartbeat(_) => {
+                ConsumerGroupHeartbeatResponse::header_version(version)
+            }
+            ResponseKind::ControllerRegistration(_) => {
+                ControllerRegistrationResponse::header_version(version)
+            }
+            ResponseKind::GetTelemetrySubscriptions(_) => {
+                GetTelemetrySubscriptionsResponse::header_version(version)
+            }
+            ResponseKind::PushTelemetry(_) => PushTelemetryResponse::header_version(version),
+            ResponseKind::AssignReplicasToDirs(_) => {
+                AssignReplicasToDirsResponse::header_version(version)
+            }
+            ResponseKind::ListClientMetricsResources(_) => {
+                ListClientMetricsResourcesResponse::header_version(version)
+            }
+        }
+    }
 }
 
 impl From<ProduceResponse> for ResponseKind {

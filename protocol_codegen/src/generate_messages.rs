@@ -95,6 +95,10 @@ pub fn run() -> Result<(), Error> {
         "use crate::protocol::{{NewType, Request, StrBytes, HeaderVersion}};"
     )?;
     writeln!(module_file, "use std::convert::TryFrom;")?;
+    writeln!(module_file, "use crate::protocol::Encodable;")?;
+    writeln!(module_file, "use crate::protocol::Decodable;")?;
+    writeln!(module_file, "use anyhow::Result;")?;
+    writeln!(module_file, "use anyhow::Context;")?;
     writeln!(module_file)?;
 
     for input_file_path in &input_file_paths {
@@ -267,6 +271,45 @@ pub fn run() -> Result<(), Error> {
     writeln!(module_file, "}}")?;
     writeln!(module_file)?;
 
+    writeln!(module_file, "impl RequestKind {{")?;
+    writeln!(module_file, "/// Encode the message into the target buffer")?;
+    writeln!(
+        module_file,
+        "pub fn encode(&self, bytes: &mut bytes::BytesMut, version: i16) -> anyhow::Result<()> {{"
+    )?;
+    writeln!(module_file, "match self {{")?;
+    for (_, request_type) in request_types.iter() {
+        let variant = request_type.trim_end_matches("Request");
+        writeln!(
+            module_file,
+            "RequestKind::{variant}(x) => x.encode(bytes, version).with_context(|| format!(\"Failed to encode {request_type} v{{version}} body\")),"
+        )?;
+    }
+    writeln!(module_file, "}}")?;
+    writeln!(module_file, "}}")?;
+
+    writeln!(module_file)?;
+    writeln!(
+        module_file,
+        "/// Decode the message from the provided buffer and version"
+    )?;
+    writeln!(
+        module_file,
+        "pub fn decode(api_key: ApiKey, bytes: &mut bytes::Bytes, version: i16) -> anyhow::Result<RequestKind> {{"
+    )?;
+    writeln!(module_file, "match api_key {{")?;
+    for (_, request_type) in request_types.iter() {
+        let variant = request_type.trim_end_matches("Request");
+        writeln!(
+            module_file,
+            "ApiKey::{variant}Key => {request_type}::decode(bytes, version).with_context(|| format!(\"Failed to decode {request_type} v{{version}} body\")).map(RequestKind::{variant}),"
+        )?;
+    }
+    writeln!(module_file, "}}")?;
+    writeln!(module_file, "}}")?;
+
+    writeln!(module_file, "}}")?;
+
     for (_, request_type) in request_types.iter() {
         writeln!(module_file, "impl From<{request_type}> for RequestKind {{")?;
         writeln!(
@@ -296,6 +339,63 @@ pub fn run() -> Result<(), Error> {
             response_type
         )?;
     }
+    writeln!(module_file, "}}")?;
+    writeln!(module_file)?;
+
+    writeln!(module_file, "impl ResponseKind {{")?;
+    writeln!(module_file, "/// Encode the message into the target buffer")?;
+    writeln!(
+        module_file,
+        "pub fn encode(&self, bytes: &mut bytes::BytesMut, version: i16) -> anyhow::Result<()> {{"
+    )?;
+    writeln!(module_file, "match self {{")?;
+    for (_, response_type) in response_types.iter() {
+        let variant = response_type.trim_end_matches("Response");
+        writeln!(
+            module_file,
+            "ResponseKind::{variant}(x) => x.encode(bytes, version).with_context(|| format!(\"Failed to encode {response_type} v{{version}} body\")),"
+        )?;
+    }
+    writeln!(module_file, "}}")?;
+    writeln!(module_file, "}}")?;
+
+    writeln!(
+        module_file,
+        "/// Decode the message from the provided buffer and version"
+    )?;
+    writeln!(
+        module_file,
+        "pub fn decode(api_key: ApiKey, bytes: &mut bytes::Bytes, version: i16) -> anyhow::Result<ResponseKind> {{"
+    )?;
+    writeln!(module_file, "match api_key {{")?;
+    for (_, response_type) in response_types.iter() {
+        let variant = response_type.trim_end_matches("Response");
+        writeln!(
+            module_file,
+            "ApiKey::{variant}Key => {response_type}::decode(bytes, version).with_context(|| format!(\"Failed to decode {response_type} v{{version}} body\")).map(ResponseKind::{variant}),"
+        )?;
+    }
+    writeln!(module_file, "}}")?;
+    writeln!(module_file, "}}")?;
+
+    writeln!(
+        module_file,
+        "/// Get the version of request header that needs to be prepended to this message"
+    )?;
+    writeln!(
+        module_file,
+        "pub fn header_version(&self, version: i16) -> i16 {{"
+    )?;
+    writeln!(module_file, "match self {{")?;
+    for (_, response_type) in response_types.iter() {
+        let variant = response_type.trim_end_matches("Response");
+        writeln!(
+            module_file,
+            "ResponseKind::{variant}(_) => {response_type}::header_version(version),"
+        )?;
+    }
+    writeln!(module_file, "}}")?;
+    writeln!(module_file, "}}")?;
     writeln!(module_file, "}}")?;
     writeln!(module_file)?;
 
