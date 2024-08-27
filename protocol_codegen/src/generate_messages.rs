@@ -282,7 +282,7 @@ pub fn run() -> Result<(), Error> {
         let variant = request_type.trim_end_matches("Request");
         writeln!(
             module_file,
-            "RequestKind::{variant}(x) => x.encode(bytes, version).with_context(|| format!(\"Failed to encode {request_type} v{{version}} body\")),"
+            "RequestKind::{variant}(x) => encode(x, bytes, version),"
         )?;
     }
     writeln!(module_file, "}}")?;
@@ -302,7 +302,7 @@ pub fn run() -> Result<(), Error> {
         let variant = request_type.trim_end_matches("Request");
         writeln!(
             module_file,
-            "ApiKey::{variant}Key => {request_type}::decode(bytes, version).with_context(|| format!(\"Failed to decode {request_type} v{{version}} body\")).map(RequestKind::{variant}),"
+            "ApiKey::{variant}Key => Ok(RequestKind::{variant}(decode(bytes, version)?)),"
         )?;
     }
     writeln!(module_file, "}}")?;
@@ -322,6 +322,31 @@ pub fn run() -> Result<(), Error> {
         writeln!(module_file, "}}")?;
         writeln!(module_file)?;
     }
+
+    writeln!(
+        module_file,
+        r#"
+    fn decode<T: Decodable>(bytes: &mut bytes::Bytes, version: i16) -> Result<T> {{
+    T::decode(bytes, version).with_context(|| {{
+        format!(
+            "Failed to decode {{}} v{{}} body",
+            std::any::type_name::<T>(),
+            version
+        )
+    }})
+}}
+
+fn encode<T: Encodable>(encodable: &T, bytes: &mut bytes::BytesMut, version: i16) -> Result<()> {{
+    encodable.encode(bytes, version).with_context(|| {{
+        format!(
+            "Failed to encode {{}} v{{}} body",
+            std::any::type_name::<T>(),
+            version
+        )
+    }})
+}}
+    "#
+    )?;
 
     writeln!(
         module_file,
@@ -353,7 +378,7 @@ pub fn run() -> Result<(), Error> {
         let variant = response_type.trim_end_matches("Response");
         writeln!(
             module_file,
-            "ResponseKind::{variant}(x) => x.encode(bytes, version).with_context(|| format!(\"Failed to encode {response_type} v{{version}} body\")),"
+            "ResponseKind::{variant}(x) => encode(x, bytes, version),"
         )?;
     }
     writeln!(module_file, "}}")?;
@@ -372,7 +397,7 @@ pub fn run() -> Result<(), Error> {
         let variant = response_type.trim_end_matches("Response");
         writeln!(
             module_file,
-            "ApiKey::{variant}Key => {response_type}::decode(bytes, version).with_context(|| format!(\"Failed to decode {response_type} v{{version}} body\")).map(ResponseKind::{variant}),"
+            "ApiKey::{variant}Key => Ok(ResponseKind::{variant}(decode(bytes, version)?)),"
         )?;
     }
     writeln!(module_file, "}}")?;
