@@ -3,9 +3,12 @@
 //! These messages are generated programmatically. See the [Kafka's protocol documentation](https://kafka.apache.org/protocol.html) for more information about a given message type.
 // WARNING: the items of this module are generated and should not be edited directly.
 
+#[cfg(feature = "messages_enum")]
 use crate::protocol::Decodable;
+#[cfg(feature = "messages_enum")]
 use crate::protocol::Encodable;
 use crate::protocol::{HeaderVersion, NewType, Request, StrBytes};
+#[cfg(feature = "messages_enum")]
 use anyhow::Context;
 use anyhow::Result;
 use std::convert::TryFrom;
@@ -1328,6 +1331,7 @@ impl TryFrom<i16> for ApiKey {
 }
 
 /// Wrapping enum for all requests in the Kafka protocol.
+#[cfg(feature = "messages_enum")]
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub enum RequestKind {
@@ -1481,6 +1485,7 @@ pub enum RequestKind {
     ListClientMetricsResources(ListClientMetricsResourcesRequest),
 }
 
+#[cfg(feature = "messages_enum")]
 impl RequestKind {
     /// Encode the message into the target buffer
     pub fn encode(&self, bytes: &mut bytes::BytesMut, version: i16) -> anyhow::Result<()> {
@@ -1561,7 +1566,6 @@ impl RequestKind {
             RequestKind::ListClientMetricsResources(x) => encode(x, bytes, version),
         }
     }
-
     /// Decode the message from the provided buffer and version
     pub fn decode(
         api_key: ApiKey,
@@ -1704,450 +1708,525 @@ impl RequestKind {
         }
     }
 }
+#[cfg(feature = "messages_enum")]
 impl From<ProduceRequest> for RequestKind {
     fn from(value: ProduceRequest) -> RequestKind {
         RequestKind::Produce(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<FetchRequest> for RequestKind {
     fn from(value: FetchRequest) -> RequestKind {
         RequestKind::Fetch(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<ListOffsetsRequest> for RequestKind {
     fn from(value: ListOffsetsRequest) -> RequestKind {
         RequestKind::ListOffsets(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<MetadataRequest> for RequestKind {
     fn from(value: MetadataRequest) -> RequestKind {
         RequestKind::Metadata(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<LeaderAndIsrRequest> for RequestKind {
     fn from(value: LeaderAndIsrRequest) -> RequestKind {
         RequestKind::LeaderAndIsr(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<StopReplicaRequest> for RequestKind {
     fn from(value: StopReplicaRequest) -> RequestKind {
         RequestKind::StopReplica(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<UpdateMetadataRequest> for RequestKind {
     fn from(value: UpdateMetadataRequest) -> RequestKind {
         RequestKind::UpdateMetadata(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<ControlledShutdownRequest> for RequestKind {
     fn from(value: ControlledShutdownRequest) -> RequestKind {
         RequestKind::ControlledShutdown(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<OffsetCommitRequest> for RequestKind {
     fn from(value: OffsetCommitRequest) -> RequestKind {
         RequestKind::OffsetCommit(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<OffsetFetchRequest> for RequestKind {
     fn from(value: OffsetFetchRequest) -> RequestKind {
         RequestKind::OffsetFetch(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<FindCoordinatorRequest> for RequestKind {
     fn from(value: FindCoordinatorRequest) -> RequestKind {
         RequestKind::FindCoordinator(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<JoinGroupRequest> for RequestKind {
     fn from(value: JoinGroupRequest) -> RequestKind {
         RequestKind::JoinGroup(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<HeartbeatRequest> for RequestKind {
     fn from(value: HeartbeatRequest) -> RequestKind {
         RequestKind::Heartbeat(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<LeaveGroupRequest> for RequestKind {
     fn from(value: LeaveGroupRequest) -> RequestKind {
         RequestKind::LeaveGroup(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<SyncGroupRequest> for RequestKind {
     fn from(value: SyncGroupRequest) -> RequestKind {
         RequestKind::SyncGroup(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<DescribeGroupsRequest> for RequestKind {
     fn from(value: DescribeGroupsRequest) -> RequestKind {
         RequestKind::DescribeGroups(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<ListGroupsRequest> for RequestKind {
     fn from(value: ListGroupsRequest) -> RequestKind {
         RequestKind::ListGroups(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<SaslHandshakeRequest> for RequestKind {
     fn from(value: SaslHandshakeRequest) -> RequestKind {
         RequestKind::SaslHandshake(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<ApiVersionsRequest> for RequestKind {
     fn from(value: ApiVersionsRequest) -> RequestKind {
         RequestKind::ApiVersions(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<CreateTopicsRequest> for RequestKind {
     fn from(value: CreateTopicsRequest) -> RequestKind {
         RequestKind::CreateTopics(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<DeleteTopicsRequest> for RequestKind {
     fn from(value: DeleteTopicsRequest) -> RequestKind {
         RequestKind::DeleteTopics(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<DeleteRecordsRequest> for RequestKind {
     fn from(value: DeleteRecordsRequest) -> RequestKind {
         RequestKind::DeleteRecords(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<InitProducerIdRequest> for RequestKind {
     fn from(value: InitProducerIdRequest) -> RequestKind {
         RequestKind::InitProducerId(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<OffsetForLeaderEpochRequest> for RequestKind {
     fn from(value: OffsetForLeaderEpochRequest) -> RequestKind {
         RequestKind::OffsetForLeaderEpoch(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<AddPartitionsToTxnRequest> for RequestKind {
     fn from(value: AddPartitionsToTxnRequest) -> RequestKind {
         RequestKind::AddPartitionsToTxn(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<AddOffsetsToTxnRequest> for RequestKind {
     fn from(value: AddOffsetsToTxnRequest) -> RequestKind {
         RequestKind::AddOffsetsToTxn(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<EndTxnRequest> for RequestKind {
     fn from(value: EndTxnRequest) -> RequestKind {
         RequestKind::EndTxn(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<WriteTxnMarkersRequest> for RequestKind {
     fn from(value: WriteTxnMarkersRequest) -> RequestKind {
         RequestKind::WriteTxnMarkers(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<TxnOffsetCommitRequest> for RequestKind {
     fn from(value: TxnOffsetCommitRequest) -> RequestKind {
         RequestKind::TxnOffsetCommit(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<DescribeAclsRequest> for RequestKind {
     fn from(value: DescribeAclsRequest) -> RequestKind {
         RequestKind::DescribeAcls(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<CreateAclsRequest> for RequestKind {
     fn from(value: CreateAclsRequest) -> RequestKind {
         RequestKind::CreateAcls(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<DeleteAclsRequest> for RequestKind {
     fn from(value: DeleteAclsRequest) -> RequestKind {
         RequestKind::DeleteAcls(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<DescribeConfigsRequest> for RequestKind {
     fn from(value: DescribeConfigsRequest) -> RequestKind {
         RequestKind::DescribeConfigs(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<AlterConfigsRequest> for RequestKind {
     fn from(value: AlterConfigsRequest) -> RequestKind {
         RequestKind::AlterConfigs(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<AlterReplicaLogDirsRequest> for RequestKind {
     fn from(value: AlterReplicaLogDirsRequest) -> RequestKind {
         RequestKind::AlterReplicaLogDirs(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<DescribeLogDirsRequest> for RequestKind {
     fn from(value: DescribeLogDirsRequest) -> RequestKind {
         RequestKind::DescribeLogDirs(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<SaslAuthenticateRequest> for RequestKind {
     fn from(value: SaslAuthenticateRequest) -> RequestKind {
         RequestKind::SaslAuthenticate(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<CreatePartitionsRequest> for RequestKind {
     fn from(value: CreatePartitionsRequest) -> RequestKind {
         RequestKind::CreatePartitions(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<CreateDelegationTokenRequest> for RequestKind {
     fn from(value: CreateDelegationTokenRequest) -> RequestKind {
         RequestKind::CreateDelegationToken(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<RenewDelegationTokenRequest> for RequestKind {
     fn from(value: RenewDelegationTokenRequest) -> RequestKind {
         RequestKind::RenewDelegationToken(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<ExpireDelegationTokenRequest> for RequestKind {
     fn from(value: ExpireDelegationTokenRequest) -> RequestKind {
         RequestKind::ExpireDelegationToken(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<DescribeDelegationTokenRequest> for RequestKind {
     fn from(value: DescribeDelegationTokenRequest) -> RequestKind {
         RequestKind::DescribeDelegationToken(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<DeleteGroupsRequest> for RequestKind {
     fn from(value: DeleteGroupsRequest) -> RequestKind {
         RequestKind::DeleteGroups(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<ElectLeadersRequest> for RequestKind {
     fn from(value: ElectLeadersRequest) -> RequestKind {
         RequestKind::ElectLeaders(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<IncrementalAlterConfigsRequest> for RequestKind {
     fn from(value: IncrementalAlterConfigsRequest) -> RequestKind {
         RequestKind::IncrementalAlterConfigs(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<AlterPartitionReassignmentsRequest> for RequestKind {
     fn from(value: AlterPartitionReassignmentsRequest) -> RequestKind {
         RequestKind::AlterPartitionReassignments(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<ListPartitionReassignmentsRequest> for RequestKind {
     fn from(value: ListPartitionReassignmentsRequest) -> RequestKind {
         RequestKind::ListPartitionReassignments(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<OffsetDeleteRequest> for RequestKind {
     fn from(value: OffsetDeleteRequest) -> RequestKind {
         RequestKind::OffsetDelete(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<DescribeClientQuotasRequest> for RequestKind {
     fn from(value: DescribeClientQuotasRequest) -> RequestKind {
         RequestKind::DescribeClientQuotas(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<AlterClientQuotasRequest> for RequestKind {
     fn from(value: AlterClientQuotasRequest) -> RequestKind {
         RequestKind::AlterClientQuotas(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<DescribeUserScramCredentialsRequest> for RequestKind {
     fn from(value: DescribeUserScramCredentialsRequest) -> RequestKind {
         RequestKind::DescribeUserScramCredentials(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<AlterUserScramCredentialsRequest> for RequestKind {
     fn from(value: AlterUserScramCredentialsRequest) -> RequestKind {
         RequestKind::AlterUserScramCredentials(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<VoteRequest> for RequestKind {
     fn from(value: VoteRequest) -> RequestKind {
         RequestKind::Vote(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<BeginQuorumEpochRequest> for RequestKind {
     fn from(value: BeginQuorumEpochRequest) -> RequestKind {
         RequestKind::BeginQuorumEpoch(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<EndQuorumEpochRequest> for RequestKind {
     fn from(value: EndQuorumEpochRequest) -> RequestKind {
         RequestKind::EndQuorumEpoch(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<DescribeQuorumRequest> for RequestKind {
     fn from(value: DescribeQuorumRequest) -> RequestKind {
         RequestKind::DescribeQuorum(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<AlterPartitionRequest> for RequestKind {
     fn from(value: AlterPartitionRequest) -> RequestKind {
         RequestKind::AlterPartition(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<UpdateFeaturesRequest> for RequestKind {
     fn from(value: UpdateFeaturesRequest) -> RequestKind {
         RequestKind::UpdateFeatures(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<EnvelopeRequest> for RequestKind {
     fn from(value: EnvelopeRequest) -> RequestKind {
         RequestKind::Envelope(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<FetchSnapshotRequest> for RequestKind {
     fn from(value: FetchSnapshotRequest) -> RequestKind {
         RequestKind::FetchSnapshot(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<DescribeClusterRequest> for RequestKind {
     fn from(value: DescribeClusterRequest) -> RequestKind {
         RequestKind::DescribeCluster(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<DescribeProducersRequest> for RequestKind {
     fn from(value: DescribeProducersRequest) -> RequestKind {
         RequestKind::DescribeProducers(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<BrokerRegistrationRequest> for RequestKind {
     fn from(value: BrokerRegistrationRequest) -> RequestKind {
         RequestKind::BrokerRegistration(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<BrokerHeartbeatRequest> for RequestKind {
     fn from(value: BrokerHeartbeatRequest) -> RequestKind {
         RequestKind::BrokerHeartbeat(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<UnregisterBrokerRequest> for RequestKind {
     fn from(value: UnregisterBrokerRequest) -> RequestKind {
         RequestKind::UnregisterBroker(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<DescribeTransactionsRequest> for RequestKind {
     fn from(value: DescribeTransactionsRequest) -> RequestKind {
         RequestKind::DescribeTransactions(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<ListTransactionsRequest> for RequestKind {
     fn from(value: ListTransactionsRequest) -> RequestKind {
         RequestKind::ListTransactions(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<AllocateProducerIdsRequest> for RequestKind {
     fn from(value: AllocateProducerIdsRequest) -> RequestKind {
         RequestKind::AllocateProducerIds(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<ConsumerGroupHeartbeatRequest> for RequestKind {
     fn from(value: ConsumerGroupHeartbeatRequest) -> RequestKind {
         RequestKind::ConsumerGroupHeartbeat(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<ControllerRegistrationRequest> for RequestKind {
     fn from(value: ControllerRegistrationRequest) -> RequestKind {
         RequestKind::ControllerRegistration(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<GetTelemetrySubscriptionsRequest> for RequestKind {
     fn from(value: GetTelemetrySubscriptionsRequest) -> RequestKind {
         RequestKind::GetTelemetrySubscriptions(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<PushTelemetryRequest> for RequestKind {
     fn from(value: PushTelemetryRequest) -> RequestKind {
         RequestKind::PushTelemetry(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<AssignReplicasToDirsRequest> for RequestKind {
     fn from(value: AssignReplicasToDirsRequest) -> RequestKind {
         RequestKind::AssignReplicasToDirs(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<ListClientMetricsResourcesRequest> for RequestKind {
     fn from(value: ListClientMetricsResourcesRequest) -> RequestKind {
         RequestKind::ListClientMetricsResources(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 fn decode<T: Decodable>(bytes: &mut bytes::Bytes, version: i16) -> Result<T> {
     T::decode(bytes, version).with_context(|| {
         format!(
@@ -2158,6 +2237,7 @@ fn decode<T: Decodable>(bytes: &mut bytes::Bytes, version: i16) -> Result<T> {
     })
 }
 
+#[cfg(feature = "messages_enum")]
 fn encode<T: Encodable>(encodable: &T, bytes: &mut bytes::BytesMut, version: i16) -> Result<()> {
     encodable.encode(bytes, version).with_context(|| {
         format!(
@@ -2171,6 +2251,7 @@ fn encode<T: Encodable>(encodable: &T, bytes: &mut bytes::BytesMut, version: i16
 /// Wrapping enum for all responses in the Kafka protocol.
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
+#[cfg(feature = "messages_enum")]
 pub enum ResponseKind {
     /// ProduceResponse,
     Produce(ProduceResponse),
@@ -2322,6 +2403,7 @@ pub enum ResponseKind {
     ListClientMetricsResources(ListClientMetricsResourcesResponse),
 }
 
+#[cfg(feature = "messages_enum")]
 impl ResponseKind {
     /// Encode the message into the target buffer
     pub fn encode(&self, bytes: &mut bytes::BytesMut, version: i16) -> anyhow::Result<()> {
@@ -2688,444 +2770,518 @@ impl ResponseKind {
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<ProduceResponse> for ResponseKind {
     fn from(value: ProduceResponse) -> ResponseKind {
         ResponseKind::Produce(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<FetchResponse> for ResponseKind {
     fn from(value: FetchResponse) -> ResponseKind {
         ResponseKind::Fetch(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<ListOffsetsResponse> for ResponseKind {
     fn from(value: ListOffsetsResponse) -> ResponseKind {
         ResponseKind::ListOffsets(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<MetadataResponse> for ResponseKind {
     fn from(value: MetadataResponse) -> ResponseKind {
         ResponseKind::Metadata(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<LeaderAndIsrResponse> for ResponseKind {
     fn from(value: LeaderAndIsrResponse) -> ResponseKind {
         ResponseKind::LeaderAndIsr(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<StopReplicaResponse> for ResponseKind {
     fn from(value: StopReplicaResponse) -> ResponseKind {
         ResponseKind::StopReplica(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<UpdateMetadataResponse> for ResponseKind {
     fn from(value: UpdateMetadataResponse) -> ResponseKind {
         ResponseKind::UpdateMetadata(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<ControlledShutdownResponse> for ResponseKind {
     fn from(value: ControlledShutdownResponse) -> ResponseKind {
         ResponseKind::ControlledShutdown(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<OffsetCommitResponse> for ResponseKind {
     fn from(value: OffsetCommitResponse) -> ResponseKind {
         ResponseKind::OffsetCommit(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<OffsetFetchResponse> for ResponseKind {
     fn from(value: OffsetFetchResponse) -> ResponseKind {
         ResponseKind::OffsetFetch(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<FindCoordinatorResponse> for ResponseKind {
     fn from(value: FindCoordinatorResponse) -> ResponseKind {
         ResponseKind::FindCoordinator(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<JoinGroupResponse> for ResponseKind {
     fn from(value: JoinGroupResponse) -> ResponseKind {
         ResponseKind::JoinGroup(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<HeartbeatResponse> for ResponseKind {
     fn from(value: HeartbeatResponse) -> ResponseKind {
         ResponseKind::Heartbeat(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<LeaveGroupResponse> for ResponseKind {
     fn from(value: LeaveGroupResponse) -> ResponseKind {
         ResponseKind::LeaveGroup(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<SyncGroupResponse> for ResponseKind {
     fn from(value: SyncGroupResponse) -> ResponseKind {
         ResponseKind::SyncGroup(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<DescribeGroupsResponse> for ResponseKind {
     fn from(value: DescribeGroupsResponse) -> ResponseKind {
         ResponseKind::DescribeGroups(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<ListGroupsResponse> for ResponseKind {
     fn from(value: ListGroupsResponse) -> ResponseKind {
         ResponseKind::ListGroups(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<SaslHandshakeResponse> for ResponseKind {
     fn from(value: SaslHandshakeResponse) -> ResponseKind {
         ResponseKind::SaslHandshake(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<ApiVersionsResponse> for ResponseKind {
     fn from(value: ApiVersionsResponse) -> ResponseKind {
         ResponseKind::ApiVersions(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<CreateTopicsResponse> for ResponseKind {
     fn from(value: CreateTopicsResponse) -> ResponseKind {
         ResponseKind::CreateTopics(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<DeleteTopicsResponse> for ResponseKind {
     fn from(value: DeleteTopicsResponse) -> ResponseKind {
         ResponseKind::DeleteTopics(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<DeleteRecordsResponse> for ResponseKind {
     fn from(value: DeleteRecordsResponse) -> ResponseKind {
         ResponseKind::DeleteRecords(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<InitProducerIdResponse> for ResponseKind {
     fn from(value: InitProducerIdResponse) -> ResponseKind {
         ResponseKind::InitProducerId(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<OffsetForLeaderEpochResponse> for ResponseKind {
     fn from(value: OffsetForLeaderEpochResponse) -> ResponseKind {
         ResponseKind::OffsetForLeaderEpoch(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<AddPartitionsToTxnResponse> for ResponseKind {
     fn from(value: AddPartitionsToTxnResponse) -> ResponseKind {
         ResponseKind::AddPartitionsToTxn(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<AddOffsetsToTxnResponse> for ResponseKind {
     fn from(value: AddOffsetsToTxnResponse) -> ResponseKind {
         ResponseKind::AddOffsetsToTxn(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<EndTxnResponse> for ResponseKind {
     fn from(value: EndTxnResponse) -> ResponseKind {
         ResponseKind::EndTxn(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<WriteTxnMarkersResponse> for ResponseKind {
     fn from(value: WriteTxnMarkersResponse) -> ResponseKind {
         ResponseKind::WriteTxnMarkers(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<TxnOffsetCommitResponse> for ResponseKind {
     fn from(value: TxnOffsetCommitResponse) -> ResponseKind {
         ResponseKind::TxnOffsetCommit(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<DescribeAclsResponse> for ResponseKind {
     fn from(value: DescribeAclsResponse) -> ResponseKind {
         ResponseKind::DescribeAcls(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<CreateAclsResponse> for ResponseKind {
     fn from(value: CreateAclsResponse) -> ResponseKind {
         ResponseKind::CreateAcls(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<DeleteAclsResponse> for ResponseKind {
     fn from(value: DeleteAclsResponse) -> ResponseKind {
         ResponseKind::DeleteAcls(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<DescribeConfigsResponse> for ResponseKind {
     fn from(value: DescribeConfigsResponse) -> ResponseKind {
         ResponseKind::DescribeConfigs(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<AlterConfigsResponse> for ResponseKind {
     fn from(value: AlterConfigsResponse) -> ResponseKind {
         ResponseKind::AlterConfigs(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<AlterReplicaLogDirsResponse> for ResponseKind {
     fn from(value: AlterReplicaLogDirsResponse) -> ResponseKind {
         ResponseKind::AlterReplicaLogDirs(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<DescribeLogDirsResponse> for ResponseKind {
     fn from(value: DescribeLogDirsResponse) -> ResponseKind {
         ResponseKind::DescribeLogDirs(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<SaslAuthenticateResponse> for ResponseKind {
     fn from(value: SaslAuthenticateResponse) -> ResponseKind {
         ResponseKind::SaslAuthenticate(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<CreatePartitionsResponse> for ResponseKind {
     fn from(value: CreatePartitionsResponse) -> ResponseKind {
         ResponseKind::CreatePartitions(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<CreateDelegationTokenResponse> for ResponseKind {
     fn from(value: CreateDelegationTokenResponse) -> ResponseKind {
         ResponseKind::CreateDelegationToken(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<RenewDelegationTokenResponse> for ResponseKind {
     fn from(value: RenewDelegationTokenResponse) -> ResponseKind {
         ResponseKind::RenewDelegationToken(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<ExpireDelegationTokenResponse> for ResponseKind {
     fn from(value: ExpireDelegationTokenResponse) -> ResponseKind {
         ResponseKind::ExpireDelegationToken(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<DescribeDelegationTokenResponse> for ResponseKind {
     fn from(value: DescribeDelegationTokenResponse) -> ResponseKind {
         ResponseKind::DescribeDelegationToken(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<DeleteGroupsResponse> for ResponseKind {
     fn from(value: DeleteGroupsResponse) -> ResponseKind {
         ResponseKind::DeleteGroups(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<ElectLeadersResponse> for ResponseKind {
     fn from(value: ElectLeadersResponse) -> ResponseKind {
         ResponseKind::ElectLeaders(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<IncrementalAlterConfigsResponse> for ResponseKind {
     fn from(value: IncrementalAlterConfigsResponse) -> ResponseKind {
         ResponseKind::IncrementalAlterConfigs(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<AlterPartitionReassignmentsResponse> for ResponseKind {
     fn from(value: AlterPartitionReassignmentsResponse) -> ResponseKind {
         ResponseKind::AlterPartitionReassignments(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<ListPartitionReassignmentsResponse> for ResponseKind {
     fn from(value: ListPartitionReassignmentsResponse) -> ResponseKind {
         ResponseKind::ListPartitionReassignments(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<OffsetDeleteResponse> for ResponseKind {
     fn from(value: OffsetDeleteResponse) -> ResponseKind {
         ResponseKind::OffsetDelete(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<DescribeClientQuotasResponse> for ResponseKind {
     fn from(value: DescribeClientQuotasResponse) -> ResponseKind {
         ResponseKind::DescribeClientQuotas(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<AlterClientQuotasResponse> for ResponseKind {
     fn from(value: AlterClientQuotasResponse) -> ResponseKind {
         ResponseKind::AlterClientQuotas(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<DescribeUserScramCredentialsResponse> for ResponseKind {
     fn from(value: DescribeUserScramCredentialsResponse) -> ResponseKind {
         ResponseKind::DescribeUserScramCredentials(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<AlterUserScramCredentialsResponse> for ResponseKind {
     fn from(value: AlterUserScramCredentialsResponse) -> ResponseKind {
         ResponseKind::AlterUserScramCredentials(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<VoteResponse> for ResponseKind {
     fn from(value: VoteResponse) -> ResponseKind {
         ResponseKind::Vote(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<BeginQuorumEpochResponse> for ResponseKind {
     fn from(value: BeginQuorumEpochResponse) -> ResponseKind {
         ResponseKind::BeginQuorumEpoch(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<EndQuorumEpochResponse> for ResponseKind {
     fn from(value: EndQuorumEpochResponse) -> ResponseKind {
         ResponseKind::EndQuorumEpoch(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<DescribeQuorumResponse> for ResponseKind {
     fn from(value: DescribeQuorumResponse) -> ResponseKind {
         ResponseKind::DescribeQuorum(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<AlterPartitionResponse> for ResponseKind {
     fn from(value: AlterPartitionResponse) -> ResponseKind {
         ResponseKind::AlterPartition(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<UpdateFeaturesResponse> for ResponseKind {
     fn from(value: UpdateFeaturesResponse) -> ResponseKind {
         ResponseKind::UpdateFeatures(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<EnvelopeResponse> for ResponseKind {
     fn from(value: EnvelopeResponse) -> ResponseKind {
         ResponseKind::Envelope(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<FetchSnapshotResponse> for ResponseKind {
     fn from(value: FetchSnapshotResponse) -> ResponseKind {
         ResponseKind::FetchSnapshot(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<DescribeClusterResponse> for ResponseKind {
     fn from(value: DescribeClusterResponse) -> ResponseKind {
         ResponseKind::DescribeCluster(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<DescribeProducersResponse> for ResponseKind {
     fn from(value: DescribeProducersResponse) -> ResponseKind {
         ResponseKind::DescribeProducers(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<BrokerRegistrationResponse> for ResponseKind {
     fn from(value: BrokerRegistrationResponse) -> ResponseKind {
         ResponseKind::BrokerRegistration(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<BrokerHeartbeatResponse> for ResponseKind {
     fn from(value: BrokerHeartbeatResponse) -> ResponseKind {
         ResponseKind::BrokerHeartbeat(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<UnregisterBrokerResponse> for ResponseKind {
     fn from(value: UnregisterBrokerResponse) -> ResponseKind {
         ResponseKind::UnregisterBroker(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<DescribeTransactionsResponse> for ResponseKind {
     fn from(value: DescribeTransactionsResponse) -> ResponseKind {
         ResponseKind::DescribeTransactions(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<ListTransactionsResponse> for ResponseKind {
     fn from(value: ListTransactionsResponse) -> ResponseKind {
         ResponseKind::ListTransactions(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<AllocateProducerIdsResponse> for ResponseKind {
     fn from(value: AllocateProducerIdsResponse) -> ResponseKind {
         ResponseKind::AllocateProducerIds(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<ConsumerGroupHeartbeatResponse> for ResponseKind {
     fn from(value: ConsumerGroupHeartbeatResponse) -> ResponseKind {
         ResponseKind::ConsumerGroupHeartbeat(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<ControllerRegistrationResponse> for ResponseKind {
     fn from(value: ControllerRegistrationResponse) -> ResponseKind {
         ResponseKind::ControllerRegistration(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<GetTelemetrySubscriptionsResponse> for ResponseKind {
     fn from(value: GetTelemetrySubscriptionsResponse) -> ResponseKind {
         ResponseKind::GetTelemetrySubscriptions(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<PushTelemetryResponse> for ResponseKind {
     fn from(value: PushTelemetryResponse) -> ResponseKind {
         ResponseKind::PushTelemetry(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<AssignReplicasToDirsResponse> for ResponseKind {
     fn from(value: AssignReplicasToDirsResponse) -> ResponseKind {
         ResponseKind::AssignReplicasToDirs(value)
     }
 }
 
+#[cfg(feature = "messages_enum")]
 impl From<ListClientMetricsResourcesResponse> for ResponseKind {
     fn from(value: ListClientMetricsResourcesResponse) -> ResponseKind {
         ResponseKind::ListClientMetricsResources(value)

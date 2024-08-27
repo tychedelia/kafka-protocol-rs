@@ -95,9 +95,12 @@ pub fn run() -> Result<(), Error> {
         "use crate::protocol::{{NewType, Request, StrBytes, HeaderVersion}};"
     )?;
     writeln!(module_file, "use std::convert::TryFrom;")?;
+    writeln!(module_file, "#[cfg(feature = \"messages_enum\")]")?;
     writeln!(module_file, "use crate::protocol::Encodable;")?;
+    writeln!(module_file, "#[cfg(feature = \"messages_enum\")]")?;
     writeln!(module_file, "use crate::protocol::Decodable;")?;
     writeln!(module_file, "use anyhow::Result;")?;
+    writeln!(module_file, "#[cfg(feature = \"messages_enum\")]")?;
     writeln!(module_file, "use anyhow::Context;")?;
     writeln!(module_file)?;
 
@@ -256,6 +259,7 @@ pub fn run() -> Result<(), Error> {
         module_file,
         "/// Wrapping enum for all requests in the Kafka protocol."
     )?;
+    writeln!(module_file, "#[cfg(feature = \"messages_enum\")]")?;
     writeln!(module_file, "#[non_exhaustive]")?;
     writeln!(module_file, "#[derive(Debug, Clone, PartialEq)]")?;
     writeln!(module_file, "pub enum RequestKind {{")?;
@@ -271,6 +275,7 @@ pub fn run() -> Result<(), Error> {
     writeln!(module_file, "}}")?;
     writeln!(module_file)?;
 
+    writeln!(module_file, "#[cfg(feature = \"messages_enum\")]")?;
     writeln!(module_file, "impl RequestKind {{")?;
     writeln!(module_file, "/// Encode the message into the target buffer")?;
     writeln!(
@@ -288,7 +293,6 @@ pub fn run() -> Result<(), Error> {
     writeln!(module_file, "}}")?;
     writeln!(module_file, "}}")?;
 
-    writeln!(module_file)?;
     writeln!(
         module_file,
         "/// Decode the message from the provided buffer and version"
@@ -311,6 +315,7 @@ pub fn run() -> Result<(), Error> {
     writeln!(module_file, "}}")?;
 
     for (_, request_type) in request_types.iter() {
+        writeln!(module_file, "#[cfg(feature = \"messages_enum\")]")?;
         writeln!(module_file, "impl From<{request_type}> for RequestKind {{")?;
         writeln!(
             module_file,
@@ -326,7 +331,8 @@ pub fn run() -> Result<(), Error> {
     writeln!(
         module_file,
         r#"
-    fn decode<T: Decodable>(bytes: &mut bytes::Bytes, version: i16) -> Result<T> {{
+#[cfg(feature = "messages_enum")]
+fn decode<T: Decodable>(bytes: &mut bytes::Bytes, version: i16) -> Result<T> {{
     T::decode(bytes, version).with_context(|| {{
         format!(
             "Failed to decode {{}} v{{}} body",
@@ -336,6 +342,7 @@ pub fn run() -> Result<(), Error> {
     }})
 }}
 
+#[cfg(feature = "messages_enum")]
 fn encode<T: Encodable>(encodable: &T, bytes: &mut bytes::BytesMut, version: i16) -> Result<()> {{
     encodable.encode(bytes, version).with_context(|| {{
         format!(
@@ -354,6 +361,7 @@ fn encode<T: Encodable>(encodable: &T, bytes: &mut bytes::BytesMut, version: i16
     )?;
     writeln!(module_file, "#[non_exhaustive]")?;
     writeln!(module_file, "#[derive(Debug, Clone, PartialEq)]")?;
+    writeln!(module_file, "#[cfg(feature = \"messages_enum\")]")?;
     writeln!(module_file, "pub enum ResponseKind {{")?;
     for (_, response_type) in response_types.iter() {
         writeln!(module_file, "    /// {},", response_type)?;
@@ -367,6 +375,7 @@ fn encode<T: Encodable>(encodable: &T, bytes: &mut bytes::BytesMut, version: i16
     writeln!(module_file, "}}")?;
     writeln!(module_file)?;
 
+    writeln!(module_file, "#[cfg(feature = \"messages_enum\")]")?;
     writeln!(module_file, "impl ResponseKind {{")?;
     writeln!(module_file, "/// Encode the message into the target buffer")?;
     writeln!(
@@ -425,6 +434,7 @@ fn encode<T: Encodable>(encodable: &T, bytes: &mut bytes::BytesMut, version: i16
     writeln!(module_file)?;
 
     for (_, response_type) in response_types.iter() {
+        writeln!(module_file, "#[cfg(feature = \"messages_enum\")]")?;
         writeln!(
             module_file,
             "impl From<{response_type}> for ResponseKind {{"
