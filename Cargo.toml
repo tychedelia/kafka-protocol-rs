@@ -18,6 +18,10 @@ documentation = "https://docs.rs/kafka-protocol"
 readme = "README.md"
 keywords = ["kafka"]
 
+[features]
+# adds the ResponseKind + RequestKind enums with variants for every message type.
+# disabled by default since it doubles clean release build times due to lots of generated code.
+messages_enum = []
 
 [dependencies]
 bytes = "1.0.1"
@@ -34,3 +38,8 @@ anyhow = "1.0.80"
 
 [dev-dependencies]
 testcontainers = { version = "0.20.1", features = ["blocking", "watchdog"] }
+
+# Display required features for items when rendering for docs.rs
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]

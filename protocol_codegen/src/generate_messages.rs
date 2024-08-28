@@ -95,6 +95,13 @@ pub fn run() -> Result<(), Error> {
         "use crate::protocol::{{NewType, Request, StrBytes, HeaderVersion}};"
     )?;
     writeln!(module_file, "use std::convert::TryFrom;")?;
+    writeln!(module_file, "#[cfg(feature = \"messages_enum\")]")?;
+    writeln!(module_file, "use crate::protocol::Encodable;")?;
+    writeln!(module_file, "#[cfg(feature = \"messages_enum\")]")?;
+    writeln!(module_file, "use crate::protocol::Decodable;")?;
+    writeln!(module_file, "use anyhow::Result;")?;
+    writeln!(module_file, "#[cfg(feature = \"messages_enum\")]")?;
+    writeln!(module_file, "use anyhow::Context;")?;
     writeln!(module_file)?;
 
     for input_file_path in &input_file_paths {
@@ -252,6 +259,7 @@ pub fn run() -> Result<(), Error> {
         module_file,
         "/// Wrapping enum for all requests in the Kafka protocol."
     )?;
+    writeln!(module_file, "#[cfg(feature = \"messages_enum\")]")?;
     writeln!(module_file, "#[non_exhaustive]")?;
     writeln!(module_file, "#[derive(Debug, Clone, PartialEq)]")?;
     writeln!(module_file, "pub enum RequestKind {{")?;
@@ -267,7 +275,47 @@ pub fn run() -> Result<(), Error> {
     writeln!(module_file, "}}")?;
     writeln!(module_file)?;
 
+    writeln!(module_file, "#[cfg(feature = \"messages_enum\")]")?;
+    writeln!(module_file, "impl RequestKind {{")?;
+    writeln!(module_file, "/// Encode the message into the target buffer")?;
+    writeln!(
+        module_file,
+        "pub fn encode(&self, bytes: &mut bytes::BytesMut, version: i16) -> anyhow::Result<()> {{"
+    )?;
+    writeln!(module_file, "match self {{")?;
     for (_, request_type) in request_types.iter() {
+        let variant = request_type.trim_end_matches("Request");
+        writeln!(
+            module_file,
+            "RequestKind::{variant}(x) => encode(x, bytes, version),"
+        )?;
+    }
+    writeln!(module_file, "}}")?;
+    writeln!(module_file, "}}")?;
+
+    writeln!(
+        module_file,
+        "/// Decode the message from the provided buffer and version"
+    )?;
+    writeln!(
+        module_file,
+        "pub fn decode(api_key: ApiKey, bytes: &mut bytes::Bytes, version: i16) -> anyhow::Result<RequestKind> {{"
+    )?;
+    writeln!(module_file, "match api_key {{")?;
+    for (_, request_type) in request_types.iter() {
+        let variant = request_type.trim_end_matches("Request");
+        writeln!(
+            module_file,
+            "ApiKey::{variant}Key => Ok(RequestKind::{variant}(decode(bytes, version)?)),"
+        )?;
+    }
+    writeln!(module_file, "}}")?;
+    writeln!(module_file, "}}")?;
+
+    writeln!(module_file, "}}")?;
+
+    for (_, request_type) in request_types.iter() {
+        writeln!(module_file, "#[cfg(feature = \"messages_enum\")]")?;
         writeln!(module_file, "impl From<{request_type}> for RequestKind {{")?;
         writeln!(
             module_file,
@@ -282,10 +330,38 @@ pub fn run() -> Result<(), Error> {
 
     writeln!(
         module_file,
+        r#"
+#[cfg(feature = "messages_enum")]
+fn decode<T: Decodable>(bytes: &mut bytes::Bytes, version: i16) -> Result<T> {{
+    T::decode(bytes, version).with_context(|| {{
+        format!(
+            "Failed to decode {{}} v{{}} body",
+            std::any::type_name::<T>(),
+            version
+        )
+    }})
+}}
+
+#[cfg(feature = "messages_enum")]
+fn encode<T: Encodable>(encodable: &T, bytes: &mut bytes::BytesMut, version: i16) -> Result<()> {{
+    encodable.encode(bytes, version).with_context(|| {{
+        format!(
+            "Failed to encode {{}} v{{}} body",
+            std::any::type_name::<T>(),
+            version
+        )
+    }})
+}}
+    "#
+    )?;
+
+    writeln!(
+        module_file,
         "/// Wrapping enum for all responses in the Kafka protocol."
     )?;
     writeln!(module_file, "#[non_exhaustive]")?;
     writeln!(module_file, "#[derive(Debug, Clone, PartialEq)]")?;
+    writeln!(module_file, "#[cfg(feature = \"messages_enum\")]")?;
     writeln!(module_file, "pub enum ResponseKind {{")?;
     for (_, response_type) in response_types.iter() {
         writeln!(module_file, "    /// {},", response_type)?;
@@ -299,7 +375,66 @@ pub fn run() -> Result<(), Error> {
     writeln!(module_file, "}}")?;
     writeln!(module_file)?;
 
+    writeln!(module_file, "#[cfg(feature = \"messages_enum\")]")?;
+    writeln!(module_file, "impl ResponseKind {{")?;
+    writeln!(module_file, "/// Encode the message into the target buffer")?;
+    writeln!(
+        module_file,
+        "pub fn encode(&self, bytes: &mut bytes::BytesMut, version: i16) -> anyhow::Result<()> {{"
+    )?;
+    writeln!(module_file, "match self {{")?;
     for (_, response_type) in response_types.iter() {
+        let variant = response_type.trim_end_matches("Response");
+        writeln!(
+            module_file,
+            "ResponseKind::{variant}(x) => encode(x, bytes, version),"
+        )?;
+    }
+    writeln!(module_file, "}}")?;
+    writeln!(module_file, "}}")?;
+
+    writeln!(
+        module_file,
+        "/// Decode the message from the provided buffer and version"
+    )?;
+    writeln!(
+        module_file,
+        "pub fn decode(api_key: ApiKey, bytes: &mut bytes::Bytes, version: i16) -> anyhow::Result<ResponseKind> {{"
+    )?;
+    writeln!(module_file, "match api_key {{")?;
+    for (_, response_type) in response_types.iter() {
+        let variant = response_type.trim_end_matches("Response");
+        writeln!(
+            module_file,
+            "ApiKey::{variant}Key => Ok(ResponseKind::{variant}(decode(bytes, version)?)),"
+        )?;
+    }
+    writeln!(module_file, "}}")?;
+    writeln!(module_file, "}}")?;
+
+    writeln!(
+        module_file,
+        "/// Get the version of request header that needs to be prepended to this message"
+    )?;
+    writeln!(
+        module_file,
+        "pub fn header_version(&self, version: i16) -> i16 {{"
+    )?;
+    writeln!(module_file, "match self {{")?;
+    for (_, response_type) in response_types.iter() {
+        let variant = response_type.trim_end_matches("Response");
+        writeln!(
+            module_file,
+            "ResponseKind::{variant}(_) => {response_type}::header_version(version),"
+        )?;
+    }
+    writeln!(module_file, "}}")?;
+    writeln!(module_file, "}}")?;
+    writeln!(module_file, "}}")?;
+    writeln!(module_file)?;
+
+    for (_, response_type) in response_types.iter() {
+        writeln!(module_file, "#[cfg(feature = \"messages_enum\")]")?;
         writeln!(
             module_file,
             "impl From<{response_type}> for ResponseKind {{"
