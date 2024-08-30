@@ -52,6 +52,7 @@ impl DeleteGroupsRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for DeleteGroupsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 2 {
@@ -97,6 +98,7 @@ impl Encodable for DeleteGroupsRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for DeleteGroupsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let groups_names = if version >= 2 {

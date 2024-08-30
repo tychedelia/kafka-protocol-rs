@@ -83,6 +83,7 @@ impl ElectLeadersRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for ElectLeadersRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 1 {
@@ -145,6 +146,7 @@ impl Encodable for ElectLeadersRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for ElectLeadersRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let election_type = if version >= 1 {
@@ -228,6 +230,7 @@ impl TopicPartitions {
     }
 }
 
+#[cfg(feature = "client")]
 impl MapEncodable for TopicPartitions {
     type Key = super::TopicName;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
@@ -283,6 +286,7 @@ impl MapEncodable for TopicPartitions {
     }
 }
 
+#[cfg(feature = "broker")]
 impl MapDecodable for TopicPartitions {
     type Key = super::TopicName;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {

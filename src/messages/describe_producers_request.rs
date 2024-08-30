@@ -52,6 +52,7 @@ impl DescribeProducersRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for DescribeProducersRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
@@ -84,6 +85,7 @@ impl Encodable for DescribeProducersRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for DescribeProducersRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let topics = types::CompactArray(types::Struct { version }).decode(buf)?;
@@ -165,6 +167,7 @@ impl TopicRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for TopicRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::CompactString.encode(buf, &self.name)?;
@@ -199,6 +202,7 @@ impl Encodable for TopicRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for TopicRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = types::CompactString.decode(buf)?;

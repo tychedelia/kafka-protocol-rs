@@ -66,6 +66,7 @@ impl DescribeTransactionsResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for DescribeTransactionsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
@@ -101,6 +102,7 @@ impl Encodable for DescribeTransactionsResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for DescribeTransactionsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = types::Int32.decode(buf)?;
@@ -171,6 +173,7 @@ impl TopicData {
     }
 }
 
+#[cfg(feature = "broker")]
 impl MapEncodable for TopicData {
     type Key = super::TopicName;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
@@ -206,6 +209,7 @@ impl MapEncodable for TopicData {
     }
 }
 
+#[cfg(feature = "client")]
 impl MapDecodable for TopicData {
     type Key = super::TopicName;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
@@ -376,6 +380,7 @@ impl TransactionState {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for TransactionState {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int16.encode(buf, &self.error_code)?;
@@ -422,6 +427,7 @@ impl Encodable for TransactionState {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for TransactionState {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let error_code = types::Int16.decode(buf)?;

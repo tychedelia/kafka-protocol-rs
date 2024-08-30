@@ -80,6 +80,7 @@ impl ExpireDelegationTokenResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for ExpireDelegationTokenResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int16.encode(buf, &self.error_code)?;
@@ -120,6 +121,7 @@ impl Encodable for ExpireDelegationTokenResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for ExpireDelegationTokenResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let error_code = types::Int16.decode(buf)?;

@@ -108,6 +108,7 @@ impl ControllerRegistrationRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for ControllerRegistrationRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.controller_id)?;
@@ -150,6 +151,7 @@ impl Encodable for ControllerRegistrationRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for ControllerRegistrationRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let controller_id = types::Int32.decode(buf)?;
@@ -243,6 +245,7 @@ impl Feature {
     }
 }
 
+#[cfg(feature = "client")]
 impl MapEncodable for Feature {
     type Key = StrBytes;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
@@ -280,6 +283,7 @@ impl MapEncodable for Feature {
     }
 }
 
+#[cfg(feature = "broker")]
 impl MapDecodable for Feature {
     type Key = StrBytes;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
@@ -383,6 +387,7 @@ impl Listener {
     }
 }
 
+#[cfg(feature = "client")]
 impl MapEncodable for Listener {
     type Key = StrBytes;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
@@ -422,6 +427,7 @@ impl MapEncodable for Listener {
     }
 }
 
+#[cfg(feature = "broker")]
 impl MapDecodable for Listener {
     type Key = StrBytes;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {

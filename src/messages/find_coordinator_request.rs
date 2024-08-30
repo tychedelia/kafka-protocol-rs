@@ -80,6 +80,7 @@ impl FindCoordinatorRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for FindCoordinatorRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version <= 3 {
@@ -165,6 +166,7 @@ impl Encodable for FindCoordinatorRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for FindCoordinatorRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let key = if version <= 3 {

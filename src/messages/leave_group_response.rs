@@ -80,6 +80,7 @@ impl LeaveGroupResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for LeaveGroupResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 1 {
@@ -146,6 +147,7 @@ impl Encodable for LeaveGroupResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for LeaveGroupResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = if version >= 1 {
@@ -261,6 +263,7 @@ impl MemberResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for MemberResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 3 {
@@ -363,6 +366,7 @@ impl Encodable for MemberResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for MemberResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let member_id = if version >= 3 {

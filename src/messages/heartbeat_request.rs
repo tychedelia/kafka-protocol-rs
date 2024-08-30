@@ -94,6 +94,7 @@ impl HeartbeatRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for HeartbeatRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 4 {
@@ -172,6 +173,7 @@ impl Encodable for HeartbeatRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for HeartbeatRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let group_id = if version >= 4 {

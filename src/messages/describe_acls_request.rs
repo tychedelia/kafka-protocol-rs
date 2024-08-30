@@ -136,6 +136,7 @@ impl DescribeAclsRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for DescribeAclsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int8.encode(buf, &self.resource_type_filter)?;
@@ -220,6 +221,7 @@ impl Encodable for DescribeAclsRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for DescribeAclsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let resource_type_filter = types::Int8.decode(buf)?;

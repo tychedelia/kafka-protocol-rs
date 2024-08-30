@@ -80,6 +80,7 @@ impl DeletableTopicResult {
     }
 }
 
+#[cfg(feature = "broker")]
 impl MapEncodable for DeletableTopicResult {
     type Key = super::TopicName;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
@@ -139,6 +140,7 @@ impl MapEncodable for DeletableTopicResult {
     }
 }
 
+#[cfg(feature = "client")]
 impl MapDecodable for DeletableTopicResult {
     type Key = super::TopicName;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
@@ -248,6 +250,7 @@ impl DeleteTopicsResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for DeleteTopicsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 1 {
@@ -299,6 +302,7 @@ impl Encodable for DeleteTopicsResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for DeleteTopicsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = if version >= 1 {

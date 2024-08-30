@@ -66,6 +66,7 @@ impl EndTxnResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for EndTxnResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
@@ -104,6 +105,7 @@ impl Encodable for EndTxnResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for EndTxnResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = types::Int32.decode(buf)?;

@@ -66,6 +66,7 @@ impl DeleteRecordsPartition {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for DeleteRecordsPartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.partition_index)?;
@@ -104,6 +105,7 @@ impl Encodable for DeleteRecordsPartition {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for DeleteRecordsPartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let partition_index = types::Int32.decode(buf)?;
@@ -190,6 +192,7 @@ impl DeleteRecordsRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for DeleteRecordsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 2 {
@@ -237,6 +240,7 @@ impl Encodable for DeleteRecordsRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for DeleteRecordsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let topics = if version >= 2 {
@@ -327,6 +331,7 @@ impl DeleteRecordsTopic {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for DeleteRecordsTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 2 {
@@ -382,6 +387,7 @@ impl Encodable for DeleteRecordsTopic {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for DeleteRecordsTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = if version >= 2 {

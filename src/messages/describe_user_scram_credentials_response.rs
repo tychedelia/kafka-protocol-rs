@@ -66,6 +66,7 @@ impl CredentialInfo {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for CredentialInfo {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int8.encode(buf, &self.mechanism)?;
@@ -100,6 +101,7 @@ impl Encodable for CredentialInfo {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for CredentialInfo {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let mechanism = types::Int8.decode(buf)?;
@@ -212,6 +214,7 @@ impl DescribeUserScramCredentialsResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for DescribeUserScramCredentialsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
@@ -250,6 +253,7 @@ impl Encodable for DescribeUserScramCredentialsResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for DescribeUserScramCredentialsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = types::Int32.decode(buf)?;
@@ -368,6 +372,7 @@ impl DescribeUserScramCredentialsResult {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for DescribeUserScramCredentialsResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::CompactString.encode(buf, &self.user)?;
@@ -407,6 +412,7 @@ impl Encodable for DescribeUserScramCredentialsResult {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for DescribeUserScramCredentialsResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let user = types::CompactString.decode(buf)?;

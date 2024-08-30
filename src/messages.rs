@@ -4,11 +4,16 @@
 // WARNING: the items of this module are generated and should not be edited directly.
 
 #[cfg(feature = "messages_enum")]
+#[cfg(any(feature = "client", feature = "broker"))]
 use crate::protocol::Decodable;
 #[cfg(feature = "messages_enum")]
+#[cfg(any(feature = "client", feature = "broker"))]
 use crate::protocol::Encodable;
-use crate::protocol::{HeaderVersion, NewType, Request, StrBytes};
+#[cfg(all(feature = "client", feature = "broker"))]
+use crate::protocol::Request;
+use crate::protocol::{HeaderVersion, NewType, StrBytes};
 #[cfg(feature = "messages_enum")]
+#[cfg(any(feature = "client", feature = "broker"))]
 use anyhow::Context;
 use anyhow::Result;
 use std::convert::TryFrom;
@@ -481,371 +486,445 @@ pub use assign_replicas_to_dirs_response::AssignReplicasToDirsResponse;
 pub mod list_client_metrics_resources_response;
 pub use list_client_metrics_resources_response::ListClientMetricsResourcesResponse;
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for ProduceRequest {
     const KEY: i16 = 0;
     type Response = ProduceResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for FetchRequest {
     const KEY: i16 = 1;
     type Response = FetchResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for ListOffsetsRequest {
     const KEY: i16 = 2;
     type Response = ListOffsetsResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for MetadataRequest {
     const KEY: i16 = 3;
     type Response = MetadataResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for LeaderAndIsrRequest {
     const KEY: i16 = 4;
     type Response = LeaderAndIsrResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for StopReplicaRequest {
     const KEY: i16 = 5;
     type Response = StopReplicaResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for UpdateMetadataRequest {
     const KEY: i16 = 6;
     type Response = UpdateMetadataResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for ControlledShutdownRequest {
     const KEY: i16 = 7;
     type Response = ControlledShutdownResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for OffsetCommitRequest {
     const KEY: i16 = 8;
     type Response = OffsetCommitResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for OffsetFetchRequest {
     const KEY: i16 = 9;
     type Response = OffsetFetchResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for FindCoordinatorRequest {
     const KEY: i16 = 10;
     type Response = FindCoordinatorResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for JoinGroupRequest {
     const KEY: i16 = 11;
     type Response = JoinGroupResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for HeartbeatRequest {
     const KEY: i16 = 12;
     type Response = HeartbeatResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for LeaveGroupRequest {
     const KEY: i16 = 13;
     type Response = LeaveGroupResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for SyncGroupRequest {
     const KEY: i16 = 14;
     type Response = SyncGroupResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for DescribeGroupsRequest {
     const KEY: i16 = 15;
     type Response = DescribeGroupsResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for ListGroupsRequest {
     const KEY: i16 = 16;
     type Response = ListGroupsResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for SaslHandshakeRequest {
     const KEY: i16 = 17;
     type Response = SaslHandshakeResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for ApiVersionsRequest {
     const KEY: i16 = 18;
     type Response = ApiVersionsResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for CreateTopicsRequest {
     const KEY: i16 = 19;
     type Response = CreateTopicsResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for DeleteTopicsRequest {
     const KEY: i16 = 20;
     type Response = DeleteTopicsResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for DeleteRecordsRequest {
     const KEY: i16 = 21;
     type Response = DeleteRecordsResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for InitProducerIdRequest {
     const KEY: i16 = 22;
     type Response = InitProducerIdResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for OffsetForLeaderEpochRequest {
     const KEY: i16 = 23;
     type Response = OffsetForLeaderEpochResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for AddPartitionsToTxnRequest {
     const KEY: i16 = 24;
     type Response = AddPartitionsToTxnResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for AddOffsetsToTxnRequest {
     const KEY: i16 = 25;
     type Response = AddOffsetsToTxnResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for EndTxnRequest {
     const KEY: i16 = 26;
     type Response = EndTxnResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for WriteTxnMarkersRequest {
     const KEY: i16 = 27;
     type Response = WriteTxnMarkersResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for TxnOffsetCommitRequest {
     const KEY: i16 = 28;
     type Response = TxnOffsetCommitResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for DescribeAclsRequest {
     const KEY: i16 = 29;
     type Response = DescribeAclsResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for CreateAclsRequest {
     const KEY: i16 = 30;
     type Response = CreateAclsResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for DeleteAclsRequest {
     const KEY: i16 = 31;
     type Response = DeleteAclsResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for DescribeConfigsRequest {
     const KEY: i16 = 32;
     type Response = DescribeConfigsResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for AlterConfigsRequest {
     const KEY: i16 = 33;
     type Response = AlterConfigsResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for AlterReplicaLogDirsRequest {
     const KEY: i16 = 34;
     type Response = AlterReplicaLogDirsResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for DescribeLogDirsRequest {
     const KEY: i16 = 35;
     type Response = DescribeLogDirsResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for SaslAuthenticateRequest {
     const KEY: i16 = 36;
     type Response = SaslAuthenticateResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for CreatePartitionsRequest {
     const KEY: i16 = 37;
     type Response = CreatePartitionsResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for CreateDelegationTokenRequest {
     const KEY: i16 = 38;
     type Response = CreateDelegationTokenResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for RenewDelegationTokenRequest {
     const KEY: i16 = 39;
     type Response = RenewDelegationTokenResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for ExpireDelegationTokenRequest {
     const KEY: i16 = 40;
     type Response = ExpireDelegationTokenResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for DescribeDelegationTokenRequest {
     const KEY: i16 = 41;
     type Response = DescribeDelegationTokenResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for DeleteGroupsRequest {
     const KEY: i16 = 42;
     type Response = DeleteGroupsResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for ElectLeadersRequest {
     const KEY: i16 = 43;
     type Response = ElectLeadersResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for IncrementalAlterConfigsRequest {
     const KEY: i16 = 44;
     type Response = IncrementalAlterConfigsResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for AlterPartitionReassignmentsRequest {
     const KEY: i16 = 45;
     type Response = AlterPartitionReassignmentsResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for ListPartitionReassignmentsRequest {
     const KEY: i16 = 46;
     type Response = ListPartitionReassignmentsResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for OffsetDeleteRequest {
     const KEY: i16 = 47;
     type Response = OffsetDeleteResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for DescribeClientQuotasRequest {
     const KEY: i16 = 48;
     type Response = DescribeClientQuotasResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for AlterClientQuotasRequest {
     const KEY: i16 = 49;
     type Response = AlterClientQuotasResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for DescribeUserScramCredentialsRequest {
     const KEY: i16 = 50;
     type Response = DescribeUserScramCredentialsResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for AlterUserScramCredentialsRequest {
     const KEY: i16 = 51;
     type Response = AlterUserScramCredentialsResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for VoteRequest {
     const KEY: i16 = 52;
     type Response = VoteResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for BeginQuorumEpochRequest {
     const KEY: i16 = 53;
     type Response = BeginQuorumEpochResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for EndQuorumEpochRequest {
     const KEY: i16 = 54;
     type Response = EndQuorumEpochResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for DescribeQuorumRequest {
     const KEY: i16 = 55;
     type Response = DescribeQuorumResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for AlterPartitionRequest {
     const KEY: i16 = 56;
     type Response = AlterPartitionResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for UpdateFeaturesRequest {
     const KEY: i16 = 57;
     type Response = UpdateFeaturesResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for EnvelopeRequest {
     const KEY: i16 = 58;
     type Response = EnvelopeResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for FetchSnapshotRequest {
     const KEY: i16 = 59;
     type Response = FetchSnapshotResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for DescribeClusterRequest {
     const KEY: i16 = 60;
     type Response = DescribeClusterResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for DescribeProducersRequest {
     const KEY: i16 = 61;
     type Response = DescribeProducersResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for BrokerRegistrationRequest {
     const KEY: i16 = 62;
     type Response = BrokerRegistrationResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for BrokerHeartbeatRequest {
     const KEY: i16 = 63;
     type Response = BrokerHeartbeatResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for UnregisterBrokerRequest {
     const KEY: i16 = 64;
     type Response = UnregisterBrokerResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for DescribeTransactionsRequest {
     const KEY: i16 = 65;
     type Response = DescribeTransactionsResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for ListTransactionsRequest {
     const KEY: i16 = 66;
     type Response = ListTransactionsResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for AllocateProducerIdsRequest {
     const KEY: i16 = 67;
     type Response = AllocateProducerIdsResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for ConsumerGroupHeartbeatRequest {
     const KEY: i16 = 68;
     type Response = ConsumerGroupHeartbeatResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for ControllerRegistrationRequest {
     const KEY: i16 = 70;
     type Response = ControllerRegistrationResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for GetTelemetrySubscriptionsRequest {
     const KEY: i16 = 71;
     type Response = GetTelemetrySubscriptionsResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for PushTelemetryRequest {
     const KEY: i16 = 72;
     type Response = PushTelemetryResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for AssignReplicasToDirsRequest {
     const KEY: i16 = 73;
     type Response = AssignReplicasToDirsResponse;
 }
 
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for ListClientMetricsResourcesRequest {
     const KEY: i16 = 74;
     type Response = ListClientMetricsResourcesResponse;
@@ -1488,6 +1567,7 @@ pub enum RequestKind {
 #[cfg(feature = "messages_enum")]
 impl RequestKind {
     /// Encode the message into the target buffer
+    #[cfg(feature = "client")]
     pub fn encode(&self, bytes: &mut bytes::BytesMut, version: i16) -> anyhow::Result<()> {
         match self {
             RequestKind::Produce(x) => encode(x, bytes, version),
@@ -1567,6 +1647,7 @@ impl RequestKind {
         }
     }
     /// Decode the message from the provided buffer and version
+    #[cfg(feature = "broker")]
     pub fn decode(
         api_key: ApiKey,
         bytes: &mut bytes::Bytes,
@@ -2227,6 +2308,7 @@ impl From<ListClientMetricsResourcesRequest> for RequestKind {
 }
 
 #[cfg(feature = "messages_enum")]
+#[cfg(any(feature = "client", feature = "broker"))]
 fn decode<T: Decodable>(bytes: &mut bytes::Bytes, version: i16) -> Result<T> {
     T::decode(bytes, version).with_context(|| {
         format!(
@@ -2238,6 +2320,7 @@ fn decode<T: Decodable>(bytes: &mut bytes::Bytes, version: i16) -> Result<T> {
 }
 
 #[cfg(feature = "messages_enum")]
+#[cfg(any(feature = "client", feature = "broker"))]
 fn encode<T: Encodable>(encodable: &T, bytes: &mut bytes::BytesMut, version: i16) -> Result<()> {
     encodable.encode(bytes, version).with_context(|| {
         format!(
@@ -2406,6 +2489,7 @@ pub enum ResponseKind {
 #[cfg(feature = "messages_enum")]
 impl ResponseKind {
     /// Encode the message into the target buffer
+    #[cfg(feature = "broker")]
     pub fn encode(&self, bytes: &mut bytes::BytesMut, version: i16) -> anyhow::Result<()> {
         match self {
             ResponseKind::Produce(x) => encode(x, bytes, version),
@@ -2485,6 +2569,7 @@ impl ResponseKind {
         }
     }
     /// Decode the message from the provided buffer and version
+    #[cfg(feature = "client")]
     pub fn decode(
         api_key: ApiKey,
         bytes: &mut bytes::Bytes,

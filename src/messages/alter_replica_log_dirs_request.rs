@@ -55,6 +55,7 @@ impl AlterReplicaLogDir {
     }
 }
 
+#[cfg(feature = "client")]
 impl MapEncodable for AlterReplicaLogDir {
     type Key = StrBytes;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
@@ -111,6 +112,7 @@ impl MapEncodable for AlterReplicaLogDir {
     }
 }
 
+#[cfg(feature = "broker")]
 impl MapDecodable for AlterReplicaLogDir {
     type Key = StrBytes;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
@@ -193,6 +195,7 @@ impl AlterReplicaLogDirTopic {
     }
 }
 
+#[cfg(feature = "client")]
 impl MapEncodable for AlterReplicaLogDirTopic {
     type Key = super::TopicName;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
@@ -248,6 +251,7 @@ impl MapEncodable for AlterReplicaLogDirTopic {
     }
 }
 
+#[cfg(feature = "broker")]
 impl MapDecodable for AlterReplicaLogDirTopic {
     type Key = super::TopicName;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
@@ -330,6 +334,7 @@ impl AlterReplicaLogDirsRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for AlterReplicaLogDirsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 2 {
@@ -375,6 +380,7 @@ impl Encodable for AlterReplicaLogDirsRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for AlterReplicaLogDirsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let dirs = if version >= 2 {

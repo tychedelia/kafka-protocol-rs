@@ -66,6 +66,7 @@ impl ApiVersionsRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for ApiVersionsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 3 {
@@ -112,6 +113,7 @@ impl Encodable for ApiVersionsRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for ApiVersionsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let client_software_name = if version >= 3 {

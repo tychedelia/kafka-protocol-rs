@@ -164,6 +164,7 @@ impl DescribeConfigsResourceResult {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for DescribeConfigsResourceResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 4 {
@@ -278,6 +279,7 @@ impl Encodable for DescribeConfigsResourceResult {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for DescribeConfigsResourceResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = if version >= 4 {
@@ -421,6 +423,7 @@ impl DescribeConfigsResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for DescribeConfigsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
@@ -468,6 +471,7 @@ impl Encodable for DescribeConfigsResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for DescribeConfigsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = types::Int32.decode(buf)?;
@@ -600,6 +604,7 @@ impl DescribeConfigsResult {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for DescribeConfigsResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int16.encode(buf, &self.error_code)?;
@@ -669,6 +674,7 @@ impl Encodable for DescribeConfigsResult {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for DescribeConfigsResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let error_code = types::Int16.decode(buf)?;
@@ -790,6 +796,7 @@ impl DescribeConfigsSynonym {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for DescribeConfigsSynonym {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 1 {
@@ -892,6 +899,7 @@ impl Encodable for DescribeConfigsSynonym {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for DescribeConfigsSynonym {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = if version >= 1 {

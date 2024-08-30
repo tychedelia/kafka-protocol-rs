@@ -66,6 +66,7 @@ impl AlterReplicaLogDirPartitionResult {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for AlterReplicaLogDirPartitionResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.partition_index)?;
@@ -104,6 +105,7 @@ impl Encodable for AlterReplicaLogDirPartitionResult {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for AlterReplicaLogDirPartitionResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let partition_index = types::Int32.decode(buf)?;
@@ -190,6 +192,7 @@ impl AlterReplicaLogDirTopicResult {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for AlterReplicaLogDirTopicResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 2 {
@@ -245,6 +248,7 @@ impl Encodable for AlterReplicaLogDirTopicResult {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for AlterReplicaLogDirTopicResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let topic_name = if version >= 2 {
@@ -339,6 +343,7 @@ impl AlterReplicaLogDirsResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for AlterReplicaLogDirsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
@@ -386,6 +391,7 @@ impl Encodable for AlterReplicaLogDirsResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for AlterReplicaLogDirsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = types::Int32.decode(buf)?;

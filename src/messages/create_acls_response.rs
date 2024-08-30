@@ -66,6 +66,7 @@ impl AclCreationResult {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for AclCreationResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int16.encode(buf, &self.error_code)?;
@@ -112,6 +113,7 @@ impl Encodable for AclCreationResult {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for AclCreationResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let error_code = types::Int16.decode(buf)?;
@@ -202,6 +204,7 @@ impl CreateAclsResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for CreateAclsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
@@ -249,6 +252,7 @@ impl Encodable for CreateAclsResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for CreateAclsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = types::Int32.decode(buf)?;

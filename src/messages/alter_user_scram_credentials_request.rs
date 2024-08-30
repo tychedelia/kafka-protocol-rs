@@ -66,6 +66,7 @@ impl AlterUserScramCredentialsRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for AlterUserScramCredentialsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::CompactArray(types::Struct { version }).encode(buf, &self.deletions)?;
@@ -102,6 +103,7 @@ impl Encodable for AlterUserScramCredentialsRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for AlterUserScramCredentialsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let deletions = types::CompactArray(types::Struct { version }).decode(buf)?;
@@ -186,6 +188,7 @@ impl ScramCredentialDeletion {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for ScramCredentialDeletion {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::CompactString.encode(buf, &self.name)?;
@@ -220,6 +223,7 @@ impl Encodable for ScramCredentialDeletion {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for ScramCredentialDeletion {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = types::CompactString.decode(buf)?;
@@ -346,6 +350,7 @@ impl ScramCredentialUpsertion {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for ScramCredentialUpsertion {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::CompactString.encode(buf, &self.name)?;
@@ -386,6 +391,7 @@ impl Encodable for ScramCredentialUpsertion {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for ScramCredentialUpsertion {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = types::CompactString.decode(buf)?;

@@ -80,6 +80,7 @@ impl EnvelopeRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for EnvelopeRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::CompactBytes.encode(buf, &self.request_data)?;
@@ -116,6 +117,7 @@ impl Encodable for EnvelopeRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for EnvelopeRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let request_data = types::CompactBytes.decode(buf)?;

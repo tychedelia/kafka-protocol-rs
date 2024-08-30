@@ -66,6 +66,7 @@ impl AlterClientQuotasResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for AlterClientQuotasResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
@@ -113,6 +114,7 @@ impl Encodable for AlterClientQuotasResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for AlterClientQuotasResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = types::Int32.decode(buf)?;
@@ -203,6 +205,7 @@ impl EntityData {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for EntityData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 1 {
@@ -257,6 +260,7 @@ impl Encodable for EntityData {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for EntityData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let entity_type = if version >= 1 {
@@ -365,6 +369,7 @@ impl EntryData {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for EntryData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int16.encode(buf, &self.error_code)?;
@@ -422,6 +427,7 @@ impl Encodable for EntryData {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for EntryData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let error_code = types::Int16.decode(buf)?;

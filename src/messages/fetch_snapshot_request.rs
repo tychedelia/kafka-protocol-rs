@@ -94,6 +94,7 @@ impl FetchSnapshotRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for FetchSnapshotRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.replica_id)?;
@@ -160,6 +161,7 @@ impl Encodable for FetchSnapshotRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for FetchSnapshotRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let mut cluster_id = None;
@@ -285,6 +287,7 @@ impl PartitionSnapshot {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for PartitionSnapshot {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.partition)?;
@@ -323,6 +326,7 @@ impl Encodable for PartitionSnapshot {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for PartitionSnapshot {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let partition = types::Int32.decode(buf)?;
@@ -413,6 +417,7 @@ impl SnapshotId {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for SnapshotId {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int64.encode(buf, &self.end_offset)?;
@@ -447,6 +452,7 @@ impl Encodable for SnapshotId {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for SnapshotId {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let end_offset = types::Int64.decode(buf)?;
@@ -531,6 +537,7 @@ impl TopicSnapshot {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for TopicSnapshot {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::CompactString.encode(buf, &self.name)?;
@@ -566,6 +573,7 @@ impl Encodable for TopicSnapshot {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for TopicSnapshot {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = types::CompactString.decode(buf)?;

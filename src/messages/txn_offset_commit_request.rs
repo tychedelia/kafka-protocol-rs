@@ -150,6 +150,7 @@ impl TxnOffsetCommitRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for TxnOffsetCommitRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 3 {
@@ -261,6 +262,7 @@ impl Encodable for TxnOffsetCommitRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for TxnOffsetCommitRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let transactional_id = if version >= 3 {
@@ -417,6 +419,7 @@ impl TxnOffsetCommitRequestPartition {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for TxnOffsetCommitRequestPartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.partition_index)?;
@@ -471,6 +474,7 @@ impl Encodable for TxnOffsetCommitRequestPartition {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for TxnOffsetCommitRequestPartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let partition_index = types::Int32.decode(buf)?;
@@ -571,6 +575,7 @@ impl TxnOffsetCommitRequestTopic {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for TxnOffsetCommitRequestTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 3 {
@@ -626,6 +631,7 @@ impl Encodable for TxnOffsetCommitRequestTopic {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for TxnOffsetCommitRequestTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = if version >= 3 {

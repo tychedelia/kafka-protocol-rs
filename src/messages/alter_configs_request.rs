@@ -66,6 +66,7 @@ impl AlterConfigsRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for AlterConfigsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 2 {
@@ -113,6 +114,7 @@ impl Encodable for AlterConfigsRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for AlterConfigsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let resources = if version >= 2 {
@@ -217,6 +219,7 @@ impl AlterConfigsResource {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for AlterConfigsResource {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int8.encode(buf, &self.resource_type)?;
@@ -274,6 +277,7 @@ impl Encodable for AlterConfigsResource {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for AlterConfigsResource {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let resource_type = types::Int8.decode(buf)?;
@@ -357,6 +361,7 @@ impl AlterableConfig {
     }
 }
 
+#[cfg(feature = "client")]
 impl MapEncodable for AlterableConfig {
     type Key = StrBytes;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
@@ -412,6 +417,7 @@ impl MapEncodable for AlterableConfig {
     }
 }
 
+#[cfg(feature = "broker")]
 impl MapDecodable for AlterableConfig {
     type Key = StrBytes;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {

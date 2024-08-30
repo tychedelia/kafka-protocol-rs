@@ -52,6 +52,7 @@ impl ClientMetricsResource {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for ClientMetricsResource {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::CompactString.encode(buf, &self.name)?;
@@ -84,6 +85,7 @@ impl Encodable for ClientMetricsResource {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for ClientMetricsResource {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = types::CompactString.decode(buf)?;
@@ -179,6 +181,7 @@ impl ListClientMetricsResourcesResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for ListClientMetricsResourcesResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
@@ -217,6 +220,7 @@ impl Encodable for ListClientMetricsResourcesResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for ListClientMetricsResourcesResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = types::Int32.decode(buf)?;

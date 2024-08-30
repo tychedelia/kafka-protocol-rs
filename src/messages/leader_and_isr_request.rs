@@ -80,6 +80,7 @@ impl LeaderAndIsrLiveLeader {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for LeaderAndIsrLiveLeader {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.broker_id)?;
@@ -128,6 +129,7 @@ impl Encodable for LeaderAndIsrLiveLeader {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for LeaderAndIsrLiveLeader {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let broker_id = types::Int32.decode(buf)?;
@@ -361,6 +363,7 @@ impl LeaderAndIsrPartitionState {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for LeaderAndIsrPartitionState {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version <= 1 {
@@ -481,6 +484,7 @@ impl Encodable for LeaderAndIsrPartitionState {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for LeaderAndIsrPartitionState {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let topic_name = if version <= 1 {
@@ -720,6 +724,7 @@ impl LeaderAndIsrRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for LeaderAndIsrRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.controller_id)?;
@@ -844,6 +849,7 @@ impl Encodable for LeaderAndIsrRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for LeaderAndIsrRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let controller_id = types::Int32.decode(buf)?;
@@ -990,6 +996,7 @@ impl LeaderAndIsrTopicState {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for LeaderAndIsrTopicState {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 2 {
@@ -1077,6 +1084,7 @@ impl Encodable for LeaderAndIsrTopicState {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for LeaderAndIsrTopicState {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let topic_name = if version >= 2 {

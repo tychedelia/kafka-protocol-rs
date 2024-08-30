@@ -153,6 +153,7 @@ impl JoinGroupRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for JoinGroupRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 6 {
@@ -264,6 +265,7 @@ impl Encodable for JoinGroupRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for JoinGroupRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let group_id = if version >= 6 {
@@ -386,6 +388,7 @@ impl JoinGroupRequestProtocol {
     }
 }
 
+#[cfg(feature = "client")]
 impl MapEncodable for JoinGroupRequestProtocol {
     type Key = StrBytes;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
@@ -441,6 +444,7 @@ impl MapEncodable for JoinGroupRequestProtocol {
     }
 }
 
+#[cfg(feature = "broker")]
 impl MapDecodable for JoinGroupRequestProtocol {
     type Key = StrBytes;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {

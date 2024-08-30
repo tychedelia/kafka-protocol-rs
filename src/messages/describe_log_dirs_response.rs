@@ -94,6 +94,7 @@ impl DescribeLogDirsPartition {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for DescribeLogDirsPartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.partition_index)?;
@@ -136,6 +137,7 @@ impl Encodable for DescribeLogDirsPartition {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for DescribeLogDirsPartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let partition_index = types::Int32.decode(buf)?;
@@ -242,6 +244,7 @@ impl DescribeLogDirsResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for DescribeLogDirsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
@@ -295,6 +298,7 @@ impl Encodable for DescribeLogDirsResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for DescribeLogDirsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = types::Int32.decode(buf)?;
@@ -434,6 +438,7 @@ impl DescribeLogDirsResult {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for DescribeLogDirsResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int16.encode(buf, &self.error_code)?;
@@ -503,6 +508,7 @@ impl Encodable for DescribeLogDirsResult {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for DescribeLogDirsResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let error_code = types::Int16.decode(buf)?;
@@ -614,6 +620,7 @@ impl DescribeLogDirsTopic {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for DescribeLogDirsTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 2 {
@@ -669,6 +676,7 @@ impl Encodable for DescribeLogDirsTopic {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for DescribeLogDirsTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = if version >= 2 {

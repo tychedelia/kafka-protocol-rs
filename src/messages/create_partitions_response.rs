@@ -66,6 +66,7 @@ impl CreatePartitionsResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for CreatePartitionsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
@@ -113,6 +114,7 @@ impl Encodable for CreatePartitionsResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for CreatePartitionsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = types::Int32.decode(buf)?;
@@ -217,6 +219,7 @@ impl CreatePartitionsTopicResult {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for CreatePartitionsTopicResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 2 {
@@ -273,6 +276,7 @@ impl Encodable for CreatePartitionsTopicResult {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for CreatePartitionsTopicResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = if version >= 2 {

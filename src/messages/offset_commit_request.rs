@@ -122,6 +122,7 @@ impl OffsetCommitRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for OffsetCommitRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 8 {
@@ -225,6 +226,7 @@ impl Encodable for OffsetCommitRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for OffsetCommitRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let group_id = if version >= 8 {
@@ -397,6 +399,7 @@ impl OffsetCommitRequestPartition {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for OffsetCommitRequestPartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.partition_index)?;
@@ -465,6 +468,7 @@ impl Encodable for OffsetCommitRequestPartition {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for OffsetCommitRequestPartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let partition_index = types::Int32.decode(buf)?;
@@ -572,6 +576,7 @@ impl OffsetCommitRequestTopic {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for OffsetCommitRequestTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 8 {
@@ -627,6 +632,7 @@ impl Encodable for OffsetCommitRequestTopic {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for OffsetCommitRequestTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = if version >= 8 {

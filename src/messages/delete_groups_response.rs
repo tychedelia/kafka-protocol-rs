@@ -52,6 +52,7 @@ impl DeletableGroupResult {
     }
 }
 
+#[cfg(feature = "broker")]
 impl MapEncodable for DeletableGroupResult {
     type Key = super::GroupId;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
@@ -99,6 +100,7 @@ impl MapEncodable for DeletableGroupResult {
     }
 }
 
+#[cfg(feature = "client")]
 impl MapDecodable for DeletableGroupResult {
     type Key = super::GroupId;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
@@ -194,6 +196,7 @@ impl DeleteGroupsResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for DeleteGroupsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
@@ -241,6 +244,7 @@ impl Encodable for DeleteGroupsResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for DeleteGroupsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = types::Int32.decode(buf)?;

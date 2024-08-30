@@ -66,6 +66,7 @@ impl CreatableRenewers {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for CreatableRenewers {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 2 {
@@ -120,6 +121,7 @@ impl Encodable for CreatableRenewers {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for CreatableRenewers {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let principal_type = if version >= 2 {
@@ -242,6 +244,7 @@ impl CreateDelegationTokenRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for CreateDelegationTokenRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 3 {
@@ -337,6 +340,7 @@ impl Encodable for CreateDelegationTokenRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for CreateDelegationTokenRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let owner_principal_type = if version >= 3 {

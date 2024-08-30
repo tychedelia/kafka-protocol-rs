@@ -80,6 +80,7 @@ impl ComponentData {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for ComponentData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 1 {
@@ -136,6 +137,7 @@ impl Encodable for ComponentData {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for ComponentData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let entity_type = if version >= 1 {
@@ -233,6 +235,7 @@ impl DescribeClientQuotasRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for DescribeClientQuotasRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 1 {
@@ -280,6 +283,7 @@ impl Encodable for DescribeClientQuotasRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for DescribeClientQuotasRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let components = if version >= 1 {

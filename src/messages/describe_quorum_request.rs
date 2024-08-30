@@ -52,6 +52,7 @@ impl DescribeQuorumRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for DescribeQuorumRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
@@ -84,6 +85,7 @@ impl Encodable for DescribeQuorumRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for DescribeQuorumRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let topics = types::CompactArray(types::Struct { version }).decode(buf)?;
@@ -151,6 +153,7 @@ impl PartitionData {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for PartitionData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.partition_index)?;
@@ -183,6 +186,7 @@ impl Encodable for PartitionData {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for PartitionData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let partition_index = types::Int32.decode(buf)?;
@@ -264,6 +268,7 @@ impl TopicData {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for TopicData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::CompactString.encode(buf, &self.topic_name)?;
@@ -299,6 +304,7 @@ impl Encodable for TopicData {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for TopicData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let topic_name = types::CompactString.decode(buf)?;

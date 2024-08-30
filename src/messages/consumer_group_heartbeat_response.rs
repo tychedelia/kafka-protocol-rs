@@ -52,6 +52,7 @@ impl Assignment {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for Assignment {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::CompactArray(types::Struct { version }).encode(buf, &self.topic_partitions)?;
@@ -85,6 +86,7 @@ impl Encodable for Assignment {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for Assignment {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let topic_partitions = types::CompactArray(types::Struct { version }).decode(buf)?;
@@ -236,6 +238,7 @@ impl ConsumerGroupHeartbeatResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for ConsumerGroupHeartbeatResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
@@ -280,6 +283,7 @@ impl Encodable for ConsumerGroupHeartbeatResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for ConsumerGroupHeartbeatResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = types::Int32.decode(buf)?;
@@ -379,6 +383,7 @@ impl TopicPartitions {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for TopicPartitions {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Uuid.encode(buf, &self.topic_id)?;
@@ -413,6 +418,7 @@ impl Encodable for TopicPartitions {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for TopicPartitions {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let topic_id = types::Uuid.decode(buf)?;

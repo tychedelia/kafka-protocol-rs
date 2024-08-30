@@ -66,6 +66,7 @@ impl AbortedTransaction {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for AbortedTransaction {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 4 {
@@ -128,6 +129,7 @@ impl Encodable for AbortedTransaction {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for AbortedTransaction {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let producer_id = if version >= 4 {
@@ -222,6 +224,7 @@ impl EpochEndOffset {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for EpochEndOffset {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 12 {
@@ -284,6 +287,7 @@ impl Encodable for EpochEndOffset {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for EpochEndOffset {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let epoch = if version >= 12 {
@@ -423,6 +427,7 @@ impl FetchResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for FetchResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 1 {
@@ -533,6 +538,7 @@ impl Encodable for FetchResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for FetchResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = if version >= 1 {
@@ -670,6 +676,7 @@ impl FetchableTopicResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for FetchableTopicResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version <= 12 {
@@ -735,6 +742,7 @@ impl Encodable for FetchableTopicResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for FetchableTopicResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let topic = if version <= 12 {
@@ -840,6 +848,7 @@ impl LeaderIdAndEpoch {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for LeaderIdAndEpoch {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 12 {
@@ -902,6 +911,7 @@ impl Encodable for LeaderIdAndEpoch {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for LeaderIdAndEpoch {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let leader_id = if version >= 12 {
@@ -1010,6 +1020,7 @@ impl NodeEndpoint {
     }
 }
 
+#[cfg(feature = "broker")]
 impl MapEncodable for NodeEndpoint {
     type Key = super::BrokerId;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
@@ -1101,6 +1112,7 @@ impl MapEncodable for NodeEndpoint {
     }
 }
 
+#[cfg(feature = "client")]
 impl MapDecodable for NodeEndpoint {
     type Key = super::BrokerId;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
@@ -1337,6 +1349,7 @@ impl PartitionData {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for PartitionData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.partition_index)?;
@@ -1522,6 +1535,7 @@ impl Encodable for PartitionData {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for PartitionData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let partition_index = types::Int32.decode(buf)?;
@@ -1672,6 +1686,7 @@ impl SnapshotId {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for SnapshotId {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int64.encode(buf, &self.end_offset)?;
@@ -1710,6 +1725,7 @@ impl Encodable for SnapshotId {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for SnapshotId {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let end_offset = types::Int64.decode(buf)?;

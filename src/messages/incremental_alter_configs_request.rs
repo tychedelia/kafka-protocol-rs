@@ -80,6 +80,7 @@ impl AlterConfigsResource {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for AlterConfigsResource {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int8.encode(buf, &self.resource_type)?;
@@ -137,6 +138,7 @@ impl Encodable for AlterConfigsResource {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for AlterConfigsResource {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let resource_type = types::Int8.decode(buf)?;
@@ -248,6 +250,7 @@ impl AlterableConfig {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for AlterableConfig {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 1 {
@@ -304,6 +307,7 @@ impl Encodable for AlterableConfig {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for AlterableConfig {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = if version >= 1 {
@@ -401,6 +405,7 @@ impl IncrementalAlterConfigsRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for IncrementalAlterConfigsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 1 {
@@ -448,6 +453,7 @@ impl Encodable for IncrementalAlterConfigsRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for IncrementalAlterConfigsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let resources = if version >= 1 {

@@ -39,6 +39,7 @@ impl SaslHandshakeRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for SaslHandshakeRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::String.encode(buf, &self.mechanism)?;
@@ -53,6 +54,7 @@ impl Encodable for SaslHandshakeRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for SaslHandshakeRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let mechanism = types::String.decode(buf)?;

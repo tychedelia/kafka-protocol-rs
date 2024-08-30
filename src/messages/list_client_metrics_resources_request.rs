@@ -38,6 +38,7 @@ impl ListClientMetricsResourcesRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for ListClientMetricsResourcesRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -68,6 +69,7 @@ impl Encodable for ListClientMetricsResourcesRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for ListClientMetricsResourcesRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let mut unknown_tagged_fields = BTreeMap::new();

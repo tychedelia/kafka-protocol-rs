@@ -13,6 +13,7 @@ use std::cmp::Ordering;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 struct PreparedStruct {
+    spec_type: SpecType,
     name: String,
     map_key: Option<Box<PreparedType>>,
     prepared_fields: Vec<PreparedField>,
@@ -249,6 +250,7 @@ fn prepare_field_type<W: Write>(
     deprecated_versions: VersionSpec,
     prepared_structs: &BTreeMap<String, PreparedStruct>,
     prepared_structs_output: &mut Vec<PreparedStruct>,
+    spec_type: SpecType,
 ) -> Result<PreparedType, Error> {
     Ok(match type_ {
         TypeSpec::Primitive(prim) => {
@@ -278,6 +280,7 @@ fn prepare_field_type<W: Write>(
                         valid_versions,
                         flexible_msg_versions,
                         deprecated_versions,
+                        spec_type,
                     }
                 }
             } else {
@@ -291,6 +294,7 @@ fn prepare_field_type<W: Write>(
                     deprecated_versions,
                     prepared_structs,
                     prepared_structs_output,
+                    spec_type,
                 )?
             };
 
@@ -307,6 +311,7 @@ fn prepare_field_type<W: Write>(
                 deprecated_versions,
                 prepared_structs,
                 prepared_structs_output,
+                spec_type,
             )?;
             match prepared_field {
                 PreparedType::Struct(PreparedStruct {
@@ -977,6 +982,7 @@ fn prepared_struct_def<W: Write>(
     deprecated_versions: VersionSpec,
     prepared_structs: &BTreeMap<String, PreparedStruct>,
     prepared_structs_output: &mut Vec<PreparedStruct>,
+    spec_type: SpecType,
 ) -> Result<PreparedStruct, Error> {
     let mut prepared_fields = Vec::new();
     let mut map_key = None;
@@ -994,6 +1000,7 @@ fn prepared_struct_def<W: Write>(
             deprecated_versions,
             prepared_structs,
             prepared_structs_output,
+            spec_type,
         )?;
 
         if field.map_key && num_map_keys == 1 {
@@ -1068,6 +1075,7 @@ fn prepared_struct_def<W: Write>(
     }
 
     let prepared_struct = PreparedStruct {
+        spec_type,
         name: name.into(),
         map_key,
         prepared_fields,
@@ -1187,6 +1195,11 @@ impl PreparedStruct {
         writeln!(w)?;
         writeln!(w)?;
 
+        match self.spec_type {
+            SpecType::Request => writeln!(w, "#[cfg(feature = \"client\")]")?,
+            SpecType::Response => writeln!(w, "#[cfg(feature = \"broker\")]")?,
+            _ => {}
+        }
         if self.map_key.is_some() {
             write!(w, "impl MapEncodable for {} ", self.name)?;
         } else {
@@ -1227,6 +1240,11 @@ impl PreparedStruct {
         writeln!(w)?;
         writeln!(w)?;
 
+        match self.spec_type {
+            SpecType::Request => writeln!(w, "#[cfg(feature = \"broker\")]")?,
+            SpecType::Response => writeln!(w, "#[cfg(feature = \"client\")]")?,
+            _ => {}
+        }
         if self.map_key.is_some() {
             write!(w, "impl MapDecodable for {} ", self.name)?;
         } else {
@@ -1459,6 +1477,7 @@ pub fn generate(output_path: &str, spec: Spec) -> Result<Option<GenerationOutput
                 deprecated_versions,
                 &prepared_structs,
                 &mut prepared_structs_output,
+                spec.type_,
             )?;
         }
 
@@ -1472,6 +1491,7 @@ pub fn generate(output_path: &str, spec: Spec) -> Result<Option<GenerationOutput
             deprecated_versions,
             &prepared_structs,
             &mut prepared_structs_output,
+            spec.type_,
         )?;
 
         for prepared_struct in prepared_structs_output {

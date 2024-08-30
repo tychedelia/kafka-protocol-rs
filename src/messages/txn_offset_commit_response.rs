@@ -66,6 +66,7 @@ impl TxnOffsetCommitResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for TxnOffsetCommitResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
@@ -113,6 +114,7 @@ impl Encodable for TxnOffsetCommitResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for TxnOffsetCommitResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = types::Int32.decode(buf)?;
@@ -203,6 +205,7 @@ impl TxnOffsetCommitResponsePartition {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for TxnOffsetCommitResponsePartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.partition_index)?;
@@ -241,6 +244,7 @@ impl Encodable for TxnOffsetCommitResponsePartition {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for TxnOffsetCommitResponsePartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let partition_index = types::Int32.decode(buf)?;
@@ -327,6 +331,7 @@ impl TxnOffsetCommitResponseTopic {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for TxnOffsetCommitResponseTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 3 {
@@ -382,6 +387,7 @@ impl Encodable for TxnOffsetCommitResponseTopic {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for TxnOffsetCommitResponseTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = if version >= 3 {

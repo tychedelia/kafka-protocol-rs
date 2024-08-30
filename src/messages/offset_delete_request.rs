@@ -56,6 +56,7 @@ impl OffsetDeleteRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for OffsetDeleteRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::String.encode(buf, &self.group_id)?;
@@ -72,6 +73,7 @@ impl Encodable for OffsetDeleteRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for OffsetDeleteRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let group_id = types::String.decode(buf)?;
@@ -116,6 +118,7 @@ impl OffsetDeleteRequestPartition {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for OffsetDeleteRequestPartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.partition_index)?;
@@ -130,6 +133,7 @@ impl Encodable for OffsetDeleteRequestPartition {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for OffsetDeleteRequestPartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let partition_index = types::Int32.decode(buf)?;
@@ -170,6 +174,7 @@ impl OffsetDeleteRequestTopic {
     }
 }
 
+#[cfg(feature = "client")]
 impl MapEncodable for OffsetDeleteRequestTopic {
     type Key = super::TopicName;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
@@ -187,6 +192,7 @@ impl MapEncodable for OffsetDeleteRequestTopic {
     }
 }
 
+#[cfg(feature = "broker")]
 impl MapDecodable for OffsetDeleteRequestTopic {
     type Key = super::TopicName;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {

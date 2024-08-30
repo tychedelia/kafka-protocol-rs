@@ -66,6 +66,7 @@ impl ListTransactionsRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for ListTransactionsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::CompactArray(types::CompactString).encode(buf, &self.state_filters)?;
@@ -101,6 +102,7 @@ impl Encodable for ListTransactionsRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for ListTransactionsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let state_filters = types::CompactArray(types::CompactString).decode(buf)?;

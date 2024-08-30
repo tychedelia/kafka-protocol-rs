@@ -94,6 +94,7 @@ impl OffsetFetchResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for OffsetFetchResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 3 {
@@ -178,6 +179,7 @@ impl Encodable for OffsetFetchResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for OffsetFetchResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = if version >= 3 {
@@ -304,6 +306,7 @@ impl OffsetFetchResponseGroup {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for OffsetFetchResponseGroup {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 8 {
@@ -381,6 +384,7 @@ impl Encodable for OffsetFetchResponseGroup {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for OffsetFetchResponseGroup {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let group_id = if version >= 8 {
@@ -524,6 +528,7 @@ impl OffsetFetchResponsePartition {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for OffsetFetchResponsePartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version <= 7 {
@@ -638,6 +643,7 @@ impl Encodable for OffsetFetchResponsePartition {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for OffsetFetchResponsePartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let partition_index = if version <= 7 {
@@ -799,6 +805,7 @@ impl OffsetFetchResponsePartitions {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for OffsetFetchResponsePartitions {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 8 {
@@ -905,6 +912,7 @@ impl Encodable for OffsetFetchResponsePartitions {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for OffsetFetchResponsePartitions {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let partition_index = if version >= 8 {
@@ -1020,6 +1028,7 @@ impl OffsetFetchResponseTopic {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for OffsetFetchResponseTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version <= 7 {
@@ -1100,6 +1109,7 @@ impl Encodable for OffsetFetchResponseTopic {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for OffsetFetchResponseTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = if version <= 7 {
@@ -1202,6 +1212,7 @@ impl OffsetFetchResponseTopics {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for OffsetFetchResponseTopics {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 8 {
@@ -1265,6 +1276,7 @@ impl Encodable for OffsetFetchResponseTopics {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for OffsetFetchResponseTopics {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = if version >= 8 {

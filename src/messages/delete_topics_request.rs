@@ -66,6 +66,7 @@ impl DeleteTopicState {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for DeleteTopicState {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 6 {
@@ -128,6 +129,7 @@ impl Encodable for DeleteTopicState {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for DeleteTopicState {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = if version >= 6 {
@@ -236,6 +238,7 @@ impl DeleteTopicsRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for DeleteTopicsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 6 {
@@ -302,6 +305,7 @@ impl Encodable for DeleteTopicsRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for DeleteTopicsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let topics = if version >= 6 {

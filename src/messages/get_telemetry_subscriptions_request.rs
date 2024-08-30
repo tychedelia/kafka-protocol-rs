@@ -52,6 +52,7 @@ impl GetTelemetrySubscriptionsRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for GetTelemetrySubscriptionsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Uuid.encode(buf, &self.client_instance_id)?;
@@ -84,6 +85,7 @@ impl Encodable for GetTelemetrySubscriptionsRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for GetTelemetrySubscriptionsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let client_instance_id = types::Uuid.decode(buf)?;

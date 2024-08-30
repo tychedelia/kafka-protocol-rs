@@ -66,6 +66,7 @@ impl PartitionProduceData {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for PartitionProduceData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.index)?;
@@ -112,6 +113,7 @@ impl Encodable for PartitionProduceData {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for PartitionProduceData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let index = types::Int32.decode(buf)?;
@@ -233,6 +235,7 @@ impl ProduceRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for ProduceRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 3 {
@@ -304,6 +307,7 @@ impl Encodable for ProduceRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for ProduceRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let transactional_id = if version >= 3 {
@@ -394,6 +398,7 @@ impl TopicProduceData {
     }
 }
 
+#[cfg(feature = "client")]
 impl MapEncodable for TopicProduceData {
     type Key = super::TopicName;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
@@ -451,6 +456,7 @@ impl MapEncodable for TopicProduceData {
     }
 }
 
+#[cfg(feature = "broker")]
 impl MapDecodable for TopicProduceData {
     type Key = super::TopicName;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {

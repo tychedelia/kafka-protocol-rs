@@ -122,6 +122,7 @@ impl Coordinator {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for Coordinator {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 4 {
@@ -232,6 +233,7 @@ impl Encodable for Coordinator {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for Coordinator {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let key = if version >= 4 {
@@ -424,6 +426,7 @@ impl FindCoordinatorResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for FindCoordinatorResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 1 {
@@ -557,6 +560,7 @@ impl Encodable for FindCoordinatorResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for FindCoordinatorResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = if version >= 1 {

@@ -66,6 +66,7 @@ impl EnvelopeResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for EnvelopeResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::CompactBytes.encode(buf, &self.response_data)?;
@@ -100,6 +101,7 @@ impl Encodable for EnvelopeResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for EnvelopeResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let response_data = types::CompactBytes.decode(buf)?;

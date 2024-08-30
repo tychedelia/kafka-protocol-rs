@@ -80,6 +80,7 @@ impl FeatureUpdateKey {
     }
 }
 
+#[cfg(feature = "client")]
 impl MapEncodable for FeatureUpdateKey {
     type Key = StrBytes;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
@@ -143,6 +144,7 @@ impl MapEncodable for FeatureUpdateKey {
     }
 }
 
+#[cfg(feature = "broker")]
 impl MapDecodable for FeatureUpdateKey {
     type Key = StrBytes;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
@@ -260,6 +262,7 @@ impl UpdateFeaturesRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for UpdateFeaturesRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.timeout_ms)?;
@@ -309,6 +312,7 @@ impl Encodable for UpdateFeaturesRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for UpdateFeaturesRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let timeout_ms = types::Int32.decode(buf)?;

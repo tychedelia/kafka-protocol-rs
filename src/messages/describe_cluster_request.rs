@@ -66,6 +66,7 @@ impl DescribeClusterRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for DescribeClusterRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Boolean.encode(buf, &self.include_cluster_authorized_operations)?;
@@ -112,6 +113,7 @@ impl Encodable for DescribeClusterRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for DescribeClusterRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let include_cluster_authorized_operations = types::Boolean.decode(buf)?;

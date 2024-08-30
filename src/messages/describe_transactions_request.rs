@@ -52,6 +52,7 @@ impl DescribeTransactionsRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for DescribeTransactionsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::CompactArray(types::CompactString).encode(buf, &self.transactional_ids)?;
@@ -85,6 +86,7 @@ impl Encodable for DescribeTransactionsRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for DescribeTransactionsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let transactional_ids = types::CompactArray(types::CompactString).decode(buf)?;

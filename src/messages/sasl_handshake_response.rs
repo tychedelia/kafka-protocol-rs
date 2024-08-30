@@ -53,6 +53,7 @@ impl SaslHandshakeResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for SaslHandshakeResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int16.encode(buf, &self.error_code)?;
@@ -69,6 +70,7 @@ impl Encodable for SaslHandshakeResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for SaslHandshakeResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let error_code = types::Int16.decode(buf)?;

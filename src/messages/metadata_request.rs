@@ -94,6 +94,7 @@ impl MetadataRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for MetadataRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 9 {
@@ -182,6 +183,7 @@ impl Encodable for MetadataRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for MetadataRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let topics = if version >= 9 {
@@ -290,6 +292,7 @@ impl MetadataRequestTopic {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for MetadataRequestTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 10 {
@@ -340,6 +343,7 @@ impl Encodable for MetadataRequestTopic {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for MetadataRequestTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let topic_id = if version >= 10 {

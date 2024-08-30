@@ -80,6 +80,7 @@ impl LeaderAndIsrPartitionError {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for LeaderAndIsrPartitionError {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version <= 4 {
@@ -132,6 +133,7 @@ impl Encodable for LeaderAndIsrPartitionError {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for LeaderAndIsrPartitionError {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let topic_name = if version <= 4 {
@@ -243,6 +245,7 @@ impl LeaderAndIsrResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for LeaderAndIsrResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int16.encode(buf, &self.error_code)?;
@@ -319,6 +322,7 @@ impl Encodable for LeaderAndIsrResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for LeaderAndIsrResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let error_code = types::Int16.decode(buf)?;
@@ -406,6 +410,7 @@ impl LeaderAndIsrTopicError {
     }
 }
 
+#[cfg(feature = "broker")]
 impl MapEncodable for LeaderAndIsrTopicError {
     type Key = Uuid;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
@@ -470,6 +475,7 @@ impl MapEncodable for LeaderAndIsrTopicError {
     }
 }
 
+#[cfg(feature = "client")]
 impl MapDecodable for LeaderAndIsrTopicError {
     type Key = Uuid;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {

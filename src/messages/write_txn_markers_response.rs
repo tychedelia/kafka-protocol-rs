@@ -66,6 +66,7 @@ impl WritableTxnMarkerPartitionResult {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for WritableTxnMarkerPartitionResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.partition_index)?;
@@ -104,6 +105,7 @@ impl Encodable for WritableTxnMarkerPartitionResult {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for WritableTxnMarkerPartitionResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let partition_index = types::Int32.decode(buf)?;
@@ -190,6 +192,7 @@ impl WritableTxnMarkerResult {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for WritableTxnMarkerResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int64.encode(buf, &self.producer_id)?;
@@ -237,6 +240,7 @@ impl Encodable for WritableTxnMarkerResult {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for WritableTxnMarkerResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let producer_id = types::Int64.decode(buf)?;
@@ -327,6 +331,7 @@ impl WritableTxnMarkerTopicResult {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for WritableTxnMarkerTopicResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 1 {
@@ -382,6 +387,7 @@ impl Encodable for WritableTxnMarkerTopicResult {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for WritableTxnMarkerTopicResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = if version >= 1 {
@@ -462,6 +468,7 @@ impl WriteTxnMarkersResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for WriteTxnMarkersResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 1 {
@@ -507,6 +514,7 @@ impl Encodable for WriteTxnMarkersResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for WriteTxnMarkersResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let markers = if version >= 1 {
