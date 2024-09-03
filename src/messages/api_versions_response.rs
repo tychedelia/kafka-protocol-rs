@@ -66,6 +66,7 @@ impl ApiVersion {
     }
 }
 
+#[cfg(feature = "broker")]
 impl MapEncodable for ApiVersion {
     type Key = i16;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
@@ -107,6 +108,7 @@ impl MapEncodable for ApiVersion {
     }
 }
 
+#[cfg(feature = "client")]
 impl MapDecodable for ApiVersion {
     type Key = i16;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
@@ -274,6 +276,7 @@ impl ApiVersionsResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for ApiVersionsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int16.encode(buf, &self.error_code)?;
@@ -453,6 +456,7 @@ impl Encodable for ApiVersionsResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for ApiVersionsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let error_code = types::Int16.decode(buf)?;
@@ -580,6 +584,7 @@ impl FinalizedFeatureKey {
     }
 }
 
+#[cfg(feature = "broker")]
 impl MapEncodable for FinalizedFeatureKey {
     type Key = StrBytes;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
@@ -657,6 +662,7 @@ impl MapEncodable for FinalizedFeatureKey {
     }
 }
 
+#[cfg(feature = "client")]
 impl MapDecodable for FinalizedFeatureKey {
     type Key = StrBytes;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
@@ -760,6 +766,7 @@ impl SupportedFeatureKey {
     }
 }
 
+#[cfg(feature = "broker")]
 impl MapEncodable for SupportedFeatureKey {
     type Key = StrBytes;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
@@ -837,6 +844,7 @@ impl MapEncodable for SupportedFeatureKey {
     }
 }
 
+#[cfg(feature = "client")]
 impl MapDecodable for SupportedFeatureKey {
     type Key = StrBytes;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {

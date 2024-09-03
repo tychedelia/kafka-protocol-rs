@@ -66,6 +66,7 @@ impl DescribeProducersResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for DescribeProducersResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
@@ -100,6 +101,7 @@ impl Encodable for DescribeProducersResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for DescribeProducersResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = types::Int32.decode(buf)?;
@@ -212,6 +214,7 @@ impl PartitionResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for PartitionResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.partition_index)?;
@@ -251,6 +254,7 @@ impl Encodable for PartitionResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for PartitionResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let partition_index = types::Int32.decode(buf)?;
@@ -397,6 +401,7 @@ impl ProducerState {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for ProducerState {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int64.encode(buf, &self.producer_id)?;
@@ -439,6 +444,7 @@ impl Encodable for ProducerState {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for ProducerState {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let producer_id = types::Int64.decode(buf)?;
@@ -535,6 +541,7 @@ impl TopicResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for TopicResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::CompactString.encode(buf, &self.name)?;
@@ -570,6 +577,7 @@ impl Encodable for TopicResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for TopicResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = types::CompactString.decode(buf)?;

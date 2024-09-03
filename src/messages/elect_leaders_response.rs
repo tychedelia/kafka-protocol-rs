@@ -80,6 +80,7 @@ impl ElectLeadersResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for ElectLeadersResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
@@ -143,6 +144,7 @@ impl Encodable for ElectLeadersResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for ElectLeadersResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = types::Int32.decode(buf)?;
@@ -254,6 +256,7 @@ impl PartitionResult {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for PartitionResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.partition_id)?;
@@ -302,6 +305,7 @@ impl Encodable for PartitionResult {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for PartitionResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let partition_id = types::Int32.decode(buf)?;
@@ -395,6 +399,7 @@ impl ReplicaElectionResult {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for ReplicaElectionResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 2 {
@@ -451,6 +456,7 @@ impl Encodable for ReplicaElectionResult {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for ReplicaElectionResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let topic = if version >= 2 {

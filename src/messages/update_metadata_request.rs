@@ -108,6 +108,7 @@ impl UpdateMetadataBroker {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for UpdateMetadataBroker {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.id)?;
@@ -186,6 +187,7 @@ impl Encodable for UpdateMetadataBroker {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for UpdateMetadataBroker {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let id = types::Int32.decode(buf)?;
@@ -333,6 +335,7 @@ impl UpdateMetadataEndpoint {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for UpdateMetadataEndpoint {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 1 {
@@ -431,6 +434,7 @@ impl Encodable for UpdateMetadataEndpoint {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for UpdateMetadataEndpoint {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let port = if version >= 1 {
@@ -645,6 +649,7 @@ impl UpdateMetadataPartitionState {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for UpdateMetadataPartitionState {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version <= 4 {
@@ -730,6 +735,7 @@ impl Encodable for UpdateMetadataPartitionState {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for UpdateMetadataPartitionState {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let topic_name = if version <= 4 {
@@ -944,6 +950,7 @@ impl UpdateMetadataRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for UpdateMetadataRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.controller_id)?;
@@ -1090,6 +1097,7 @@ impl Encodable for UpdateMetadataRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for UpdateMetadataRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let controller_id = types::Int32.decode(buf)?;
@@ -1243,6 +1251,7 @@ impl UpdateMetadataTopicState {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for UpdateMetadataTopicState {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 5 {
@@ -1330,6 +1339,7 @@ impl Encodable for UpdateMetadataTopicState {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for UpdateMetadataTopicState {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let topic_name = if version >= 5 {

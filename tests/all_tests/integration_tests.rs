@@ -1,7 +1,5 @@
+use crate::all_tests::common::*;
 use kafka_protocol::messages::{ApiKey, ApiVersionsRequest, ApiVersionsResponse, RequestHeader};
-
-mod common;
-use common::*;
 
 #[test]
 fn get_api_versions() {

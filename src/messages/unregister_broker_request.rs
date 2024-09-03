@@ -52,6 +52,7 @@ impl UnregisterBrokerRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for UnregisterBrokerRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.broker_id)?;
@@ -84,6 +85,7 @@ impl Encodable for UnregisterBrokerRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for UnregisterBrokerRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let broker_id = types::Int32.decode(buf)?;

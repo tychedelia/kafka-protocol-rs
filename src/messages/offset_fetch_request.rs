@@ -94,6 +94,7 @@ impl OffsetFetchRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for OffsetFetchRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version <= 7 {
@@ -212,6 +213,7 @@ impl Encodable for OffsetFetchRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for OffsetFetchRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let group_id = if version <= 7 {
@@ -356,6 +358,7 @@ impl OffsetFetchRequestGroup {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for OffsetFetchRequestGroup {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 8 {
@@ -441,6 +444,7 @@ impl Encodable for OffsetFetchRequestGroup {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for OffsetFetchRequestGroup {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let group_id = if version >= 8 {
@@ -549,6 +553,7 @@ impl OffsetFetchRequestTopic {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for OffsetFetchRequestTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version <= 7 {
@@ -628,6 +633,7 @@ impl Encodable for OffsetFetchRequestTopic {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for OffsetFetchRequestTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = if version <= 7 {
@@ -730,6 +736,7 @@ impl OffsetFetchRequestTopics {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for OffsetFetchRequestTopics {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 8 {
@@ -793,6 +800,7 @@ impl Encodable for OffsetFetchRequestTopics {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for OffsetFetchRequestTopics {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = if version >= 8 {

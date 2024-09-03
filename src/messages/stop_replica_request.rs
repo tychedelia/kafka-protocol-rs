@@ -80,6 +80,7 @@ impl StopReplicaPartitionState {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for StopReplicaPartitionState {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 3 {
@@ -156,6 +157,7 @@ impl Encodable for StopReplicaPartitionState {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for StopReplicaPartitionState {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let partition_index = if version >= 3 {
@@ -257,6 +259,7 @@ impl StopReplicaPartitionV0 {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for StopReplicaPartitionV0 {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version == 0 {
@@ -319,6 +322,7 @@ impl Encodable for StopReplicaPartitionV0 {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for StopReplicaPartitionV0 {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let topic_name = if version == 0 {
@@ -497,6 +501,7 @@ impl StopReplicaRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for StopReplicaRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.controller_id)?;
@@ -622,6 +627,7 @@ impl Encodable for StopReplicaRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for StopReplicaRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let controller_id = types::Int32.decode(buf)?;
@@ -754,6 +760,7 @@ impl StopReplicaTopicState {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for StopReplicaTopicState {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 3 {
@@ -817,6 +824,7 @@ impl Encodable for StopReplicaTopicState {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for StopReplicaTopicState {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let topic_name = if version >= 3 {
@@ -911,6 +919,7 @@ impl StopReplicaTopicV1 {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for StopReplicaTopicV1 {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 1 && version <= 2 {
@@ -990,6 +999,7 @@ impl Encodable for StopReplicaTopicV1 {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for StopReplicaTopicV1 {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = if version >= 1 && version <= 2 {

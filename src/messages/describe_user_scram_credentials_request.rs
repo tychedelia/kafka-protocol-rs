@@ -52,6 +52,7 @@ impl DescribeUserScramCredentialsRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for DescribeUserScramCredentialsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::CompactArray(types::Struct { version }).encode(buf, &self.users)?;
@@ -84,6 +85,7 @@ impl Encodable for DescribeUserScramCredentialsRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for DescribeUserScramCredentialsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let users = types::CompactArray(types::Struct { version }).decode(buf)?;
@@ -151,6 +153,7 @@ impl UserName {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for UserName {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::CompactString.encode(buf, &self.name)?;
@@ -183,6 +186,7 @@ impl Encodable for UserName {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for UserName {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = types::CompactString.decode(buf)?;

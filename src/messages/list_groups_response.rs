@@ -80,6 +80,7 @@ impl ListGroupsResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for ListGroupsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 1 {
@@ -133,6 +134,7 @@ impl Encodable for ListGroupsResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for ListGroupsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = if version >= 1 {
@@ -244,6 +246,7 @@ impl ListedGroup {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for ListedGroup {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 3 {
@@ -304,6 +307,7 @@ impl Encodable for ListedGroup {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for ListedGroup {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let group_id = if version >= 3 {

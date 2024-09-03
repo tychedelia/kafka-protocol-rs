@@ -136,6 +136,7 @@ impl SyncGroupRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for SyncGroupRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 4 {
@@ -238,6 +239,7 @@ impl Encodable for SyncGroupRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for SyncGroupRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let group_id = if version >= 4 {
@@ -367,6 +369,7 @@ impl SyncGroupRequestAssignment {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for SyncGroupRequestAssignment {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 4 {
@@ -421,6 +424,7 @@ impl Encodable for SyncGroupRequestAssignment {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for SyncGroupRequestAssignment {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let member_id = if version >= 4 {

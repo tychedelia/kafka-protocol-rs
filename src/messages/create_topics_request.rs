@@ -52,6 +52,7 @@ impl CreatableReplicaAssignment {
     }
 }
 
+#[cfg(feature = "client")]
 impl MapEncodable for CreatableReplicaAssignment {
     type Key = i32;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
@@ -99,6 +100,7 @@ impl MapEncodable for CreatableReplicaAssignment {
     }
 }
 
+#[cfg(feature = "broker")]
 impl MapDecodable for CreatableReplicaAssignment {
     type Key = i32;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
@@ -225,6 +227,7 @@ impl CreatableTopic {
     }
 }
 
+#[cfg(feature = "client")]
 impl MapEncodable for CreatableTopic {
     type Key = super::TopicName;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
@@ -297,6 +300,7 @@ impl MapEncodable for CreatableTopic {
     }
 }
 
+#[cfg(feature = "broker")]
 impl MapDecodable for CreatableTopic {
     type Key = super::TopicName;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
@@ -423,6 +427,7 @@ impl CreateTopicsRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for CreateTopicsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 5 {
@@ -484,6 +489,7 @@ impl Encodable for CreateTopicsRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for CreateTopicsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let topics = if version >= 5 {
@@ -567,6 +573,7 @@ impl CreateableTopicConfig {
     }
 }
 
+#[cfg(feature = "client")]
 impl MapEncodable for CreateableTopicConfig {
     type Key = StrBytes;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
@@ -622,6 +629,7 @@ impl MapEncodable for CreateableTopicConfig {
     }
 }
 
+#[cfg(feature = "broker")]
 impl MapDecodable for CreateableTopicConfig {
     type Key = StrBytes;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {

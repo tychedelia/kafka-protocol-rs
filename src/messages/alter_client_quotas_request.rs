@@ -66,6 +66,7 @@ impl AlterClientQuotasRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for AlterClientQuotasRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 1 {
@@ -113,6 +114,7 @@ impl Encodable for AlterClientQuotasRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for AlterClientQuotasRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let entries = if version >= 1 {
@@ -203,6 +205,7 @@ impl EntityData {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for EntityData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 1 {
@@ -257,6 +260,7 @@ impl Encodable for EntityData {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for EntityData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let entity_type = if version >= 1 {
@@ -351,6 +355,7 @@ impl EntryData {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for EntryData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 1 {
@@ -406,6 +411,7 @@ impl Encodable for EntryData {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for EntryData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let entity = if version >= 1 {
@@ -514,6 +520,7 @@ impl OpData {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for OpData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 1 {
@@ -562,6 +569,7 @@ impl Encodable for OpData {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for OpData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let key = if version >= 1 {

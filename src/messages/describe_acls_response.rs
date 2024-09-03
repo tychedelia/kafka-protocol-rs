@@ -94,6 +94,7 @@ impl AclDescription {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for AclDescription {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 2 {
@@ -152,6 +153,7 @@ impl Encodable for AclDescription {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for AclDescription {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let principal = if version >= 2 {
@@ -280,6 +282,7 @@ impl DescribeAclsResource {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for DescribeAclsResource {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int8.encode(buf, &self.resource_type)?;
@@ -351,6 +354,7 @@ impl Encodable for DescribeAclsResource {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for DescribeAclsResource {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let resource_type = types::Int8.decode(buf)?;
@@ -483,6 +487,7 @@ impl DescribeAclsResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for DescribeAclsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
@@ -542,6 +547,7 @@ impl Encodable for DescribeAclsResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for DescribeAclsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = types::Int32.decode(buf)?;

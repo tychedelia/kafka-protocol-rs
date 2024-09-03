@@ -80,6 +80,7 @@ impl LeaveGroupRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for LeaveGroupRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 4 {
@@ -162,6 +163,7 @@ impl Encodable for LeaveGroupRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for LeaveGroupRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let group_id = if version >= 4 {
@@ -281,6 +283,7 @@ impl MemberIdentity {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for MemberIdentity {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 3 {
@@ -365,6 +368,7 @@ impl Encodable for MemberIdentity {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for MemberIdentity {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let member_id = if version >= 3 {

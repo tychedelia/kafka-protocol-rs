@@ -164,6 +164,7 @@ impl JoinGroupResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for JoinGroupResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 2 {
@@ -269,6 +270,7 @@ impl Encodable for JoinGroupResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for JoinGroupResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = if version >= 2 {
@@ -418,6 +420,7 @@ impl JoinGroupResponseMember {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for JoinGroupResponseMember {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 6 {
@@ -486,6 +489,7 @@ impl Encodable for JoinGroupResponseMember {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for JoinGroupResponseMember {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let member_id = if version >= 6 {

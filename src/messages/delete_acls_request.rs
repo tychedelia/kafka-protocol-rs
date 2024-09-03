@@ -136,6 +136,7 @@ impl DeleteAclsFilter {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for DeleteAclsFilter {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int8.encode(buf, &self.resource_type_filter)?;
@@ -220,6 +221,7 @@ impl Encodable for DeleteAclsFilter {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for DeleteAclsFilter {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let resource_type_filter = types::Int8.decode(buf)?;
@@ -323,6 +325,7 @@ impl DeleteAclsRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for DeleteAclsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 2 {
@@ -368,6 +371,7 @@ impl Encodable for DeleteAclsRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for DeleteAclsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let filters = if version >= 2 {

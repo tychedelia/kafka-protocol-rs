@@ -108,6 +108,7 @@ impl CreatableTopicConfigs {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for CreatableTopicConfigs {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 5 {
@@ -214,6 +215,7 @@ impl Encodable for CreatableTopicConfigs {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for CreatableTopicConfigs {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = if version >= 5 {
@@ -399,6 +401,7 @@ impl CreatableTopicResult {
     }
 }
 
+#[cfg(feature = "broker")]
 impl MapEncodable for CreatableTopicResult {
     type Key = super::TopicName;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
@@ -515,6 +518,7 @@ impl MapEncodable for CreatableTopicResult {
     }
 }
 
+#[cfg(feature = "client")]
 impl MapDecodable for CreatableTopicResult {
     type Key = super::TopicName;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
@@ -659,6 +663,7 @@ impl CreateTopicsResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for CreateTopicsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 2 {
@@ -710,6 +715,7 @@ impl Encodable for CreateTopicsResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for CreateTopicsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = if version >= 2 {

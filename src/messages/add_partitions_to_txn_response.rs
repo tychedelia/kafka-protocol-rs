@@ -52,6 +52,7 @@ impl AddPartitionsToTxnPartitionResult {
     }
 }
 
+#[cfg(feature = "broker")]
 impl MapEncodable for AddPartitionsToTxnPartitionResult {
     type Key = i32;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
@@ -91,6 +92,7 @@ impl MapEncodable for AddPartitionsToTxnPartitionResult {
     }
 }
 
+#[cfg(feature = "client")]
 impl MapDecodable for AddPartitionsToTxnPartitionResult {
     type Key = i32;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
@@ -215,6 +217,7 @@ impl AddPartitionsToTxnResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for AddPartitionsToTxnResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
@@ -299,6 +302,7 @@ impl Encodable for AddPartitionsToTxnResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for AddPartitionsToTxnResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = types::Int32.decode(buf)?;
@@ -396,6 +400,7 @@ impl AddPartitionsToTxnResult {
     }
 }
 
+#[cfg(feature = "broker")]
 impl MapEncodable for AddPartitionsToTxnResult {
     type Key = super::TransactionalId;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
@@ -460,6 +465,7 @@ impl MapEncodable for AddPartitionsToTxnResult {
     }
 }
 
+#[cfg(feature = "client")]
 impl MapDecodable for AddPartitionsToTxnResult {
     type Key = super::TransactionalId;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
@@ -545,6 +551,7 @@ impl AddPartitionsToTxnTopicResult {
     }
 }
 
+#[cfg(feature = "broker")]
 impl MapEncodable for AddPartitionsToTxnTopicResult {
     type Key = super::TopicName;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
@@ -603,6 +610,7 @@ impl MapEncodable for AddPartitionsToTxnTopicResult {
     }
 }
 
+#[cfg(feature = "client")]
 impl MapDecodable for AddPartitionsToTxnTopicResult {
     type Key = super::TopicName;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {

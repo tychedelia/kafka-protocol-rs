@@ -80,6 +80,7 @@ impl DeleteAclsFilterResult {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for DeleteAclsFilterResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int16.encode(buf, &self.error_code)?;
@@ -138,6 +139,7 @@ impl Encodable for DeleteAclsFilterResult {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for DeleteAclsFilterResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let error_code = types::Int16.decode(buf)?;
@@ -333,6 +335,7 @@ impl DeleteAclsMatchingAcl {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for DeleteAclsMatchingAcl {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int16.encode(buf, &self.error_code)?;
@@ -429,6 +432,7 @@ impl Encodable for DeleteAclsMatchingAcl {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for DeleteAclsMatchingAcl {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let error_code = types::Int16.decode(buf)?;
@@ -556,6 +560,7 @@ impl DeleteAclsResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for DeleteAclsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
@@ -604,6 +609,7 @@ impl Encodable for DeleteAclsResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for DeleteAclsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = types::Int32.decode(buf)?;

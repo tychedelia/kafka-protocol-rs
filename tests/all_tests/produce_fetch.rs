@@ -16,8 +16,7 @@ use kafka_protocol::{
     },
 };
 
-mod common;
-use common::*;
+use crate::all_tests::common::*;
 
 #[test]
 fn record_batch_produce_fetch() {

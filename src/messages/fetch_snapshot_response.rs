@@ -80,6 +80,7 @@ impl FetchSnapshotResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for FetchSnapshotResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
@@ -116,6 +117,7 @@ impl Encodable for FetchSnapshotResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for FetchSnapshotResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = types::Int32.decode(buf)?;
@@ -203,6 +205,7 @@ impl LeaderIdAndEpoch {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for LeaderIdAndEpoch {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.leader_id)?;
@@ -237,6 +240,7 @@ impl Encodable for LeaderIdAndEpoch {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for LeaderIdAndEpoch {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let leader_id = types::Int32.decode(buf)?;
@@ -391,6 +395,7 @@ impl PartitionSnapshot {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for PartitionSnapshot {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.index)?;
@@ -463,6 +468,7 @@ impl Encodable for PartitionSnapshot {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for PartitionSnapshot {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let index = types::Int32.decode(buf)?;
@@ -569,6 +575,7 @@ impl SnapshotId {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for SnapshotId {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int64.encode(buf, &self.end_offset)?;
@@ -603,6 +610,7 @@ impl Encodable for SnapshotId {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for SnapshotId {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let end_offset = types::Int64.decode(buf)?;
@@ -687,6 +695,7 @@ impl TopicSnapshot {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for TopicSnapshot {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::CompactString.encode(buf, &self.name)?;
@@ -722,6 +731,7 @@ impl Encodable for TopicSnapshot {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for TopicSnapshot {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = types::CompactString.decode(buf)?;

@@ -66,6 +66,7 @@ impl DescribeGroupsRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for DescribeGroupsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 5 {
@@ -124,6 +125,7 @@ impl Encodable for DescribeGroupsRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for DescribeGroupsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let groups = if version >= 5 {

@@ -66,6 +66,7 @@ impl ControlledShutdownResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for ControlledShutdownResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int16.encode(buf, &self.error_code)?;
@@ -115,6 +116,7 @@ impl Encodable for ControlledShutdownResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for ControlledShutdownResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let error_code = types::Int16.decode(buf)?;
@@ -205,6 +207,7 @@ impl RemainingPartition {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for RemainingPartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 3 {
@@ -251,6 +254,7 @@ impl Encodable for RemainingPartition {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for RemainingPartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let topic_name = if version >= 3 {

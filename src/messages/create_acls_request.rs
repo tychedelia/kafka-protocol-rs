@@ -136,6 +136,7 @@ impl AclCreation {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for AclCreation {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int8.encode(buf, &self.resource_type)?;
@@ -220,6 +221,7 @@ impl Encodable for AclCreation {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for AclCreation {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let resource_type = types::Int8.decode(buf)?;
@@ -323,6 +325,7 @@ impl CreateAclsRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for CreateAclsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 2 {
@@ -368,6 +371,7 @@ impl Encodable for CreateAclsRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for CreateAclsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let creations = if version >= 2 {

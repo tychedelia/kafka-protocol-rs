@@ -94,6 +94,7 @@ impl ListOffsetsPartition {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for ListOffsetsPartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.partition_index)?;
@@ -152,6 +153,7 @@ impl Encodable for ListOffsetsPartition {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for ListOffsetsPartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let partition_index = types::Int32.decode(buf)?;
@@ -266,6 +268,7 @@ impl ListOffsetsRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for ListOffsetsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.replica_id)?;
@@ -327,6 +330,7 @@ impl Encodable for ListOffsetsRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for ListOffsetsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let replica_id = types::Int32.decode(buf)?;
@@ -424,6 +428,7 @@ impl ListOffsetsTopic {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for ListOffsetsTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 6 {
@@ -479,6 +484,7 @@ impl Encodable for ListOffsetsTopic {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for ListOffsetsTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = if version >= 6 {

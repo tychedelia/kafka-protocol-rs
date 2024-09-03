@@ -69,6 +69,7 @@ impl OffsetForLeaderEpochRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for OffsetForLeaderEpochRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 3 {
@@ -120,6 +121,7 @@ impl Encodable for OffsetForLeaderEpochRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for OffsetForLeaderEpochRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let replica_id = if version >= 3 {
@@ -228,6 +230,7 @@ impl OffsetForLeaderPartition {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for OffsetForLeaderPartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.partition)?;
@@ -272,6 +275,7 @@ impl Encodable for OffsetForLeaderPartition {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for OffsetForLeaderPartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let partition = types::Int32.decode(buf)?;
@@ -351,6 +355,7 @@ impl OffsetForLeaderTopic {
     }
 }
 
+#[cfg(feature = "client")]
 impl MapEncodable for OffsetForLeaderTopic {
     type Key = super::TopicName;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
@@ -407,6 +412,7 @@ impl MapEncodable for OffsetForLeaderTopic {
     }
 }
 
+#[cfg(feature = "broker")]
 impl MapDecodable for OffsetForLeaderTopic {
     type Key = super::TopicName;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {

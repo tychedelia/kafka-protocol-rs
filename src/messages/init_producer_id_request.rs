@@ -94,6 +94,7 @@ impl InitProducerIdRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for InitProducerIdRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 2 {
@@ -168,6 +169,7 @@ impl Encodable for InitProducerIdRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for InitProducerIdRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let transactional_id = if version >= 2 {

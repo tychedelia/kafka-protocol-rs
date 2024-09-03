@@ -66,6 +66,7 @@ impl ListPartitionReassignmentsRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for ListPartitionReassignmentsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.timeout_ms)?;
@@ -100,6 +101,7 @@ impl Encodable for ListPartitionReassignmentsRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for ListPartitionReassignmentsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let timeout_ms = types::Int32.decode(buf)?;
@@ -184,6 +186,7 @@ impl ListPartitionReassignmentsTopics {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for ListPartitionReassignmentsTopics {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::CompactString.encode(buf, &self.name)?;
@@ -218,6 +221,7 @@ impl Encodable for ListPartitionReassignmentsTopics {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for ListPartitionReassignmentsTopics {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = types::CompactString.decode(buf)?;

@@ -80,6 +80,7 @@ impl DescribeClusterBroker {
     }
 }
 
+#[cfg(feature = "broker")]
 impl MapEncodable for DescribeClusterBroker {
     type Key = super::BrokerId;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
@@ -119,6 +120,7 @@ impl MapEncodable for DescribeClusterBroker {
     }
 }
 
+#[cfg(feature = "client")]
 impl MapDecodable for DescribeClusterBroker {
     type Key = super::BrokerId;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
@@ -298,6 +300,7 @@ impl DescribeClusterResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for DescribeClusterResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
@@ -356,6 +359,7 @@ impl Encodable for DescribeClusterResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for DescribeClusterResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = types::Int32.decode(buf)?;

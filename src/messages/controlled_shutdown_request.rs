@@ -66,6 +66,7 @@ impl ControlledShutdownRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for ControlledShutdownRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.broker_id)?;
@@ -108,6 +109,7 @@ impl Encodable for ControlledShutdownRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for ControlledShutdownRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let broker_id = types::Int32.decode(buf)?;

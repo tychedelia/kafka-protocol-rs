@@ -80,6 +80,7 @@ impl AssignReplicasToDirsResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for AssignReplicasToDirsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
@@ -117,6 +118,7 @@ impl Encodable for AssignReplicasToDirsResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for AssignReplicasToDirsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = types::Int32.decode(buf)?;
@@ -204,6 +206,7 @@ impl DirectoryData {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for DirectoryData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Uuid.encode(buf, &self.id)?;
@@ -238,6 +241,7 @@ impl Encodable for DirectoryData {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for DirectoryData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let id = types::Uuid.decode(buf)?;
@@ -322,6 +326,7 @@ impl PartitionData {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for PartitionData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.partition_index)?;
@@ -356,6 +361,7 @@ impl Encodable for PartitionData {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for PartitionData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let partition_index = types::Int32.decode(buf)?;
@@ -440,6 +446,7 @@ impl TopicData {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for TopicData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Uuid.encode(buf, &self.topic_id)?;
@@ -475,6 +482,7 @@ impl Encodable for TopicData {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for TopicData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let topic_id = types::Uuid.decode(buf)?;

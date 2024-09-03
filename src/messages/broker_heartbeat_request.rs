@@ -122,6 +122,7 @@ impl BrokerHeartbeatRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for BrokerHeartbeatRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.broker_id)?;
@@ -200,6 +201,7 @@ impl Encodable for BrokerHeartbeatRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for BrokerHeartbeatRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let broker_id = types::Int32.decode(buf)?;

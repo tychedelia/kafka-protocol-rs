@@ -52,6 +52,7 @@ impl ListGroupsRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for ListGroupsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 4 {
@@ -101,6 +102,7 @@ impl Encodable for ListGroupsRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for ListGroupsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let states_filter = if version >= 4 {

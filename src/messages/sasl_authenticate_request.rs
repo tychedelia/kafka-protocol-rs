@@ -52,6 +52,7 @@ impl SaslAuthenticateRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for SaslAuthenticateRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 2 {
@@ -96,6 +97,7 @@ impl Encodable for SaslAuthenticateRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for SaslAuthenticateRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let auth_bytes = if version >= 2 {

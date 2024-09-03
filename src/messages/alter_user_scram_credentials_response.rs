@@ -66,6 +66,7 @@ impl AlterUserScramCredentialsResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for AlterUserScramCredentialsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
@@ -100,6 +101,7 @@ impl Encodable for AlterUserScramCredentialsResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for AlterUserScramCredentialsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = types::Int32.decode(buf)?;
@@ -198,6 +200,7 @@ impl AlterUserScramCredentialsResult {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for AlterUserScramCredentialsResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::CompactString.encode(buf, &self.user)?;
@@ -234,6 +237,7 @@ impl Encodable for AlterUserScramCredentialsResult {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for AlterUserScramCredentialsResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let user = types::CompactString.decode(buf)?;

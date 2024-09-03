@@ -94,6 +94,7 @@ impl EndTxnRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for EndTxnRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 3 {
@@ -144,6 +145,7 @@ impl Encodable for EndTxnRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for EndTxnRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let transactional_id = if version >= 3 {

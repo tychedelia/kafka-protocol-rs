@@ -32,5 +32,8 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy
-      - run: cargo clippy --workspace -- -D warnings
-      - run: cargo clippy --workspace --all-features -- -D warnings
+      - name: Install cargo-hack
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-hack@0.6.31
+      - run: cargo hack --feature-powerset clippy --all-targets --locked -- -D warnings

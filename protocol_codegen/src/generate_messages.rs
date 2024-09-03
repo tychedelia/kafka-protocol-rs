@@ -92,15 +92,32 @@ pub fn run() -> Result<(), Error> {
     writeln!(module_file)?;
     writeln!(
         module_file,
-        "use crate::protocol::{{NewType, Request, StrBytes, HeaderVersion}};"
+        "use crate::protocol::{{NewType, StrBytes, HeaderVersion}};"
     )?;
+    writeln!(
+        module_file,
+        "#[cfg(all(feature = \"client\", feature = \"broker\"))]"
+    )?;
+    writeln!(module_file, "use crate::protocol::Request;")?;
     writeln!(module_file, "use std::convert::TryFrom;")?;
     writeln!(module_file, "#[cfg(feature = \"messages_enum\")]")?;
+    writeln!(
+        module_file,
+        "#[cfg(any(feature = \"client\", feature = \"broker\"))]"
+    )?;
     writeln!(module_file, "use crate::protocol::Encodable;")?;
     writeln!(module_file, "#[cfg(feature = \"messages_enum\")]")?;
+    writeln!(
+        module_file,
+        "#[cfg(any(feature = \"client\", feature = \"broker\"))]"
+    )?;
     writeln!(module_file, "use crate::protocol::Decodable;")?;
     writeln!(module_file, "use anyhow::Result;")?;
     writeln!(module_file, "#[cfg(feature = \"messages_enum\")]")?;
+    writeln!(
+        module_file,
+        "#[cfg(any(feature = \"client\", feature = \"broker\"))]"
+    )?;
     writeln!(module_file, "use anyhow::Context;")?;
     writeln!(module_file)?;
 
@@ -169,6 +186,10 @@ pub fn run() -> Result<(), Error> {
             .find(|(k, _)| k == api_key)
             .map(|(_, v)| v)
             .expect("Every request type has a response type");
+        writeln!(
+            module_file,
+            "#[cfg(all(feature = \"client\", feature = \"broker\"))]"
+        )?;
         writeln!(module_file, "impl Request for {} {{", request_type)?;
         writeln!(module_file, "    const KEY: i16 = {};", api_key)?;
         writeln!(module_file, "    type Response = {};", response_type)?;
@@ -278,6 +299,7 @@ pub fn run() -> Result<(), Error> {
     writeln!(module_file, "#[cfg(feature = \"messages_enum\")]")?;
     writeln!(module_file, "impl RequestKind {{")?;
     writeln!(module_file, "/// Encode the message into the target buffer")?;
+    writeln!(module_file, "#[cfg(feature = \"client\")]")?;
     writeln!(
         module_file,
         "pub fn encode(&self, bytes: &mut bytes::BytesMut, version: i16) -> anyhow::Result<()> {{"
@@ -297,6 +319,7 @@ pub fn run() -> Result<(), Error> {
         module_file,
         "/// Decode the message from the provided buffer and version"
     )?;
+    writeln!(module_file, "#[cfg(feature = \"broker\")]")?;
     writeln!(
         module_file,
         "pub fn decode(api_key: ApiKey, bytes: &mut bytes::Bytes, version: i16) -> anyhow::Result<RequestKind> {{"
@@ -332,6 +355,7 @@ pub fn run() -> Result<(), Error> {
         module_file,
         r#"
 #[cfg(feature = "messages_enum")]
+#[cfg(any(feature = "client", feature = "broker"))]
 fn decode<T: Decodable>(bytes: &mut bytes::Bytes, version: i16) -> Result<T> {{
     T::decode(bytes, version).with_context(|| {{
         format!(
@@ -343,6 +367,7 @@ fn decode<T: Decodable>(bytes: &mut bytes::Bytes, version: i16) -> Result<T> {{
 }}
 
 #[cfg(feature = "messages_enum")]
+#[cfg(any(feature = "client", feature = "broker"))]
 fn encode<T: Encodable>(encodable: &T, bytes: &mut bytes::BytesMut, version: i16) -> Result<()> {{
     encodable.encode(bytes, version).with_context(|| {{
         format!(
@@ -378,6 +403,7 @@ fn encode<T: Encodable>(encodable: &T, bytes: &mut bytes::BytesMut, version: i16
     writeln!(module_file, "#[cfg(feature = \"messages_enum\")]")?;
     writeln!(module_file, "impl ResponseKind {{")?;
     writeln!(module_file, "/// Encode the message into the target buffer")?;
+    writeln!(module_file, "#[cfg(feature = \"broker\")]")?;
     writeln!(
         module_file,
         "pub fn encode(&self, bytes: &mut bytes::BytesMut, version: i16) -> anyhow::Result<()> {{"
@@ -397,6 +423,7 @@ fn encode<T: Encodable>(encodable: &T, bytes: &mut bytes::BytesMut, version: i16
         module_file,
         "/// Decode the message from the provided buffer and version"
     )?;
+    writeln!(module_file, "#[cfg(feature = \"client\")]")?;
     writeln!(
         module_file,
         "pub fn decode(api_key: ApiKey, bytes: &mut bytes::Bytes, version: i16) -> anyhow::Result<ResponseKind> {{"

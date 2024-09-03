@@ -66,6 +66,7 @@ impl DeleteRecordsPartitionResult {
     }
 }
 
+#[cfg(feature = "broker")]
 impl MapEncodable for DeleteRecordsPartitionResult {
     type Key = i32;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
@@ -107,6 +108,7 @@ impl MapEncodable for DeleteRecordsPartitionResult {
     }
 }
 
+#[cfg(feature = "client")]
 impl MapDecodable for DeleteRecordsPartitionResult {
     type Key = i32;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
@@ -201,6 +203,7 @@ impl DeleteRecordsResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for DeleteRecordsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.throttle_time_ms)?;
@@ -248,6 +251,7 @@ impl Encodable for DeleteRecordsResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for DeleteRecordsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = types::Int32.decode(buf)?;
@@ -327,6 +331,7 @@ impl DeleteRecordsTopicResult {
     }
 }
 
+#[cfg(feature = "broker")]
 impl MapEncodable for DeleteRecordsTopicResult {
     type Key = super::TopicName;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
@@ -383,6 +388,7 @@ impl MapEncodable for DeleteRecordsTopicResult {
     }
 }
 
+#[cfg(feature = "client")]
 impl MapDecodable for DeleteRecordsTopicResult {
     type Key = super::TopicName;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {

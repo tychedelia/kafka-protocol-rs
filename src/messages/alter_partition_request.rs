@@ -80,6 +80,7 @@ impl AlterPartitionRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for AlterPartitionRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.broker_id)?;
@@ -116,6 +117,7 @@ impl Encodable for AlterPartitionRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for AlterPartitionRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let broker_id = types::Int32.decode(buf)?;
@@ -203,6 +205,7 @@ impl BrokerState {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for BrokerState {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 3 {
@@ -261,6 +264,7 @@ impl Encodable for BrokerState {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for BrokerState {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let broker_id = if version >= 3 {
@@ -409,6 +413,7 @@ impl PartitionData {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for PartitionData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.partition_index)?;
@@ -489,6 +494,7 @@ impl Encodable for PartitionData {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for PartitionData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let partition_index = types::Int32.decode(buf)?;
@@ -611,6 +617,7 @@ impl TopicData {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for TopicData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version <= 1 {
@@ -656,6 +663,7 @@ impl Encodable for TopicData {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for TopicData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let topic_name = if version <= 1 {

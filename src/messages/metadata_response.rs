@@ -128,6 +128,7 @@ impl MetadataResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for MetadataResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 3 {
@@ -224,6 +225,7 @@ impl Encodable for MetadataResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for MetadataResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = if version >= 3 {
@@ -364,6 +366,7 @@ impl MetadataResponseBroker {
     }
 }
 
+#[cfg(feature = "broker")]
 impl MapEncodable for MetadataResponseBroker {
     type Key = super::BrokerId;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
@@ -427,6 +430,7 @@ impl MapEncodable for MetadataResponseBroker {
     }
 }
 
+#[cfg(feature = "client")]
 impl MapDecodable for MetadataResponseBroker {
     type Key = super::BrokerId;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
@@ -603,6 +607,7 @@ impl MetadataResponsePartition {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for MetadataResponsePartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int16.encode(buf, &self.error_code)?;
@@ -684,6 +689,7 @@ impl Encodable for MetadataResponsePartition {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for MetadataResponsePartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let error_code = types::Int16.decode(buf)?;
@@ -847,6 +853,7 @@ impl MetadataResponseTopic {
     }
 }
 
+#[cfg(feature = "broker")]
 impl MapEncodable for MetadataResponseTopic {
     type Key = super::TopicName;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
@@ -931,6 +938,7 @@ impl MapEncodable for MetadataResponseTopic {
     }
 }
 
+#[cfg(feature = "client")]
 impl MapDecodable for MetadataResponseTopic {
     type Key = super::TopicName;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {

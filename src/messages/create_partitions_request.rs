@@ -52,6 +52,7 @@ impl CreatePartitionsAssignment {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for CreatePartitionsAssignment {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 2 {
@@ -96,6 +97,7 @@ impl Encodable for CreatePartitionsAssignment {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for CreatePartitionsAssignment {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let broker_ids = if version >= 2 {
@@ -200,6 +202,7 @@ impl CreatePartitionsRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for CreatePartitionsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 2 {
@@ -249,6 +252,7 @@ impl Encodable for CreatePartitionsRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for CreatePartitionsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let topics = if version >= 2 {
@@ -342,6 +346,7 @@ impl CreatePartitionsTopic {
     }
 }
 
+#[cfg(feature = "client")]
 impl MapEncodable for CreatePartitionsTopic {
     type Key = super::TopicName;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
@@ -401,6 +406,7 @@ impl MapEncodable for CreatePartitionsTopic {
     }
 }
 
+#[cfg(feature = "broker")]
 impl MapDecodable for CreatePartitionsTopic {
     type Key = super::TopicName;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {

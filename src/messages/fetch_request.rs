@@ -122,6 +122,7 @@ impl FetchPartition {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for FetchPartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.partition)?;
@@ -188,6 +189,7 @@ impl Encodable for FetchPartition {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for FetchPartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let partition = types::Int32.decode(buf)?;
@@ -438,6 +440,7 @@ impl FetchRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for FetchRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version <= 14 {
@@ -632,6 +635,7 @@ impl Encodable for FetchRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for FetchRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let mut cluster_id = None;
@@ -816,6 +820,7 @@ impl FetchTopic {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for FetchTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version <= 12 {
@@ -881,6 +886,7 @@ impl Encodable for FetchTopic {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for FetchTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let topic = if version <= 12 {
@@ -1000,6 +1006,7 @@ impl ForgottenTopic {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for ForgottenTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 7 && version <= 12 {
@@ -1076,6 +1083,7 @@ impl Encodable for ForgottenTopic {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for ForgottenTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let topic = if version >= 7 && version <= 12 {
@@ -1185,6 +1193,7 @@ impl ReplicaState {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for ReplicaState {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 15 {
@@ -1247,6 +1256,7 @@ impl Encodable for ReplicaState {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for ReplicaState {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let replica_id = if version >= 15 {

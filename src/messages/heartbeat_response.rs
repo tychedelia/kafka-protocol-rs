@@ -66,6 +66,7 @@ impl HeartbeatResponse {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Encodable for HeartbeatResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 1 {
@@ -108,6 +109,7 @@ impl Encodable for HeartbeatResponse {
     }
 }
 
+#[cfg(feature = "client")]
 impl Decodable for HeartbeatResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let throttle_time_ms = if version >= 1 {

@@ -108,6 +108,7 @@ impl WritableTxnMarker {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for WritableTxnMarker {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int64.encode(buf, &self.producer_id)?;
@@ -161,6 +162,7 @@ impl Encodable for WritableTxnMarker {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for WritableTxnMarker {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let producer_id = types::Int64.decode(buf)?;
@@ -260,6 +262,7 @@ impl WritableTxnMarkerTopic {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for WritableTxnMarkerTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 1 {
@@ -315,6 +318,7 @@ impl Encodable for WritableTxnMarkerTopic {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for WritableTxnMarkerTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = if version >= 1 {
@@ -395,6 +399,7 @@ impl WriteTxnMarkersRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for WriteTxnMarkersRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 1 {
@@ -440,6 +445,7 @@ impl Encodable for WriteTxnMarkersRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for WriteTxnMarkersRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let markers = if version >= 1 {

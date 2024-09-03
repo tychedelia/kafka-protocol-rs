@@ -114,6 +114,7 @@ impl AddPartitionsToTxnRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for AddPartitionsToTxnRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 4 {
@@ -239,6 +240,7 @@ impl Encodable for AddPartitionsToTxnRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for AddPartitionsToTxnRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let transactions = if version >= 4 {
@@ -348,6 +350,7 @@ impl AddPartitionsToTxnTopic {
     }
 }
 
+#[cfg(feature = "client")]
 impl MapEncodable for AddPartitionsToTxnTopic {
     type Key = super::TopicName;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
@@ -403,6 +406,7 @@ impl MapEncodable for AddPartitionsToTxnTopic {
     }
 }
 
+#[cfg(feature = "broker")]
 impl MapDecodable for AddPartitionsToTxnTopic {
     type Key = super::TopicName;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
@@ -530,6 +534,7 @@ impl AddPartitionsToTxnTransaction {
     }
 }
 
+#[cfg(feature = "client")]
 impl MapEncodable for AddPartitionsToTxnTransaction {
     type Key = super::TransactionalId;
     fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
@@ -636,6 +641,7 @@ impl MapEncodable for AddPartitionsToTxnTransaction {
     }
 }
 
+#[cfg(feature = "broker")]
 impl MapDecodable for AddPartitionsToTxnTransaction {
     type Key = super::TransactionalId;
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {

@@ -164,6 +164,7 @@ impl ConsumerGroupHeartbeatRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for ConsumerGroupHeartbeatRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::CompactString.encode(buf, &self.group_id)?;
@@ -214,6 +215,7 @@ impl Encodable for ConsumerGroupHeartbeatRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for ConsumerGroupHeartbeatRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let group_id = types::CompactString.decode(buf)?;
@@ -319,6 +321,7 @@ impl TopicPartitions {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for TopicPartitions {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Uuid.encode(buf, &self.topic_id)?;
@@ -353,6 +356,7 @@ impl Encodable for TopicPartitions {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for TopicPartitions {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let topic_id = types::Uuid.decode(buf)?;

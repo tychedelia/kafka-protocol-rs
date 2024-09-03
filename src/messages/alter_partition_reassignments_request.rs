@@ -66,6 +66,7 @@ impl AlterPartitionReassignmentsRequest {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for AlterPartitionReassignmentsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.timeout_ms)?;
@@ -100,6 +101,7 @@ impl Encodable for AlterPartitionReassignmentsRequest {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for AlterPartitionReassignmentsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let timeout_ms = types::Int32.decode(buf)?;
@@ -184,6 +186,7 @@ impl ReassignablePartition {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for ReassignablePartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int32.encode(buf, &self.partition_index)?;
@@ -218,6 +221,7 @@ impl Encodable for ReassignablePartition {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for ReassignablePartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let partition_index = types::Int32.decode(buf)?;
@@ -302,6 +306,7 @@ impl ReassignableTopic {
     }
 }
 
+#[cfg(feature = "client")]
 impl Encodable for ReassignableTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::CompactString.encode(buf, &self.name)?;
@@ -337,6 +342,7 @@ impl Encodable for ReassignableTopic {
     }
 }
 
+#[cfg(feature = "broker")]
 impl Decodable for ReassignableTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let name = types::CompactString.decode(buf)?;
