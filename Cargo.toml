@@ -21,7 +21,7 @@ keywords = ["kafka"]
 [features]
 # adds the ResponseKind + RequestKind enums with variants for every message type.
 # disabled by default since it doubles clean release build times due to lots of generated code.
-messages_enum = []
+messages_enums = []
 # Enable this feature if you are implementing a kafka client.
 # It will enable encoding of requests and decoding of responses.
 client = []
