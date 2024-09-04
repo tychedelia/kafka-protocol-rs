@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.12.0
+
+- Add `client` feature to enable encoding of requests and decoding of responses (enabled by default)
+- Add `broker` feature to enable encoding of responses and decoding of requests (enabled by default)
+- Add `messages_enums` feature to enable `ResponseKind` and `RequestKind` enums
+- Add `encode`, `decode` and `header_version` methods to `ResponseKind` and `RequestKind`
+
 ## v0.11.0
 
 - Replace `derive_builder` with custom impl.
