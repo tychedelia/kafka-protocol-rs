@@ -17,18 +17,18 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-10
+/// Valid versions: 0-11
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct PartitionProduceData {
     /// The partition index.
     ///
-    /// Supported API versions: 0-10
+    /// Supported API versions: 0-11
     pub index: i32,
 
     /// The record data to be produced.
     ///
-    /// Supported API versions: 0-10
+    /// Supported API versions: 0-11
     pub records: Option<Bytes>,
 
     /// Other tagged fields
@@ -40,7 +40,7 @@ impl PartitionProduceData {
     ///
     /// The partition index.
     ///
-    /// Supported API versions: 0-10
+    /// Supported API versions: 0-11
     pub fn with_index(mut self, value: i32) -> Self {
         self.index = value;
         self
@@ -49,7 +49,7 @@ impl PartitionProduceData {
     ///
     /// The record data to be produced.
     ///
-    /// Supported API versions: 0-10
+    /// Supported API versions: 0-11
     pub fn with_records(mut self, value: Option<Bytes>) -> Self {
         self.records = value;
         self
@@ -151,32 +151,32 @@ impl Default for PartitionProduceData {
 }
 
 impl Message for PartitionProduceData {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 10 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 11 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 6 });
 }
 
-/// Valid versions: 0-10
+/// Valid versions: 0-11
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct ProduceRequest {
     /// The transactional ID, or null if the producer is not transactional.
     ///
-    /// Supported API versions: 3-10
+    /// Supported API versions: 3-11
     pub transactional_id: Option<super::TransactionalId>,
 
     /// The number of acknowledgments the producer requires the leader to have received before considering a request complete. Allowed values: 0 for no acknowledgments, 1 for only the leader and -1 for the full ISR.
     ///
-    /// Supported API versions: 0-10
+    /// Supported API versions: 0-11
     pub acks: i16,
 
     /// The timeout to await a response in milliseconds.
     ///
-    /// Supported API versions: 0-10
+    /// Supported API versions: 0-11
     pub timeout_ms: i32,
 
     /// Each topic to produce to.
     ///
-    /// Supported API versions: 0-10
+    /// Supported API versions: 0-11
     pub topic_data: indexmap::IndexMap<super::TopicName, TopicProduceData>,
 
     /// Other tagged fields
@@ -188,7 +188,7 @@ impl ProduceRequest {
     ///
     /// The transactional ID, or null if the producer is not transactional.
     ///
-    /// Supported API versions: 3-10
+    /// Supported API versions: 3-11
     pub fn with_transactional_id(mut self, value: Option<super::TransactionalId>) -> Self {
         self.transactional_id = value;
         self
@@ -197,7 +197,7 @@ impl ProduceRequest {
     ///
     /// The number of acknowledgments the producer requires the leader to have received before considering a request complete. Allowed values: 0 for no acknowledgments, 1 for only the leader and -1 for the full ISR.
     ///
-    /// Supported API versions: 0-10
+    /// Supported API versions: 0-11
     pub fn with_acks(mut self, value: i16) -> Self {
         self.acks = value;
         self
@@ -206,7 +206,7 @@ impl ProduceRequest {
     ///
     /// The timeout to await a response in milliseconds.
     ///
-    /// Supported API versions: 0-10
+    /// Supported API versions: 0-11
     pub fn with_timeout_ms(mut self, value: i32) -> Self {
         self.timeout_ms = value;
         self
@@ -215,7 +215,7 @@ impl ProduceRequest {
     ///
     /// Each topic to produce to.
     ///
-    /// Supported API versions: 0-10
+    /// Supported API versions: 0-11
     pub fn with_topic_data(
         mut self,
         value: indexmap::IndexMap<super::TopicName, TopicProduceData>,
@@ -359,17 +359,17 @@ impl Default for ProduceRequest {
 }
 
 impl Message for ProduceRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 10 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 11 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 6 });
 }
 
-/// Valid versions: 0-10
+/// Valid versions: 0-11
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct TopicProduceData {
     /// Each partition to produce to.
     ///
-    /// Supported API versions: 0-10
+    /// Supported API versions: 0-11
     pub partition_data: Vec<PartitionProduceData>,
 
     /// Other tagged fields
@@ -381,7 +381,7 @@ impl TopicProduceData {
     ///
     /// Each partition to produce to.
     ///
-    /// Supported API versions: 0-10
+    /// Supported API versions: 0-11
     pub fn with_partition_data(mut self, value: Vec<PartitionProduceData>) -> Self {
         self.partition_data = value;
         self
@@ -500,7 +500,7 @@ impl Default for TopicProduceData {
 }
 
 impl Message for TopicProduceData {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 10 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 11 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 6 });
 }
 

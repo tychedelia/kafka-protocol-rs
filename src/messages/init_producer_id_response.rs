@@ -17,28 +17,28 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-4
+/// Valid versions: 0-5
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct InitProducerIdResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub throttle_time_ms: i32,
 
     /// The error code, or 0 if there was no error.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub error_code: i16,
 
     /// The current producer id.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub producer_id: super::ProducerId,
 
     /// The current epoch associated with the producer id.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub producer_epoch: i16,
 
     /// Other tagged fields
@@ -50,7 +50,7 @@ impl InitProducerIdResponse {
     ///
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
         self.throttle_time_ms = value;
         self
@@ -59,7 +59,7 @@ impl InitProducerIdResponse {
     ///
     /// The error code, or 0 if there was no error.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub fn with_error_code(mut self, value: i16) -> Self {
         self.error_code = value;
         self
@@ -68,7 +68,7 @@ impl InitProducerIdResponse {
     ///
     /// The current producer id.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub fn with_producer_id(mut self, value: super::ProducerId) -> Self {
         self.producer_id = value;
         self
@@ -77,7 +77,7 @@ impl InitProducerIdResponse {
     ///
     /// The current epoch associated with the producer id.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub fn with_producer_epoch(mut self, value: i16) -> Self {
         self.producer_epoch = value;
         self
@@ -177,7 +177,7 @@ impl Default for InitProducerIdResponse {
 }
 
 impl Message for InitProducerIdResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 5 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 

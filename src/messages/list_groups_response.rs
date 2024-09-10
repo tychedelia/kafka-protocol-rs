@@ -17,23 +17,23 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-4
+/// Valid versions: 0-5
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct ListGroupsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 1-4
+    /// Supported API versions: 1-5
     pub throttle_time_ms: i32,
 
     /// The error code, or 0 if there was no error.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub error_code: i16,
 
     /// Each group in the response.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub groups: Vec<ListedGroup>,
 
     /// Other tagged fields
@@ -45,7 +45,7 @@ impl ListGroupsResponse {
     ///
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 1-4
+    /// Supported API versions: 1-5
     pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
         self.throttle_time_ms = value;
         self
@@ -54,7 +54,7 @@ impl ListGroupsResponse {
     ///
     /// The error code, or 0 if there was no error.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub fn with_error_code(mut self, value: i16) -> Self {
         self.error_code = value;
         self
@@ -63,7 +63,7 @@ impl ListGroupsResponse {
     ///
     /// Each group in the response.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub fn with_groups(mut self, value: Vec<ListedGroup>) -> Self {
         self.groups = value;
         self
@@ -179,28 +179,33 @@ impl Default for ListGroupsResponse {
 }
 
 impl Message for ListGroupsResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 5 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-4
+/// Valid versions: 0-5
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct ListedGroup {
     /// The group ID.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub group_id: super::GroupId,
 
     /// The group protocol type.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub protocol_type: StrBytes,
 
     /// The group state name.
     ///
-    /// Supported API versions: 4
+    /// Supported API versions: 4-5
     pub group_state: StrBytes,
+
+    /// The group type name.
+    ///
+    /// Supported API versions: 5
+    pub group_type: StrBytes,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
@@ -211,7 +216,7 @@ impl ListedGroup {
     ///
     /// The group ID.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub fn with_group_id(mut self, value: super::GroupId) -> Self {
         self.group_id = value;
         self
@@ -220,7 +225,7 @@ impl ListedGroup {
     ///
     /// The group protocol type.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub fn with_protocol_type(mut self, value: StrBytes) -> Self {
         self.protocol_type = value;
         self
@@ -229,9 +234,18 @@ impl ListedGroup {
     ///
     /// The group state name.
     ///
-    /// Supported API versions: 4
+    /// Supported API versions: 4-5
     pub fn with_group_state(mut self, value: StrBytes) -> Self {
         self.group_state = value;
+        self
+    }
+    /// Sets `group_type` to the passed value.
+    ///
+    /// The group type name.
+    ///
+    /// Supported API versions: 5
+    pub fn with_group_type(mut self, value: StrBytes) -> Self {
+        self.group_type = value;
         self
     }
     /// Sets unknown_tagged_fields to the passed value.
@@ -262,6 +276,9 @@ impl Encodable for ListedGroup {
         if version >= 4 {
             types::CompactString.encode(buf, &self.group_state)?;
         }
+        if version >= 5 {
+            types::CompactString.encode(buf, &self.group_type)?;
+        }
         if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
@@ -290,6 +307,9 @@ impl Encodable for ListedGroup {
         }
         if version >= 4 {
             total_size += types::CompactString.compute_size(&self.group_state)?;
+        }
+        if version >= 5 {
+            total_size += types::CompactString.compute_size(&self.group_type)?;
         }
         if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -325,6 +345,11 @@ impl Decodable for ListedGroup {
         } else {
             Default::default()
         };
+        let group_type = if version >= 5 {
+            types::CompactString.decode(buf)?
+        } else {
+            Default::default()
+        };
         let mut unknown_tagged_fields = BTreeMap::new();
         if version >= 3 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
@@ -339,6 +364,7 @@ impl Decodable for ListedGroup {
             group_id,
             protocol_type,
             group_state,
+            group_type,
             unknown_tagged_fields,
         })
     }
@@ -350,13 +376,14 @@ impl Default for ListedGroup {
             group_id: Default::default(),
             protocol_type: Default::default(),
             group_state: Default::default(),
+            group_type: Default::default(),
             unknown_tagged_fields: BTreeMap::new(),
         }
     }
 }
 
 impl Message for ListedGroup {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 5 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 

@@ -17,13 +17,13 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-4
+/// Valid versions: 0-5
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct AddPartitionsToTxnPartitionResult {
     /// The response error code.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub partition_error_code: i16,
 
     /// Other tagged fields
@@ -35,7 +35,7 @@ impl AddPartitionsToTxnPartitionResult {
     ///
     /// The response error code.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub fn with_partition_error_code(mut self, value: i16) -> Self {
         self.partition_error_code = value;
         self
@@ -128,27 +128,27 @@ impl Default for AddPartitionsToTxnPartitionResult {
 }
 
 impl Message for AddPartitionsToTxnPartitionResult {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 5 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-4
+/// Valid versions: 0-5
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct AddPartitionsToTxnResponse {
     /// Duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub throttle_time_ms: i32,
 
     /// The response top level error code.
     ///
-    /// Supported API versions: 4
+    /// Supported API versions: 4-5
     pub error_code: i16,
 
     /// Results categorized by transactional ID.
     ///
-    /// Supported API versions: 4
+    /// Supported API versions: 4-5
     pub results_by_transaction:
         indexmap::IndexMap<super::TransactionalId, AddPartitionsToTxnResult>,
 
@@ -167,7 +167,7 @@ impl AddPartitionsToTxnResponse {
     ///
     /// Duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
         self.throttle_time_ms = value;
         self
@@ -176,7 +176,7 @@ impl AddPartitionsToTxnResponse {
     ///
     /// The response top level error code.
     ///
-    /// Supported API versions: 4
+    /// Supported API versions: 4-5
     pub fn with_error_code(mut self, value: i16) -> Self {
         self.error_code = value;
         self
@@ -185,7 +185,7 @@ impl AddPartitionsToTxnResponse {
     ///
     /// Results categorized by transactional ID.
     ///
-    /// Supported API versions: 4
+    /// Supported API versions: 4-5
     pub fn with_results_by_transaction(
         mut self,
         value: indexmap::IndexMap<super::TransactionalId, AddPartitionsToTxnResult>,
@@ -358,17 +358,17 @@ impl Default for AddPartitionsToTxnResponse {
 }
 
 impl Message for AddPartitionsToTxnResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 5 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-4
+/// Valid versions: 0-5
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct AddPartitionsToTxnResult {
     /// The results for each topic.
     ///
-    /// Supported API versions: 4
+    /// Supported API versions: 4-5
     pub topic_results: indexmap::IndexMap<super::TopicName, AddPartitionsToTxnTopicResult>,
 
     /// Other tagged fields
@@ -380,7 +380,7 @@ impl AddPartitionsToTxnResult {
     ///
     /// The results for each topic.
     ///
-    /// Supported API versions: 4
+    /// Supported API versions: 4-5
     pub fn with_topic_results(
         mut self,
         value: indexmap::IndexMap<super::TopicName, AddPartitionsToTxnTopicResult>,
@@ -509,17 +509,17 @@ impl Default for AddPartitionsToTxnResult {
 }
 
 impl Message for AddPartitionsToTxnResult {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 5 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-4
+/// Valid versions: 0-5
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct AddPartitionsToTxnTopicResult {
     /// The results for each partition
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub results_by_partition: indexmap::IndexMap<i32, AddPartitionsToTxnPartitionResult>,
 
     /// Other tagged fields
@@ -531,7 +531,7 @@ impl AddPartitionsToTxnTopicResult {
     ///
     /// The results for each partition
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub fn with_results_by_partition(
         mut self,
         value: indexmap::IndexMap<i32, AddPartitionsToTxnPartitionResult>,
@@ -654,7 +654,7 @@ impl Default for AddPartitionsToTxnTopicResult {
 }
 
 impl Message for AddPartitionsToTxnTopicResult {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 5 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 

@@ -17,28 +17,28 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-3
+/// Valid versions: 0-4
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct EndTxnRequest {
     /// The ID of the transaction to end.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub transactional_id: super::TransactionalId,
 
     /// The producer ID.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub producer_id: super::ProducerId,
 
     /// The current epoch associated with the producer.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub producer_epoch: i16,
 
     /// True if the transaction was committed, false if it was aborted.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub committed: bool,
 
     /// Other tagged fields
@@ -50,7 +50,7 @@ impl EndTxnRequest {
     ///
     /// The ID of the transaction to end.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub fn with_transactional_id(mut self, value: super::TransactionalId) -> Self {
         self.transactional_id = value;
         self
@@ -59,7 +59,7 @@ impl EndTxnRequest {
     ///
     /// The producer ID.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub fn with_producer_id(mut self, value: super::ProducerId) -> Self {
         self.producer_id = value;
         self
@@ -68,7 +68,7 @@ impl EndTxnRequest {
     ///
     /// The current epoch associated with the producer.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub fn with_producer_epoch(mut self, value: i16) -> Self {
         self.producer_epoch = value;
         self
@@ -77,7 +77,7 @@ impl EndTxnRequest {
     ///
     /// True if the transaction was committed, false if it was aborted.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub fn with_committed(mut self, value: bool) -> Self {
         self.committed = value;
         self
@@ -189,7 +189,7 @@ impl Default for EndTxnRequest {
 }
 
 impl Message for EndTxnRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
