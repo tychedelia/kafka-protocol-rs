@@ -479,7 +479,6 @@ fn encode<T: Encodable>(encodable: &T, bytes: &mut bytes::BytesMut, version: i16
 
     for entity_type in entity_types {
         let mut derives = vec![
-            "Debug",
             "Clone",
             "Eq",
             "PartialEq",
@@ -567,6 +566,18 @@ fn encode<T: Encodable>(encodable: &T, bytes: &mut bytes::BytesMut, version: i16
             entity_type.name
         )?;
         writeln!(module_file, "}}")?;
+
+        writeln!(
+            module_file,
+            "impl std::fmt::Debug for {} {{",
+            entity_type.name
+        )?;
+        writeln!(
+            module_file,
+            "    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {{ self.0.fmt(f) }}",
+        )?;
+        writeln!(module_file, "}}")?;
+
         writeln!(
             module_file,
             "impl NewType<{}> for {} {{}}",

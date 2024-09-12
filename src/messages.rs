@@ -962,7 +962,6 @@ impl Request for DescribeTopicPartitionsRequest {
 
 /// Valid API keys in the Kafka protocol.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[non_exhaustive]
 pub enum ApiKey {
     /// API key for request ProduceRequest
     ProduceKey = 0,
@@ -3485,7 +3484,7 @@ impl From<DescribeTopicPartitionsResponse> for ResponseKind {
 }
 
 /// The ID of the leader broker.
-#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default, Copy)]
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default, Copy)]
 pub struct BrokerId(pub i32);
 
 impl From<i32> for BrokerId {
@@ -3519,10 +3518,15 @@ impl std::cmp::PartialEq<BrokerId> for i32 {
         self == &other.0
     }
 }
+impl std::fmt::Debug for BrokerId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.0.fmt(f)
+    }
+}
 impl NewType<i32> for BrokerId {}
 
 /// The group ID string.
-#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default)]
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default)]
 pub struct GroupId(pub StrBytes);
 
 impl From<StrBytes> for GroupId {
@@ -3556,10 +3560,15 @@ impl std::cmp::PartialEq<GroupId> for StrBytes {
         self == &other.0
     }
 }
+impl std::fmt::Debug for GroupId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.0.fmt(f)
+    }
+}
 impl NewType<StrBytes> for GroupId {}
 
 /// The first producer ID in this range, inclusive
-#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default, Copy)]
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default, Copy)]
 pub struct ProducerId(pub i64);
 
 impl From<i64> for ProducerId {
@@ -3593,10 +3602,15 @@ impl std::cmp::PartialEq<ProducerId> for i64 {
         self == &other.0
     }
 }
+impl std::fmt::Debug for ProducerId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.0.fmt(f)
+    }
+}
 impl NewType<i64> for ProducerId {}
 
 /// The topic name.
-#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default)]
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default)]
 pub struct TopicName(pub StrBytes);
 
 impl From<StrBytes> for TopicName {
@@ -3630,10 +3644,15 @@ impl std::cmp::PartialEq<TopicName> for StrBytes {
         self == &other.0
     }
 }
+impl std::fmt::Debug for TopicName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.0.fmt(f)
+    }
+}
 impl NewType<StrBytes> for TopicName {}
 
 ///
-#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default)]
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default)]
 pub struct TransactionalId(pub StrBytes);
 
 impl From<StrBytes> for TransactionalId {
@@ -3665,6 +3684,11 @@ impl std::cmp::PartialEq<StrBytes> for TransactionalId {
 impl std::cmp::PartialEq<TransactionalId> for StrBytes {
     fn eq(&self, other: &TransactionalId) -> bool {
         self == &other.0
+    }
+}
+impl std::fmt::Debug for TransactionalId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.0.fmt(f)
     }
 }
 impl NewType<StrBytes> for TransactionalId {}
