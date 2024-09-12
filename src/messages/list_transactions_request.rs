@@ -17,19 +17,24 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0
+/// Valid versions: 0-1
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct ListTransactionsRequest {
     /// The transaction states to filter by: if empty, all transactions are returned; if non-empty, then only transactions matching one of the filtered states will be returned
     ///
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub state_filters: Vec<StrBytes>,
 
     /// The producerIds to filter by: if empty, all transactions will be returned; if non-empty, only transactions which match one of the filtered producerIds will be returned
     ///
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub producer_id_filters: Vec<super::ProducerId>,
+
+    /// Duration (in millis) to filter by: if < 0, all transactions will be returned; otherwise, only transactions running longer than this duration will be returned
+    ///
+    /// Supported API versions: 1
+    pub duration_filter: i64,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
@@ -40,7 +45,7 @@ impl ListTransactionsRequest {
     ///
     /// The transaction states to filter by: if empty, all transactions are returned; if non-empty, then only transactions matching one of the filtered states will be returned
     ///
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub fn with_state_filters(mut self, value: Vec<StrBytes>) -> Self {
         self.state_filters = value;
         self
@@ -49,9 +54,18 @@ impl ListTransactionsRequest {
     ///
     /// The producerIds to filter by: if empty, all transactions will be returned; if non-empty, only transactions which match one of the filtered producerIds will be returned
     ///
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub fn with_producer_id_filters(mut self, value: Vec<super::ProducerId>) -> Self {
         self.producer_id_filters = value;
+        self
+    }
+    /// Sets `duration_filter` to the passed value.
+    ///
+    /// Duration (in millis) to filter by: if < 0, all transactions will be returned; otherwise, only transactions running longer than this duration will be returned
+    ///
+    /// Supported API versions: 1
+    pub fn with_duration_filter(mut self, value: i64) -> Self {
+        self.duration_filter = value;
         self
     }
     /// Sets unknown_tagged_fields to the passed value.
@@ -71,6 +85,13 @@ impl Encodable for ListTransactionsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::CompactArray(types::CompactString).encode(buf, &self.state_filters)?;
         types::CompactArray(types::Int64).encode(buf, &self.producer_id_filters)?;
+        if version >= 1 {
+            types::Int64.encode(buf, &self.duration_filter)?;
+        } else {
+            if self.duration_filter != -1 {
+                bail!("failed to encode");
+            }
+        }
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             bail!(
@@ -88,6 +109,13 @@ impl Encodable for ListTransactionsRequest {
         total_size +=
             types::CompactArray(types::CompactString).compute_size(&self.state_filters)?;
         total_size += types::CompactArray(types::Int64).compute_size(&self.producer_id_filters)?;
+        if version >= 1 {
+            total_size += types::Int64.compute_size(&self.duration_filter)?;
+        } else {
+            if self.duration_filter != -1 {
+                bail!("failed to encode");
+            }
+        }
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             bail!(
@@ -107,6 +135,11 @@ impl Decodable for ListTransactionsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let state_filters = types::CompactArray(types::CompactString).decode(buf)?;
         let producer_id_filters = types::CompactArray(types::Int64).decode(buf)?;
+        let duration_filter = if version >= 1 {
+            types::Int64.decode(buf)?
+        } else {
+            -1
+        };
         let mut unknown_tagged_fields = BTreeMap::new();
         let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
         for _ in 0..num_tagged_fields {
@@ -118,6 +151,7 @@ impl Decodable for ListTransactionsRequest {
         Ok(Self {
             state_filters,
             producer_id_filters,
+            duration_filter,
             unknown_tagged_fields,
         })
     }
@@ -128,13 +162,14 @@ impl Default for ListTransactionsRequest {
         Self {
             state_filters: Default::default(),
             producer_id_filters: Default::default(),
+            duration_filter: -1,
             unknown_tagged_fields: BTreeMap::new(),
         }
     }
 }
 
 impl Message for ListTransactionsRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 0 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 

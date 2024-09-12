@@ -27,6 +27,9 @@ pub use consumer_protocol_subscription::ConsumerProtocolSubscription;
 pub mod default_principal_data;
 pub use default_principal_data::DefaultPrincipalData;
 
+pub mod k_raft_version_record;
+pub use k_raft_version_record::KRaftVersionRecord;
+
 pub mod leader_change_message;
 pub use leader_change_message::LeaderChangeMessage;
 
@@ -41,6 +44,9 @@ pub use snapshot_footer_record::SnapshotFooterRecord;
 
 pub mod snapshot_header_record;
 pub use snapshot_header_record::SnapshotHeaderRecord;
+
+pub mod voters_record;
+pub use voters_record::VotersRecord;
 
 pub mod produce_request;
 pub use produce_request::ProduceRequest;
@@ -249,6 +255,9 @@ pub use allocate_producer_ids_request::AllocateProducerIdsRequest;
 pub mod consumer_group_heartbeat_request;
 pub use consumer_group_heartbeat_request::ConsumerGroupHeartbeatRequest;
 
+pub mod consumer_group_describe_request;
+pub use consumer_group_describe_request::ConsumerGroupDescribeRequest;
+
 pub mod controller_registration_request;
 pub use controller_registration_request::ControllerRegistrationRequest;
 
@@ -263,6 +272,9 @@ pub use assign_replicas_to_dirs_request::AssignReplicasToDirsRequest;
 
 pub mod list_client_metrics_resources_request;
 pub use list_client_metrics_resources_request::ListClientMetricsResourcesRequest;
+
+pub mod describe_topic_partitions_request;
+pub use describe_topic_partitions_request::DescribeTopicPartitionsRequest;
 
 pub mod produce_response;
 pub use produce_response::ProduceResponse;
@@ -471,6 +483,9 @@ pub use allocate_producer_ids_response::AllocateProducerIdsResponse;
 pub mod consumer_group_heartbeat_response;
 pub use consumer_group_heartbeat_response::ConsumerGroupHeartbeatResponse;
 
+pub mod consumer_group_describe_response;
+pub use consumer_group_describe_response::ConsumerGroupDescribeResponse;
+
 pub mod controller_registration_response;
 pub use controller_registration_response::ControllerRegistrationResponse;
 
@@ -485,6 +500,9 @@ pub use assign_replicas_to_dirs_response::AssignReplicasToDirsResponse;
 
 pub mod list_client_metrics_resources_response;
 pub use list_client_metrics_resources_response::ListClientMetricsResourcesResponse;
+
+pub mod describe_topic_partitions_response;
+pub use describe_topic_partitions_response::DescribeTopicPartitionsResponse;
 
 #[cfg(all(feature = "client", feature = "broker"))]
 impl Request for ProduceRequest {
@@ -901,6 +919,12 @@ impl Request for ConsumerGroupHeartbeatRequest {
 }
 
 #[cfg(all(feature = "client", feature = "broker"))]
+impl Request for ConsumerGroupDescribeRequest {
+    const KEY: i16 = 69;
+    type Response = ConsumerGroupDescribeResponse;
+}
+
+#[cfg(all(feature = "client", feature = "broker"))]
 impl Request for ControllerRegistrationRequest {
     const KEY: i16 = 70;
     type Response = ControllerRegistrationResponse;
@@ -928,6 +952,12 @@ impl Request for AssignReplicasToDirsRequest {
 impl Request for ListClientMetricsResourcesRequest {
     const KEY: i16 = 74;
     type Response = ListClientMetricsResourcesResponse;
+}
+
+#[cfg(all(feature = "client", feature = "broker"))]
+impl Request for DescribeTopicPartitionsRequest {
+    const KEY: i16 = 75;
+    type Response = DescribeTopicPartitionsResponse;
 }
 
 /// Valid API keys in the Kafka protocol.
@@ -1072,6 +1102,8 @@ pub enum ApiKey {
     AllocateProducerIdsKey = 67,
     /// API key for request ConsumerGroupHeartbeatRequest
     ConsumerGroupHeartbeatKey = 68,
+    /// API key for request ConsumerGroupDescribeRequest
+    ConsumerGroupDescribeKey = 69,
     /// API key for request ControllerRegistrationRequest
     ControllerRegistrationKey = 70,
     /// API key for request GetTelemetrySubscriptionsRequest
@@ -1082,6 +1114,8 @@ pub enum ApiKey {
     AssignReplicasToDirsKey = 73,
     /// API key for request ListClientMetricsResourcesRequest
     ListClientMetricsResourcesKey = 74,
+    /// API key for request DescribeTopicPartitionsRequest
+    DescribeTopicPartitionsKey = 75,
 }
 
 impl ApiKey {
@@ -1175,6 +1209,9 @@ impl ApiKey {
             ApiKey::ConsumerGroupHeartbeatKey => {
                 ConsumerGroupHeartbeatRequest::header_version(version)
             }
+            ApiKey::ConsumerGroupDescribeKey => {
+                ConsumerGroupDescribeRequest::header_version(version)
+            }
             ApiKey::ControllerRegistrationKey => {
                 ControllerRegistrationRequest::header_version(version)
             }
@@ -1185,6 +1222,9 @@ impl ApiKey {
             ApiKey::AssignReplicasToDirsKey => AssignReplicasToDirsRequest::header_version(version),
             ApiKey::ListClientMetricsResourcesKey => {
                 ListClientMetricsResourcesRequest::header_version(version)
+            }
+            ApiKey::DescribeTopicPartitionsKey => {
+                DescribeTopicPartitionsRequest::header_version(version)
             }
         }
     }
@@ -1286,6 +1326,9 @@ impl ApiKey {
             ApiKey::ConsumerGroupHeartbeatKey => {
                 ConsumerGroupHeartbeatResponse::header_version(version)
             }
+            ApiKey::ConsumerGroupDescribeKey => {
+                ConsumerGroupDescribeResponse::header_version(version)
+            }
             ApiKey::ControllerRegistrationKey => {
                 ControllerRegistrationResponse::header_version(version)
             }
@@ -1298,6 +1341,9 @@ impl ApiKey {
             }
             ApiKey::ListClientMetricsResourcesKey => {
                 ListClientMetricsResourcesResponse::header_version(version)
+            }
+            ApiKey::DescribeTopicPartitionsKey => {
+                DescribeTopicPartitionsResponse::header_version(version)
             }
         }
     }
@@ -1394,6 +1440,9 @@ impl TryFrom<i16> for ApiKey {
             x if x == ApiKey::ConsumerGroupHeartbeatKey as i16 => {
                 Ok(ApiKey::ConsumerGroupHeartbeatKey)
             }
+            x if x == ApiKey::ConsumerGroupDescribeKey as i16 => {
+                Ok(ApiKey::ConsumerGroupDescribeKey)
+            }
             x if x == ApiKey::ControllerRegistrationKey as i16 => {
                 Ok(ApiKey::ControllerRegistrationKey)
             }
@@ -1404,6 +1453,9 @@ impl TryFrom<i16> for ApiKey {
             x if x == ApiKey::AssignReplicasToDirsKey as i16 => Ok(ApiKey::AssignReplicasToDirsKey),
             x if x == ApiKey::ListClientMetricsResourcesKey as i16 => {
                 Ok(ApiKey::ListClientMetricsResourcesKey)
+            }
+            x if x == ApiKey::DescribeTopicPartitionsKey as i16 => {
+                Ok(ApiKey::DescribeTopicPartitionsKey)
             }
             _ => Err(()),
         }
@@ -1553,6 +1605,8 @@ pub enum RequestKind {
     AllocateProducerIds(AllocateProducerIdsRequest),
     /// ConsumerGroupHeartbeatRequest,
     ConsumerGroupHeartbeat(ConsumerGroupHeartbeatRequest),
+    /// ConsumerGroupDescribeRequest,
+    ConsumerGroupDescribe(ConsumerGroupDescribeRequest),
     /// ControllerRegistrationRequest,
     ControllerRegistration(ControllerRegistrationRequest),
     /// GetTelemetrySubscriptionsRequest,
@@ -1563,6 +1617,8 @@ pub enum RequestKind {
     AssignReplicasToDirs(AssignReplicasToDirsRequest),
     /// ListClientMetricsResourcesRequest,
     ListClientMetricsResources(ListClientMetricsResourcesRequest),
+    /// DescribeTopicPartitionsRequest,
+    DescribeTopicPartitions(DescribeTopicPartitionsRequest),
 }
 
 #[cfg(feature = "messages_enums")]
@@ -1640,11 +1696,13 @@ impl RequestKind {
             RequestKind::ListTransactions(x) => encode(x, bytes, version),
             RequestKind::AllocateProducerIds(x) => encode(x, bytes, version),
             RequestKind::ConsumerGroupHeartbeat(x) => encode(x, bytes, version),
+            RequestKind::ConsumerGroupDescribe(x) => encode(x, bytes, version),
             RequestKind::ControllerRegistration(x) => encode(x, bytes, version),
             RequestKind::GetTelemetrySubscriptions(x) => encode(x, bytes, version),
             RequestKind::PushTelemetry(x) => encode(x, bytes, version),
             RequestKind::AssignReplicasToDirs(x) => encode(x, bytes, version),
             RequestKind::ListClientMetricsResources(x) => encode(x, bytes, version),
+            RequestKind::DescribeTopicPartitions(x) => encode(x, bytes, version),
         }
     }
     /// Decode the message from the provided buffer and version
@@ -1774,6 +1832,9 @@ impl RequestKind {
             ApiKey::ConsumerGroupHeartbeatKey => {
                 Ok(RequestKind::ConsumerGroupHeartbeat(decode(bytes, version)?))
             }
+            ApiKey::ConsumerGroupDescribeKey => {
+                Ok(RequestKind::ConsumerGroupDescribe(decode(bytes, version)?))
+            }
             ApiKey::ControllerRegistrationKey => {
                 Ok(RequestKind::ControllerRegistration(decode(bytes, version)?))
             }
@@ -1787,6 +1848,9 @@ impl RequestKind {
             ApiKey::ListClientMetricsResourcesKey => Ok(RequestKind::ListClientMetricsResources(
                 decode(bytes, version)?,
             )),
+            ApiKey::DescribeTopicPartitionsKey => Ok(RequestKind::DescribeTopicPartitions(decode(
+                bytes, version,
+            )?)),
         }
     }
 }
@@ -2274,6 +2338,13 @@ impl From<ConsumerGroupHeartbeatRequest> for RequestKind {
 }
 
 #[cfg(feature = "messages_enums")]
+impl From<ConsumerGroupDescribeRequest> for RequestKind {
+    fn from(value: ConsumerGroupDescribeRequest) -> RequestKind {
+        RequestKind::ConsumerGroupDescribe(value)
+    }
+}
+
+#[cfg(feature = "messages_enums")]
 impl From<ControllerRegistrationRequest> for RequestKind {
     fn from(value: ControllerRegistrationRequest) -> RequestKind {
         RequestKind::ControllerRegistration(value)
@@ -2305,6 +2376,13 @@ impl From<AssignReplicasToDirsRequest> for RequestKind {
 impl From<ListClientMetricsResourcesRequest> for RequestKind {
     fn from(value: ListClientMetricsResourcesRequest) -> RequestKind {
         RequestKind::ListClientMetricsResources(value)
+    }
+}
+
+#[cfg(feature = "messages_enums")]
+impl From<DescribeTopicPartitionsRequest> for RequestKind {
+    fn from(value: DescribeTopicPartitionsRequest) -> RequestKind {
+        RequestKind::DescribeTopicPartitions(value)
     }
 }
 
@@ -2475,6 +2553,8 @@ pub enum ResponseKind {
     AllocateProducerIds(AllocateProducerIdsResponse),
     /// ConsumerGroupHeartbeatResponse,
     ConsumerGroupHeartbeat(ConsumerGroupHeartbeatResponse),
+    /// ConsumerGroupDescribeResponse,
+    ConsumerGroupDescribe(ConsumerGroupDescribeResponse),
     /// ControllerRegistrationResponse,
     ControllerRegistration(ControllerRegistrationResponse),
     /// GetTelemetrySubscriptionsResponse,
@@ -2485,6 +2565,8 @@ pub enum ResponseKind {
     AssignReplicasToDirs(AssignReplicasToDirsResponse),
     /// ListClientMetricsResourcesResponse,
     ListClientMetricsResources(ListClientMetricsResourcesResponse),
+    /// DescribeTopicPartitionsResponse,
+    DescribeTopicPartitions(DescribeTopicPartitionsResponse),
 }
 
 #[cfg(feature = "messages_enums")]
@@ -2562,11 +2644,13 @@ impl ResponseKind {
             ResponseKind::ListTransactions(x) => encode(x, bytes, version),
             ResponseKind::AllocateProducerIds(x) => encode(x, bytes, version),
             ResponseKind::ConsumerGroupHeartbeat(x) => encode(x, bytes, version),
+            ResponseKind::ConsumerGroupDescribe(x) => encode(x, bytes, version),
             ResponseKind::ControllerRegistration(x) => encode(x, bytes, version),
             ResponseKind::GetTelemetrySubscriptions(x) => encode(x, bytes, version),
             ResponseKind::PushTelemetry(x) => encode(x, bytes, version),
             ResponseKind::AssignReplicasToDirs(x) => encode(x, bytes, version),
             ResponseKind::ListClientMetricsResources(x) => encode(x, bytes, version),
+            ResponseKind::DescribeTopicPartitions(x) => encode(x, bytes, version),
         }
     }
     /// Decode the message from the provided buffer and version
@@ -2712,6 +2796,9 @@ impl ResponseKind {
             ApiKey::ConsumerGroupHeartbeatKey => Ok(ResponseKind::ConsumerGroupHeartbeat(decode(
                 bytes, version,
             )?)),
+            ApiKey::ConsumerGroupDescribeKey => {
+                Ok(ResponseKind::ConsumerGroupDescribe(decode(bytes, version)?))
+            }
             ApiKey::ControllerRegistrationKey => Ok(ResponseKind::ControllerRegistration(decode(
                 bytes, version,
             )?)),
@@ -2723,6 +2810,9 @@ impl ResponseKind {
                 Ok(ResponseKind::AssignReplicasToDirs(decode(bytes, version)?))
             }
             ApiKey::ListClientMetricsResourcesKey => Ok(ResponseKind::ListClientMetricsResources(
+                decode(bytes, version)?,
+            )),
+            ApiKey::DescribeTopicPartitionsKey => Ok(ResponseKind::DescribeTopicPartitions(
                 decode(bytes, version)?,
             )),
         }
@@ -2839,6 +2929,9 @@ impl ResponseKind {
             ResponseKind::ConsumerGroupHeartbeat(_) => {
                 ConsumerGroupHeartbeatResponse::header_version(version)
             }
+            ResponseKind::ConsumerGroupDescribe(_) => {
+                ConsumerGroupDescribeResponse::header_version(version)
+            }
             ResponseKind::ControllerRegistration(_) => {
                 ControllerRegistrationResponse::header_version(version)
             }
@@ -2851,6 +2944,9 @@ impl ResponseKind {
             }
             ResponseKind::ListClientMetricsResources(_) => {
                 ListClientMetricsResourcesResponse::header_version(version)
+            }
+            ResponseKind::DescribeTopicPartitions(_) => {
+                DescribeTopicPartitionsResponse::header_version(version)
             }
         }
     }
@@ -3340,6 +3436,13 @@ impl From<ConsumerGroupHeartbeatResponse> for ResponseKind {
 }
 
 #[cfg(feature = "messages_enums")]
+impl From<ConsumerGroupDescribeResponse> for ResponseKind {
+    fn from(value: ConsumerGroupDescribeResponse) -> ResponseKind {
+        ResponseKind::ConsumerGroupDescribe(value)
+    }
+}
+
+#[cfg(feature = "messages_enums")]
 impl From<ControllerRegistrationResponse> for ResponseKind {
     fn from(value: ControllerRegistrationResponse) -> ResponseKind {
         ResponseKind::ControllerRegistration(value)
@@ -3374,7 +3477,14 @@ impl From<ListClientMetricsResourcesResponse> for ResponseKind {
     }
 }
 
-/// The ID of the controller broker.
+#[cfg(feature = "messages_enums")]
+impl From<DescribeTopicPartitionsResponse> for ResponseKind {
+    fn from(value: DescribeTopicPartitionsResponse) -> ResponseKind {
+        ResponseKind::DescribeTopicPartitions(value)
+    }
+}
+
+/// The ID of the leader broker.
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default, Copy)]
 pub struct BrokerId(pub i32);
 
@@ -3411,7 +3521,7 @@ impl std::cmp::PartialEq<BrokerId> for i32 {
 }
 impl NewType<i32> for BrokerId {}
 
-/// The group id
+/// The group ID string.
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default)]
 pub struct GroupId(pub StrBytes);
 
@@ -3485,7 +3595,7 @@ impl std::cmp::PartialEq<ProducerId> for i64 {
 }
 impl NewType<i64> for ProducerId {}
 
-///
+/// The topic name.
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default)]
 pub struct TopicName(pub StrBytes);
 

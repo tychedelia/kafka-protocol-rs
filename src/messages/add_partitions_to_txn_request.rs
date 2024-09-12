@@ -17,13 +17,13 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-4
+/// Valid versions: 0-5
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct AddPartitionsToTxnRequest {
     /// List of transactions to add partitions to.
     ///
-    /// Supported API versions: 4
+    /// Supported API versions: 4-5
     pub transactions: indexmap::IndexMap<super::TransactionalId, AddPartitionsToTxnTransaction>,
 
     /// The transactional id corresponding to the transaction.
@@ -55,7 +55,7 @@ impl AddPartitionsToTxnRequest {
     ///
     /// List of transactions to add partitions to.
     ///
-    /// Supported API versions: 4
+    /// Supported API versions: 4-5
     pub fn with_transactions(
         mut self,
         value: indexmap::IndexMap<super::TransactionalId, AddPartitionsToTxnTransaction>,
@@ -311,17 +311,17 @@ impl Default for AddPartitionsToTxnRequest {
 }
 
 impl Message for AddPartitionsToTxnRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 5 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-4
+/// Valid versions: 0-5
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct AddPartitionsToTxnTopic {
     /// The partition indexes to add to the transaction
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub partitions: Vec<i32>,
 
     /// Other tagged fields
@@ -333,7 +333,7 @@ impl AddPartitionsToTxnTopic {
     ///
     /// The partition indexes to add to the transaction
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub fn with_partitions(mut self, value: Vec<i32>) -> Self {
         self.partitions = value;
         self
@@ -450,32 +450,32 @@ impl Default for AddPartitionsToTxnTopic {
 }
 
 impl Message for AddPartitionsToTxnTopic {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 5 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-4
+/// Valid versions: 0-5
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct AddPartitionsToTxnTransaction {
     /// Current producer id in use by the transactional id.
     ///
-    /// Supported API versions: 4
+    /// Supported API versions: 4-5
     pub producer_id: super::ProducerId,
 
     /// Current epoch associated with the producer id.
     ///
-    /// Supported API versions: 4
+    /// Supported API versions: 4-5
     pub producer_epoch: i16,
 
     /// Boolean to signify if we want to check if the partition is in the transaction rather than add it.
     ///
-    /// Supported API versions: 4
+    /// Supported API versions: 4-5
     pub verify_only: bool,
 
     /// The partitions to add to the transaction.
     ///
-    /// Supported API versions: 4
+    /// Supported API versions: 4-5
     pub topics: indexmap::IndexMap<super::TopicName, AddPartitionsToTxnTopic>,
 
     /// Other tagged fields
@@ -487,7 +487,7 @@ impl AddPartitionsToTxnTransaction {
     ///
     /// Current producer id in use by the transactional id.
     ///
-    /// Supported API versions: 4
+    /// Supported API versions: 4-5
     pub fn with_producer_id(mut self, value: super::ProducerId) -> Self {
         self.producer_id = value;
         self
@@ -496,7 +496,7 @@ impl AddPartitionsToTxnTransaction {
     ///
     /// Current epoch associated with the producer id.
     ///
-    /// Supported API versions: 4
+    /// Supported API versions: 4-5
     pub fn with_producer_epoch(mut self, value: i16) -> Self {
         self.producer_epoch = value;
         self
@@ -505,7 +505,7 @@ impl AddPartitionsToTxnTransaction {
     ///
     /// Boolean to signify if we want to check if the partition is in the transaction rather than add it.
     ///
-    /// Supported API versions: 4
+    /// Supported API versions: 4-5
     pub fn with_verify_only(mut self, value: bool) -> Self {
         self.verify_only = value;
         self
@@ -514,7 +514,7 @@ impl AddPartitionsToTxnTransaction {
     ///
     /// The partitions to add to the transaction.
     ///
-    /// Supported API versions: 4
+    /// Supported API versions: 4-5
     pub fn with_topics(
         mut self,
         value: indexmap::IndexMap<super::TopicName, AddPartitionsToTxnTopic>,
@@ -706,7 +706,7 @@ impl Default for AddPartitionsToTxnTransaction {
 }
 
 impl Message for AddPartitionsToTxnTransaction {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 5 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 

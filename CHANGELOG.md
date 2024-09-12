@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Update protocol to kafka 3.8.0
+
 ## v0.12.0
 
 - Add `client` feature to enable encoding of requests and decoding of responses (enabled by default)
@@ -40,12 +44,15 @@ and other misc improvements.
 - Update `derive-builder`.
 
 ## v0.8.2
+
 - Expose protocol::buf::gap module.
 
 ## v0.8.1
+
 - Re-export `indexmap` as part of the public api.
 
 ## v0.8.0
+
 - Implement Zstd and Lz4 compression.
 
 ## v0.7.0
@@ -85,17 +92,16 @@ with protocol upgrades.
 
 - Add utilities for dealing with response error codes.
 
-## v0.3.0 
+## v0.3.0
 
-#### Enhancements:
+#### Enhancements
 
 - Build messages from crate root.
 - Upgrade to latest version of Kafka protocol.
 
+## v0.2.0
 
-## v0.2.0 
-
-#### Enhancements:
+#### Enhancements
 
 - Add derive builder for all messages.
 

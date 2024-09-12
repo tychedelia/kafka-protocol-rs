@@ -17,28 +17,28 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-3
+/// Valid versions: 0-4
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct AddOffsetsToTxnRequest {
     /// The transactional id corresponding to the transaction.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub transactional_id: super::TransactionalId,
 
     /// Current producer id in use by the transactional id.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub producer_id: super::ProducerId,
 
     /// Current epoch associated with the producer id.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub producer_epoch: i16,
 
     /// The unique group identifier.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub group_id: super::GroupId,
 
     /// Other tagged fields
@@ -50,7 +50,7 @@ impl AddOffsetsToTxnRequest {
     ///
     /// The transactional id corresponding to the transaction.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub fn with_transactional_id(mut self, value: super::TransactionalId) -> Self {
         self.transactional_id = value;
         self
@@ -59,7 +59,7 @@ impl AddOffsetsToTxnRequest {
     ///
     /// Current producer id in use by the transactional id.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub fn with_producer_id(mut self, value: super::ProducerId) -> Self {
         self.producer_id = value;
         self
@@ -68,7 +68,7 @@ impl AddOffsetsToTxnRequest {
     ///
     /// Current epoch associated with the producer id.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub fn with_producer_epoch(mut self, value: i16) -> Self {
         self.producer_epoch = value;
         self
@@ -77,7 +77,7 @@ impl AddOffsetsToTxnRequest {
     ///
     /// The unique group identifier.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 0-4
     pub fn with_group_id(mut self, value: super::GroupId) -> Self {
         self.group_id = value;
         self
@@ -201,7 +201,7 @@ impl Default for AddOffsetsToTxnRequest {
 }
 
 impl Message for AddOffsetsToTxnRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 

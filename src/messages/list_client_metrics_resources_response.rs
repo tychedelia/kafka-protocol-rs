@@ -21,7 +21,7 @@ use crate::protocol::{
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct ClientMetricsResource {
-    ///
+    /// The resource name.
     ///
     /// Supported API versions: 0
     pub name: StrBytes,
@@ -33,7 +33,7 @@ pub struct ClientMetricsResource {
 impl ClientMetricsResource {
     /// Sets `name` to the passed value.
     ///
-    ///
+    /// The resource name.
     ///
     /// Supported API versions: 0
     pub fn with_name(mut self, value: StrBytes) -> Self {
@@ -127,12 +127,12 @@ pub struct ListClientMetricsResourcesResponse {
     /// Supported API versions: 0
     pub throttle_time_ms: i32,
 
-    ///
+    /// The error code, or 0 if there was no error.
     ///
     /// Supported API versions: 0
     pub error_code: i16,
 
-    ///
+    /// Each client metrics resource in the response.
     ///
     /// Supported API versions: 0
     pub client_metrics_resources: Vec<ClientMetricsResource>,
@@ -153,7 +153,7 @@ impl ListClientMetricsResourcesResponse {
     }
     /// Sets `error_code` to the passed value.
     ///
-    ///
+    /// The error code, or 0 if there was no error.
     ///
     /// Supported API versions: 0
     pub fn with_error_code(mut self, value: i16) -> Self {
@@ -162,7 +162,7 @@ impl ListClientMetricsResourcesResponse {
     }
     /// Sets `client_metrics_resources` to the passed value.
     ///
-    ///
+    /// Each client metrics resource in the response.
     ///
     /// Supported API versions: 0
     pub fn with_client_metrics_resources(mut self, value: Vec<ClientMetricsResource>) -> Self {
