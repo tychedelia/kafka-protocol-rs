@@ -185,7 +185,7 @@ macro_rules! define_errors {
 
 define_errors! { ResponseError,
     (UNKNOWN_SERVER_ERROR,                  -1, false, "The server experienced an unexpected error when processing the request."),
-    // (NONE,                                  0, false, "No error"),
+    (NONE,                                  0, false, "No error"),
     (OFFSET_OUT_OF_RANGE,                   1, false, "The requested offset is not within the range of offsets maintained by the server."),
     (CORRUPT_MESSAGE,                       2, true, "This message has failed its CRC checksum, exceeds the valid size, has a null key for a compacted topic, or is otherwise corrupt."),
     (UNKNOWN_TOPIC_OR_PARTITION,            3, true, "This server does not host this topic-partition."),
