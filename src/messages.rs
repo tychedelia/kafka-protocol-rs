@@ -932,6 +932,7 @@ impl Request for ListClientMetricsResourcesRequest {
 
 /// Valid API keys in the Kafka protocol.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[non_exhaustive]
 pub enum ApiKey {
     /// API key for request ProduceRequest
     ProduceKey = 0,
