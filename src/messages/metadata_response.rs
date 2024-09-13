@@ -26,7 +26,7 @@ pub struct MetadataResponse {
     /// Supported API versions: 3-12
     pub throttle_time_ms: i32,
 
-    /// Each broker in the response.
+    /// A list of brokers present in the cluster.
     ///
     /// Supported API versions: 0-12
     pub brokers: indexmap::IndexMap<super::BrokerId, MetadataResponseBroker>,
@@ -67,7 +67,7 @@ impl MetadataResponse {
     }
     /// Sets `brokers` to the passed value.
     ///
-    /// Each broker in the response.
+    /// A list of brokers present in the cluster.
     ///
     /// Supported API versions: 0-12
     pub fn with_brokers(
@@ -771,7 +771,7 @@ pub struct MetadataResponseTopic {
     /// Supported API versions: 0-12
     pub error_code: i16,
 
-    /// The topic id.
+    /// The topic id. Zero for non-existing topics queried by name. This is never zero when ErrorCode is zero. One of Name and TopicId is always populated.
     ///
     /// Supported API versions: 10-12
     pub topic_id: Uuid,
@@ -807,7 +807,7 @@ impl MetadataResponseTopic {
     }
     /// Sets `topic_id` to the passed value.
     ///
-    /// The topic id.
+    /// The topic id. Zero for non-existing topics queried by name. This is never zero when ErrorCode is zero. One of Name and TopicId is always populated.
     ///
     /// Supported API versions: 10-12
     pub fn with_topic_id(mut self, value: Uuid) -> Self {

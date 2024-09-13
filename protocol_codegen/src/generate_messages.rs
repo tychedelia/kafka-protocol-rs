@@ -40,9 +40,9 @@ pub fn run() -> Result<(), Error> {
     };
 
     // Checkout the release commit
-    // https://github.com/apache/kafka/releases/tag/3.7.0
+    // https://github.com/apache/kafka/releases/tag/3.8.0
     // checking out a tag with git2 is annoying -- we pin to the tag's commit sha instead
-    let release_commit = "2ae524ed625438c5fee89e78648bd73e64a3ada0";
+    let release_commit = "771b9576b00ecf5b64ab6e8bedf04156fbdb5cd6";
     println!("Checking out release {}", release_commit);
     let oid = Oid::from_str(release_commit).unwrap();
     let commit = repo
@@ -479,7 +479,6 @@ fn encode<T: Encodable>(encodable: &T, bytes: &mut bytes::BytesMut, version: i16
 
     for entity_type in entity_types {
         let mut derives = vec![
-            "Debug",
             "Clone",
             "Eq",
             "PartialEq",
@@ -567,6 +566,18 @@ fn encode<T: Encodable>(encodable: &T, bytes: &mut bytes::BytesMut, version: i16
             entity_type.name
         )?;
         writeln!(module_file, "}}")?;
+
+        writeln!(
+            module_file,
+            "impl std::fmt::Debug for {} {{",
+            entity_type.name
+        )?;
+        writeln!(
+            module_file,
+            "    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {{ self.0.fmt(f) }}",
+        )?;
+        writeln!(module_file, "}}")?;
+
         writeln!(
             module_file,
             "impl NewType<{}> for {} {{}}",

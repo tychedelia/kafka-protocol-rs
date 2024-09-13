@@ -17,14 +17,19 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-4
+/// Valid versions: 0-5
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct ListGroupsRequest {
-    /// The states of the groups we want to list. If empty all groups are returned with their state.
+    /// The states of the groups we want to list. If empty, all groups are returned with their state.
     ///
-    /// Supported API versions: 4
+    /// Supported API versions: 4-5
     pub states_filter: Vec<StrBytes>,
+
+    /// The types of the groups we want to list. If empty, all groups are returned with their type.
+    ///
+    /// Supported API versions: 5
+    pub types_filter: Vec<StrBytes>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
@@ -33,11 +38,20 @@ pub struct ListGroupsRequest {
 impl ListGroupsRequest {
     /// Sets `states_filter` to the passed value.
     ///
-    /// The states of the groups we want to list. If empty all groups are returned with their state.
+    /// The states of the groups we want to list. If empty, all groups are returned with their state.
     ///
-    /// Supported API versions: 4
+    /// Supported API versions: 4-5
     pub fn with_states_filter(mut self, value: Vec<StrBytes>) -> Self {
         self.states_filter = value;
+        self
+    }
+    /// Sets `types_filter` to the passed value.
+    ///
+    /// The types of the groups we want to list. If empty, all groups are returned with their type.
+    ///
+    /// Supported API versions: 5
+    pub fn with_types_filter(mut self, value: Vec<StrBytes>) -> Self {
+        self.types_filter = value;
         self
     }
     /// Sets unknown_tagged_fields to the passed value.
@@ -59,6 +73,13 @@ impl Encodable for ListGroupsRequest {
             types::CompactArray(types::CompactString).encode(buf, &self.states_filter)?;
         } else {
             if !self.states_filter.is_empty() {
+                bail!("failed to encode");
+            }
+        }
+        if version >= 5 {
+            types::CompactArray(types::CompactString).encode(buf, &self.types_filter)?;
+        } else {
+            if !self.types_filter.is_empty() {
                 bail!("failed to encode");
             }
         }
@@ -86,6 +107,14 @@ impl Encodable for ListGroupsRequest {
                 bail!("failed to encode");
             }
         }
+        if version >= 5 {
+            total_size +=
+                types::CompactArray(types::CompactString).compute_size(&self.types_filter)?;
+        } else {
+            if !self.types_filter.is_empty() {
+                bail!("failed to encode");
+            }
+        }
         if version >= 3 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
@@ -110,6 +139,11 @@ impl Decodable for ListGroupsRequest {
         } else {
             Default::default()
         };
+        let types_filter = if version >= 5 {
+            types::CompactArray(types::CompactString).decode(buf)?
+        } else {
+            Default::default()
+        };
         let mut unknown_tagged_fields = BTreeMap::new();
         if version >= 3 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
@@ -122,6 +156,7 @@ impl Decodable for ListGroupsRequest {
         }
         Ok(Self {
             states_filter,
+            types_filter,
             unknown_tagged_fields,
         })
     }
@@ -131,13 +166,14 @@ impl Default for ListGroupsRequest {
     fn default() -> Self {
         Self {
             states_filter: Default::default(),
+            types_filter: Default::default(),
             unknown_tagged_fields: BTreeMap::new(),
         }
     }
 }
 
 impl Message for ListGroupsRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 5 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 

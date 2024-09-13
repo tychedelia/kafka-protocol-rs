@@ -17,28 +17,28 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-4
+/// Valid versions: 0-5
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct InitProducerIdRequest {
     /// The transactional id, or null if the producer is not transactional.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub transactional_id: Option<super::TransactionalId>,
 
     /// The time in ms to wait before aborting idle transactions sent by this producer. This is only relevant if a TransactionalId has been defined.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub transaction_timeout_ms: i32,
 
     /// The producer id. This is used to disambiguate requests if a transactional id is reused following its expiration.
     ///
-    /// Supported API versions: 3-4
+    /// Supported API versions: 3-5
     pub producer_id: super::ProducerId,
 
     /// The producer's current epoch. This will be checked against the producer epoch on the broker, and the request will return an error if they do not match.
     ///
-    /// Supported API versions: 3-4
+    /// Supported API versions: 3-5
     pub producer_epoch: i16,
 
     /// Other tagged fields
@@ -50,7 +50,7 @@ impl InitProducerIdRequest {
     ///
     /// The transactional id, or null if the producer is not transactional.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub fn with_transactional_id(mut self, value: Option<super::TransactionalId>) -> Self {
         self.transactional_id = value;
         self
@@ -59,7 +59,7 @@ impl InitProducerIdRequest {
     ///
     /// The time in ms to wait before aborting idle transactions sent by this producer. This is only relevant if a TransactionalId has been defined.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub fn with_transaction_timeout_ms(mut self, value: i32) -> Self {
         self.transaction_timeout_ms = value;
         self
@@ -68,7 +68,7 @@ impl InitProducerIdRequest {
     ///
     /// The producer id. This is used to disambiguate requests if a transactional id is reused following its expiration.
     ///
-    /// Supported API versions: 3-4
+    /// Supported API versions: 3-5
     pub fn with_producer_id(mut self, value: super::ProducerId) -> Self {
         self.producer_id = value;
         self
@@ -77,7 +77,7 @@ impl InitProducerIdRequest {
     ///
     /// The producer's current epoch. This will be checked against the producer epoch on the broker, and the request will return an error if they do not match.
     ///
-    /// Supported API versions: 3-4
+    /// Supported API versions: 3-5
     pub fn with_producer_epoch(mut self, value: i16) -> Self {
         self.producer_epoch = value;
         self
@@ -221,7 +221,7 @@ impl Default for InitProducerIdRequest {
 }
 
 impl Message for InitProducerIdRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 5 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 

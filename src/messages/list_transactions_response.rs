@@ -17,28 +17,28 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0
+/// Valid versions: 0-1
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct ListTransactionsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub throttle_time_ms: i32,
 
     ///
     ///
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub error_code: i16,
 
     /// Set of state filters provided in the request which were unknown to the transaction coordinator
     ///
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub unknown_state_filters: Vec<StrBytes>,
 
     ///
     ///
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub transaction_states: Vec<TransactionState>,
 
     /// Other tagged fields
@@ -50,7 +50,7 @@ impl ListTransactionsResponse {
     ///
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
         self.throttle_time_ms = value;
         self
@@ -59,7 +59,7 @@ impl ListTransactionsResponse {
     ///
     ///
     ///
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub fn with_error_code(mut self, value: i16) -> Self {
         self.error_code = value;
         self
@@ -68,7 +68,7 @@ impl ListTransactionsResponse {
     ///
     /// Set of state filters provided in the request which were unknown to the transaction coordinator
     ///
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub fn with_unknown_state_filters(mut self, value: Vec<StrBytes>) -> Self {
         self.unknown_state_filters = value;
         self
@@ -77,7 +77,7 @@ impl ListTransactionsResponse {
     ///
     ///
     ///
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub fn with_transaction_states(mut self, value: Vec<TransactionState>) -> Self {
         self.transaction_states = value;
         self
@@ -173,27 +173,27 @@ impl Default for ListTransactionsResponse {
 }
 
 impl Message for ListTransactionsResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 0 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0
+/// Valid versions: 0-1
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct TransactionState {
     ///
     ///
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub transactional_id: super::TransactionalId,
 
     ///
     ///
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub producer_id: super::ProducerId,
 
     /// The current transaction state of the producer
     ///
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub transaction_state: StrBytes,
 
     /// Other tagged fields
@@ -205,7 +205,7 @@ impl TransactionState {
     ///
     ///
     ///
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub fn with_transactional_id(mut self, value: super::TransactionalId) -> Self {
         self.transactional_id = value;
         self
@@ -214,7 +214,7 @@ impl TransactionState {
     ///
     ///
     ///
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub fn with_producer_id(mut self, value: super::ProducerId) -> Self {
         self.producer_id = value;
         self
@@ -223,7 +223,7 @@ impl TransactionState {
     ///
     /// The current transaction state of the producer
     ///
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub fn with_transaction_state(mut self, value: StrBytes) -> Self {
         self.transaction_state = value;
         self
@@ -312,7 +312,7 @@ impl Default for TransactionState {
 }
 
 impl Message for TransactionState {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 0 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
