@@ -137,8 +137,7 @@ macro_rules! define_errors {
                 #[doc = "Returns `None` if the error `code` is `0`."]
                 #[doc = concat!("Otherwise, the `Some(", stringify!($name), ")` is returned.")]
                 pub fn try_from_code(code: i16) -> Option<Self> {
-                    match code {
-                        0 => None,
+                    match code {                        
                         $(
                             $code => Some($name::[<$kind:camel>]),
                         )*
