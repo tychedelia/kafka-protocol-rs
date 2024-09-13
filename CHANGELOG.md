@@ -3,6 +3,9 @@
 ## Unreleased
 
 - Update protocol to kafka 3.8.0
+- The Debug impl for new type wrappers now passes directly to the inner type.
+  The full list of new type wrappers is BrokerId, GroupId, ProducerId, TopicName and TransactionalId.
+  For example GroupId was previously `GroupId("some group")` but is now `"some group"`.
 
 ## v0.12.0
 
