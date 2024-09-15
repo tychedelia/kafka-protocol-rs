@@ -32,21 +32,3 @@ impl<B: ByteBufMut> Compressor<B> for Gzip {
         Ok(res)
     }
 }
-
-impl<B: ByteBuf> Decompressor<B> for Gzip {
-    type Buf = Bytes;
-    fn decompress<R, F>(buf: &mut B, f: F) -> Result<R>
-    where
-        F: FnOnce(&mut Self::Buf) -> Result<R>,
-    {
-        let mut tmp = BytesMut::new();
-
-        // Decompress directly from the input buffer
-        let mut d = GzDecoder::new((&mut tmp).writer());
-        d.write_all(&buf.copy_to_bytes(buf.remaining()))
-            .context("Failed to decompress gzip")?;
-        d.finish().context("Failed to decompress gzip")?;
-
-        f(&mut tmp.into())
-    }
-}

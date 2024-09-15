@@ -15,13 +15,3 @@ impl<B: ByteBufMut> Compressor<B> for None {
         f(buf)
     }
 }
-
-impl<B: ByteBuf> Decompressor<B> for None {
-    type Buf = B;
-    fn decompress<R, F>(buf: &mut B, f: F) -> Result<R>
-    where
-        F: FnOnce(&mut Self::Buf) -> Result<R>,
-    {
-        f(buf)
-    }
-}

@@ -31,24 +31,3 @@ impl<B: ByteBufMut> Compressor<B> for Snappy {
         Ok(res)
     }
 }
-
-impl<B: ByteBuf> Decompressor<B> for Snappy {
-    type Buf = Bytes;
-    fn decompress<R, F>(buf: &mut B, f: F) -> Result<R>
-    where
-        F: FnOnce(&mut Self::Buf) -> Result<R>,
-    {
-        // Allocate a temporary buffer to hold the uncompressed bytes
-        let buf = buf.copy_to_bytes(buf.remaining());
-        let actual_len = decompress_len(&buf).context("Failed to decompress snappy")?;
-        let mut tmp = BytesMut::new();
-        tmp.resize(actual_len, 0);
-
-        // Decompress directly from the input buffer
-        Decoder::new()
-            .decompress(&buf, &mut tmp)
-            .context("Failed to decompress snappy")?;
-
-        f(&mut tmp.into())
-    }
-}

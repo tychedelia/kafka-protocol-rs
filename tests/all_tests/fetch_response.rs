@@ -1,6 +1,7 @@
 #[cfg(feature = "client")]
 mod client_tests {
     use bytes::Bytes;
+    use kafka_protocol::records::Compression;
     use kafka_protocol::{
         messages::FetchResponse, protocol::Decodable, records::RecordBatchDecoder,
     };
@@ -85,7 +86,8 @@ mod client_tests {
                 assert_eq!(partition.aborted_transactions.as_ref().unwrap().len(), 0);
 
                 let mut records = partition.records.unwrap();
-                let records = RecordBatchDecoder::decode(&mut records).unwrap();
+                let records =
+                    RecordBatchDecoder::decode(&mut records, decompress_record_batch_data).unwrap();
                 assert_eq!(records.len(), 1);
                 for record in records {
                     assert_eq!(
@@ -120,7 +122,8 @@ mod client_tests {
                 assert_eq!(partition.aborted_transactions.as_ref().unwrap().len(), 0);
 
                 let mut records = partition.records.unwrap();
-                let records = RecordBatchDecoder::decode(&mut records).unwrap();
+                let records =
+                    RecordBatchDecoder::decode(&mut records, decompress_record_batch_data).unwrap();
                 assert_eq!(records.len(), 1);
                 for record in records {
                     assert_eq!(
@@ -156,8 +159,21 @@ mod client_tests {
                 assert_eq!(partition.aborted_transactions.as_ref().unwrap().len(), 0);
 
                 let mut records = partition.records.unwrap();
-                let records = RecordBatchDecoder::decode(&mut records).unwrap();
+                let records =
+                    RecordBatchDecoder::decode(&mut records, decompress_record_batch_data).unwrap();
                 assert_eq!(records.len(), 1);
+            }
+        }
+    }
+
+    fn decompress_record_batch_data(
+        compressed_buffer: &mut bytes::Bytes,
+        compression: Compression,
+    ) -> anyhow::Result<Bytes> {
+        match compression {
+            Compression::None => Ok(compressed_buffer.to_vec().into()),
+            _ => {
+                panic!("Compression not implemented")
             }
         }
     }

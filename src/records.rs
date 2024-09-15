@@ -12,6 +12,7 @@
 //! use kafka_protocol::protocol::Decodable;
 //! use kafka_protocol::records::RecordBatchDecoder;
 //! use bytes::Bytes;
+//!  use kafka_protocol::records::Compression;
 //!
 //! # const HEADER: [u8; 45] = [ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x05, 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,];
 //! # const RECORD: [u8; 79] = [ 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x43, 0x0, 0x0, 0x0, 0x0, 0x2, 0x73, 0x6d, 0x29, 0x7b, 0x0, 0b00000000, 0x0, 0x0, 0x0, 0x3, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x1, 0x22, 0x1, 0xd0, 0xf, 0x2, 0xa, 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0xa, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x0,];
@@ -26,9 +27,16 @@
 //! for topic in res.responses {
 //!     for partition in topic.partitions {
 //!          let mut records = partition.records.unwrap();
-//!          let records = RecordBatchDecoder::decode(&mut records).unwrap();
+//!          let records = RecordBatchDecoder::decode(&mut records, decompress_record_batch_data).unwrap();
 //!     }
 //! }
+//!
+//! fn decompress_record_batch_data(compressed_buffer: &mut bytes::Bytes, compression: Compression) -> anyhow::Result<Bytes> {
+//!         match compression {
+//!             Compression::None => Ok(compressed_buffer.to_vec().into()),
+//!             _ => { panic!("Compression not implemented") }
+//!         }
+//!  }
 //! ```
 use anyhow::{anyhow, bail, Result};
 use bytes::Bytes;
@@ -429,18 +437,28 @@ impl RecordBatchEncoder {
 
 impl RecordBatchDecoder {
     /// Decode the provided buffer into a vec of records.
-    pub fn decode<B: ByteBuf>(buf: &mut B) -> Result<Vec<Record>> {
+    pub fn decode<B: ByteBuf, F>(buf: &mut B, decompress_func: F) -> Result<Vec<Record>>
+    where
+        F: Fn(&mut bytes::Bytes, Compression) -> Result<B>,
+    {
         let mut records = Vec::new();
         while buf.has_remaining() {
-            Self::decode_batch(buf, &mut records)?;
+            Self::decode_batch(buf, &mut records, &decompress_func)?;
         }
         Ok(records)
     }
-    fn decode_batch<B: ByteBuf>(buf: &mut B, records: &mut Vec<Record>) -> Result<()> {
+    fn decode_batch<B: ByteBuf, F>(
+        buf: &mut B,
+        records: &mut Vec<Record>,
+        decompress_func: F,
+    ) -> Result<()>
+    where
+        F: Fn(&mut bytes::Bytes, Compression) -> Result<B>,
+    {
         let version = buf.try_peek_bytes(MAGIC_BYTE_OFFSET..(MAGIC_BYTE_OFFSET + 1))?[0] as i8;
         match version {
             0..=1 => Record::decode_legacy(buf, version, records),
-            2 => Self::decode_new_batch(buf, version, records),
+            2 => Self::decode_new_batch(buf, version, records, decompress_func),
             _ => {
                 bail!("Unknown record batch version ({})", version);
             }
@@ -458,11 +476,15 @@ impl RecordBatchDecoder {
         }
         Ok(())
     }
-    fn decode_new_batch<B: ByteBuf>(
+    fn decode_new_batch<B: ByteBuf, F>(
         buf: &mut B,
         version: i8,
         records: &mut Vec<Record>,
-    ) -> Result<()> {
+        decompress_func: F,
+    ) -> Result<()>
+    where
+        F: Fn(&mut bytes::Bytes, Compression) -> Result<B>,
+    {
         // Base offset
         let min_offset = types::Int64.decode(buf)?;
 
@@ -554,24 +576,28 @@ impl RecordBatchDecoder {
             producer_epoch,
         };
 
+        let mut decompressed_buf = decompress_func(buf, compression)?;
+
+        Self::decode_new_records(&mut decompressed_buf, &batch_decode_info, version, records)?;
+
         // Records
-        match compression {
-            Compression::None => cmpr::None::decompress(buf, |buf| {
-                Self::decode_new_records(buf, &batch_decode_info, version, records)
-            })?,
-            Compression::Snappy => cmpr::Snappy::decompress(buf, |buf| {
-                Self::decode_new_records(buf, &batch_decode_info, version, records)
-            })?,
-            Compression::Gzip => cmpr::Gzip::decompress(buf, |buf| {
-                Self::decode_new_records(buf, &batch_decode_info, version, records)
-            })?,
-            Compression::Zstd => cmpr::Zstd::decompress(buf, |buf| {
-                Self::decode_new_records(buf, &batch_decode_info, version, records)
-            })?,
-            Compression::Lz4 => cmpr::Lz4::decompress(buf, |buf| {
-                Self::decode_new_records(buf, &batch_decode_info, version, records)
-            })?,
-        };
+        // match compression {
+        //     Compression::None => cmpr::None::decompress(buf, |buf| {
+        //         Self::decode_new_records(buf, &batch_decode_info, version, records)
+        //     })?,
+        //     Compression::Snappy => cmpr::Snappy::decompress(buf, |buf| {
+        //         Self::decode_new_records(buf, &batch_decode_info, version, records)
+        //     })?,
+        //     Compression::Gzip => cmpr::Gzip::decompress(buf, |buf| {
+        //         Self::decode_new_records(buf, &batch_decode_info, version, records)
+        //     })?,
+        //     Compression::Zstd => cmpr::Zstd::decompress(buf, |buf| {
+        //         Self::decode_new_records(buf, &batch_decode_info, version, records)
+        //     })?,
+        //     Compression::Lz4 => cmpr::Lz4::decompress(buf, |buf| {
+        //         Self::decode_new_records(buf, &batch_decode_info, version, records)
+        //     })?,
+        // };
 
         Ok(())
     }
