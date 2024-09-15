@@ -106,7 +106,6 @@
 // Display required features for items when rendering for docs.rs
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
 
-pub mod compression;
 pub mod error;
 #[allow(clippy::all)]
 pub mod messages;
