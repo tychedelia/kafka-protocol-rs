@@ -6,18 +6,6 @@
 use crate::protocol::buf::{ByteBuf, ByteBufMut};
 use anyhow::Result;
 
-mod gzip;
-mod lz4;
-mod none;
-mod snappy;
-mod zstd;
-
-pub use gzip::Gzip;
-pub use lz4::Lz4;
-pub use none::None;
-pub use snappy::Snappy;
-pub use zstd::Zstd;
-
 /// A trait for record compression algorithms.
 pub trait Compressor<B: ByteBufMut> {
     /// Target buffer type for compression.

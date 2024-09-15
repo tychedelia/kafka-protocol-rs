@@ -39,7 +39,7 @@
 //!  }
 //! ```
 use anyhow::{anyhow, bail, Result};
-use bytes::Bytes;
+use bytes::{Bytes, BytesMut};
 use crc::{Crc, CRC_32_ISO_HDLC};
 use crc32c::crc32c;
 use indexmap::IndexMap;
@@ -49,7 +49,6 @@ use crate::protocol::{
     types, Decoder, Encoder, StrBytes,
 };
 
-use super::compression::{self as cmpr, Compressor, Decompressor};
 use std::cmp::Ordering;
 use std::convert::TryFrom;
 
@@ -159,16 +158,22 @@ const MAGIC_BYTE_OFFSET: usize = 16;
 impl RecordBatchEncoder {
     /// Encode records into given buffer, using provided encoding options that select the encoding
     /// strategy based on version.
-    pub fn encode<'a, B, I>(buf: &mut B, records: I, options: &RecordEncodeOptions) -> Result<()>
+    pub fn encode<'a, B, I, CF>(
+        buf: &mut B,
+        records: I,
+        options: &RecordEncodeOptions,
+        compressor: CF,
+    ) -> Result<()>
     where
         B: ByteBufMut,
         I: IntoIterator<Item = &'a Record>,
         I::IntoIter: Clone,
+        CF: Fn(&mut BytesMut, &mut B, Compression) -> Result<()>,
     {
         let records = records.into_iter();
         match options.version {
-            0..=1 => Self::encode_legacy(buf, records, options),
-            2 => Self::encode_new(buf, records, options),
+            0..=1 => Self::encode_legacy(buf, records, options, compressor),
+            2 => Self::encode_new(buf, records, options, compressor),
             _ => bail!("Unknown record batch version"),
         }
     }
@@ -186,10 +191,16 @@ impl RecordBatchEncoder {
         }
         Ok(())
     }
-    fn encode_legacy<'a, B, I>(buf: &mut B, records: I, options: &RecordEncodeOptions) -> Result<()>
+    fn encode_legacy<'a, B, I, CF>(
+        buf: &mut B,
+        records: I,
+        options: &RecordEncodeOptions,
+        compressor: CF,
+    ) -> Result<()>
     where
         B: ByteBufMut,
         I: Iterator<Item = &'a Record> + Clone,
+        CF: Fn(&mut BytesMut, &mut B, Compression) -> Result<()>,
     {
         if options.compression == Compression::None {
             // No wrapper needed
@@ -218,21 +229,24 @@ impl RecordBatchEncoder {
                 // Value (Compressed MessageSet)
                 let size_gap = buf.put_typed_gap(gap::I32);
                 let value_start = buf.offset();
-                match options.compression {
-                    Compression::Snappy => cmpr::Snappy::compress(buf, |buf| {
-                        Self::encode_legacy_records(buf, records, &inner_opts)
-                    })?,
-                    Compression::Gzip => cmpr::Gzip::compress(buf, |buf| {
-                        Self::encode_legacy_records(buf, records, &inner_opts)
-                    })?,
-                    Compression::Lz4 => cmpr::Lz4::compress(buf, |buf| {
-                        Self::encode_legacy_records(buf, records, &inner_opts)
-                    })?,
-                    Compression::Zstd => cmpr::Zstd::compress(buf, |buf| {
-                        Self::encode_legacy_records(buf, records, &inner_opts)
-                    })?,
-                    _ => unimplemented!(),
-                }
+                let mut encoded_buf = BytesMut::new();
+                Self::encode_legacy_records(&mut encoded_buf, records, &inner_opts)?;
+                compressor(&mut encoded_buf, buf, options.compression)?;
+                // match options.compression {
+                //     Compression::Snappy => cmpr::Snappy::compress(buf, |buf| {
+                //         Self::encode_legacy_records(buf, records, &inner_opts)
+                //     })?,
+                //     Compression::Gzip => cmpr::Gzip::compress(buf, |buf| {
+                //         Self::encode_legacy_records(buf, records, &inner_opts)
+                //     })?,
+                //     Compression::Lz4 => cmpr::Lz4::compress(buf, |buf| {
+                //         Self::encode_legacy_records(buf, records, &inner_opts)
+                //     })?,
+                //     Compression::Zstd => cmpr::Zstd::compress(buf, |buf| {
+                //         Self::encode_legacy_records(buf, records, &inner_opts)
+                //     })?,
+                //     _ => unimplemented!(),
+                // }
 
                 let value_end = buf.offset();
                 let value_size = value_end - value_start;
@@ -267,14 +281,16 @@ impl RecordBatchEncoder {
         Ok(())
     }
 
-    fn encode_new_batch<'a, B, I>(
+    fn encode_new_batch<'a, B, I, CF>(
         buf: &mut B,
         records: &mut I,
         options: &RecordEncodeOptions,
+        compressor: &CF,
     ) -> Result<bool>
     where
         B: ByteBufMut,
         I: Iterator<Item = &'a Record> + Clone,
+        CF: Fn(&mut BytesMut, &mut B, Compression) -> Result<()>,
     {
         let mut record_peeker = records.clone();
 
@@ -383,23 +399,10 @@ impl RecordBatchEncoder {
 
         // Records
         let records = records.take(num_records);
-        match options.compression {
-            Compression::None => cmpr::None::compress(buf, |buf| {
-                Self::encode_new_records(buf, records, min_offset, min_timestamp, options)
-            })?,
-            Compression::Snappy => cmpr::Snappy::compress(buf, |buf| {
-                Self::encode_new_records(buf, records, min_offset, min_timestamp, options)
-            })?,
-            Compression::Gzip => cmpr::Gzip::compress(buf, |buf| {
-                Self::encode_new_records(buf, records, min_offset, min_timestamp, options)
-            })?,
-            Compression::Lz4 => cmpr::Lz4::compress(buf, |buf| {
-                Self::encode_new_records(buf, records, min_offset, min_timestamp, options)
-            })?,
-            Compression::Zstd => cmpr::Zstd::compress(buf, |buf| {
-                Self::encode_new_records(buf, records, min_offset, min_timestamp, options)
-            })?,
-        }
+
+        let mut record_buf = BytesMut::new();
+        Self::encode_new_records(&mut record_buf, records, min_offset, min_timestamp, options)?;
+        compressor(&mut record_buf, buf, options.compression)?;
 
         let batch_end = buf.offset();
 
@@ -421,16 +424,18 @@ impl RecordBatchEncoder {
         Ok(true)
     }
 
-    fn encode_new<'a, B, I>(
+    fn encode_new<'a, B, I, CF>(
         buf: &mut B,
         mut records: I,
         options: &RecordEncodeOptions,
+        compressor: CF,
     ) -> Result<()>
     where
         B: ByteBufMut,
         I: Iterator<Item = &'a Record> + Clone,
+        CF: Fn(&mut BytesMut, &mut B, Compression) -> Result<()>,
     {
-        while Self::encode_new_batch(buf, &mut records, options)? {}
+        while Self::encode_new_batch(buf, &mut records, options, &compressor)? {}
         Ok(())
     }
 }

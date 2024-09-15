@@ -39,6 +39,7 @@ fn record_batch_produce_fetch() {
             version: 2,
             compression: Compression::None,
         },
+        compress_record_batch_data,
     )
     .unwrap();
 
@@ -73,6 +74,7 @@ fn message_set_v1_produce_fetch() {
             version: 1,
             compression: Compression::None,
         },
+        compress_record_batch_data,
     )
     .unwrap();
 
@@ -232,6 +234,22 @@ fn decompress_record_batch_data(
 ) -> anyhow::Result<Bytes> {
     match compression {
         Compression::None => Ok(compressed_buffer.to_vec().into()),
+        _ => {
+            panic!("Compression not implemented")
+        }
+    }
+}
+
+fn compress_record_batch_data(
+    src: &mut bytes::BytesMut,
+    dest: &mut BytesMut,
+    compression: Compression,
+) -> anyhow::Result<()> {
+    match compression {
+        Compression::None => {
+            dest.extend_from_slice(src.as_ref());
+            Ok(())
+        }
         _ => {
             panic!("Compression not implemented")
         }
