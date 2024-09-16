@@ -1,11 +1,9 @@
 use std::collections::{BTreeMap, BTreeSet};
-use std::fs::{self, File};
+use std::fs::File;
 use std::io::Write;
-use std::path::Path;
-use std::process::Command;
+use std::path::PathBuf;
 
 use failure::Error;
-use git2::{Oid, Repository};
 
 mod code_writer;
 pub mod expr;
@@ -15,71 +13,13 @@ mod spec;
 
 use spec::SpecType;
 
-pub fn run() -> Result<(), Error> {
-    let mut dir = std::fs::canonicalize(std::file!().rsplit_once('/').unwrap().0)?;
-    dir.push("../../src/messages");
-    let output_path = std::fs::canonicalize(dir)?;
-    let output_path = output_path.to_str().unwrap();
-
-    // Download messages from head of Kafka repo
-    let kafka_repo = Path::new("kafka_repo");
-    let repo = if kafka_repo.exists() {
-        println!("Fetching latest kafka repo");
-        let repo = Repository::open(kafka_repo)?;
-        repo.find_remote("origin")
-            .unwrap()
-            .fetch(&["trunk"], None, None)
-            .unwrap();
-        repo
-    } else {
-        println!("Cloning kafka repo");
-        git2::build::RepoBuilder::new()
-            .fetch_options(git2::FetchOptions::new())
-            .with_checkout(git2::build::CheckoutBuilder::new())
-            .clone("https://github.com/apache/kafka.git", kafka_repo)?
-    };
-
-    // Checkout the release commit
-    // https://github.com/apache/kafka/releases/tag/3.8.0
-    // checking out a tag with git2 is annoying -- we pin to the tag's commit sha instead
-    let release_commit = "771b9576b00ecf5b64ab6e8bedf04156fbdb5cd6";
-    println!("Checking out release {}", release_commit);
-    let oid = Oid::from_str(release_commit).unwrap();
-    let commit = repo
-        .find_commit(oid)
-        .expect("Could not find release commit!")
-        .into_object();
-    repo.checkout_tree(&commit, None).unwrap();
-    repo.set_head_detached(commit.id()).unwrap();
-
-    // Clear output directory
-    for file in fs::read_dir(output_path)? {
-        let file = file?;
-        if file.file_type()?.is_file() {
-            let path = file.path();
-            if path.extension() == Some("rs".as_ref()) {
-                fs::remove_file(path)?;
-            }
-        }
-    }
-
-    // Find input files
-    let mut input_file_paths = Vec::new();
-    for file in fs::read_dir(kafka_repo.join("clients/src/main/resources/common/message"))? {
-        let file = file?;
-        if file.file_type()?.is_file() {
-            let path = file.path();
-            if path.extension() == Some("json".as_ref()) {
-                input_file_paths.push(path);
-            }
-        }
-    }
+pub fn run(messages_module_dir: &str, mut input_file_paths: Vec<PathBuf>) -> Result<(), Error> {
     input_file_paths.sort();
     let mut entity_types = BTreeSet::new();
     let mut request_types = BTreeMap::new();
     let mut response_types = BTreeMap::new();
 
-    let module_path = format!("{}.rs", output_path);
+    let module_path = format!("{}.rs", messages_module_dir);
     let mut module_file = File::create(module_path)?;
 
     writeln!(module_file, "//! Messages used by the Kafka protocol.")?;
@@ -125,7 +65,7 @@ pub fn run() -> Result<(), Error> {
         let spec = parse::parse(input_file_path)?;
         let spec_meta = (spec.type_, spec.api_key);
 
-        let outcome = generate::generate(output_path, spec)?;
+        let outcome = generate::generate(messages_module_dir, spec)?;
         if let Some(output) = outcome {
             match spec_meta {
                 (SpecType::Request, Some(k)) => {
@@ -585,14 +525,6 @@ fn encode<T: Encodable>(encodable: &T, bytes: &mut bytes::BytesMut, version: i16
         )?;
         writeln!(module_file)?;
     }
-
-    println!("Running cargo fmt...");
-    let mut process = Command::new("cargo")
-        .args(vec!["fmt"])
-        .spawn()
-        .expect("cargo fmt failed");
-
-    process.wait().expect("cargo fmt failed");
 
     Ok(())
 }
