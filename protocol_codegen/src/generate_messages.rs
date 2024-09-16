@@ -20,46 +20,36 @@ pub fn run(messages_module_dir: &str, mut input_file_paths: Vec<PathBuf>) -> Res
     let mut response_types = BTreeMap::new();
 
     let module_path = format!("{}.rs", messages_module_dir);
-    let mut module_file = File::create(module_path)?;
 
-    writeln!(module_file, "//! Messages used by the Kafka protocol.")?;
-    writeln!(module_file, "//!")?;
-    writeln!(module_file, "//! These messages are generated programmatically. See the [Kafka's protocol documentation](https://kafka.apache.org/protocol.html) for more information about a given message type.")?;
+    // generate file messages.rs
+    let mut m = File::create(module_path)?;
+
+    writeln!(m, "//! Messages used by the Kafka protocol.")?;
+    writeln!(m, "//!")?;
+    writeln!(m, "//! These messages are generated programmatically. See the [Kafka's protocol documentation](https://kafka.apache.org/protocol.html) for more information about a given message type.")?;
     writeln!(
-        module_file,
+        m,
         "// WARNING: the items of this module are generated and should not be edited directly."
     )?;
-    writeln!(module_file)?;
+    writeln!(m)?;
     writeln!(
-        module_file,
+        m,
         "use crate::protocol::{{NewType, StrBytes, HeaderVersion}};"
     )?;
-    writeln!(
-        module_file,
-        "#[cfg(all(feature = \"client\", feature = \"broker\"))]"
-    )?;
-    writeln!(module_file, "use crate::protocol::Request;")?;
-    writeln!(module_file, "use std::convert::TryFrom;")?;
-    writeln!(module_file, "#[cfg(feature = \"messages_enums\")]")?;
-    writeln!(
-        module_file,
-        "#[cfg(any(feature = \"client\", feature = \"broker\"))]"
-    )?;
-    writeln!(module_file, "use crate::protocol::Encodable;")?;
-    writeln!(module_file, "#[cfg(feature = \"messages_enums\")]")?;
-    writeln!(
-        module_file,
-        "#[cfg(any(feature = \"client\", feature = \"broker\"))]"
-    )?;
-    writeln!(module_file, "use crate::protocol::Decodable;")?;
-    writeln!(module_file, "use anyhow::Result;")?;
-    writeln!(module_file, "#[cfg(feature = \"messages_enums\")]")?;
-    writeln!(
-        module_file,
-        "#[cfg(any(feature = \"client\", feature = \"broker\"))]"
-    )?;
-    writeln!(module_file, "use anyhow::Context;")?;
-    writeln!(module_file)?;
+    writeln!(m, "#[cfg(all(feature = \"client\", feature = \"broker\"))]")?;
+    writeln!(m, "use crate::protocol::Request;")?;
+    writeln!(m, "use std::convert::TryFrom;")?;
+    writeln!(m, "#[cfg(feature = \"messages_enums\")]")?;
+    writeln!(m, "#[cfg(any(feature = \"client\", feature = \"broker\"))]")?;
+    writeln!(m, "use crate::protocol::Encodable;")?;
+    writeln!(m, "#[cfg(feature = \"messages_enums\")]")?;
+    writeln!(m, "#[cfg(any(feature = \"client\", feature = \"broker\"))]")?;
+    writeln!(m, "use crate::protocol::Decodable;")?;
+    writeln!(m, "use anyhow::Result;")?;
+    writeln!(m, "#[cfg(feature = \"messages_enums\")]")?;
+    writeln!(m, "#[cfg(any(feature = \"client\", feature = \"broker\"))]")?;
+    writeln!(m, "use anyhow::Context;")?;
+    writeln!(m)?;
 
     for input_file_path in &input_file_paths {
         let spec = parse::parse(input_file_path)?;
@@ -75,7 +65,7 @@ pub fn run(messages_module_dir: &str, mut input_file_paths: Vec<PathBuf>) -> Res
                     response_types.insert(k, output);
                 }
                 _ => {
-                    output.apply(&mut module_file, &mut entity_types)?;
+                    output.apply(&mut m, &mut entity_types)?;
                 }
             }
         }
@@ -98,7 +88,7 @@ pub fn run(messages_module_dir: &str, mut input_file_paths: Vec<PathBuf>) -> Res
     }
 
     for (_api_key, output) in request_types.iter().chain(response_types.iter()) {
-        output.apply(&mut module_file, &mut entity_types)?;
+        output.apply(&mut m, &mut entity_types)?;
     }
 
     // strip away the module name which is no longer needed
@@ -126,173 +116,161 @@ pub fn run(messages_module_dir: &str, mut input_file_paths: Vec<PathBuf>) -> Res
             .find(|(k, _)| k == api_key)
             .map(|(_, v)| v)
             .expect("Every request type has a response type");
-        writeln!(
-            module_file,
-            "#[cfg(all(feature = \"client\", feature = \"broker\"))]"
-        )?;
-        writeln!(module_file, "impl Request for {} {{", request_type)?;
-        writeln!(module_file, "    const KEY: i16 = {};", api_key)?;
-        writeln!(module_file, "    type Response = {};", response_type)?;
-        writeln!(module_file, "}}")?;
-        writeln!(module_file)?;
+        writeln!(m, "#[cfg(all(feature = \"client\", feature = \"broker\"))]")?;
+        writeln!(m, "impl Request for {} {{", request_type)?;
+        writeln!(m, "    const KEY: i16 = {};", api_key)?;
+        writeln!(m, "    type Response = {};", response_type)?;
+        writeln!(m, "}}")?;
+        writeln!(m)?;
     }
 
-    writeln!(module_file, "/// Valid API keys in the Kafka protocol.")?;
-    writeln!(module_file, "#[derive(Debug, Clone, Copy, PartialEq, Eq)]")?;
-    writeln!(module_file, "pub enum ApiKey {{")?;
+    writeln!(m, "/// Valid API keys in the Kafka protocol.")?;
+    writeln!(m, "#[derive(Debug, Clone, Copy, PartialEq, Eq)]")?;
+    writeln!(m, "pub enum ApiKey {{")?;
     for (api_key, request_type) in request_types.iter() {
-        writeln!(module_file, "    /// API key for request {}", request_type)?;
+        writeln!(m, "    /// API key for request {}", request_type)?;
         writeln!(
-            module_file,
+            m,
             "    {} = {},",
             request_type.replace("Request", "Key"),
             api_key
         )?;
     }
-    writeln!(module_file, "}}")?;
-    writeln!(module_file)?;
+    writeln!(m, "}}")?;
+    writeln!(m)?;
 
-    writeln!(module_file, "impl ApiKey {{")?;
+    writeln!(m, "impl ApiKey {{")?;
     writeln!(
-        module_file,
+        m,
         "    /// Get the version of request header that needs to be prepended to this message"
     )?;
     writeln!(
-        module_file,
+        m,
         "    pub fn request_header_version(&self, version: i16) -> i16 {{"
     )?;
-    writeln!(module_file, "        match self {{")?;
+    writeln!(m, "        match self {{")?;
     for (_api_key, request_type) in request_types.iter() {
         writeln!(
-            module_file,
+            m,
             "            ApiKey::{} => {}::header_version(version),",
             request_type.replace("Request", "Key"),
             request_type
         )?;
     }
-    writeln!(module_file, "        }}")?;
-    writeln!(module_file, "    }}")?;
+    writeln!(m, "        }}")?;
+    writeln!(m, "    }}")?;
 
     writeln!(
-        module_file,
+        m,
         "    /// Get the version of response header that needs to be prepended to this message"
     )?;
     writeln!(
-        module_file,
+        m,
         "    pub fn response_header_version(&self, version: i16) -> i16 {{"
     )?;
-    writeln!(module_file, "        match self {{")?;
+    writeln!(m, "        match self {{")?;
     for (_api_key, response_type) in response_types.iter() {
         writeln!(
-            module_file,
+            m,
             "            ApiKey::{} => {}::header_version(version),",
             response_type.replace("Response", "Key"),
             response_type
         )?;
     }
-    writeln!(module_file, "        }}")?;
-    writeln!(module_file, "    }}")?;
-    writeln!(module_file, "}}")?;
+    writeln!(m, "        }}")?;
+    writeln!(m, "    }}")?;
+    writeln!(m, "}}")?;
 
-    writeln!(module_file, "impl TryFrom<i16> for ApiKey {{")?;
-    writeln!(module_file, "    type Error = ();")?;
-    writeln!(module_file)?;
-    writeln!(
-        module_file,
-        "    fn try_from(v: i16) -> Result<Self, Self::Error> {{"
-    )?;
-    writeln!(module_file, "        match v {{")?;
+    writeln!(m, "impl TryFrom<i16> for ApiKey {{")?;
+    writeln!(m, "    type Error = ();")?;
+    writeln!(m)?;
+    writeln!(m, "    fn try_from(v: i16) -> Result<Self, Self::Error> {{")?;
+    writeln!(m, "        match v {{")?;
     for (_, request_type) in request_types.iter() {
         let key = request_type.replace("Request", "Key");
         writeln!(
-            module_file,
+            m,
             "            x if x == ApiKey::{} as i16 => Ok(ApiKey::{}),",
             key, key
         )?;
     }
-    writeln!(module_file, "            _ => Err(()),")?;
-    writeln!(module_file, "        }}")?;
-    writeln!(module_file, "    }}")?;
-    writeln!(module_file, "}}")?;
-    writeln!(module_file)?;
+    writeln!(m, "            _ => Err(()),")?;
+    writeln!(m, "        }}")?;
+    writeln!(m, "    }}")?;
+    writeln!(m, "}}")?;
+    writeln!(m)?;
 
     writeln!(
-        module_file,
+        m,
         "/// Wrapping enum for all requests in the Kafka protocol."
     )?;
-    writeln!(module_file, "#[cfg(feature = \"messages_enums\")]")?;
-    writeln!(module_file, "#[non_exhaustive]")?;
-    writeln!(module_file, "#[derive(Debug, Clone, PartialEq)]")?;
-    writeln!(module_file, "pub enum RequestKind {{")?;
+    writeln!(m, "#[cfg(feature = \"messages_enums\")]")?;
+    writeln!(m, "#[non_exhaustive]")?;
+    writeln!(m, "#[derive(Debug, Clone, PartialEq)]")?;
+    writeln!(m, "pub enum RequestKind {{")?;
     for (_, request_type) in request_types.iter() {
-        writeln!(module_file, "    /// {},", request_type)?;
+        writeln!(m, "    /// {},", request_type)?;
         writeln!(
-            module_file,
+            m,
             "    {}({}),",
             request_type.trim_end_matches("Request"),
             request_type
         )?;
     }
-    writeln!(module_file, "}}")?;
-    writeln!(module_file)?;
+    writeln!(m, "}}")?;
+    writeln!(m)?;
 
-    writeln!(module_file, "#[cfg(feature = \"messages_enums\")]")?;
-    writeln!(module_file, "impl RequestKind {{")?;
-    writeln!(module_file, "/// Encode the message into the target buffer")?;
-    writeln!(module_file, "#[cfg(feature = \"client\")]")?;
+    writeln!(m, "#[cfg(feature = \"messages_enums\")]")?;
+    writeln!(m, "impl RequestKind {{")?;
+    writeln!(m, "/// Encode the message into the target buffer")?;
+    writeln!(m, "#[cfg(feature = \"client\")]")?;
     writeln!(
-        module_file,
+        m,
         "pub fn encode(&self, bytes: &mut bytes::BytesMut, version: i16) -> anyhow::Result<()> {{"
     )?;
-    writeln!(module_file, "match self {{")?;
+    writeln!(m, "match self {{")?;
     for (_, request_type) in request_types.iter() {
         let variant = request_type.trim_end_matches("Request");
-        writeln!(
-            module_file,
-            "RequestKind::{variant}(x) => encode(x, bytes, version),"
-        )?;
+        writeln!(m, "RequestKind::{variant}(x) => encode(x, bytes, version),")?;
     }
-    writeln!(module_file, "}}")?;
-    writeln!(module_file, "}}")?;
+    writeln!(m, "}}")?;
+    writeln!(m, "}}")?;
 
     writeln!(
-        module_file,
+        m,
         "/// Decode the message from the provided buffer and version"
     )?;
-    writeln!(module_file, "#[cfg(feature = \"broker\")]")?;
+    writeln!(m, "#[cfg(feature = \"broker\")]")?;
     writeln!(
-        module_file,
+        m,
         "pub fn decode(api_key: ApiKey, bytes: &mut bytes::Bytes, version: i16) -> anyhow::Result<RequestKind> {{"
     )?;
-    writeln!(module_file, "match api_key {{")?;
+    writeln!(m, "match api_key {{")?;
     for (_, request_type) in request_types.iter() {
         let variant = request_type.trim_end_matches("Request");
         writeln!(
-            module_file,
+            m,
             "ApiKey::{variant}Key => Ok(RequestKind::{variant}(decode(bytes, version)?)),"
         )?;
     }
-    writeln!(module_file, "}}")?;
-    writeln!(module_file, "}}")?;
+    writeln!(m, "}}")?;
+    writeln!(m, "}}")?;
 
-    writeln!(module_file, "}}")?;
+    writeln!(m, "}}")?;
 
     for (_, request_type) in request_types.iter() {
-        writeln!(module_file, "#[cfg(feature = \"messages_enums\")]")?;
-        writeln!(module_file, "impl From<{request_type}> for RequestKind {{")?;
-        writeln!(
-            module_file,
-            "    fn from(value: {request_type}) -> RequestKind {{"
-        )?;
+        writeln!(m, "#[cfg(feature = \"messages_enums\")]")?;
+        writeln!(m, "impl From<{request_type}> for RequestKind {{")?;
+        writeln!(m, "    fn from(value: {request_type}) -> RequestKind {{")?;
         let variant = request_type.trim_end_matches("Request");
-        writeln!(module_file, "        RequestKind::{variant}(value)")?;
-        writeln!(module_file, "    }}")?;
-        writeln!(module_file, "}}")?;
-        writeln!(module_file)?;
+        writeln!(m, "        RequestKind::{variant}(value)")?;
+        writeln!(m, "    }}")?;
+        writeln!(m, "}}")?;
+        writeln!(m)?;
     }
 
     writeln!(
-        module_file,
+        m,
         r#"
 #[cfg(feature = "messages_enums")]
 #[cfg(any(feature = "client", feature = "broker"))]
@@ -321,100 +299,91 @@ fn encode<T: Encodable>(encodable: &T, bytes: &mut bytes::BytesMut, version: i16
     )?;
 
     writeln!(
-        module_file,
+        m,
         "/// Wrapping enum for all responses in the Kafka protocol."
     )?;
-    writeln!(module_file, "#[non_exhaustive]")?;
-    writeln!(module_file, "#[derive(Debug, Clone, PartialEq)]")?;
-    writeln!(module_file, "#[cfg(feature = \"messages_enums\")]")?;
-    writeln!(module_file, "pub enum ResponseKind {{")?;
+    writeln!(m, "#[non_exhaustive]")?;
+    writeln!(m, "#[derive(Debug, Clone, PartialEq)]")?;
+    writeln!(m, "#[cfg(feature = \"messages_enums\")]")?;
+    writeln!(m, "pub enum ResponseKind {{")?;
     for (_, response_type) in response_types.iter() {
-        writeln!(module_file, "    /// {},", response_type)?;
+        writeln!(m, "    /// {},", response_type)?;
         writeln!(
-            module_file,
+            m,
             "    {}({}),",
             response_type.trim_end_matches("Response"),
             response_type
         )?;
     }
-    writeln!(module_file, "}}")?;
-    writeln!(module_file)?;
+    writeln!(m, "}}")?;
+    writeln!(m)?;
 
-    writeln!(module_file, "#[cfg(feature = \"messages_enums\")]")?;
-    writeln!(module_file, "impl ResponseKind {{")?;
-    writeln!(module_file, "/// Encode the message into the target buffer")?;
-    writeln!(module_file, "#[cfg(feature = \"broker\")]")?;
+    writeln!(m, "#[cfg(feature = \"messages_enums\")]")?;
+    writeln!(m, "impl ResponseKind {{")?;
+    writeln!(m, "/// Encode the message into the target buffer")?;
+    writeln!(m, "#[cfg(feature = \"broker\")]")?;
     writeln!(
-        module_file,
+        m,
         "pub fn encode(&self, bytes: &mut bytes::BytesMut, version: i16) -> anyhow::Result<()> {{"
     )?;
-    writeln!(module_file, "match self {{")?;
+    writeln!(m, "match self {{")?;
     for (_, response_type) in response_types.iter() {
         let variant = response_type.trim_end_matches("Response");
         writeln!(
-            module_file,
+            m,
             "ResponseKind::{variant}(x) => encode(x, bytes, version),"
         )?;
     }
-    writeln!(module_file, "}}")?;
-    writeln!(module_file, "}}")?;
+    writeln!(m, "}}")?;
+    writeln!(m, "}}")?;
 
     writeln!(
-        module_file,
+        m,
         "/// Decode the message from the provided buffer and version"
     )?;
-    writeln!(module_file, "#[cfg(feature = \"client\")]")?;
+    writeln!(m, "#[cfg(feature = \"client\")]")?;
     writeln!(
-        module_file,
+        m,
         "pub fn decode(api_key: ApiKey, bytes: &mut bytes::Bytes, version: i16) -> anyhow::Result<ResponseKind> {{"
     )?;
-    writeln!(module_file, "match api_key {{")?;
+    writeln!(m, "match api_key {{")?;
     for (_, response_type) in response_types.iter() {
         let variant = response_type.trim_end_matches("Response");
         writeln!(
-            module_file,
+            m,
             "ApiKey::{variant}Key => Ok(ResponseKind::{variant}(decode(bytes, version)?)),"
         )?;
     }
-    writeln!(module_file, "}}")?;
-    writeln!(module_file, "}}")?;
+    writeln!(m, "}}")?;
+    writeln!(m, "}}")?;
 
     writeln!(
-        module_file,
+        m,
         "/// Get the version of request header that needs to be prepended to this message"
     )?;
-    writeln!(
-        module_file,
-        "pub fn header_version(&self, version: i16) -> i16 {{"
-    )?;
-    writeln!(module_file, "match self {{")?;
+    writeln!(m, "pub fn header_version(&self, version: i16) -> i16 {{")?;
+    writeln!(m, "match self {{")?;
     for (_, response_type) in response_types.iter() {
         let variant = response_type.trim_end_matches("Response");
         writeln!(
-            module_file,
+            m,
             "ResponseKind::{variant}(_) => {response_type}::header_version(version),"
         )?;
     }
-    writeln!(module_file, "}}")?;
-    writeln!(module_file, "}}")?;
-    writeln!(module_file, "}}")?;
-    writeln!(module_file)?;
+    writeln!(m, "}}")?;
+    writeln!(m, "}}")?;
+    writeln!(m, "}}")?;
+    writeln!(m)?;
 
     for (_, response_type) in response_types.iter() {
-        writeln!(module_file, "#[cfg(feature = \"messages_enums\")]")?;
-        writeln!(
-            module_file,
-            "impl From<{response_type}> for ResponseKind {{"
-        )?;
-        writeln!(
-            module_file,
-            "    fn from(value: {response_type}) -> ResponseKind {{"
-        )?;
+        writeln!(m, "#[cfg(feature = \"messages_enums\")]")?;
+        writeln!(m, "impl From<{response_type}> for ResponseKind {{")?;
+        writeln!(m, "    fn from(value: {response_type}) -> ResponseKind {{")?;
         let variant = response_type.trim_end_matches("Response");
-        writeln!(module_file, "        ResponseKind::{variant}(value)")?;
-        writeln!(module_file, "    }}")?;
-        writeln!(module_file, "}}")?;
-        writeln!(module_file)?;
+        writeln!(m, "        ResponseKind::{variant}(value)")?;
+        writeln!(m, "    }}")?;
+        writeln!(m, "}}")?;
+        writeln!(m)?;
     }
 
     for entity_type in entity_types {
@@ -433,97 +402,70 @@ fn encode<T: Encodable>(encodable: &T, bytes: &mut bytes::BytesMut, version: i16
 
         let rust_name = entity_type.inner.rust_name();
 
-        writeln!(module_file, "/// {}", entity_type.doc)?;
-        writeln!(module_file, "#[derive({})]", derives.join(", "))?;
+        writeln!(m, "/// {}", entity_type.doc)?;
+        writeln!(m, "#[derive({})]", derives.join(", "))?;
+        writeln!(m, "pub struct {}(pub {});\n", entity_type.name, rust_name)?;
+        writeln!(m, "impl From<{}> for {} {{", rust_name, entity_type.name)?;
         writeln!(
-            module_file,
-            "pub struct {}(pub {});\n",
-            entity_type.name, rust_name
-        )?;
-        writeln!(
-            module_file,
-            "impl From<{}> for {} {{",
-            rust_name, entity_type.name
-        )?;
-        writeln!(
-            module_file,
+            m,
             "    fn from(other: {}) -> Self {{ Self(other) }}",
             rust_name
         )?;
-        writeln!(module_file, "}}")?;
+        writeln!(m, "}}")?;
+        writeln!(m, "impl From<{}> for {} {{", entity_type.name, rust_name)?;
         writeln!(
-            module_file,
-            "impl From<{}> for {} {{",
-            entity_type.name, rust_name
-        )?;
-        writeln!(
-            module_file,
+            m,
             "    fn from(other: {}) -> Self {{ other.0 }}",
             entity_type.name
         )?;
-        writeln!(module_file, "}}")?;
+        writeln!(m, "}}")?;
         writeln!(
-            module_file,
+            m,
             "impl std::borrow::Borrow<{}> for {} {{",
             rust_name, entity_type.name
         )?;
+        writeln!(m, "    fn borrow(&self) -> &{} {{ &self.0 }}", rust_name)?;
+        writeln!(m, "}}")?;
+        writeln!(m, "impl std::ops::Deref for {} {{", entity_type.name)?;
+        writeln!(m, "    type Target = {};", rust_name)?;
+        writeln!(m, "    fn deref(&self) -> &Self::Target {{ &self.0 }}")?;
+        writeln!(m, "}}")?;
         writeln!(
-            module_file,
-            "    fn borrow(&self) -> &{} {{ &self.0 }}",
-            rust_name
-        )?;
-        writeln!(module_file, "}}")?;
-        writeln!(
-            module_file,
-            "impl std::ops::Deref for {} {{",
-            entity_type.name
-        )?;
-        writeln!(module_file, "    type Target = {};", rust_name)?;
-        writeln!(
-            module_file,
-            "    fn deref(&self) -> &Self::Target {{ &self.0 }}"
-        )?;
-        writeln!(module_file, "}}")?;
-        writeln!(
-            module_file,
+            m,
             "impl std::cmp::PartialEq<{}> for {} {{",
             rust_name, entity_type.name
         )?;
         writeln!(
-            module_file,
+            m,
             "    fn eq(&self, other: &{}) -> bool {{ &self.0 == other }}",
             rust_name
         )?;
-        writeln!(module_file, "}}")?;
+        writeln!(m, "}}")?;
         writeln!(
-            module_file,
+            m,
             "impl std::cmp::PartialEq<{}> for {} {{",
             entity_type.name, rust_name
         )?;
         writeln!(
-            module_file,
+            m,
             "    fn eq(&self, other: &{}) -> bool {{ self == &other.0 }}",
             entity_type.name
         )?;
-        writeln!(module_file, "}}")?;
+        writeln!(m, "}}")?;
 
+        writeln!(m, "impl std::fmt::Debug for {} {{", entity_type.name)?;
         writeln!(
-            module_file,
-            "impl std::fmt::Debug for {} {{",
-            entity_type.name
-        )?;
-        writeln!(
-            module_file,
+            m,
             "    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {{ self.0.fmt(f) }}",
         )?;
-        writeln!(module_file, "}}")?;
+        writeln!(m, "}}")?;
 
         writeln!(
-            module_file,
+            m,
             "impl NewType<{}> for {} {{}}",
             rust_name, entity_type.name
         )?;
-        writeln!(module_file)?;
+        writeln!(m)?;
     }
 
     Ok(())
