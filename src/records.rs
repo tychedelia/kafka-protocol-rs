@@ -158,6 +158,9 @@ const MAGIC_BYTE_OFFSET: usize = 16;
 impl RecordBatchEncoder {
     /// Encode records into given buffer, using provided encoding options that select the encoding
     /// strategy based on version.
+    /// # Arguments
+    /// * `compressor` - A function that compresses the given batch of records.
+    /// If `None`, the right compression algorithm will automatically be selected and applied.
     pub fn encode<'a, B, I, CF>(
         buf: &mut B,
         records: I,
@@ -464,13 +467,16 @@ impl RecordBatchEncoder {
 
 impl RecordBatchDecoder {
     /// Decode the provided buffer into a vec of records.
-    pub fn decode<B: ByteBuf, F>(buf: &mut B, decompress_func: Option<F>) -> Result<Vec<Record>>
+    /// # Arguments
+    /// * `decompressor` - A function that decompresses the given batch of records.
+    /// If `None`, the right decompression algorithm will automatically be selected and applied.
+    pub fn decode<B: ByteBuf, F>(buf: &mut B, decompressor: Option<F>) -> Result<Vec<Record>>
     where
         F: Fn(&mut bytes::Bytes, Compression) -> Result<B>,
     {
         let mut records = Vec::new();
         while buf.has_remaining() {
-            Self::decode_batch(buf, &mut records, decompress_func.as_ref())?;
+            Self::decode_batch(buf, &mut records, decompressor.as_ref())?;
         }
         Ok(records)
     }
