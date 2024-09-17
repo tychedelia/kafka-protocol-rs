@@ -87,7 +87,8 @@ mod client_tests {
 
                 let mut records = partition.records.unwrap();
                 let records =
-                    RecordBatchDecoder::decode(&mut records, decompress_record_batch_data).unwrap();
+                    RecordBatchDecoder::decode(&mut records, Some(decompress_record_batch_data))
+                        .unwrap();
                 assert_eq!(records.len(), 1);
                 for record in records {
                     assert_eq!(
@@ -123,7 +124,8 @@ mod client_tests {
 
                 let mut records = partition.records.unwrap();
                 let records =
-                    RecordBatchDecoder::decode(&mut records, decompress_record_batch_data).unwrap();
+                    RecordBatchDecoder::decode(&mut records, Some(decompress_record_batch_data))
+                        .unwrap();
                 assert_eq!(records.len(), 1);
                 for record in records {
                     assert_eq!(
@@ -160,7 +162,8 @@ mod client_tests {
 
                 let mut records = partition.records.unwrap();
                 let records =
-                    RecordBatchDecoder::decode(&mut records, decompress_record_batch_data).unwrap();
+                    RecordBatchDecoder::decode(&mut records, Some(decompress_record_batch_data))
+                        .unwrap();
                 assert_eq!(records.len(), 1);
             }
         }
