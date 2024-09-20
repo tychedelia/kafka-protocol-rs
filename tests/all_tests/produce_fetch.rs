@@ -39,6 +39,7 @@ fn record_batch_produce_fetch() {
             version: 2,
             compression: Compression::None,
         },
+        Some(compress_record_batch_data),
     )
     .unwrap();
 
@@ -73,6 +74,7 @@ fn message_set_v1_produce_fetch() {
             version: 1,
             compression: Compression::None,
         },
+        Some(compress_record_batch_data),
     )
     .unwrap();
 
@@ -200,7 +202,9 @@ fn fetch_records(
     );
 
     let mut fetched_records = partition_response.records.clone().unwrap();
-    let fetched_records = RecordBatchDecoder::decode(&mut fetched_records).unwrap();
+    let fetched_records =
+        RecordBatchDecoder::decode(&mut fetched_records, Some(decompress_record_batch_data))
+            .unwrap();
 
     eprintln!("{expected:#?}");
     eprintln!("{fetched_records:#?}");
@@ -222,5 +226,33 @@ fn new_record(offset: i64, v2: bool) -> Record {
         key: Some(format!("key{offset}").into()),
         value: Some(format!("value{offset}").into()),
         headers: Default::default(),
+    }
+}
+
+fn decompress_record_batch_data(
+    compressed_buffer: &mut bytes::Bytes,
+    compression: Compression,
+) -> anyhow::Result<Bytes> {
+    match compression {
+        Compression::None => Ok(compressed_buffer.to_vec().into()),
+        _ => {
+            panic!("Compression not implemented")
+        }
+    }
+}
+
+fn compress_record_batch_data(
+    src: &mut bytes::BytesMut,
+    dest: &mut BytesMut,
+    compression: Compression,
+) -> anyhow::Result<()> {
+    match compression {
+        Compression::None => {
+            dest.extend_from_slice(src.as_ref());
+            Ok(())
+        }
+        _ => {
+            panic!("Compression not implemented")
+        }
     }
 }
