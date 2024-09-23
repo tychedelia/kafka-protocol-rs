@@ -238,19 +238,27 @@ impl RecordBatchEncoder {
                     compressor(&mut encoded_buf, buf, options.compression)?;
                 } else {
                     match options.compression {
+                        #[cfg(feature = "snappy")]
                         Compression::Snappy => cmpr::Snappy::compress(buf, |buf| {
                             Self::encode_legacy_records(buf, records, &inner_opts)
                         })?,
+                        #[cfg(feature = "gzip")]
                         Compression::Gzip => cmpr::Gzip::compress(buf, |buf| {
                             Self::encode_legacy_records(buf, records, &inner_opts)
                         })?,
+                        #[cfg(feature = "lz4")]
                         Compression::Lz4 => cmpr::Lz4::compress(buf, |buf| {
                             Self::encode_legacy_records(buf, records, &inner_opts)
                         })?,
+                        #[cfg(feature = "zstd")]
                         Compression::Zstd => cmpr::Zstd::compress(buf, |buf| {
                             Self::encode_legacy_records(buf, records, &inner_opts)
                         })?,
-                        _ => unimplemented!(),
+                        c => {
+                            return Err(anyhow!(
+                                "Support for {c:?} is not enabled as a cargo feature"
+                            ))
+                        }
                     }
                 }
 
@@ -415,18 +423,27 @@ impl RecordBatchEncoder {
                 Compression::None => cmpr::None::compress(buf, |buf| {
                     Self::encode_new_records(buf, records, min_offset, min_timestamp, options)
                 })?,
+                #[cfg(feature = "snappy")]
                 Compression::Snappy => cmpr::Snappy::compress(buf, |buf| {
                     Self::encode_new_records(buf, records, min_offset, min_timestamp, options)
                 })?,
+                #[cfg(feature = "gzip")]
                 Compression::Gzip => cmpr::Gzip::compress(buf, |buf| {
                     Self::encode_new_records(buf, records, min_offset, min_timestamp, options)
                 })?,
+                #[cfg(feature = "lz4")]
                 Compression::Lz4 => cmpr::Lz4::compress(buf, |buf| {
                     Self::encode_new_records(buf, records, min_offset, min_timestamp, options)
                 })?,
+                #[cfg(feature = "zstd")]
                 Compression::Zstd => cmpr::Zstd::compress(buf, |buf| {
                     Self::encode_new_records(buf, records, min_offset, min_timestamp, options)
                 })?,
+                c => {
+                    return Err(anyhow!(
+                        "Support for {c:?} is not enabled as a cargo feature"
+                    ))
+                }
             }
         }
         let batch_end = buf.offset();
@@ -618,18 +635,27 @@ impl RecordBatchDecoder {
                 Compression::None => cmpr::None::decompress(buf, |buf| {
                     Self::decode_new_records(buf, &batch_decode_info, version, records)
                 })?,
+                #[cfg(feature = "snappy")]
                 Compression::Snappy => cmpr::Snappy::decompress(buf, |buf| {
                     Self::decode_new_records(buf, &batch_decode_info, version, records)
                 })?,
+                #[cfg(feature = "gzip")]
                 Compression::Gzip => cmpr::Gzip::decompress(buf, |buf| {
                     Self::decode_new_records(buf, &batch_decode_info, version, records)
                 })?,
+                #[cfg(feature = "zstd")]
                 Compression::Zstd => cmpr::Zstd::decompress(buf, |buf| {
                     Self::decode_new_records(buf, &batch_decode_info, version, records)
                 })?,
+                #[cfg(feature = "lz4")]
                 Compression::Lz4 => cmpr::Lz4::decompress(buf, |buf| {
                     Self::decode_new_records(buf, &batch_decode_info, version, records)
                 })?,
+                c => {
+                    return Err(anyhow!(
+                        "Support for {c:?} is not enabled as a cargo feature"
+                    ))
+                }
             };
         }
 
