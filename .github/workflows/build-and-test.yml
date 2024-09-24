@@ -10,6 +10,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: Swatinem/rust-cache@v2
+        with:
+          # this line means that only the main branch writes to the cache
+          # benefits: save about 7s per workflow by skipping the actual cache write
+          # downsides: PRs that update rust version or changes deps will be slower to iterate on due to changes not being cached.
+          save-if: ${{ github.ref == 'refs/heads/main' }}
       - uses: dtolnay/rust-toolchain@stable
       - run: cargo build --workspace --all-features
       - run: cargo test --workspace --all-features
@@ -29,6 +35,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: Swatinem/rust-cache@v2
+        with:
+          save-if: ${{ github.ref == 'refs/heads/main' }}
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy
