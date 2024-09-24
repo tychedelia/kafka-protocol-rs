@@ -6,16 +6,24 @@
 use crate::protocol::buf::{ByteBuf, ByteBufMut};
 use anyhow::Result;
 
+#[cfg(feature = "gzip")]
 mod gzip;
+#[cfg(feature = "lz4")]
 mod lz4;
 mod none;
+#[cfg(feature = "snappy")]
 mod snappy;
+#[cfg(feature = "zstd")]
 mod zstd;
 
+#[cfg(feature = "gzip")]
 pub use gzip::Gzip;
+#[cfg(feature = "lz4")]
 pub use lz4::Lz4;
 pub use none::None;
+#[cfg(feature = "snappy")]
 pub use snappy::Snappy;
+#[cfg(feature = "zstd")]
 pub use zstd::Zstd;
 
 /// A trait for record compression algorithms.
