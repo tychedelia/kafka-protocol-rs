@@ -210,7 +210,7 @@ pub(crate) fn write_unknown_tagged_fields<B: ByteBufMut, R: RangeBounds<i32>>(
     unknown_tagged_fields: &BTreeMap<i32, Bytes>,
 ) -> Result<()> {
     for (&k, v) in unknown_tagged_fields.range(range) {
-        if v.len() > std::u32::MAX as usize {
+        if v.len() > u32::MAX as usize {
             bail!("Tagged field is too long to encode ({} bytes)", v.len());
         }
         types::UnsignedVarInt.encode(buf, k as u32)?;
@@ -225,7 +225,7 @@ pub(crate) fn compute_unknown_tagged_fields_size(
 ) -> Result<usize> {
     let mut total_size = 0;
     for (&k, v) in unknown_tagged_fields {
-        if v.len() > std::u32::MAX as usize {
+        if v.len() > u32::MAX as usize {
             bail!("Tagged field is too long to encode ({} bytes)", v.len());
         }
         total_size += types::UnsignedVarInt.compute_size(k as u32)?;

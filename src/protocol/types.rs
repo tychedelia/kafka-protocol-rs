@@ -270,7 +270,7 @@ pub struct String;
 impl Encoder<Option<&str>> for String {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, value: Option<&str>) -> Result<()> {
         if let Some(s) = value {
-            if s.len() > std::i16::MAX as usize {
+            if s.len() > i16::MAX as usize {
                 bail!("String is too long to encode ({} bytes)", s.len());
             } else {
                 Int16.encode(buf, s.len() as i16)?;
@@ -284,7 +284,7 @@ impl Encoder<Option<&str>> for String {
     }
     fn compute_size(&self, value: Option<&str>) -> Result<usize> {
         if let Some(s) = value {
-            if s.len() > std::i16::MAX as usize {
+            if s.len() > i16::MAX as usize {
                 bail!("String is too long to encode ({} bytes)", s.len());
             } else {
                 Ok(2 + s.len())
@@ -421,7 +421,7 @@ impl Encoder<Option<&str>> for CompactString {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, value: Option<&str>) -> Result<()> {
         if let Some(s) = value {
             // Use >= because we're going to add one to the length
-            if s.len() >= std::u32::MAX as usize {
+            if s.len() >= u32::MAX as usize {
                 bail!("CompactString is too long to encode ({} bytes)", s.len());
             } else {
                 UnsignedVarInt.encode(buf, (s.len() as u32) + 1)?;
@@ -436,7 +436,7 @@ impl Encoder<Option<&str>> for CompactString {
     fn compute_size(&self, value: Option<&str>) -> Result<usize> {
         if let Some(s) = value {
             // Use >= because we're going to add one to the length
-            if s.len() >= std::u32::MAX as usize {
+            if s.len() >= u32::MAX as usize {
                 bail!("CompactString is too long to encode ({} bytes)", s.len());
             } else {
                 Ok(UnsignedVarInt.compute_size((s.len() as u32) + 1)? + s.len())
@@ -714,7 +714,7 @@ impl Encoder<Option<&[u8]>> for CompactBytes {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, value: Option<&[u8]>) -> Result<()> {
         if let Some(s) = value {
             // Use >= because we're going to add one to the length
-            if s.len() >= std::u32::MAX as usize {
+            if s.len() >= u32::MAX as usize {
                 bail!("CompactBytes is too long to encode ({} bytes)", s.len());
             } else {
                 UnsignedVarInt.encode(buf, (s.len() as u32) + 1)?;
@@ -729,7 +729,7 @@ impl Encoder<Option<&[u8]>> for CompactBytes {
     fn compute_size(&self, value: Option<&[u8]>) -> Result<usize> {
         if let Some(s) = value {
             // Use >= because we're going to add one to the length
-            if s.len() >= std::u32::MAX as usize {
+            if s.len() >= u32::MAX as usize {
                 bail!("CompactBytes is too long to encode ({} bytes)", s.len());
             } else {
                 Ok(UnsignedVarInt.compute_size((s.len() as u32) + 1)? + s.len())
@@ -1126,7 +1126,7 @@ impl<T, E: for<'a> Encoder<&'a T>> Encoder<Option<&[T]>> for CompactArray<E> {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, value: Option<&[T]>) -> Result<()> {
         if let Some(a) = value {
             // Use >= because we're going to add one to the length
-            if a.len() >= std::u32::MAX as usize {
+            if a.len() >= u32::MAX as usize {
                 bail!("CompactArray is too long to encode ({} items)", a.len());
             } else {
                 UnsignedVarInt.encode(buf, (a.len() as u32) + 1)?;
@@ -1143,7 +1143,7 @@ impl<T, E: for<'a> Encoder<&'a T>> Encoder<Option<&[T]>> for CompactArray<E> {
     fn compute_size(&self, value: Option<&[T]>) -> Result<usize> {
         if let Some(a) = value {
             // Use >= because we're going to add one to the length
-            if a.len() >= std::u32::MAX as usize {
+            if a.len() >= u32::MAX as usize {
                 bail!("CompactArray is too long to encode ({} items)", a.len());
             } else if let Some(fixed_size) = self.0.fixed_size() {
                 Ok(UnsignedVarInt.compute_size((a.len() as u32) + 1)? + a.len() * fixed_size)
@@ -1202,7 +1202,7 @@ impl<K: Eq + Hash, V, E: for<'a> Encoder<(&'a K, &'a V)>> Encoder<Option<&IndexM
     fn encode<B: ByteBufMut>(&self, buf: &mut B, value: Option<&IndexMap<K, V>>) -> Result<()> {
         if let Some(a) = value {
             // Use >= because we're going to add one to the length
-            if a.len() >= std::u32::MAX as usize {
+            if a.len() >= u32::MAX as usize {
                 bail!("CompactArray is too long to encode ({} items)", a.len());
             } else {
                 UnsignedVarInt.encode(buf, (a.len() as u32) + 1)?;
@@ -1219,7 +1219,7 @@ impl<K: Eq + Hash, V, E: for<'a> Encoder<(&'a K, &'a V)>> Encoder<Option<&IndexM
     fn compute_size(&self, value: Option<&IndexMap<K, V>>) -> Result<usize> {
         if let Some(a) = value {
             // Use >= because we're going to add one to the length
-            if a.len() >= std::u32::MAX as usize {
+            if a.len() >= u32::MAX as usize {
                 bail!("CompactArray is too long to encode ({} items)", a.len());
             } else if let Some(fixed_size) = self.0.fixed_size() {
                 Ok(UnsignedVarInt.compute_size((a.len() as u32) + 1)? + a.len() * fixed_size)
@@ -1352,12 +1352,12 @@ mod tests {
         test_encoder_decoder(VarLong, 300, &[216, 4]);
         test_encoder_decoder(
             VarLong,
-            std::i64::MAX,
+            i64::MAX,
             &[254, 255, 255, 255, 255, 255, 255, 255, 255, 1],
         );
         test_encoder_decoder(
             VarLong,
-            std::i64::MIN,
+            i64::MIN,
             &[255, 255, 255, 255, 255, 255, 255, 255, 255, 1],
         );
     }

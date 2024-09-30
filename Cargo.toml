@@ -34,11 +34,11 @@ gzip = ["dep:flate2"]
 # Enable compression of records using zstd
 zstd = ["dep:zstd"]
 # Enable compression of records using snap
-snap = ["dep:snap"]
+snappy = ["dep:snap"]
 # Enable compression of records using lz4
 lz4 = ["dep:lz4"]
 
-default = ["client", "broker", "gzip", "zstd", "snap", "lz4"]
+default = ["client", "broker", "gzip", "zstd", "snappy", "lz4"]
 
 [dependencies]
 bytes = "1.0.1"
