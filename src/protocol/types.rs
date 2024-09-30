@@ -4,9 +4,7 @@
 //! types that use zigzag encoded to represent length as a "compact" representation.
 //!
 //! It is unnecessary to interact directly with these types for most use cases.
-use super::{
-    Decodable, Decoder, Encodable, Encoder, MapDecodable, MapEncodable, NewType, StrBytes,
-};
+use super::{Decodable, Decoder, Encodable, Encoder, NewType, StrBytes};
 use crate::protocol::buf::{ByteBuf, ByteBufMut};
 use anyhow::{bail, Result};
 use indexmap::IndexMap;
@@ -905,21 +903,6 @@ impl<T: Decodable> Decoder<Option<T>> for OptionStruct {
         } else {
             Ok(None)
         }
-    }
-}
-
-impl<T: MapEncodable> Encoder<(&T::Key, &T)> for Struct {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, (key, value): (&T::Key, &T)) -> Result<()> {
-        value.encode(key, buf, self.version)
-    }
-    fn compute_size(&self, (key, value): (&T::Key, &T)) -> Result<usize> {
-        value.compute_size(key, self.version)
-    }
-}
-
-impl<T: MapDecodable> Decoder<(T::Key, T)> for Struct {
-    fn decode<B: ByteBuf>(&self, buf: &mut B) -> Result<(T::Key, T)> {
-        T::decode(buf, self.version)
     }
 }
 
