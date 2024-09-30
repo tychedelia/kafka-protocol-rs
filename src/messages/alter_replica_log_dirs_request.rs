@@ -14,32 +14,43 @@ use uuid::Uuid;
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
-    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
+    Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-2
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct AlterReplicaLogDir {
+    /// The absolute directory path.
+    ///
+    /// Supported API versions: 0-2
+    pub path: StrBytes,
+
     /// The topics to add to the directory.
     ///
     /// Supported API versions: 0-2
-    pub topics: indexmap::IndexMap<super::TopicName, AlterReplicaLogDirTopic>,
+    pub topics: Vec<AlterReplicaLogDirTopic>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
 impl AlterReplicaLogDir {
+    /// Sets `path` to the passed value.
+    ///
+    /// The absolute directory path.
+    ///
+    /// Supported API versions: 0-2
+    pub fn with_path(mut self, value: StrBytes) -> Self {
+        self.path = value;
+        self
+    }
     /// Sets `topics` to the passed value.
     ///
     /// The topics to add to the directory.
     ///
     /// Supported API versions: 0-2
-    pub fn with_topics(
-        mut self,
-        value: indexmap::IndexMap<super::TopicName, AlterReplicaLogDirTopic>,
-    ) -> Self {
+    pub fn with_topics(mut self, value: Vec<AlterReplicaLogDirTopic>) -> Self {
         self.topics = value;
         self
     }
@@ -56,13 +67,12 @@ impl AlterReplicaLogDir {
 }
 
 #[cfg(feature = "client")]
-impl MapEncodable for AlterReplicaLogDir {
-    type Key = StrBytes;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
+impl Encodable for AlterReplicaLogDir {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 2 {
-            types::CompactString.encode(buf, key)?;
+            types::CompactString.encode(buf, &self.path)?;
         } else {
-            types::String.encode(buf, key)?;
+            types::String.encode(buf, &self.path)?;
         }
         if version >= 2 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
@@ -83,12 +93,12 @@ impl MapEncodable for AlterReplicaLogDir {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 2 {
-            total_size += types::CompactString.compute_size(key)?;
+            total_size += types::CompactString.compute_size(&self.path)?;
         } else {
-            total_size += types::String.compute_size(key)?;
+            total_size += types::String.compute_size(&self.path)?;
         }
         if version >= 2 {
             total_size +=
@@ -113,10 +123,9 @@ impl MapEncodable for AlterReplicaLogDir {
 }
 
 #[cfg(feature = "broker")]
-impl MapDecodable for AlterReplicaLogDir {
-    type Key = StrBytes;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
-        let key_field = if version >= 2 {
+impl Decodable for AlterReplicaLogDir {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        let path = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
@@ -136,19 +145,18 @@ impl MapDecodable for AlterReplicaLogDir {
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
-        Ok((
-            key_field,
-            Self {
-                topics,
-                unknown_tagged_fields,
-            },
-        ))
+        Ok(Self {
+            path,
+            topics,
+            unknown_tagged_fields,
+        })
     }
 }
 
 impl Default for AlterReplicaLogDir {
     fn default() -> Self {
         Self {
+            path: Default::default(),
             topics: Default::default(),
             unknown_tagged_fields: BTreeMap::new(),
         }
@@ -164,6 +172,11 @@ impl Message for AlterReplicaLogDir {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct AlterReplicaLogDirTopic {
+    /// The topic name.
+    ///
+    /// Supported API versions: 0-2
+    pub name: super::TopicName,
+
     /// The partition indexes.
     ///
     /// Supported API versions: 0-2
@@ -174,6 +187,15 @@ pub struct AlterReplicaLogDirTopic {
 }
 
 impl AlterReplicaLogDirTopic {
+    /// Sets `name` to the passed value.
+    ///
+    /// The topic name.
+    ///
+    /// Supported API versions: 0-2
+    pub fn with_name(mut self, value: super::TopicName) -> Self {
+        self.name = value;
+        self
+    }
     /// Sets `partitions` to the passed value.
     ///
     /// The partition indexes.
@@ -196,13 +218,12 @@ impl AlterReplicaLogDirTopic {
 }
 
 #[cfg(feature = "client")]
-impl MapEncodable for AlterReplicaLogDirTopic {
-    type Key = super::TopicName;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
+impl Encodable for AlterReplicaLogDirTopic {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 2 {
-            types::CompactString.encode(buf, key)?;
+            types::CompactString.encode(buf, &self.name)?;
         } else {
-            types::String.encode(buf, key)?;
+            types::String.encode(buf, &self.name)?;
         }
         if version >= 2 {
             types::CompactArray(types::Int32).encode(buf, &self.partitions)?;
@@ -223,12 +244,12 @@ impl MapEncodable for AlterReplicaLogDirTopic {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 2 {
-            total_size += types::CompactString.compute_size(key)?;
+            total_size += types::CompactString.compute_size(&self.name)?;
         } else {
-            total_size += types::String.compute_size(key)?;
+            total_size += types::String.compute_size(&self.name)?;
         }
         if version >= 2 {
             total_size += types::CompactArray(types::Int32).compute_size(&self.partitions)?;
@@ -252,10 +273,9 @@ impl MapEncodable for AlterReplicaLogDirTopic {
 }
 
 #[cfg(feature = "broker")]
-impl MapDecodable for AlterReplicaLogDirTopic {
-    type Key = super::TopicName;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
-        let key_field = if version >= 2 {
+impl Decodable for AlterReplicaLogDirTopic {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        let name = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
@@ -275,19 +295,18 @@ impl MapDecodable for AlterReplicaLogDirTopic {
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
-        Ok((
-            key_field,
-            Self {
-                partitions,
-                unknown_tagged_fields,
-            },
-        ))
+        Ok(Self {
+            name,
+            partitions,
+            unknown_tagged_fields,
+        })
     }
 }
 
 impl Default for AlterReplicaLogDirTopic {
     fn default() -> Self {
         Self {
+            name: Default::default(),
             partitions: Default::default(),
             unknown_tagged_fields: BTreeMap::new(),
         }
@@ -306,7 +325,7 @@ pub struct AlterReplicaLogDirsRequest {
     /// The alterations to make for each directory.
     ///
     /// Supported API versions: 0-2
-    pub dirs: indexmap::IndexMap<StrBytes, AlterReplicaLogDir>,
+    pub dirs: Vec<AlterReplicaLogDir>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
@@ -318,7 +337,7 @@ impl AlterReplicaLogDirsRequest {
     /// The alterations to make for each directory.
     ///
     /// Supported API versions: 0-2
-    pub fn with_dirs(mut self, value: indexmap::IndexMap<StrBytes, AlterReplicaLogDir>) -> Self {
+    pub fn with_dirs(mut self, value: Vec<AlterReplicaLogDir>) -> Self {
         self.dirs = value;
         self
     }

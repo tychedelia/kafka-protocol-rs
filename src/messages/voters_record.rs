@@ -14,13 +14,18 @@ use uuid::Uuid;
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
-    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
+    Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct Endpoint {
+    /// The name of the endpoint
+    ///
+    /// Supported API versions: 0
+    pub name: StrBytes,
+
     /// The hostname
     ///
     /// Supported API versions: 0
@@ -36,6 +41,15 @@ pub struct Endpoint {
 }
 
 impl Endpoint {
+    /// Sets `name` to the passed value.
+    ///
+    /// The name of the endpoint
+    ///
+    /// Supported API versions: 0
+    pub fn with_name(mut self, value: StrBytes) -> Self {
+        self.name = value;
+        self
+    }
     /// Sets `host` to the passed value.
     ///
     /// The hostname
@@ -66,10 +80,9 @@ impl Endpoint {
     }
 }
 
-impl MapEncodable for Endpoint {
-    type Key = StrBytes;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
-        types::CompactString.encode(buf, key)?;
+impl Encodable for Endpoint {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        types::CompactString.encode(buf, &self.name)?;
         types::CompactString.encode(buf, &self.host)?;
         types::UInt16.encode(buf, &self.port)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -84,9 +97,9 @@ impl MapEncodable for Endpoint {
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
-        total_size += types::CompactString.compute_size(key)?;
+        total_size += types::CompactString.compute_size(&self.name)?;
         total_size += types::CompactString.compute_size(&self.host)?;
         total_size += types::UInt16.compute_size(&self.port)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -103,10 +116,9 @@ impl MapEncodable for Endpoint {
     }
 }
 
-impl MapDecodable for Endpoint {
-    type Key = StrBytes;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
-        let key_field = types::CompactString.decode(buf)?;
+impl Decodable for Endpoint {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        let name = types::CompactString.decode(buf)?;
         let host = types::CompactString.decode(buf)?;
         let port = types::UInt16.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
@@ -117,20 +129,19 @@ impl MapDecodable for Endpoint {
             let unknown_value = buf.try_get_bytes(size as usize)?;
             unknown_tagged_fields.insert(tag as i32, unknown_value);
         }
-        Ok((
-            key_field,
-            Self {
-                host,
-                port,
-                unknown_tagged_fields,
-            },
-        ))
+        Ok(Self {
+            name,
+            host,
+            port,
+            unknown_tagged_fields,
+        })
     }
 }
 
 impl Default for Endpoint {
     fn default() -> Self {
         Self {
+            name: Default::default(),
             host: Default::default(),
             port: 0,
             unknown_tagged_fields: BTreeMap::new(),
@@ -278,7 +289,7 @@ pub struct Voter {
     /// The endpoint that can be used to communicate with the voter
     ///
     /// Supported API versions: 0
-    pub endpoints: indexmap::IndexMap<StrBytes, Endpoint>,
+    pub endpoints: Vec<Endpoint>,
 
     /// The range of versions of the protocol that the replica supports
     ///
@@ -313,7 +324,7 @@ impl Voter {
     /// The endpoint that can be used to communicate with the voter
     ///
     /// Supported API versions: 0
-    pub fn with_endpoints(mut self, value: indexmap::IndexMap<StrBytes, Endpoint>) -> Self {
+    pub fn with_endpoints(mut self, value: Vec<Endpoint>) -> Self {
         self.endpoints = value;
         self
     }
