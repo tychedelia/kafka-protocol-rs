@@ -1092,12 +1092,8 @@ impl<K: Eq + Hash, V, E: Decoder<(K, V)>> Decoder<Option<IndexMap<K, V>>> for Ar
         match Int32.decode(buf)? {
             -1 => Ok(None),
             n if n >= 0 => {
-                let mut result = IndexMap::new();
-                for _ in 0..n {
-                    let (k, v) = self.0.decode(buf)?;
-                    result.insert(k, v);
-                }
-                Ok(Some(result))
+                let result: Result<IndexMap<K, V>> = (0..n).map(|_| self.0.decode(buf)).collect();
+                Ok(Some(result?))
             }
             n => {
                 bail!("Array length is negative ({})", n);
@@ -1290,12 +1286,8 @@ impl<K: Eq + Hash, V, E: Decoder<(K, V)>> Decoder<Option<IndexMap<K, V>>> for Co
         match UnsignedVarInt.decode(buf)? {
             0 => Ok(None),
             n => {
-                let mut result = IndexMap::new();
-                for _ in 1..n {
-                    let (k, v) = self.0.decode(buf)?;
-                    result.insert(k, v);
-                }
-                Ok(Some(result))
+                let result: Result<IndexMap<K, V>> = (1..n).map(|_| self.0.decode(buf)).collect();
+                Ok(Some(result?))
             }
         }
     }
