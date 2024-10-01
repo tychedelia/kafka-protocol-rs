@@ -160,6 +160,7 @@ impl RecordBatchEncoder {
     /// strategy based on version.
     /// # Arguments
     /// * `compressor` - A function that compresses the given batch of records.
+    ///
     /// If `None`, the right compression algorithm will automatically be selected and applied.
     pub fn encode<'a, B, I, CF>(
         buf: &mut B,
@@ -439,6 +440,7 @@ impl RecordBatchEncoder {
                 Compression::Zstd => cmpr::Zstd::compress(buf, |buf| {
                     Self::encode_new_records(buf, records, min_offset, min_timestamp, options)
                 })?,
+                #[allow(unreachable_patterns)]
                 c => {
                     return Err(anyhow!(
                         "Support for {c:?} is not enabled as a cargo feature"
@@ -486,6 +488,7 @@ impl RecordBatchDecoder {
     /// Decode the provided buffer into a vec of records.
     /// # Arguments
     /// * `decompressor` - A function that decompresses the given batch of records.
+    ///
     /// If `None`, the right decompression algorithm will automatically be selected and applied.
     pub fn decode<B: ByteBuf, F>(buf: &mut B, decompressor: Option<F>) -> Result<Vec<Record>>
     where
@@ -651,6 +654,7 @@ impl RecordBatchDecoder {
                 Compression::Lz4 => cmpr::Lz4::decompress(buf, |buf| {
                     Self::decode_new_records(buf, &batch_decode_info, version, records)
                 })?,
+                #[allow(unreachable_patterns)]
                 c => {
                     return Err(anyhow!(
                         "Support for {c:?} is not enabled as a cargo feature"
