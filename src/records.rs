@@ -119,6 +119,7 @@ struct BatchDecodeInfo {
     partition_leader_epoch: i32,
     producer_id: i64,
     producer_epoch: i16,
+    compression: Compression,
 }
 
 /// A Kafka message containing key, payload value, and all associated metadata.
@@ -169,7 +170,7 @@ impl RecordBatchEncoder {
     ) -> Result<()>
     where
         B: ByteBufMut,
-        I: IntoIterator<Item = &'a Record>,
+        I: IntoIterator<Item=&'a Record>,
         I::IntoIter: Clone,
         CF: Fn(&mut BytesMut, &mut B, Compression) -> Result<()>,
     {
@@ -187,7 +188,7 @@ impl RecordBatchEncoder {
     ) -> Result<()>
     where
         B: ByteBufMut,
-        I: Iterator<Item = &'a Record> + Clone,
+        I: Iterator<Item=&'a Record> + Clone,
     {
         for record in records {
             record.encode_legacy(buf, options)?;
@@ -202,7 +203,7 @@ impl RecordBatchEncoder {
     ) -> Result<()>
     where
         B: ByteBufMut,
-        I: Iterator<Item = &'a Record> + Clone,
+        I: Iterator<Item=&'a Record> + Clone,
         CF: Fn(&mut BytesMut, &mut B, Compression) -> Result<()>,
     {
         if options.compression == Compression::None {
@@ -279,7 +280,7 @@ impl RecordBatchEncoder {
     ) -> Result<()>
     where
         B: ByteBufMut,
-        I: Iterator<Item = &'a Record>,
+        I: Iterator<Item=&'a Record>,
     {
         for record in records {
             record.encode_new(buf, min_offset, min_timestamp, options)?;
@@ -295,7 +296,7 @@ impl RecordBatchEncoder {
     ) -> Result<bool>
     where
         B: ByteBufMut,
-        I: Iterator<Item = &'a Record> + Clone,
+        I: Iterator<Item=&'a Record> + Clone,
         CF: Fn(&mut BytesMut, &mut B, Compression) -> Result<()>,
     {
         let mut record_peeker = records.clone();
@@ -315,7 +316,7 @@ impl RecordBatchEncoder {
                     && record.producer_id == first_record.producer_id
                     && record.producer_epoch == first_record.producer_epoch
                     && (record.offset as i32).wrapping_sub(record.sequence)
-                        == (first_record.offset as i32).wrapping_sub(first_record.sequence)
+                    == (first_record.offset as i32).wrapping_sub(first_record.sequence)
             })
             .count()
             + 1;
@@ -457,7 +458,7 @@ impl RecordBatchEncoder {
     ) -> Result<()>
     where
         B: ByteBufMut,
-        I: Iterator<Item = &'a Record> + Clone,
+        I: Iterator<Item=&'a Record> + Clone,
         CF: Fn(&mut BytesMut, &mut B, Compression) -> Result<()>,
     {
         while Self::encode_new_batch(buf, &mut records, options, compressor.as_ref())? {}
@@ -465,7 +466,52 @@ impl RecordBatchEncoder {
     }
 }
 
+
+struct RecordIterator
+{
+    buf: Bytes,
+    batch_decode_info: BatchDecodeInfo,
+    current: i64,
+}
+
+impl Iterator for RecordIterator
+{
+    type Item = Record;
+
+    fn next(&mut self) -> Option<Record>
+    {
+        if self.current >= self.batch_decode_info.record_count as i64
+        {
+            return None;
+        }
+        self.current += 1;
+        Record::decode_new(&mut self.buf, &self.batch_decode_info, 2).ok()
+    }
+}
+
+impl RecordIterator {
+    fn new(buf: &mut Bytes, version: i8) -> Self
+    {
+        let (batch_decode_info, buf) = RecordBatchDecoder::decode_batch_info(buf, version).unwrap();
+        RecordIterator {
+            buf,
+            batch_decode_info,
+            current: 0,
+        }
+    }
+}
+
+
 impl RecordBatchDecoder {
+    /// Decode the provided buffer into a vec of records.
+    /// # Arguments
+    /// * `buf` - The buffer to decode.
+    /// * `version` - The version of the record batch.
+    pub fn records(buf: &mut Bytes, version: i8) -> Box<dyn Iterator<Item=Record>>
+    {
+        Box::new(RecordIterator::new(buf, version))
+    }
+    
     /// Decode the provided buffer into a vec of records.
     /// # Arguments
     /// * `decompressor` - A function that decompresses the given batch of records.
@@ -509,14 +555,10 @@ impl RecordBatchDecoder {
         }
         Ok(())
     }
-    fn decode_new_batch<B: ByteBuf, F>(
+    fn decode_batch_info<B: ByteBuf>(
         buf: &mut B,
         version: i8,
-        records: &mut Vec<Record>,
-        decompress_func: Option<&F>,
-    ) -> Result<()>
-    where
-        F: Fn(&mut bytes::Bytes, Compression) -> Result<B>,
+    ) -> Result<(BatchDecodeInfo, Bytes)>
     {
         // Base offset
         let min_offset = types::Int64.decode(buf)?;
@@ -596,7 +638,7 @@ impl RecordBatchDecoder {
         }
         let record_count = record_count as usize;
 
-        let batch_decode_info = BatchDecodeInfo {
+        Ok((BatchDecodeInfo {
             record_count,
             timestamp_type,
             min_offset,
@@ -607,27 +649,41 @@ impl RecordBatchDecoder {
             partition_leader_epoch,
             producer_id,
             producer_epoch,
-        };
+            compression,
+        }, buf.to_owned()))
+    }
+    fn decode_new_batch<B: ByteBuf, F>(
+        buf: &mut B,
+        version: i8,
+        records: &mut Vec<Record>,
+        decompress_func: Option<&F>,
+    ) -> Result<()>
+    where
+        F: Fn(&mut bytes::Bytes, Compression) -> Result<B>,
+    {
+        let (batch_decode_info, mut buf) = Self::decode_batch_info(buf, version)?;
+        let compression = batch_decode_info.compression;
+
 
         if let Some(decompress_func) = decompress_func {
-            let mut decompressed_buf = decompress_func(buf, compression)?;
+            let mut decompressed_buf = decompress_func(&mut buf, compression)?;
 
             Self::decode_new_records(&mut decompressed_buf, &batch_decode_info, version, records)?;
         } else {
-            match compression {
-                Compression::None => cmpr::None::decompress(buf, |buf| {
+            match batch_decode_info.compression {
+                Compression::None => cmpr::None::decompress(&mut buf, |buf| {
                     Self::decode_new_records(buf, &batch_decode_info, version, records)
                 })?,
-                Compression::Snappy => cmpr::Snappy::decompress(buf, |buf| {
+                Compression::Snappy => cmpr::Snappy::decompress(&mut buf, |buf| {
                     Self::decode_new_records(buf, &batch_decode_info, version, records)
                 })?,
-                Compression::Gzip => cmpr::Gzip::decompress(buf, |buf| {
+                Compression::Gzip => cmpr::Gzip::decompress(&mut buf, |buf| {
                     Self::decode_new_records(buf, &batch_decode_info, version, records)
                 })?,
-                Compression::Zstd => cmpr::Zstd::decompress(buf, |buf| {
+                Compression::Zstd => cmpr::Zstd::decompress(&mut buf, |buf| {
                     Self::decode_new_records(buf, &batch_decode_info, version, records)
                 })?,
-                Compression::Lz4 => cmpr::Lz4::decompress(buf, |buf| {
+                Compression::Lz4 => cmpr::Lz4::decompress(&mut buf, |buf| {
                     Self::decode_new_records(buf, &batch_decode_info, version, records)
                 })?,
             };
