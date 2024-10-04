@@ -196,10 +196,6 @@ impl Encodable for ListOffsetsPartitionResponse {
         }
         if version >= 4 {
             total_size += types::Int32.compute_size(&self.leader_epoch)?;
-        } else {
-            if self.leader_epoch != -1 {
-                bail!("failed to encode");
-            }
         }
         if version >= 6 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
