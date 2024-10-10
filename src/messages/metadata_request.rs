@@ -14,7 +14,7 @@ use uuid::Uuid;
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
-    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
+    Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-12

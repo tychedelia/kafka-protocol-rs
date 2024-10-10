@@ -14,7 +14,7 @@ use uuid::Uuid;
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
-    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
+    Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-11
@@ -349,6 +349,11 @@ impl Message for LeaderIdAndEpoch {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct NodeEndpoint {
+    /// The ID of the associated node.
+    ///
+    /// Supported API versions: 10-11
+    pub node_id: super::BrokerId,
+
     /// The node's hostname.
     ///
     /// Supported API versions: 10-11
@@ -369,6 +374,15 @@ pub struct NodeEndpoint {
 }
 
 impl NodeEndpoint {
+    /// Sets `node_id` to the passed value.
+    ///
+    /// The ID of the associated node.
+    ///
+    /// Supported API versions: 10-11
+    pub fn with_node_id(mut self, value: super::BrokerId) -> Self {
+        self.node_id = value;
+        self
+    }
     /// Sets `host` to the passed value.
     ///
     /// The node's hostname.
@@ -409,13 +423,12 @@ impl NodeEndpoint {
 }
 
 #[cfg(feature = "broker")]
-impl MapEncodable for NodeEndpoint {
-    type Key = super::BrokerId;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
+impl Encodable for NodeEndpoint {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 10 {
-            types::Int32.encode(buf, key)?;
+            types::Int32.encode(buf, &self.node_id)?;
         } else {
-            if *key != 0 {
+            if self.node_id != 0 {
                 bail!("failed to encode");
             }
         }
@@ -454,12 +467,12 @@ impl MapEncodable for NodeEndpoint {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 10 {
-            total_size += types::Int32.compute_size(key)?;
+            total_size += types::Int32.compute_size(&self.node_id)?;
         } else {
-            if *key != 0 {
+            if self.node_id != 0 {
                 bail!("failed to encode");
             }
         }
@@ -501,10 +514,9 @@ impl MapEncodable for NodeEndpoint {
 }
 
 #[cfg(feature = "client")]
-impl MapDecodable for NodeEndpoint {
-    type Key = super::BrokerId;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
-        let key_field = if version >= 10 {
+impl Decodable for NodeEndpoint {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        let node_id = if version >= 10 {
             types::Int32.decode(buf)?
         } else {
             (0).into()
@@ -534,21 +546,20 @@ impl MapDecodable for NodeEndpoint {
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
-        Ok((
-            key_field,
-            Self {
-                host,
-                port,
-                rack,
-                unknown_tagged_fields,
-            },
-        ))
+        Ok(Self {
+            node_id,
+            host,
+            port,
+            rack,
+            unknown_tagged_fields,
+        })
     }
 }
 
 impl Default for NodeEndpoint {
     fn default() -> Self {
         Self {
+            node_id: (0).into(),
             host: Default::default(),
             port: 0,
             rack: None,
@@ -914,7 +925,7 @@ pub struct ProduceResponse {
     /// Each produce response
     ///
     /// Supported API versions: 0-11
-    pub responses: indexmap::IndexMap<super::TopicName, TopicProduceResponse>,
+    pub responses: Vec<TopicProduceResponse>,
 
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
@@ -924,7 +935,7 @@ pub struct ProduceResponse {
     /// Endpoints for all current-leaders enumerated in PartitionProduceResponses, with errors NOT_LEADER_OR_FOLLOWER.
     ///
     /// Supported API versions: 10-11
-    pub node_endpoints: indexmap::IndexMap<super::BrokerId, NodeEndpoint>,
+    pub node_endpoints: Vec<NodeEndpoint>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
@@ -936,10 +947,7 @@ impl ProduceResponse {
     /// Each produce response
     ///
     /// Supported API versions: 0-11
-    pub fn with_responses(
-        mut self,
-        value: indexmap::IndexMap<super::TopicName, TopicProduceResponse>,
-    ) -> Self {
+    pub fn with_responses(mut self, value: Vec<TopicProduceResponse>) -> Self {
         self.responses = value;
         self
     }
@@ -957,10 +965,7 @@ impl ProduceResponse {
     /// Endpoints for all current-leaders enumerated in PartitionProduceResponses, with errors NOT_LEADER_OR_FOLLOWER.
     ///
     /// Supported API versions: 10-11
-    pub fn with_node_endpoints(
-        mut self,
-        value: indexmap::IndexMap<super::BrokerId, NodeEndpoint>,
-    ) -> Self {
+    pub fn with_node_endpoints(mut self, value: Vec<NodeEndpoint>) -> Self {
         self.node_endpoints = value;
         self
     }
@@ -1132,6 +1137,11 @@ impl Message for ProduceResponse {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct TopicProduceResponse {
+    /// The topic name
+    ///
+    /// Supported API versions: 0-11
+    pub name: super::TopicName,
+
     /// Each partition that we produced to within the topic.
     ///
     /// Supported API versions: 0-11
@@ -1142,6 +1152,15 @@ pub struct TopicProduceResponse {
 }
 
 impl TopicProduceResponse {
+    /// Sets `name` to the passed value.
+    ///
+    /// The topic name
+    ///
+    /// Supported API versions: 0-11
+    pub fn with_name(mut self, value: super::TopicName) -> Self {
+        self.name = value;
+        self
+    }
     /// Sets `partition_responses` to the passed value.
     ///
     /// Each partition that we produced to within the topic.
@@ -1164,13 +1183,12 @@ impl TopicProduceResponse {
 }
 
 #[cfg(feature = "broker")]
-impl MapEncodable for TopicProduceResponse {
-    type Key = super::TopicName;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
+impl Encodable for TopicProduceResponse {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 9 {
-            types::CompactString.encode(buf, key)?;
+            types::CompactString.encode(buf, &self.name)?;
         } else {
-            types::String.encode(buf, key)?;
+            types::String.encode(buf, &self.name)?;
         }
         if version >= 9 {
             types::CompactArray(types::Struct { version })
@@ -1192,12 +1210,12 @@ impl MapEncodable for TopicProduceResponse {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 9 {
-            total_size += types::CompactString.compute_size(key)?;
+            total_size += types::CompactString.compute_size(&self.name)?;
         } else {
-            total_size += types::String.compute_size(key)?;
+            total_size += types::String.compute_size(&self.name)?;
         }
         if version >= 9 {
             total_size += types::CompactArray(types::Struct { version })
@@ -1223,10 +1241,9 @@ impl MapEncodable for TopicProduceResponse {
 }
 
 #[cfg(feature = "client")]
-impl MapDecodable for TopicProduceResponse {
-    type Key = super::TopicName;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
-        let key_field = if version >= 9 {
+impl Decodable for TopicProduceResponse {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        let name = if version >= 9 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
@@ -1246,19 +1263,18 @@ impl MapDecodable for TopicProduceResponse {
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
-        Ok((
-            key_field,
-            Self {
-                partition_responses,
-                unknown_tagged_fields,
-            },
-        ))
+        Ok(Self {
+            name,
+            partition_responses,
+            unknown_tagged_fields,
+        })
     }
 }
 
 impl Default for TopicProduceResponse {
     fn default() -> Self {
         Self {
+            name: Default::default(),
             partition_responses: Default::default(),
             unknown_tagged_fields: BTreeMap::new(),
         }

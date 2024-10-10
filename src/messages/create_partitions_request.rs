@@ -14,7 +14,7 @@ use uuid::Uuid;
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
-    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
+    Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-3
@@ -143,7 +143,7 @@ pub struct CreatePartitionsRequest {
     /// Each topic that we want to create new partitions inside.
     ///
     /// Supported API versions: 0-3
-    pub topics: indexmap::IndexMap<super::TopicName, CreatePartitionsTopic>,
+    pub topics: Vec<CreatePartitionsTopic>,
 
     /// The time in ms to wait for the partitions to be created.
     ///
@@ -165,10 +165,7 @@ impl CreatePartitionsRequest {
     /// Each topic that we want to create new partitions inside.
     ///
     /// Supported API versions: 0-3
-    pub fn with_topics(
-        mut self,
-        value: indexmap::IndexMap<super::TopicName, CreatePartitionsTopic>,
-    ) -> Self {
+    pub fn with_topics(mut self, value: Vec<CreatePartitionsTopic>) -> Self {
         self.topics = value;
         self
     }
@@ -301,6 +298,11 @@ impl Message for CreatePartitionsRequest {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct CreatePartitionsTopic {
+    /// The topic name.
+    ///
+    /// Supported API versions: 0-3
+    pub name: super::TopicName,
+
     /// The new partition count.
     ///
     /// Supported API versions: 0-3
@@ -316,6 +318,15 @@ pub struct CreatePartitionsTopic {
 }
 
 impl CreatePartitionsTopic {
+    /// Sets `name` to the passed value.
+    ///
+    /// The topic name.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_name(mut self, value: super::TopicName) -> Self {
+        self.name = value;
+        self
+    }
     /// Sets `count` to the passed value.
     ///
     /// The new partition count.
@@ -347,13 +358,12 @@ impl CreatePartitionsTopic {
 }
 
 #[cfg(feature = "client")]
-impl MapEncodable for CreatePartitionsTopic {
-    type Key = super::TopicName;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
+impl Encodable for CreatePartitionsTopic {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 2 {
-            types::CompactString.encode(buf, key)?;
+            types::CompactString.encode(buf, &self.name)?;
         } else {
-            types::String.encode(buf, key)?;
+            types::String.encode(buf, &self.name)?;
         }
         types::Int32.encode(buf, &self.count)?;
         if version >= 2 {
@@ -375,12 +385,12 @@ impl MapEncodable for CreatePartitionsTopic {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 2 {
-            total_size += types::CompactString.compute_size(key)?;
+            total_size += types::CompactString.compute_size(&self.name)?;
         } else {
-            total_size += types::String.compute_size(key)?;
+            total_size += types::String.compute_size(&self.name)?;
         }
         total_size += types::Int32.compute_size(&self.count)?;
         if version >= 2 {
@@ -407,10 +417,9 @@ impl MapEncodable for CreatePartitionsTopic {
 }
 
 #[cfg(feature = "broker")]
-impl MapDecodable for CreatePartitionsTopic {
-    type Key = super::TopicName;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
-        let key_field = if version >= 2 {
+impl Decodable for CreatePartitionsTopic {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        let name = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
@@ -431,20 +440,19 @@ impl MapDecodable for CreatePartitionsTopic {
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
-        Ok((
-            key_field,
-            Self {
-                count,
-                assignments,
-                unknown_tagged_fields,
-            },
-        ))
+        Ok(Self {
+            name,
+            count,
+            assignments,
+            unknown_tagged_fields,
+        })
     }
 }
 
 impl Default for CreatePartitionsTopic {
     fn default() -> Self {
         Self {
+            name: Default::default(),
             count: 0,
             assignments: Some(Default::default()),
             unknown_tagged_fields: BTreeMap::new(),

@@ -14,13 +14,18 @@ use uuid::Uuid;
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
-    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
+    Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct ApiVersion {
+    /// The API index.
+    ///
+    /// Supported API versions: 0-3
+    pub api_key: i16,
+
     /// The minimum supported version, inclusive.
     ///
     /// Supported API versions: 0-3
@@ -36,6 +41,15 @@ pub struct ApiVersion {
 }
 
 impl ApiVersion {
+    /// Sets `api_key` to the passed value.
+    ///
+    /// The API index.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_api_key(mut self, value: i16) -> Self {
+        self.api_key = value;
+        self
+    }
     /// Sets `min_version` to the passed value.
     ///
     /// The minimum supported version, inclusive.
@@ -67,10 +81,9 @@ impl ApiVersion {
 }
 
 #[cfg(feature = "broker")]
-impl MapEncodable for ApiVersion {
-    type Key = i16;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
-        types::Int16.encode(buf, key)?;
+impl Encodable for ApiVersion {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        types::Int16.encode(buf, &self.api_key)?;
         types::Int16.encode(buf, &self.min_version)?;
         types::Int16.encode(buf, &self.max_version)?;
         if version >= 3 {
@@ -87,9 +100,9 @@ impl MapEncodable for ApiVersion {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
-        total_size += types::Int16.compute_size(key)?;
+        total_size += types::Int16.compute_size(&self.api_key)?;
         total_size += types::Int16.compute_size(&self.min_version)?;
         total_size += types::Int16.compute_size(&self.max_version)?;
         if version >= 3 {
@@ -109,10 +122,9 @@ impl MapEncodable for ApiVersion {
 }
 
 #[cfg(feature = "client")]
-impl MapDecodable for ApiVersion {
-    type Key = i16;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
-        let key_field = types::Int16.decode(buf)?;
+impl Decodable for ApiVersion {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        let api_key = types::Int16.decode(buf)?;
         let min_version = types::Int16.decode(buf)?;
         let max_version = types::Int16.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
@@ -125,20 +137,19 @@ impl MapDecodable for ApiVersion {
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
-        Ok((
-            key_field,
-            Self {
-                min_version,
-                max_version,
-                unknown_tagged_fields,
-            },
-        ))
+        Ok(Self {
+            api_key,
+            min_version,
+            max_version,
+            unknown_tagged_fields,
+        })
     }
 }
 
 impl Default for ApiVersion {
     fn default() -> Self {
         Self {
+            api_key: 0,
             min_version: 0,
             max_version: 0,
             unknown_tagged_fields: BTreeMap::new(),
@@ -163,7 +174,7 @@ pub struct ApiVersionsResponse {
     /// The APIs supported by the broker.
     ///
     /// Supported API versions: 0-3
-    pub api_keys: indexmap::IndexMap<i16, ApiVersion>,
+    pub api_keys: Vec<ApiVersion>,
 
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
@@ -173,7 +184,7 @@ pub struct ApiVersionsResponse {
     /// Features supported by the broker.
     ///
     /// Supported API versions: 3
-    pub supported_features: indexmap::IndexMap<StrBytes, SupportedFeatureKey>,
+    pub supported_features: Vec<SupportedFeatureKey>,
 
     /// The monotonically increasing epoch for the finalized features information. Valid values are >= 0. A value of -1 is special and represents unknown epoch.
     ///
@@ -183,7 +194,7 @@ pub struct ApiVersionsResponse {
     /// List of cluster-wide finalized features. The information is valid only if FinalizedFeaturesEpoch >= 0.
     ///
     /// Supported API versions: 3
-    pub finalized_features: indexmap::IndexMap<StrBytes, FinalizedFeatureKey>,
+    pub finalized_features: Vec<FinalizedFeatureKey>,
 
     /// Set by a KRaft controller if the required configurations for ZK migration are present
     ///
@@ -209,7 +220,7 @@ impl ApiVersionsResponse {
     /// The APIs supported by the broker.
     ///
     /// Supported API versions: 0-3
-    pub fn with_api_keys(mut self, value: indexmap::IndexMap<i16, ApiVersion>) -> Self {
+    pub fn with_api_keys(mut self, value: Vec<ApiVersion>) -> Self {
         self.api_keys = value;
         self
     }
@@ -227,10 +238,7 @@ impl ApiVersionsResponse {
     /// Features supported by the broker.
     ///
     /// Supported API versions: 3
-    pub fn with_supported_features(
-        mut self,
-        value: indexmap::IndexMap<StrBytes, SupportedFeatureKey>,
-    ) -> Self {
+    pub fn with_supported_features(mut self, value: Vec<SupportedFeatureKey>) -> Self {
         self.supported_features = value;
         self
     }
@@ -248,10 +256,7 @@ impl ApiVersionsResponse {
     /// List of cluster-wide finalized features. The information is valid only if FinalizedFeaturesEpoch >= 0.
     ///
     /// Supported API versions: 3
-    pub fn with_finalized_features(
-        mut self,
-        value: indexmap::IndexMap<StrBytes, FinalizedFeatureKey>,
-    ) -> Self {
+    pub fn with_finalized_features(mut self, value: Vec<FinalizedFeatureKey>) -> Self {
         self.finalized_features = value;
         self
     }
@@ -539,6 +544,11 @@ impl Message for ApiVersionsResponse {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct FinalizedFeatureKey {
+    /// The name of the feature.
+    ///
+    /// Supported API versions: 3
+    pub name: StrBytes,
+
     /// The cluster-wide finalized max version level for the feature.
     ///
     /// Supported API versions: 3
@@ -554,6 +564,15 @@ pub struct FinalizedFeatureKey {
 }
 
 impl FinalizedFeatureKey {
+    /// Sets `name` to the passed value.
+    ///
+    /// The name of the feature.
+    ///
+    /// Supported API versions: 3
+    pub fn with_name(mut self, value: StrBytes) -> Self {
+        self.name = value;
+        self
+    }
     /// Sets `max_version_level` to the passed value.
     ///
     /// The cluster-wide finalized max version level for the feature.
@@ -585,13 +604,12 @@ impl FinalizedFeatureKey {
 }
 
 #[cfg(feature = "broker")]
-impl MapEncodable for FinalizedFeatureKey {
-    type Key = StrBytes;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
+impl Encodable for FinalizedFeatureKey {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 3 {
-            types::CompactString.encode(buf, key)?;
+            types::CompactString.encode(buf, &self.name)?;
         } else {
-            if !key.is_empty() {
+            if !self.name.is_empty() {
                 bail!("failed to encode");
             }
         }
@@ -623,12 +641,12 @@ impl MapEncodable for FinalizedFeatureKey {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 3 {
-            total_size += types::CompactString.compute_size(key)?;
+            total_size += types::CompactString.compute_size(&self.name)?;
         } else {
-            if !key.is_empty() {
+            if !self.name.is_empty() {
                 bail!("failed to encode");
             }
         }
@@ -663,10 +681,9 @@ impl MapEncodable for FinalizedFeatureKey {
 }
 
 #[cfg(feature = "client")]
-impl MapDecodable for FinalizedFeatureKey {
-    type Key = StrBytes;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
-        let key_field = if version >= 3 {
+impl Decodable for FinalizedFeatureKey {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        let name = if version >= 3 {
             types::CompactString.decode(buf)?
         } else {
             Default::default()
@@ -691,20 +708,19 @@ impl MapDecodable for FinalizedFeatureKey {
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
-        Ok((
-            key_field,
-            Self {
-                max_version_level,
-                min_version_level,
-                unknown_tagged_fields,
-            },
-        ))
+        Ok(Self {
+            name,
+            max_version_level,
+            min_version_level,
+            unknown_tagged_fields,
+        })
     }
 }
 
 impl Default for FinalizedFeatureKey {
     fn default() -> Self {
         Self {
+            name: Default::default(),
             max_version_level: 0,
             min_version_level: 0,
             unknown_tagged_fields: BTreeMap::new(),
@@ -721,6 +737,11 @@ impl Message for FinalizedFeatureKey {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct SupportedFeatureKey {
+    /// The name of the feature.
+    ///
+    /// Supported API versions: 3
+    pub name: StrBytes,
+
     /// The minimum supported version for the feature.
     ///
     /// Supported API versions: 3
@@ -736,6 +757,15 @@ pub struct SupportedFeatureKey {
 }
 
 impl SupportedFeatureKey {
+    /// Sets `name` to the passed value.
+    ///
+    /// The name of the feature.
+    ///
+    /// Supported API versions: 3
+    pub fn with_name(mut self, value: StrBytes) -> Self {
+        self.name = value;
+        self
+    }
     /// Sets `min_version` to the passed value.
     ///
     /// The minimum supported version for the feature.
@@ -767,13 +797,12 @@ impl SupportedFeatureKey {
 }
 
 #[cfg(feature = "broker")]
-impl MapEncodable for SupportedFeatureKey {
-    type Key = StrBytes;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
+impl Encodable for SupportedFeatureKey {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 3 {
-            types::CompactString.encode(buf, key)?;
+            types::CompactString.encode(buf, &self.name)?;
         } else {
-            if !key.is_empty() {
+            if !self.name.is_empty() {
                 bail!("failed to encode");
             }
         }
@@ -805,12 +834,12 @@ impl MapEncodable for SupportedFeatureKey {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 3 {
-            total_size += types::CompactString.compute_size(key)?;
+            total_size += types::CompactString.compute_size(&self.name)?;
         } else {
-            if !key.is_empty() {
+            if !self.name.is_empty() {
                 bail!("failed to encode");
             }
         }
@@ -845,10 +874,9 @@ impl MapEncodable for SupportedFeatureKey {
 }
 
 #[cfg(feature = "client")]
-impl MapDecodable for SupportedFeatureKey {
-    type Key = StrBytes;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
-        let key_field = if version >= 3 {
+impl Decodable for SupportedFeatureKey {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        let name = if version >= 3 {
             types::CompactString.decode(buf)?
         } else {
             Default::default()
@@ -873,20 +901,19 @@ impl MapDecodable for SupportedFeatureKey {
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
-        Ok((
-            key_field,
-            Self {
-                min_version,
-                max_version,
-                unknown_tagged_fields,
-            },
-        ))
+        Ok(Self {
+            name,
+            min_version,
+            max_version,
+            unknown_tagged_fields,
+        })
     }
 }
 
 impl Default for SupportedFeatureKey {
     fn default() -> Self {
         Self {
+            name: Default::default(),
             min_version: 0,
             max_version: 0,
             unknown_tagged_fields: BTreeMap::new(),

@@ -175,17 +175,6 @@ pub trait Decodable: Sized {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self>;
 }
 
-pub(crate) trait MapEncodable: Sized {
-    type Key;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()>;
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize>;
-}
-
-pub(crate) trait MapDecodable: Sized {
-    type Key;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)>;
-}
-
 /// Every message has a set of versions valid for a given header version.
 pub trait HeaderVersion {
     /// Maps a header version to a given version for a particular API message.

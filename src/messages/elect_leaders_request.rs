@@ -14,7 +14,7 @@ use uuid::Uuid;
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
-    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
+    Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-2
@@ -29,7 +29,7 @@ pub struct ElectLeadersRequest {
     /// The topic partitions to elect leaders.
     ///
     /// Supported API versions: 0-2
-    pub topic_partitions: Option<indexmap::IndexMap<super::TopicName, TopicPartitions>>,
+    pub topic_partitions: Option<Vec<TopicPartitions>>,
 
     /// The time in ms to wait for the election to complete.
     ///
@@ -55,10 +55,7 @@ impl ElectLeadersRequest {
     /// The topic partitions to elect leaders.
     ///
     /// Supported API versions: 0-2
-    pub fn with_topic_partitions(
-        mut self,
-        value: Option<indexmap::IndexMap<super::TopicName, TopicPartitions>>,
-    ) -> Self {
+    pub fn with_topic_partitions(mut self, value: Option<Vec<TopicPartitions>>) -> Self {
         self.topic_partitions = value;
         self
     }
@@ -199,6 +196,11 @@ impl Message for ElectLeadersRequest {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct TopicPartitions {
+    /// The name of a topic.
+    ///
+    /// Supported API versions: 0-2
+    pub topic: super::TopicName,
+
     /// The partitions of this topic whose leader should be elected.
     ///
     /// Supported API versions: 0-2
@@ -209,6 +211,15 @@ pub struct TopicPartitions {
 }
 
 impl TopicPartitions {
+    /// Sets `topic` to the passed value.
+    ///
+    /// The name of a topic.
+    ///
+    /// Supported API versions: 0-2
+    pub fn with_topic(mut self, value: super::TopicName) -> Self {
+        self.topic = value;
+        self
+    }
     /// Sets `partitions` to the passed value.
     ///
     /// The partitions of this topic whose leader should be elected.
@@ -231,13 +242,12 @@ impl TopicPartitions {
 }
 
 #[cfg(feature = "client")]
-impl MapEncodable for TopicPartitions {
-    type Key = super::TopicName;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
+impl Encodable for TopicPartitions {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 2 {
-            types::CompactString.encode(buf, key)?;
+            types::CompactString.encode(buf, &self.topic)?;
         } else {
-            types::String.encode(buf, key)?;
+            types::String.encode(buf, &self.topic)?;
         }
         if version >= 2 {
             types::CompactArray(types::Int32).encode(buf, &self.partitions)?;
@@ -258,12 +268,12 @@ impl MapEncodable for TopicPartitions {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 2 {
-            total_size += types::CompactString.compute_size(key)?;
+            total_size += types::CompactString.compute_size(&self.topic)?;
         } else {
-            total_size += types::String.compute_size(key)?;
+            total_size += types::String.compute_size(&self.topic)?;
         }
         if version >= 2 {
             total_size += types::CompactArray(types::Int32).compute_size(&self.partitions)?;
@@ -287,10 +297,9 @@ impl MapEncodable for TopicPartitions {
 }
 
 #[cfg(feature = "broker")]
-impl MapDecodable for TopicPartitions {
-    type Key = super::TopicName;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
-        let key_field = if version >= 2 {
+impl Decodable for TopicPartitions {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        let topic = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
@@ -310,19 +319,18 @@ impl MapDecodable for TopicPartitions {
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
-        Ok((
-            key_field,
-            Self {
-                partitions,
-                unknown_tagged_fields,
-            },
-        ))
+        Ok(Self {
+            topic,
+            partitions,
+            unknown_tagged_fields,
+        })
     }
 }
 
 impl Default for TopicPartitions {
     fn default() -> Self {
         Self {
+            topic: Default::default(),
             partitions: Default::default(),
             unknown_tagged_fields: BTreeMap::new(),
         }

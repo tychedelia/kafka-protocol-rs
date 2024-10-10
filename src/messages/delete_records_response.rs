@@ -14,13 +14,18 @@ use uuid::Uuid;
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
-    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
+    Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-2
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct DeleteRecordsPartitionResult {
+    /// The partition index.
+    ///
+    /// Supported API versions: 0-2
+    pub partition_index: i32,
+
     /// The partition low water mark.
     ///
     /// Supported API versions: 0-2
@@ -36,6 +41,15 @@ pub struct DeleteRecordsPartitionResult {
 }
 
 impl DeleteRecordsPartitionResult {
+    /// Sets `partition_index` to the passed value.
+    ///
+    /// The partition index.
+    ///
+    /// Supported API versions: 0-2
+    pub fn with_partition_index(mut self, value: i32) -> Self {
+        self.partition_index = value;
+        self
+    }
     /// Sets `low_watermark` to the passed value.
     ///
     /// The partition low water mark.
@@ -67,10 +81,9 @@ impl DeleteRecordsPartitionResult {
 }
 
 #[cfg(feature = "broker")]
-impl MapEncodable for DeleteRecordsPartitionResult {
-    type Key = i32;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
-        types::Int32.encode(buf, key)?;
+impl Encodable for DeleteRecordsPartitionResult {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        types::Int32.encode(buf, &self.partition_index)?;
         types::Int64.encode(buf, &self.low_watermark)?;
         types::Int16.encode(buf, &self.error_code)?;
         if version >= 2 {
@@ -87,9 +100,9 @@ impl MapEncodable for DeleteRecordsPartitionResult {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
-        total_size += types::Int32.compute_size(key)?;
+        total_size += types::Int32.compute_size(&self.partition_index)?;
         total_size += types::Int64.compute_size(&self.low_watermark)?;
         total_size += types::Int16.compute_size(&self.error_code)?;
         if version >= 2 {
@@ -109,10 +122,9 @@ impl MapEncodable for DeleteRecordsPartitionResult {
 }
 
 #[cfg(feature = "client")]
-impl MapDecodable for DeleteRecordsPartitionResult {
-    type Key = i32;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
-        let key_field = types::Int32.decode(buf)?;
+impl Decodable for DeleteRecordsPartitionResult {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        let partition_index = types::Int32.decode(buf)?;
         let low_watermark = types::Int64.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
@@ -125,20 +137,19 @@ impl MapDecodable for DeleteRecordsPartitionResult {
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
-        Ok((
-            key_field,
-            Self {
-                low_watermark,
-                error_code,
-                unknown_tagged_fields,
-            },
-        ))
+        Ok(Self {
+            partition_index,
+            low_watermark,
+            error_code,
+            unknown_tagged_fields,
+        })
     }
 }
 
 impl Default for DeleteRecordsPartitionResult {
     fn default() -> Self {
         Self {
+            partition_index: 0,
             low_watermark: 0,
             error_code: 0,
             unknown_tagged_fields: BTreeMap::new(),
@@ -163,7 +174,7 @@ pub struct DeleteRecordsResponse {
     /// Each topic that we wanted to delete records from.
     ///
     /// Supported API versions: 0-2
-    pub topics: indexmap::IndexMap<super::TopicName, DeleteRecordsTopicResult>,
+    pub topics: Vec<DeleteRecordsTopicResult>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
@@ -184,10 +195,7 @@ impl DeleteRecordsResponse {
     /// Each topic that we wanted to delete records from.
     ///
     /// Supported API versions: 0-2
-    pub fn with_topics(
-        mut self,
-        value: indexmap::IndexMap<super::TopicName, DeleteRecordsTopicResult>,
-    ) -> Self {
+    pub fn with_topics(mut self, value: Vec<DeleteRecordsTopicResult>) -> Self {
         self.topics = value;
         self
     }
@@ -297,25 +305,36 @@ impl Message for DeleteRecordsResponse {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct DeleteRecordsTopicResult {
+    /// The topic name.
+    ///
+    /// Supported API versions: 0-2
+    pub name: super::TopicName,
+
     /// Each partition that we wanted to delete records from.
     ///
     /// Supported API versions: 0-2
-    pub partitions: indexmap::IndexMap<i32, DeleteRecordsPartitionResult>,
+    pub partitions: Vec<DeleteRecordsPartitionResult>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
 impl DeleteRecordsTopicResult {
+    /// Sets `name` to the passed value.
+    ///
+    /// The topic name.
+    ///
+    /// Supported API versions: 0-2
+    pub fn with_name(mut self, value: super::TopicName) -> Self {
+        self.name = value;
+        self
+    }
     /// Sets `partitions` to the passed value.
     ///
     /// Each partition that we wanted to delete records from.
     ///
     /// Supported API versions: 0-2
-    pub fn with_partitions(
-        mut self,
-        value: indexmap::IndexMap<i32, DeleteRecordsPartitionResult>,
-    ) -> Self {
+    pub fn with_partitions(mut self, value: Vec<DeleteRecordsPartitionResult>) -> Self {
         self.partitions = value;
         self
     }
@@ -332,13 +351,12 @@ impl DeleteRecordsTopicResult {
 }
 
 #[cfg(feature = "broker")]
-impl MapEncodable for DeleteRecordsTopicResult {
-    type Key = super::TopicName;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
+impl Encodable for DeleteRecordsTopicResult {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 2 {
-            types::CompactString.encode(buf, key)?;
+            types::CompactString.encode(buf, &self.name)?;
         } else {
-            types::String.encode(buf, key)?;
+            types::String.encode(buf, &self.name)?;
         }
         if version >= 2 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.partitions)?;
@@ -359,12 +377,12 @@ impl MapEncodable for DeleteRecordsTopicResult {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 2 {
-            total_size += types::CompactString.compute_size(key)?;
+            total_size += types::CompactString.compute_size(&self.name)?;
         } else {
-            total_size += types::String.compute_size(key)?;
+            total_size += types::String.compute_size(&self.name)?;
         }
         if version >= 2 {
             total_size +=
@@ -389,10 +407,9 @@ impl MapEncodable for DeleteRecordsTopicResult {
 }
 
 #[cfg(feature = "client")]
-impl MapDecodable for DeleteRecordsTopicResult {
-    type Key = super::TopicName;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
-        let key_field = if version >= 2 {
+impl Decodable for DeleteRecordsTopicResult {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        let name = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
@@ -412,19 +429,18 @@ impl MapDecodable for DeleteRecordsTopicResult {
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
-        Ok((
-            key_field,
-            Self {
-                partitions,
-                unknown_tagged_fields,
-            },
-        ))
+        Ok(Self {
+            name,
+            partitions,
+            unknown_tagged_fields,
+        })
     }
 }
 
 impl Default for DeleteRecordsTopicResult {
     fn default() -> Self {
         Self {
+            name: Default::default(),
             partitions: Default::default(),
             unknown_tagged_fields: BTreeMap::new(),
         }

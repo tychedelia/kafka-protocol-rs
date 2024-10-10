@@ -14,7 +14,7 @@ use uuid::Uuid;
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
-    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
+    Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0
@@ -145,6 +145,11 @@ pub struct TopicData {
     ///
     ///
     /// Supported API versions: 0
+    pub topic: super::TopicName,
+
+    ///
+    ///
+    /// Supported API versions: 0
     pub partitions: Vec<i32>,
 
     /// Other tagged fields
@@ -152,6 +157,15 @@ pub struct TopicData {
 }
 
 impl TopicData {
+    /// Sets `topic` to the passed value.
+    ///
+    ///
+    ///
+    /// Supported API versions: 0
+    pub fn with_topic(mut self, value: super::TopicName) -> Self {
+        self.topic = value;
+        self
+    }
     /// Sets `partitions` to the passed value.
     ///
     ///
@@ -174,10 +188,9 @@ impl TopicData {
 }
 
 #[cfg(feature = "broker")]
-impl MapEncodable for TopicData {
-    type Key = super::TopicName;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
-        types::CompactString.encode(buf, key)?;
+impl Encodable for TopicData {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        types::CompactString.encode(buf, &self.topic)?;
         types::CompactArray(types::Int32).encode(buf, &self.partitions)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
@@ -191,9 +204,9 @@ impl MapEncodable for TopicData {
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
-        total_size += types::CompactString.compute_size(key)?;
+        total_size += types::CompactString.compute_size(&self.topic)?;
         total_size += types::CompactArray(types::Int32).compute_size(&self.partitions)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
@@ -210,10 +223,9 @@ impl MapEncodable for TopicData {
 }
 
 #[cfg(feature = "client")]
-impl MapDecodable for TopicData {
-    type Key = super::TopicName;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
-        let key_field = types::CompactString.decode(buf)?;
+impl Decodable for TopicData {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        let topic = types::CompactString.decode(buf)?;
         let partitions = types::CompactArray(types::Int32).decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
         let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
@@ -223,19 +235,18 @@ impl MapDecodable for TopicData {
             let unknown_value = buf.try_get_bytes(size as usize)?;
             unknown_tagged_fields.insert(tag as i32, unknown_value);
         }
-        Ok((
-            key_field,
-            Self {
-                partitions,
-                unknown_tagged_fields,
-            },
-        ))
+        Ok(Self {
+            topic,
+            partitions,
+            unknown_tagged_fields,
+        })
     }
 }
 
 impl Default for TopicData {
     fn default() -> Self {
         Self {
+            topic: Default::default(),
             partitions: Default::default(),
             unknown_tagged_fields: BTreeMap::new(),
         }
@@ -289,7 +300,7 @@ pub struct TransactionState {
     /// The set of partitions included in the current transaction (if active). When a transaction is preparing to commit or abort, this will include only partitions which do not have markers.
     ///
     /// Supported API versions: 0
-    pub topics: indexmap::IndexMap<super::TopicName, TopicData>,
+    pub topics: Vec<TopicData>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
@@ -364,7 +375,7 @@ impl TransactionState {
     /// The set of partitions included in the current transaction (if active). When a transaction is preparing to commit or abort, this will include only partitions which do not have markers.
     ///
     /// Supported API versions: 0
-    pub fn with_topics(mut self, value: indexmap::IndexMap<super::TopicName, TopicData>) -> Self {
+    pub fn with_topics(mut self, value: Vec<TopicData>) -> Self {
         self.topics = value;
         self
     }

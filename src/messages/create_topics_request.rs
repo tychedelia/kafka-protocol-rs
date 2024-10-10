@@ -14,13 +14,18 @@ use uuid::Uuid;
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
-    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
+    Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-7
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct CreatableReplicaAssignment {
+    /// The partition index.
+    ///
+    /// Supported API versions: 0-7
+    pub partition_index: i32,
+
     /// The brokers to place the partition on.
     ///
     /// Supported API versions: 0-7
@@ -31,6 +36,15 @@ pub struct CreatableReplicaAssignment {
 }
 
 impl CreatableReplicaAssignment {
+    /// Sets `partition_index` to the passed value.
+    ///
+    /// The partition index.
+    ///
+    /// Supported API versions: 0-7
+    pub fn with_partition_index(mut self, value: i32) -> Self {
+        self.partition_index = value;
+        self
+    }
     /// Sets `broker_ids` to the passed value.
     ///
     /// The brokers to place the partition on.
@@ -53,10 +67,9 @@ impl CreatableReplicaAssignment {
 }
 
 #[cfg(feature = "client")]
-impl MapEncodable for CreatableReplicaAssignment {
-    type Key = i32;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
-        types::Int32.encode(buf, key)?;
+impl Encodable for CreatableReplicaAssignment {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        types::Int32.encode(buf, &self.partition_index)?;
         if version >= 5 {
             types::CompactArray(types::Int32).encode(buf, &self.broker_ids)?;
         } else {
@@ -76,9 +89,9 @@ impl MapEncodable for CreatableReplicaAssignment {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
-        total_size += types::Int32.compute_size(key)?;
+        total_size += types::Int32.compute_size(&self.partition_index)?;
         if version >= 5 {
             total_size += types::CompactArray(types::Int32).compute_size(&self.broker_ids)?;
         } else {
@@ -101,10 +114,9 @@ impl MapEncodable for CreatableReplicaAssignment {
 }
 
 #[cfg(feature = "broker")]
-impl MapDecodable for CreatableReplicaAssignment {
-    type Key = i32;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
-        let key_field = types::Int32.decode(buf)?;
+impl Decodable for CreatableReplicaAssignment {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        let partition_index = types::Int32.decode(buf)?;
         let broker_ids = if version >= 5 {
             types::CompactArray(types::Int32).decode(buf)?
         } else {
@@ -120,19 +132,18 @@ impl MapDecodable for CreatableReplicaAssignment {
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
-        Ok((
-            key_field,
-            Self {
-                broker_ids,
-                unknown_tagged_fields,
-            },
-        ))
+        Ok(Self {
+            partition_index,
+            broker_ids,
+            unknown_tagged_fields,
+        })
     }
 }
 
 impl Default for CreatableReplicaAssignment {
     fn default() -> Self {
         Self {
+            partition_index: 0,
             broker_ids: Default::default(),
             unknown_tagged_fields: BTreeMap::new(),
         }
@@ -148,6 +159,11 @@ impl Message for CreatableReplicaAssignment {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct CreatableTopic {
+    /// The topic name.
+    ///
+    /// Supported API versions: 0-7
+    pub name: super::TopicName,
+
     /// The number of partitions to create in the topic, or -1 if we are either specifying a manual partition assignment or using the default partitions.
     ///
     /// Supported API versions: 0-7
@@ -161,18 +177,27 @@ pub struct CreatableTopic {
     /// The manual partition assignment, or the empty array if we are using automatic assignment.
     ///
     /// Supported API versions: 0-7
-    pub assignments: indexmap::IndexMap<i32, CreatableReplicaAssignment>,
+    pub assignments: Vec<CreatableReplicaAssignment>,
 
     /// The custom topic configurations to set.
     ///
     /// Supported API versions: 0-7
-    pub configs: indexmap::IndexMap<StrBytes, CreateableTopicConfig>,
+    pub configs: Vec<CreateableTopicConfig>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
 impl CreatableTopic {
+    /// Sets `name` to the passed value.
+    ///
+    /// The topic name.
+    ///
+    /// Supported API versions: 0-7
+    pub fn with_name(mut self, value: super::TopicName) -> Self {
+        self.name = value;
+        self
+    }
     /// Sets `num_partitions` to the passed value.
     ///
     /// The number of partitions to create in the topic, or -1 if we are either specifying a manual partition assignment or using the default partitions.
@@ -196,10 +221,7 @@ impl CreatableTopic {
     /// The manual partition assignment, or the empty array if we are using automatic assignment.
     ///
     /// Supported API versions: 0-7
-    pub fn with_assignments(
-        mut self,
-        value: indexmap::IndexMap<i32, CreatableReplicaAssignment>,
-    ) -> Self {
+    pub fn with_assignments(mut self, value: Vec<CreatableReplicaAssignment>) -> Self {
         self.assignments = value;
         self
     }
@@ -208,10 +230,7 @@ impl CreatableTopic {
     /// The custom topic configurations to set.
     ///
     /// Supported API versions: 0-7
-    pub fn with_configs(
-        mut self,
-        value: indexmap::IndexMap<StrBytes, CreateableTopicConfig>,
-    ) -> Self {
+    pub fn with_configs(mut self, value: Vec<CreateableTopicConfig>) -> Self {
         self.configs = value;
         self
     }
@@ -228,13 +247,12 @@ impl CreatableTopic {
 }
 
 #[cfg(feature = "client")]
-impl MapEncodable for CreatableTopic {
-    type Key = super::TopicName;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
+impl Encodable for CreatableTopic {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 5 {
-            types::CompactString.encode(buf, key)?;
+            types::CompactString.encode(buf, &self.name)?;
         } else {
-            types::String.encode(buf, key)?;
+            types::String.encode(buf, &self.name)?;
         }
         types::Int32.encode(buf, &self.num_partitions)?;
         types::Int16.encode(buf, &self.replication_factor)?;
@@ -262,12 +280,12 @@ impl MapEncodable for CreatableTopic {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 5 {
-            total_size += types::CompactString.compute_size(key)?;
+            total_size += types::CompactString.compute_size(&self.name)?;
         } else {
-            total_size += types::String.compute_size(key)?;
+            total_size += types::String.compute_size(&self.name)?;
         }
         total_size += types::Int32.compute_size(&self.num_partitions)?;
         total_size += types::Int16.compute_size(&self.replication_factor)?;
@@ -301,10 +319,9 @@ impl MapEncodable for CreatableTopic {
 }
 
 #[cfg(feature = "broker")]
-impl MapDecodable for CreatableTopic {
-    type Key = super::TopicName;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
-        let key_field = if version >= 5 {
+impl Decodable for CreatableTopic {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        let name = if version >= 5 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
@@ -331,22 +348,21 @@ impl MapDecodable for CreatableTopic {
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
-        Ok((
-            key_field,
-            Self {
-                num_partitions,
-                replication_factor,
-                assignments,
-                configs,
-                unknown_tagged_fields,
-            },
-        ))
+        Ok(Self {
+            name,
+            num_partitions,
+            replication_factor,
+            assignments,
+            configs,
+            unknown_tagged_fields,
+        })
     }
 }
 
 impl Default for CreatableTopic {
     fn default() -> Self {
         Self {
+            name: Default::default(),
             num_partitions: 0,
             replication_factor: 0,
             assignments: Default::default(),
@@ -368,7 +384,7 @@ pub struct CreateTopicsRequest {
     /// The topics to create.
     ///
     /// Supported API versions: 0-7
-    pub topics: indexmap::IndexMap<super::TopicName, CreatableTopic>,
+    pub topics: Vec<CreatableTopic>,
 
     /// How long to wait in milliseconds before timing out the request.
     ///
@@ -390,10 +406,7 @@ impl CreateTopicsRequest {
     /// The topics to create.
     ///
     /// Supported API versions: 0-7
-    pub fn with_topics(
-        mut self,
-        value: indexmap::IndexMap<super::TopicName, CreatableTopic>,
-    ) -> Self {
+    pub fn with_topics(mut self, value: Vec<CreatableTopic>) -> Self {
         self.topics = value;
         self
     }
@@ -542,6 +555,11 @@ impl Message for CreateTopicsRequest {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct CreateableTopicConfig {
+    /// The configuration name.
+    ///
+    /// Supported API versions: 0-7
+    pub name: StrBytes,
+
     /// The configuration value.
     ///
     /// Supported API versions: 0-7
@@ -552,6 +570,15 @@ pub struct CreateableTopicConfig {
 }
 
 impl CreateableTopicConfig {
+    /// Sets `name` to the passed value.
+    ///
+    /// The configuration name.
+    ///
+    /// Supported API versions: 0-7
+    pub fn with_name(mut self, value: StrBytes) -> Self {
+        self.name = value;
+        self
+    }
     /// Sets `value` to the passed value.
     ///
     /// The configuration value.
@@ -574,13 +601,12 @@ impl CreateableTopicConfig {
 }
 
 #[cfg(feature = "client")]
-impl MapEncodable for CreateableTopicConfig {
-    type Key = StrBytes;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
+impl Encodable for CreateableTopicConfig {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 5 {
-            types::CompactString.encode(buf, key)?;
+            types::CompactString.encode(buf, &self.name)?;
         } else {
-            types::String.encode(buf, key)?;
+            types::String.encode(buf, &self.name)?;
         }
         if version >= 5 {
             types::CompactString.encode(buf, &self.value)?;
@@ -601,12 +627,12 @@ impl MapEncodable for CreateableTopicConfig {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 5 {
-            total_size += types::CompactString.compute_size(key)?;
+            total_size += types::CompactString.compute_size(&self.name)?;
         } else {
-            total_size += types::String.compute_size(key)?;
+            total_size += types::String.compute_size(&self.name)?;
         }
         if version >= 5 {
             total_size += types::CompactString.compute_size(&self.value)?;
@@ -630,10 +656,9 @@ impl MapEncodable for CreateableTopicConfig {
 }
 
 #[cfg(feature = "broker")]
-impl MapDecodable for CreateableTopicConfig {
-    type Key = StrBytes;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
-        let key_field = if version >= 5 {
+impl Decodable for CreateableTopicConfig {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        let name = if version >= 5 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
@@ -653,19 +678,18 @@ impl MapDecodable for CreateableTopicConfig {
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
-        Ok((
-            key_field,
-            Self {
-                value,
-                unknown_tagged_fields,
-            },
-        ))
+        Ok(Self {
+            name,
+            value,
+            unknown_tagged_fields,
+        })
     }
 }
 
 impl Default for CreateableTopicConfig {
     fn default() -> Self {
         Self {
+            name: Default::default(),
             value: Some(Default::default()),
             unknown_tagged_fields: BTreeMap::new(),
         }

@@ -14,13 +14,18 @@ use uuid::Uuid;
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
-    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
+    Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-2
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct DeletableGroupResult {
+    /// The group id
+    ///
+    /// Supported API versions: 0-2
+    pub group_id: super::GroupId,
+
     /// The deletion error, or 0 if the deletion succeeded.
     ///
     /// Supported API versions: 0-2
@@ -31,6 +36,15 @@ pub struct DeletableGroupResult {
 }
 
 impl DeletableGroupResult {
+    /// Sets `group_id` to the passed value.
+    ///
+    /// The group id
+    ///
+    /// Supported API versions: 0-2
+    pub fn with_group_id(mut self, value: super::GroupId) -> Self {
+        self.group_id = value;
+        self
+    }
     /// Sets `error_code` to the passed value.
     ///
     /// The deletion error, or 0 if the deletion succeeded.
@@ -53,13 +67,12 @@ impl DeletableGroupResult {
 }
 
 #[cfg(feature = "broker")]
-impl MapEncodable for DeletableGroupResult {
-    type Key = super::GroupId;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
+impl Encodable for DeletableGroupResult {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 2 {
-            types::CompactString.encode(buf, key)?;
+            types::CompactString.encode(buf, &self.group_id)?;
         } else {
-            types::String.encode(buf, key)?;
+            types::String.encode(buf, &self.group_id)?;
         }
         types::Int16.encode(buf, &self.error_code)?;
         if version >= 2 {
@@ -76,12 +89,12 @@ impl MapEncodable for DeletableGroupResult {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 2 {
-            total_size += types::CompactString.compute_size(key)?;
+            total_size += types::CompactString.compute_size(&self.group_id)?;
         } else {
-            total_size += types::String.compute_size(key)?;
+            total_size += types::String.compute_size(&self.group_id)?;
         }
         total_size += types::Int16.compute_size(&self.error_code)?;
         if version >= 2 {
@@ -101,10 +114,9 @@ impl MapEncodable for DeletableGroupResult {
 }
 
 #[cfg(feature = "client")]
-impl MapDecodable for DeletableGroupResult {
-    type Key = super::GroupId;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
-        let key_field = if version >= 2 {
+impl Decodable for DeletableGroupResult {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        let group_id = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
@@ -120,19 +132,18 @@ impl MapDecodable for DeletableGroupResult {
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
-        Ok((
-            key_field,
-            Self {
-                error_code,
-                unknown_tagged_fields,
-            },
-        ))
+        Ok(Self {
+            group_id,
+            error_code,
+            unknown_tagged_fields,
+        })
     }
 }
 
 impl Default for DeletableGroupResult {
     fn default() -> Self {
         Self {
+            group_id: Default::default(),
             error_code: 0,
             unknown_tagged_fields: BTreeMap::new(),
         }
@@ -156,7 +167,7 @@ pub struct DeleteGroupsResponse {
     /// The deletion results
     ///
     /// Supported API versions: 0-2
-    pub results: indexmap::IndexMap<super::GroupId, DeletableGroupResult>,
+    pub results: Vec<DeletableGroupResult>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
@@ -177,10 +188,7 @@ impl DeleteGroupsResponse {
     /// The deletion results
     ///
     /// Supported API versions: 0-2
-    pub fn with_results(
-        mut self,
-        value: indexmap::IndexMap<super::GroupId, DeletableGroupResult>,
-    ) -> Self {
+    pub fn with_results(mut self, value: Vec<DeletableGroupResult>) -> Self {
         self.results = value;
         self
     }

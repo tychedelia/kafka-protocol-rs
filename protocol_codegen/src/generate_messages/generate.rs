@@ -15,7 +15,6 @@ use std::cmp::Ordering;
 struct PreparedStruct {
     spec_type: SpecType,
     name: String,
-    map_key: Option<Box<PreparedType>>,
     prepared_fields: Vec<PreparedField>,
     valid_versions: VersionSpec,
     flexible_msg_versions: VersionSpec,
@@ -83,7 +82,6 @@ enum PreparedType {
     Entity(EntityType),
     Struct(PreparedStruct),
     Array(Box<PreparedType>),
-    Map(Box<PreparedType>, String),
 }
 
 impl PreparedType {
@@ -93,7 +91,6 @@ impl PreparedType {
             Self::Entity(entity_type) => format!("super::{}", entity_type.name),
             Self::Struct(inner) => inner.name.clone(),
             Self::Array(inner) => format!("Vec<{}>", inner.rust_name()),
-            Self::Map(key, value) => format!("indexmap::IndexMap<{}, {}>", key.rust_name(), value),
         }
     }
     fn name(&self, flexible: bool, optional: bool) -> String {
@@ -114,13 +111,6 @@ impl PreparedType {
                     format!("types::Array({})", inner.name(flexible, false))
                 }
             }
-            Self::Map(_, _) => {
-                if flexible {
-                    "types::CompactArray(types::Struct { version })".into()
-                } else {
-                    "types::Array(types::Struct { version })".into()
-                }
-            }
         }
     }
     pub fn has_compact_form(&self) -> bool {
@@ -129,7 +119,6 @@ impl PreparedType {
             Self::Entity(entity_type) => entity_type.inner.has_compact_form(),
             Self::Struct(_) => false,
             Self::Array(_) => true,
-            Self::Map(_, _) => true,
         }
     }
     fn default(&self) -> PreparedDefault {
@@ -137,7 +126,7 @@ impl PreparedType {
             Self::Primitive(prim) => primitive_default(*prim),
             Self::Entity(entity_type) => primitive_default(entity_type.inner),
             Self::Struct(_) => PreparedDefault::EmptyStruct,
-            Self::Array(_) | Self::Map(_, _) => PreparedDefault::Empty,
+            Self::Array(_) => PreparedDefault::Empty,
         }
     }
     fn is_entity(&self) -> bool {
@@ -224,18 +213,13 @@ struct PreparedField {
     default: PreparedDefault,
     ignorable: bool,
     _entity_type: Option<String>,
-    map_key: bool,
     about: String,
     flexible_versions: VersionSpec,
 }
 
 impl PreparedField {
     fn var_name(&self) -> Expr {
-        if self.map_key {
-            Expr::new_atom("key")
-        } else {
-            Expr::new_atom("self").field(&self.name).by_ref()
-        }
+        Expr::new_atom("self").field(&self.name).by_ref()
     }
 }
 
@@ -275,7 +259,6 @@ fn prepare_field_type<W: Write>(
                 } else {
                     PreparedStruct {
                         name: name.clone(),
-                        map_key: None,
                         prepared_fields: vec![],
                         valid_versions,
                         flexible_msg_versions,
@@ -313,14 +296,7 @@ fn prepare_field_type<W: Write>(
                 prepared_structs_output,
                 spec_type,
             )?;
-            match prepared_field {
-                PreparedType::Struct(PreparedStruct {
-                    name,
-                    map_key: Some(map_key),
-                    ..
-                }) => PreparedType::Map(map_key, name),
-                other => PreparedType::Array(Box::new(other)),
-            }
+            PreparedType::Array(Box::new(prepared_field))
         }
     })
 }
@@ -755,11 +731,7 @@ fn write_decode_field<W: Write>(
     field: &PreparedField,
     valid_versions: VersionSpec,
 ) -> Result<(), Error> {
-    let var_name = if field.map_key {
-        "key_field"
-    } else {
-        &field.name
-    };
+    let var_name = &field.name;
 
     if field.tagged_versions.is_none() {
         write!(w, "let {} = ", var_name)?;
@@ -884,11 +856,7 @@ fn write_decode_tag_buffer<W: Write>(
                     write!(w, "match tag ")?;
                     w.block(|w| {
                         for (&k, field) in &sorted_tagged_fields {
-                            let var_name = if field.map_key {
-                                "key_field"
-                            } else {
-                                &field.name
-                            };
+                            let var_name = &field.name;
                             write!(w, "{} => ", k)?;
                             w.block(|w| {
                                 let tagged_field_versions =
@@ -985,9 +953,6 @@ fn prepared_struct_def<W: Write>(
     spec_type: SpecType,
 ) -> Result<PreparedStruct, Error> {
     let mut prepared_fields = Vec::new();
-    let mut map_key = None;
-
-    let num_map_keys = fields.iter().filter(|field| field.map_key).count();
 
     for field in fields {
         let type_ = prepare_field_type(
@@ -1002,10 +967,6 @@ fn prepared_struct_def<W: Write>(
             prepared_structs_output,
             spec_type,
         )?;
-
-        if field.map_key && num_map_keys == 1 {
-            map_key = Some(Box::new(type_.clone()))
-        }
 
         let mut name = field.name.to_snake_case();
         if name == "type" {
@@ -1068,7 +1029,6 @@ fn prepared_struct_def<W: Write>(
             default,
             ignorable: field.ignorable,
             _entity_type: field.entity_type.clone(),
-            map_key: field.map_key && num_map_keys == 1,
             about: field.about.clone(),
             flexible_versions,
         });
@@ -1077,7 +1037,6 @@ fn prepared_struct_def<W: Write>(
     let prepared_struct = PreparedStruct {
         spec_type,
         name: name.into(),
-        map_key,
         prepared_fields,
         valid_versions,
         flexible_msg_versions,
@@ -1095,9 +1054,6 @@ impl PreparedStruct {
         write!(w, "pub struct {} ", self.name)?;
         w.block(|w| {
             for prepared_field in &self.prepared_fields {
-                if prepared_field.map_key {
-                    continue;
-                }
                 writeln!(w, "/// {}", prepared_field.about)?;
                 writeln!(w, "/// ")?;
                 writeln!(w, "/// Supported API versions: {}", prepared_field.versions)?;
@@ -1132,10 +1088,6 @@ impl PreparedStruct {
         write!(w, "impl {} ", self.name)?;
         w.block(|w| {
             for prepared_field in &self.prepared_fields {
-                if prepared_field.map_key {
-                    continue;
-                }
-
                 writeln!(w, "/// Sets `{}` to the passed value.", prepared_field.name)?;
                 writeln!(w, "/// ")?;
                 writeln!(w, "/// {}", prepared_field.about)?;
@@ -1200,38 +1152,41 @@ impl PreparedStruct {
             SpecType::Response => writeln!(w, "#[cfg(feature = \"broker\")]")?,
             _ => {}
         }
-        if self.map_key.is_some() {
-            write!(w, "impl MapEncodable for {} ", self.name)?;
-        } else {
-            write!(w, "impl Encodable for {} ", self.name)?;
-        }
+
+        write!(w, "impl Encodable for {} ", self.name)?;
         w.block(|w| {
-            if let Some(key) = &self.map_key {
-                writeln!(w, "type Key = {};", key.rust_name())?;
-                write!(w, "fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> ")?;
-            } else {
-                write!(w, "fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> ")?;
-            }
+            write!(
+                w,
+                "fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> "
+            )?;
             w.block(|w| {
                 for prepared_field in &self.prepared_fields {
                     write_encode_field(w, prepared_field, self.valid_versions, false)?;
                 }
-                write_encode_tag_buffer(w, &self.prepared_fields, self.valid_versions, self.flexible_msg_versions, false)?;
+                write_encode_tag_buffer(
+                    w,
+                    &self.prepared_fields,
+                    self.valid_versions,
+                    self.flexible_msg_versions,
+                    false,
+                )?;
                 write!(w, "Ok(())")?;
                 Ok(())
             })?;
             writeln!(w)?;
-            if self.map_key.is_some() {
-                write!(w, "fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> ")?;
-            } else {
-                write!(w, "fn compute_size(&self, version: i16) -> Result<usize> ")?;
-            }
+            write!(w, "fn compute_size(&self, version: i16) -> Result<usize> ")?;
             w.block(|w| {
                 writeln!(w, "let mut total_size = 0;")?;
                 for prepared_field in &self.prepared_fields {
                     write_encode_field(w, prepared_field, self.valid_versions, true)?;
                 }
-                write_encode_tag_buffer(w, &self.prepared_fields, self.valid_versions, self.flexible_msg_versions, true)?;
+                write_encode_tag_buffer(
+                    w,
+                    &self.prepared_fields,
+                    self.valid_versions,
+                    self.flexible_msg_versions,
+                    true,
+                )?;
                 write!(w, "Ok(total_size)")?;
                 Ok(())
             })?;
@@ -1245,36 +1200,29 @@ impl PreparedStruct {
             SpecType::Response => writeln!(w, "#[cfg(feature = \"client\")]")?,
             _ => {}
         }
-        if self.map_key.is_some() {
-            write!(w, "impl MapDecodable for {} ", self.name)?;
-        } else {
-            write!(w, "impl Decodable for {} ", self.name)?;
-        }
+        write!(w, "impl Decodable for {} ", self.name)?;
         w.block(|w| {
-            if let Some(key) = &self.map_key {
-                writeln!(w, "type Key = {};", key.rust_name())?;
-                write!(w, "fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> ")?;
-            } else {
-                write!(w, "fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> ")?;
-            }
+            write!(
+                w,
+                "fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> "
+            )?;
             w.block(|w| {
                 for prepared_field in &self.prepared_fields {
                     write_decode_field(w, prepared_field, self.valid_versions)?;
                 }
                 if !self.flexible_msg_versions.is_none() {
                     writeln!(w, "let mut unknown_tagged_fields = BTreeMap::new();")?;
-                    write_decode_tag_buffer(w, &self.prepared_fields, self.valid_versions, self.flexible_msg_versions)?;
+                    write_decode_tag_buffer(
+                        w,
+                        &self.prepared_fields,
+                        self.valid_versions,
+                        self.flexible_msg_versions,
+                    )?;
                 }
-                if self.map_key.is_some() {
-                    write!(w, "Ok((key_field, Self ")?;
-                } else {
-                    write!(w, "Ok(Self ")?;
-                }
+                write!(w, "Ok(Self ")?;
                 w.block(|w| {
                     for prepared_field in &self.prepared_fields {
-                        if !prepared_field.map_key {
-                            writeln!(w, "{},", prepared_field.name)?;
-                        }
+                        writeln!(w, "{},", prepared_field.name)?;
                     }
 
                     if !self.flexible_msg_versions.is_none() {
@@ -1283,11 +1231,8 @@ impl PreparedStruct {
 
                     Ok(())
                 })?;
-                if self.map_key.is_some() {
-                    write!(w, "))")?;
-                } else {
-                    write!(w, ")")?;
-                }
+
+                write!(w, ")")?;
                 Ok(())
             })
         })?;
@@ -1301,17 +1246,15 @@ impl PreparedStruct {
                 write!(w, "Self ")?;
                 w.block(|w| {
                     for prepared_field in &self.prepared_fields {
-                        if !prepared_field.map_key {
-                            writeln!(
-                                w,
-                                "{}: {},",
-                                prepared_field.name,
-                                prepared_field.default.gen_default(
-                                    prepared_field.optional,
-                                    prepared_field.type_.is_entity(),
-                                )
-                            )?;
-                        }
+                        writeln!(
+                            w,
+                            "{}: {},",
+                            prepared_field.name,
+                            prepared_field.default.gen_default(
+                                prepared_field.optional,
+                                prepared_field.type_.is_entity(),
+                            )
+                        )?;
                     }
 
                     if !self.flexible_msg_versions.is_none() {
@@ -1373,7 +1316,10 @@ fn write_file_header<W: Write>(w: &mut CodeWriter<W>, name: &str) -> Result<(), 
     writeln!(w, "use anyhow::{{bail, Result}};")?;
     writeln!(w)?;
     writeln!(w, "use crate::protocol::{{")?;
-    writeln!(w, "    Encodable, Decodable, MapEncodable, MapDecodable, Encoder, Decoder, Message, HeaderVersion, VersionRange,")?;
+    writeln!(
+        w,
+        "    Encodable, Decodable, Encoder, Decoder, Message, HeaderVersion, VersionRange,"
+    )?;
     writeln!(w, "    types, write_unknown_tagged_fields, compute_unknown_tagged_fields_size, StrBytes, buf::{{ByteBuf, ByteBufMut}}")?;
     writeln!(w, "}};")?;
     writeln!(w)?;

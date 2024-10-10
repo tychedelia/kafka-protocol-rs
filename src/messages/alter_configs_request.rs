@@ -14,7 +14,7 @@ use uuid::Uuid;
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
-    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
+    Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-2
@@ -173,7 +173,7 @@ pub struct AlterConfigsResource {
     /// The configurations.
     ///
     /// Supported API versions: 0-2
-    pub configs: indexmap::IndexMap<StrBytes, AlterableConfig>,
+    pub configs: Vec<AlterableConfig>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
@@ -203,7 +203,7 @@ impl AlterConfigsResource {
     /// The configurations.
     ///
     /// Supported API versions: 0-2
-    pub fn with_configs(mut self, value: indexmap::IndexMap<StrBytes, AlterableConfig>) -> Self {
+    pub fn with_configs(mut self, value: Vec<AlterableConfig>) -> Self {
         self.configs = value;
         self
     }
@@ -330,6 +330,11 @@ impl Message for AlterConfigsResource {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct AlterableConfig {
+    /// The configuration key name.
+    ///
+    /// Supported API versions: 0-2
+    pub name: StrBytes,
+
     /// The value to set for the configuration key.
     ///
     /// Supported API versions: 0-2
@@ -340,6 +345,15 @@ pub struct AlterableConfig {
 }
 
 impl AlterableConfig {
+    /// Sets `name` to the passed value.
+    ///
+    /// The configuration key name.
+    ///
+    /// Supported API versions: 0-2
+    pub fn with_name(mut self, value: StrBytes) -> Self {
+        self.name = value;
+        self
+    }
     /// Sets `value` to the passed value.
     ///
     /// The value to set for the configuration key.
@@ -362,13 +376,12 @@ impl AlterableConfig {
 }
 
 #[cfg(feature = "client")]
-impl MapEncodable for AlterableConfig {
-    type Key = StrBytes;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
+impl Encodable for AlterableConfig {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 2 {
-            types::CompactString.encode(buf, key)?;
+            types::CompactString.encode(buf, &self.name)?;
         } else {
-            types::String.encode(buf, key)?;
+            types::String.encode(buf, &self.name)?;
         }
         if version >= 2 {
             types::CompactString.encode(buf, &self.value)?;
@@ -389,12 +402,12 @@ impl MapEncodable for AlterableConfig {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 2 {
-            total_size += types::CompactString.compute_size(key)?;
+            total_size += types::CompactString.compute_size(&self.name)?;
         } else {
-            total_size += types::String.compute_size(key)?;
+            total_size += types::String.compute_size(&self.name)?;
         }
         if version >= 2 {
             total_size += types::CompactString.compute_size(&self.value)?;
@@ -418,10 +431,9 @@ impl MapEncodable for AlterableConfig {
 }
 
 #[cfg(feature = "broker")]
-impl MapDecodable for AlterableConfig {
-    type Key = StrBytes;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
-        let key_field = if version >= 2 {
+impl Decodable for AlterableConfig {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        let name = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
@@ -441,19 +453,18 @@ impl MapDecodable for AlterableConfig {
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
-        Ok((
-            key_field,
-            Self {
-                value,
-                unknown_tagged_fields,
-            },
-        ))
+        Ok(Self {
+            name,
+            value,
+            unknown_tagged_fields,
+        })
     }
 }
 
 impl Default for AlterableConfig {
     fn default() -> Self {
         Self {
+            name: Default::default(),
             value: Some(Default::default()),
             unknown_tagged_fields: BTreeMap::new(),
         }
