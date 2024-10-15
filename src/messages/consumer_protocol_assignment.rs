@@ -14,7 +14,7 @@ use uuid::Uuid;
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
-    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
+    Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-3
@@ -24,7 +24,7 @@ pub struct ConsumerProtocolAssignment {
     ///
     ///
     /// Supported API versions: 0-3
-    pub assigned_partitions: indexmap::IndexMap<super::TopicName, TopicPartition>,
+    pub assigned_partitions: Vec<TopicPartition>,
 
     ///
     ///
@@ -38,10 +38,7 @@ impl ConsumerProtocolAssignment {
     ///
     ///
     /// Supported API versions: 0-3
-    pub fn with_assigned_partitions(
-        mut self,
-        value: indexmap::IndexMap<super::TopicName, TopicPartition>,
-    ) -> Self {
+    pub fn with_assigned_partitions(mut self, value: Vec<TopicPartition>) -> Self {
         self.assigned_partitions = value;
         self
     }
@@ -105,10 +102,24 @@ pub struct TopicPartition {
     ///
     ///
     /// Supported API versions: 0-3
+    pub topic: super::TopicName,
+
+    ///
+    ///
+    /// Supported API versions: 0-3
     pub partitions: Vec<i32>,
 }
 
 impl TopicPartition {
+    /// Sets `topic` to the passed value.
+    ///
+    ///
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_topic(mut self, value: super::TopicName) -> Self {
+        self.topic = value;
+        self
+    }
     /// Sets `partitions` to the passed value.
     ///
     ///
@@ -120,35 +131,34 @@ impl TopicPartition {
     }
 }
 
-impl MapEncodable for TopicPartition {
-    type Key = super::TopicName;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
-        types::String.encode(buf, key)?;
+impl Encodable for TopicPartition {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        types::String.encode(buf, &self.topic)?;
         types::Array(types::Int32).encode(buf, &self.partitions)?;
 
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
-        total_size += types::String.compute_size(key)?;
+        total_size += types::String.compute_size(&self.topic)?;
         total_size += types::Array(types::Int32).compute_size(&self.partitions)?;
 
         Ok(total_size)
     }
 }
 
-impl MapDecodable for TopicPartition {
-    type Key = super::TopicName;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
-        let key_field = types::String.decode(buf)?;
+impl Decodable for TopicPartition {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        let topic = types::String.decode(buf)?;
         let partitions = types::Array(types::Int32).decode(buf)?;
-        Ok((key_field, Self { partitions }))
+        Ok(Self { topic, partitions })
     }
 }
 
 impl Default for TopicPartition {
     fn default() -> Self {
         Self {
+            topic: Default::default(),
             partitions: Default::default(),
         }
     }

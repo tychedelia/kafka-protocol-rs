@@ -14,7 +14,7 @@ use uuid::Uuid;
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
-    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
+    Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-4
@@ -29,7 +29,7 @@ pub struct OffsetForLeaderEpochRequest {
     /// Each topic to get offsets for.
     ///
     /// Supported API versions: 0-4
-    pub topics: indexmap::IndexMap<super::TopicName, OffsetForLeaderTopic>,
+    pub topics: Vec<OffsetForLeaderTopic>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
@@ -50,10 +50,7 @@ impl OffsetForLeaderEpochRequest {
     /// Each topic to get offsets for.
     ///
     /// Supported API versions: 0-4
-    pub fn with_topics(
-        mut self,
-        value: indexmap::IndexMap<super::TopicName, OffsetForLeaderTopic>,
-    ) -> Self {
+    pub fn with_topics(mut self, value: Vec<OffsetForLeaderTopic>) -> Self {
         self.topics = value;
         self
     }
@@ -324,6 +321,11 @@ impl Message for OffsetForLeaderPartition {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct OffsetForLeaderTopic {
+    /// The topic name.
+    ///
+    /// Supported API versions: 0-4
+    pub topic: super::TopicName,
+
     /// Each partition to get offsets for.
     ///
     /// Supported API versions: 0-4
@@ -334,6 +336,15 @@ pub struct OffsetForLeaderTopic {
 }
 
 impl OffsetForLeaderTopic {
+    /// Sets `topic` to the passed value.
+    ///
+    /// The topic name.
+    ///
+    /// Supported API versions: 0-4
+    pub fn with_topic(mut self, value: super::TopicName) -> Self {
+        self.topic = value;
+        self
+    }
     /// Sets `partitions` to the passed value.
     ///
     /// Each partition to get offsets for.
@@ -356,13 +367,12 @@ impl OffsetForLeaderTopic {
 }
 
 #[cfg(feature = "client")]
-impl MapEncodable for OffsetForLeaderTopic {
-    type Key = super::TopicName;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
+impl Encodable for OffsetForLeaderTopic {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 4 {
-            types::CompactString.encode(buf, key)?;
+            types::CompactString.encode(buf, &self.topic)?;
         } else {
-            types::String.encode(buf, key)?;
+            types::String.encode(buf, &self.topic)?;
         }
         if version >= 4 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.partitions)?;
@@ -383,12 +393,12 @@ impl MapEncodable for OffsetForLeaderTopic {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 4 {
-            total_size += types::CompactString.compute_size(key)?;
+            total_size += types::CompactString.compute_size(&self.topic)?;
         } else {
-            total_size += types::String.compute_size(key)?;
+            total_size += types::String.compute_size(&self.topic)?;
         }
         if version >= 4 {
             total_size +=
@@ -413,10 +423,9 @@ impl MapEncodable for OffsetForLeaderTopic {
 }
 
 #[cfg(feature = "broker")]
-impl MapDecodable for OffsetForLeaderTopic {
-    type Key = super::TopicName;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
-        let key_field = if version >= 4 {
+impl Decodable for OffsetForLeaderTopic {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        let topic = if version >= 4 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
@@ -436,19 +445,18 @@ impl MapDecodable for OffsetForLeaderTopic {
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
-        Ok((
-            key_field,
-            Self {
-                partitions,
-                unknown_tagged_fields,
-            },
-        ))
+        Ok(Self {
+            topic,
+            partitions,
+            unknown_tagged_fields,
+        })
     }
 }
 
 impl Default for OffsetForLeaderTopic {
     fn default() -> Self {
         Self {
+            topic: Default::default(),
             partitions: Default::default(),
             unknown_tagged_fields: BTreeMap::new(),
         }

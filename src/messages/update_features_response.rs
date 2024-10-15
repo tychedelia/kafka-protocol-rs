@@ -14,13 +14,18 @@ use uuid::Uuid;
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
-    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
+    Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-1
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct UpdatableFeatureResult {
+    /// The name of the finalized feature.
+    ///
+    /// Supported API versions: 0-1
+    pub feature: StrBytes,
+
     /// The feature update error code or `0` if the feature update succeeded.
     ///
     /// Supported API versions: 0-1
@@ -36,6 +41,15 @@ pub struct UpdatableFeatureResult {
 }
 
 impl UpdatableFeatureResult {
+    /// Sets `feature` to the passed value.
+    ///
+    /// The name of the finalized feature.
+    ///
+    /// Supported API versions: 0-1
+    pub fn with_feature(mut self, value: StrBytes) -> Self {
+        self.feature = value;
+        self
+    }
     /// Sets `error_code` to the passed value.
     ///
     /// The feature update error code or `0` if the feature update succeeded.
@@ -67,10 +81,9 @@ impl UpdatableFeatureResult {
 }
 
 #[cfg(feature = "broker")]
-impl MapEncodable for UpdatableFeatureResult {
-    type Key = StrBytes;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
-        types::CompactString.encode(buf, key)?;
+impl Encodable for UpdatableFeatureResult {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        types::CompactString.encode(buf, &self.feature)?;
         types::Int16.encode(buf, &self.error_code)?;
         types::CompactString.encode(buf, &self.error_message)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -85,9 +98,9 @@ impl MapEncodable for UpdatableFeatureResult {
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
-        total_size += types::CompactString.compute_size(key)?;
+        total_size += types::CompactString.compute_size(&self.feature)?;
         total_size += types::Int16.compute_size(&self.error_code)?;
         total_size += types::CompactString.compute_size(&self.error_message)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -105,10 +118,9 @@ impl MapEncodable for UpdatableFeatureResult {
 }
 
 #[cfg(feature = "client")]
-impl MapDecodable for UpdatableFeatureResult {
-    type Key = StrBytes;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
-        let key_field = types::CompactString.decode(buf)?;
+impl Decodable for UpdatableFeatureResult {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        let feature = types::CompactString.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
         let error_message = types::CompactString.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
@@ -119,20 +131,19 @@ impl MapDecodable for UpdatableFeatureResult {
             let unknown_value = buf.try_get_bytes(size as usize)?;
             unknown_tagged_fields.insert(tag as i32, unknown_value);
         }
-        Ok((
-            key_field,
-            Self {
-                error_code,
-                error_message,
-                unknown_tagged_fields,
-            },
-        ))
+        Ok(Self {
+            feature,
+            error_code,
+            error_message,
+            unknown_tagged_fields,
+        })
     }
 }
 
 impl Default for UpdatableFeatureResult {
     fn default() -> Self {
         Self {
+            feature: Default::default(),
             error_code: 0,
             error_message: Some(Default::default()),
             unknown_tagged_fields: BTreeMap::new(),
@@ -167,7 +178,7 @@ pub struct UpdateFeaturesResponse {
     /// Results for each feature update.
     ///
     /// Supported API versions: 0-1
-    pub results: indexmap::IndexMap<StrBytes, UpdatableFeatureResult>,
+    pub results: Vec<UpdatableFeatureResult>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
@@ -206,10 +217,7 @@ impl UpdateFeaturesResponse {
     /// Results for each feature update.
     ///
     /// Supported API versions: 0-1
-    pub fn with_results(
-        mut self,
-        value: indexmap::IndexMap<StrBytes, UpdatableFeatureResult>,
-    ) -> Self {
+    pub fn with_results(mut self, value: Vec<UpdatableFeatureResult>) -> Self {
         self.results = value;
         self
     }

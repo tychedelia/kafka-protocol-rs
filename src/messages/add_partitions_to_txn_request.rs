@@ -14,7 +14,7 @@ use uuid::Uuid;
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
-    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
+    Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-5
@@ -24,7 +24,7 @@ pub struct AddPartitionsToTxnRequest {
     /// List of transactions to add partitions to.
     ///
     /// Supported API versions: 4-5
-    pub transactions: indexmap::IndexMap<super::TransactionalId, AddPartitionsToTxnTransaction>,
+    pub transactions: Vec<AddPartitionsToTxnTransaction>,
 
     /// The transactional id corresponding to the transaction.
     ///
@@ -44,7 +44,7 @@ pub struct AddPartitionsToTxnRequest {
     /// The partitions to add to the transaction.
     ///
     /// Supported API versions: 0-3
-    pub v3_and_below_topics: indexmap::IndexMap<super::TopicName, AddPartitionsToTxnTopic>,
+    pub v3_and_below_topics: Vec<AddPartitionsToTxnTopic>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
@@ -56,10 +56,7 @@ impl AddPartitionsToTxnRequest {
     /// List of transactions to add partitions to.
     ///
     /// Supported API versions: 4-5
-    pub fn with_transactions(
-        mut self,
-        value: indexmap::IndexMap<super::TransactionalId, AddPartitionsToTxnTransaction>,
-    ) -> Self {
+    pub fn with_transactions(mut self, value: Vec<AddPartitionsToTxnTransaction>) -> Self {
         self.transactions = value;
         self
     }
@@ -95,10 +92,7 @@ impl AddPartitionsToTxnRequest {
     /// The partitions to add to the transaction.
     ///
     /// Supported API versions: 0-3
-    pub fn with_v3_and_below_topics(
-        mut self,
-        value: indexmap::IndexMap<super::TopicName, AddPartitionsToTxnTopic>,
-    ) -> Self {
+    pub fn with_v3_and_below_topics(mut self, value: Vec<AddPartitionsToTxnTopic>) -> Self {
         self.v3_and_below_topics = value;
         self
     }
@@ -319,6 +313,11 @@ impl Message for AddPartitionsToTxnRequest {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct AddPartitionsToTxnTopic {
+    /// The name of the topic.
+    ///
+    /// Supported API versions: 0-5
+    pub name: super::TopicName,
+
     /// The partition indexes to add to the transaction
     ///
     /// Supported API versions: 0-5
@@ -329,6 +328,15 @@ pub struct AddPartitionsToTxnTopic {
 }
 
 impl AddPartitionsToTxnTopic {
+    /// Sets `name` to the passed value.
+    ///
+    /// The name of the topic.
+    ///
+    /// Supported API versions: 0-5
+    pub fn with_name(mut self, value: super::TopicName) -> Self {
+        self.name = value;
+        self
+    }
     /// Sets `partitions` to the passed value.
     ///
     /// The partition indexes to add to the transaction
@@ -351,13 +359,12 @@ impl AddPartitionsToTxnTopic {
 }
 
 #[cfg(feature = "client")]
-impl MapEncodable for AddPartitionsToTxnTopic {
-    type Key = super::TopicName;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
+impl Encodable for AddPartitionsToTxnTopic {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 3 {
-            types::CompactString.encode(buf, key)?;
+            types::CompactString.encode(buf, &self.name)?;
         } else {
-            types::String.encode(buf, key)?;
+            types::String.encode(buf, &self.name)?;
         }
         if version >= 3 {
             types::CompactArray(types::Int32).encode(buf, &self.partitions)?;
@@ -378,12 +385,12 @@ impl MapEncodable for AddPartitionsToTxnTopic {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 3 {
-            total_size += types::CompactString.compute_size(key)?;
+            total_size += types::CompactString.compute_size(&self.name)?;
         } else {
-            total_size += types::String.compute_size(key)?;
+            total_size += types::String.compute_size(&self.name)?;
         }
         if version >= 3 {
             total_size += types::CompactArray(types::Int32).compute_size(&self.partitions)?;
@@ -407,10 +414,9 @@ impl MapEncodable for AddPartitionsToTxnTopic {
 }
 
 #[cfg(feature = "broker")]
-impl MapDecodable for AddPartitionsToTxnTopic {
-    type Key = super::TopicName;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
-        let key_field = if version >= 3 {
+impl Decodable for AddPartitionsToTxnTopic {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        let name = if version >= 3 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
@@ -430,19 +436,18 @@ impl MapDecodable for AddPartitionsToTxnTopic {
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
-        Ok((
-            key_field,
-            Self {
-                partitions,
-                unknown_tagged_fields,
-            },
-        ))
+        Ok(Self {
+            name,
+            partitions,
+            unknown_tagged_fields,
+        })
     }
 }
 
 impl Default for AddPartitionsToTxnTopic {
     fn default() -> Self {
         Self {
+            name: Default::default(),
             partitions: Default::default(),
             unknown_tagged_fields: BTreeMap::new(),
         }
@@ -458,6 +463,11 @@ impl Message for AddPartitionsToTxnTopic {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct AddPartitionsToTxnTransaction {
+    /// The transactional id corresponding to the transaction.
+    ///
+    /// Supported API versions: 4-5
+    pub transactional_id: super::TransactionalId,
+
     /// Current producer id in use by the transactional id.
     ///
     /// Supported API versions: 4-5
@@ -476,13 +486,22 @@ pub struct AddPartitionsToTxnTransaction {
     /// The partitions to add to the transaction.
     ///
     /// Supported API versions: 4-5
-    pub topics: indexmap::IndexMap<super::TopicName, AddPartitionsToTxnTopic>,
+    pub topics: Vec<AddPartitionsToTxnTopic>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
 impl AddPartitionsToTxnTransaction {
+    /// Sets `transactional_id` to the passed value.
+    ///
+    /// The transactional id corresponding to the transaction.
+    ///
+    /// Supported API versions: 4-5
+    pub fn with_transactional_id(mut self, value: super::TransactionalId) -> Self {
+        self.transactional_id = value;
+        self
+    }
     /// Sets `producer_id` to the passed value.
     ///
     /// Current producer id in use by the transactional id.
@@ -515,10 +534,7 @@ impl AddPartitionsToTxnTransaction {
     /// The partitions to add to the transaction.
     ///
     /// Supported API versions: 4-5
-    pub fn with_topics(
-        mut self,
-        value: indexmap::IndexMap<super::TopicName, AddPartitionsToTxnTopic>,
-    ) -> Self {
+    pub fn with_topics(mut self, value: Vec<AddPartitionsToTxnTopic>) -> Self {
         self.topics = value;
         self
     }
@@ -535,13 +551,12 @@ impl AddPartitionsToTxnTransaction {
 }
 
 #[cfg(feature = "client")]
-impl MapEncodable for AddPartitionsToTxnTransaction {
-    type Key = super::TransactionalId;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
+impl Encodable for AddPartitionsToTxnTransaction {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 4 {
-            types::CompactString.encode(buf, key)?;
+            types::CompactString.encode(buf, &self.transactional_id)?;
         } else {
-            if !key.is_empty() {
+            if !self.transactional_id.is_empty() {
                 bail!("failed to encode");
             }
         }
@@ -587,12 +602,12 @@ impl MapEncodable for AddPartitionsToTxnTransaction {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 4 {
-            total_size += types::CompactString.compute_size(key)?;
+            total_size += types::CompactString.compute_size(&self.transactional_id)?;
         } else {
-            if !key.is_empty() {
+            if !self.transactional_id.is_empty() {
                 bail!("failed to encode");
             }
         }
@@ -642,10 +657,9 @@ impl MapEncodable for AddPartitionsToTxnTransaction {
 }
 
 #[cfg(feature = "broker")]
-impl MapDecodable for AddPartitionsToTxnTransaction {
-    type Key = super::TransactionalId;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
-        let key_field = if version >= 4 {
+impl Decodable for AddPartitionsToTxnTransaction {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        let transactional_id = if version >= 4 {
             types::CompactString.decode(buf)?
         } else {
             Default::default()
@@ -680,22 +694,21 @@ impl MapDecodable for AddPartitionsToTxnTransaction {
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
-        Ok((
-            key_field,
-            Self {
-                producer_id,
-                producer_epoch,
-                verify_only,
-                topics,
-                unknown_tagged_fields,
-            },
-        ))
+        Ok(Self {
+            transactional_id,
+            producer_id,
+            producer_epoch,
+            verify_only,
+            topics,
+            unknown_tagged_fields,
+        })
     }
 }
 
 impl Default for AddPartitionsToTxnTransaction {
     fn default() -> Self {
         Self {
+            transactional_id: Default::default(),
             producer_id: (0).into(),
             producer_epoch: 0,
             verify_only: false,
