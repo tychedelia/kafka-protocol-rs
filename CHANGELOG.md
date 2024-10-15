@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.13.0
+
 - All "map" types in the protocol that were previously of type `IndexMap<K, V>` are now of type `Vec<V>`, the value of `K` is stored as a field within `V`.
   - This was done to resolve <https://github.com/tychedelia/kafka-protocol-rs/issues/84> and improve decoding speed.
   - If you were previously calling `.get()` on the map, the best way to migrate is to refactor your code to avoid the need to lookup by iterating over the items in the response instead.
@@ -11,6 +13,8 @@
 - The Debug impl for new type wrappers now passes directly to the inner type.
   The full list of new type wrappers is BrokerId, GroupId, ProducerId, TopicName and TransactionalId.
   For example GroupId was previously `GroupId("some group")` but is now `"some group"`.
+- ApiKey is now non_exhaustive.
+- Added `gzip`, `zstd`, `snappy` and `lz4` features to enable the different compression algorithms for records (All enabled by default)
 
 ## v0.12.0
 
