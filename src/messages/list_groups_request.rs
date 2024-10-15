@@ -73,14 +73,14 @@ impl Encodable for ListGroupsRequest {
             types::CompactArray(types::CompactString).encode(buf, &self.states_filter)?;
         } else {
             if !self.states_filter.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 5 {
             types::CompactArray(types::CompactString).encode(buf, &self.types_filter)?;
         } else {
             if !self.types_filter.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
@@ -104,7 +104,7 @@ impl Encodable for ListGroupsRequest {
                 types::CompactArray(types::CompactString).compute_size(&self.states_filter)?;
         } else {
             if !self.states_filter.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 5 {
@@ -112,7 +112,7 @@ impl Encodable for ListGroupsRequest {
                 types::CompactArray(types::CompactString).compute_size(&self.types_filter)?;
         } else {
             if !self.types_filter.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {

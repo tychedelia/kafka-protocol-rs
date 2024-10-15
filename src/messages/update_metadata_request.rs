@@ -342,7 +342,7 @@ impl Encodable for UpdateMetadataEndpoint {
             types::Int32.encode(buf, &self.port)?;
         } else {
             if self.port != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 1 {
@@ -353,7 +353,7 @@ impl Encodable for UpdateMetadataEndpoint {
             }
         } else {
             if !self.host.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
@@ -367,7 +367,7 @@ impl Encodable for UpdateMetadataEndpoint {
             types::Int16.encode(buf, &self.security_protocol)?;
         } else {
             if self.security_protocol != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 6 {
@@ -390,7 +390,7 @@ impl Encodable for UpdateMetadataEndpoint {
             total_size += types::Int32.compute_size(&self.port)?;
         } else {
             if self.port != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 1 {
@@ -401,7 +401,7 @@ impl Encodable for UpdateMetadataEndpoint {
             }
         } else {
             if !self.host.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
@@ -415,7 +415,7 @@ impl Encodable for UpdateMetadataEndpoint {
             total_size += types::Int16.compute_size(&self.security_protocol)?;
         } else {
             if self.security_protocol != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 6 {
@@ -958,7 +958,7 @@ impl Encodable for UpdateMetadataRequest {
             types::Boolean.encode(buf, &self.is_k_raft_controller)?;
         } else {
             if self.is_k_raft_controller {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         types::Int32.encode(buf, &self.controller_epoch)?;
@@ -970,7 +970,7 @@ impl Encodable for UpdateMetadataRequest {
                 .encode(buf, &self.ungrouped_partition_states)?;
         } else {
             if !self.ungrouped_partition_states.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 5 {
@@ -981,7 +981,7 @@ impl Encodable for UpdateMetadataRequest {
             }
         } else {
             if !self.topic_states.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 6 {
@@ -1028,7 +1028,7 @@ impl Encodable for UpdateMetadataRequest {
             total_size += types::Boolean.compute_size(&self.is_k_raft_controller)?;
         } else {
             if self.is_k_raft_controller {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         total_size += types::Int32.compute_size(&self.controller_epoch)?;
@@ -1040,7 +1040,7 @@ impl Encodable for UpdateMetadataRequest {
                 .compute_size(&self.ungrouped_partition_states)?;
         } else {
             if !self.ungrouped_partition_states.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 5 {
@@ -1053,7 +1053,7 @@ impl Encodable for UpdateMetadataRequest {
             }
         } else {
             if !self.topic_states.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 6 {
@@ -1262,7 +1262,7 @@ impl Encodable for UpdateMetadataTopicState {
             }
         } else {
             if !self.topic_name.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 7 {
@@ -1277,7 +1277,7 @@ impl Encodable for UpdateMetadataTopicState {
             }
         } else {
             if !self.partition_states.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 6 {
@@ -1304,7 +1304,7 @@ impl Encodable for UpdateMetadataTopicState {
             }
         } else {
             if !self.topic_name.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 7 {
@@ -1320,7 +1320,7 @@ impl Encodable for UpdateMetadataTopicState {
             }
         } else {
             if !self.partition_states.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 6 {

@@ -74,7 +74,7 @@ impl Encodable for DescribeClusterRequest {
             types::Int8.encode(buf, &self.endpoint_type)?;
         } else {
             if self.endpoint_type != 1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -96,7 +96,7 @@ impl Encodable for DescribeClusterRequest {
             total_size += types::Int8.compute_size(&self.endpoint_type)?;
         } else {
             if self.endpoint_type != 1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         let num_tagged_fields = self.unknown_tagged_fields.len();

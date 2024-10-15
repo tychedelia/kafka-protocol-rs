@@ -89,7 +89,7 @@ impl Encodable for ListTransactionsRequest {
             types::Int64.encode(buf, &self.duration_filter)?;
         } else {
             if self.duration_filter != -1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -113,7 +113,7 @@ impl Encodable for ListTransactionsRequest {
             total_size += types::Int64.compute_size(&self.duration_filter)?;
         } else {
             if self.duration_filter != -1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         let num_tagged_fields = self.unknown_tagged_fields.len();

@@ -131,28 +131,28 @@ impl Encodable for ListOffsetsPartitionResponse {
             types::Array(types::Int64).encode(buf, &self.old_style_offsets)?;
         } else {
             if !self.old_style_offsets.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 1 {
             types::Int64.encode(buf, &self.timestamp)?;
         } else {
             if self.timestamp != -1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 1 {
             types::Int64.encode(buf, &self.offset)?;
         } else {
             if self.offset != -1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 4 {
             types::Int32.encode(buf, &self.leader_epoch)?;
         } else {
             if self.leader_epoch != -1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 6 {
@@ -177,28 +177,28 @@ impl Encodable for ListOffsetsPartitionResponse {
             total_size += types::Array(types::Int64).compute_size(&self.old_style_offsets)?;
         } else {
             if !self.old_style_offsets.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 1 {
             total_size += types::Int64.compute_size(&self.timestamp)?;
         } else {
             if self.timestamp != -1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 1 {
             total_size += types::Int64.compute_size(&self.offset)?;
         } else {
             if self.offset != -1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 4 {
             total_size += types::Int32.compute_size(&self.leader_epoch)?;
         } else {
             if self.leader_epoch != -1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 6 {

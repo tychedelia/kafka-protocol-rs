@@ -401,7 +401,7 @@ fn write_encode_field<W: Write>(
                 // field is used in this version, encode it
                 |w| write_encode_field_inner(w, field, valid_versions, compute_size),
                 // field is not present in this version, ensure that the default value is used
-                |w| write_default_check(w, field),
+                |w| write_fail_if_field_set(w, field),
                 false,
                 field.ignorable,
             )
@@ -457,19 +457,22 @@ fn write_encode_field_inner<W: Write>(
     }
 }
 
-fn write_default_check<W: Write>(
+fn write_fail_if_field_set<W: Write>(
     w: &mut CodeWriter<W>,
     field: &PreparedField,
 ) -> Result<(), Error> {
     let var_name = field.var_name();
 
-    let is_default = field
+    let is_not_default = field
         .default
         .gen_is_default(&var_name, field.optional)
         .not();
-    write!(w, "if {is_default} ")?;
+    write!(w, "if {is_not_default} ")?;
     w.block(|w| {
-        write!(w, r#"bail!("failed to encode");"#)?;
+        write!(
+            w,
+            r#"bail!("A field is set that is not available on the selected protocol version");"#
+        )?;
         Ok(())
     })
 }
@@ -596,7 +599,7 @@ fn write_encode_tag_buffer<W: Write>(
                                     compute_size,
                                 )
                             },
-                            |w| write_default_check(w, field),
+                            |w| write_fail_if_field_set(w, field),
                             false,
                             field.ignorable,
                         )?;

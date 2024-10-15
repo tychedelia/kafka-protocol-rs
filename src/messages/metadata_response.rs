@@ -152,7 +152,7 @@ impl Encodable for MetadataResponse {
             types::Int32.encode(buf, &self.cluster_authorized_operations)?;
         } else {
             if self.cluster_authorized_operations != -2147483648 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 9 {
@@ -200,7 +200,7 @@ impl Encodable for MetadataResponse {
             total_size += types::Int32.compute_size(&self.cluster_authorized_operations)?;
         } else {
             if self.cluster_authorized_operations != -2147483648 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 9 {
@@ -896,7 +896,7 @@ impl Encodable for MetadataResponseTopic {
             types::Int32.encode(buf, &self.topic_authorized_operations)?;
         } else {
             if self.topic_authorized_operations != -2147483648 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 9 {
@@ -937,7 +937,7 @@ impl Encodable for MetadataResponseTopic {
             total_size += types::Int32.compute_size(&self.topic_authorized_operations)?;
         } else {
             if self.topic_authorized_operations != -2147483648 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 9 {
