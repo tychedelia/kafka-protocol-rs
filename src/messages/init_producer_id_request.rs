@@ -107,14 +107,14 @@ impl Encodable for InitProducerIdRequest {
             types::Int64.encode(buf, &self.producer_id)?;
         } else {
             if self.producer_id != -1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
             types::Int16.encode(buf, &self.producer_epoch)?;
         } else {
             if self.producer_epoch != -1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 2 {
@@ -143,14 +143,14 @@ impl Encodable for InitProducerIdRequest {
             total_size += types::Int64.compute_size(&self.producer_id)?;
         } else {
             if self.producer_id != -1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
             total_size += types::Int16.compute_size(&self.producer_epoch)?;
         } else {
             if self.producer_epoch != -1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 2 {

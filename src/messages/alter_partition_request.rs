@@ -212,14 +212,14 @@ impl Encodable for BrokerState {
             types::Int32.encode(buf, &self.broker_id)?;
         } else {
             if self.broker_id != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
             types::Int64.encode(buf, &self.broker_epoch)?;
         } else {
             if self.broker_epoch != -1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -240,14 +240,14 @@ impl Encodable for BrokerState {
             total_size += types::Int32.compute_size(&self.broker_id)?;
         } else {
             if self.broker_id != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
             total_size += types::Int64.compute_size(&self.broker_epoch)?;
         } else {
             if self.broker_epoch != -1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -422,7 +422,7 @@ impl Encodable for PartitionData {
             types::CompactArray(types::Int32).encode(buf, &self.new_isr)?;
         } else {
             if !self.new_isr.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
@@ -430,14 +430,14 @@ impl Encodable for PartitionData {
                 .encode(buf, &self.new_isr_with_epochs)?;
         } else {
             if !self.new_isr_with_epochs.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 1 {
             types::Int8.encode(buf, &self.leader_recovery_state)?;
         } else {
             if self.leader_recovery_state != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         types::Int32.encode(buf, &self.partition_epoch)?;
@@ -461,7 +461,7 @@ impl Encodable for PartitionData {
             total_size += types::CompactArray(types::Int32).compute_size(&self.new_isr)?;
         } else {
             if !self.new_isr.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
@@ -469,14 +469,14 @@ impl Encodable for PartitionData {
                 .compute_size(&self.new_isr_with_epochs)?;
         } else {
             if !self.new_isr_with_epochs.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 1 {
             total_size += types::Int8.compute_size(&self.leader_recovery_state)?;
         } else {
             if self.leader_recovery_state != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         total_size += types::Int32.compute_size(&self.partition_epoch)?;

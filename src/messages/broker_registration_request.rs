@@ -177,7 +177,7 @@ impl Encodable for BrokerRegistrationRequest {
             types::Boolean.encode(buf, &self.is_migrating_zk_broker)?;
         } else {
             if self.is_migrating_zk_broker {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 2 {
@@ -212,7 +212,7 @@ impl Encodable for BrokerRegistrationRequest {
             total_size += types::Boolean.compute_size(&self.is_migrating_zk_broker)?;
         } else {
             if self.is_migrating_zk_broker {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 2 {

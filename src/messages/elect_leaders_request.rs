@@ -87,7 +87,7 @@ impl Encodable for ElectLeadersRequest {
             types::Int8.encode(buf, &self.election_type)?;
         } else {
             if self.election_type != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 2 {
@@ -116,7 +116,7 @@ impl Encodable for ElectLeadersRequest {
             total_size += types::Int8.compute_size(&self.election_type)?;
         } else {
             if self.election_type != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 2 {

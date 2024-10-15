@@ -73,7 +73,7 @@ impl Encodable for BatchIndexAndErrorMessage {
             types::Int32.encode(buf, &self.batch_index)?;
         } else {
             if self.batch_index != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 8 {
@@ -84,7 +84,7 @@ impl Encodable for BatchIndexAndErrorMessage {
             }
         } else {
             if !self.batch_index_error_message.is_none() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 9 {
@@ -107,7 +107,7 @@ impl Encodable for BatchIndexAndErrorMessage {
             total_size += types::Int32.compute_size(&self.batch_index)?;
         } else {
             if self.batch_index != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 8 {
@@ -118,7 +118,7 @@ impl Encodable for BatchIndexAndErrorMessage {
             }
         } else {
             if !self.batch_index_error_message.is_none() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 9 {
@@ -243,14 +243,14 @@ impl Encodable for LeaderIdAndEpoch {
             types::Int32.encode(buf, &self.leader_id)?;
         } else {
             if self.leader_id != -1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 10 {
             types::Int32.encode(buf, &self.leader_epoch)?;
         } else {
             if self.leader_epoch != -1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 9 {
@@ -273,14 +273,14 @@ impl Encodable for LeaderIdAndEpoch {
             total_size += types::Int32.compute_size(&self.leader_id)?;
         } else {
             if self.leader_id != -1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 10 {
             total_size += types::Int32.compute_size(&self.leader_epoch)?;
         } else {
             if self.leader_epoch != -1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 9 {
@@ -429,28 +429,28 @@ impl Encodable for NodeEndpoint {
             types::Int32.encode(buf, &self.node_id)?;
         } else {
             if self.node_id != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 10 {
             types::CompactString.encode(buf, &self.host)?;
         } else {
             if !self.host.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 10 {
             types::Int32.encode(buf, &self.port)?;
         } else {
             if self.port != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 10 {
             types::CompactString.encode(buf, &self.rack)?;
         } else {
             if !self.rack.is_none() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 9 {
@@ -473,28 +473,28 @@ impl Encodable for NodeEndpoint {
             total_size += types::Int32.compute_size(&self.node_id)?;
         } else {
             if self.node_id != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 10 {
             total_size += types::CompactString.compute_size(&self.host)?;
         } else {
             if !self.host.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 10 {
             total_size += types::Int32.compute_size(&self.port)?;
         } else {
             if self.port != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 10 {
             total_size += types::CompactString.compute_size(&self.rack)?;
         } else {
             if !self.rack.is_none() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 9 {

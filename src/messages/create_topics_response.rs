@@ -115,7 +115,7 @@ impl Encodable for CreatableTopicConfigs {
             types::CompactString.encode(buf, &self.name)?;
         } else {
             if !self.name.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 5 {
@@ -127,14 +127,14 @@ impl Encodable for CreatableTopicConfigs {
                 .map(|x| x.is_empty())
                 .unwrap_or_default()
             {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 5 {
             types::Boolean.encode(buf, &self.read_only)?;
         } else {
             if self.read_only {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 5 {
@@ -144,7 +144,7 @@ impl Encodable for CreatableTopicConfigs {
             types::Boolean.encode(buf, &self.is_sensitive)?;
         } else {
             if self.is_sensitive {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 5 {
@@ -167,7 +167,7 @@ impl Encodable for CreatableTopicConfigs {
             total_size += types::CompactString.compute_size(&self.name)?;
         } else {
             if !self.name.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 5 {
@@ -179,14 +179,14 @@ impl Encodable for CreatableTopicConfigs {
                 .map(|x| x.is_empty())
                 .unwrap_or_default()
             {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 5 {
             total_size += types::Boolean.compute_size(&self.read_only)?;
         } else {
             if self.read_only {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 5 {
@@ -196,7 +196,7 @@ impl Encodable for CreatableTopicConfigs {
             total_size += types::Boolean.compute_size(&self.is_sensitive)?;
         } else {
             if self.is_sensitive {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 5 {

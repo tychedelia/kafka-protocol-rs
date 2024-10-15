@@ -103,14 +103,14 @@ impl Encodable for FeatureUpdateKey {
             types::Boolean.encode(buf, &self.allow_downgrade)?;
         } else {
             if self.allow_downgrade {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 1 {
             types::Int8.encode(buf, &self.upgrade_type)?;
         } else {
             if self.upgrade_type != 1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -133,14 +133,14 @@ impl Encodable for FeatureUpdateKey {
             total_size += types::Boolean.compute_size(&self.allow_downgrade)?;
         } else {
             if self.allow_downgrade {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 1 {
             total_size += types::Int8.compute_size(&self.upgrade_type)?;
         } else {
             if self.upgrade_type != 1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -279,7 +279,7 @@ impl Encodable for UpdateFeaturesRequest {
             types::Boolean.encode(buf, &self.validate_only)?;
         } else {
             if self.validate_only {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -303,7 +303,7 @@ impl Encodable for UpdateFeaturesRequest {
             total_size += types::Boolean.compute_size(&self.validate_only)?;
         } else {
             if self.validate_only {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         let num_tagged_fields = self.unknown_tagged_fields.len();

@@ -243,7 +243,7 @@ impl Encodable for ProduceRequest {
             }
         } else {
             if !self.transactional_id.is_none() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         types::Int16.encode(buf, &self.acks)?;
@@ -277,7 +277,7 @@ impl Encodable for ProduceRequest {
             }
         } else {
             if !self.transactional_id.is_none() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         total_size += types::Int16.compute_size(&self.acks)?;

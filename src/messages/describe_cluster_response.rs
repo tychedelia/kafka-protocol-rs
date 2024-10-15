@@ -318,7 +318,7 @@ impl Encodable for DescribeClusterResponse {
             types::Int8.encode(buf, &self.endpoint_type)?;
         } else {
             if self.endpoint_type != 1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         types::CompactString.encode(buf, &self.cluster_id)?;
@@ -346,7 +346,7 @@ impl Encodable for DescribeClusterResponse {
             total_size += types::Int8.compute_size(&self.endpoint_type)?;
         } else {
             if self.endpoint_type != 1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         total_size += types::CompactString.compute_size(&self.cluster_id)?;

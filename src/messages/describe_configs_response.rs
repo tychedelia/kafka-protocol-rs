@@ -182,7 +182,7 @@ impl Encodable for DescribeConfigsResourceResult {
             types::Boolean.encode(buf, &self.is_default)?;
         } else {
             if self.is_default {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 1 {
@@ -237,7 +237,7 @@ impl Encodable for DescribeConfigsResourceResult {
             total_size += types::Boolean.compute_size(&self.is_default)?;
         } else {
             if self.is_default {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 1 {
@@ -807,7 +807,7 @@ impl Encodable for DescribeConfigsSynonym {
             }
         } else {
             if !self.name.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 1 {
@@ -823,14 +823,14 @@ impl Encodable for DescribeConfigsSynonym {
                 .map(|x| x.is_empty())
                 .unwrap_or_default()
             {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 1 {
             types::Int8.encode(buf, &self.source)?;
         } else {
             if self.source != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 4 {
@@ -857,7 +857,7 @@ impl Encodable for DescribeConfigsSynonym {
             }
         } else {
             if !self.name.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 1 {
@@ -873,14 +873,14 @@ impl Encodable for DescribeConfigsSynonym {
                 .map(|x| x.is_empty())
                 .unwrap_or_default()
             {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 1 {
             total_size += types::Int8.compute_size(&self.source)?;
         } else {
             if self.source != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 4 {

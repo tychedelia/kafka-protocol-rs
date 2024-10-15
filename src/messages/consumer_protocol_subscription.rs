@@ -218,14 +218,14 @@ impl Encodable for TopicPartition {
             types::String.encode(buf, &self.topic)?;
         } else {
             if !self.topic.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 1 {
             types::Array(types::Int32).encode(buf, &self.partitions)?;
         } else {
             if !self.partitions.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
 
@@ -237,14 +237,14 @@ impl Encodable for TopicPartition {
             total_size += types::String.compute_size(&self.topic)?;
         } else {
             if !self.topic.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 1 {
             total_size += types::Array(types::Int32).compute_size(&self.partitions)?;
         } else {
             if !self.partitions.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
 

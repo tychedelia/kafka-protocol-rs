@@ -92,7 +92,7 @@ impl Encodable for LeaveGroupRequest {
             types::String.encode(buf, &self.member_id)?;
         } else {
             if !self.member_id.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
@@ -103,7 +103,7 @@ impl Encodable for LeaveGroupRequest {
             }
         } else {
             if !self.members.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 4 {
@@ -131,7 +131,7 @@ impl Encodable for LeaveGroupRequest {
             total_size += types::String.compute_size(&self.member_id)?;
         } else {
             if !self.member_id.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
@@ -144,7 +144,7 @@ impl Encodable for LeaveGroupRequest {
             }
         } else {
             if !self.members.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 4 {
@@ -294,7 +294,7 @@ impl Encodable for MemberIdentity {
             }
         } else {
             if !self.member_id.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
@@ -305,7 +305,7 @@ impl Encodable for MemberIdentity {
             }
         } else {
             if !self.group_instance_id.is_none() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 5 {
@@ -335,7 +335,7 @@ impl Encodable for MemberIdentity {
             }
         } else {
             if !self.member_id.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
@@ -346,7 +346,7 @@ impl Encodable for MemberIdentity {
             }
         } else {
             if !self.group_instance_id.is_none() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 5 {

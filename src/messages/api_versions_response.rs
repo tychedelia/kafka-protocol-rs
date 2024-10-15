@@ -610,21 +610,21 @@ impl Encodable for FinalizedFeatureKey {
             types::CompactString.encode(buf, &self.name)?;
         } else {
             if !self.name.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
             types::Int16.encode(buf, &self.max_version_level)?;
         } else {
             if self.max_version_level != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
             types::Int16.encode(buf, &self.min_version_level)?;
         } else {
             if self.min_version_level != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
@@ -647,21 +647,21 @@ impl Encodable for FinalizedFeatureKey {
             total_size += types::CompactString.compute_size(&self.name)?;
         } else {
             if !self.name.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
             total_size += types::Int16.compute_size(&self.max_version_level)?;
         } else {
             if self.max_version_level != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
             total_size += types::Int16.compute_size(&self.min_version_level)?;
         } else {
             if self.min_version_level != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
@@ -803,21 +803,21 @@ impl Encodable for SupportedFeatureKey {
             types::CompactString.encode(buf, &self.name)?;
         } else {
             if !self.name.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
             types::Int16.encode(buf, &self.min_version)?;
         } else {
             if self.min_version != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
             types::Int16.encode(buf, &self.max_version)?;
         } else {
             if self.max_version != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
@@ -840,21 +840,21 @@ impl Encodable for SupportedFeatureKey {
             total_size += types::CompactString.compute_size(&self.name)?;
         } else {
             if !self.name.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
             total_size += types::Int16.compute_size(&self.min_version)?;
         } else {
             if self.min_version != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
             total_size += types::Int16.compute_size(&self.max_version)?;
         } else {
             if self.max_version != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {

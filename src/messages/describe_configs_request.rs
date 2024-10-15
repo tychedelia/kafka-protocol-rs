@@ -92,14 +92,14 @@ impl Encodable for DescribeConfigsRequest {
             types::Boolean.encode(buf, &self.include_synonyms)?;
         } else {
             if self.include_synonyms {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
             types::Boolean.encode(buf, &self.include_documentation)?;
         } else {
             if self.include_documentation {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 4 {
@@ -128,14 +128,14 @@ impl Encodable for DescribeConfigsRequest {
             total_size += types::Boolean.compute_size(&self.include_synonyms)?;
         } else {
             if self.include_synonyms {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
             total_size += types::Boolean.compute_size(&self.include_documentation)?;
         } else {
             if self.include_documentation {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 4 {

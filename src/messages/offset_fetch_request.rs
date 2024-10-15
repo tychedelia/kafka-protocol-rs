@@ -105,7 +105,7 @@ impl Encodable for OffsetFetchRequest {
             }
         } else {
             if !self.group_id.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version <= 7 {
@@ -121,21 +121,21 @@ impl Encodable for OffsetFetchRequest {
                 .map(|x| x.is_empty())
                 .unwrap_or_default()
             {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 8 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.groups)?;
         } else {
             if !self.groups.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 7 {
             types::Boolean.encode(buf, &self.require_stable)?;
         } else {
             if self.require_stable {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 6 {
@@ -162,7 +162,7 @@ impl Encodable for OffsetFetchRequest {
             }
         } else {
             if !self.group_id.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version <= 7 {
@@ -179,7 +179,7 @@ impl Encodable for OffsetFetchRequest {
                 .map(|x| x.is_empty())
                 .unwrap_or_default()
             {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 8 {
@@ -187,14 +187,14 @@ impl Encodable for OffsetFetchRequest {
                 types::CompactArray(types::Struct { version }).compute_size(&self.groups)?;
         } else {
             if !self.groups.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 7 {
             total_size += types::Boolean.compute_size(&self.require_stable)?;
         } else {
             if self.require_stable {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 6 {
@@ -365,7 +365,7 @@ impl Encodable for OffsetFetchRequestGroup {
             types::CompactString.encode(buf, &self.group_id)?;
         } else {
             if !self.group_id.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 9 {
@@ -383,7 +383,7 @@ impl Encodable for OffsetFetchRequestGroup {
                 .map(|x| x.is_empty())
                 .unwrap_or_default()
             {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 6 {
@@ -406,7 +406,7 @@ impl Encodable for OffsetFetchRequestGroup {
             total_size += types::CompactString.compute_size(&self.group_id)?;
         } else {
             if !self.group_id.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 9 {
@@ -425,7 +425,7 @@ impl Encodable for OffsetFetchRequestGroup {
                 .map(|x| x.is_empty())
                 .unwrap_or_default()
             {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 6 {
@@ -564,7 +564,7 @@ impl Encodable for OffsetFetchRequestTopic {
             }
         } else {
             if !self.name.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version <= 7 {
@@ -575,7 +575,7 @@ impl Encodable for OffsetFetchRequestTopic {
             }
         } else {
             if !self.partition_indexes.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 6 {
@@ -602,7 +602,7 @@ impl Encodable for OffsetFetchRequestTopic {
             }
         } else {
             if !self.name.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version <= 7 {
@@ -614,7 +614,7 @@ impl Encodable for OffsetFetchRequestTopic {
             }
         } else {
             if !self.partition_indexes.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 6 {
@@ -743,14 +743,14 @@ impl Encodable for OffsetFetchRequestTopics {
             types::CompactString.encode(buf, &self.name)?;
         } else {
             if !self.name.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 8 {
             types::CompactArray(types::Int32).encode(buf, &self.partition_indexes)?;
         } else {
             if !self.partition_indexes.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 6 {
@@ -773,7 +773,7 @@ impl Encodable for OffsetFetchRequestTopics {
             total_size += types::CompactString.compute_size(&self.name)?;
         } else {
             if !self.name.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 8 {
@@ -781,7 +781,7 @@ impl Encodable for OffsetFetchRequestTopics {
                 types::CompactArray(types::Int32).compute_size(&self.partition_indexes)?;
         } else {
             if !self.partition_indexes.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 6 {

@@ -158,7 +158,7 @@ impl Encodable for SyncGroupRequest {
             }
         } else {
             if !self.group_instance_id.is_none() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 5 {
@@ -207,7 +207,7 @@ impl Encodable for SyncGroupRequest {
             }
         } else {
             if !self.group_instance_id.is_none() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 5 {

@@ -189,7 +189,7 @@ impl Encodable for JoinGroupResponse {
             types::Boolean.encode(buf, &self.skip_assignment)?;
         } else {
             if self.skip_assignment {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 6 {
@@ -240,7 +240,7 @@ impl Encodable for JoinGroupResponse {
             total_size += types::Boolean.compute_size(&self.skip_assignment)?;
         } else {
             if self.skip_assignment {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 6 {
