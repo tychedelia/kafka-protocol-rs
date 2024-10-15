@@ -235,7 +235,7 @@ impl Encodable for AddPartitionsToTxnResponse {
                 .encode(buf, &self.results_by_transaction)?;
         } else {
             if !self.results_by_transaction.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version <= 3 {
@@ -248,7 +248,7 @@ impl Encodable for AddPartitionsToTxnResponse {
             }
         } else {
             if !self.results_by_topic_v3_and_below.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
@@ -276,7 +276,7 @@ impl Encodable for AddPartitionsToTxnResponse {
                 .compute_size(&self.results_by_transaction)?;
         } else {
             if !self.results_by_transaction.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version <= 3 {
@@ -289,7 +289,7 @@ impl Encodable for AddPartitionsToTxnResponse {
             }
         } else {
             if !self.results_by_topic_v3_and_below.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
@@ -424,14 +424,14 @@ impl Encodable for AddPartitionsToTxnResult {
             types::CompactString.encode(buf, &self.transactional_id)?;
         } else {
             if !self.transactional_id.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 4 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.topic_results)?;
         } else {
             if !self.topic_results.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
@@ -454,7 +454,7 @@ impl Encodable for AddPartitionsToTxnResult {
             total_size += types::CompactString.compute_size(&self.transactional_id)?;
         } else {
             if !self.transactional_id.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 4 {
@@ -462,7 +462,7 @@ impl Encodable for AddPartitionsToTxnResult {
                 types::CompactArray(types::Struct { version }).compute_size(&self.topic_results)?;
         } else {
             if !self.topic_results.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {

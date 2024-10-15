@@ -169,21 +169,21 @@ impl Encodable for TxnOffsetCommitRequest {
             types::Int32.encode(buf, &self.generation_id)?;
         } else {
             if self.generation_id != -1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
             types::CompactString.encode(buf, &self.member_id)?;
         } else {
             if &self.member_id != "" {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
             types::CompactString.encode(buf, &self.group_instance_id)?;
         } else {
             if !self.group_instance_id.is_none() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
@@ -223,21 +223,21 @@ impl Encodable for TxnOffsetCommitRequest {
             total_size += types::Int32.compute_size(&self.generation_id)?;
         } else {
             if self.generation_id != -1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
             total_size += types::CompactString.compute_size(&self.member_id)?;
         } else {
             if &self.member_id != "" {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
             total_size += types::CompactString.compute_size(&self.group_instance_id)?;
         } else {
             if !self.group_instance_id.is_none() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {

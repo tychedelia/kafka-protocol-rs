@@ -258,14 +258,14 @@ impl Encodable for LeaderAndIsrResponse {
             }
         } else {
             if !self.partition_errors.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 5 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
         } else {
             if !self.topics.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 4 {
@@ -295,7 +295,7 @@ impl Encodable for LeaderAndIsrResponse {
             }
         } else {
             if !self.partition_errors.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 5 {
@@ -303,7 +303,7 @@ impl Encodable for LeaderAndIsrResponse {
                 types::CompactArray(types::Struct { version }).compute_size(&self.topics)?;
         } else {
             if !self.topics.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 4 {
@@ -431,14 +431,14 @@ impl Encodable for LeaderAndIsrTopicError {
             types::Uuid.encode(buf, &self.topic_id)?;
         } else {
             if &self.topic_id != &Uuid::nil() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 5 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.partition_errors)?;
         } else {
             if !self.partition_errors.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 4 {
@@ -461,7 +461,7 @@ impl Encodable for LeaderAndIsrTopicError {
             total_size += types::Uuid.compute_size(&self.topic_id)?;
         } else {
             if &self.topic_id != &Uuid::nil() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 5 {
@@ -469,7 +469,7 @@ impl Encodable for LeaderAndIsrTopicError {
                 .compute_size(&self.partition_errors)?;
         } else {
             if !self.partition_errors.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 4 {

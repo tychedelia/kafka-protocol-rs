@@ -106,7 +106,7 @@ impl Encodable for ListOffsetsPartition {
             types::Int32.encode(buf, &self.max_num_offsets)?;
         } else {
             if self.max_num_offsets != 1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 6 {
@@ -134,7 +134,7 @@ impl Encodable for ListOffsetsPartition {
             total_size += types::Int32.compute_size(&self.max_num_offsets)?;
         } else {
             if self.max_num_offsets != 1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 6 {
@@ -276,7 +276,7 @@ impl Encodable for ListOffsetsRequest {
             types::Int8.encode(buf, &self.isolation_level)?;
         } else {
             if self.isolation_level != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 6 {
@@ -305,7 +305,7 @@ impl Encodable for ListOffsetsRequest {
             total_size += types::Int8.compute_size(&self.isolation_level)?;
         } else {
             if self.isolation_level != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 6 {

@@ -354,7 +354,7 @@ impl Encodable for DeleteAclsMatchingAcl {
             types::Int8.encode(buf, &self.pattern_type)?;
         } else {
             if self.pattern_type != 3 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 2 {
@@ -401,7 +401,7 @@ impl Encodable for DeleteAclsMatchingAcl {
             total_size += types::Int8.compute_size(&self.pattern_type)?;
         } else {
             if self.pattern_type != 3 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 2 {

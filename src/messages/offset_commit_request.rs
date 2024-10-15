@@ -148,7 +148,7 @@ impl Encodable for OffsetCommitRequest {
             }
         } else {
             if !self.group_instance_id.is_none() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 2 && version <= 4 {
@@ -198,7 +198,7 @@ impl Encodable for OffsetCommitRequest {
             }
         } else {
             if !self.group_instance_id.is_none() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 2 && version <= 4 {
@@ -411,7 +411,7 @@ impl Encodable for OffsetCommitRequestPartition {
             types::Int64.encode(buf, &self.commit_timestamp)?;
         } else {
             if self.commit_timestamp != -1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 8 {
@@ -444,7 +444,7 @@ impl Encodable for OffsetCommitRequestPartition {
             total_size += types::Int64.compute_size(&self.commit_timestamp)?;
         } else {
             if self.commit_timestamp != -1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 8 {

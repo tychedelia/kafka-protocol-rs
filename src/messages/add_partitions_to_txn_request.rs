@@ -115,7 +115,7 @@ impl Encodable for AddPartitionsToTxnRequest {
             types::CompactArray(types::Struct { version }).encode(buf, &self.transactions)?;
         } else {
             if !self.transactions.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version <= 3 {
@@ -126,21 +126,21 @@ impl Encodable for AddPartitionsToTxnRequest {
             }
         } else {
             if !self.v3_and_below_transactional_id.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version <= 3 {
             types::Int64.encode(buf, &self.v3_and_below_producer_id)?;
         } else {
             if self.v3_and_below_producer_id != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version <= 3 {
             types::Int16.encode(buf, &self.v3_and_below_producer_epoch)?;
         } else {
             if self.v3_and_below_producer_epoch != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version <= 3 {
@@ -152,7 +152,7 @@ impl Encodable for AddPartitionsToTxnRequest {
             }
         } else {
             if !self.v3_and_below_topics.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
@@ -176,7 +176,7 @@ impl Encodable for AddPartitionsToTxnRequest {
                 types::CompactArray(types::Struct { version }).compute_size(&self.transactions)?;
         } else {
             if !self.transactions.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version <= 3 {
@@ -188,21 +188,21 @@ impl Encodable for AddPartitionsToTxnRequest {
             }
         } else {
             if !self.v3_and_below_transactional_id.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version <= 3 {
             total_size += types::Int64.compute_size(&self.v3_and_below_producer_id)?;
         } else {
             if self.v3_and_below_producer_id != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version <= 3 {
             total_size += types::Int16.compute_size(&self.v3_and_below_producer_epoch)?;
         } else {
             if self.v3_and_below_producer_epoch != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version <= 3 {
@@ -215,7 +215,7 @@ impl Encodable for AddPartitionsToTxnRequest {
             }
         } else {
             if !self.v3_and_below_topics.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
@@ -557,35 +557,35 @@ impl Encodable for AddPartitionsToTxnTransaction {
             types::CompactString.encode(buf, &self.transactional_id)?;
         } else {
             if !self.transactional_id.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 4 {
             types::Int64.encode(buf, &self.producer_id)?;
         } else {
             if self.producer_id != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 4 {
             types::Int16.encode(buf, &self.producer_epoch)?;
         } else {
             if self.producer_epoch != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 4 {
             types::Boolean.encode(buf, &self.verify_only)?;
         } else {
             if self.verify_only {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 4 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
         } else {
             if !self.topics.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
@@ -608,28 +608,28 @@ impl Encodable for AddPartitionsToTxnTransaction {
             total_size += types::CompactString.compute_size(&self.transactional_id)?;
         } else {
             if !self.transactional_id.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 4 {
             total_size += types::Int64.compute_size(&self.producer_id)?;
         } else {
             if self.producer_id != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 4 {
             total_size += types::Int16.compute_size(&self.producer_epoch)?;
         } else {
             if self.producer_epoch != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 4 {
             total_size += types::Boolean.compute_size(&self.verify_only)?;
         } else {
             if self.verify_only {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 4 {
@@ -637,7 +637,7 @@ impl Encodable for AddPartitionsToTxnTransaction {
                 types::CompactArray(types::Struct { version }).compute_size(&self.topics)?;
         } else {
             if !self.topics.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
