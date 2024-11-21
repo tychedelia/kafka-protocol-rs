@@ -23,7 +23,7 @@ use kafka_protocol::protocol::StrBytes;
 
 let mut header = RequestHeader::default();
 header.client_id = Some(StrBytes::from_static_str("my-client"));
-header.request_api_key = ApiKey::MetadataKey as i16;
+header.request_api_key = ApiKey::Metadata as i16;
 header.request_api_version = 12;
 
 let mut request = MetadataRequest::default();
@@ -38,7 +38,7 @@ use kafka_protocol::protocol::StrBytes;
 
 let header = RequestHeader::default()
     .with_client_id(Some(StrBytes::from_static_str("my-client")))
-    .with_request_api_key(ApiKey::MetadataKey as i16)
+    .with_request_api_key(ApiKey::Metadata as i16)
     .with_request_api_version(12);
 
 let request = MetadataRequest::default()

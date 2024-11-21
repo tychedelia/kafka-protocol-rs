@@ -91,7 +91,7 @@ fn message_set_v1_produce_fetch() {
 fn create_topic(topic_name: TopicName, socket: &mut TcpStream) {
     let version = 7;
     let header = RequestHeader::default()
-        .with_request_api_key(ApiKey::CreateTopicsKey as i16)
+        .with_request_api_key(ApiKey::CreateTopics as i16)
         .with_request_api_version(version);
 
     let request = CreateTopicsRequest::default()
@@ -115,7 +115,7 @@ fn create_topic(topic_name: TopicName, socket: &mut TcpStream) {
 
 fn produce_records(topic_name: TopicName, version: i16, records: Bytes, socket: &mut TcpStream) {
     let header = RequestHeader::default()
-        .with_request_api_key(ApiKey::ProduceKey as i16)
+        .with_request_api_key(ApiKey::Produce as i16)
         .with_request_api_version(version);
 
     let request = ProduceRequest::default()
@@ -161,7 +161,7 @@ fn fetch_records(
     socket: &mut TcpStream,
 ) {
     let header = RequestHeader::default()
-        .with_request_api_key(ApiKey::FetchKey as i16)
+        .with_request_api_key(ApiKey::Fetch as i16)
         .with_request_api_version(version);
 
     let request = FetchRequest::default().with_topics(vec![FetchTopic::default()

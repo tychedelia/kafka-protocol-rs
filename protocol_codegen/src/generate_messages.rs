@@ -132,7 +132,7 @@ pub fn run(messages_module_dir: &str, mut input_file_paths: Vec<PathBuf>) -> Res
         writeln!(
             m,
             "    {} = {},",
-            request_type.replace("Request", "Key"),
+            request_type.replace("Request", ""),
             api_key
         )?;
     }
@@ -153,7 +153,7 @@ pub fn run(messages_module_dir: &str, mut input_file_paths: Vec<PathBuf>) -> Res
         writeln!(
             m,
             "            ApiKey::{} => {}::header_version(version),",
-            request_type.replace("Request", "Key"),
+            request_type.replace("Request", ""),
             request_type
         )?;
     }
@@ -173,7 +173,7 @@ pub fn run(messages_module_dir: &str, mut input_file_paths: Vec<PathBuf>) -> Res
         writeln!(
             m,
             "            ApiKey::{} => {}::header_version(version),",
-            response_type.replace("Response", "Key"),
+            response_type.replace("Response", ""),
             response_type
         )?;
     }
@@ -187,7 +187,7 @@ pub fn run(messages_module_dir: &str, mut input_file_paths: Vec<PathBuf>) -> Res
     writeln!(m, "    fn try_from(v: i16) -> Result<Self, Self::Error> {{")?;
     writeln!(m, "        match v {{")?;
     for (_, request_type) in request_types.iter() {
-        let key = request_type.replace("Request", "Key");
+        let key = request_type.replace("Request", "");
         writeln!(
             m,
             "            x if x == ApiKey::{} as i16 => Ok(ApiKey::{}),",
@@ -250,7 +250,7 @@ pub fn run(messages_module_dir: &str, mut input_file_paths: Vec<PathBuf>) -> Res
         let variant = request_type.trim_end_matches("Request");
         writeln!(
             m,
-            "ApiKey::{variant}Key => Ok(RequestKind::{variant}(decode(bytes, version)?)),"
+            "ApiKey::{variant} => Ok(RequestKind::{variant}(decode(bytes, version)?)),"
         )?;
     }
     writeln!(m, "}}")?;
@@ -351,7 +351,7 @@ fn encode<T: Encodable>(encodable: &T, bytes: &mut bytes::BytesMut, version: i16
         let variant = response_type.trim_end_matches("Response");
         writeln!(
             m,
-            "ApiKey::{variant}Key => Ok(ResponseKind::{variant}(decode(bytes, version)?)),"
+            "ApiKey::{variant} => Ok(ResponseKind::{variant}(decode(bytes, version)?)),"
         )?;
     }
     writeln!(m, "}}")?;
