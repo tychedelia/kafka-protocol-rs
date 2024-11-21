@@ -1,10 +1,10 @@
 //! Most types are used internally in encoding/decoding, and are not required by typical use cases
 //! for interacting with the protocol. However, types can be used for decoding partial messages,
 //! or rewriting parts of an encoded message.
-use std::borrow::Borrow;
 use std::cmp;
 use std::collections::BTreeMap;
 use std::ops::RangeBounds;
+use std::{borrow::Borrow, fmt::Display};
 
 use anyhow::{bail, Result};
 use buf::{ByteBuf, ByteBufMut};
@@ -128,7 +128,7 @@ pub(crate) trait Decoder<Value> {
 }
 
 /// The range of versions (min, max) allowed for agiven message.
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct VersionRange {
     /// The minimum version in the range.
     pub min: i16,
@@ -148,6 +148,12 @@ impl VersionRange {
             min: cmp::max(self.min, other.min),
             max: cmp::min(self.max, other.max),
         }
+    }
+}
+
+impl Display for VersionRange {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}..{}", self.min, self.max)
     }
 }
 
