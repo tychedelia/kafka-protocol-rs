@@ -11,6 +11,7 @@ use crate::protocol::Decodable;
 use crate::protocol::Encodable;
 #[cfg(all(feature = "client", feature = "broker"))]
 use crate::protocol::Request;
+use crate::protocol::VersionRange;
 use crate::protocol::{HeaderVersion, NewType, StrBytes};
 #[cfg(feature = "messages_enums")]
 #[cfg(any(feature = "client", feature = "broker"))]
@@ -1323,6 +1324,92 @@ impl ApiKey {
                 DescribeTopicPartitionsResponse::header_version(version)
             }
         }
+    }
+    /// Returns the valid versions that can be used with this ApiKey
+    pub fn valid_versions(&self) -> VersionRange {
+        match self {
+            ApiKey::ProduceKey => VersionRange { min: 0, max: 11 },
+            ApiKey::FetchKey => VersionRange { min: 0, max: 16 },
+            ApiKey::ListOffsetsKey => VersionRange { min: 0, max: 8 },
+            ApiKey::MetadataKey => VersionRange { min: 0, max: 12 },
+            ApiKey::LeaderAndIsrKey => VersionRange { min: 0, max: 7 },
+            ApiKey::StopReplicaKey => VersionRange { min: 0, max: 4 },
+            ApiKey::UpdateMetadataKey => VersionRange { min: 0, max: 8 },
+            ApiKey::ControlledShutdownKey => VersionRange { min: 0, max: 3 },
+            ApiKey::OffsetCommitKey => VersionRange { min: 0, max: 9 },
+            ApiKey::OffsetFetchKey => VersionRange { min: 0, max: 9 },
+            ApiKey::FindCoordinatorKey => VersionRange { min: 0, max: 5 },
+            ApiKey::JoinGroupKey => VersionRange { min: 0, max: 9 },
+            ApiKey::HeartbeatKey => VersionRange { min: 0, max: 4 },
+            ApiKey::LeaveGroupKey => VersionRange { min: 0, max: 5 },
+            ApiKey::SyncGroupKey => VersionRange { min: 0, max: 5 },
+            ApiKey::DescribeGroupsKey => VersionRange { min: 0, max: 5 },
+            ApiKey::ListGroupsKey => VersionRange { min: 0, max: 5 },
+            ApiKey::SaslHandshakeKey => VersionRange { min: 0, max: 1 },
+            ApiKey::ApiVersionsKey => VersionRange { min: 0, max: 3 },
+            ApiKey::CreateTopicsKey => VersionRange { min: 0, max: 7 },
+            ApiKey::DeleteTopicsKey => VersionRange { min: 0, max: 6 },
+            ApiKey::DeleteRecordsKey => VersionRange { min: 0, max: 2 },
+            ApiKey::InitProducerIdKey => VersionRange { min: 0, max: 5 },
+            ApiKey::OffsetForLeaderEpochKey => VersionRange { min: 0, max: 4 },
+            ApiKey::AddPartitionsToTxnKey => VersionRange { min: 0, max: 5 },
+            ApiKey::AddOffsetsToTxnKey => VersionRange { min: 0, max: 4 },
+            ApiKey::EndTxnKey => VersionRange { min: 0, max: 4 },
+            ApiKey::WriteTxnMarkersKey => VersionRange { min: 0, max: 1 },
+            ApiKey::TxnOffsetCommitKey => VersionRange { min: 0, max: 4 },
+            ApiKey::DescribeAclsKey => VersionRange { min: 0, max: 3 },
+            ApiKey::CreateAclsKey => VersionRange { min: 0, max: 3 },
+            ApiKey::DeleteAclsKey => VersionRange { min: 0, max: 3 },
+            ApiKey::DescribeConfigsKey => VersionRange { min: 0, max: 4 },
+            ApiKey::AlterConfigsKey => VersionRange { min: 0, max: 2 },
+            ApiKey::AlterReplicaLogDirsKey => VersionRange { min: 0, max: 2 },
+            ApiKey::DescribeLogDirsKey => VersionRange { min: 0, max: 4 },
+            ApiKey::SaslAuthenticateKey => VersionRange { min: 0, max: 2 },
+            ApiKey::CreatePartitionsKey => VersionRange { min: 0, max: 3 },
+            ApiKey::CreateDelegationTokenKey => VersionRange { min: 0, max: 3 },
+            ApiKey::RenewDelegationTokenKey => VersionRange { min: 0, max: 2 },
+            ApiKey::ExpireDelegationTokenKey => VersionRange { min: 0, max: 2 },
+            ApiKey::DescribeDelegationTokenKey => VersionRange { min: 0, max: 3 },
+            ApiKey::DeleteGroupsKey => VersionRange { min: 0, max: 2 },
+            ApiKey::ElectLeadersKey => VersionRange { min: 0, max: 2 },
+            ApiKey::IncrementalAlterConfigsKey => VersionRange { min: 0, max: 1 },
+            ApiKey::AlterPartitionReassignmentsKey => VersionRange { min: 0, max: 0 },
+            ApiKey::ListPartitionReassignmentsKey => VersionRange { min: 0, max: 0 },
+            ApiKey::OffsetDeleteKey => VersionRange { min: 0, max: 0 },
+            ApiKey::DescribeClientQuotasKey => VersionRange { min: 0, max: 1 },
+            ApiKey::AlterClientQuotasKey => VersionRange { min: 0, max: 1 },
+            ApiKey::DescribeUserScramCredentialsKey => VersionRange { min: 0, max: 0 },
+            ApiKey::AlterUserScramCredentialsKey => VersionRange { min: 0, max: 0 },
+            ApiKey::VoteKey => VersionRange { min: 0, max: 0 },
+            ApiKey::BeginQuorumEpochKey => VersionRange { min: 0, max: 0 },
+            ApiKey::EndQuorumEpochKey => VersionRange { min: 0, max: 0 },
+            ApiKey::DescribeQuorumKey => VersionRange { min: 0, max: 1 },
+            ApiKey::AlterPartitionKey => VersionRange { min: 0, max: 3 },
+            ApiKey::UpdateFeaturesKey => VersionRange { min: 0, max: 1 },
+            ApiKey::EnvelopeKey => VersionRange { min: 0, max: 0 },
+            ApiKey::FetchSnapshotKey => VersionRange { min: 0, max: 0 },
+            ApiKey::DescribeClusterKey => VersionRange { min: 0, max: 1 },
+            ApiKey::DescribeProducersKey => VersionRange { min: 0, max: 0 },
+            ApiKey::BrokerRegistrationKey => VersionRange { min: 0, max: 3 },
+            ApiKey::BrokerHeartbeatKey => VersionRange { min: 0, max: 1 },
+            ApiKey::UnregisterBrokerKey => VersionRange { min: 0, max: 0 },
+            ApiKey::DescribeTransactionsKey => VersionRange { min: 0, max: 0 },
+            ApiKey::ListTransactionsKey => VersionRange { min: 0, max: 1 },
+            ApiKey::AllocateProducerIdsKey => VersionRange { min: 0, max: 0 },
+            ApiKey::ConsumerGroupHeartbeatKey => VersionRange { min: 0, max: 0 },
+            ApiKey::ConsumerGroupDescribeKey => VersionRange { min: 0, max: 0 },
+            ApiKey::ControllerRegistrationKey => VersionRange { min: 0, max: 0 },
+            ApiKey::GetTelemetrySubscriptionsKey => VersionRange { min: 0, max: 0 },
+            ApiKey::PushTelemetryKey => VersionRange { min: 0, max: 0 },
+            ApiKey::AssignReplicasToDirsKey => VersionRange { min: 0, max: 0 },
+            ApiKey::ListClientMetricsResourcesKey => VersionRange { min: 0, max: 0 },
+            ApiKey::DescribeTopicPartitionsKey => VersionRange { min: 0, max: 0 },
+        }
+    }
+
+    /// Iterate through every ApiKey variant in the order of the internal code.
+    pub fn iterate_all() -> impl Iterator<Item = ApiKey> {
+        (0..i16::MAX).map_while(|i| ApiKey::try_from(i).ok())
     }
 }
 impl TryFrom<i16> for ApiKey {
