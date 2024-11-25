@@ -32,7 +32,7 @@ fn record_batch_produce_fetch() {
     ];
 
     let mut encoded = BytesMut::new();
-    RecordBatchEncoder::encode(
+    RecordBatchEncoder::encode_with_custom_compression(
         &mut encoded,
         &records,
         &RecordEncodeOptions {
@@ -67,7 +67,7 @@ fn message_set_v1_produce_fetch() {
     ];
 
     let mut encoded = BytesMut::new();
-    RecordBatchEncoder::encode(
+    RecordBatchEncoder::encode_with_custom_compression(
         &mut encoded,
         &records,
         &RecordEncodeOptions {
@@ -196,9 +196,11 @@ fn fetch_records(
     );
 
     let mut fetched_records = partition_response.records.clone().unwrap();
-    let fetched_records =
-        RecordBatchDecoder::decode(&mut fetched_records, Some(decompress_record_batch_data))
-            .unwrap();
+    let fetched_records = RecordBatchDecoder::decode_with_custom_compression(
+        &mut fetched_records,
+        Some(decompress_record_batch_data),
+    )
+    .unwrap();
 
     eprintln!("{expected:#?}");
     eprintln!("{fetched_records:#?}");
