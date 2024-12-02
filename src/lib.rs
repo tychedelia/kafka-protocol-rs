@@ -45,7 +45,7 @@
 //! let mut buf = BytesMut::new();
 //! let mut req_header = RequestHeader::default();
 //! req_header.request_api_version = 3;
-//! req_header.request_api_key = ApiKey::ApiVersionsKey as i16;
+//! req_header.request_api_key = ApiKey::ApiVersions as i16;
 //! req_header.client_id = Some(StrBytes::from_static_str("example"));
 //! req_header.encode(&mut buf, ApiVersionsRequest::header_version(req_header.request_api_version)).unwrap();
 //! let mut api_versions_req = ApiVersionsRequest::default();
@@ -76,7 +76,7 @@
 //! # let mut buf = BytesMut::new();
 //! # let mut req_header = RequestHeader::default();
 //! # req_header.request_api_version = 3;
-//! # req_header.request_api_key = ApiKey::ApiVersionsKey as i16;
+//! # req_header.request_api_key = ApiKey::ApiVersions as i16;
 //! # req_header.client_id = Some(StrBytes::from_static_str("example"));
 //! # req_header.encode(&mut buf, ApiVersionsRequest::header_version(req_header.request_api_version)).unwrap();
 //! # let mut api_versions_req = ApiVersionsRequest::default();

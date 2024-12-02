@@ -8,7 +8,7 @@ fn get_api_versions() {
 
     let version = 2;
     let header = RequestHeader::default()
-        .with_request_api_key(ApiKey::ApiVersionsKey as i16)
+        .with_request_api_key(ApiKey::ApiVersions as i16)
         .with_request_api_version(version);
 
     let request = ApiVersionsRequest::default();
