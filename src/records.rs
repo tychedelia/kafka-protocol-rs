@@ -27,7 +27,7 @@
 //! for topic in res.responses {
 //!     for partition in topic.partitions {
 //!          let mut records = partition.records.unwrap();
-//!          let records = RecordBatchDecoder::decode(&mut records, Some(decompress_record_batch_data)).unwrap();
+//!          let records = RecordBatchDecoder::decode_with_custom_compression(&mut records, Some(decompress_record_batch_data)).unwrap();
 //!     }
 //! }
 //!
@@ -158,11 +158,32 @@ const MAGIC_BYTE_OFFSET: usize = 16;
 impl RecordBatchEncoder {
     /// Encode records into given buffer, using provided encoding options that select the encoding
     /// strategy based on version.
+    pub fn encode<'a, B, I, CF>(
+        buf: &mut B,
+        records: I,
+        options: &RecordEncodeOptions,
+    ) -> Result<()>
+    where
+        B: ByteBufMut,
+        I: IntoIterator<Item = &'a Record>,
+        I::IntoIter: Clone,
+        CF: Fn(&mut BytesMut, &mut B, Compression) -> Result<()>,
+    {
+        Self::encode_with_custom_compression(
+            buf,
+            records,
+            options,
+            None::<fn(&mut BytesMut, &mut B, Compression) -> Result<()>>,
+        )
+    }
+
+    /// Encode records into given buffer, using provided encoding options that select the encoding
+    /// strategy based on version.
     /// # Arguments
     /// * `compressor` - A function that compresses the given batch of records.
     ///
     /// If `None`, the right compression algorithm will automatically be selected and applied.
-    pub fn encode<'a, B, I, CF>(
+    pub fn encode_with_custom_compression<'a, B, I, CF>(
         buf: &mut B,
         records: I,
         options: &RecordEncodeOptions,
@@ -486,11 +507,25 @@ impl RecordBatchEncoder {
 
 impl RecordBatchDecoder {
     /// Decode the provided buffer into a vec of records.
+    pub fn decode<B: ByteBuf, F>(buf: &mut B) -> Result<Vec<Record>>
+    where
+        F: Fn(&mut bytes::Bytes, Compression) -> Result<B>,
+    {
+        Self::decode_with_custom_compression(
+            buf,
+            None::<fn(&mut bytes::Bytes, Compression) -> Result<B>>,
+        )
+    }
+
+    /// Decode the provided buffer into a vec of records.
     /// # Arguments
     /// * `decompressor` - A function that decompresses the given batch of records.
     ///
     /// If `None`, the right decompression algorithm will automatically be selected and applied.
-    pub fn decode<B: ByteBuf, F>(buf: &mut B, decompressor: Option<F>) -> Result<Vec<Record>>
+    pub fn decode_with_custom_compression<B: ByteBuf, F>(
+        buf: &mut B,
+        decompressor: Option<F>,
+    ) -> Result<Vec<Record>>
     where
         F: Fn(&mut bytes::Bytes, Compression) -> Result<B>,
     {
