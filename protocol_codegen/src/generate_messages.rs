@@ -200,7 +200,7 @@ pub fn run(messages_module_dir: &str, mut input_file_paths: Vec<PathBuf>) -> Res
         writeln!(
             m,
             "ApiKey::{} => VersionRange {{ min: {}, max: {} }},",
-            request_type.replace("Request", "Key"),
+            request_type.replace("Request", ""),
             valid_versions.start(),
             valid_versions.end(),
         )?;
@@ -212,7 +212,7 @@ pub fn run(messages_module_dir: &str, mut input_file_paths: Vec<PathBuf>) -> Res
         m,
         r#"
   /// Iterate through every ApiKey variant in the order of the internal code.
-  pub fn iterate_all() -> impl Iterator<Item = ApiKey> {{
+  pub fn iter() -> impl Iterator<Item = ApiKey> {{
     (0..i16::MAX).map_while(|i| ApiKey::try_from(i).ok())
   }}
     "#
