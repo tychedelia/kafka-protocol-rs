@@ -964,265 +964,259 @@ impl Request for DescribeTopicPartitionsRequest {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ApiKey {
     /// API key for request ProduceRequest
-    ProduceKey = 0,
+    Produce = 0,
     /// API key for request FetchRequest
-    FetchKey = 1,
+    Fetch = 1,
     /// API key for request ListOffsetsRequest
-    ListOffsetsKey = 2,
+    ListOffsets = 2,
     /// API key for request MetadataRequest
-    MetadataKey = 3,
+    Metadata = 3,
     /// API key for request LeaderAndIsrRequest
-    LeaderAndIsrKey = 4,
+    LeaderAndIsr = 4,
     /// API key for request StopReplicaRequest
-    StopReplicaKey = 5,
+    StopReplica = 5,
     /// API key for request UpdateMetadataRequest
-    UpdateMetadataKey = 6,
+    UpdateMetadata = 6,
     /// API key for request ControlledShutdownRequest
-    ControlledShutdownKey = 7,
+    ControlledShutdown = 7,
     /// API key for request OffsetCommitRequest
-    OffsetCommitKey = 8,
+    OffsetCommit = 8,
     /// API key for request OffsetFetchRequest
-    OffsetFetchKey = 9,
+    OffsetFetch = 9,
     /// API key for request FindCoordinatorRequest
-    FindCoordinatorKey = 10,
+    FindCoordinator = 10,
     /// API key for request JoinGroupRequest
-    JoinGroupKey = 11,
+    JoinGroup = 11,
     /// API key for request HeartbeatRequest
-    HeartbeatKey = 12,
+    Heartbeat = 12,
     /// API key for request LeaveGroupRequest
-    LeaveGroupKey = 13,
+    LeaveGroup = 13,
     /// API key for request SyncGroupRequest
-    SyncGroupKey = 14,
+    SyncGroup = 14,
     /// API key for request DescribeGroupsRequest
-    DescribeGroupsKey = 15,
+    DescribeGroups = 15,
     /// API key for request ListGroupsRequest
-    ListGroupsKey = 16,
+    ListGroups = 16,
     /// API key for request SaslHandshakeRequest
-    SaslHandshakeKey = 17,
+    SaslHandshake = 17,
     /// API key for request ApiVersionsRequest
-    ApiVersionsKey = 18,
+    ApiVersions = 18,
     /// API key for request CreateTopicsRequest
-    CreateTopicsKey = 19,
+    CreateTopics = 19,
     /// API key for request DeleteTopicsRequest
-    DeleteTopicsKey = 20,
+    DeleteTopics = 20,
     /// API key for request DeleteRecordsRequest
-    DeleteRecordsKey = 21,
+    DeleteRecords = 21,
     /// API key for request InitProducerIdRequest
-    InitProducerIdKey = 22,
+    InitProducerId = 22,
     /// API key for request OffsetForLeaderEpochRequest
-    OffsetForLeaderEpochKey = 23,
+    OffsetForLeaderEpoch = 23,
     /// API key for request AddPartitionsToTxnRequest
-    AddPartitionsToTxnKey = 24,
+    AddPartitionsToTxn = 24,
     /// API key for request AddOffsetsToTxnRequest
-    AddOffsetsToTxnKey = 25,
+    AddOffsetsToTxn = 25,
     /// API key for request EndTxnRequest
-    EndTxnKey = 26,
+    EndTxn = 26,
     /// API key for request WriteTxnMarkersRequest
-    WriteTxnMarkersKey = 27,
+    WriteTxnMarkers = 27,
     /// API key for request TxnOffsetCommitRequest
-    TxnOffsetCommitKey = 28,
+    TxnOffsetCommit = 28,
     /// API key for request DescribeAclsRequest
-    DescribeAclsKey = 29,
+    DescribeAcls = 29,
     /// API key for request CreateAclsRequest
-    CreateAclsKey = 30,
+    CreateAcls = 30,
     /// API key for request DeleteAclsRequest
-    DeleteAclsKey = 31,
+    DeleteAcls = 31,
     /// API key for request DescribeConfigsRequest
-    DescribeConfigsKey = 32,
+    DescribeConfigs = 32,
     /// API key for request AlterConfigsRequest
-    AlterConfigsKey = 33,
+    AlterConfigs = 33,
     /// API key for request AlterReplicaLogDirsRequest
-    AlterReplicaLogDirsKey = 34,
+    AlterReplicaLogDirs = 34,
     /// API key for request DescribeLogDirsRequest
-    DescribeLogDirsKey = 35,
+    DescribeLogDirs = 35,
     /// API key for request SaslAuthenticateRequest
-    SaslAuthenticateKey = 36,
+    SaslAuthenticate = 36,
     /// API key for request CreatePartitionsRequest
-    CreatePartitionsKey = 37,
+    CreatePartitions = 37,
     /// API key for request CreateDelegationTokenRequest
-    CreateDelegationTokenKey = 38,
+    CreateDelegationToken = 38,
     /// API key for request RenewDelegationTokenRequest
-    RenewDelegationTokenKey = 39,
+    RenewDelegationToken = 39,
     /// API key for request ExpireDelegationTokenRequest
-    ExpireDelegationTokenKey = 40,
+    ExpireDelegationToken = 40,
     /// API key for request DescribeDelegationTokenRequest
-    DescribeDelegationTokenKey = 41,
+    DescribeDelegationToken = 41,
     /// API key for request DeleteGroupsRequest
-    DeleteGroupsKey = 42,
+    DeleteGroups = 42,
     /// API key for request ElectLeadersRequest
-    ElectLeadersKey = 43,
+    ElectLeaders = 43,
     /// API key for request IncrementalAlterConfigsRequest
-    IncrementalAlterConfigsKey = 44,
+    IncrementalAlterConfigs = 44,
     /// API key for request AlterPartitionReassignmentsRequest
-    AlterPartitionReassignmentsKey = 45,
+    AlterPartitionReassignments = 45,
     /// API key for request ListPartitionReassignmentsRequest
-    ListPartitionReassignmentsKey = 46,
+    ListPartitionReassignments = 46,
     /// API key for request OffsetDeleteRequest
-    OffsetDeleteKey = 47,
+    OffsetDelete = 47,
     /// API key for request DescribeClientQuotasRequest
-    DescribeClientQuotasKey = 48,
+    DescribeClientQuotas = 48,
     /// API key for request AlterClientQuotasRequest
-    AlterClientQuotasKey = 49,
+    AlterClientQuotas = 49,
     /// API key for request DescribeUserScramCredentialsRequest
-    DescribeUserScramCredentialsKey = 50,
+    DescribeUserScramCredentials = 50,
     /// API key for request AlterUserScramCredentialsRequest
-    AlterUserScramCredentialsKey = 51,
+    AlterUserScramCredentials = 51,
     /// API key for request VoteRequest
-    VoteKey = 52,
+    Vote = 52,
     /// API key for request BeginQuorumEpochRequest
-    BeginQuorumEpochKey = 53,
+    BeginQuorumEpoch = 53,
     /// API key for request EndQuorumEpochRequest
-    EndQuorumEpochKey = 54,
+    EndQuorumEpoch = 54,
     /// API key for request DescribeQuorumRequest
-    DescribeQuorumKey = 55,
+    DescribeQuorum = 55,
     /// API key for request AlterPartitionRequest
-    AlterPartitionKey = 56,
+    AlterPartition = 56,
     /// API key for request UpdateFeaturesRequest
-    UpdateFeaturesKey = 57,
+    UpdateFeatures = 57,
     /// API key for request EnvelopeRequest
-    EnvelopeKey = 58,
+    Envelope = 58,
     /// API key for request FetchSnapshotRequest
-    FetchSnapshotKey = 59,
+    FetchSnapshot = 59,
     /// API key for request DescribeClusterRequest
-    DescribeClusterKey = 60,
+    DescribeCluster = 60,
     /// API key for request DescribeProducersRequest
-    DescribeProducersKey = 61,
+    DescribeProducers = 61,
     /// API key for request BrokerRegistrationRequest
-    BrokerRegistrationKey = 62,
+    BrokerRegistration = 62,
     /// API key for request BrokerHeartbeatRequest
-    BrokerHeartbeatKey = 63,
+    BrokerHeartbeat = 63,
     /// API key for request UnregisterBrokerRequest
-    UnregisterBrokerKey = 64,
+    UnregisterBroker = 64,
     /// API key for request DescribeTransactionsRequest
-    DescribeTransactionsKey = 65,
+    DescribeTransactions = 65,
     /// API key for request ListTransactionsRequest
-    ListTransactionsKey = 66,
+    ListTransactions = 66,
     /// API key for request AllocateProducerIdsRequest
-    AllocateProducerIdsKey = 67,
+    AllocateProducerIds = 67,
     /// API key for request ConsumerGroupHeartbeatRequest
-    ConsumerGroupHeartbeatKey = 68,
+    ConsumerGroupHeartbeat = 68,
     /// API key for request ConsumerGroupDescribeRequest
-    ConsumerGroupDescribeKey = 69,
+    ConsumerGroupDescribe = 69,
     /// API key for request ControllerRegistrationRequest
-    ControllerRegistrationKey = 70,
+    ControllerRegistration = 70,
     /// API key for request GetTelemetrySubscriptionsRequest
-    GetTelemetrySubscriptionsKey = 71,
+    GetTelemetrySubscriptions = 71,
     /// API key for request PushTelemetryRequest
-    PushTelemetryKey = 72,
+    PushTelemetry = 72,
     /// API key for request AssignReplicasToDirsRequest
-    AssignReplicasToDirsKey = 73,
+    AssignReplicasToDirs = 73,
     /// API key for request ListClientMetricsResourcesRequest
-    ListClientMetricsResourcesKey = 74,
+    ListClientMetricsResources = 74,
     /// API key for request DescribeTopicPartitionsRequest
-    DescribeTopicPartitionsKey = 75,
+    DescribeTopicPartitions = 75,
 }
 
 impl ApiKey {
     /// Get the version of request header that needs to be prepended to this message
     pub fn request_header_version(&self, version: i16) -> i16 {
         match self {
-            ApiKey::ProduceKey => ProduceRequest::header_version(version),
-            ApiKey::FetchKey => FetchRequest::header_version(version),
-            ApiKey::ListOffsetsKey => ListOffsetsRequest::header_version(version),
-            ApiKey::MetadataKey => MetadataRequest::header_version(version),
-            ApiKey::LeaderAndIsrKey => LeaderAndIsrRequest::header_version(version),
-            ApiKey::StopReplicaKey => StopReplicaRequest::header_version(version),
-            ApiKey::UpdateMetadataKey => UpdateMetadataRequest::header_version(version),
-            ApiKey::ControlledShutdownKey => ControlledShutdownRequest::header_version(version),
-            ApiKey::OffsetCommitKey => OffsetCommitRequest::header_version(version),
-            ApiKey::OffsetFetchKey => OffsetFetchRequest::header_version(version),
-            ApiKey::FindCoordinatorKey => FindCoordinatorRequest::header_version(version),
-            ApiKey::JoinGroupKey => JoinGroupRequest::header_version(version),
-            ApiKey::HeartbeatKey => HeartbeatRequest::header_version(version),
-            ApiKey::LeaveGroupKey => LeaveGroupRequest::header_version(version),
-            ApiKey::SyncGroupKey => SyncGroupRequest::header_version(version),
-            ApiKey::DescribeGroupsKey => DescribeGroupsRequest::header_version(version),
-            ApiKey::ListGroupsKey => ListGroupsRequest::header_version(version),
-            ApiKey::SaslHandshakeKey => SaslHandshakeRequest::header_version(version),
-            ApiKey::ApiVersionsKey => ApiVersionsRequest::header_version(version),
-            ApiKey::CreateTopicsKey => CreateTopicsRequest::header_version(version),
-            ApiKey::DeleteTopicsKey => DeleteTopicsRequest::header_version(version),
-            ApiKey::DeleteRecordsKey => DeleteRecordsRequest::header_version(version),
-            ApiKey::InitProducerIdKey => InitProducerIdRequest::header_version(version),
-            ApiKey::OffsetForLeaderEpochKey => OffsetForLeaderEpochRequest::header_version(version),
-            ApiKey::AddPartitionsToTxnKey => AddPartitionsToTxnRequest::header_version(version),
-            ApiKey::AddOffsetsToTxnKey => AddOffsetsToTxnRequest::header_version(version),
-            ApiKey::EndTxnKey => EndTxnRequest::header_version(version),
-            ApiKey::WriteTxnMarkersKey => WriteTxnMarkersRequest::header_version(version),
-            ApiKey::TxnOffsetCommitKey => TxnOffsetCommitRequest::header_version(version),
-            ApiKey::DescribeAclsKey => DescribeAclsRequest::header_version(version),
-            ApiKey::CreateAclsKey => CreateAclsRequest::header_version(version),
-            ApiKey::DeleteAclsKey => DeleteAclsRequest::header_version(version),
-            ApiKey::DescribeConfigsKey => DescribeConfigsRequest::header_version(version),
-            ApiKey::AlterConfigsKey => AlterConfigsRequest::header_version(version),
-            ApiKey::AlterReplicaLogDirsKey => AlterReplicaLogDirsRequest::header_version(version),
-            ApiKey::DescribeLogDirsKey => DescribeLogDirsRequest::header_version(version),
-            ApiKey::SaslAuthenticateKey => SaslAuthenticateRequest::header_version(version),
-            ApiKey::CreatePartitionsKey => CreatePartitionsRequest::header_version(version),
-            ApiKey::CreateDelegationTokenKey => {
-                CreateDelegationTokenRequest::header_version(version)
-            }
-            ApiKey::RenewDelegationTokenKey => RenewDelegationTokenRequest::header_version(version),
-            ApiKey::ExpireDelegationTokenKey => {
-                ExpireDelegationTokenRequest::header_version(version)
-            }
-            ApiKey::DescribeDelegationTokenKey => {
+            ApiKey::Produce => ProduceRequest::header_version(version),
+            ApiKey::Fetch => FetchRequest::header_version(version),
+            ApiKey::ListOffsets => ListOffsetsRequest::header_version(version),
+            ApiKey::Metadata => MetadataRequest::header_version(version),
+            ApiKey::LeaderAndIsr => LeaderAndIsrRequest::header_version(version),
+            ApiKey::StopReplica => StopReplicaRequest::header_version(version),
+            ApiKey::UpdateMetadata => UpdateMetadataRequest::header_version(version),
+            ApiKey::ControlledShutdown => ControlledShutdownRequest::header_version(version),
+            ApiKey::OffsetCommit => OffsetCommitRequest::header_version(version),
+            ApiKey::OffsetFetch => OffsetFetchRequest::header_version(version),
+            ApiKey::FindCoordinator => FindCoordinatorRequest::header_version(version),
+            ApiKey::JoinGroup => JoinGroupRequest::header_version(version),
+            ApiKey::Heartbeat => HeartbeatRequest::header_version(version),
+            ApiKey::LeaveGroup => LeaveGroupRequest::header_version(version),
+            ApiKey::SyncGroup => SyncGroupRequest::header_version(version),
+            ApiKey::DescribeGroups => DescribeGroupsRequest::header_version(version),
+            ApiKey::ListGroups => ListGroupsRequest::header_version(version),
+            ApiKey::SaslHandshake => SaslHandshakeRequest::header_version(version),
+            ApiKey::ApiVersions => ApiVersionsRequest::header_version(version),
+            ApiKey::CreateTopics => CreateTopicsRequest::header_version(version),
+            ApiKey::DeleteTopics => DeleteTopicsRequest::header_version(version),
+            ApiKey::DeleteRecords => DeleteRecordsRequest::header_version(version),
+            ApiKey::InitProducerId => InitProducerIdRequest::header_version(version),
+            ApiKey::OffsetForLeaderEpoch => OffsetForLeaderEpochRequest::header_version(version),
+            ApiKey::AddPartitionsToTxn => AddPartitionsToTxnRequest::header_version(version),
+            ApiKey::AddOffsetsToTxn => AddOffsetsToTxnRequest::header_version(version),
+            ApiKey::EndTxn => EndTxnRequest::header_version(version),
+            ApiKey::WriteTxnMarkers => WriteTxnMarkersRequest::header_version(version),
+            ApiKey::TxnOffsetCommit => TxnOffsetCommitRequest::header_version(version),
+            ApiKey::DescribeAcls => DescribeAclsRequest::header_version(version),
+            ApiKey::CreateAcls => CreateAclsRequest::header_version(version),
+            ApiKey::DeleteAcls => DeleteAclsRequest::header_version(version),
+            ApiKey::DescribeConfigs => DescribeConfigsRequest::header_version(version),
+            ApiKey::AlterConfigs => AlterConfigsRequest::header_version(version),
+            ApiKey::AlterReplicaLogDirs => AlterReplicaLogDirsRequest::header_version(version),
+            ApiKey::DescribeLogDirs => DescribeLogDirsRequest::header_version(version),
+            ApiKey::SaslAuthenticate => SaslAuthenticateRequest::header_version(version),
+            ApiKey::CreatePartitions => CreatePartitionsRequest::header_version(version),
+            ApiKey::CreateDelegationToken => CreateDelegationTokenRequest::header_version(version),
+            ApiKey::RenewDelegationToken => RenewDelegationTokenRequest::header_version(version),
+            ApiKey::ExpireDelegationToken => ExpireDelegationTokenRequest::header_version(version),
+            ApiKey::DescribeDelegationToken => {
                 DescribeDelegationTokenRequest::header_version(version)
             }
-            ApiKey::DeleteGroupsKey => DeleteGroupsRequest::header_version(version),
-            ApiKey::ElectLeadersKey => ElectLeadersRequest::header_version(version),
-            ApiKey::IncrementalAlterConfigsKey => {
+            ApiKey::DeleteGroups => DeleteGroupsRequest::header_version(version),
+            ApiKey::ElectLeaders => ElectLeadersRequest::header_version(version),
+            ApiKey::IncrementalAlterConfigs => {
                 IncrementalAlterConfigsRequest::header_version(version)
             }
-            ApiKey::AlterPartitionReassignmentsKey => {
+            ApiKey::AlterPartitionReassignments => {
                 AlterPartitionReassignmentsRequest::header_version(version)
             }
-            ApiKey::ListPartitionReassignmentsKey => {
+            ApiKey::ListPartitionReassignments => {
                 ListPartitionReassignmentsRequest::header_version(version)
             }
-            ApiKey::OffsetDeleteKey => OffsetDeleteRequest::header_version(version),
-            ApiKey::DescribeClientQuotasKey => DescribeClientQuotasRequest::header_version(version),
-            ApiKey::AlterClientQuotasKey => AlterClientQuotasRequest::header_version(version),
-            ApiKey::DescribeUserScramCredentialsKey => {
+            ApiKey::OffsetDelete => OffsetDeleteRequest::header_version(version),
+            ApiKey::DescribeClientQuotas => DescribeClientQuotasRequest::header_version(version),
+            ApiKey::AlterClientQuotas => AlterClientQuotasRequest::header_version(version),
+            ApiKey::DescribeUserScramCredentials => {
                 DescribeUserScramCredentialsRequest::header_version(version)
             }
-            ApiKey::AlterUserScramCredentialsKey => {
+            ApiKey::AlterUserScramCredentials => {
                 AlterUserScramCredentialsRequest::header_version(version)
             }
-            ApiKey::VoteKey => VoteRequest::header_version(version),
-            ApiKey::BeginQuorumEpochKey => BeginQuorumEpochRequest::header_version(version),
-            ApiKey::EndQuorumEpochKey => EndQuorumEpochRequest::header_version(version),
-            ApiKey::DescribeQuorumKey => DescribeQuorumRequest::header_version(version),
-            ApiKey::AlterPartitionKey => AlterPartitionRequest::header_version(version),
-            ApiKey::UpdateFeaturesKey => UpdateFeaturesRequest::header_version(version),
-            ApiKey::EnvelopeKey => EnvelopeRequest::header_version(version),
-            ApiKey::FetchSnapshotKey => FetchSnapshotRequest::header_version(version),
-            ApiKey::DescribeClusterKey => DescribeClusterRequest::header_version(version),
-            ApiKey::DescribeProducersKey => DescribeProducersRequest::header_version(version),
-            ApiKey::BrokerRegistrationKey => BrokerRegistrationRequest::header_version(version),
-            ApiKey::BrokerHeartbeatKey => BrokerHeartbeatRequest::header_version(version),
-            ApiKey::UnregisterBrokerKey => UnregisterBrokerRequest::header_version(version),
-            ApiKey::DescribeTransactionsKey => DescribeTransactionsRequest::header_version(version),
-            ApiKey::ListTransactionsKey => ListTransactionsRequest::header_version(version),
-            ApiKey::AllocateProducerIdsKey => AllocateProducerIdsRequest::header_version(version),
-            ApiKey::ConsumerGroupHeartbeatKey => {
+            ApiKey::Vote => VoteRequest::header_version(version),
+            ApiKey::BeginQuorumEpoch => BeginQuorumEpochRequest::header_version(version),
+            ApiKey::EndQuorumEpoch => EndQuorumEpochRequest::header_version(version),
+            ApiKey::DescribeQuorum => DescribeQuorumRequest::header_version(version),
+            ApiKey::AlterPartition => AlterPartitionRequest::header_version(version),
+            ApiKey::UpdateFeatures => UpdateFeaturesRequest::header_version(version),
+            ApiKey::Envelope => EnvelopeRequest::header_version(version),
+            ApiKey::FetchSnapshot => FetchSnapshotRequest::header_version(version),
+            ApiKey::DescribeCluster => DescribeClusterRequest::header_version(version),
+            ApiKey::DescribeProducers => DescribeProducersRequest::header_version(version),
+            ApiKey::BrokerRegistration => BrokerRegistrationRequest::header_version(version),
+            ApiKey::BrokerHeartbeat => BrokerHeartbeatRequest::header_version(version),
+            ApiKey::UnregisterBroker => UnregisterBrokerRequest::header_version(version),
+            ApiKey::DescribeTransactions => DescribeTransactionsRequest::header_version(version),
+            ApiKey::ListTransactions => ListTransactionsRequest::header_version(version),
+            ApiKey::AllocateProducerIds => AllocateProducerIdsRequest::header_version(version),
+            ApiKey::ConsumerGroupHeartbeat => {
                 ConsumerGroupHeartbeatRequest::header_version(version)
             }
-            ApiKey::ConsumerGroupDescribeKey => {
-                ConsumerGroupDescribeRequest::header_version(version)
-            }
-            ApiKey::ControllerRegistrationKey => {
+            ApiKey::ConsumerGroupDescribe => ConsumerGroupDescribeRequest::header_version(version),
+            ApiKey::ControllerRegistration => {
                 ControllerRegistrationRequest::header_version(version)
             }
-            ApiKey::GetTelemetrySubscriptionsKey => {
+            ApiKey::GetTelemetrySubscriptions => {
                 GetTelemetrySubscriptionsRequest::header_version(version)
             }
-            ApiKey::PushTelemetryKey => PushTelemetryRequest::header_version(version),
-            ApiKey::AssignReplicasToDirsKey => AssignReplicasToDirsRequest::header_version(version),
-            ApiKey::ListClientMetricsResourcesKey => {
+            ApiKey::PushTelemetry => PushTelemetryRequest::header_version(version),
+            ApiKey::AssignReplicasToDirs => AssignReplicasToDirsRequest::header_version(version),
+            ApiKey::ListClientMetricsResources => {
                 ListClientMetricsResourcesRequest::header_version(version)
             }
-            ApiKey::DescribeTopicPartitionsKey => {
+            ApiKey::DescribeTopicPartitions => {
                 DescribeTopicPartitionsRequest::header_version(version)
             }
         }
@@ -1230,118 +1224,102 @@ impl ApiKey {
     /// Get the version of response header that needs to be prepended to this message
     pub fn response_header_version(&self, version: i16) -> i16 {
         match self {
-            ApiKey::ProduceKey => ProduceResponse::header_version(version),
-            ApiKey::FetchKey => FetchResponse::header_version(version),
-            ApiKey::ListOffsetsKey => ListOffsetsResponse::header_version(version),
-            ApiKey::MetadataKey => MetadataResponse::header_version(version),
-            ApiKey::LeaderAndIsrKey => LeaderAndIsrResponse::header_version(version),
-            ApiKey::StopReplicaKey => StopReplicaResponse::header_version(version),
-            ApiKey::UpdateMetadataKey => UpdateMetadataResponse::header_version(version),
-            ApiKey::ControlledShutdownKey => ControlledShutdownResponse::header_version(version),
-            ApiKey::OffsetCommitKey => OffsetCommitResponse::header_version(version),
-            ApiKey::OffsetFetchKey => OffsetFetchResponse::header_version(version),
-            ApiKey::FindCoordinatorKey => FindCoordinatorResponse::header_version(version),
-            ApiKey::JoinGroupKey => JoinGroupResponse::header_version(version),
-            ApiKey::HeartbeatKey => HeartbeatResponse::header_version(version),
-            ApiKey::LeaveGroupKey => LeaveGroupResponse::header_version(version),
-            ApiKey::SyncGroupKey => SyncGroupResponse::header_version(version),
-            ApiKey::DescribeGroupsKey => DescribeGroupsResponse::header_version(version),
-            ApiKey::ListGroupsKey => ListGroupsResponse::header_version(version),
-            ApiKey::SaslHandshakeKey => SaslHandshakeResponse::header_version(version),
-            ApiKey::ApiVersionsKey => ApiVersionsResponse::header_version(version),
-            ApiKey::CreateTopicsKey => CreateTopicsResponse::header_version(version),
-            ApiKey::DeleteTopicsKey => DeleteTopicsResponse::header_version(version),
-            ApiKey::DeleteRecordsKey => DeleteRecordsResponse::header_version(version),
-            ApiKey::InitProducerIdKey => InitProducerIdResponse::header_version(version),
-            ApiKey::OffsetForLeaderEpochKey => {
-                OffsetForLeaderEpochResponse::header_version(version)
-            }
-            ApiKey::AddPartitionsToTxnKey => AddPartitionsToTxnResponse::header_version(version),
-            ApiKey::AddOffsetsToTxnKey => AddOffsetsToTxnResponse::header_version(version),
-            ApiKey::EndTxnKey => EndTxnResponse::header_version(version),
-            ApiKey::WriteTxnMarkersKey => WriteTxnMarkersResponse::header_version(version),
-            ApiKey::TxnOffsetCommitKey => TxnOffsetCommitResponse::header_version(version),
-            ApiKey::DescribeAclsKey => DescribeAclsResponse::header_version(version),
-            ApiKey::CreateAclsKey => CreateAclsResponse::header_version(version),
-            ApiKey::DeleteAclsKey => DeleteAclsResponse::header_version(version),
-            ApiKey::DescribeConfigsKey => DescribeConfigsResponse::header_version(version),
-            ApiKey::AlterConfigsKey => AlterConfigsResponse::header_version(version),
-            ApiKey::AlterReplicaLogDirsKey => AlterReplicaLogDirsResponse::header_version(version),
-            ApiKey::DescribeLogDirsKey => DescribeLogDirsResponse::header_version(version),
-            ApiKey::SaslAuthenticateKey => SaslAuthenticateResponse::header_version(version),
-            ApiKey::CreatePartitionsKey => CreatePartitionsResponse::header_version(version),
-            ApiKey::CreateDelegationTokenKey => {
-                CreateDelegationTokenResponse::header_version(version)
-            }
-            ApiKey::RenewDelegationTokenKey => {
-                RenewDelegationTokenResponse::header_version(version)
-            }
-            ApiKey::ExpireDelegationTokenKey => {
-                ExpireDelegationTokenResponse::header_version(version)
-            }
-            ApiKey::DescribeDelegationTokenKey => {
+            ApiKey::Produce => ProduceResponse::header_version(version),
+            ApiKey::Fetch => FetchResponse::header_version(version),
+            ApiKey::ListOffsets => ListOffsetsResponse::header_version(version),
+            ApiKey::Metadata => MetadataResponse::header_version(version),
+            ApiKey::LeaderAndIsr => LeaderAndIsrResponse::header_version(version),
+            ApiKey::StopReplica => StopReplicaResponse::header_version(version),
+            ApiKey::UpdateMetadata => UpdateMetadataResponse::header_version(version),
+            ApiKey::ControlledShutdown => ControlledShutdownResponse::header_version(version),
+            ApiKey::OffsetCommit => OffsetCommitResponse::header_version(version),
+            ApiKey::OffsetFetch => OffsetFetchResponse::header_version(version),
+            ApiKey::FindCoordinator => FindCoordinatorResponse::header_version(version),
+            ApiKey::JoinGroup => JoinGroupResponse::header_version(version),
+            ApiKey::Heartbeat => HeartbeatResponse::header_version(version),
+            ApiKey::LeaveGroup => LeaveGroupResponse::header_version(version),
+            ApiKey::SyncGroup => SyncGroupResponse::header_version(version),
+            ApiKey::DescribeGroups => DescribeGroupsResponse::header_version(version),
+            ApiKey::ListGroups => ListGroupsResponse::header_version(version),
+            ApiKey::SaslHandshake => SaslHandshakeResponse::header_version(version),
+            ApiKey::ApiVersions => ApiVersionsResponse::header_version(version),
+            ApiKey::CreateTopics => CreateTopicsResponse::header_version(version),
+            ApiKey::DeleteTopics => DeleteTopicsResponse::header_version(version),
+            ApiKey::DeleteRecords => DeleteRecordsResponse::header_version(version),
+            ApiKey::InitProducerId => InitProducerIdResponse::header_version(version),
+            ApiKey::OffsetForLeaderEpoch => OffsetForLeaderEpochResponse::header_version(version),
+            ApiKey::AddPartitionsToTxn => AddPartitionsToTxnResponse::header_version(version),
+            ApiKey::AddOffsetsToTxn => AddOffsetsToTxnResponse::header_version(version),
+            ApiKey::EndTxn => EndTxnResponse::header_version(version),
+            ApiKey::WriteTxnMarkers => WriteTxnMarkersResponse::header_version(version),
+            ApiKey::TxnOffsetCommit => TxnOffsetCommitResponse::header_version(version),
+            ApiKey::DescribeAcls => DescribeAclsResponse::header_version(version),
+            ApiKey::CreateAcls => CreateAclsResponse::header_version(version),
+            ApiKey::DeleteAcls => DeleteAclsResponse::header_version(version),
+            ApiKey::DescribeConfigs => DescribeConfigsResponse::header_version(version),
+            ApiKey::AlterConfigs => AlterConfigsResponse::header_version(version),
+            ApiKey::AlterReplicaLogDirs => AlterReplicaLogDirsResponse::header_version(version),
+            ApiKey::DescribeLogDirs => DescribeLogDirsResponse::header_version(version),
+            ApiKey::SaslAuthenticate => SaslAuthenticateResponse::header_version(version),
+            ApiKey::CreatePartitions => CreatePartitionsResponse::header_version(version),
+            ApiKey::CreateDelegationToken => CreateDelegationTokenResponse::header_version(version),
+            ApiKey::RenewDelegationToken => RenewDelegationTokenResponse::header_version(version),
+            ApiKey::ExpireDelegationToken => ExpireDelegationTokenResponse::header_version(version),
+            ApiKey::DescribeDelegationToken => {
                 DescribeDelegationTokenResponse::header_version(version)
             }
-            ApiKey::DeleteGroupsKey => DeleteGroupsResponse::header_version(version),
-            ApiKey::ElectLeadersKey => ElectLeadersResponse::header_version(version),
-            ApiKey::IncrementalAlterConfigsKey => {
+            ApiKey::DeleteGroups => DeleteGroupsResponse::header_version(version),
+            ApiKey::ElectLeaders => ElectLeadersResponse::header_version(version),
+            ApiKey::IncrementalAlterConfigs => {
                 IncrementalAlterConfigsResponse::header_version(version)
             }
-            ApiKey::AlterPartitionReassignmentsKey => {
+            ApiKey::AlterPartitionReassignments => {
                 AlterPartitionReassignmentsResponse::header_version(version)
             }
-            ApiKey::ListPartitionReassignmentsKey => {
+            ApiKey::ListPartitionReassignments => {
                 ListPartitionReassignmentsResponse::header_version(version)
             }
-            ApiKey::OffsetDeleteKey => OffsetDeleteResponse::header_version(version),
-            ApiKey::DescribeClientQuotasKey => {
-                DescribeClientQuotasResponse::header_version(version)
-            }
-            ApiKey::AlterClientQuotasKey => AlterClientQuotasResponse::header_version(version),
-            ApiKey::DescribeUserScramCredentialsKey => {
+            ApiKey::OffsetDelete => OffsetDeleteResponse::header_version(version),
+            ApiKey::DescribeClientQuotas => DescribeClientQuotasResponse::header_version(version),
+            ApiKey::AlterClientQuotas => AlterClientQuotasResponse::header_version(version),
+            ApiKey::DescribeUserScramCredentials => {
                 DescribeUserScramCredentialsResponse::header_version(version)
             }
-            ApiKey::AlterUserScramCredentialsKey => {
+            ApiKey::AlterUserScramCredentials => {
                 AlterUserScramCredentialsResponse::header_version(version)
             }
-            ApiKey::VoteKey => VoteResponse::header_version(version),
-            ApiKey::BeginQuorumEpochKey => BeginQuorumEpochResponse::header_version(version),
-            ApiKey::EndQuorumEpochKey => EndQuorumEpochResponse::header_version(version),
-            ApiKey::DescribeQuorumKey => DescribeQuorumResponse::header_version(version),
-            ApiKey::AlterPartitionKey => AlterPartitionResponse::header_version(version),
-            ApiKey::UpdateFeaturesKey => UpdateFeaturesResponse::header_version(version),
-            ApiKey::EnvelopeKey => EnvelopeResponse::header_version(version),
-            ApiKey::FetchSnapshotKey => FetchSnapshotResponse::header_version(version),
-            ApiKey::DescribeClusterKey => DescribeClusterResponse::header_version(version),
-            ApiKey::DescribeProducersKey => DescribeProducersResponse::header_version(version),
-            ApiKey::BrokerRegistrationKey => BrokerRegistrationResponse::header_version(version),
-            ApiKey::BrokerHeartbeatKey => BrokerHeartbeatResponse::header_version(version),
-            ApiKey::UnregisterBrokerKey => UnregisterBrokerResponse::header_version(version),
-            ApiKey::DescribeTransactionsKey => {
-                DescribeTransactionsResponse::header_version(version)
-            }
-            ApiKey::ListTransactionsKey => ListTransactionsResponse::header_version(version),
-            ApiKey::AllocateProducerIdsKey => AllocateProducerIdsResponse::header_version(version),
-            ApiKey::ConsumerGroupHeartbeatKey => {
+            ApiKey::Vote => VoteResponse::header_version(version),
+            ApiKey::BeginQuorumEpoch => BeginQuorumEpochResponse::header_version(version),
+            ApiKey::EndQuorumEpoch => EndQuorumEpochResponse::header_version(version),
+            ApiKey::DescribeQuorum => DescribeQuorumResponse::header_version(version),
+            ApiKey::AlterPartition => AlterPartitionResponse::header_version(version),
+            ApiKey::UpdateFeatures => UpdateFeaturesResponse::header_version(version),
+            ApiKey::Envelope => EnvelopeResponse::header_version(version),
+            ApiKey::FetchSnapshot => FetchSnapshotResponse::header_version(version),
+            ApiKey::DescribeCluster => DescribeClusterResponse::header_version(version),
+            ApiKey::DescribeProducers => DescribeProducersResponse::header_version(version),
+            ApiKey::BrokerRegistration => BrokerRegistrationResponse::header_version(version),
+            ApiKey::BrokerHeartbeat => BrokerHeartbeatResponse::header_version(version),
+            ApiKey::UnregisterBroker => UnregisterBrokerResponse::header_version(version),
+            ApiKey::DescribeTransactions => DescribeTransactionsResponse::header_version(version),
+            ApiKey::ListTransactions => ListTransactionsResponse::header_version(version),
+            ApiKey::AllocateProducerIds => AllocateProducerIdsResponse::header_version(version),
+            ApiKey::ConsumerGroupHeartbeat => {
                 ConsumerGroupHeartbeatResponse::header_version(version)
             }
-            ApiKey::ConsumerGroupDescribeKey => {
-                ConsumerGroupDescribeResponse::header_version(version)
-            }
-            ApiKey::ControllerRegistrationKey => {
+            ApiKey::ConsumerGroupDescribe => ConsumerGroupDescribeResponse::header_version(version),
+            ApiKey::ControllerRegistration => {
                 ControllerRegistrationResponse::header_version(version)
             }
-            ApiKey::GetTelemetrySubscriptionsKey => {
+            ApiKey::GetTelemetrySubscriptions => {
                 GetTelemetrySubscriptionsResponse::header_version(version)
             }
-            ApiKey::PushTelemetryKey => PushTelemetryResponse::header_version(version),
-            ApiKey::AssignReplicasToDirsKey => {
-                AssignReplicasToDirsResponse::header_version(version)
-            }
-            ApiKey::ListClientMetricsResourcesKey => {
+            ApiKey::PushTelemetry => PushTelemetryResponse::header_version(version),
+            ApiKey::AssignReplicasToDirs => AssignReplicasToDirsResponse::header_version(version),
+            ApiKey::ListClientMetricsResources => {
                 ListClientMetricsResourcesResponse::header_version(version)
             }
-            ApiKey::DescribeTopicPartitionsKey => {
+            ApiKey::DescribeTopicPartitions => {
                 DescribeTopicPartitionsResponse::header_version(version)
             }
         }
@@ -1352,110 +1330,94 @@ impl TryFrom<i16> for ApiKey {
 
     fn try_from(v: i16) -> Result<Self, Self::Error> {
         match v {
-            x if x == ApiKey::ProduceKey as i16 => Ok(ApiKey::ProduceKey),
-            x if x == ApiKey::FetchKey as i16 => Ok(ApiKey::FetchKey),
-            x if x == ApiKey::ListOffsetsKey as i16 => Ok(ApiKey::ListOffsetsKey),
-            x if x == ApiKey::MetadataKey as i16 => Ok(ApiKey::MetadataKey),
-            x if x == ApiKey::LeaderAndIsrKey as i16 => Ok(ApiKey::LeaderAndIsrKey),
-            x if x == ApiKey::StopReplicaKey as i16 => Ok(ApiKey::StopReplicaKey),
-            x if x == ApiKey::UpdateMetadataKey as i16 => Ok(ApiKey::UpdateMetadataKey),
-            x if x == ApiKey::ControlledShutdownKey as i16 => Ok(ApiKey::ControlledShutdownKey),
-            x if x == ApiKey::OffsetCommitKey as i16 => Ok(ApiKey::OffsetCommitKey),
-            x if x == ApiKey::OffsetFetchKey as i16 => Ok(ApiKey::OffsetFetchKey),
-            x if x == ApiKey::FindCoordinatorKey as i16 => Ok(ApiKey::FindCoordinatorKey),
-            x if x == ApiKey::JoinGroupKey as i16 => Ok(ApiKey::JoinGroupKey),
-            x if x == ApiKey::HeartbeatKey as i16 => Ok(ApiKey::HeartbeatKey),
-            x if x == ApiKey::LeaveGroupKey as i16 => Ok(ApiKey::LeaveGroupKey),
-            x if x == ApiKey::SyncGroupKey as i16 => Ok(ApiKey::SyncGroupKey),
-            x if x == ApiKey::DescribeGroupsKey as i16 => Ok(ApiKey::DescribeGroupsKey),
-            x if x == ApiKey::ListGroupsKey as i16 => Ok(ApiKey::ListGroupsKey),
-            x if x == ApiKey::SaslHandshakeKey as i16 => Ok(ApiKey::SaslHandshakeKey),
-            x if x == ApiKey::ApiVersionsKey as i16 => Ok(ApiKey::ApiVersionsKey),
-            x if x == ApiKey::CreateTopicsKey as i16 => Ok(ApiKey::CreateTopicsKey),
-            x if x == ApiKey::DeleteTopicsKey as i16 => Ok(ApiKey::DeleteTopicsKey),
-            x if x == ApiKey::DeleteRecordsKey as i16 => Ok(ApiKey::DeleteRecordsKey),
-            x if x == ApiKey::InitProducerIdKey as i16 => Ok(ApiKey::InitProducerIdKey),
-            x if x == ApiKey::OffsetForLeaderEpochKey as i16 => Ok(ApiKey::OffsetForLeaderEpochKey),
-            x if x == ApiKey::AddPartitionsToTxnKey as i16 => Ok(ApiKey::AddPartitionsToTxnKey),
-            x if x == ApiKey::AddOffsetsToTxnKey as i16 => Ok(ApiKey::AddOffsetsToTxnKey),
-            x if x == ApiKey::EndTxnKey as i16 => Ok(ApiKey::EndTxnKey),
-            x if x == ApiKey::WriteTxnMarkersKey as i16 => Ok(ApiKey::WriteTxnMarkersKey),
-            x if x == ApiKey::TxnOffsetCommitKey as i16 => Ok(ApiKey::TxnOffsetCommitKey),
-            x if x == ApiKey::DescribeAclsKey as i16 => Ok(ApiKey::DescribeAclsKey),
-            x if x == ApiKey::CreateAclsKey as i16 => Ok(ApiKey::CreateAclsKey),
-            x if x == ApiKey::DeleteAclsKey as i16 => Ok(ApiKey::DeleteAclsKey),
-            x if x == ApiKey::DescribeConfigsKey as i16 => Ok(ApiKey::DescribeConfigsKey),
-            x if x == ApiKey::AlterConfigsKey as i16 => Ok(ApiKey::AlterConfigsKey),
-            x if x == ApiKey::AlterReplicaLogDirsKey as i16 => Ok(ApiKey::AlterReplicaLogDirsKey),
-            x if x == ApiKey::DescribeLogDirsKey as i16 => Ok(ApiKey::DescribeLogDirsKey),
-            x if x == ApiKey::SaslAuthenticateKey as i16 => Ok(ApiKey::SaslAuthenticateKey),
-            x if x == ApiKey::CreatePartitionsKey as i16 => Ok(ApiKey::CreatePartitionsKey),
-            x if x == ApiKey::CreateDelegationTokenKey as i16 => {
-                Ok(ApiKey::CreateDelegationTokenKey)
+            x if x == ApiKey::Produce as i16 => Ok(ApiKey::Produce),
+            x if x == ApiKey::Fetch as i16 => Ok(ApiKey::Fetch),
+            x if x == ApiKey::ListOffsets as i16 => Ok(ApiKey::ListOffsets),
+            x if x == ApiKey::Metadata as i16 => Ok(ApiKey::Metadata),
+            x if x == ApiKey::LeaderAndIsr as i16 => Ok(ApiKey::LeaderAndIsr),
+            x if x == ApiKey::StopReplica as i16 => Ok(ApiKey::StopReplica),
+            x if x == ApiKey::UpdateMetadata as i16 => Ok(ApiKey::UpdateMetadata),
+            x if x == ApiKey::ControlledShutdown as i16 => Ok(ApiKey::ControlledShutdown),
+            x if x == ApiKey::OffsetCommit as i16 => Ok(ApiKey::OffsetCommit),
+            x if x == ApiKey::OffsetFetch as i16 => Ok(ApiKey::OffsetFetch),
+            x if x == ApiKey::FindCoordinator as i16 => Ok(ApiKey::FindCoordinator),
+            x if x == ApiKey::JoinGroup as i16 => Ok(ApiKey::JoinGroup),
+            x if x == ApiKey::Heartbeat as i16 => Ok(ApiKey::Heartbeat),
+            x if x == ApiKey::LeaveGroup as i16 => Ok(ApiKey::LeaveGroup),
+            x if x == ApiKey::SyncGroup as i16 => Ok(ApiKey::SyncGroup),
+            x if x == ApiKey::DescribeGroups as i16 => Ok(ApiKey::DescribeGroups),
+            x if x == ApiKey::ListGroups as i16 => Ok(ApiKey::ListGroups),
+            x if x == ApiKey::SaslHandshake as i16 => Ok(ApiKey::SaslHandshake),
+            x if x == ApiKey::ApiVersions as i16 => Ok(ApiKey::ApiVersions),
+            x if x == ApiKey::CreateTopics as i16 => Ok(ApiKey::CreateTopics),
+            x if x == ApiKey::DeleteTopics as i16 => Ok(ApiKey::DeleteTopics),
+            x if x == ApiKey::DeleteRecords as i16 => Ok(ApiKey::DeleteRecords),
+            x if x == ApiKey::InitProducerId as i16 => Ok(ApiKey::InitProducerId),
+            x if x == ApiKey::OffsetForLeaderEpoch as i16 => Ok(ApiKey::OffsetForLeaderEpoch),
+            x if x == ApiKey::AddPartitionsToTxn as i16 => Ok(ApiKey::AddPartitionsToTxn),
+            x if x == ApiKey::AddOffsetsToTxn as i16 => Ok(ApiKey::AddOffsetsToTxn),
+            x if x == ApiKey::EndTxn as i16 => Ok(ApiKey::EndTxn),
+            x if x == ApiKey::WriteTxnMarkers as i16 => Ok(ApiKey::WriteTxnMarkers),
+            x if x == ApiKey::TxnOffsetCommit as i16 => Ok(ApiKey::TxnOffsetCommit),
+            x if x == ApiKey::DescribeAcls as i16 => Ok(ApiKey::DescribeAcls),
+            x if x == ApiKey::CreateAcls as i16 => Ok(ApiKey::CreateAcls),
+            x if x == ApiKey::DeleteAcls as i16 => Ok(ApiKey::DeleteAcls),
+            x if x == ApiKey::DescribeConfigs as i16 => Ok(ApiKey::DescribeConfigs),
+            x if x == ApiKey::AlterConfigs as i16 => Ok(ApiKey::AlterConfigs),
+            x if x == ApiKey::AlterReplicaLogDirs as i16 => Ok(ApiKey::AlterReplicaLogDirs),
+            x if x == ApiKey::DescribeLogDirs as i16 => Ok(ApiKey::DescribeLogDirs),
+            x if x == ApiKey::SaslAuthenticate as i16 => Ok(ApiKey::SaslAuthenticate),
+            x if x == ApiKey::CreatePartitions as i16 => Ok(ApiKey::CreatePartitions),
+            x if x == ApiKey::CreateDelegationToken as i16 => Ok(ApiKey::CreateDelegationToken),
+            x if x == ApiKey::RenewDelegationToken as i16 => Ok(ApiKey::RenewDelegationToken),
+            x if x == ApiKey::ExpireDelegationToken as i16 => Ok(ApiKey::ExpireDelegationToken),
+            x if x == ApiKey::DescribeDelegationToken as i16 => Ok(ApiKey::DescribeDelegationToken),
+            x if x == ApiKey::DeleteGroups as i16 => Ok(ApiKey::DeleteGroups),
+            x if x == ApiKey::ElectLeaders as i16 => Ok(ApiKey::ElectLeaders),
+            x if x == ApiKey::IncrementalAlterConfigs as i16 => Ok(ApiKey::IncrementalAlterConfigs),
+            x if x == ApiKey::AlterPartitionReassignments as i16 => {
+                Ok(ApiKey::AlterPartitionReassignments)
             }
-            x if x == ApiKey::RenewDelegationTokenKey as i16 => Ok(ApiKey::RenewDelegationTokenKey),
-            x if x == ApiKey::ExpireDelegationTokenKey as i16 => {
-                Ok(ApiKey::ExpireDelegationTokenKey)
+            x if x == ApiKey::ListPartitionReassignments as i16 => {
+                Ok(ApiKey::ListPartitionReassignments)
             }
-            x if x == ApiKey::DescribeDelegationTokenKey as i16 => {
-                Ok(ApiKey::DescribeDelegationTokenKey)
+            x if x == ApiKey::OffsetDelete as i16 => Ok(ApiKey::OffsetDelete),
+            x if x == ApiKey::DescribeClientQuotas as i16 => Ok(ApiKey::DescribeClientQuotas),
+            x if x == ApiKey::AlterClientQuotas as i16 => Ok(ApiKey::AlterClientQuotas),
+            x if x == ApiKey::DescribeUserScramCredentials as i16 => {
+                Ok(ApiKey::DescribeUserScramCredentials)
             }
-            x if x == ApiKey::DeleteGroupsKey as i16 => Ok(ApiKey::DeleteGroupsKey),
-            x if x == ApiKey::ElectLeadersKey as i16 => Ok(ApiKey::ElectLeadersKey),
-            x if x == ApiKey::IncrementalAlterConfigsKey as i16 => {
-                Ok(ApiKey::IncrementalAlterConfigsKey)
+            x if x == ApiKey::AlterUserScramCredentials as i16 => {
+                Ok(ApiKey::AlterUserScramCredentials)
             }
-            x if x == ApiKey::AlterPartitionReassignmentsKey as i16 => {
-                Ok(ApiKey::AlterPartitionReassignmentsKey)
+            x if x == ApiKey::Vote as i16 => Ok(ApiKey::Vote),
+            x if x == ApiKey::BeginQuorumEpoch as i16 => Ok(ApiKey::BeginQuorumEpoch),
+            x if x == ApiKey::EndQuorumEpoch as i16 => Ok(ApiKey::EndQuorumEpoch),
+            x if x == ApiKey::DescribeQuorum as i16 => Ok(ApiKey::DescribeQuorum),
+            x if x == ApiKey::AlterPartition as i16 => Ok(ApiKey::AlterPartition),
+            x if x == ApiKey::UpdateFeatures as i16 => Ok(ApiKey::UpdateFeatures),
+            x if x == ApiKey::Envelope as i16 => Ok(ApiKey::Envelope),
+            x if x == ApiKey::FetchSnapshot as i16 => Ok(ApiKey::FetchSnapshot),
+            x if x == ApiKey::DescribeCluster as i16 => Ok(ApiKey::DescribeCluster),
+            x if x == ApiKey::DescribeProducers as i16 => Ok(ApiKey::DescribeProducers),
+            x if x == ApiKey::BrokerRegistration as i16 => Ok(ApiKey::BrokerRegistration),
+            x if x == ApiKey::BrokerHeartbeat as i16 => Ok(ApiKey::BrokerHeartbeat),
+            x if x == ApiKey::UnregisterBroker as i16 => Ok(ApiKey::UnregisterBroker),
+            x if x == ApiKey::DescribeTransactions as i16 => Ok(ApiKey::DescribeTransactions),
+            x if x == ApiKey::ListTransactions as i16 => Ok(ApiKey::ListTransactions),
+            x if x == ApiKey::AllocateProducerIds as i16 => Ok(ApiKey::AllocateProducerIds),
+            x if x == ApiKey::ConsumerGroupHeartbeat as i16 => Ok(ApiKey::ConsumerGroupHeartbeat),
+            x if x == ApiKey::ConsumerGroupDescribe as i16 => Ok(ApiKey::ConsumerGroupDescribe),
+            x if x == ApiKey::ControllerRegistration as i16 => Ok(ApiKey::ControllerRegistration),
+            x if x == ApiKey::GetTelemetrySubscriptions as i16 => {
+                Ok(ApiKey::GetTelemetrySubscriptions)
             }
-            x if x == ApiKey::ListPartitionReassignmentsKey as i16 => {
-                Ok(ApiKey::ListPartitionReassignmentsKey)
+            x if x == ApiKey::PushTelemetry as i16 => Ok(ApiKey::PushTelemetry),
+            x if x == ApiKey::AssignReplicasToDirs as i16 => Ok(ApiKey::AssignReplicasToDirs),
+            x if x == ApiKey::ListClientMetricsResources as i16 => {
+                Ok(ApiKey::ListClientMetricsResources)
             }
-            x if x == ApiKey::OffsetDeleteKey as i16 => Ok(ApiKey::OffsetDeleteKey),
-            x if x == ApiKey::DescribeClientQuotasKey as i16 => Ok(ApiKey::DescribeClientQuotasKey),
-            x if x == ApiKey::AlterClientQuotasKey as i16 => Ok(ApiKey::AlterClientQuotasKey),
-            x if x == ApiKey::DescribeUserScramCredentialsKey as i16 => {
-                Ok(ApiKey::DescribeUserScramCredentialsKey)
-            }
-            x if x == ApiKey::AlterUserScramCredentialsKey as i16 => {
-                Ok(ApiKey::AlterUserScramCredentialsKey)
-            }
-            x if x == ApiKey::VoteKey as i16 => Ok(ApiKey::VoteKey),
-            x if x == ApiKey::BeginQuorumEpochKey as i16 => Ok(ApiKey::BeginQuorumEpochKey),
-            x if x == ApiKey::EndQuorumEpochKey as i16 => Ok(ApiKey::EndQuorumEpochKey),
-            x if x == ApiKey::DescribeQuorumKey as i16 => Ok(ApiKey::DescribeQuorumKey),
-            x if x == ApiKey::AlterPartitionKey as i16 => Ok(ApiKey::AlterPartitionKey),
-            x if x == ApiKey::UpdateFeaturesKey as i16 => Ok(ApiKey::UpdateFeaturesKey),
-            x if x == ApiKey::EnvelopeKey as i16 => Ok(ApiKey::EnvelopeKey),
-            x if x == ApiKey::FetchSnapshotKey as i16 => Ok(ApiKey::FetchSnapshotKey),
-            x if x == ApiKey::DescribeClusterKey as i16 => Ok(ApiKey::DescribeClusterKey),
-            x if x == ApiKey::DescribeProducersKey as i16 => Ok(ApiKey::DescribeProducersKey),
-            x if x == ApiKey::BrokerRegistrationKey as i16 => Ok(ApiKey::BrokerRegistrationKey),
-            x if x == ApiKey::BrokerHeartbeatKey as i16 => Ok(ApiKey::BrokerHeartbeatKey),
-            x if x == ApiKey::UnregisterBrokerKey as i16 => Ok(ApiKey::UnregisterBrokerKey),
-            x if x == ApiKey::DescribeTransactionsKey as i16 => Ok(ApiKey::DescribeTransactionsKey),
-            x if x == ApiKey::ListTransactionsKey as i16 => Ok(ApiKey::ListTransactionsKey),
-            x if x == ApiKey::AllocateProducerIdsKey as i16 => Ok(ApiKey::AllocateProducerIdsKey),
-            x if x == ApiKey::ConsumerGroupHeartbeatKey as i16 => {
-                Ok(ApiKey::ConsumerGroupHeartbeatKey)
-            }
-            x if x == ApiKey::ConsumerGroupDescribeKey as i16 => {
-                Ok(ApiKey::ConsumerGroupDescribeKey)
-            }
-            x if x == ApiKey::ControllerRegistrationKey as i16 => {
-                Ok(ApiKey::ControllerRegistrationKey)
-            }
-            x if x == ApiKey::GetTelemetrySubscriptionsKey as i16 => {
-                Ok(ApiKey::GetTelemetrySubscriptionsKey)
-            }
-            x if x == ApiKey::PushTelemetryKey as i16 => Ok(ApiKey::PushTelemetryKey),
-            x if x == ApiKey::AssignReplicasToDirsKey as i16 => Ok(ApiKey::AssignReplicasToDirsKey),
-            x if x == ApiKey::ListClientMetricsResourcesKey as i16 => {
-                Ok(ApiKey::ListClientMetricsResourcesKey)
-            }
-            x if x == ApiKey::DescribeTopicPartitionsKey as i16 => {
-                Ok(ApiKey::DescribeTopicPartitionsKey)
-            }
+            x if x == ApiKey::DescribeTopicPartitions as i16 => Ok(ApiKey::DescribeTopicPartitions),
             _ => Err(()),
         }
     }
@@ -1712,142 +1674,132 @@ impl RequestKind {
         version: i16,
     ) -> anyhow::Result<RequestKind> {
         match api_key {
-            ApiKey::ProduceKey => Ok(RequestKind::Produce(decode(bytes, version)?)),
-            ApiKey::FetchKey => Ok(RequestKind::Fetch(decode(bytes, version)?)),
-            ApiKey::ListOffsetsKey => Ok(RequestKind::ListOffsets(decode(bytes, version)?)),
-            ApiKey::MetadataKey => Ok(RequestKind::Metadata(decode(bytes, version)?)),
-            ApiKey::LeaderAndIsrKey => Ok(RequestKind::LeaderAndIsr(decode(bytes, version)?)),
-            ApiKey::StopReplicaKey => Ok(RequestKind::StopReplica(decode(bytes, version)?)),
-            ApiKey::UpdateMetadataKey => Ok(RequestKind::UpdateMetadata(decode(bytes, version)?)),
-            ApiKey::ControlledShutdownKey => {
+            ApiKey::Produce => Ok(RequestKind::Produce(decode(bytes, version)?)),
+            ApiKey::Fetch => Ok(RequestKind::Fetch(decode(bytes, version)?)),
+            ApiKey::ListOffsets => Ok(RequestKind::ListOffsets(decode(bytes, version)?)),
+            ApiKey::Metadata => Ok(RequestKind::Metadata(decode(bytes, version)?)),
+            ApiKey::LeaderAndIsr => Ok(RequestKind::LeaderAndIsr(decode(bytes, version)?)),
+            ApiKey::StopReplica => Ok(RequestKind::StopReplica(decode(bytes, version)?)),
+            ApiKey::UpdateMetadata => Ok(RequestKind::UpdateMetadata(decode(bytes, version)?)),
+            ApiKey::ControlledShutdown => {
                 Ok(RequestKind::ControlledShutdown(decode(bytes, version)?))
             }
-            ApiKey::OffsetCommitKey => Ok(RequestKind::OffsetCommit(decode(bytes, version)?)),
-            ApiKey::OffsetFetchKey => Ok(RequestKind::OffsetFetch(decode(bytes, version)?)),
-            ApiKey::FindCoordinatorKey => Ok(RequestKind::FindCoordinator(decode(bytes, version)?)),
-            ApiKey::JoinGroupKey => Ok(RequestKind::JoinGroup(decode(bytes, version)?)),
-            ApiKey::HeartbeatKey => Ok(RequestKind::Heartbeat(decode(bytes, version)?)),
-            ApiKey::LeaveGroupKey => Ok(RequestKind::LeaveGroup(decode(bytes, version)?)),
-            ApiKey::SyncGroupKey => Ok(RequestKind::SyncGroup(decode(bytes, version)?)),
-            ApiKey::DescribeGroupsKey => Ok(RequestKind::DescribeGroups(decode(bytes, version)?)),
-            ApiKey::ListGroupsKey => Ok(RequestKind::ListGroups(decode(bytes, version)?)),
-            ApiKey::SaslHandshakeKey => Ok(RequestKind::SaslHandshake(decode(bytes, version)?)),
-            ApiKey::ApiVersionsKey => Ok(RequestKind::ApiVersions(decode(bytes, version)?)),
-            ApiKey::CreateTopicsKey => Ok(RequestKind::CreateTopics(decode(bytes, version)?)),
-            ApiKey::DeleteTopicsKey => Ok(RequestKind::DeleteTopics(decode(bytes, version)?)),
-            ApiKey::DeleteRecordsKey => Ok(RequestKind::DeleteRecords(decode(bytes, version)?)),
-            ApiKey::InitProducerIdKey => Ok(RequestKind::InitProducerId(decode(bytes, version)?)),
-            ApiKey::OffsetForLeaderEpochKey => {
+            ApiKey::OffsetCommit => Ok(RequestKind::OffsetCommit(decode(bytes, version)?)),
+            ApiKey::OffsetFetch => Ok(RequestKind::OffsetFetch(decode(bytes, version)?)),
+            ApiKey::FindCoordinator => Ok(RequestKind::FindCoordinator(decode(bytes, version)?)),
+            ApiKey::JoinGroup => Ok(RequestKind::JoinGroup(decode(bytes, version)?)),
+            ApiKey::Heartbeat => Ok(RequestKind::Heartbeat(decode(bytes, version)?)),
+            ApiKey::LeaveGroup => Ok(RequestKind::LeaveGroup(decode(bytes, version)?)),
+            ApiKey::SyncGroup => Ok(RequestKind::SyncGroup(decode(bytes, version)?)),
+            ApiKey::DescribeGroups => Ok(RequestKind::DescribeGroups(decode(bytes, version)?)),
+            ApiKey::ListGroups => Ok(RequestKind::ListGroups(decode(bytes, version)?)),
+            ApiKey::SaslHandshake => Ok(RequestKind::SaslHandshake(decode(bytes, version)?)),
+            ApiKey::ApiVersions => Ok(RequestKind::ApiVersions(decode(bytes, version)?)),
+            ApiKey::CreateTopics => Ok(RequestKind::CreateTopics(decode(bytes, version)?)),
+            ApiKey::DeleteTopics => Ok(RequestKind::DeleteTopics(decode(bytes, version)?)),
+            ApiKey::DeleteRecords => Ok(RequestKind::DeleteRecords(decode(bytes, version)?)),
+            ApiKey::InitProducerId => Ok(RequestKind::InitProducerId(decode(bytes, version)?)),
+            ApiKey::OffsetForLeaderEpoch => {
                 Ok(RequestKind::OffsetForLeaderEpoch(decode(bytes, version)?))
             }
-            ApiKey::AddPartitionsToTxnKey => {
+            ApiKey::AddPartitionsToTxn => {
                 Ok(RequestKind::AddPartitionsToTxn(decode(bytes, version)?))
             }
-            ApiKey::AddOffsetsToTxnKey => Ok(RequestKind::AddOffsetsToTxn(decode(bytes, version)?)),
-            ApiKey::EndTxnKey => Ok(RequestKind::EndTxn(decode(bytes, version)?)),
-            ApiKey::WriteTxnMarkersKey => Ok(RequestKind::WriteTxnMarkers(decode(bytes, version)?)),
-            ApiKey::TxnOffsetCommitKey => Ok(RequestKind::TxnOffsetCommit(decode(bytes, version)?)),
-            ApiKey::DescribeAclsKey => Ok(RequestKind::DescribeAcls(decode(bytes, version)?)),
-            ApiKey::CreateAclsKey => Ok(RequestKind::CreateAcls(decode(bytes, version)?)),
-            ApiKey::DeleteAclsKey => Ok(RequestKind::DeleteAcls(decode(bytes, version)?)),
-            ApiKey::DescribeConfigsKey => Ok(RequestKind::DescribeConfigs(decode(bytes, version)?)),
-            ApiKey::AlterConfigsKey => Ok(RequestKind::AlterConfigs(decode(bytes, version)?)),
-            ApiKey::AlterReplicaLogDirsKey => {
+            ApiKey::AddOffsetsToTxn => Ok(RequestKind::AddOffsetsToTxn(decode(bytes, version)?)),
+            ApiKey::EndTxn => Ok(RequestKind::EndTxn(decode(bytes, version)?)),
+            ApiKey::WriteTxnMarkers => Ok(RequestKind::WriteTxnMarkers(decode(bytes, version)?)),
+            ApiKey::TxnOffsetCommit => Ok(RequestKind::TxnOffsetCommit(decode(bytes, version)?)),
+            ApiKey::DescribeAcls => Ok(RequestKind::DescribeAcls(decode(bytes, version)?)),
+            ApiKey::CreateAcls => Ok(RequestKind::CreateAcls(decode(bytes, version)?)),
+            ApiKey::DeleteAcls => Ok(RequestKind::DeleteAcls(decode(bytes, version)?)),
+            ApiKey::DescribeConfigs => Ok(RequestKind::DescribeConfigs(decode(bytes, version)?)),
+            ApiKey::AlterConfigs => Ok(RequestKind::AlterConfigs(decode(bytes, version)?)),
+            ApiKey::AlterReplicaLogDirs => {
                 Ok(RequestKind::AlterReplicaLogDirs(decode(bytes, version)?))
             }
-            ApiKey::DescribeLogDirsKey => Ok(RequestKind::DescribeLogDirs(decode(bytes, version)?)),
-            ApiKey::SaslAuthenticateKey => {
-                Ok(RequestKind::SaslAuthenticate(decode(bytes, version)?))
-            }
-            ApiKey::CreatePartitionsKey => {
-                Ok(RequestKind::CreatePartitions(decode(bytes, version)?))
-            }
-            ApiKey::CreateDelegationTokenKey => {
+            ApiKey::DescribeLogDirs => Ok(RequestKind::DescribeLogDirs(decode(bytes, version)?)),
+            ApiKey::SaslAuthenticate => Ok(RequestKind::SaslAuthenticate(decode(bytes, version)?)),
+            ApiKey::CreatePartitions => Ok(RequestKind::CreatePartitions(decode(bytes, version)?)),
+            ApiKey::CreateDelegationToken => {
                 Ok(RequestKind::CreateDelegationToken(decode(bytes, version)?))
             }
-            ApiKey::RenewDelegationTokenKey => {
+            ApiKey::RenewDelegationToken => {
                 Ok(RequestKind::RenewDelegationToken(decode(bytes, version)?))
             }
-            ApiKey::ExpireDelegationTokenKey => {
+            ApiKey::ExpireDelegationToken => {
                 Ok(RequestKind::ExpireDelegationToken(decode(bytes, version)?))
             }
-            ApiKey::DescribeDelegationTokenKey => Ok(RequestKind::DescribeDelegationToken(decode(
+            ApiKey::DescribeDelegationToken => Ok(RequestKind::DescribeDelegationToken(decode(
                 bytes, version,
             )?)),
-            ApiKey::DeleteGroupsKey => Ok(RequestKind::DeleteGroups(decode(bytes, version)?)),
-            ApiKey::ElectLeadersKey => Ok(RequestKind::ElectLeaders(decode(bytes, version)?)),
-            ApiKey::IncrementalAlterConfigsKey => Ok(RequestKind::IncrementalAlterConfigs(decode(
+            ApiKey::DeleteGroups => Ok(RequestKind::DeleteGroups(decode(bytes, version)?)),
+            ApiKey::ElectLeaders => Ok(RequestKind::ElectLeaders(decode(bytes, version)?)),
+            ApiKey::IncrementalAlterConfigs => Ok(RequestKind::IncrementalAlterConfigs(decode(
                 bytes, version,
             )?)),
-            ApiKey::AlterPartitionReassignmentsKey => Ok(RequestKind::AlterPartitionReassignments(
+            ApiKey::AlterPartitionReassignments => Ok(RequestKind::AlterPartitionReassignments(
                 decode(bytes, version)?,
             )),
-            ApiKey::ListPartitionReassignmentsKey => Ok(RequestKind::ListPartitionReassignments(
+            ApiKey::ListPartitionReassignments => Ok(RequestKind::ListPartitionReassignments(
                 decode(bytes, version)?,
             )),
-            ApiKey::OffsetDeleteKey => Ok(RequestKind::OffsetDelete(decode(bytes, version)?)),
-            ApiKey::DescribeClientQuotasKey => {
+            ApiKey::OffsetDelete => Ok(RequestKind::OffsetDelete(decode(bytes, version)?)),
+            ApiKey::DescribeClientQuotas => {
                 Ok(RequestKind::DescribeClientQuotas(decode(bytes, version)?))
             }
-            ApiKey::AlterClientQuotasKey => {
+            ApiKey::AlterClientQuotas => {
                 Ok(RequestKind::AlterClientQuotas(decode(bytes, version)?))
             }
-            ApiKey::DescribeUserScramCredentialsKey => Ok(
-                RequestKind::DescribeUserScramCredentials(decode(bytes, version)?),
-            ),
-            ApiKey::AlterUserScramCredentialsKey => Ok(RequestKind::AlterUserScramCredentials(
+            ApiKey::DescribeUserScramCredentials => Ok(RequestKind::DescribeUserScramCredentials(
                 decode(bytes, version)?,
             )),
-            ApiKey::VoteKey => Ok(RequestKind::Vote(decode(bytes, version)?)),
-            ApiKey::BeginQuorumEpochKey => {
-                Ok(RequestKind::BeginQuorumEpoch(decode(bytes, version)?))
-            }
-            ApiKey::EndQuorumEpochKey => Ok(RequestKind::EndQuorumEpoch(decode(bytes, version)?)),
-            ApiKey::DescribeQuorumKey => Ok(RequestKind::DescribeQuorum(decode(bytes, version)?)),
-            ApiKey::AlterPartitionKey => Ok(RequestKind::AlterPartition(decode(bytes, version)?)),
-            ApiKey::UpdateFeaturesKey => Ok(RequestKind::UpdateFeatures(decode(bytes, version)?)),
-            ApiKey::EnvelopeKey => Ok(RequestKind::Envelope(decode(bytes, version)?)),
-            ApiKey::FetchSnapshotKey => Ok(RequestKind::FetchSnapshot(decode(bytes, version)?)),
-            ApiKey::DescribeClusterKey => Ok(RequestKind::DescribeCluster(decode(bytes, version)?)),
-            ApiKey::DescribeProducersKey => {
+            ApiKey::AlterUserScramCredentials => Ok(RequestKind::AlterUserScramCredentials(
+                decode(bytes, version)?,
+            )),
+            ApiKey::Vote => Ok(RequestKind::Vote(decode(bytes, version)?)),
+            ApiKey::BeginQuorumEpoch => Ok(RequestKind::BeginQuorumEpoch(decode(bytes, version)?)),
+            ApiKey::EndQuorumEpoch => Ok(RequestKind::EndQuorumEpoch(decode(bytes, version)?)),
+            ApiKey::DescribeQuorum => Ok(RequestKind::DescribeQuorum(decode(bytes, version)?)),
+            ApiKey::AlterPartition => Ok(RequestKind::AlterPartition(decode(bytes, version)?)),
+            ApiKey::UpdateFeatures => Ok(RequestKind::UpdateFeatures(decode(bytes, version)?)),
+            ApiKey::Envelope => Ok(RequestKind::Envelope(decode(bytes, version)?)),
+            ApiKey::FetchSnapshot => Ok(RequestKind::FetchSnapshot(decode(bytes, version)?)),
+            ApiKey::DescribeCluster => Ok(RequestKind::DescribeCluster(decode(bytes, version)?)),
+            ApiKey::DescribeProducers => {
                 Ok(RequestKind::DescribeProducers(decode(bytes, version)?))
             }
-            ApiKey::BrokerRegistrationKey => {
+            ApiKey::BrokerRegistration => {
                 Ok(RequestKind::BrokerRegistration(decode(bytes, version)?))
             }
-            ApiKey::BrokerHeartbeatKey => Ok(RequestKind::BrokerHeartbeat(decode(bytes, version)?)),
-            ApiKey::UnregisterBrokerKey => {
-                Ok(RequestKind::UnregisterBroker(decode(bytes, version)?))
-            }
-            ApiKey::DescribeTransactionsKey => {
+            ApiKey::BrokerHeartbeat => Ok(RequestKind::BrokerHeartbeat(decode(bytes, version)?)),
+            ApiKey::UnregisterBroker => Ok(RequestKind::UnregisterBroker(decode(bytes, version)?)),
+            ApiKey::DescribeTransactions => {
                 Ok(RequestKind::DescribeTransactions(decode(bytes, version)?))
             }
-            ApiKey::ListTransactionsKey => {
-                Ok(RequestKind::ListTransactions(decode(bytes, version)?))
-            }
-            ApiKey::AllocateProducerIdsKey => {
+            ApiKey::ListTransactions => Ok(RequestKind::ListTransactions(decode(bytes, version)?)),
+            ApiKey::AllocateProducerIds => {
                 Ok(RequestKind::AllocateProducerIds(decode(bytes, version)?))
             }
-            ApiKey::ConsumerGroupHeartbeatKey => {
+            ApiKey::ConsumerGroupHeartbeat => {
                 Ok(RequestKind::ConsumerGroupHeartbeat(decode(bytes, version)?))
             }
-            ApiKey::ConsumerGroupDescribeKey => {
+            ApiKey::ConsumerGroupDescribe => {
                 Ok(RequestKind::ConsumerGroupDescribe(decode(bytes, version)?))
             }
-            ApiKey::ControllerRegistrationKey => {
+            ApiKey::ControllerRegistration => {
                 Ok(RequestKind::ControllerRegistration(decode(bytes, version)?))
             }
-            ApiKey::GetTelemetrySubscriptionsKey => Ok(RequestKind::GetTelemetrySubscriptions(
+            ApiKey::GetTelemetrySubscriptions => Ok(RequestKind::GetTelemetrySubscriptions(
                 decode(bytes, version)?,
             )),
-            ApiKey::PushTelemetryKey => Ok(RequestKind::PushTelemetry(decode(bytes, version)?)),
-            ApiKey::AssignReplicasToDirsKey => {
+            ApiKey::PushTelemetry => Ok(RequestKind::PushTelemetry(decode(bytes, version)?)),
+            ApiKey::AssignReplicasToDirs => {
                 Ok(RequestKind::AssignReplicasToDirs(decode(bytes, version)?))
             }
-            ApiKey::ListClientMetricsResourcesKey => Ok(RequestKind::ListClientMetricsResources(
+            ApiKey::ListClientMetricsResources => Ok(RequestKind::ListClientMetricsResources(
                 decode(bytes, version)?,
             )),
-            ApiKey::DescribeTopicPartitionsKey => Ok(RequestKind::DescribeTopicPartitions(decode(
+            ApiKey::DescribeTopicPartitions => Ok(RequestKind::DescribeTopicPartitions(decode(
                 bytes, version,
             )?)),
         }
@@ -2660,160 +2612,134 @@ impl ResponseKind {
         version: i16,
     ) -> anyhow::Result<ResponseKind> {
         match api_key {
-            ApiKey::ProduceKey => Ok(ResponseKind::Produce(decode(bytes, version)?)),
-            ApiKey::FetchKey => Ok(ResponseKind::Fetch(decode(bytes, version)?)),
-            ApiKey::ListOffsetsKey => Ok(ResponseKind::ListOffsets(decode(bytes, version)?)),
-            ApiKey::MetadataKey => Ok(ResponseKind::Metadata(decode(bytes, version)?)),
-            ApiKey::LeaderAndIsrKey => Ok(ResponseKind::LeaderAndIsr(decode(bytes, version)?)),
-            ApiKey::StopReplicaKey => Ok(ResponseKind::StopReplica(decode(bytes, version)?)),
-            ApiKey::UpdateMetadataKey => Ok(ResponseKind::UpdateMetadata(decode(bytes, version)?)),
-            ApiKey::ControlledShutdownKey => {
+            ApiKey::Produce => Ok(ResponseKind::Produce(decode(bytes, version)?)),
+            ApiKey::Fetch => Ok(ResponseKind::Fetch(decode(bytes, version)?)),
+            ApiKey::ListOffsets => Ok(ResponseKind::ListOffsets(decode(bytes, version)?)),
+            ApiKey::Metadata => Ok(ResponseKind::Metadata(decode(bytes, version)?)),
+            ApiKey::LeaderAndIsr => Ok(ResponseKind::LeaderAndIsr(decode(bytes, version)?)),
+            ApiKey::StopReplica => Ok(ResponseKind::StopReplica(decode(bytes, version)?)),
+            ApiKey::UpdateMetadata => Ok(ResponseKind::UpdateMetadata(decode(bytes, version)?)),
+            ApiKey::ControlledShutdown => {
                 Ok(ResponseKind::ControlledShutdown(decode(bytes, version)?))
             }
-            ApiKey::OffsetCommitKey => Ok(ResponseKind::OffsetCommit(decode(bytes, version)?)),
-            ApiKey::OffsetFetchKey => Ok(ResponseKind::OffsetFetch(decode(bytes, version)?)),
-            ApiKey::FindCoordinatorKey => {
-                Ok(ResponseKind::FindCoordinator(decode(bytes, version)?))
-            }
-            ApiKey::JoinGroupKey => Ok(ResponseKind::JoinGroup(decode(bytes, version)?)),
-            ApiKey::HeartbeatKey => Ok(ResponseKind::Heartbeat(decode(bytes, version)?)),
-            ApiKey::LeaveGroupKey => Ok(ResponseKind::LeaveGroup(decode(bytes, version)?)),
-            ApiKey::SyncGroupKey => Ok(ResponseKind::SyncGroup(decode(bytes, version)?)),
-            ApiKey::DescribeGroupsKey => Ok(ResponseKind::DescribeGroups(decode(bytes, version)?)),
-            ApiKey::ListGroupsKey => Ok(ResponseKind::ListGroups(decode(bytes, version)?)),
-            ApiKey::SaslHandshakeKey => Ok(ResponseKind::SaslHandshake(decode(bytes, version)?)),
-            ApiKey::ApiVersionsKey => Ok(ResponseKind::ApiVersions(decode(bytes, version)?)),
-            ApiKey::CreateTopicsKey => Ok(ResponseKind::CreateTopics(decode(bytes, version)?)),
-            ApiKey::DeleteTopicsKey => Ok(ResponseKind::DeleteTopics(decode(bytes, version)?)),
-            ApiKey::DeleteRecordsKey => Ok(ResponseKind::DeleteRecords(decode(bytes, version)?)),
-            ApiKey::InitProducerIdKey => Ok(ResponseKind::InitProducerId(decode(bytes, version)?)),
-            ApiKey::OffsetForLeaderEpochKey => {
+            ApiKey::OffsetCommit => Ok(ResponseKind::OffsetCommit(decode(bytes, version)?)),
+            ApiKey::OffsetFetch => Ok(ResponseKind::OffsetFetch(decode(bytes, version)?)),
+            ApiKey::FindCoordinator => Ok(ResponseKind::FindCoordinator(decode(bytes, version)?)),
+            ApiKey::JoinGroup => Ok(ResponseKind::JoinGroup(decode(bytes, version)?)),
+            ApiKey::Heartbeat => Ok(ResponseKind::Heartbeat(decode(bytes, version)?)),
+            ApiKey::LeaveGroup => Ok(ResponseKind::LeaveGroup(decode(bytes, version)?)),
+            ApiKey::SyncGroup => Ok(ResponseKind::SyncGroup(decode(bytes, version)?)),
+            ApiKey::DescribeGroups => Ok(ResponseKind::DescribeGroups(decode(bytes, version)?)),
+            ApiKey::ListGroups => Ok(ResponseKind::ListGroups(decode(bytes, version)?)),
+            ApiKey::SaslHandshake => Ok(ResponseKind::SaslHandshake(decode(bytes, version)?)),
+            ApiKey::ApiVersions => Ok(ResponseKind::ApiVersions(decode(bytes, version)?)),
+            ApiKey::CreateTopics => Ok(ResponseKind::CreateTopics(decode(bytes, version)?)),
+            ApiKey::DeleteTopics => Ok(ResponseKind::DeleteTopics(decode(bytes, version)?)),
+            ApiKey::DeleteRecords => Ok(ResponseKind::DeleteRecords(decode(bytes, version)?)),
+            ApiKey::InitProducerId => Ok(ResponseKind::InitProducerId(decode(bytes, version)?)),
+            ApiKey::OffsetForLeaderEpoch => {
                 Ok(ResponseKind::OffsetForLeaderEpoch(decode(bytes, version)?))
             }
-            ApiKey::AddPartitionsToTxnKey => {
+            ApiKey::AddPartitionsToTxn => {
                 Ok(ResponseKind::AddPartitionsToTxn(decode(bytes, version)?))
             }
-            ApiKey::AddOffsetsToTxnKey => {
-                Ok(ResponseKind::AddOffsetsToTxn(decode(bytes, version)?))
-            }
-            ApiKey::EndTxnKey => Ok(ResponseKind::EndTxn(decode(bytes, version)?)),
-            ApiKey::WriteTxnMarkersKey => {
-                Ok(ResponseKind::WriteTxnMarkers(decode(bytes, version)?))
-            }
-            ApiKey::TxnOffsetCommitKey => {
-                Ok(ResponseKind::TxnOffsetCommit(decode(bytes, version)?))
-            }
-            ApiKey::DescribeAclsKey => Ok(ResponseKind::DescribeAcls(decode(bytes, version)?)),
-            ApiKey::CreateAclsKey => Ok(ResponseKind::CreateAcls(decode(bytes, version)?)),
-            ApiKey::DeleteAclsKey => Ok(ResponseKind::DeleteAcls(decode(bytes, version)?)),
-            ApiKey::DescribeConfigsKey => {
-                Ok(ResponseKind::DescribeConfigs(decode(bytes, version)?))
-            }
-            ApiKey::AlterConfigsKey => Ok(ResponseKind::AlterConfigs(decode(bytes, version)?)),
-            ApiKey::AlterReplicaLogDirsKey => {
+            ApiKey::AddOffsetsToTxn => Ok(ResponseKind::AddOffsetsToTxn(decode(bytes, version)?)),
+            ApiKey::EndTxn => Ok(ResponseKind::EndTxn(decode(bytes, version)?)),
+            ApiKey::WriteTxnMarkers => Ok(ResponseKind::WriteTxnMarkers(decode(bytes, version)?)),
+            ApiKey::TxnOffsetCommit => Ok(ResponseKind::TxnOffsetCommit(decode(bytes, version)?)),
+            ApiKey::DescribeAcls => Ok(ResponseKind::DescribeAcls(decode(bytes, version)?)),
+            ApiKey::CreateAcls => Ok(ResponseKind::CreateAcls(decode(bytes, version)?)),
+            ApiKey::DeleteAcls => Ok(ResponseKind::DeleteAcls(decode(bytes, version)?)),
+            ApiKey::DescribeConfigs => Ok(ResponseKind::DescribeConfigs(decode(bytes, version)?)),
+            ApiKey::AlterConfigs => Ok(ResponseKind::AlterConfigs(decode(bytes, version)?)),
+            ApiKey::AlterReplicaLogDirs => {
                 Ok(ResponseKind::AlterReplicaLogDirs(decode(bytes, version)?))
             }
-            ApiKey::DescribeLogDirsKey => {
-                Ok(ResponseKind::DescribeLogDirs(decode(bytes, version)?))
-            }
-            ApiKey::SaslAuthenticateKey => {
-                Ok(ResponseKind::SaslAuthenticate(decode(bytes, version)?))
-            }
-            ApiKey::CreatePartitionsKey => {
-                Ok(ResponseKind::CreatePartitions(decode(bytes, version)?))
-            }
-            ApiKey::CreateDelegationTokenKey => {
+            ApiKey::DescribeLogDirs => Ok(ResponseKind::DescribeLogDirs(decode(bytes, version)?)),
+            ApiKey::SaslAuthenticate => Ok(ResponseKind::SaslAuthenticate(decode(bytes, version)?)),
+            ApiKey::CreatePartitions => Ok(ResponseKind::CreatePartitions(decode(bytes, version)?)),
+            ApiKey::CreateDelegationToken => {
                 Ok(ResponseKind::CreateDelegationToken(decode(bytes, version)?))
             }
-            ApiKey::RenewDelegationTokenKey => {
+            ApiKey::RenewDelegationToken => {
                 Ok(ResponseKind::RenewDelegationToken(decode(bytes, version)?))
             }
-            ApiKey::ExpireDelegationTokenKey => {
+            ApiKey::ExpireDelegationToken => {
                 Ok(ResponseKind::ExpireDelegationToken(decode(bytes, version)?))
             }
-            ApiKey::DescribeDelegationTokenKey => Ok(ResponseKind::DescribeDelegationToken(
+            ApiKey::DescribeDelegationToken => Ok(ResponseKind::DescribeDelegationToken(decode(
+                bytes, version,
+            )?)),
+            ApiKey::DeleteGroups => Ok(ResponseKind::DeleteGroups(decode(bytes, version)?)),
+            ApiKey::ElectLeaders => Ok(ResponseKind::ElectLeaders(decode(bytes, version)?)),
+            ApiKey::IncrementalAlterConfigs => Ok(ResponseKind::IncrementalAlterConfigs(decode(
+                bytes, version,
+            )?)),
+            ApiKey::AlterPartitionReassignments => Ok(ResponseKind::AlterPartitionReassignments(
                 decode(bytes, version)?,
             )),
-            ApiKey::DeleteGroupsKey => Ok(ResponseKind::DeleteGroups(decode(bytes, version)?)),
-            ApiKey::ElectLeadersKey => Ok(ResponseKind::ElectLeaders(decode(bytes, version)?)),
-            ApiKey::IncrementalAlterConfigsKey => Ok(ResponseKind::IncrementalAlterConfigs(
+            ApiKey::ListPartitionReassignments => Ok(ResponseKind::ListPartitionReassignments(
                 decode(bytes, version)?,
             )),
-            ApiKey::AlterPartitionReassignmentsKey => Ok(
-                ResponseKind::AlterPartitionReassignments(decode(bytes, version)?),
-            ),
-            ApiKey::ListPartitionReassignmentsKey => Ok(ResponseKind::ListPartitionReassignments(
-                decode(bytes, version)?,
-            )),
-            ApiKey::OffsetDeleteKey => Ok(ResponseKind::OffsetDelete(decode(bytes, version)?)),
-            ApiKey::DescribeClientQuotasKey => {
+            ApiKey::OffsetDelete => Ok(ResponseKind::OffsetDelete(decode(bytes, version)?)),
+            ApiKey::DescribeClientQuotas => {
                 Ok(ResponseKind::DescribeClientQuotas(decode(bytes, version)?))
             }
-            ApiKey::AlterClientQuotasKey => {
+            ApiKey::AlterClientQuotas => {
                 Ok(ResponseKind::AlterClientQuotas(decode(bytes, version)?))
             }
-            ApiKey::DescribeUserScramCredentialsKey => Ok(
-                ResponseKind::DescribeUserScramCredentials(decode(bytes, version)?),
-            ),
-            ApiKey::AlterUserScramCredentialsKey => Ok(ResponseKind::AlterUserScramCredentials(
+            ApiKey::DescribeUserScramCredentials => Ok(ResponseKind::DescribeUserScramCredentials(
                 decode(bytes, version)?,
             )),
-            ApiKey::VoteKey => Ok(ResponseKind::Vote(decode(bytes, version)?)),
-            ApiKey::BeginQuorumEpochKey => {
-                Ok(ResponseKind::BeginQuorumEpoch(decode(bytes, version)?))
-            }
-            ApiKey::EndQuorumEpochKey => Ok(ResponseKind::EndQuorumEpoch(decode(bytes, version)?)),
-            ApiKey::DescribeQuorumKey => Ok(ResponseKind::DescribeQuorum(decode(bytes, version)?)),
-            ApiKey::AlterPartitionKey => Ok(ResponseKind::AlterPartition(decode(bytes, version)?)),
-            ApiKey::UpdateFeaturesKey => Ok(ResponseKind::UpdateFeatures(decode(bytes, version)?)),
-            ApiKey::EnvelopeKey => Ok(ResponseKind::Envelope(decode(bytes, version)?)),
-            ApiKey::FetchSnapshotKey => Ok(ResponseKind::FetchSnapshot(decode(bytes, version)?)),
-            ApiKey::DescribeClusterKey => {
-                Ok(ResponseKind::DescribeCluster(decode(bytes, version)?))
-            }
-            ApiKey::DescribeProducersKey => {
+            ApiKey::AlterUserScramCredentials => Ok(ResponseKind::AlterUserScramCredentials(
+                decode(bytes, version)?,
+            )),
+            ApiKey::Vote => Ok(ResponseKind::Vote(decode(bytes, version)?)),
+            ApiKey::BeginQuorumEpoch => Ok(ResponseKind::BeginQuorumEpoch(decode(bytes, version)?)),
+            ApiKey::EndQuorumEpoch => Ok(ResponseKind::EndQuorumEpoch(decode(bytes, version)?)),
+            ApiKey::DescribeQuorum => Ok(ResponseKind::DescribeQuorum(decode(bytes, version)?)),
+            ApiKey::AlterPartition => Ok(ResponseKind::AlterPartition(decode(bytes, version)?)),
+            ApiKey::UpdateFeatures => Ok(ResponseKind::UpdateFeatures(decode(bytes, version)?)),
+            ApiKey::Envelope => Ok(ResponseKind::Envelope(decode(bytes, version)?)),
+            ApiKey::FetchSnapshot => Ok(ResponseKind::FetchSnapshot(decode(bytes, version)?)),
+            ApiKey::DescribeCluster => Ok(ResponseKind::DescribeCluster(decode(bytes, version)?)),
+            ApiKey::DescribeProducers => {
                 Ok(ResponseKind::DescribeProducers(decode(bytes, version)?))
             }
-            ApiKey::BrokerRegistrationKey => {
+            ApiKey::BrokerRegistration => {
                 Ok(ResponseKind::BrokerRegistration(decode(bytes, version)?))
             }
-            ApiKey::BrokerHeartbeatKey => {
-                Ok(ResponseKind::BrokerHeartbeat(decode(bytes, version)?))
-            }
-            ApiKey::UnregisterBrokerKey => {
-                Ok(ResponseKind::UnregisterBroker(decode(bytes, version)?))
-            }
-            ApiKey::DescribeTransactionsKey => {
+            ApiKey::BrokerHeartbeat => Ok(ResponseKind::BrokerHeartbeat(decode(bytes, version)?)),
+            ApiKey::UnregisterBroker => Ok(ResponseKind::UnregisterBroker(decode(bytes, version)?)),
+            ApiKey::DescribeTransactions => {
                 Ok(ResponseKind::DescribeTransactions(decode(bytes, version)?))
             }
-            ApiKey::ListTransactionsKey => {
-                Ok(ResponseKind::ListTransactions(decode(bytes, version)?))
-            }
-            ApiKey::AllocateProducerIdsKey => {
+            ApiKey::ListTransactions => Ok(ResponseKind::ListTransactions(decode(bytes, version)?)),
+            ApiKey::AllocateProducerIds => {
                 Ok(ResponseKind::AllocateProducerIds(decode(bytes, version)?))
             }
-            ApiKey::ConsumerGroupHeartbeatKey => Ok(ResponseKind::ConsumerGroupHeartbeat(decode(
+            ApiKey::ConsumerGroupHeartbeat => Ok(ResponseKind::ConsumerGroupHeartbeat(decode(
                 bytes, version,
             )?)),
-            ApiKey::ConsumerGroupDescribeKey => {
+            ApiKey::ConsumerGroupDescribe => {
                 Ok(ResponseKind::ConsumerGroupDescribe(decode(bytes, version)?))
             }
-            ApiKey::ControllerRegistrationKey => Ok(ResponseKind::ControllerRegistration(decode(
+            ApiKey::ControllerRegistration => Ok(ResponseKind::ControllerRegistration(decode(
                 bytes, version,
             )?)),
-            ApiKey::GetTelemetrySubscriptionsKey => Ok(ResponseKind::GetTelemetrySubscriptions(
+            ApiKey::GetTelemetrySubscriptions => Ok(ResponseKind::GetTelemetrySubscriptions(
                 decode(bytes, version)?,
             )),
-            ApiKey::PushTelemetryKey => Ok(ResponseKind::PushTelemetry(decode(bytes, version)?)),
-            ApiKey::AssignReplicasToDirsKey => {
+            ApiKey::PushTelemetry => Ok(ResponseKind::PushTelemetry(decode(bytes, version)?)),
+            ApiKey::AssignReplicasToDirs => {
                 Ok(ResponseKind::AssignReplicasToDirs(decode(bytes, version)?))
             }
-            ApiKey::ListClientMetricsResourcesKey => Ok(ResponseKind::ListClientMetricsResources(
+            ApiKey::ListClientMetricsResources => Ok(ResponseKind::ListClientMetricsResources(
                 decode(bytes, version)?,
             )),
-            ApiKey::DescribeTopicPartitionsKey => Ok(ResponseKind::DescribeTopicPartitions(
-                decode(bytes, version)?,
-            )),
+            ApiKey::DescribeTopicPartitions => Ok(ResponseKind::DescribeTopicPartitions(decode(
+                bytes, version,
+            )?)),
         }
     }
     /// Get the version of request header that needs to be prepended to this message
