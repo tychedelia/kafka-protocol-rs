@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## v0.14.0
+
+- `Records::encode`/`Records::decode` is now reverted back to their original API, instead `encode_with_custom_compression` and `decode_with_custom_compression` is provided for custom compression.
+- `ApiKey` variants are renamed to remove the `Key` suffix.
+- Add `iterate_all` and `valid_versions` methods to `ApiKey`
+- Implement `PartialEq` and `Display` for `VersionRange`
+
 ## v0.13.0
 
 - All "map" types in the protocol that were previously of type `IndexMap<K, V>` are now of type `Vec<V>`, the value of `K` is stored as a field within `V`.
