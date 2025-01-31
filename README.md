@@ -8,7 +8,7 @@ for an example of protocol schema.
 
 ## Versioning
 
-Protocol messages are generated against a recent stable Kafka release, currently [3.7.0](https://github.com/apache/kafka/releases/tag/3.7.0).
+Protocol messages are generated against a recent stable Kafka release, currently [3.9.0](https://github.com/apache/kafka/releases/tag/3.9.0).
 
 Although the Kafka protocol remains relatively stable and strives to be backwards compatible, new fields are occasionally 
 added. In order to ensure forward compatibility with the protocol, this crate marks all exported items as `#[non-exhaustive]`.
