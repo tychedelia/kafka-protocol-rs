@@ -1,4 +1,4 @@
-//! Provides utilities for working with records (Kafka messages).
+'''//! Provides utilities for working with records (Kafka messages).
 //!
 //! [`FetchResponse`](crate::messages::fetch_response::FetchResponse) and associated APIs for interacting with reading and writing
 //! contain records in a raw format, allowing the user to implement their own logic for interacting
@@ -119,6 +119,7 @@ struct BatchDecodeInfo {
     partition_leader_epoch: i32,
     producer_id: i64,
     producer_epoch: i16,
+    compression: Compression,
 }
 
 /// Decoded records plus information about compression.
@@ -414,8 +415,51 @@ impl RecordBatchEncoder {
     }
 }
 
+struct RecordIterator
+{
+    buf: Bytes,
+    batch_decode_info: BatchDecodeInfo,
+    current: i64,
+}
+
+impl Iterator for RecordIterator
+{
+    type Item = Record;
+
+    fn next(&mut self) -> Option<Record>
+    {
+        if self.current >= self.batch_decode_info.record_count as i64
+        {
+            return None;
+        }
+        self.current += 1;
+        Record::decode_new(&mut self.buf, &self.batch_decode_info, 2).ok()
+    }
+}
+
+impl RecordIterator {
+    fn new(buf: &mut Bytes, version: i8) -> Self
+    {
+        let (batch_decode_info, buf) = RecordBatchDecoder::decode_batch_info(buf, version).unwrap();
+        RecordIterator {
+            buf,
+            batch_decode_info,
+            current: 0,
+        }
+    }
+}
+
 impl RecordBatchDecoder {
-    /// Decode one RecordSet from the provided buffer.
+    /// Decode the provided buffer into a RecordIterator.
+    /// # Arguments
+    /// * `buf` - The buffer to decode.
+    /// * `version` - The version of the record batch.
+    pub fn records(buf: &mut Bytes, version: i8) -> Box<dyn Iterator<Item=Record>>
+    {
+        Box::new(RecordIterator::new(buf, version))
+    }
+
+    /// Decode the provided buffer into a vec of records.
     /// # Arguments
     /// * `decompressor` - A function that decompresses the given batch of records.
     ///
@@ -472,26 +516,11 @@ impl RecordBatchDecoder {
         }?;
         Ok((version, compression))
     }
-    fn decode_new_records<B: ByteBuf>(
-        buf: &mut B,
-        batch_decode_info: &BatchDecodeInfo,
-        version: i8,
-        records: &mut Vec<Record>,
-    ) -> Result<()> {
-        records.reserve(batch_decode_info.record_count);
-        for _ in 0..batch_decode_info.record_count {
-            records.push(Record::decode_new(buf, batch_decode_info, version)?);
-        }
-        Ok(())
-    }
-    fn decode_new_batch<B: ByteBuf, F>(
+
+    fn decode_batch_info<B: ByteBuf>(
         buf: &mut B,
         version: i8,
-        records: &mut Vec<Record>,
-        decompress_func: Option<&F>,
-    ) -> Result<Compression>
-    where
-        F: Fn(&mut bytes::Bytes, Compression) -> Result<B>,
+    ) -> Result<(BatchDecodeInfo, Bytes)>
     {
         // Base offset
         let min_offset = types::Int64.decode(buf)?;
@@ -571,7 +600,7 @@ impl RecordBatchDecoder {
         }
         let record_count = record_count as usize;
 
-        let batch_decode_info = BatchDecodeInfo {
+        Ok((BatchDecodeInfo {
             record_count,
             timestamp_type,
             min_offset,
@@ -582,31 +611,58 @@ impl RecordBatchDecoder {
             partition_leader_epoch,
             producer_id,
             producer_epoch,
-        };
+            compression,
+        }, buf.to_owned()))
+    }
+
+    fn decode_new_records<B: ByteBuf>(
+        buf: &mut B,
+        batch_decode_info: &BatchDecodeInfo,
+        version: i8,
+        records: &mut Vec<Record>,
+    ) -> Result<()> {
+        records.reserve(batch_decode_info.record_count);
+        for _ in 0..batch_decode_info.record_count {
+            records.push(Record::decode_new(buf, batch_decode_info, version)?);
+        }
+        Ok(())
+    }
+
+    fn decode_new_batch<B: ByteBuf, F>(
+        buf: &mut B,
+        version: i8,
+        records: &mut Vec<Record>,
+        decompress_func: Option<&F>,
+    ) -> Result<Compression>
+    where
+        F: Fn(&mut bytes::Bytes, Compression) -> Result<B>,
+    {
+        let (batch_decode_info, mut buf) = Self::decode_batch_info(buf, version)?;
+        let compression = batch_decode_info.compression;
 
         if let Some(decompress_func) = decompress_func {
-            let mut decompressed_buf = decompress_func(buf, compression)?;
+            let mut decompressed_buf = decompress_func(&mut buf, compression)?;
 
             Self::decode_new_records(&mut decompressed_buf, &batch_decode_info, version, records)?;
         } else {
             match compression {
-                Compression::None => cmpr::None::decompress(buf, |buf| {
+                Compression::None => cmpr::None::decompress(&mut buf, |buf| {
                     Self::decode_new_records(buf, &batch_decode_info, version, records)
                 })?,
                 #[cfg(feature = "snappy")]
-                Compression::Snappy => cmpr::Snappy::decompress(buf, |buf| {
+                Compression::Snappy => cmpr::Snappy::decompress(&mut buf, |buf| {
                     Self::decode_new_records(buf, &batch_decode_info, version, records)
                 })?,
                 #[cfg(feature = "gzip")]
-                Compression::Gzip => cmpr::Gzip::decompress(buf, |buf| {
+                Compression::Gzip => cmpr::Gzip::decompress(&mut buf, |buf| {
                     Self::decode_new_records(buf, &batch_decode_info, version, records)
                 })?,
                 #[cfg(feature = "zstd")]
-                Compression::Zstd => cmpr::Zstd::decompress(buf, |buf| {
+                Compression::Zstd => cmpr::Zstd::decompress(&mut buf, |buf| {
                     Self::decode_new_records(buf, &batch_decode_info, version, records)
                 })?,
                 #[cfg(feature = "lz4")]
-                Compression::Lz4 => cmpr::Lz4::decompress(buf, |buf| {
+                Compression::Lz4 => cmpr::Lz4::decompress(&mut buf, |buf| {
                     Self::decode_new_records(buf, &batch_decode_info, version, records)
                 })?,
                 #[allow(unreachable_patterns)]
@@ -867,6 +923,7 @@ impl Record {
 
         let mut headers = IndexMap::with_capacity(num_headers);
         for _ in 0..num_headers {
+
             // Key len
             let key_len: i32 = types::VarInt.decode(buf)?;
             if key_len < 0 {
@@ -994,9 +1051,11 @@ mod tests {
                 partition_leader_epoch: 0,
                 producer_id: 0,
                 producer_epoch: 0,
+                compression: Compression::None,
             },
             2,
         )
         .expect("decode works");
     }
 }
+''
