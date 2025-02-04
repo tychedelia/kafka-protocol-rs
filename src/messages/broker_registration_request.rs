@@ -14,7 +14,7 @@ use uuid::Uuid;
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
-    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
+    Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-3
@@ -39,12 +39,12 @@ pub struct BrokerRegistrationRequest {
     /// The listeners of this broker
     ///
     /// Supported API versions: 0-3
-    pub listeners: indexmap::IndexMap<StrBytes, Listener>,
+    pub listeners: Vec<Listener>,
 
     /// The features on this broker
     ///
     /// Supported API versions: 0-3
-    pub features: indexmap::IndexMap<StrBytes, Feature>,
+    pub features: Vec<Feature>,
 
     /// The rack which this broker is in.
     ///
@@ -103,7 +103,7 @@ impl BrokerRegistrationRequest {
     /// The listeners of this broker
     ///
     /// Supported API versions: 0-3
-    pub fn with_listeners(mut self, value: indexmap::IndexMap<StrBytes, Listener>) -> Self {
+    pub fn with_listeners(mut self, value: Vec<Listener>) -> Self {
         self.listeners = value;
         self
     }
@@ -112,7 +112,7 @@ impl BrokerRegistrationRequest {
     /// The features on this broker
     ///
     /// Supported API versions: 0-3
-    pub fn with_features(mut self, value: indexmap::IndexMap<StrBytes, Feature>) -> Self {
+    pub fn with_features(mut self, value: Vec<Feature>) -> Self {
         self.features = value;
         self
     }
@@ -177,7 +177,7 @@ impl Encodable for BrokerRegistrationRequest {
             types::Boolean.encode(buf, &self.is_migrating_zk_broker)?;
         } else {
             if self.is_migrating_zk_broker {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 2 {
@@ -212,7 +212,7 @@ impl Encodable for BrokerRegistrationRequest {
             total_size += types::Boolean.compute_size(&self.is_migrating_zk_broker)?;
         } else {
             if self.is_migrating_zk_broker {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 2 {
@@ -308,6 +308,11 @@ impl Message for BrokerRegistrationRequest {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct Feature {
+    /// The feature name.
+    ///
+    /// Supported API versions: 0-3
+    pub name: StrBytes,
+
     /// The minimum supported feature level.
     ///
     /// Supported API versions: 0-3
@@ -323,6 +328,15 @@ pub struct Feature {
 }
 
 impl Feature {
+    /// Sets `name` to the passed value.
+    ///
+    /// The feature name.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_name(mut self, value: StrBytes) -> Self {
+        self.name = value;
+        self
+    }
     /// Sets `min_supported_version` to the passed value.
     ///
     /// The minimum supported feature level.
@@ -354,10 +368,9 @@ impl Feature {
 }
 
 #[cfg(feature = "client")]
-impl MapEncodable for Feature {
-    type Key = StrBytes;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
-        types::CompactString.encode(buf, key)?;
+impl Encodable for Feature {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        types::CompactString.encode(buf, &self.name)?;
         types::Int16.encode(buf, &self.min_supported_version)?;
         types::Int16.encode(buf, &self.max_supported_version)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -372,9 +385,9 @@ impl MapEncodable for Feature {
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
-        total_size += types::CompactString.compute_size(key)?;
+        total_size += types::CompactString.compute_size(&self.name)?;
         total_size += types::Int16.compute_size(&self.min_supported_version)?;
         total_size += types::Int16.compute_size(&self.max_supported_version)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -392,10 +405,9 @@ impl MapEncodable for Feature {
 }
 
 #[cfg(feature = "broker")]
-impl MapDecodable for Feature {
-    type Key = StrBytes;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
-        let key_field = types::CompactString.decode(buf)?;
+impl Decodable for Feature {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        let name = types::CompactString.decode(buf)?;
         let min_supported_version = types::Int16.decode(buf)?;
         let max_supported_version = types::Int16.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
@@ -406,20 +418,19 @@ impl MapDecodable for Feature {
             let unknown_value = buf.try_get_bytes(size as usize)?;
             unknown_tagged_fields.insert(tag as i32, unknown_value);
         }
-        Ok((
-            key_field,
-            Self {
-                min_supported_version,
-                max_supported_version,
-                unknown_tagged_fields,
-            },
-        ))
+        Ok(Self {
+            name,
+            min_supported_version,
+            max_supported_version,
+            unknown_tagged_fields,
+        })
     }
 }
 
 impl Default for Feature {
     fn default() -> Self {
         Self {
+            name: Default::default(),
             min_supported_version: 0,
             max_supported_version: 0,
             unknown_tagged_fields: BTreeMap::new(),
@@ -436,6 +447,11 @@ impl Message for Feature {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct Listener {
+    /// The name of the endpoint.
+    ///
+    /// Supported API versions: 0-3
+    pub name: StrBytes,
+
     /// The hostname.
     ///
     /// Supported API versions: 0-3
@@ -456,6 +472,15 @@ pub struct Listener {
 }
 
 impl Listener {
+    /// Sets `name` to the passed value.
+    ///
+    /// The name of the endpoint.
+    ///
+    /// Supported API versions: 0-3
+    pub fn with_name(mut self, value: StrBytes) -> Self {
+        self.name = value;
+        self
+    }
     /// Sets `host` to the passed value.
     ///
     /// The hostname.
@@ -496,10 +521,9 @@ impl Listener {
 }
 
 #[cfg(feature = "client")]
-impl MapEncodable for Listener {
-    type Key = StrBytes;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
-        types::CompactString.encode(buf, key)?;
+impl Encodable for Listener {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        types::CompactString.encode(buf, &self.name)?;
         types::CompactString.encode(buf, &self.host)?;
         types::UInt16.encode(buf, &self.port)?;
         types::Int16.encode(buf, &self.security_protocol)?;
@@ -515,9 +539,9 @@ impl MapEncodable for Listener {
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
-        total_size += types::CompactString.compute_size(key)?;
+        total_size += types::CompactString.compute_size(&self.name)?;
         total_size += types::CompactString.compute_size(&self.host)?;
         total_size += types::UInt16.compute_size(&self.port)?;
         total_size += types::Int16.compute_size(&self.security_protocol)?;
@@ -536,10 +560,9 @@ impl MapEncodable for Listener {
 }
 
 #[cfg(feature = "broker")]
-impl MapDecodable for Listener {
-    type Key = StrBytes;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
-        let key_field = types::CompactString.decode(buf)?;
+impl Decodable for Listener {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        let name = types::CompactString.decode(buf)?;
         let host = types::CompactString.decode(buf)?;
         let port = types::UInt16.decode(buf)?;
         let security_protocol = types::Int16.decode(buf)?;
@@ -551,21 +574,20 @@ impl MapDecodable for Listener {
             let unknown_value = buf.try_get_bytes(size as usize)?;
             unknown_tagged_fields.insert(tag as i32, unknown_value);
         }
-        Ok((
-            key_field,
-            Self {
-                host,
-                port,
-                security_protocol,
-                unknown_tagged_fields,
-            },
-        ))
+        Ok(Self {
+            name,
+            host,
+            port,
+            security_protocol,
+            unknown_tagged_fields,
+        })
     }
 }
 
 impl Default for Listener {
     fn default() -> Self {
         Self {
+            name: Default::default(),
             host: Default::default(),
             port: 0,
             security_protocol: 0,

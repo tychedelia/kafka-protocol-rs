@@ -14,7 +14,7 @@ use uuid::Uuid;
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
-    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
+    Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-6
@@ -73,14 +73,14 @@ impl Encodable for DeleteTopicState {
             types::CompactString.encode(buf, &self.name)?;
         } else {
             if !self.name.is_none() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 6 {
             types::Uuid.encode(buf, &self.topic_id)?;
         } else {
             if &self.topic_id != &Uuid::nil() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 4 {
@@ -103,14 +103,14 @@ impl Encodable for DeleteTopicState {
             total_size += types::CompactString.compute_size(&self.name)?;
         } else {
             if !self.name.is_none() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 6 {
             total_size += types::Uuid.compute_size(&self.topic_id)?;
         } else {
             if &self.topic_id != &Uuid::nil() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 4 {
@@ -245,7 +245,7 @@ impl Encodable for DeleteTopicsRequest {
             types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
         } else {
             if !self.topics.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version <= 5 {
@@ -277,7 +277,7 @@ impl Encodable for DeleteTopicsRequest {
                 types::CompactArray(types::Struct { version }).compute_size(&self.topics)?;
         } else {
             if !self.topics.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version <= 5 {

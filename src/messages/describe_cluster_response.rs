@@ -14,13 +14,18 @@ use uuid::Uuid;
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
-    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
+    Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-1
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct DescribeClusterBroker {
+    /// The broker ID.
+    ///
+    /// Supported API versions: 0-1
+    pub broker_id: super::BrokerId,
+
     /// The broker hostname.
     ///
     /// Supported API versions: 0-1
@@ -41,6 +46,15 @@ pub struct DescribeClusterBroker {
 }
 
 impl DescribeClusterBroker {
+    /// Sets `broker_id` to the passed value.
+    ///
+    /// The broker ID.
+    ///
+    /// Supported API versions: 0-1
+    pub fn with_broker_id(mut self, value: super::BrokerId) -> Self {
+        self.broker_id = value;
+        self
+    }
     /// Sets `host` to the passed value.
     ///
     /// The broker hostname.
@@ -81,10 +95,9 @@ impl DescribeClusterBroker {
 }
 
 #[cfg(feature = "broker")]
-impl MapEncodable for DescribeClusterBroker {
-    type Key = super::BrokerId;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
-        types::Int32.encode(buf, key)?;
+impl Encodable for DescribeClusterBroker {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        types::Int32.encode(buf, &self.broker_id)?;
         types::CompactString.encode(buf, &self.host)?;
         types::Int32.encode(buf, &self.port)?;
         types::CompactString.encode(buf, &self.rack)?;
@@ -100,9 +113,9 @@ impl MapEncodable for DescribeClusterBroker {
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
-        total_size += types::Int32.compute_size(key)?;
+        total_size += types::Int32.compute_size(&self.broker_id)?;
         total_size += types::CompactString.compute_size(&self.host)?;
         total_size += types::Int32.compute_size(&self.port)?;
         total_size += types::CompactString.compute_size(&self.rack)?;
@@ -121,10 +134,9 @@ impl MapEncodable for DescribeClusterBroker {
 }
 
 #[cfg(feature = "client")]
-impl MapDecodable for DescribeClusterBroker {
-    type Key = super::BrokerId;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
-        let key_field = types::Int32.decode(buf)?;
+impl Decodable for DescribeClusterBroker {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        let broker_id = types::Int32.decode(buf)?;
         let host = types::CompactString.decode(buf)?;
         let port = types::Int32.decode(buf)?;
         let rack = types::CompactString.decode(buf)?;
@@ -136,21 +148,20 @@ impl MapDecodable for DescribeClusterBroker {
             let unknown_value = buf.try_get_bytes(size as usize)?;
             unknown_tagged_fields.insert(tag as i32, unknown_value);
         }
-        Ok((
-            key_field,
-            Self {
-                host,
-                port,
-                rack,
-                unknown_tagged_fields,
-            },
-        ))
+        Ok(Self {
+            broker_id,
+            host,
+            port,
+            rack,
+            unknown_tagged_fields,
+        })
     }
 }
 
 impl Default for DescribeClusterBroker {
     fn default() -> Self {
         Self {
+            broker_id: (0).into(),
             host: Default::default(),
             port: 0,
             rack: None,
@@ -201,7 +212,7 @@ pub struct DescribeClusterResponse {
     /// Each broker in the response.
     ///
     /// Supported API versions: 0-1
-    pub brokers: indexmap::IndexMap<super::BrokerId, DescribeClusterBroker>,
+    pub brokers: Vec<DescribeClusterBroker>,
 
     /// 32-bit bitfield to represent authorized operations for this cluster.
     ///
@@ -272,10 +283,7 @@ impl DescribeClusterResponse {
     /// Each broker in the response.
     ///
     /// Supported API versions: 0-1
-    pub fn with_brokers(
-        mut self,
-        value: indexmap::IndexMap<super::BrokerId, DescribeClusterBroker>,
-    ) -> Self {
+    pub fn with_brokers(mut self, value: Vec<DescribeClusterBroker>) -> Self {
         self.brokers = value;
         self
     }
@@ -310,7 +318,7 @@ impl Encodable for DescribeClusterResponse {
             types::Int8.encode(buf, &self.endpoint_type)?;
         } else {
             if self.endpoint_type != 1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         types::CompactString.encode(buf, &self.cluster_id)?;
@@ -338,7 +346,7 @@ impl Encodable for DescribeClusterResponse {
             total_size += types::Int8.compute_size(&self.endpoint_type)?;
         } else {
             if self.endpoint_type != 1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         total_size += types::CompactString.compute_size(&self.cluster_id)?;

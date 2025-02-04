@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::fs::File;
 use std::io::Write;
 use std::path::PathBuf;
@@ -11,13 +11,10 @@ mod generate;
 mod parse;
 mod spec;
 
-use spec::SpecType;
+use spec::{SpecType, VersionSpec};
 
 pub fn run(messages_module_dir: &str, mut input_file_paths: Vec<PathBuf>) -> Result<(), Error> {
     input_file_paths.sort();
-    let mut entity_types = BTreeSet::new();
-    let mut request_types = BTreeMap::new();
-    let mut response_types = BTreeMap::new();
 
     let module_path = format!("{}.rs", messages_module_dir);
 
@@ -38,6 +35,7 @@ pub fn run(messages_module_dir: &str, mut input_file_paths: Vec<PathBuf>) -> Res
     )?;
     writeln!(m, "#[cfg(all(feature = \"client\", feature = \"broker\"))]")?;
     writeln!(m, "use crate::protocol::Request;")?;
+    writeln!(m, "use crate::protocol::VersionRange;")?;
     writeln!(m, "use std::convert::TryFrom;")?;
     writeln!(m, "#[cfg(feature = \"messages_enums\")]")?;
     writeln!(m, "#[cfg(any(feature = \"client\", feature = \"broker\"))]")?;
@@ -51,15 +49,22 @@ pub fn run(messages_module_dir: &str, mut input_file_paths: Vec<PathBuf>) -> Res
     writeln!(m, "use anyhow::Context;")?;
     writeln!(m)?;
 
+    let mut entity_types = BTreeSet::new();
+    let mut request_types = BTreeMap::new();
+    let mut response_types = BTreeMap::new();
+    let mut api_key_to_valid_version: HashMap<i16, VersionSpec> = HashMap::new();
+
     for input_file_path in &input_file_paths {
         let spec = parse::parse(input_file_path)?;
         let spec_meta = (spec.type_, spec.api_key);
+        let valid_versions = spec.valid_versions;
 
         let outcome = generate::generate(messages_module_dir, spec)?;
         if let Some(output) = outcome {
             match spec_meta {
                 (SpecType::Request, Some(k)) => {
                     request_types.insert(k, output);
+                    api_key_to_valid_version.insert(k, valid_versions);
                 }
                 (SpecType::Response, Some(k)) => {
                     response_types.insert(k, output);
@@ -132,7 +137,7 @@ pub fn run(messages_module_dir: &str, mut input_file_paths: Vec<PathBuf>) -> Res
         writeln!(
             m,
             "    {} = {},",
-            request_type.replace("Request", "Key"),
+            request_type.replace("Request", ""),
             api_key
         )?;
     }
@@ -153,7 +158,7 @@ pub fn run(messages_module_dir: &str, mut input_file_paths: Vec<PathBuf>) -> Res
         writeln!(
             m,
             "            ApiKey::{} => {}::header_version(version),",
-            request_type.replace("Request", "Key"),
+            request_type.replace("Request", ""),
             request_type
         )?;
     }
@@ -173,12 +178,46 @@ pub fn run(messages_module_dir: &str, mut input_file_paths: Vec<PathBuf>) -> Res
         writeln!(
             m,
             "            ApiKey::{} => {}::header_version(version),",
-            response_type.replace("Response", "Key"),
+            response_type.replace("Response", ""),
             response_type
         )?;
     }
     writeln!(m, "        }}")?;
     writeln!(m, "    }}")?;
+
+    writeln!(
+        m,
+        "    /// Returns the valid versions that can be used with this ApiKey"
+    )?;
+    writeln!(m, "    pub fn valid_versions(&self) -> VersionRange {{")?;
+    writeln!(m, "        match self {{")?;
+    for (api_key, request_type) in request_types.iter() {
+        let valid_versions = api_key_to_valid_version
+            .get(api_key)
+            .unwrap()
+            .range()
+            .unwrap();
+        writeln!(
+            m,
+            "ApiKey::{} => VersionRange {{ min: {}, max: {} }},",
+            request_type.replace("Request", ""),
+            valid_versions.start(),
+            valid_versions.end(),
+        )?;
+    }
+    writeln!(m, "        }}")?;
+    writeln!(m, "    }}")?;
+
+    writeln!(
+        m,
+        r#"
+  /// Iterate through every ApiKey variant in the order of the internal code.
+  pub fn iter() -> impl Iterator<Item = ApiKey> {{
+    (0..i16::MAX).map_while(|i| ApiKey::try_from(i).ok())
+  }}
+    "#
+    )?;
+
     writeln!(m, "}}")?;
 
     writeln!(m, "impl TryFrom<i16> for ApiKey {{")?;
@@ -187,7 +226,7 @@ pub fn run(messages_module_dir: &str, mut input_file_paths: Vec<PathBuf>) -> Res
     writeln!(m, "    fn try_from(v: i16) -> Result<Self, Self::Error> {{")?;
     writeln!(m, "        match v {{")?;
     for (_, request_type) in request_types.iter() {
-        let key = request_type.replace("Request", "Key");
+        let key = request_type.replace("Request", "");
         writeln!(
             m,
             "            x if x == ApiKey::{} as i16 => Ok(ApiKey::{}),",
@@ -250,7 +289,7 @@ pub fn run(messages_module_dir: &str, mut input_file_paths: Vec<PathBuf>) -> Res
         let variant = request_type.trim_end_matches("Request");
         writeln!(
             m,
-            "ApiKey::{variant}Key => Ok(RequestKind::{variant}(decode(bytes, version)?)),"
+            "ApiKey::{variant} => Ok(RequestKind::{variant}(decode(bytes, version)?)),"
         )?;
     }
     writeln!(m, "}}")?;
@@ -351,7 +390,7 @@ fn encode<T: Encodable>(encodable: &T, bytes: &mut bytes::BytesMut, version: i16
         let variant = response_type.trim_end_matches("Response");
         writeln!(
             m,
-            "ApiKey::{variant}Key => Ok(ResponseKind::{variant}(decode(bytes, version)?)),"
+            "ApiKey::{variant} => Ok(ResponseKind::{variant}(decode(bytes, version)?)),"
         )?;
     }
     writeln!(m, "}}")?;

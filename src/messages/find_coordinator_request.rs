@@ -14,7 +14,7 @@ use uuid::Uuid;
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
-    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
+    Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-5
@@ -91,21 +91,21 @@ impl Encodable for FindCoordinatorRequest {
             }
         } else {
             if !self.key.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 1 {
             types::Int8.encode(buf, &self.key_type)?;
         } else {
             if self.key_type != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 4 {
             types::CompactArray(types::CompactString).encode(buf, &self.coordinator_keys)?;
         } else {
             if !self.coordinator_keys.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
@@ -132,14 +132,14 @@ impl Encodable for FindCoordinatorRequest {
             }
         } else {
             if !self.key.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 1 {
             total_size += types::Int8.compute_size(&self.key_type)?;
         } else {
             if self.key_type != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 4 {
@@ -147,7 +147,7 @@ impl Encodable for FindCoordinatorRequest {
                 types::CompactArray(types::CompactString).compute_size(&self.coordinator_keys)?;
         } else {
             if !self.coordinator_keys.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {

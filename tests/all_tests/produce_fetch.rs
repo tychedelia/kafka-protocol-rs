@@ -32,7 +32,7 @@ fn record_batch_produce_fetch() {
     ];
 
     let mut encoded = BytesMut::new();
-    RecordBatchEncoder::encode(
+    RecordBatchEncoder::encode_with_custom_compression(
         &mut encoded,
         &records,
         &RecordEncodeOptions {
@@ -74,7 +74,6 @@ fn message_set_v1_produce_fetch() {
             version: 1,
             compression: Compression::None,
         },
-        Some(compress_record_batch_data),
     )
     .unwrap();
 
@@ -91,51 +90,41 @@ fn message_set_v1_produce_fetch() {
 fn create_topic(topic_name: TopicName, socket: &mut TcpStream) {
     let version = 7;
     let header = RequestHeader::default()
-        .with_request_api_key(ApiKey::CreateTopicsKey as i16)
+        .with_request_api_key(ApiKey::CreateTopics as i16)
         .with_request_api_version(version);
 
     let request = CreateTopicsRequest::default()
         .with_timeout_ms(5000)
-        .with_topics(
-            [(
-                topic_name.clone(),
-                CreatableTopic::default()
-                    .with_num_partitions(1)
-                    .with_replication_factor(1),
-            )]
-            .into(),
-        );
+        .with_topics(vec![CreatableTopic::default()
+            .with_num_partitions(1)
+            .with_name(topic_name.clone())
+            .with_replication_factor(1)]);
 
     send_request(socket, header, request);
     let result: CreateTopicsResponse = receive_response(socket, version).1;
 
     assert_eq!(result.throttle_time_ms, 0, "response throttle time");
 
-    let topic = result.topics.get(&topic_name).unwrap();
+    let topic = result.topics.first().unwrap();
 
+    assert_eq!(topic.name, topic_name, "topic name");
     assert_eq!(topic.error_code, 0, "topic error code");
     assert_eq!(topic.error_message, None, "topic error message");
 }
 
 fn produce_records(topic_name: TopicName, version: i16, records: Bytes, socket: &mut TcpStream) {
     let header = RequestHeader::default()
-        .with_request_api_key(ApiKey::ProduceKey as i16)
+        .with_request_api_key(ApiKey::Produce as i16)
         .with_request_api_version(version);
 
     let request = ProduceRequest::default()
         .with_acks(1)
         .with_timeout_ms(5000)
-        .with_topic_data(
-            [(
-                topic_name.clone(),
-                TopicProduceData::default().with_partition_data(vec![
-                    PartitionProduceData::default()
-                        .with_index(0)
-                        .with_records(Some(records)),
-                ]),
-            )]
-            .into(),
-        );
+        .with_topic_data(vec![TopicProduceData::default()
+            .with_name(topic_name.clone())
+            .with_partition_data(vec![PartitionProduceData::default()
+                .with_index(0)
+                .with_records(Some(records))])]);
 
     send_request(socket, header, request);
 
@@ -143,7 +132,11 @@ fn produce_records(topic_name: TopicName, version: i16, records: Bytes, socket: 
 
     assert_eq!(result.throttle_time_ms, 0, "produce response throttle time");
 
-    let topic_response = result.responses.get(&topic_name).unwrap();
+    let topic_response = result.responses.first().unwrap();
+    assert_eq!(
+        topic_response.name, topic_name,
+        "produce response partition index"
+    );
     let partition_response = topic_response.partition_responses.first().unwrap();
 
     assert_eq!(
@@ -167,7 +160,7 @@ fn fetch_records(
     socket: &mut TcpStream,
 ) {
     let header = RequestHeader::default()
-        .with_request_api_key(ApiKey::FetchKey as i16)
+        .with_request_api_key(ApiKey::Fetch as i16)
         .with_request_api_version(version);
 
     let request = FetchRequest::default().with_topics(vec![FetchTopic::default()
@@ -202,9 +195,11 @@ fn fetch_records(
     );
 
     let mut fetched_records = partition_response.records.clone().unwrap();
-    let fetched_records =
-        RecordBatchDecoder::decode(&mut fetched_records, Some(decompress_record_batch_data))
-            .unwrap();
+    let fetched_records = RecordBatchDecoder::decode_with_custom_compression(
+        &mut fetched_records,
+        Some(decompress_record_batch_data),
+    )
+    .unwrap();
 
     eprintln!("{expected:#?}");
     eprintln!("{fetched_records:#?}");

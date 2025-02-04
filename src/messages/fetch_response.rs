@@ -14,7 +14,7 @@ use uuid::Uuid;
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
-    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
+    Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-16
@@ -73,14 +73,14 @@ impl Encodable for AbortedTransaction {
             types::Int64.encode(buf, &self.producer_id)?;
         } else {
             if self.producer_id != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 4 {
             types::Int64.encode(buf, &self.first_offset)?;
         } else {
             if self.first_offset != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 12 {
@@ -103,14 +103,14 @@ impl Encodable for AbortedTransaction {
             total_size += types::Int64.compute_size(&self.producer_id)?;
         } else {
             if self.producer_id != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 4 {
             total_size += types::Int64.compute_size(&self.first_offset)?;
         } else {
             if self.first_offset != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 12 {
@@ -231,14 +231,14 @@ impl Encodable for EpochEndOffset {
             types::Int32.encode(buf, &self.epoch)?;
         } else {
             if self.epoch != -1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 12 {
             types::Int64.encode(buf, &self.end_offset)?;
         } else {
             if self.end_offset != -1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 12 {
@@ -261,14 +261,14 @@ impl Encodable for EpochEndOffset {
             total_size += types::Int32.compute_size(&self.epoch)?;
         } else {
             if self.epoch != -1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 12 {
             total_size += types::Int64.compute_size(&self.end_offset)?;
         } else {
             if self.end_offset != -1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 12 {
@@ -360,7 +360,7 @@ pub struct FetchResponse {
     /// Endpoints for all current-leaders enumerated in PartitionData, with errors NOT_LEADER_OR_FOLLOWER & FENCED_LEADER_EPOCH.
     ///
     /// Supported API versions: 16
-    pub node_endpoints: indexmap::IndexMap<super::BrokerId, NodeEndpoint>,
+    pub node_endpoints: Vec<NodeEndpoint>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
@@ -408,10 +408,7 @@ impl FetchResponse {
     /// Endpoints for all current-leaders enumerated in PartitionData, with errors NOT_LEADER_OR_FOLLOWER & FENCED_LEADER_EPOCH.
     ///
     /// Supported API versions: 16
-    pub fn with_node_endpoints(
-        mut self,
-        value: indexmap::IndexMap<super::BrokerId, NodeEndpoint>,
-    ) -> Self {
+    pub fn with_node_endpoints(mut self, value: Vec<NodeEndpoint>) -> Self {
         self.node_endpoints = value;
         self
     }
@@ -440,7 +437,7 @@ impl Encodable for FetchResponse {
             types::Int32.encode(buf, &self.session_id)?;
         } else {
             if self.session_id != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 12 {
@@ -494,7 +491,7 @@ impl Encodable for FetchResponse {
             total_size += types::Int32.compute_size(&self.session_id)?;
         } else {
             if self.session_id != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 12 {
@@ -855,14 +852,14 @@ impl Encodable for LeaderIdAndEpoch {
             types::Int32.encode(buf, &self.leader_id)?;
         } else {
             if self.leader_id != -1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 12 {
             types::Int32.encode(buf, &self.leader_epoch)?;
         } else {
             if self.leader_epoch != -1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 12 {
@@ -885,14 +882,14 @@ impl Encodable for LeaderIdAndEpoch {
             total_size += types::Int32.compute_size(&self.leader_id)?;
         } else {
             if self.leader_id != -1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 12 {
             total_size += types::Int32.compute_size(&self.leader_epoch)?;
         } else {
             if self.leader_epoch != -1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 12 {
@@ -961,6 +958,11 @@ impl Message for LeaderIdAndEpoch {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct NodeEndpoint {
+    /// The ID of the associated node.
+    ///
+    /// Supported API versions: 16
+    pub node_id: super::BrokerId,
+
     /// The node's hostname.
     ///
     /// Supported API versions: 16
@@ -981,6 +983,15 @@ pub struct NodeEndpoint {
 }
 
 impl NodeEndpoint {
+    /// Sets `node_id` to the passed value.
+    ///
+    /// The ID of the associated node.
+    ///
+    /// Supported API versions: 16
+    pub fn with_node_id(mut self, value: super::BrokerId) -> Self {
+        self.node_id = value;
+        self
+    }
     /// Sets `host` to the passed value.
     ///
     /// The node's hostname.
@@ -1021,35 +1032,34 @@ impl NodeEndpoint {
 }
 
 #[cfg(feature = "broker")]
-impl MapEncodable for NodeEndpoint {
-    type Key = super::BrokerId;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
+impl Encodable for NodeEndpoint {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 16 {
-            types::Int32.encode(buf, key)?;
+            types::Int32.encode(buf, &self.node_id)?;
         } else {
-            if *key != 0 {
-                bail!("failed to encode");
+            if self.node_id != 0 {
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 16 {
             types::CompactString.encode(buf, &self.host)?;
         } else {
             if !self.host.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 16 {
             types::Int32.encode(buf, &self.port)?;
         } else {
             if self.port != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 16 {
             types::CompactString.encode(buf, &self.rack)?;
         } else {
             if !self.rack.is_none() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 12 {
@@ -1066,34 +1076,34 @@ impl MapEncodable for NodeEndpoint {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 16 {
-            total_size += types::Int32.compute_size(key)?;
+            total_size += types::Int32.compute_size(&self.node_id)?;
         } else {
-            if *key != 0 {
-                bail!("failed to encode");
+            if self.node_id != 0 {
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 16 {
             total_size += types::CompactString.compute_size(&self.host)?;
         } else {
             if !self.host.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 16 {
             total_size += types::Int32.compute_size(&self.port)?;
         } else {
             if self.port != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 16 {
             total_size += types::CompactString.compute_size(&self.rack)?;
         } else {
             if !self.rack.is_none() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 12 {
@@ -1113,10 +1123,9 @@ impl MapEncodable for NodeEndpoint {
 }
 
 #[cfg(feature = "client")]
-impl MapDecodable for NodeEndpoint {
-    type Key = super::BrokerId;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
-        let key_field = if version >= 16 {
+impl Decodable for NodeEndpoint {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        let node_id = if version >= 16 {
             types::Int32.decode(buf)?
         } else {
             (0).into()
@@ -1146,21 +1155,20 @@ impl MapDecodable for NodeEndpoint {
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
-        Ok((
-            key_field,
-            Self {
-                host,
-                port,
-                rack,
-                unknown_tagged_fields,
-            },
-        ))
+        Ok(Self {
+            node_id,
+            host,
+            port,
+            rack,
+            unknown_tagged_fields,
+        })
     }
 }
 
 impl Default for NodeEndpoint {
     fn default() -> Self {
         Self {
+            node_id: (0).into(),
             host: Default::default(),
             port: 0,
             rack: None,
@@ -1373,7 +1381,7 @@ impl Encodable for PartitionData {
             types::Int32.encode(buf, &self.preferred_read_replica)?;
         } else {
             if self.preferred_read_replica != -1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 12 {
@@ -1465,7 +1473,7 @@ impl Encodable for PartitionData {
             total_size += types::Int32.compute_size(&self.preferred_read_replica)?;
         } else {
             if self.preferred_read_replica != -1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 12 {

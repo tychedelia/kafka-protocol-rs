@@ -14,7 +14,7 @@ use uuid::Uuid;
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
-    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
+    Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-11
@@ -177,7 +177,7 @@ pub struct ProduceRequest {
     /// Each topic to produce to.
     ///
     /// Supported API versions: 0-11
-    pub topic_data: indexmap::IndexMap<super::TopicName, TopicProduceData>,
+    pub topic_data: Vec<TopicProduceData>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
@@ -216,10 +216,7 @@ impl ProduceRequest {
     /// Each topic to produce to.
     ///
     /// Supported API versions: 0-11
-    pub fn with_topic_data(
-        mut self,
-        value: indexmap::IndexMap<super::TopicName, TopicProduceData>,
-    ) -> Self {
+    pub fn with_topic_data(mut self, value: Vec<TopicProduceData>) -> Self {
         self.topic_data = value;
         self
     }
@@ -246,7 +243,7 @@ impl Encodable for ProduceRequest {
             }
         } else {
             if !self.transactional_id.is_none() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         types::Int16.encode(buf, &self.acks)?;
@@ -280,7 +277,7 @@ impl Encodable for ProduceRequest {
             }
         } else {
             if !self.transactional_id.is_none() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         total_size += types::Int16.compute_size(&self.acks)?;
@@ -367,6 +364,11 @@ impl Message for ProduceRequest {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct TopicProduceData {
+    /// The topic name.
+    ///
+    /// Supported API versions: 0-11
+    pub name: super::TopicName,
+
     /// Each partition to produce to.
     ///
     /// Supported API versions: 0-11
@@ -377,6 +379,15 @@ pub struct TopicProduceData {
 }
 
 impl TopicProduceData {
+    /// Sets `name` to the passed value.
+    ///
+    /// The topic name.
+    ///
+    /// Supported API versions: 0-11
+    pub fn with_name(mut self, value: super::TopicName) -> Self {
+        self.name = value;
+        self
+    }
     /// Sets `partition_data` to the passed value.
     ///
     /// Each partition to produce to.
@@ -399,13 +410,12 @@ impl TopicProduceData {
 }
 
 #[cfg(feature = "client")]
-impl MapEncodable for TopicProduceData {
-    type Key = super::TopicName;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
+impl Encodable for TopicProduceData {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 9 {
-            types::CompactString.encode(buf, key)?;
+            types::CompactString.encode(buf, &self.name)?;
         } else {
-            types::String.encode(buf, key)?;
+            types::String.encode(buf, &self.name)?;
         }
         if version >= 9 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.partition_data)?;
@@ -426,12 +436,12 @@ impl MapEncodable for TopicProduceData {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 9 {
-            total_size += types::CompactString.compute_size(key)?;
+            total_size += types::CompactString.compute_size(&self.name)?;
         } else {
-            total_size += types::String.compute_size(key)?;
+            total_size += types::String.compute_size(&self.name)?;
         }
         if version >= 9 {
             total_size += types::CompactArray(types::Struct { version })
@@ -457,10 +467,9 @@ impl MapEncodable for TopicProduceData {
 }
 
 #[cfg(feature = "broker")]
-impl MapDecodable for TopicProduceData {
-    type Key = super::TopicName;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
-        let key_field = if version >= 9 {
+impl Decodable for TopicProduceData {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        let name = if version >= 9 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
@@ -480,19 +489,18 @@ impl MapDecodable for TopicProduceData {
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
-        Ok((
-            key_field,
-            Self {
-                partition_data,
-                unknown_tagged_fields,
-            },
-        ))
+        Ok(Self {
+            name,
+            partition_data,
+            unknown_tagged_fields,
+        })
     }
 }
 
 impl Default for TopicProduceData {
     fn default() -> Self {
         Self {
+            name: Default::default(),
             partition_data: Default::default(),
             unknown_tagged_fields: BTreeMap::new(),
         }

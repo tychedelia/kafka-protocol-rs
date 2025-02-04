@@ -1,10 +1,10 @@
 //! Most types are used internally in encoding/decoding, and are not required by typical use cases
 //! for interacting with the protocol. However, types can be used for decoding partial messages,
 //! or rewriting parts of an encoded message.
-use std::borrow::Borrow;
 use std::cmp;
 use std::collections::BTreeMap;
 use std::ops::RangeBounds;
+use std::{borrow::Borrow, fmt::Display};
 
 use anyhow::{bail, Result};
 use buf::{ByteBuf, ByteBufMut};
@@ -128,7 +128,7 @@ pub(crate) trait Decoder<Value> {
 }
 
 /// The range of versions (min, max) allowed for agiven message.
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct VersionRange {
     /// The minimum version in the range.
     pub min: i16,
@@ -148,6 +148,12 @@ impl VersionRange {
             min: cmp::max(self.min, other.min),
             max: cmp::min(self.max, other.max),
         }
+    }
+}
+
+impl Display for VersionRange {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}..{}", self.min, self.max)
     }
 }
 
@@ -175,17 +181,6 @@ pub trait Decodable: Sized {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self>;
 }
 
-pub(crate) trait MapEncodable: Sized {
-    type Key;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()>;
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize>;
-}
-
-pub(crate) trait MapDecodable: Sized {
-    type Key;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)>;
-}
-
 /// Every message has a set of versions valid for a given header version.
 pub trait HeaderVersion {
     /// Maps a header version to a given version for a particular API message.
@@ -210,7 +205,7 @@ pub(crate) fn write_unknown_tagged_fields<B: ByteBufMut, R: RangeBounds<i32>>(
     unknown_tagged_fields: &BTreeMap<i32, Bytes>,
 ) -> Result<()> {
     for (&k, v) in unknown_tagged_fields.range(range) {
-        if v.len() > std::u32::MAX as usize {
+        if v.len() > u32::MAX as usize {
             bail!("Tagged field is too long to encode ({} bytes)", v.len());
         }
         types::UnsignedVarInt.encode(buf, k as u32)?;
@@ -225,7 +220,7 @@ pub(crate) fn compute_unknown_tagged_fields_size(
 ) -> Result<usize> {
     let mut total_size = 0;
     for (&k, v) in unknown_tagged_fields {
-        if v.len() > std::u32::MAX as usize {
+        if v.len() > u32::MAX as usize {
             bail!("Tagged field is too long to encode ({} bytes)", v.len());
         }
         total_size += types::UnsignedVarInt.compute_size(k as u32)?;

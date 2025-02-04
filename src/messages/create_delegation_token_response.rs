@@ -14,7 +14,7 @@ use uuid::Uuid;
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
-    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
+    Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-3
@@ -210,14 +210,14 @@ impl Encodable for CreateDelegationTokenResponse {
             types::CompactString.encode(buf, &self.token_requester_principal_type)?;
         } else {
             if !self.token_requester_principal_type.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
             types::CompactString.encode(buf, &self.token_requester_principal_name)?;
         } else {
             if !self.token_requester_principal_name.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         types::Int64.encode(buf, &self.issue_timestamp_ms)?;
@@ -266,7 +266,7 @@ impl Encodable for CreateDelegationTokenResponse {
                 types::CompactString.compute_size(&self.token_requester_principal_type)?;
         } else {
             if !self.token_requester_principal_type.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
@@ -274,7 +274,7 @@ impl Encodable for CreateDelegationTokenResponse {
                 types::CompactString.compute_size(&self.token_requester_principal_name)?;
         } else {
             if !self.token_requester_principal_name.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         total_size += types::Int64.compute_size(&self.issue_timestamp_ms)?;

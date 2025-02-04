@@ -14,7 +14,7 @@ use uuid::Uuid;
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
-    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
+    Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0
@@ -149,7 +149,7 @@ pub struct DescribeTopicPartitionsResponse {
     /// Each topic in the response.
     ///
     /// Supported API versions: 0
-    pub topics: indexmap::IndexMap<super::TopicName, DescribeTopicPartitionsResponseTopic>,
+    pub topics: Vec<DescribeTopicPartitionsResponseTopic>,
 
     /// The next topic and partition index to fetch details for.
     ///
@@ -175,10 +175,7 @@ impl DescribeTopicPartitionsResponse {
     /// Each topic in the response.
     ///
     /// Supported API versions: 0
-    pub fn with_topics(
-        mut self,
-        value: indexmap::IndexMap<super::TopicName, DescribeTopicPartitionsResponseTopic>,
-    ) -> Self {
+    pub fn with_topics(mut self, value: Vec<DescribeTopicPartitionsResponseTopic>) -> Self {
         self.topics = value;
         self
     }
@@ -542,6 +539,11 @@ pub struct DescribeTopicPartitionsResponseTopic {
     /// Supported API versions: 0
     pub error_code: i16,
 
+    /// The topic name.
+    ///
+    /// Supported API versions: 0
+    pub name: Option<super::TopicName>,
+
     /// The topic id.
     ///
     /// Supported API versions: 0
@@ -574,6 +576,15 @@ impl DescribeTopicPartitionsResponseTopic {
     /// Supported API versions: 0
     pub fn with_error_code(mut self, value: i16) -> Self {
         self.error_code = value;
+        self
+    }
+    /// Sets `name` to the passed value.
+    ///
+    /// The topic name.
+    ///
+    /// Supported API versions: 0
+    pub fn with_name(mut self, value: Option<super::TopicName>) -> Self {
+        self.name = value;
         self
     }
     /// Sets `topic_id` to the passed value.
@@ -625,11 +636,10 @@ impl DescribeTopicPartitionsResponseTopic {
 }
 
 #[cfg(feature = "broker")]
-impl MapEncodable for DescribeTopicPartitionsResponseTopic {
-    type Key = super::TopicName;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
+impl Encodable for DescribeTopicPartitionsResponseTopic {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int16.encode(buf, &self.error_code)?;
-        types::CompactString.encode(buf, key)?;
+        types::CompactString.encode(buf, &self.name)?;
         types::Uuid.encode(buf, &self.topic_id)?;
         types::Boolean.encode(buf, &self.is_internal)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.partitions)?;
@@ -646,10 +656,10 @@ impl MapEncodable for DescribeTopicPartitionsResponseTopic {
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int16.compute_size(&self.error_code)?;
-        total_size += types::CompactString.compute_size(key)?;
+        total_size += types::CompactString.compute_size(&self.name)?;
         total_size += types::Uuid.compute_size(&self.topic_id)?;
         total_size += types::Boolean.compute_size(&self.is_internal)?;
         total_size +=
@@ -670,11 +680,10 @@ impl MapEncodable for DescribeTopicPartitionsResponseTopic {
 }
 
 #[cfg(feature = "client")]
-impl MapDecodable for DescribeTopicPartitionsResponseTopic {
-    type Key = super::TopicName;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
+impl Decodable for DescribeTopicPartitionsResponseTopic {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let error_code = types::Int16.decode(buf)?;
-        let key_field = types::CompactString.decode(buf)?;
+        let name = types::CompactString.decode(buf)?;
         let topic_id = types::Uuid.decode(buf)?;
         let is_internal = types::Boolean.decode(buf)?;
         let partitions = types::CompactArray(types::Struct { version }).decode(buf)?;
@@ -687,17 +696,15 @@ impl MapDecodable for DescribeTopicPartitionsResponseTopic {
             let unknown_value = buf.try_get_bytes(size as usize)?;
             unknown_tagged_fields.insert(tag as i32, unknown_value);
         }
-        Ok((
-            key_field,
-            Self {
-                error_code,
-                topic_id,
-                is_internal,
-                partitions,
-                topic_authorized_operations,
-                unknown_tagged_fields,
-            },
-        ))
+        Ok(Self {
+            error_code,
+            name,
+            topic_id,
+            is_internal,
+            partitions,
+            topic_authorized_operations,
+            unknown_tagged_fields,
+        })
     }
 }
 
@@ -705,6 +712,7 @@ impl Default for DescribeTopicPartitionsResponseTopic {
     fn default() -> Self {
         Self {
             error_code: 0,
+            name: Some(Default::default()),
             topic_id: Uuid::nil(),
             is_internal: false,
             partitions: Default::default(),

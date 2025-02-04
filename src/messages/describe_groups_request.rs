@@ -14,7 +14,7 @@ use uuid::Uuid;
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
-    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
+    Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-5
@@ -78,7 +78,7 @@ impl Encodable for DescribeGroupsRequest {
             types::Boolean.encode(buf, &self.include_authorized_operations)?;
         } else {
             if self.include_authorized_operations {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 5 {
@@ -106,7 +106,7 @@ impl Encodable for DescribeGroupsRequest {
             total_size += types::Boolean.compute_size(&self.include_authorized_operations)?;
         } else {
             if self.include_authorized_operations {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 5 {

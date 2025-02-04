@@ -14,7 +14,7 @@ use uuid::Uuid;
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
-    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
+    Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0
@@ -29,7 +29,7 @@ pub struct OffsetDeleteRequest {
     /// The topics to delete offsets for
     ///
     /// Supported API versions: 0
-    pub topics: indexmap::IndexMap<super::TopicName, OffsetDeleteRequestTopic>,
+    pub topics: Vec<OffsetDeleteRequestTopic>,
 }
 
 impl OffsetDeleteRequest {
@@ -47,10 +47,7 @@ impl OffsetDeleteRequest {
     /// The topics to delete offsets for
     ///
     /// Supported API versions: 0
-    pub fn with_topics(
-        mut self,
-        value: indexmap::IndexMap<super::TopicName, OffsetDeleteRequestTopic>,
-    ) -> Self {
+    pub fn with_topics(mut self, value: Vec<OffsetDeleteRequestTopic>) -> Self {
         self.topics = value;
         self
     }
@@ -156,6 +153,11 @@ impl Message for OffsetDeleteRequestPartition {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct OffsetDeleteRequestTopic {
+    /// The topic name.
+    ///
+    /// Supported API versions: 0
+    pub name: super::TopicName,
+
     /// Each partition to delete offsets for.
     ///
     /// Supported API versions: 0
@@ -163,6 +165,15 @@ pub struct OffsetDeleteRequestTopic {
 }
 
 impl OffsetDeleteRequestTopic {
+    /// Sets `name` to the passed value.
+    ///
+    /// The topic name.
+    ///
+    /// Supported API versions: 0
+    pub fn with_name(mut self, value: super::TopicName) -> Self {
+        self.name = value;
+        self
+    }
     /// Sets `partitions` to the passed value.
     ///
     /// Each partition to delete offsets for.
@@ -175,17 +186,16 @@ impl OffsetDeleteRequestTopic {
 }
 
 #[cfg(feature = "client")]
-impl MapEncodable for OffsetDeleteRequestTopic {
-    type Key = super::TopicName;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
-        types::String.encode(buf, key)?;
+impl Encodable for OffsetDeleteRequestTopic {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        types::String.encode(buf, &self.name)?;
         types::Array(types::Struct { version }).encode(buf, &self.partitions)?;
 
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
-        total_size += types::String.compute_size(key)?;
+        total_size += types::String.compute_size(&self.name)?;
         total_size += types::Array(types::Struct { version }).compute_size(&self.partitions)?;
 
         Ok(total_size)
@@ -193,18 +203,18 @@ impl MapEncodable for OffsetDeleteRequestTopic {
 }
 
 #[cfg(feature = "broker")]
-impl MapDecodable for OffsetDeleteRequestTopic {
-    type Key = super::TopicName;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
-        let key_field = types::String.decode(buf)?;
+impl Decodable for OffsetDeleteRequestTopic {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        let name = types::String.decode(buf)?;
         let partitions = types::Array(types::Struct { version }).decode(buf)?;
-        Ok((key_field, Self { partitions }))
+        Ok(Self { name, partitions })
     }
 }
 
 impl Default for OffsetDeleteRequestTopic {
     fn default() -> Self {
         Self {
+            name: Default::default(),
             partitions: Default::default(),
         }
     }

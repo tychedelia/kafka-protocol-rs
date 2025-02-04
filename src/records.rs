@@ -554,6 +554,14 @@ impl RecordBatchDecoder {
     }
 
     /// Decode the provided buffer into a vec of records.
+    pub fn decode<B: ByteBuf>(buf: &mut B) -> Result<Vec<Record>> {
+        Self::decode_with_custom_compression(
+            buf,
+            None::<fn(&mut bytes::Bytes, Compression) -> Result<B>>,
+        )
+    }
+
+    /// Decode the provided buffer into a vec of records.
     /// # Arguments
     /// * `decompressor` - A function that decompresses the given batch of records.
     ///

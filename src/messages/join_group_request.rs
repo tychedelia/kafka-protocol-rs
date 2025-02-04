@@ -14,7 +14,7 @@ use uuid::Uuid;
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
-    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
+    Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-9
@@ -54,7 +54,7 @@ pub struct JoinGroupRequest {
     /// The list of protocols that the member supports.
     ///
     /// Supported API versions: 0-9
-    pub protocols: indexmap::IndexMap<StrBytes, JoinGroupRequestProtocol>,
+    pub protocols: Vec<JoinGroupRequestProtocol>,
 
     /// The reason why the member (re-)joins the group.
     ///
@@ -125,10 +125,7 @@ impl JoinGroupRequest {
     /// The list of protocols that the member supports.
     ///
     /// Supported API versions: 0-9
-    pub fn with_protocols(
-        mut self,
-        value: indexmap::IndexMap<StrBytes, JoinGroupRequestProtocol>,
-    ) -> Self {
+    pub fn with_protocols(mut self, value: Vec<JoinGroupRequestProtocol>) -> Self {
         self.protocols = value;
         self
     }
@@ -178,7 +175,7 @@ impl Encodable for JoinGroupRequest {
             }
         } else {
             if !self.group_instance_id.is_none() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 6 {
@@ -232,7 +229,7 @@ impl Encodable for JoinGroupRequest {
             }
         } else {
             if !self.group_instance_id.is_none() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 6 {
@@ -357,6 +354,11 @@ impl Message for JoinGroupRequest {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct JoinGroupRequestProtocol {
+    /// The protocol name.
+    ///
+    /// Supported API versions: 0-9
+    pub name: StrBytes,
+
     /// The protocol metadata.
     ///
     /// Supported API versions: 0-9
@@ -367,6 +369,15 @@ pub struct JoinGroupRequestProtocol {
 }
 
 impl JoinGroupRequestProtocol {
+    /// Sets `name` to the passed value.
+    ///
+    /// The protocol name.
+    ///
+    /// Supported API versions: 0-9
+    pub fn with_name(mut self, value: StrBytes) -> Self {
+        self.name = value;
+        self
+    }
     /// Sets `metadata` to the passed value.
     ///
     /// The protocol metadata.
@@ -389,13 +400,12 @@ impl JoinGroupRequestProtocol {
 }
 
 #[cfg(feature = "client")]
-impl MapEncodable for JoinGroupRequestProtocol {
-    type Key = StrBytes;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
+impl Encodable for JoinGroupRequestProtocol {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 6 {
-            types::CompactString.encode(buf, key)?;
+            types::CompactString.encode(buf, &self.name)?;
         } else {
-            types::String.encode(buf, key)?;
+            types::String.encode(buf, &self.name)?;
         }
         if version >= 6 {
             types::CompactBytes.encode(buf, &self.metadata)?;
@@ -416,12 +426,12 @@ impl MapEncodable for JoinGroupRequestProtocol {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 6 {
-            total_size += types::CompactString.compute_size(key)?;
+            total_size += types::CompactString.compute_size(&self.name)?;
         } else {
-            total_size += types::String.compute_size(key)?;
+            total_size += types::String.compute_size(&self.name)?;
         }
         if version >= 6 {
             total_size += types::CompactBytes.compute_size(&self.metadata)?;
@@ -445,10 +455,9 @@ impl MapEncodable for JoinGroupRequestProtocol {
 }
 
 #[cfg(feature = "broker")]
-impl MapDecodable for JoinGroupRequestProtocol {
-    type Key = StrBytes;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
-        let key_field = if version >= 6 {
+impl Decodable for JoinGroupRequestProtocol {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        let name = if version >= 6 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
@@ -468,19 +477,18 @@ impl MapDecodable for JoinGroupRequestProtocol {
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
-        Ok((
-            key_field,
-            Self {
-                metadata,
-                unknown_tagged_fields,
-            },
-        ))
+        Ok(Self {
+            name,
+            metadata,
+            unknown_tagged_fields,
+        })
     }
 }
 
 impl Default for JoinGroupRequestProtocol {
     fn default() -> Self {
         Self {
+            name: Default::default(),
             metadata: Default::default(),
             unknown_tagged_fields: BTreeMap::new(),
         }

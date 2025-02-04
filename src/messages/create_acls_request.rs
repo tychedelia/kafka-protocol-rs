@@ -14,7 +14,7 @@ use uuid::Uuid;
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
-    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
+    Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-3
@@ -149,7 +149,7 @@ impl Encodable for AclCreation {
             types::Int8.encode(buf, &self.resource_pattern_type)?;
         } else {
             if self.resource_pattern_type != 3 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 2 {
@@ -190,7 +190,7 @@ impl Encodable for AclCreation {
             total_size += types::Int8.compute_size(&self.resource_pattern_type)?;
         } else {
             if self.resource_pattern_type != 3 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 2 {

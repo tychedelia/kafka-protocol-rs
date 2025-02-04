@@ -14,7 +14,7 @@ use uuid::Uuid;
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
-    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
+    Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-7
@@ -199,7 +199,7 @@ pub struct LeaderAndIsrResponse {
     /// Each topic
     ///
     /// Supported API versions: 5-7
-    pub topics: indexmap::IndexMap<Uuid, LeaderAndIsrTopicError>,
+    pub topics: Vec<LeaderAndIsrTopicError>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
@@ -229,7 +229,7 @@ impl LeaderAndIsrResponse {
     /// Each topic
     ///
     /// Supported API versions: 5-7
-    pub fn with_topics(mut self, value: indexmap::IndexMap<Uuid, LeaderAndIsrTopicError>) -> Self {
+    pub fn with_topics(mut self, value: Vec<LeaderAndIsrTopicError>) -> Self {
         self.topics = value;
         self
     }
@@ -258,14 +258,14 @@ impl Encodable for LeaderAndIsrResponse {
             }
         } else {
             if !self.partition_errors.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 5 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
         } else {
             if !self.topics.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 4 {
@@ -295,7 +295,7 @@ impl Encodable for LeaderAndIsrResponse {
             }
         } else {
             if !self.partition_errors.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 5 {
@@ -303,7 +303,7 @@ impl Encodable for LeaderAndIsrResponse {
                 types::CompactArray(types::Struct { version }).compute_size(&self.topics)?;
         } else {
             if !self.topics.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 4 {
@@ -379,6 +379,11 @@ impl Message for LeaderAndIsrResponse {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct LeaderAndIsrTopicError {
+    /// The unique topic ID
+    ///
+    /// Supported API versions: 5-7
+    pub topic_id: Uuid,
+
     /// Each partition.
     ///
     /// Supported API versions: 5-7
@@ -389,6 +394,15 @@ pub struct LeaderAndIsrTopicError {
 }
 
 impl LeaderAndIsrTopicError {
+    /// Sets `topic_id` to the passed value.
+    ///
+    /// The unique topic ID
+    ///
+    /// Supported API versions: 5-7
+    pub fn with_topic_id(mut self, value: Uuid) -> Self {
+        self.topic_id = value;
+        self
+    }
     /// Sets `partition_errors` to the passed value.
     ///
     /// Each partition.
@@ -411,21 +425,20 @@ impl LeaderAndIsrTopicError {
 }
 
 #[cfg(feature = "broker")]
-impl MapEncodable for LeaderAndIsrTopicError {
-    type Key = Uuid;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
+impl Encodable for LeaderAndIsrTopicError {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 5 {
-            types::Uuid.encode(buf, key)?;
+            types::Uuid.encode(buf, &self.topic_id)?;
         } else {
-            if key != &Uuid::nil() {
-                bail!("failed to encode");
+            if &self.topic_id != &Uuid::nil() {
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 5 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.partition_errors)?;
         } else {
             if !self.partition_errors.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 4 {
@@ -442,13 +455,13 @@ impl MapEncodable for LeaderAndIsrTopicError {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 5 {
-            total_size += types::Uuid.compute_size(key)?;
+            total_size += types::Uuid.compute_size(&self.topic_id)?;
         } else {
-            if key != &Uuid::nil() {
-                bail!("failed to encode");
+            if &self.topic_id != &Uuid::nil() {
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 5 {
@@ -456,7 +469,7 @@ impl MapEncodable for LeaderAndIsrTopicError {
                 .compute_size(&self.partition_errors)?;
         } else {
             if !self.partition_errors.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 4 {
@@ -476,10 +489,9 @@ impl MapEncodable for LeaderAndIsrTopicError {
 }
 
 #[cfg(feature = "client")]
-impl MapDecodable for LeaderAndIsrTopicError {
-    type Key = Uuid;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
-        let key_field = if version >= 5 {
+impl Decodable for LeaderAndIsrTopicError {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        let topic_id = if version >= 5 {
             types::Uuid.decode(buf)?
         } else {
             Uuid::nil()
@@ -499,19 +511,18 @@ impl MapDecodable for LeaderAndIsrTopicError {
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
-        Ok((
-            key_field,
-            Self {
-                partition_errors,
-                unknown_tagged_fields,
-            },
-        ))
+        Ok(Self {
+            topic_id,
+            partition_errors,
+            unknown_tagged_fields,
+        })
     }
 }
 
 impl Default for LeaderAndIsrTopicError {
     fn default() -> Self {
         Self {
+            topic_id: Uuid::nil(),
             partition_errors: Default::default(),
             unknown_tagged_fields: BTreeMap::new(),
         }

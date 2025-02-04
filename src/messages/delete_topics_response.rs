@@ -14,13 +14,18 @@ use uuid::Uuid;
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
-    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
+    Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-6
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct DeletableTopicResult {
+    /// The topic name
+    ///
+    /// Supported API versions: 0-6
+    pub name: Option<super::TopicName>,
+
     /// the unique topic ID
     ///
     /// Supported API versions: 6
@@ -41,6 +46,15 @@ pub struct DeletableTopicResult {
 }
 
 impl DeletableTopicResult {
+    /// Sets `name` to the passed value.
+    ///
+    /// The topic name
+    ///
+    /// Supported API versions: 0-6
+    pub fn with_name(mut self, value: Option<super::TopicName>) -> Self {
+        self.name = value;
+        self
+    }
     /// Sets `topic_id` to the passed value.
     ///
     /// the unique topic ID
@@ -81,13 +95,12 @@ impl DeletableTopicResult {
 }
 
 #[cfg(feature = "broker")]
-impl MapEncodable for DeletableTopicResult {
-    type Key = super::TopicName;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
+impl Encodable for DeletableTopicResult {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 4 {
-            types::CompactString.encode(buf, key)?;
+            types::CompactString.encode(buf, &self.name)?;
         } else {
-            types::String.encode(buf, key)?;
+            types::String.encode(buf, &self.name)?;
         }
         if version >= 6 {
             types::Uuid.encode(buf, &self.topic_id)?;
@@ -110,12 +123,12 @@ impl MapEncodable for DeletableTopicResult {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 4 {
-            total_size += types::CompactString.compute_size(key)?;
+            total_size += types::CompactString.compute_size(&self.name)?;
         } else {
-            total_size += types::String.compute_size(key)?;
+            total_size += types::String.compute_size(&self.name)?;
         }
         if version >= 6 {
             total_size += types::Uuid.compute_size(&self.topic_id)?;
@@ -141,10 +154,9 @@ impl MapEncodable for DeletableTopicResult {
 }
 
 #[cfg(feature = "client")]
-impl MapDecodable for DeletableTopicResult {
-    type Key = super::TopicName;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
-        let key_field = if version >= 4 {
+impl Decodable for DeletableTopicResult {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        let name = if version >= 4 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
@@ -170,21 +182,20 @@ impl MapDecodable for DeletableTopicResult {
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
-        Ok((
-            key_field,
-            Self {
-                topic_id,
-                error_code,
-                error_message,
-                unknown_tagged_fields,
-            },
-        ))
+        Ok(Self {
+            name,
+            topic_id,
+            error_code,
+            error_message,
+            unknown_tagged_fields,
+        })
     }
 }
 
 impl Default for DeletableTopicResult {
     fn default() -> Self {
         Self {
+            name: Some(Default::default()),
             topic_id: Uuid::nil(),
             error_code: 0,
             error_message: None,
@@ -210,7 +221,7 @@ pub struct DeleteTopicsResponse {
     /// The results for each topic we tried to delete.
     ///
     /// Supported API versions: 0-6
-    pub responses: indexmap::IndexMap<super::TopicName, DeletableTopicResult>,
+    pub responses: Vec<DeletableTopicResult>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
@@ -231,10 +242,7 @@ impl DeleteTopicsResponse {
     /// The results for each topic we tried to delete.
     ///
     /// Supported API versions: 0-6
-    pub fn with_responses(
-        mut self,
-        value: indexmap::IndexMap<super::TopicName, DeletableTopicResult>,
-    ) -> Self {
+    pub fn with_responses(mut self, value: Vec<DeletableTopicResult>) -> Self {
         self.responses = value;
         self
     }

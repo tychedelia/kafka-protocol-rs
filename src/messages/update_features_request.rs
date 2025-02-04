@@ -14,13 +14,18 @@ use uuid::Uuid;
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
-    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
+    Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-1
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct FeatureUpdateKey {
+    /// The name of the finalized feature to be updated.
+    ///
+    /// Supported API versions: 0-1
+    pub feature: StrBytes,
+
     /// The new maximum version level for the finalized feature. A value >= 1 is valid. A value < 1, is special, and can be used to request the deletion of the finalized feature.
     ///
     /// Supported API versions: 0-1
@@ -41,6 +46,15 @@ pub struct FeatureUpdateKey {
 }
 
 impl FeatureUpdateKey {
+    /// Sets `feature` to the passed value.
+    ///
+    /// The name of the finalized feature to be updated.
+    ///
+    /// Supported API versions: 0-1
+    pub fn with_feature(mut self, value: StrBytes) -> Self {
+        self.feature = value;
+        self
+    }
     /// Sets `max_version_level` to the passed value.
     ///
     /// The new maximum version level for the finalized feature. A value >= 1 is valid. A value < 1, is special, and can be used to request the deletion of the finalized feature.
@@ -81,23 +95,22 @@ impl FeatureUpdateKey {
 }
 
 #[cfg(feature = "client")]
-impl MapEncodable for FeatureUpdateKey {
-    type Key = StrBytes;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
-        types::CompactString.encode(buf, key)?;
+impl Encodable for FeatureUpdateKey {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        types::CompactString.encode(buf, &self.feature)?;
         types::Int16.encode(buf, &self.max_version_level)?;
         if version == 0 {
             types::Boolean.encode(buf, &self.allow_downgrade)?;
         } else {
             if self.allow_downgrade {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 1 {
             types::Int8.encode(buf, &self.upgrade_type)?;
         } else {
             if self.upgrade_type != 1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -112,22 +125,22 @@ impl MapEncodable for FeatureUpdateKey {
         write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
-        total_size += types::CompactString.compute_size(key)?;
+        total_size += types::CompactString.compute_size(&self.feature)?;
         total_size += types::Int16.compute_size(&self.max_version_level)?;
         if version == 0 {
             total_size += types::Boolean.compute_size(&self.allow_downgrade)?;
         } else {
             if self.allow_downgrade {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 1 {
             total_size += types::Int8.compute_size(&self.upgrade_type)?;
         } else {
             if self.upgrade_type != 1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -145,10 +158,9 @@ impl MapEncodable for FeatureUpdateKey {
 }
 
 #[cfg(feature = "broker")]
-impl MapDecodable for FeatureUpdateKey {
-    type Key = StrBytes;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
-        let key_field = types::CompactString.decode(buf)?;
+impl Decodable for FeatureUpdateKey {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        let feature = types::CompactString.decode(buf)?;
         let max_version_level = types::Int16.decode(buf)?;
         let allow_downgrade = if version == 0 {
             types::Boolean.decode(buf)?
@@ -168,21 +180,20 @@ impl MapDecodable for FeatureUpdateKey {
             let unknown_value = buf.try_get_bytes(size as usize)?;
             unknown_tagged_fields.insert(tag as i32, unknown_value);
         }
-        Ok((
-            key_field,
-            Self {
-                max_version_level,
-                allow_downgrade,
-                upgrade_type,
-                unknown_tagged_fields,
-            },
-        ))
+        Ok(Self {
+            feature,
+            max_version_level,
+            allow_downgrade,
+            upgrade_type,
+            unknown_tagged_fields,
+        })
     }
 }
 
 impl Default for FeatureUpdateKey {
     fn default() -> Self {
         Self {
+            feature: Default::default(),
             max_version_level: 0,
             allow_downgrade: false,
             upgrade_type: 1,
@@ -208,7 +219,7 @@ pub struct UpdateFeaturesRequest {
     /// The list of updates to finalized features.
     ///
     /// Supported API versions: 0-1
-    pub feature_updates: indexmap::IndexMap<StrBytes, FeatureUpdateKey>,
+    pub feature_updates: Vec<FeatureUpdateKey>,
 
     /// True if we should validate the request, but not perform the upgrade or downgrade.
     ///
@@ -234,10 +245,7 @@ impl UpdateFeaturesRequest {
     /// The list of updates to finalized features.
     ///
     /// Supported API versions: 0-1
-    pub fn with_feature_updates(
-        mut self,
-        value: indexmap::IndexMap<StrBytes, FeatureUpdateKey>,
-    ) -> Self {
+    pub fn with_feature_updates(mut self, value: Vec<FeatureUpdateKey>) -> Self {
         self.feature_updates = value;
         self
     }
@@ -271,7 +279,7 @@ impl Encodable for UpdateFeaturesRequest {
             types::Boolean.encode(buf, &self.validate_only)?;
         } else {
             if self.validate_only {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -295,7 +303,7 @@ impl Encodable for UpdateFeaturesRequest {
             total_size += types::Boolean.compute_size(&self.validate_only)?;
         } else {
             if self.validate_only {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         let num_tagged_fields = self.unknown_tagged_fields.len();

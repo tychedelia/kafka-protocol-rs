@@ -14,7 +14,7 @@ use uuid::Uuid;
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
-    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
+    Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-7
@@ -405,7 +405,7 @@ impl Encodable for LeaderAndIsrPartitionState {
             types::Int8.encode(buf, &self.leader_recovery_state)?;
         } else {
             if self.leader_recovery_state != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 4 {
@@ -465,7 +465,7 @@ impl Encodable for LeaderAndIsrPartitionState {
             total_size += types::Int8.compute_size(&self.leader_recovery_state)?;
         } else {
             if self.leader_recovery_state != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 4 {
@@ -732,7 +732,7 @@ impl Encodable for LeaderAndIsrRequest {
             types::Boolean.encode(buf, &self.is_k_raft_controller)?;
         } else {
             if self.is_k_raft_controller {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         types::Int32.encode(buf, &self.controller_epoch)?;
@@ -743,7 +743,7 @@ impl Encodable for LeaderAndIsrRequest {
             types::Int8.encode(buf, &self._type)?;
         } else {
             if self._type != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version <= 1 {
@@ -751,7 +751,7 @@ impl Encodable for LeaderAndIsrRequest {
                 .encode(buf, &self.ungrouped_partition_states)?;
         } else {
             if !self.ungrouped_partition_states.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 2 {
@@ -762,7 +762,7 @@ impl Encodable for LeaderAndIsrRequest {
             }
         } else {
             if !self.topic_states.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 4 {
@@ -791,7 +791,7 @@ impl Encodable for LeaderAndIsrRequest {
             total_size += types::Boolean.compute_size(&self.is_k_raft_controller)?;
         } else {
             if self.is_k_raft_controller {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         total_size += types::Int32.compute_size(&self.controller_epoch)?;
@@ -802,7 +802,7 @@ impl Encodable for LeaderAndIsrRequest {
             total_size += types::Int8.compute_size(&self._type)?;
         } else {
             if self._type != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version <= 1 {
@@ -810,7 +810,7 @@ impl Encodable for LeaderAndIsrRequest {
                 .compute_size(&self.ungrouped_partition_states)?;
         } else {
             if !self.ungrouped_partition_states.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 2 {
@@ -823,7 +823,7 @@ impl Encodable for LeaderAndIsrRequest {
             }
         } else {
             if !self.topic_states.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 4 {
@@ -1007,7 +1007,7 @@ impl Encodable for LeaderAndIsrTopicState {
             }
         } else {
             if !self.topic_name.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 5 {
@@ -1022,7 +1022,7 @@ impl Encodable for LeaderAndIsrTopicState {
             }
         } else {
             if !self.partition_states.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 4 {
@@ -1049,7 +1049,7 @@ impl Encodable for LeaderAndIsrTopicState {
             }
         } else {
             if !self.topic_name.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 5 {
@@ -1065,7 +1065,7 @@ impl Encodable for LeaderAndIsrTopicState {
             }
         } else {
             if !self.partition_states.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 4 {

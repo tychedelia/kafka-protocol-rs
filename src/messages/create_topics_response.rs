@@ -14,7 +14,7 @@ use uuid::Uuid;
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
-    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
+    Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-7
@@ -115,7 +115,7 @@ impl Encodable for CreatableTopicConfigs {
             types::CompactString.encode(buf, &self.name)?;
         } else {
             if !self.name.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 5 {
@@ -127,14 +127,14 @@ impl Encodable for CreatableTopicConfigs {
                 .map(|x| x.is_empty())
                 .unwrap_or_default()
             {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 5 {
             types::Boolean.encode(buf, &self.read_only)?;
         } else {
             if self.read_only {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 5 {
@@ -144,7 +144,7 @@ impl Encodable for CreatableTopicConfigs {
             types::Boolean.encode(buf, &self.is_sensitive)?;
         } else {
             if self.is_sensitive {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 5 {
@@ -167,7 +167,7 @@ impl Encodable for CreatableTopicConfigs {
             total_size += types::CompactString.compute_size(&self.name)?;
         } else {
             if !self.name.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 5 {
@@ -179,14 +179,14 @@ impl Encodable for CreatableTopicConfigs {
                 .map(|x| x.is_empty())
                 .unwrap_or_default()
             {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 5 {
             total_size += types::Boolean.compute_size(&self.read_only)?;
         } else {
             if self.read_only {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 5 {
@@ -196,7 +196,7 @@ impl Encodable for CreatableTopicConfigs {
             total_size += types::Boolean.compute_size(&self.is_sensitive)?;
         } else {
             if self.is_sensitive {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 5 {
@@ -286,6 +286,11 @@ impl Message for CreatableTopicConfigs {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct CreatableTopicResult {
+    /// The topic name.
+    ///
+    /// Supported API versions: 0-7
+    pub name: super::TopicName,
+
     /// The unique topic ID
     ///
     /// Supported API versions: 7
@@ -326,6 +331,15 @@ pub struct CreatableTopicResult {
 }
 
 impl CreatableTopicResult {
+    /// Sets `name` to the passed value.
+    ///
+    /// The topic name.
+    ///
+    /// Supported API versions: 0-7
+    pub fn with_name(mut self, value: super::TopicName) -> Self {
+        self.name = value;
+        self
+    }
     /// Sets `topic_id` to the passed value.
     ///
     /// The unique topic ID
@@ -402,13 +416,12 @@ impl CreatableTopicResult {
 }
 
 #[cfg(feature = "broker")]
-impl MapEncodable for CreatableTopicResult {
-    type Key = super::TopicName;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
+impl Encodable for CreatableTopicResult {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version >= 5 {
-            types::CompactString.encode(buf, key)?;
+            types::CompactString.encode(buf, &self.name)?;
         } else {
-            types::String.encode(buf, key)?;
+            types::String.encode(buf, &self.name)?;
         }
         if version >= 7 {
             types::Uuid.encode(buf, &self.topic_id)?;
@@ -459,12 +472,12 @@ impl MapEncodable for CreatableTopicResult {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         if version >= 5 {
-            total_size += types::CompactString.compute_size(key)?;
+            total_size += types::CompactString.compute_size(&self.name)?;
         } else {
-            total_size += types::String.compute_size(key)?;
+            total_size += types::String.compute_size(&self.name)?;
         }
         if version >= 7 {
             total_size += types::Uuid.compute_size(&self.topic_id)?;
@@ -519,10 +532,9 @@ impl MapEncodable for CreatableTopicResult {
 }
 
 #[cfg(feature = "client")]
-impl MapDecodable for CreatableTopicResult {
-    type Key = super::TopicName;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
-        let key_field = if version >= 5 {
+impl Decodable for CreatableTopicResult {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        let name = if version >= 5 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
@@ -575,25 +587,24 @@ impl MapDecodable for CreatableTopicResult {
                 }
             }
         }
-        Ok((
-            key_field,
-            Self {
-                topic_id,
-                error_code,
-                error_message,
-                topic_config_error_code,
-                num_partitions,
-                replication_factor,
-                configs,
-                unknown_tagged_fields,
-            },
-        ))
+        Ok(Self {
+            name,
+            topic_id,
+            error_code,
+            error_message,
+            topic_config_error_code,
+            num_partitions,
+            replication_factor,
+            configs,
+            unknown_tagged_fields,
+        })
     }
 }
 
 impl Default for CreatableTopicResult {
     fn default() -> Self {
         Self {
+            name: Default::default(),
             topic_id: Uuid::nil(),
             error_code: 0,
             error_message: Some(Default::default()),
@@ -623,7 +634,7 @@ pub struct CreateTopicsResponse {
     /// Results for each topic we tried to create.
     ///
     /// Supported API versions: 0-7
-    pub topics: indexmap::IndexMap<super::TopicName, CreatableTopicResult>,
+    pub topics: Vec<CreatableTopicResult>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
@@ -644,10 +655,7 @@ impl CreateTopicsResponse {
     /// Results for each topic we tried to create.
     ///
     /// Supported API versions: 0-7
-    pub fn with_topics(
-        mut self,
-        value: indexmap::IndexMap<super::TopicName, CreatableTopicResult>,
-    ) -> Self {
+    pub fn with_topics(mut self, value: Vec<CreatableTopicResult>) -> Self {
         self.topics = value;
         self
     }

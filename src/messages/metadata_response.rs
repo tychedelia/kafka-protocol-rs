@@ -14,7 +14,7 @@ use uuid::Uuid;
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
-    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
+    Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-12
@@ -29,7 +29,7 @@ pub struct MetadataResponse {
     /// A list of brokers present in the cluster.
     ///
     /// Supported API versions: 0-12
-    pub brokers: indexmap::IndexMap<super::BrokerId, MetadataResponseBroker>,
+    pub brokers: Vec<MetadataResponseBroker>,
 
     /// The cluster ID that responding broker belongs to.
     ///
@@ -44,7 +44,7 @@ pub struct MetadataResponse {
     /// Each topic in the response.
     ///
     /// Supported API versions: 0-12
-    pub topics: indexmap::IndexMap<super::TopicName, MetadataResponseTopic>,
+    pub topics: Vec<MetadataResponseTopic>,
 
     /// 32-bit bitfield to represent authorized operations for this cluster.
     ///
@@ -70,10 +70,7 @@ impl MetadataResponse {
     /// A list of brokers present in the cluster.
     ///
     /// Supported API versions: 0-12
-    pub fn with_brokers(
-        mut self,
-        value: indexmap::IndexMap<super::BrokerId, MetadataResponseBroker>,
-    ) -> Self {
+    pub fn with_brokers(mut self, value: Vec<MetadataResponseBroker>) -> Self {
         self.brokers = value;
         self
     }
@@ -100,10 +97,7 @@ impl MetadataResponse {
     /// Each topic in the response.
     ///
     /// Supported API versions: 0-12
-    pub fn with_topics(
-        mut self,
-        value: indexmap::IndexMap<super::TopicName, MetadataResponseTopic>,
-    ) -> Self {
+    pub fn with_topics(mut self, value: Vec<MetadataResponseTopic>) -> Self {
         self.topics = value;
         self
     }
@@ -158,7 +152,7 @@ impl Encodable for MetadataResponse {
             types::Int32.encode(buf, &self.cluster_authorized_operations)?;
         } else {
             if self.cluster_authorized_operations != -2147483648 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 9 {
@@ -206,7 +200,7 @@ impl Encodable for MetadataResponse {
             total_size += types::Int32.compute_size(&self.cluster_authorized_operations)?;
         } else {
             if self.cluster_authorized_operations != -2147483648 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 9 {
@@ -307,6 +301,11 @@ impl Message for MetadataResponse {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct MetadataResponseBroker {
+    /// The broker ID.
+    ///
+    /// Supported API versions: 0-12
+    pub node_id: super::BrokerId,
+
     /// The broker hostname.
     ///
     /// Supported API versions: 0-12
@@ -327,6 +326,15 @@ pub struct MetadataResponseBroker {
 }
 
 impl MetadataResponseBroker {
+    /// Sets `node_id` to the passed value.
+    ///
+    /// The broker ID.
+    ///
+    /// Supported API versions: 0-12
+    pub fn with_node_id(mut self, value: super::BrokerId) -> Self {
+        self.node_id = value;
+        self
+    }
     /// Sets `host` to the passed value.
     ///
     /// The broker hostname.
@@ -367,10 +375,9 @@ impl MetadataResponseBroker {
 }
 
 #[cfg(feature = "broker")]
-impl MapEncodable for MetadataResponseBroker {
-    type Key = super::BrokerId;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
-        types::Int32.encode(buf, key)?;
+impl Encodable for MetadataResponseBroker {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        types::Int32.encode(buf, &self.node_id)?;
         if version >= 9 {
             types::CompactString.encode(buf, &self.host)?;
         } else {
@@ -398,9 +405,9 @@ impl MapEncodable for MetadataResponseBroker {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
-        total_size += types::Int32.compute_size(key)?;
+        total_size += types::Int32.compute_size(&self.node_id)?;
         if version >= 9 {
             total_size += types::CompactString.compute_size(&self.host)?;
         } else {
@@ -431,10 +438,9 @@ impl MapEncodable for MetadataResponseBroker {
 }
 
 #[cfg(feature = "client")]
-impl MapDecodable for MetadataResponseBroker {
-    type Key = super::BrokerId;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
-        let key_field = types::Int32.decode(buf)?;
+impl Decodable for MetadataResponseBroker {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        let node_id = types::Int32.decode(buf)?;
         let host = if version >= 9 {
             types::CompactString.decode(buf)?
         } else {
@@ -460,21 +466,20 @@ impl MapDecodable for MetadataResponseBroker {
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
-        Ok((
-            key_field,
-            Self {
-                host,
-                port,
-                rack,
-                unknown_tagged_fields,
-            },
-        ))
+        Ok(Self {
+            node_id,
+            host,
+            port,
+            rack,
+            unknown_tagged_fields,
+        })
     }
 }
 
 impl Default for MetadataResponseBroker {
     fn default() -> Self {
         Self {
+            node_id: (0).into(),
             host: Default::default(),
             port: 0,
             rack: None,
@@ -771,6 +776,11 @@ pub struct MetadataResponseTopic {
     /// Supported API versions: 0-12
     pub error_code: i16,
 
+    /// The topic name. Null for non-existing topics queried by ID. This is never null when ErrorCode is zero. One of Name and TopicId is always populated.
+    ///
+    /// Supported API versions: 0-12
+    pub name: Option<super::TopicName>,
+
     /// The topic id. Zero for non-existing topics queried by name. This is never zero when ErrorCode is zero. One of Name and TopicId is always populated.
     ///
     /// Supported API versions: 10-12
@@ -803,6 +813,15 @@ impl MetadataResponseTopic {
     /// Supported API versions: 0-12
     pub fn with_error_code(mut self, value: i16) -> Self {
         self.error_code = value;
+        self
+    }
+    /// Sets `name` to the passed value.
+    ///
+    /// The topic name. Null for non-existing topics queried by ID. This is never null when ErrorCode is zero. One of Name and TopicId is always populated.
+    ///
+    /// Supported API versions: 0-12
+    pub fn with_name(mut self, value: Option<super::TopicName>) -> Self {
+        self.name = value;
         self
     }
     /// Sets `topic_id` to the passed value.
@@ -854,14 +873,13 @@ impl MetadataResponseTopic {
 }
 
 #[cfg(feature = "broker")]
-impl MapEncodable for MetadataResponseTopic {
-    type Key = super::TopicName;
-    fn encode<B: ByteBufMut>(&self, key: &Self::Key, buf: &mut B, version: i16) -> Result<()> {
+impl Encodable for MetadataResponseTopic {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         types::Int16.encode(buf, &self.error_code)?;
         if version >= 9 {
-            types::CompactString.encode(buf, key)?;
+            types::CompactString.encode(buf, &self.name)?;
         } else {
-            types::String.encode(buf, key)?;
+            types::String.encode(buf, &self.name)?;
         }
         if version >= 10 {
             types::Uuid.encode(buf, &self.topic_id)?;
@@ -878,7 +896,7 @@ impl MapEncodable for MetadataResponseTopic {
             types::Int32.encode(buf, &self.topic_authorized_operations)?;
         } else {
             if self.topic_authorized_operations != -2147483648 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 9 {
@@ -895,13 +913,13 @@ impl MapEncodable for MetadataResponseTopic {
         }
         Ok(())
     }
-    fn compute_size(&self, key: &Self::Key, version: i16) -> Result<usize> {
+    fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int16.compute_size(&self.error_code)?;
         if version >= 9 {
-            total_size += types::CompactString.compute_size(key)?;
+            total_size += types::CompactString.compute_size(&self.name)?;
         } else {
-            total_size += types::String.compute_size(key)?;
+            total_size += types::String.compute_size(&self.name)?;
         }
         if version >= 10 {
             total_size += types::Uuid.compute_size(&self.topic_id)?;
@@ -919,7 +937,7 @@ impl MapEncodable for MetadataResponseTopic {
             total_size += types::Int32.compute_size(&self.topic_authorized_operations)?;
         } else {
             if self.topic_authorized_operations != -2147483648 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 9 {
@@ -939,11 +957,10 @@ impl MapEncodable for MetadataResponseTopic {
 }
 
 #[cfg(feature = "client")]
-impl MapDecodable for MetadataResponseTopic {
-    type Key = super::TopicName;
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<(Self::Key, Self)> {
+impl Decodable for MetadataResponseTopic {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let error_code = types::Int16.decode(buf)?;
-        let key_field = if version >= 9 {
+        let name = if version >= 9 {
             types::CompactString.decode(buf)?
         } else {
             types::String.decode(buf)?
@@ -978,17 +995,15 @@ impl MapDecodable for MetadataResponseTopic {
                 unknown_tagged_fields.insert(tag as i32, unknown_value);
             }
         }
-        Ok((
-            key_field,
-            Self {
-                error_code,
-                topic_id,
-                is_internal,
-                partitions,
-                topic_authorized_operations,
-                unknown_tagged_fields,
-            },
-        ))
+        Ok(Self {
+            error_code,
+            name,
+            topic_id,
+            is_internal,
+            partitions,
+            topic_authorized_operations,
+            unknown_tagged_fields,
+        })
     }
 }
 
@@ -996,6 +1011,7 @@ impl Default for MetadataResponseTopic {
     fn default() -> Self {
         Self {
             error_code: 0,
+            name: Some(Default::default()),
             topic_id: Uuid::nil(),
             is_internal: false,
             partitions: Default::default(),

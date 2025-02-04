@@ -14,7 +14,7 @@ use uuid::Uuid;
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
-    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
+    Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-16
@@ -134,7 +134,7 @@ impl Encodable for FetchPartition {
             types::Int32.encode(buf, &self.last_fetched_epoch)?;
         } else {
             if self.last_fetched_epoch != -1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 5 {
@@ -166,7 +166,7 @@ impl Encodable for FetchPartition {
             total_size += types::Int32.compute_size(&self.last_fetched_epoch)?;
         } else {
             if self.last_fetched_epoch != -1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 5 {
@@ -447,7 +447,7 @@ impl Encodable for FetchRequest {
             types::Int32.encode(buf, &self.replica_id)?;
         } else {
             if self.replica_id != -1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         types::Int32.encode(buf, &self.max_wait_ms)?;
@@ -478,7 +478,7 @@ impl Encodable for FetchRequest {
             }
         } else {
             if !self.forgotten_topics_data.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 11 {
@@ -542,7 +542,7 @@ impl Encodable for FetchRequest {
             total_size += types::Int32.compute_size(&self.replica_id)?;
         } else {
             if self.replica_id != -1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         total_size += types::Int32.compute_size(&self.max_wait_ms)?;
@@ -575,7 +575,7 @@ impl Encodable for FetchRequest {
             }
         } else {
             if !self.forgotten_topics_data.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 11 {
@@ -1027,7 +1027,7 @@ impl Encodable for ForgottenTopic {
             }
         } else {
             if !self.partitions.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 12 {
@@ -1064,7 +1064,7 @@ impl Encodable for ForgottenTopic {
             }
         } else {
             if !self.partitions.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 12 {
@@ -1200,14 +1200,14 @@ impl Encodable for ReplicaState {
             types::Int32.encode(buf, &self.replica_id)?;
         } else {
             if self.replica_id != -1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 15 {
             types::Int64.encode(buf, &self.replica_epoch)?;
         } else {
             if self.replica_epoch != -1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 12 {
@@ -1230,14 +1230,14 @@ impl Encodable for ReplicaState {
             total_size += types::Int32.compute_size(&self.replica_id)?;
         } else {
             if self.replica_id != -1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 15 {
             total_size += types::Int64.compute_size(&self.replica_epoch)?;
         } else {
             if self.replica_epoch != -1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 12 {

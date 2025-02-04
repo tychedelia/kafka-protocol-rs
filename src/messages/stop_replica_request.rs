@@ -14,7 +14,7 @@ use uuid::Uuid;
 use crate::protocol::{
     buf::{ByteBuf, ByteBufMut},
     compute_unknown_tagged_fields_size, types, write_unknown_tagged_fields, Decodable, Decoder,
-    Encodable, Encoder, HeaderVersion, MapDecodable, MapEncodable, Message, StrBytes, VersionRange,
+    Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
 /// Valid versions: 0-4
@@ -87,21 +87,21 @@ impl Encodable for StopReplicaPartitionState {
             types::Int32.encode(buf, &self.partition_index)?;
         } else {
             if self.partition_index != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
             types::Int32.encode(buf, &self.leader_epoch)?;
         } else {
             if self.leader_epoch != -1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
             types::Boolean.encode(buf, &self.delete_partition)?;
         } else {
             if self.delete_partition {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 2 {
@@ -124,21 +124,21 @@ impl Encodable for StopReplicaPartitionState {
             total_size += types::Int32.compute_size(&self.partition_index)?;
         } else {
             if self.partition_index != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
             total_size += types::Int32.compute_size(&self.leader_epoch)?;
         } else {
             if self.leader_epoch != -1 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
             total_size += types::Boolean.compute_size(&self.delete_partition)?;
         } else {
             if self.delete_partition {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 2 {
@@ -266,14 +266,14 @@ impl Encodable for StopReplicaPartitionV0 {
             types::String.encode(buf, &self.topic_name)?;
         } else {
             if !self.topic_name.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version == 0 {
             types::Int32.encode(buf, &self.partition_index)?;
         } else {
             if self.partition_index != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 2 {
@@ -296,14 +296,14 @@ impl Encodable for StopReplicaPartitionV0 {
             total_size += types::String.compute_size(&self.topic_name)?;
         } else {
             if !self.topic_name.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version == 0 {
             total_size += types::Int32.compute_size(&self.partition_index)?;
         } else {
             if self.partition_index != 0 {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 2 {
@@ -509,7 +509,7 @@ impl Encodable for StopReplicaRequest {
             types::Boolean.encode(buf, &self.is_k_raft_controller)?;
         } else {
             if self.is_k_raft_controller {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         types::Int32.encode(buf, &self.controller_epoch)?;
@@ -520,14 +520,14 @@ impl Encodable for StopReplicaRequest {
             types::Boolean.encode(buf, &self.delete_partitions)?;
         } else {
             if self.delete_partitions {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version == 0 {
             types::Array(types::Struct { version }).encode(buf, &self.ungrouped_partitions)?;
         } else {
             if !self.ungrouped_partitions.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 1 && version <= 2 {
@@ -538,14 +538,14 @@ impl Encodable for StopReplicaRequest {
             }
         } else {
             if !self.topics.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.topic_states)?;
         } else {
             if !self.topic_states.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 2 {
@@ -569,7 +569,7 @@ impl Encodable for StopReplicaRequest {
             total_size += types::Boolean.compute_size(&self.is_k_raft_controller)?;
         } else {
             if self.is_k_raft_controller {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         total_size += types::Int32.compute_size(&self.controller_epoch)?;
@@ -580,7 +580,7 @@ impl Encodable for StopReplicaRequest {
             total_size += types::Boolean.compute_size(&self.delete_partitions)?;
         } else {
             if self.delete_partitions {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version == 0 {
@@ -588,7 +588,7 @@ impl Encodable for StopReplicaRequest {
                 types::Array(types::Struct { version }).compute_size(&self.ungrouped_partitions)?;
         } else {
             if !self.ungrouped_partitions.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 1 && version <= 2 {
@@ -600,7 +600,7 @@ impl Encodable for StopReplicaRequest {
             }
         } else {
             if !self.topics.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
@@ -608,7 +608,7 @@ impl Encodable for StopReplicaRequest {
                 types::CompactArray(types::Struct { version }).compute_size(&self.topic_states)?;
         } else {
             if !self.topic_states.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 2 {
@@ -767,14 +767,14 @@ impl Encodable for StopReplicaTopicState {
             types::CompactString.encode(buf, &self.topic_name)?;
         } else {
             if !self.topic_name.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.partition_states)?;
         } else {
             if !self.partition_states.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 2 {
@@ -797,7 +797,7 @@ impl Encodable for StopReplicaTopicState {
             total_size += types::CompactString.compute_size(&self.topic_name)?;
         } else {
             if !self.topic_name.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 3 {
@@ -805,7 +805,7 @@ impl Encodable for StopReplicaTopicState {
                 .compute_size(&self.partition_states)?;
         } else {
             if !self.partition_states.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 2 {
@@ -930,7 +930,7 @@ impl Encodable for StopReplicaTopicV1 {
             }
         } else {
             if !self.name.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 1 && version <= 2 {
@@ -941,7 +941,7 @@ impl Encodable for StopReplicaTopicV1 {
             }
         } else {
             if !self.partition_indexes.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 2 {
@@ -968,7 +968,7 @@ impl Encodable for StopReplicaTopicV1 {
             }
         } else {
             if !self.name.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 1 && version <= 2 {
@@ -980,7 +980,7 @@ impl Encodable for StopReplicaTopicV1 {
             }
         } else {
             if !self.partition_indexes.is_empty() {
-                bail!("failed to encode");
+                bail!("A field is set that is not available on the selected protocol version");
             }
         }
         if version >= 2 {
