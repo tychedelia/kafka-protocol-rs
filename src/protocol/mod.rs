@@ -109,9 +109,9 @@ mod str_bytes {
         }
     }
 
-    impl Borrow<[u8]> for StrBytes {
-        fn borrow(&self) -> &[u8] {
-            self.as_bytes()
+    impl Borrow<str> for StrBytes {
+        fn borrow(&self) -> &str {
+            self.as_str()
         }
     }
 }
