@@ -1137,3 +1137,38 @@ impl Record {
         })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use bytes::Bytes;
+
+    use super::{Record, TimestampType};
+
+    #[test]
+    fn lookup_header_via_str() {
+        let record = Record {
+            transactional: false,
+            control: false,
+            partition_leader_epoch: 0,
+            producer_id: 0,
+            producer_epoch: 0,
+            sequence: 0,
+            timestamp_type: TimestampType::Creation,
+            offset: Default::default(),
+            timestamp: Default::default(),
+            key: Default::default(),
+            value: Default::default(),
+            headers: [("some-key".into(), Some("some-value".into()))].into(),
+        };
+        assert_eq!(
+            Bytes::from("some-value"),
+            record
+                .headers
+                // This relies on `impl Borrow<str> for StrBytes`
+                .get("some-key")
+                .expect("key exists in headers")
+                .as_ref()
+                .expect("value is present")
+        );
+    }
+}
