@@ -1158,7 +1158,11 @@ mod tests {
             timestamp: Default::default(),
             key: Default::default(),
             value: Default::default(),
-            headers: [("some-key".into(), Some("some-value".into()))].into(),
+            headers: [
+                ("some-key".into(), Some("some-value".into())),
+                ("other-header".into(), None),
+            ]
+            .into(),
         };
         assert_eq!(
             Bytes::from("some-value"),
