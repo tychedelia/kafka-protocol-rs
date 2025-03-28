@@ -15,6 +15,7 @@ pub mod types;
 
 mod str_bytes {
     use bytes::Bytes;
+    use std::borrow::Borrow;
     use std::convert::TryFrom;
     use std::fmt::{Debug, Display, Formatter};
     use std::ops::Deref;
@@ -105,6 +106,12 @@ mod str_bytes {
     impl PartialEq<str> for StrBytes {
         fn eq(&self, other: &str) -> bool {
             self.as_str().eq(other)
+        }
+    }
+
+    impl Borrow<str> for StrBytes {
+        fn borrow(&self) -> &str {
+            self.as_str()
         }
     }
 }
