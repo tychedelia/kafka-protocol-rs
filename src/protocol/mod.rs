@@ -109,9 +109,12 @@ mod str_bytes {
         }
     }
 
-    impl Borrow<str> for StrBytes {
-        fn borrow(&self) -> &str {
-            self.as_str()
+    impl Borrow<[u8]> for StrBytes {
+        fn borrow(&self) -> &[u8] {
+            // Note that there is an equivalent Hash implementation between
+            // &[u8] and StrBytes, which makes this impl correct
+            // as described in the `std::borrow::Borrow` docs.
+            self.as_bytes()
         }
     }
 }
