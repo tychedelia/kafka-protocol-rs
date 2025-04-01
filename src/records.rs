@@ -121,6 +121,26 @@ struct BatchDecodeInfo {
     producer_epoch: i16,
 }
 
+/// Record compression for a set of records.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum RecordCompression {
+    /// The set of records was a record batch with the given `Compression`.
+    RecordBatch(Compression),
+    /// The set of records was a message set and does not have a well-defined `Compression`.
+    MessageSet,
+}
+
+/// Decoded records plus information about compression.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RecordSet {
+    /// Compression used for this set of records
+    pub compression: RecordCompression,
+    /// Version used to encode the set of records
+    pub version: i8,
+    /// Records decoded in this set
+    pub records: Vec<Record>,
+}
+
 /// A Kafka message containing key, payload value, and all associated metadata.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Record {
@@ -523,26 +543,50 @@ impl RecordBatchDecoder {
     {
         let mut records = Vec::new();
         while buf.has_remaining() {
-            Self::decode_batch(buf, &mut records, decompressor.as_ref())?;
+            let _ = Self::decode_into_vec(buf, &mut records, decompressor.as_ref())?;
         }
         Ok(records)
     }
-    fn decode_batch<B: ByteBuf, F>(
+
+    /// Decode the provided buffer into a vec of RecordSets.
+    pub fn decode_batches<B: ByteBuf>(buf: &mut B) -> Result<Vec<RecordSet>> {
+        let mut batches = Vec::new();
+        while buf.has_remaining() {
+            let mut records = Vec::new();
+            let (version, compression) = Self::decode_into_vec(
+                buf,
+                &mut records,
+                None::<fn(&mut bytes::Bytes, Compression) -> Result<B>>.as_ref(),
+            )?;
+            batches.push(RecordSet {
+                version,
+                compression,
+                records,
+            });
+        }
+        Ok(batches)
+    }
+
+    fn decode_into_vec<B: ByteBuf, F>(
         buf: &mut B,
         records: &mut Vec<Record>,
         decompress_func: Option<&F>,
-    ) -> Result<()>
+    ) -> Result<(i8, RecordCompression)>
     where
         F: Fn(&mut bytes::Bytes, Compression) -> Result<B>,
     {
         let version = buf.try_peek_bytes(MAGIC_BYTE_OFFSET..(MAGIC_BYTE_OFFSET + 1))?[0] as i8;
-        match version {
-            0..=1 => Record::decode_legacy(buf, version, records),
-            2 => Self::decode_new_batch(buf, version, records, decompress_func),
+        let compression = match version {
+            0..=1 => {
+                Record::decode_legacy(buf, version, records).map(|()| RecordCompression::MessageSet)
+            }
+            2 => Self::decode_new_batch(buf, version, records, decompress_func)
+                .map(RecordCompression::RecordBatch),
             _ => {
                 bail!("Unknown record batch version ({})", version);
             }
-        }
+        }?;
+        Ok((version, compression))
     }
     fn decode_new_records<B: ByteBuf>(
         buf: &mut B,
@@ -561,7 +605,7 @@ impl RecordBatchDecoder {
         version: i8,
         records: &mut Vec<Record>,
         decompress_func: Option<&F>,
-    ) -> Result<()>
+    ) -> Result<Compression>
     where
         F: Fn(&mut bytes::Bytes, Compression) -> Result<B>,
     {
@@ -690,7 +734,7 @@ impl RecordBatchDecoder {
             };
         }
 
-        Ok(())
+        Ok(compression)
     }
 }
 
