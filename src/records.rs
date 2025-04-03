@@ -521,15 +521,7 @@ impl RecordBatchEncoder {
 }
 
 impl RecordBatchDecoder {
-    /// Decode the provided buffer into a vec of records.
-    pub fn decode<B: ByteBuf>(buf: &mut B) -> Result<Vec<Record>> {
-        Self::decode_with_custom_compression(
-            buf,
-            None::<fn(&mut bytes::Bytes, Compression) -> Result<B>>,
-        )
-    }
-
-    /// Decode the provided buffer into a vec of records.
+    /// Decode one RecordSet from the provided buffer.
     /// # Arguments
     /// * `decompressor` - A function that decompresses the given batch of records.
     ///
@@ -537,34 +529,35 @@ impl RecordBatchDecoder {
     pub fn decode_with_custom_compression<B: ByteBuf, F>(
         buf: &mut B,
         decompressor: Option<F>,
-    ) -> Result<Vec<Record>>
+    ) -> Result<RecordSet>
     where
         F: Fn(&mut bytes::Bytes, Compression) -> Result<B>,
     {
         let mut records = Vec::new();
-        while buf.has_remaining() {
-            let _ = Self::decode_into_vec(buf, &mut records, decompressor.as_ref())?;
-        }
-        Ok(records)
+        let (version, compression) =
+            Self::decode_into_vec(buf, &mut records, decompressor.as_ref())?;
+        Ok(RecordSet {
+            version,
+            compression,
+            records,
+        })
     }
 
-    /// Decode the provided buffer into a vec of RecordSets.
-    pub fn decode_batches<B: ByteBuf>(buf: &mut B) -> Result<Vec<RecordSet>> {
+    /// Decode the entire buffer into a vec of RecordSets.
+    pub fn decode_all<B: ByteBuf>(buf: &mut B) -> Result<Vec<RecordSet>> {
         let mut batches = Vec::new();
         while buf.has_remaining() {
-            let mut records = Vec::new();
-            let (version, compression) = Self::decode_into_vec(
-                buf,
-                &mut records,
-                None::<fn(&mut bytes::Bytes, Compression) -> Result<B>>.as_ref(),
-            )?;
-            batches.push(RecordSet {
-                version,
-                compression,
-                records,
-            });
+            batches.push(Self::decode(buf)?);
         }
         Ok(batches)
+    }
+
+    /// Decode one RecordSet from the provided buffer.
+    pub fn decode<B: ByteBuf>(buf: &mut B) -> Result<RecordSet> {
+        Self::decode_with_custom_compression(
+            buf,
+            None::<fn(&mut bytes::Bytes, Compression) -> Result<B>>.as_ref(),
+        )
     }
 
     fn decode_into_vec<B: ByteBuf, F>(
