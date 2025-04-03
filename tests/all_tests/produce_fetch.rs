@@ -1,6 +1,6 @@
 use std::{net::TcpStream, time::Duration};
 
-use bytes::{Bytes, BytesMut};
+use bytes::{Buf, Bytes, BytesMut};
 use kafka_protocol::{
     messages::{
         create_topics_request::CreatableTopic,
@@ -195,16 +195,22 @@ fn fetch_records(
     );
 
     let mut fetched_records = partition_response.records.clone().unwrap();
-    let fetched_records = RecordBatchDecoder::decode_with_custom_compression(
-        &mut fetched_records,
-        Some(decompress_record_batch_data),
-    )
-    .unwrap();
+    let mut decoded_records = Vec::new();
+    while fetched_records.has_remaining() {
+        decoded_records.extend(
+            RecordBatchDecoder::decode_with_custom_compression(
+                &mut fetched_records,
+                Some(decompress_record_batch_data),
+            )
+            .unwrap()
+            .records,
+        );
+    }
 
     eprintln!("{expected:#?}");
     eprintln!("{fetched_records:#?}");
 
-    assert_eq!(expected, fetched_records);
+    assert_eq!(expected, decoded_records);
 }
 
 fn new_record(offset: i64, v2: bool) -> Record {

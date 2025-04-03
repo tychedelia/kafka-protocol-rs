@@ -86,13 +86,13 @@ mod client_tests {
                 assert_eq!(partition.aborted_transactions.as_ref().unwrap().len(), 0);
 
                 let mut records = partition.records.unwrap();
-                let records = RecordBatchDecoder::decode_with_custom_compression(
+                let decoded = RecordBatchDecoder::decode_with_custom_compression(
                     &mut records,
                     Some(decompress_record_batch_data),
                 )
                 .unwrap();
-                assert_eq!(records.len(), 1);
-                for record in records {
+                assert_eq!(decoded.records.len(), 1);
+                for record in decoded.records {
                     assert_eq!(
                         String::from_utf8(record.key.unwrap().to_vec()).unwrap(),
                         "hello"
@@ -125,9 +125,9 @@ mod client_tests {
                 assert_eq!(partition.aborted_transactions.as_ref().unwrap().len(), 0);
 
                 let mut records = partition.records.unwrap();
-                let records = RecordBatchDecoder::decode(&mut records).unwrap();
-                assert_eq!(records.len(), 1);
-                for record in records {
+                let decoded = RecordBatchDecoder::decode(&mut records).unwrap();
+                assert_eq!(decoded.records.len(), 1);
+                for record in decoded.records {
                     assert_eq!(
                         String::from_utf8(record.key.unwrap().to_vec()).unwrap(),
                         "hiiii"
@@ -161,8 +161,8 @@ mod client_tests {
                 assert_eq!(partition.aborted_transactions.as_ref().unwrap().len(), 0);
 
                 let mut records = partition.records.unwrap();
-                let records = RecordBatchDecoder::decode(&mut records).unwrap();
-                assert_eq!(records.len(), 1);
+                let decoded = RecordBatchDecoder::decode(&mut records).unwrap();
+                assert_eq!(decoded.records.len(), 1);
             }
         }
     }
