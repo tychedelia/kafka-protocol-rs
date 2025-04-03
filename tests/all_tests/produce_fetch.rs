@@ -204,7 +204,7 @@ fn fetch_records(
     eprintln!("{expected:#?}");
     eprintln!("{fetched_records:#?}");
 
-    assert_eq!(expected, fetched_records);
+    assert_eq!(expected, fetched_records.records);
 }
 
 fn new_record(offset: i64, v2: bool) -> Record {
