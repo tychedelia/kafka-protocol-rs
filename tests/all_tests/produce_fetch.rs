@@ -11,8 +11,8 @@ use kafka_protocol::{
     },
     protocol::StrBytes,
     records::{
-        Compression, Record, RecordBatchDecoder, RecordBatchEncoder, RecordEncodeOptions,
-        TimestampType,
+        Compression, Record, RecordBatchDecoder, RecordBatchEncoder, RecordCompression,
+        RecordEncodeOptions, TimestampType,
     },
 };
 
@@ -50,7 +50,13 @@ fn record_batch_produce_fetch() {
     std::thread::sleep(Duration::from_secs(1));
 
     produce_records(topic_name.clone(), 9, encoded.freeze(), &mut socket);
-    fetch_records(topic_name.clone(), 12, records, &mut socket);
+    fetch_records(
+        topic_name.clone(),
+        12,
+        records,
+        (2, RecordCompression::RecordBatch(Compression::None)),
+        &mut socket,
+    );
 }
 
 #[test]
@@ -84,7 +90,13 @@ fn message_set_v1_produce_fetch() {
     std::thread::sleep(Duration::from_secs(1));
 
     produce_records(topic_name.clone(), 2, encoded.freeze(), &mut socket);
-    fetch_records(topic_name.clone(), 3, records, &mut socket);
+    fetch_records(
+        topic_name.clone(),
+        3,
+        records,
+        (1, RecordCompression::MessageSet),
+        &mut socket,
+    );
 }
 
 fn create_topic(topic_name: TopicName, socket: &mut TcpStream) {
@@ -157,6 +169,7 @@ fn fetch_records(
     topic_name: TopicName,
     version: i16,
     expected: Vec<Record>,
+    (expected_version, expected_compression): (i8, RecordCompression),
     socket: &mut TcpStream,
 ) {
     let header = RequestHeader::default()
@@ -197,14 +210,14 @@ fn fetch_records(
     let mut fetched_records = partition_response.records.clone().unwrap();
     let mut decoded_records = Vec::new();
     while fetched_records.has_remaining() {
-        decoded_records.extend(
-            RecordBatchDecoder::decode_with_custom_compression(
-                &mut fetched_records,
-                Some(decompress_record_batch_data),
-            )
-            .unwrap()
-            .records,
-        );
+        let decoded = RecordBatchDecoder::decode_with_custom_compression(
+            &mut fetched_records,
+            Some(decompress_record_batch_data),
+        )
+        .unwrap();
+        assert_eq!(expected_version, decoded.version);
+        assert_eq!(expected_compression, decoded.compression);
+        decoded_records.extend(decoded.records);
     }
 
     eprintln!("{expected:#?}");

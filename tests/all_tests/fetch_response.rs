@@ -1,7 +1,7 @@
 #[cfg(feature = "client")]
 mod client_tests {
     use bytes::Bytes;
-    use kafka_protocol::records::Compression;
+    use kafka_protocol::records::{Compression, RecordCompression};
     use kafka_protocol::{
         messages::FetchResponse, protocol::Decodable, records::RecordBatchDecoder,
     };
@@ -91,6 +91,11 @@ mod client_tests {
                     Some(decompress_record_batch_data),
                 )
                 .unwrap();
+                assert_eq!(
+                    decoded.compression,
+                    RecordCompression::RecordBatch(Compression::None)
+                );
+                assert_eq!(decoded.version, 2);
                 assert_eq!(decoded.records.len(), 1);
                 for record in decoded.records {
                     assert_eq!(
@@ -126,6 +131,11 @@ mod client_tests {
 
                 let mut records = partition.records.unwrap();
                 let decoded = RecordBatchDecoder::decode(&mut records).unwrap();
+                assert_eq!(
+                    decoded.compression,
+                    RecordCompression::RecordBatch(Compression::None)
+                );
+                assert_eq!(decoded.version, 2);
                 assert_eq!(decoded.records.len(), 1);
                 for record in decoded.records {
                     assert_eq!(
@@ -162,6 +172,11 @@ mod client_tests {
 
                 let mut records = partition.records.unwrap();
                 let decoded = RecordBatchDecoder::decode(&mut records).unwrap();
+                assert_eq!(
+                    decoded.compression,
+                    RecordCompression::RecordBatch(Compression::None)
+                );
+                assert_eq!(decoded.version, 2);
                 assert_eq!(decoded.records.len(), 1);
             }
         }
