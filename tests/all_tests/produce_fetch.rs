@@ -1,6 +1,6 @@
 use std::{net::TcpStream, time::Duration};
 
-use bytes::{Buf, Bytes, BytesMut};
+use bytes::{Bytes, BytesMut};
 use kafka_protocol::{
     messages::{
         create_topics_request::CreatableTopic,
@@ -167,14 +167,14 @@ fn produce_records(topic_name: TopicName, version: i16, records: Bytes, socket: 
 
 fn fetch_records(
     topic_name: TopicName,
-    version: i16,
+    api_version: i16,
     expected: Vec<Record>,
-    (expected_version, expected_compression): (i8, RecordCompression),
+    (expected_record_version, expected_compression): (i8, RecordCompression),
     socket: &mut TcpStream,
 ) {
     let header = RequestHeader::default()
         .with_request_api_key(ApiKey::Fetch as i16)
-        .with_request_api_version(version);
+        .with_request_api_version(api_version);
 
     let request = FetchRequest::default().with_topics(vec![FetchTopic::default()
         .with_topic(topic_name.clone())
@@ -184,7 +184,7 @@ fn fetch_records(
 
     send_request(socket, header, request);
 
-    let result: FetchResponse = receive_response(socket, version).1;
+    let result: FetchResponse = receive_response(socket, api_version).1;
 
     assert_eq!(result.throttle_time_ms, 0, "fetch response throttle time");
     assert_eq!(result.error_code, 0, "fetch response error code");
@@ -208,22 +208,28 @@ fn fetch_records(
     );
 
     let mut fetched_records = partition_response.records.clone().unwrap();
-    let mut decoded_records = Vec::new();
-    while fetched_records.has_remaining() {
-        let decoded = RecordBatchDecoder::decode_with_custom_compression(
-            &mut fetched_records,
-            Some(decompress_record_batch_data),
-        )
-        .unwrap();
-        assert_eq!(expected_version, decoded.version);
+    let decoded_records =
+        RecordBatchDecoder::decode_all(&mut fetched_records).expect("records should decode");
+    if expected_record_version == 2 {
+        assert_eq!(1, decoded_records.len());
+    } else {
+        assert_eq!(expected.len(), decoded_records.len());
+    }
+    for decoded in &decoded_records {
+        assert_eq!(expected_record_version, decoded.version);
         assert_eq!(expected_compression, decoded.compression);
-        decoded_records.extend(decoded.records);
     }
 
     eprintln!("{expected:#?}");
     eprintln!("{fetched_records:#?}");
 
-    assert_eq!(expected, decoded_records);
+    assert_eq!(
+        expected,
+        decoded_records
+            .into_iter()
+            .flat_map(|r| r.records)
+            .collect::<Vec<_>>()
+    );
 }
 
 fn new_record(offset: i64, v2: bool) -> Record {
@@ -240,18 +246,6 @@ fn new_record(offset: i64, v2: bool) -> Record {
         key: Some(format!("key{offset}").into()),
         value: Some(format!("value{offset}").into()),
         headers: Default::default(),
-    }
-}
-
-fn decompress_record_batch_data(
-    compressed_buffer: &mut bytes::Bytes,
-    compression: Compression,
-) -> anyhow::Result<Bytes> {
-    match compression {
-        Compression::None => Ok(compressed_buffer.to_vec().into()),
-        _ => {
-            panic!("Compression not implemented")
-        }
     }
 }
 

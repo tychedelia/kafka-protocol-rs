@@ -171,7 +171,10 @@ mod client_tests {
                 assert_eq!(partition.aborted_transactions.as_ref().unwrap().len(), 0);
 
                 let mut records = partition.records.unwrap();
-                let decoded = RecordBatchDecoder::decode(&mut records).unwrap();
+                let decoded = RecordBatchDecoder::decode_all(&mut records).unwrap();
+                let [decoded] = decoded.as_slice() else {
+                    panic!("expected exactly one record");
+                };
                 assert_eq!(
                     decoded.compression,
                     RecordCompression::RecordBatch(Compression::None)
