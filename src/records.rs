@@ -1182,7 +1182,7 @@ mod tests {
     use super::{Record, TimestampType};
 
     #[test]
-    fn lookup_header_via_str() {
+    fn lookup_header_via_u8_slice() {
         let record = Record {
             transactional: false,
             control: false,
@@ -1195,14 +1195,18 @@ mod tests {
             timestamp: Default::default(),
             key: Default::default(),
             value: Default::default(),
-            headers: [("some-key".into(), Some("some-value".into()))].into(),
+            headers: [
+                ("some-key".into(), Some("some-value".into())),
+                ("other-header".into(), None),
+            ]
+            .into(),
         };
         assert_eq!(
             Bytes::from("some-value"),
             record
                 .headers
-                // This relies on `impl Borrow<str> for StrBytes`
-                .get("some-key")
+                // This relies on `impl Borrow<[u8]> for StrBytes`
+                .get("some-key".as_bytes())
                 .expect("key exists in headers")
                 .as_ref()
                 .expect("value is present")
