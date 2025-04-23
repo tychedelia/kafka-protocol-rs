@@ -11,8 +11,8 @@ use kafka_protocol::{
     },
     protocol::StrBytes,
     records::{
-        Compression, Record, RecordBatchDecoder, RecordBatchEncoder, RecordEncodeOptions,
-        TimestampType,
+        Compression, Record, RecordBatchDecoder, RecordBatchEncoder, RecordCompression,
+        RecordEncodeOptions, TimestampType,
     },
 };
 
@@ -50,7 +50,13 @@ fn record_batch_produce_fetch() {
     std::thread::sleep(Duration::from_secs(1));
 
     produce_records(topic_name.clone(), 9, encoded.freeze(), &mut socket);
-    fetch_records(topic_name.clone(), 12, records, &mut socket);
+    fetch_records(
+        topic_name.clone(),
+        12,
+        records,
+        (2, RecordCompression::RecordBatch(Compression::None)),
+        &mut socket,
+    );
 }
 
 #[test]
@@ -84,7 +90,13 @@ fn message_set_v1_produce_fetch() {
     std::thread::sleep(Duration::from_secs(1));
 
     produce_records(topic_name.clone(), 2, encoded.freeze(), &mut socket);
-    fetch_records(topic_name.clone(), 3, records, &mut socket);
+    fetch_records(
+        topic_name.clone(),
+        3,
+        records,
+        (1, RecordCompression::MessageSet),
+        &mut socket,
+    );
 }
 
 fn create_topic(topic_name: TopicName, socket: &mut TcpStream) {
@@ -155,13 +167,14 @@ fn produce_records(topic_name: TopicName, version: i16, records: Bytes, socket: 
 
 fn fetch_records(
     topic_name: TopicName,
-    version: i16,
+    api_version: i16,
     expected: Vec<Record>,
+    (expected_record_version, expected_compression): (i8, RecordCompression),
     socket: &mut TcpStream,
 ) {
     let header = RequestHeader::default()
         .with_request_api_key(ApiKey::Fetch as i16)
-        .with_request_api_version(version);
+        .with_request_api_version(api_version);
 
     let request = FetchRequest::default().with_topics(vec![FetchTopic::default()
         .with_topic(topic_name.clone())
@@ -171,7 +184,7 @@ fn fetch_records(
 
     send_request(socket, header, request);
 
-    let result: FetchResponse = receive_response(socket, version).1;
+    let result: FetchResponse = receive_response(socket, api_version).1;
 
     assert_eq!(result.throttle_time_ms, 0, "fetch response throttle time");
     assert_eq!(result.error_code, 0, "fetch response error code");
@@ -195,16 +208,28 @@ fn fetch_records(
     );
 
     let mut fetched_records = partition_response.records.clone().unwrap();
-    let fetched_records = RecordBatchDecoder::decode_with_custom_compression(
-        &mut fetched_records,
-        Some(decompress_record_batch_data),
-    )
-    .unwrap();
+    let decoded_records =
+        RecordBatchDecoder::decode_all(&mut fetched_records).expect("records should decode");
+    if expected_record_version == 2 {
+        assert_eq!(1, decoded_records.len());
+    } else {
+        assert_eq!(expected.len(), decoded_records.len());
+    }
+    for decoded in &decoded_records {
+        assert_eq!(expected_record_version, decoded.version);
+        assert_eq!(expected_compression, decoded.compression);
+    }
 
     eprintln!("{expected:#?}");
     eprintln!("{fetched_records:#?}");
 
-    assert_eq!(expected, fetched_records);
+    assert_eq!(
+        expected,
+        decoded_records
+            .into_iter()
+            .flat_map(|r| r.records)
+            .collect::<Vec<_>>()
+    );
 }
 
 fn new_record(offset: i64, v2: bool) -> Record {
@@ -221,18 +246,6 @@ fn new_record(offset: i64, v2: bool) -> Record {
         key: Some(format!("key{offset}").into()),
         value: Some(format!("value{offset}").into()),
         headers: Default::default(),
-    }
-}
-
-fn decompress_record_batch_data(
-    compressed_buffer: &mut bytes::Bytes,
-    compression: Compression,
-) -> anyhow::Result<Bytes> {
-    match compression {
-        Compression::None => Ok(compressed_buffer.to_vec().into()),
-        _ => {
-            panic!("Compression not implemented")
-        }
     }
 }
 
