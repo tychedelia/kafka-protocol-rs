@@ -6,6 +6,8 @@
 
 ## 0.15.0
 
+- Added support for kafka 4.0
+  - deprecated message types were removed in kafka 4.0 and those types have also been removed from this crate.
 - `Records::encode`/`Records::decode` no longer has unneeded trait bounds.
 - `ByteBuf::try_get_*` methods that already exist on `Buf` are removed in favor of the `Buf` method
 

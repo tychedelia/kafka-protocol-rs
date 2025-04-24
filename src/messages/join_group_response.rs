@@ -17,7 +17,7 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-9
+/// Valid versions: 2-9
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct JoinGroupResponse {
@@ -28,12 +28,12 @@ pub struct JoinGroupResponse {
 
     /// The error code, or 0 if there was no error.
     ///
-    /// Supported API versions: 0-9
+    /// Supported API versions: 2-9
     pub error_code: i16,
 
     /// The generation ID of the group.
     ///
-    /// Supported API versions: 0-9
+    /// Supported API versions: 2-9
     pub generation_id: i32,
 
     /// The group protocol name.
@@ -43,12 +43,12 @@ pub struct JoinGroupResponse {
 
     /// The group protocol selected by the coordinator.
     ///
-    /// Supported API versions: 0-9
+    /// Supported API versions: 2-9
     pub protocol_name: Option<StrBytes>,
 
     /// The leader of the group.
     ///
-    /// Supported API versions: 0-9
+    /// Supported API versions: 2-9
     pub leader: StrBytes,
 
     /// True if the leader must skip running the assignment.
@@ -58,12 +58,12 @@ pub struct JoinGroupResponse {
 
     /// The member ID assigned by the group coordinator.
     ///
-    /// Supported API versions: 0-9
+    /// Supported API versions: 2-9
     pub member_id: StrBytes,
 
+    /// The group members.
     ///
-    ///
-    /// Supported API versions: 0-9
+    /// Supported API versions: 2-9
     pub members: Vec<JoinGroupResponseMember>,
 
     /// Other tagged fields
@@ -84,7 +84,7 @@ impl JoinGroupResponse {
     ///
     /// The error code, or 0 if there was no error.
     ///
-    /// Supported API versions: 0-9
+    /// Supported API versions: 2-9
     pub fn with_error_code(mut self, value: i16) -> Self {
         self.error_code = value;
         self
@@ -93,7 +93,7 @@ impl JoinGroupResponse {
     ///
     /// The generation ID of the group.
     ///
-    /// Supported API versions: 0-9
+    /// Supported API versions: 2-9
     pub fn with_generation_id(mut self, value: i32) -> Self {
         self.generation_id = value;
         self
@@ -111,7 +111,7 @@ impl JoinGroupResponse {
     ///
     /// The group protocol selected by the coordinator.
     ///
-    /// Supported API versions: 0-9
+    /// Supported API versions: 2-9
     pub fn with_protocol_name(mut self, value: Option<StrBytes>) -> Self {
         self.protocol_name = value;
         self
@@ -120,7 +120,7 @@ impl JoinGroupResponse {
     ///
     /// The leader of the group.
     ///
-    /// Supported API versions: 0-9
+    /// Supported API versions: 2-9
     pub fn with_leader(mut self, value: StrBytes) -> Self {
         self.leader = value;
         self
@@ -138,16 +138,16 @@ impl JoinGroupResponse {
     ///
     /// The member ID assigned by the group coordinator.
     ///
-    /// Supported API versions: 0-9
+    /// Supported API versions: 2-9
     pub fn with_member_id(mut self, value: StrBytes) -> Self {
         self.member_id = value;
         self
     }
     /// Sets `members` to the passed value.
     ///
+    /// The group members.
     ///
-    ///
-    /// Supported API versions: 0-9
+    /// Supported API versions: 2-9
     pub fn with_members(mut self, value: Vec<JoinGroupResponseMember>) -> Self {
         self.members = value;
         self
@@ -167,12 +167,20 @@ impl JoinGroupResponse {
 #[cfg(feature = "broker")]
 impl Encodable for JoinGroupResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+<<<<<<< HEAD
         if version < 0 || version > 9 {
             bail!("specified version not supported by this message type");
         }
         if version >= 2 {
             types::Int32.encode(buf, &self.throttle_time_ms)?;
         }
+||||||| parent of 8921dfd (Kafka 4.0 support)
+        if version >= 2 {
+            types::Int32.encode(buf, &self.throttle_time_ms)?;
+        }
+=======
+        types::Int32.encode(buf, &self.throttle_time_ms)?;
+>>>>>>> 8921dfd (Kafka 4.0 support)
         types::Int16.encode(buf, &self.error_code)?;
         types::Int32.encode(buf, &self.generation_id)?;
         if version >= 7 {
@@ -221,9 +229,7 @@ impl Encodable for JoinGroupResponse {
     }
     fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
-        if version >= 2 {
-            total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
-        }
+        total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
         total_size += types::Int16.compute_size(&self.error_code)?;
         total_size += types::Int32.compute_size(&self.generation_id)?;
         if version >= 7 {
@@ -276,6 +282,7 @@ impl Encodable for JoinGroupResponse {
 #[cfg(feature = "client")]
 impl Decodable for JoinGroupResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+<<<<<<< HEAD
         if version < 0 || version > 9 {
             bail!("specified version not supported by this message type");
         }
@@ -284,6 +291,15 @@ impl Decodable for JoinGroupResponse {
         } else {
             0
         };
+||||||| parent of 8921dfd (Kafka 4.0 support)
+        let throttle_time_ms = if version >= 2 {
+            types::Int32.decode(buf)?
+        } else {
+            0
+        };
+=======
+        let throttle_time_ms = types::Int32.decode(buf)?;
+>>>>>>> 8921dfd (Kafka 4.0 support)
         let error_code = types::Int16.decode(buf)?;
         let generation_id = types::Int32.decode(buf)?;
         let protocol_type = if version >= 7 {
@@ -359,17 +375,17 @@ impl Default for JoinGroupResponse {
 }
 
 impl Message for JoinGroupResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 9 };
+    const VERSIONS: VersionRange = VersionRange { min: 2, max: 9 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-9
+/// Valid versions: 2-9
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct JoinGroupResponseMember {
     /// The group member ID.
     ///
-    /// Supported API versions: 0-9
+    /// Supported API versions: 2-9
     pub member_id: StrBytes,
 
     /// The unique identifier of the consumer instance provided by end user.
@@ -379,7 +395,7 @@ pub struct JoinGroupResponseMember {
 
     /// The group member metadata.
     ///
-    /// Supported API versions: 0-9
+    /// Supported API versions: 2-9
     pub metadata: Bytes,
 
     /// Other tagged fields
@@ -391,7 +407,7 @@ impl JoinGroupResponseMember {
     ///
     /// The group member ID.
     ///
-    /// Supported API versions: 0-9
+    /// Supported API versions: 2-9
     pub fn with_member_id(mut self, value: StrBytes) -> Self {
         self.member_id = value;
         self
@@ -409,7 +425,7 @@ impl JoinGroupResponseMember {
     ///
     /// The group member metadata.
     ///
-    /// Supported API versions: 0-9
+    /// Supported API versions: 2-9
     pub fn with_metadata(mut self, value: Bytes) -> Self {
         self.metadata = value;
         self
@@ -554,7 +570,7 @@ impl Default for JoinGroupResponseMember {
 }
 
 impl Message for JoinGroupResponseMember {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 9 };
+    const VERSIONS: VersionRange = VersionRange { min: 2, max: 9 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 

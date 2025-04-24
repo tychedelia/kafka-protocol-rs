@@ -17,23 +17,23 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-2
+/// Valid versions: 1-2
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct RequestHeader {
     /// The API key of this request.
     ///
-    /// Supported API versions: 0-2
+    /// Supported API versions: 1-2
     pub request_api_key: i16,
 
     /// The API version of this request.
     ///
-    /// Supported API versions: 0-2
+    /// Supported API versions: 1-2
     pub request_api_version: i16,
 
     /// The correlation ID of this request.
     ///
-    /// Supported API versions: 0-2
+    /// Supported API versions: 1-2
     pub correlation_id: i32,
 
     /// The client ID string.
@@ -50,7 +50,7 @@ impl RequestHeader {
     ///
     /// The API key of this request.
     ///
-    /// Supported API versions: 0-2
+    /// Supported API versions: 1-2
     pub fn with_request_api_key(mut self, value: i16) -> Self {
         self.request_api_key = value;
         self
@@ -59,7 +59,7 @@ impl RequestHeader {
     ///
     /// The API version of this request.
     ///
-    /// Supported API versions: 0-2
+    /// Supported API versions: 1-2
     pub fn with_request_api_version(mut self, value: i16) -> Self {
         self.request_api_version = value;
         self
@@ -68,7 +68,7 @@ impl RequestHeader {
     ///
     /// The correlation ID of this request.
     ///
-    /// Supported API versions: 0-2
+    /// Supported API versions: 1-2
     pub fn with_correlation_id(mut self, value: i32) -> Self {
         self.correlation_id = value;
         self
@@ -102,9 +102,7 @@ impl Encodable for RequestHeader {
         types::Int16.encode(buf, &self.request_api_key)?;
         types::Int16.encode(buf, &self.request_api_version)?;
         types::Int32.encode(buf, &self.correlation_id)?;
-        if version >= 1 {
-            types::String.encode(buf, &self.client_id)?;
-        }
+        types::String.encode(buf, &self.client_id)?;
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
@@ -124,9 +122,7 @@ impl Encodable for RequestHeader {
         total_size += types::Int16.compute_size(&self.request_api_key)?;
         total_size += types::Int16.compute_size(&self.request_api_version)?;
         total_size += types::Int32.compute_size(&self.correlation_id)?;
-        if version >= 1 {
-            total_size += types::String.compute_size(&self.client_id)?;
-        }
+        total_size += types::String.compute_size(&self.client_id)?;
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
@@ -151,11 +147,7 @@ impl Decodable for RequestHeader {
         let request_api_key = types::Int16.decode(buf)?;
         let request_api_version = types::Int16.decode(buf)?;
         let correlation_id = types::Int32.decode(buf)?;
-        let client_id = if version >= 1 {
-            types::String.decode(buf)?
-        } else {
-            Some(Default::default())
-        };
+        let client_id = types::String.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
         if version >= 2 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
@@ -189,6 +181,6 @@ impl Default for RequestHeader {
 }
 
 impl Message for RequestHeader {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
+    const VERSIONS: VersionRange = VersionRange { min: 1, max: 2 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }

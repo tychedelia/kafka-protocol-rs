@@ -26,17 +26,17 @@ pub struct AllocateProducerIdsResponse {
     /// Supported API versions: 0
     pub throttle_time_ms: i32,
 
-    /// The top level response error code
+    /// The top level response error code.
     ///
     /// Supported API versions: 0
     pub error_code: i16,
 
-    /// The first producer ID in this range, inclusive
+    /// The first producer ID in this range, inclusive.
     ///
     /// Supported API versions: 0
     pub producer_id_start: super::ProducerId,
 
-    /// The number of producer IDs in this range
+    /// The number of producer IDs in this range.
     ///
     /// Supported API versions: 0
     pub producer_id_len: i32,
@@ -57,7 +57,7 @@ impl AllocateProducerIdsResponse {
     }
     /// Sets `error_code` to the passed value.
     ///
-    /// The top level response error code
+    /// The top level response error code.
     ///
     /// Supported API versions: 0
     pub fn with_error_code(mut self, value: i16) -> Self {
@@ -66,7 +66,7 @@ impl AllocateProducerIdsResponse {
     }
     /// Sets `producer_id_start` to the passed value.
     ///
-    /// The first producer ID in this range, inclusive
+    /// The first producer ID in this range, inclusive.
     ///
     /// Supported API versions: 0
     pub fn with_producer_id_start(mut self, value: super::ProducerId) -> Self {
@@ -75,7 +75,7 @@ impl AllocateProducerIdsResponse {
     }
     /// Sets `producer_id_len` to the passed value.
     ///
-    /// The number of producer IDs in this range
+    /// The number of producer IDs in this range.
     ///
     /// Supported API versions: 0
     pub fn with_producer_id_len(mut self, value: i32) -> Self {

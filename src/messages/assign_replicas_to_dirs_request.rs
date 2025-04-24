@@ -21,17 +21,17 @@ use crate::protocol::{
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct AssignReplicasToDirsRequest {
-    /// The ID of the requesting broker
+    /// The ID of the requesting broker.
     ///
     /// Supported API versions: 0
     pub broker_id: super::BrokerId,
 
-    /// The epoch of the requesting broker
+    /// The epoch of the requesting broker.
     ///
     /// Supported API versions: 0
     pub broker_epoch: i64,
 
-    ///
+    /// The directories to which replicas should be assigned.
     ///
     /// Supported API versions: 0
     pub directories: Vec<DirectoryData>,
@@ -43,7 +43,7 @@ pub struct AssignReplicasToDirsRequest {
 impl AssignReplicasToDirsRequest {
     /// Sets `broker_id` to the passed value.
     ///
-    /// The ID of the requesting broker
+    /// The ID of the requesting broker.
     ///
     /// Supported API versions: 0
     pub fn with_broker_id(mut self, value: super::BrokerId) -> Self {
@@ -52,7 +52,7 @@ impl AssignReplicasToDirsRequest {
     }
     /// Sets `broker_epoch` to the passed value.
     ///
-    /// The epoch of the requesting broker
+    /// The epoch of the requesting broker.
     ///
     /// Supported API versions: 0
     pub fn with_broker_epoch(mut self, value: i64) -> Self {
@@ -61,7 +61,7 @@ impl AssignReplicasToDirsRequest {
     }
     /// Sets `directories` to the passed value.
     ///
-    ///
+    /// The directories to which replicas should be assigned.
     ///
     /// Supported API versions: 0
     pub fn with_directories(mut self, value: Vec<DirectoryData>) -> Self {
@@ -167,12 +167,12 @@ impl Message for AssignReplicasToDirsRequest {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct DirectoryData {
-    /// The ID of the directory
+    /// The ID of the directory.
     ///
     /// Supported API versions: 0
     pub id: Uuid,
 
-    ///
+    /// The topics assigned to the directory.
     ///
     /// Supported API versions: 0
     pub topics: Vec<TopicData>,
@@ -184,7 +184,7 @@ pub struct DirectoryData {
 impl DirectoryData {
     /// Sets `id` to the passed value.
     ///
-    /// The ID of the directory
+    /// The ID of the directory.
     ///
     /// Supported API versions: 0
     pub fn with_id(mut self, value: Uuid) -> Self {
@@ -193,7 +193,7 @@ impl DirectoryData {
     }
     /// Sets `topics` to the passed value.
     ///
-    ///
+    /// The topics assigned to the directory.
     ///
     /// Supported API versions: 0
     pub fn with_topics(mut self, value: Vec<TopicData>) -> Self {
@@ -293,7 +293,7 @@ impl Message for DirectoryData {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct PartitionData {
-    /// The partition index
+    /// The partition index.
     ///
     /// Supported API versions: 0
     pub partition_index: i32,
@@ -305,7 +305,7 @@ pub struct PartitionData {
 impl PartitionData {
     /// Sets `partition_index` to the passed value.
     ///
-    /// The partition index
+    /// The partition index.
     ///
     /// Supported API versions: 0
     pub fn with_partition_index(mut self, value: i32) -> Self {
@@ -400,12 +400,12 @@ impl Message for PartitionData {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct TopicData {
-    /// The ID of the assigned topic
+    /// The ID of the assigned topic.
     ///
     /// Supported API versions: 0
     pub topic_id: Uuid,
 
-    ///
+    /// The partitions assigned to the directory.
     ///
     /// Supported API versions: 0
     pub partitions: Vec<PartitionData>,
@@ -417,7 +417,7 @@ pub struct TopicData {
 impl TopicData {
     /// Sets `topic_id` to the passed value.
     ///
-    /// The ID of the assigned topic
+    /// The ID of the assigned topic.
     ///
     /// Supported API versions: 0
     pub fn with_topic_id(mut self, value: Uuid) -> Self {
@@ -426,7 +426,7 @@ impl TopicData {
     }
     /// Sets `partitions` to the passed value.
     ///
-    ///
+    /// The partitions assigned to the directory.
     ///
     /// Supported API versions: 0
     pub fn with_partitions(mut self, value: Vec<PartitionData>) -> Self {

@@ -36,12 +36,12 @@ pub struct ControllerRegistrationRequest {
     /// Supported API versions: 0
     pub zk_migration_ready: bool,
 
-    /// The listeners of this controller
+    /// The listeners of this controller.
     ///
     /// Supported API versions: 0
     pub listeners: Vec<Listener>,
 
-    /// The features on this controller
+    /// The features on this controller.
     ///
     /// Supported API versions: 0
     pub features: Vec<Feature>,
@@ -80,7 +80,7 @@ impl ControllerRegistrationRequest {
     }
     /// Sets `listeners` to the passed value.
     ///
-    /// The listeners of this controller
+    /// The listeners of this controller.
     ///
     /// Supported API versions: 0
     pub fn with_listeners(mut self, value: Vec<Listener>) -> Self {
@@ -89,7 +89,7 @@ impl ControllerRegistrationRequest {
     }
     /// Sets `features` to the passed value.
     ///
-    /// The features on this controller
+    /// The features on this controller.
     ///
     /// Supported API versions: 0
     pub fn with_features(mut self, value: Vec<Feature>) -> Self {

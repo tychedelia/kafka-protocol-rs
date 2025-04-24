@@ -17,21 +17,21 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-9
+/// Valid versions: 1-9
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct OffsetFetchRequest {
     /// The group to fetch offsets for.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 1-7
     pub group_id: super::GroupId,
 
     /// Each topic we would like to fetch offsets for, or null to fetch offsets for all topics.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 1-7
     pub topics: Option<Vec<OffsetFetchRequestTopic>>,
 
-    /// Each group we would like to fetch offsets for
+    /// Each group we would like to fetch offsets for.
     ///
     /// Supported API versions: 8-9
     pub groups: Vec<OffsetFetchRequestGroup>,
@@ -50,7 +50,7 @@ impl OffsetFetchRequest {
     ///
     /// The group to fetch offsets for.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 1-7
     pub fn with_group_id(mut self, value: super::GroupId) -> Self {
         self.group_id = value;
         self
@@ -59,14 +59,14 @@ impl OffsetFetchRequest {
     ///
     /// Each topic we would like to fetch offsets for, or null to fetch offsets for all topics.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 1-7
     pub fn with_topics(mut self, value: Option<Vec<OffsetFetchRequestTopic>>) -> Self {
         self.topics = value;
         self
     }
     /// Sets `groups` to the passed value.
     ///
-    /// Each group we would like to fetch offsets for
+    /// Each group we would like to fetch offsets for.
     ///
     /// Supported API versions: 8-9
     pub fn with_groups(mut self, value: Vec<OffsetFetchRequestGroup>) -> Self {
@@ -283,11 +283,11 @@ impl Default for OffsetFetchRequest {
 }
 
 impl Message for OffsetFetchRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 9 };
-    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 0 });
+    const VERSIONS: VersionRange = VersionRange { min: 1, max: 9 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-9
+/// Valid versions: 1-9
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct OffsetFetchRequestGroup {
@@ -296,7 +296,7 @@ pub struct OffsetFetchRequestGroup {
     /// Supported API versions: 8-9
     pub group_id: super::GroupId,
 
-    /// The member ID assigned by the group coordinator if using the new consumer protocol (KIP-848).
+    /// The member id.
     ///
     /// Supported API versions: 9
     pub member_id: Option<StrBytes>,
@@ -327,7 +327,7 @@ impl OffsetFetchRequestGroup {
     }
     /// Sets `member_id` to the passed value.
     ///
-    /// The member ID assigned by the group coordinator if using the new consumer protocol (KIP-848).
+    /// The member id.
     ///
     /// Supported API versions: 9
     pub fn with_member_id(mut self, value: Option<StrBytes>) -> Self {
@@ -512,22 +512,22 @@ impl Default for OffsetFetchRequestGroup {
 }
 
 impl Message for OffsetFetchRequestGroup {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 9 };
-    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 0 });
+    const VERSIONS: VersionRange = VersionRange { min: 1, max: 9 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-9
+/// Valid versions: 1-9
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct OffsetFetchRequestTopic {
     /// The topic name.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 1-7
     pub name: super::TopicName,
 
     /// The partition indexes we would like to fetch offsets for.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 1-7
     pub partition_indexes: Vec<i32>,
 
     /// Other tagged fields
@@ -539,7 +539,7 @@ impl OffsetFetchRequestTopic {
     ///
     /// The topic name.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 1-7
     pub fn with_name(mut self, value: super::TopicName) -> Self {
         self.name = value;
         self
@@ -548,7 +548,7 @@ impl OffsetFetchRequestTopic {
     ///
     /// The partition indexes we would like to fetch offsets for.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 1-7
     pub fn with_partition_indexes(mut self, value: Vec<i32>) -> Self {
         self.partition_indexes = value;
         self
@@ -701,11 +701,11 @@ impl Default for OffsetFetchRequestTopic {
 }
 
 impl Message for OffsetFetchRequestTopic {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 9 };
-    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 0 });
+    const VERSIONS: VersionRange = VersionRange { min: 1, max: 9 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-9
+/// Valid versions: 1-9
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct OffsetFetchRequestTopics {
@@ -866,8 +866,8 @@ impl Default for OffsetFetchRequestTopics {
 }
 
 impl Message for OffsetFetchRequestTopics {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 9 };
-    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 0 });
+    const VERSIONS: VersionRange = VersionRange { min: 1, max: 9 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 impl HeaderVersion for OffsetFetchRequest {

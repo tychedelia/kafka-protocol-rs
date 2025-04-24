@@ -17,18 +17,18 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-1
+/// Valid versions: 0-2
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct FeatureUpdateKey {
     /// The name of the finalized feature to be updated.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub feature: StrBytes,
 
     /// The new maximum version level for the finalized feature. A value >= 1 is valid. A value < 1, is special, and can be used to request the deletion of the finalized feature.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub max_version_level: i16,
 
     /// DEPRECATED in version 1 (see DowngradeType). When set to true, the finalized feature version level is allowed to be downgraded/deleted. The downgrade request will fail if the new maximum version level is a value that's not lower than the existing maximum finalized version level.
@@ -38,7 +38,7 @@ pub struct FeatureUpdateKey {
 
     /// Determine which type of upgrade will be performed: 1 will perform an upgrade only (default), 2 is safe downgrades only (lossless), 3 is unsafe downgrades (lossy).
     ///
-    /// Supported API versions: 1
+    /// Supported API versions: 1-2
     pub upgrade_type: i8,
 
     /// Other tagged fields
@@ -50,7 +50,7 @@ impl FeatureUpdateKey {
     ///
     /// The name of the finalized feature to be updated.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub fn with_feature(mut self, value: StrBytes) -> Self {
         self.feature = value;
         self
@@ -59,7 +59,7 @@ impl FeatureUpdateKey {
     ///
     /// The new maximum version level for the finalized feature. A value >= 1 is valid. A value < 1, is special, and can be used to request the deletion of the finalized feature.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub fn with_max_version_level(mut self, value: i16) -> Self {
         self.max_version_level = value;
         self
@@ -77,7 +77,7 @@ impl FeatureUpdateKey {
     ///
     /// Determine which type of upgrade will be performed: 1 will perform an upgrade only (default), 2 is safe downgrades only (lossless), 3 is unsafe downgrades (lossy).
     ///
-    /// Supported API versions: 1
+    /// Supported API versions: 1-2
     pub fn with_upgrade_type(mut self, value: i8) -> Self {
         self.upgrade_type = value;
         self
@@ -209,27 +209,27 @@ impl Default for FeatureUpdateKey {
 }
 
 impl Message for FeatureUpdateKey {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-1
+/// Valid versions: 0-2
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct UpdateFeaturesRequest {
     /// How long to wait in milliseconds before timing out the request.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub timeout_ms: i32,
 
     /// The list of updates to finalized features.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub feature_updates: Vec<FeatureUpdateKey>,
 
     /// True if we should validate the request, but not perform the upgrade or downgrade.
     ///
-    /// Supported API versions: 1
+    /// Supported API versions: 1-2
     pub validate_only: bool,
 
     /// Other tagged fields
@@ -241,7 +241,7 @@ impl UpdateFeaturesRequest {
     ///
     /// How long to wait in milliseconds before timing out the request.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub fn with_timeout_ms(mut self, value: i32) -> Self {
         self.timeout_ms = value;
         self
@@ -250,7 +250,7 @@ impl UpdateFeaturesRequest {
     ///
     /// The list of updates to finalized features.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub fn with_feature_updates(mut self, value: Vec<FeatureUpdateKey>) -> Self {
         self.feature_updates = value;
         self
@@ -259,7 +259,7 @@ impl UpdateFeaturesRequest {
     ///
     /// True if we should validate the request, but not perform the upgrade or downgrade.
     ///
-    /// Supported API versions: 1
+    /// Supported API versions: 1-2
     pub fn with_validate_only(mut self, value: bool) -> Self {
         self.validate_only = value;
         self
@@ -371,7 +371,7 @@ impl Default for UpdateFeaturesRequest {
 }
 
 impl Message for UpdateFeaturesRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 

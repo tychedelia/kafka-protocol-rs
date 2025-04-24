@@ -21,7 +21,7 @@ use crate::protocol::{
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct DescribeQuorumRequest {
-    ///
+    /// The topics to describe.
     ///
     /// Supported API versions: 0-2
     pub topics: Vec<TopicData>,
@@ -33,7 +33,7 @@ pub struct DescribeQuorumRequest {
 impl DescribeQuorumRequest {
     /// Sets `topics` to the passed value.
     ///
-    ///
+    /// The topics to describe.
     ///
     /// Supported API versions: 0-2
     pub fn with_topics(mut self, value: Vec<TopicData>) -> Self {
@@ -240,7 +240,7 @@ pub struct TopicData {
     /// Supported API versions: 0-2
     pub topic_name: super::TopicName,
 
-    ///
+    /// The partitions to describe.
     ///
     /// Supported API versions: 0-2
     pub partitions: Vec<PartitionData>,
@@ -261,7 +261,7 @@ impl TopicData {
     }
     /// Sets `partitions` to the passed value.
     ///
-    ///
+    /// The partitions to describe.
     ///
     /// Supported API versions: 0-2
     pub fn with_partitions(mut self, value: Vec<PartitionData>) -> Self {

@@ -21,7 +21,7 @@ use crate::protocol::{
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct DeletableGroupResult {
-    /// The group id
+    /// The group id.
     ///
     /// Supported API versions: 0-2
     pub group_id: super::GroupId,
@@ -38,7 +38,7 @@ pub struct DeletableGroupResult {
 impl DeletableGroupResult {
     /// Sets `group_id` to the passed value.
     ///
-    /// The group id
+    /// The group id.
     ///
     /// Supported API versions: 0-2
     pub fn with_group_id(mut self, value: super::GroupId) -> Self {
@@ -170,7 +170,7 @@ pub struct DeleteGroupsResponse {
     /// Supported API versions: 0-2
     pub throttle_time_ms: i32,
 
-    /// The deletion results
+    /// The deletion results.
     ///
     /// Supported API versions: 0-2
     pub results: Vec<DeletableGroupResult>,
@@ -191,7 +191,7 @@ impl DeleteGroupsResponse {
     }
     /// Sets `results` to the passed value.
     ///
-    /// The deletion results
+    /// The deletion results.
     ///
     /// Supported API versions: 0-2
     pub fn with_results(mut self, value: Vec<DeletableGroupResult>) -> Self {

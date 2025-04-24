@@ -21,22 +21,22 @@ use crate::protocol::{
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct LeaderChangeMessage {
-    /// The version of the leader change message
+    /// The version of the leader change message.
     ///
     /// Supported API versions: 0-1
     pub version: i16,
 
-    /// The ID of the newly elected leader
+    /// The ID of the newly elected leader.
     ///
     /// Supported API versions: 0-1
     pub leader_id: super::BrokerId,
 
-    /// The set of voters in the quorum for this epoch
+    /// The set of voters in the quorum for this epoch.
     ///
     /// Supported API versions: 0-1
     pub voters: Vec<Voter>,
 
-    /// The voters who voted for the leader at the time of election
+    /// The voters who voted for the leader at the time of election.
     ///
     /// Supported API versions: 0-1
     pub granting_voters: Vec<Voter>,
@@ -48,7 +48,7 @@ pub struct LeaderChangeMessage {
 impl LeaderChangeMessage {
     /// Sets `version` to the passed value.
     ///
-    /// The version of the leader change message
+    /// The version of the leader change message.
     ///
     /// Supported API versions: 0-1
     pub fn with_version(mut self, value: i16) -> Self {
@@ -57,7 +57,7 @@ impl LeaderChangeMessage {
     }
     /// Sets `leader_id` to the passed value.
     ///
-    /// The ID of the newly elected leader
+    /// The ID of the newly elected leader.
     ///
     /// Supported API versions: 0-1
     pub fn with_leader_id(mut self, value: super::BrokerId) -> Self {
@@ -66,7 +66,7 @@ impl LeaderChangeMessage {
     }
     /// Sets `voters` to the passed value.
     ///
-    /// The set of voters in the quorum for this epoch
+    /// The set of voters in the quorum for this epoch.
     ///
     /// Supported API versions: 0-1
     pub fn with_voters(mut self, value: Vec<Voter>) -> Self {
@@ -75,7 +75,7 @@ impl LeaderChangeMessage {
     }
     /// Sets `granting_voters` to the passed value.
     ///
-    /// The voters who voted for the leader at the time of election
+    /// The voters who voted for the leader at the time of election.
     ///
     /// Supported API versions: 0-1
     pub fn with_granting_voters(mut self, value: Vec<Voter>) -> Self {
@@ -184,12 +184,12 @@ impl Message for LeaderChangeMessage {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct Voter {
-    ///
+    /// The ID of the voter.
     ///
     /// Supported API versions: 0-1
     pub voter_id: i32,
 
-    /// The directory id of the voter
+    /// The directory id of the voter.
     ///
     /// Supported API versions: 1
     pub voter_directory_id: Uuid,
@@ -201,7 +201,7 @@ pub struct Voter {
 impl Voter {
     /// Sets `voter_id` to the passed value.
     ///
-    ///
+    /// The ID of the voter.
     ///
     /// Supported API versions: 0-1
     pub fn with_voter_id(mut self, value: i32) -> Self {
@@ -210,7 +210,7 @@ impl Voter {
     }
     /// Sets `voter_directory_id` to the passed value.
     ///
-    /// The directory id of the voter
+    /// The directory id of the voter.
     ///
     /// Supported API versions: 1
     pub fn with_voter_directory_id(mut self, value: Uuid) -> Self {

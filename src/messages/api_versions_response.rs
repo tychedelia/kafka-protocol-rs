@@ -202,7 +202,7 @@ pub struct ApiVersionsResponse {
     /// Supported API versions: 3-4
     pub finalized_features: Vec<FinalizedFeatureKey>,
 
-    /// Set by a KRaft controller if the required configurations for ZK migration are present
+    /// Set by a KRaft controller if the required configurations for ZK migration are present.
     ///
     /// Supported API versions: 3-4
     pub zk_migration_ready: bool,
@@ -268,7 +268,7 @@ impl ApiVersionsResponse {
     }
     /// Sets `zk_migration_ready` to the passed value.
     ///
-    /// Set by a KRaft controller if the required configurations for ZK migration are present
+    /// Set by a KRaft controller if the required configurations for ZK migration are present.
     ///
     /// Supported API versions: 3-4
     pub fn with_zk_migration_ready(mut self, value: bool) -> Self {

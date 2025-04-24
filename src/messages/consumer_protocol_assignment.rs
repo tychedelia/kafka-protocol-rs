@@ -21,12 +21,12 @@ use crate::protocol::{
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct ConsumerProtocolAssignment {
-    ///
+    /// The list of topics and partitions assigned to this consumer.
     ///
     /// Supported API versions: 0-3
     pub assigned_partitions: Vec<TopicPartition>,
 
-    ///
+    /// User data.
     ///
     /// Supported API versions: 0-3
     pub user_data: Option<Bytes>,
@@ -35,7 +35,7 @@ pub struct ConsumerProtocolAssignment {
 impl ConsumerProtocolAssignment {
     /// Sets `assigned_partitions` to the passed value.
     ///
-    ///
+    /// The list of topics and partitions assigned to this consumer.
     ///
     /// Supported API versions: 0-3
     pub fn with_assigned_partitions(mut self, value: Vec<TopicPartition>) -> Self {
@@ -44,7 +44,7 @@ impl ConsumerProtocolAssignment {
     }
     /// Sets `user_data` to the passed value.
     ///
-    ///
+    /// User data.
     ///
     /// Supported API versions: 0-3
     pub fn with_user_data(mut self, value: Option<Bytes>) -> Self {
@@ -105,12 +105,12 @@ impl Message for ConsumerProtocolAssignment {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct TopicPartition {
-    ///
+    /// The topic name.
     ///
     /// Supported API versions: 0-3
     pub topic: super::TopicName,
 
-    ///
+    /// The list of partitions assigned to this consumer.
     ///
     /// Supported API versions: 0-3
     pub partitions: Vec<i32>,
@@ -119,7 +119,7 @@ pub struct TopicPartition {
 impl TopicPartition {
     /// Sets `topic` to the passed value.
     ///
-    ///
+    /// The topic name.
     ///
     /// Supported API versions: 0-3
     pub fn with_topic(mut self, value: super::TopicName) -> Self {
@@ -128,7 +128,7 @@ impl TopicPartition {
     }
     /// Sets `partitions` to the passed value.
     ///
-    ///
+    /// The list of partitions assigned to this consumer.
     ///
     /// Supported API versions: 0-3
     pub fn with_partitions(mut self, value: Vec<i32>) -> Self {

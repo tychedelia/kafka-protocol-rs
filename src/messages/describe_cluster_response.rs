@@ -17,29 +17,34 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-1
+/// Valid versions: 0-2
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct DescribeClusterBroker {
     /// The broker ID.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub broker_id: super::BrokerId,
 
     /// The broker hostname.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub host: StrBytes,
 
     /// The broker port.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub port: i32,
 
     /// The rack of the broker, or null if it has not been assigned to a rack.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub rack: Option<StrBytes>,
+
+    /// Whether the broker is fenced
+    ///
+    /// Supported API versions: 2
+    pub is_fenced: bool,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
@@ -50,7 +55,7 @@ impl DescribeClusterBroker {
     ///
     /// The broker ID.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub fn with_broker_id(mut self, value: super::BrokerId) -> Self {
         self.broker_id = value;
         self
@@ -59,7 +64,7 @@ impl DescribeClusterBroker {
     ///
     /// The broker hostname.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub fn with_host(mut self, value: StrBytes) -> Self {
         self.host = value;
         self
@@ -68,7 +73,7 @@ impl DescribeClusterBroker {
     ///
     /// The broker port.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub fn with_port(mut self, value: i32) -> Self {
         self.port = value;
         self
@@ -77,9 +82,18 @@ impl DescribeClusterBroker {
     ///
     /// The rack of the broker, or null if it has not been assigned to a rack.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub fn with_rack(mut self, value: Option<StrBytes>) -> Self {
         self.rack = value;
+        self
+    }
+    /// Sets `is_fenced` to the passed value.
+    ///
+    /// Whether the broker is fenced
+    ///
+    /// Supported API versions: 2
+    pub fn with_is_fenced(mut self, value: bool) -> Self {
+        self.is_fenced = value;
         self
     }
     /// Sets unknown_tagged_fields to the passed value.
@@ -104,6 +118,13 @@ impl Encodable for DescribeClusterBroker {
         types::CompactString.encode(buf, &self.host)?;
         types::Int32.encode(buf, &self.port)?;
         types::CompactString.encode(buf, &self.rack)?;
+        if version >= 2 {
+            types::Boolean.encode(buf, &self.is_fenced)?;
+        } else {
+            if self.is_fenced {
+                bail!("A field is set that is not available on the selected protocol version");
+            }
+        }
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             bail!(
@@ -122,6 +143,13 @@ impl Encodable for DescribeClusterBroker {
         total_size += types::CompactString.compute_size(&self.host)?;
         total_size += types::Int32.compute_size(&self.port)?;
         total_size += types::CompactString.compute_size(&self.rack)?;
+        if version >= 2 {
+            total_size += types::Boolean.compute_size(&self.is_fenced)?;
+        } else {
+            if self.is_fenced {
+                bail!("A field is set that is not available on the selected protocol version");
+            }
+        }
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             bail!(
@@ -146,6 +174,11 @@ impl Decodable for DescribeClusterBroker {
         let host = types::CompactString.decode(buf)?;
         let port = types::Int32.decode(buf)?;
         let rack = types::CompactString.decode(buf)?;
+        let is_fenced = if version >= 2 {
+            types::Boolean.decode(buf)?
+        } else {
+            false
+        };
         let mut unknown_tagged_fields = BTreeMap::new();
         let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
         for _ in 0..num_tagged_fields {
@@ -159,6 +192,7 @@ impl Decodable for DescribeClusterBroker {
             host,
             port,
             rack,
+            is_fenced,
             unknown_tagged_fields,
         })
     }
@@ -171,58 +205,59 @@ impl Default for DescribeClusterBroker {
             host: Default::default(),
             port: 0,
             rack: None,
+            is_fenced: false,
             unknown_tagged_fields: BTreeMap::new(),
         }
     }
 }
 
 impl Message for DescribeClusterBroker {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-1
+/// Valid versions: 0-2
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct DescribeClusterResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub throttle_time_ms: i32,
 
-    /// The top-level error code, or 0 if there was no error
+    /// The top-level error code, or 0 if there was no error.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub error_code: i16,
 
     /// The top-level error message, or null if there was no error.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub error_message: Option<StrBytes>,
 
     /// The endpoint type that was described. 1=brokers, 2=controllers.
     ///
-    /// Supported API versions: 1
+    /// Supported API versions: 1-2
     pub endpoint_type: i8,
 
     /// The cluster ID that responding broker belongs to.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub cluster_id: StrBytes,
 
     /// The ID of the controller broker.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub controller_id: super::BrokerId,
 
     /// Each broker in the response.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub brokers: Vec<DescribeClusterBroker>,
 
     /// 32-bit bitfield to represent authorized operations for this cluster.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub cluster_authorized_operations: i32,
 
     /// Other tagged fields
@@ -234,16 +269,16 @@ impl DescribeClusterResponse {
     ///
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
         self.throttle_time_ms = value;
         self
     }
     /// Sets `error_code` to the passed value.
     ///
-    /// The top-level error code, or 0 if there was no error
+    /// The top-level error code, or 0 if there was no error.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub fn with_error_code(mut self, value: i16) -> Self {
         self.error_code = value;
         self
@@ -252,7 +287,7 @@ impl DescribeClusterResponse {
     ///
     /// The top-level error message, or null if there was no error.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub fn with_error_message(mut self, value: Option<StrBytes>) -> Self {
         self.error_message = value;
         self
@@ -261,7 +296,7 @@ impl DescribeClusterResponse {
     ///
     /// The endpoint type that was described. 1=brokers, 2=controllers.
     ///
-    /// Supported API versions: 1
+    /// Supported API versions: 1-2
     pub fn with_endpoint_type(mut self, value: i8) -> Self {
         self.endpoint_type = value;
         self
@@ -270,7 +305,7 @@ impl DescribeClusterResponse {
     ///
     /// The cluster ID that responding broker belongs to.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub fn with_cluster_id(mut self, value: StrBytes) -> Self {
         self.cluster_id = value;
         self
@@ -279,7 +314,7 @@ impl DescribeClusterResponse {
     ///
     /// The ID of the controller broker.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub fn with_controller_id(mut self, value: super::BrokerId) -> Self {
         self.controller_id = value;
         self
@@ -288,7 +323,7 @@ impl DescribeClusterResponse {
     ///
     /// Each broker in the response.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub fn with_brokers(mut self, value: Vec<DescribeClusterBroker>) -> Self {
         self.brokers = value;
         self
@@ -297,7 +332,7 @@ impl DescribeClusterResponse {
     ///
     /// 32-bit bitfield to represent authorized operations for this cluster.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub fn with_cluster_authorized_operations(mut self, value: i32) -> Self {
         self.cluster_authorized_operations = value;
         self
@@ -433,7 +468,7 @@ impl Default for DescribeClusterResponse {
 }
 
 impl Message for DescribeClusterResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 

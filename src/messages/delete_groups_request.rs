@@ -140,7 +140,7 @@ impl Default for DeleteGroupsRequest {
 
 impl Message for DeleteGroupsRequest {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
-    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 0 });
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 impl HeaderVersion for DeleteGroupsRequest {

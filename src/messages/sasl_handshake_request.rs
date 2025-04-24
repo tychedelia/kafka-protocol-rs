@@ -78,7 +78,7 @@ impl Default for SaslHandshakeRequest {
 
 impl Message for SaslHandshakeRequest {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
-    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 0 });
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 impl HeaderVersion for SaslHandshakeRequest {

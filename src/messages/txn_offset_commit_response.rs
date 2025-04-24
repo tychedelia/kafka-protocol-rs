@@ -17,18 +17,18 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-4
+/// Valid versions: 0-5
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct TxnOffsetCommitResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub throttle_time_ms: i32,
 
     /// The responses for each topic.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub topics: Vec<TxnOffsetCommitResponseTopic>,
 
     /// Other tagged fields
@@ -40,7 +40,7 @@ impl TxnOffsetCommitResponse {
     ///
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
         self.throttle_time_ms = value;
         self
@@ -49,7 +49,7 @@ impl TxnOffsetCommitResponse {
     ///
     /// The responses for each topic.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub fn with_topics(mut self, value: Vec<TxnOffsetCommitResponseTopic>) -> Self {
         self.topics = value;
         self
@@ -158,22 +158,22 @@ impl Default for TxnOffsetCommitResponse {
 }
 
 impl Message for TxnOffsetCommitResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 5 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-4
+/// Valid versions: 0-5
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct TxnOffsetCommitResponsePartition {
     /// The partition index.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub partition_index: i32,
 
     /// The error code, or 0 if there was no error.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub error_code: i16,
 
     /// Other tagged fields
@@ -185,7 +185,7 @@ impl TxnOffsetCommitResponsePartition {
     ///
     /// The partition index.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub fn with_partition_index(mut self, value: i32) -> Self {
         self.partition_index = value;
         self
@@ -194,7 +194,7 @@ impl TxnOffsetCommitResponsePartition {
     ///
     /// The error code, or 0 if there was no error.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub fn with_error_code(mut self, value: i16) -> Self {
         self.error_code = value;
         self
@@ -290,22 +290,22 @@ impl Default for TxnOffsetCommitResponsePartition {
 }
 
 impl Message for TxnOffsetCommitResponsePartition {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 5 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-4
+/// Valid versions: 0-5
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct TxnOffsetCommitResponseTopic {
     /// The topic name.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub name: super::TopicName,
 
     /// The responses for each partition in the topic.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub partitions: Vec<TxnOffsetCommitResponsePartition>,
 
     /// Other tagged fields
@@ -317,7 +317,7 @@ impl TxnOffsetCommitResponseTopic {
     ///
     /// The topic name.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub fn with_name(mut self, value: super::TopicName) -> Self {
         self.name = value;
         self
@@ -326,7 +326,7 @@ impl TxnOffsetCommitResponseTopic {
     ///
     /// The responses for each partition in the topic.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub fn with_partitions(mut self, value: Vec<TxnOffsetCommitResponsePartition>) -> Self {
         self.partitions = value;
         self
@@ -447,7 +447,7 @@ impl Default for TxnOffsetCommitResponseTopic {
 }
 
 impl Message for TxnOffsetCommitResponseTopic {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 5 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 

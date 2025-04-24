@@ -17,18 +17,18 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-2
+/// Valid versions: 1-2
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct ExpireDelegationTokenRequest {
     /// The HMAC of the delegation token to be expired.
     ///
-    /// Supported API versions: 0-2
+    /// Supported API versions: 1-2
     pub hmac: Bytes,
 
     /// The expiry time period in milliseconds.
     ///
-    /// Supported API versions: 0-2
+    /// Supported API versions: 1-2
     pub expiry_time_period_ms: i64,
 
     /// Other tagged fields
@@ -40,7 +40,7 @@ impl ExpireDelegationTokenRequest {
     ///
     /// The HMAC of the delegation token to be expired.
     ///
-    /// Supported API versions: 0-2
+    /// Supported API versions: 1-2
     pub fn with_hmac(mut self, value: Bytes) -> Self {
         self.hmac = value;
         self
@@ -49,7 +49,7 @@ impl ExpireDelegationTokenRequest {
     ///
     /// The expiry time period in milliseconds.
     ///
-    /// Supported API versions: 0-2
+    /// Supported API versions: 1-2
     pub fn with_expiry_time_period_ms(mut self, value: i64) -> Self {
         self.expiry_time_period_ms = value;
         self
@@ -157,8 +157,8 @@ impl Default for ExpireDelegationTokenRequest {
 }
 
 impl Message for ExpireDelegationTokenRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
-    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 0 });
+    const VERSIONS: VersionRange = VersionRange { min: 1, max: 2 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 impl HeaderVersion for ExpireDelegationTokenRequest {

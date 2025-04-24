@@ -203,7 +203,7 @@ impl Message for ElectLeadersResponse {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct PartitionResult {
-    /// The partition id
+    /// The partition id.
     ///
     /// Supported API versions: 0-2
     pub partition_id: i32,
@@ -225,7 +225,7 @@ pub struct PartitionResult {
 impl PartitionResult {
     /// Sets `partition_id` to the passed value.
     ///
-    /// The partition id
+    /// The partition id.
     ///
     /// Supported API versions: 0-2
     pub fn with_partition_id(mut self, value: i32) -> Self {
@@ -366,12 +366,12 @@ impl Message for PartitionResult {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct ReplicaElectionResult {
-    /// The topic name
+    /// The topic name.
     ///
     /// Supported API versions: 0-2
     pub topic: super::TopicName,
 
-    /// The results for each partition
+    /// The results for each partition.
     ///
     /// Supported API versions: 0-2
     pub partition_result: Vec<PartitionResult>,
@@ -383,7 +383,7 @@ pub struct ReplicaElectionResult {
 impl ReplicaElectionResult {
     /// Sets `topic` to the passed value.
     ///
-    /// The topic name
+    /// The topic name.
     ///
     /// Supported API versions: 0-2
     pub fn with_topic(mut self, value: super::TopicName) -> Self {
@@ -392,7 +392,7 @@ impl ReplicaElectionResult {
     }
     /// Sets `partition_result` to the passed value.
     ///
-    /// The results for each partition
+    /// The results for each partition.
     ///
     /// Supported API versions: 0-2
     pub fn with_partition_result(mut self, value: Vec<PartitionResult>) -> Self {

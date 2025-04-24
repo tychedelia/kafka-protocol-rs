@@ -17,13 +17,13 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-17
+/// Valid versions: 4-17
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct FetchPartition {
     /// The partition index.
     ///
-    /// Supported API versions: 0-17
+    /// Supported API versions: 4-17
     pub partition: i32,
 
     /// The current leader epoch of the partition.
@@ -33,10 +33,10 @@ pub struct FetchPartition {
 
     /// The message offset.
     ///
-    /// Supported API versions: 0-17
+    /// Supported API versions: 4-17
     pub fetch_offset: i64,
 
-    /// The epoch of the last fetched record or -1 if there is none
+    /// The epoch of the last fetched record or -1 if there is none.
     ///
     /// Supported API versions: 12-17
     pub last_fetched_epoch: i32,
@@ -48,10 +48,10 @@ pub struct FetchPartition {
 
     /// The maximum bytes to fetch from this partition.  See KIP-74 for cases where this limit may not be honored.
     ///
-    /// Supported API versions: 0-17
+    /// Supported API versions: 4-17
     pub partition_max_bytes: i32,
 
-    /// The directory id of the follower fetching
+    /// The directory id of the follower fetching.
     ///
     /// Supported API versions: 17
     pub replica_directory_id: Uuid,
@@ -65,7 +65,7 @@ impl FetchPartition {
     ///
     /// The partition index.
     ///
-    /// Supported API versions: 0-17
+    /// Supported API versions: 4-17
     pub fn with_partition(mut self, value: i32) -> Self {
         self.partition = value;
         self
@@ -83,14 +83,14 @@ impl FetchPartition {
     ///
     /// The message offset.
     ///
-    /// Supported API versions: 0-17
+    /// Supported API versions: 4-17
     pub fn with_fetch_offset(mut self, value: i64) -> Self {
         self.fetch_offset = value;
         self
     }
     /// Sets `last_fetched_epoch` to the passed value.
     ///
-    /// The epoch of the last fetched record or -1 if there is none
+    /// The epoch of the last fetched record or -1 if there is none.
     ///
     /// Supported API versions: 12-17
     pub fn with_last_fetched_epoch(mut self, value: i32) -> Self {
@@ -110,14 +110,14 @@ impl FetchPartition {
     ///
     /// The maximum bytes to fetch from this partition.  See KIP-74 for cases where this limit may not be honored.
     ///
-    /// Supported API versions: 0-17
+    /// Supported API versions: 4-17
     pub fn with_partition_max_bytes(mut self, value: i32) -> Self {
         self.partition_max_bytes = value;
         self
     }
     /// Sets `replica_directory_id` to the passed value.
     ///
-    /// The directory id of the follower fetching
+    /// The directory id of the follower fetching.
     ///
     /// Supported API versions: 17
     pub fn with_replica_directory_id(mut self, value: Uuid) -> Self {
@@ -317,11 +317,11 @@ impl Default for FetchPartition {
 }
 
 impl Message for FetchPartition {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 17 };
-    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 3 });
+    const VERSIONS: VersionRange = VersionRange { min: 4, max: 17 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-17
+/// Valid versions: 4-17
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct FetchRequest {
@@ -332,30 +332,30 @@ pub struct FetchRequest {
 
     /// The broker ID of the follower, of -1 if this request is from a consumer.
     ///
-    /// Supported API versions: 0-14
+    /// Supported API versions: 4-14
     pub replica_id: super::BrokerId,
 
-    ///
+    /// The state of the replica in the follower.
     ///
     /// Supported API versions: 15-17
     pub replica_state: ReplicaState,
 
     /// The maximum time in milliseconds to wait for the response.
     ///
-    /// Supported API versions: 0-17
+    /// Supported API versions: 4-17
     pub max_wait_ms: i32,
 
     /// The minimum bytes to accumulate in the response.
     ///
-    /// Supported API versions: 0-17
+    /// Supported API versions: 4-17
     pub min_bytes: i32,
 
     /// The maximum bytes to fetch.  See KIP-74 for cases where this limit may not be honored.
     ///
-    /// Supported API versions: 3-17
+    /// Supported API versions: 4-17
     pub max_bytes: i32,
 
-    /// This setting controls the visibility of transactional records. Using READ_UNCOMMITTED (isolation_level = 0) makes all records visible. With READ_COMMITTED (isolation_level = 1), non-transactional and COMMITTED transactional records are visible. To be more concrete, READ_COMMITTED returns all data from offsets smaller than the current LSO (last stable offset), and enables the inclusion of the list of aborted transactions in the result, which allows consumers to discard ABORTED transactional records
+    /// This setting controls the visibility of transactional records. Using READ_UNCOMMITTED (isolation_level = 0) makes all records visible. With READ_COMMITTED (isolation_level = 1), non-transactional and COMMITTED transactional records are visible. To be more concrete, READ_COMMITTED returns all data from offsets smaller than the current LSO (last stable offset), and enables the inclusion of the list of aborted transactions in the result, which allows consumers to discard ABORTED transactional records.
     ///
     /// Supported API versions: 4-17
     pub isolation_level: i8,
@@ -372,7 +372,7 @@ pub struct FetchRequest {
 
     /// The topics to fetch.
     ///
-    /// Supported API versions: 0-17
+    /// Supported API versions: 4-17
     pub topics: Vec<FetchTopic>,
 
     /// In an incremental fetch request, the partitions to remove.
@@ -380,7 +380,7 @@ pub struct FetchRequest {
     /// Supported API versions: 7-17
     pub forgotten_topics_data: Vec<ForgottenTopic>,
 
-    /// Rack ID of the consumer making this request
+    /// Rack ID of the consumer making this request.
     ///
     /// Supported API versions: 11-17
     pub rack_id: StrBytes,
@@ -403,14 +403,14 @@ impl FetchRequest {
     ///
     /// The broker ID of the follower, of -1 if this request is from a consumer.
     ///
-    /// Supported API versions: 0-14
+    /// Supported API versions: 4-14
     pub fn with_replica_id(mut self, value: super::BrokerId) -> Self {
         self.replica_id = value;
         self
     }
     /// Sets `replica_state` to the passed value.
     ///
-    ///
+    /// The state of the replica in the follower.
     ///
     /// Supported API versions: 15-17
     pub fn with_replica_state(mut self, value: ReplicaState) -> Self {
@@ -421,7 +421,7 @@ impl FetchRequest {
     ///
     /// The maximum time in milliseconds to wait for the response.
     ///
-    /// Supported API versions: 0-17
+    /// Supported API versions: 4-17
     pub fn with_max_wait_ms(mut self, value: i32) -> Self {
         self.max_wait_ms = value;
         self
@@ -430,7 +430,7 @@ impl FetchRequest {
     ///
     /// The minimum bytes to accumulate in the response.
     ///
-    /// Supported API versions: 0-17
+    /// Supported API versions: 4-17
     pub fn with_min_bytes(mut self, value: i32) -> Self {
         self.min_bytes = value;
         self
@@ -439,14 +439,14 @@ impl FetchRequest {
     ///
     /// The maximum bytes to fetch.  See KIP-74 for cases where this limit may not be honored.
     ///
-    /// Supported API versions: 3-17
+    /// Supported API versions: 4-17
     pub fn with_max_bytes(mut self, value: i32) -> Self {
         self.max_bytes = value;
         self
     }
     /// Sets `isolation_level` to the passed value.
     ///
-    /// This setting controls the visibility of transactional records. Using READ_UNCOMMITTED (isolation_level = 0) makes all records visible. With READ_COMMITTED (isolation_level = 1), non-transactional and COMMITTED transactional records are visible. To be more concrete, READ_COMMITTED returns all data from offsets smaller than the current LSO (last stable offset), and enables the inclusion of the list of aborted transactions in the result, which allows consumers to discard ABORTED transactional records
+    /// This setting controls the visibility of transactional records. Using READ_UNCOMMITTED (isolation_level = 0) makes all records visible. With READ_COMMITTED (isolation_level = 1), non-transactional and COMMITTED transactional records are visible. To be more concrete, READ_COMMITTED returns all data from offsets smaller than the current LSO (last stable offset), and enables the inclusion of the list of aborted transactions in the result, which allows consumers to discard ABORTED transactional records.
     ///
     /// Supported API versions: 4-17
     pub fn with_isolation_level(mut self, value: i8) -> Self {
@@ -475,7 +475,7 @@ impl FetchRequest {
     ///
     /// The topics to fetch.
     ///
-    /// Supported API versions: 0-17
+    /// Supported API versions: 4-17
     pub fn with_topics(mut self, value: Vec<FetchTopic>) -> Self {
         self.topics = value;
         self
@@ -491,7 +491,7 @@ impl FetchRequest {
     }
     /// Sets `rack_id` to the passed value.
     ///
-    /// Rack ID of the consumer making this request
+    /// Rack ID of the consumer making this request.
     ///
     /// Supported API versions: 11-17
     pub fn with_rack_id(mut self, value: StrBytes) -> Self {
@@ -525,12 +525,8 @@ impl Encodable for FetchRequest {
         }
         types::Int32.encode(buf, &self.max_wait_ms)?;
         types::Int32.encode(buf, &self.min_bytes)?;
-        if version >= 3 {
-            types::Int32.encode(buf, &self.max_bytes)?;
-        }
-        if version >= 4 {
-            types::Int8.encode(buf, &self.isolation_level)?;
-        }
+        types::Int32.encode(buf, &self.max_bytes)?;
+        types::Int8.encode(buf, &self.isolation_level)?;
         if version >= 7 {
             types::Int32.encode(buf, &self.session_id)?;
         }
@@ -620,12 +616,8 @@ impl Encodable for FetchRequest {
         }
         total_size += types::Int32.compute_size(&self.max_wait_ms)?;
         total_size += types::Int32.compute_size(&self.min_bytes)?;
-        if version >= 3 {
-            total_size += types::Int32.compute_size(&self.max_bytes)?;
-        }
-        if version >= 4 {
-            total_size += types::Int8.compute_size(&self.isolation_level)?;
-        }
+        total_size += types::Int32.compute_size(&self.max_bytes)?;
+        total_size += types::Int8.compute_size(&self.isolation_level)?;
         if version >= 7 {
             total_size += types::Int32.compute_size(&self.session_id)?;
         }
@@ -723,16 +715,8 @@ impl Decodable for FetchRequest {
         let mut replica_state = Default::default();
         let max_wait_ms = types::Int32.decode(buf)?;
         let min_bytes = types::Int32.decode(buf)?;
-        let max_bytes = if version >= 3 {
-            types::Int32.decode(buf)?
-        } else {
-            0x7fffffff
-        };
-        let isolation_level = if version >= 4 {
-            types::Int8.decode(buf)?
-        } else {
-            0
-        };
+        let max_bytes = types::Int32.decode(buf)?;
+        let isolation_level = types::Int8.decode(buf)?;
         let session_id = if version >= 7 {
             types::Int32.decode(buf)?
         } else {
@@ -829,27 +813,27 @@ impl Default for FetchRequest {
 }
 
 impl Message for FetchRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 17 };
-    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 3 });
+    const VERSIONS: VersionRange = VersionRange { min: 4, max: 17 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-17
+/// Valid versions: 4-17
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct FetchTopic {
     /// The name of the topic to fetch.
     ///
-    /// Supported API versions: 0-12
+    /// Supported API versions: 4-12
     pub topic: super::TopicName,
 
-    /// The unique topic ID
+    /// The unique topic ID.
     ///
     /// Supported API versions: 13-17
     pub topic_id: Uuid,
 
     /// The partitions to fetch.
     ///
-    /// Supported API versions: 0-17
+    /// Supported API versions: 4-17
     pub partitions: Vec<FetchPartition>,
 
     /// Other tagged fields
@@ -861,14 +845,14 @@ impl FetchTopic {
     ///
     /// The name of the topic to fetch.
     ///
-    /// Supported API versions: 0-12
+    /// Supported API versions: 4-12
     pub fn with_topic(mut self, value: super::TopicName) -> Self {
         self.topic = value;
         self
     }
     /// Sets `topic_id` to the passed value.
     ///
-    /// The unique topic ID
+    /// The unique topic ID.
     ///
     /// Supported API versions: 13-17
     pub fn with_topic_id(mut self, value: Uuid) -> Self {
@@ -879,7 +863,7 @@ impl FetchTopic {
     ///
     /// The partitions to fetch.
     ///
-    /// Supported API versions: 0-17
+    /// Supported API versions: 4-17
     pub fn with_partitions(mut self, value: Vec<FetchPartition>) -> Self {
         self.partitions = value;
         self
@@ -1021,11 +1005,11 @@ impl Default for FetchTopic {
 }
 
 impl Message for FetchTopic {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 17 };
-    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 3 });
+    const VERSIONS: VersionRange = VersionRange { min: 4, max: 17 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-17
+/// Valid versions: 4-17
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct ForgottenTopic {
@@ -1034,7 +1018,7 @@ pub struct ForgottenTopic {
     /// Supported API versions: 7-12
     pub topic: super::TopicName,
 
-    /// The unique topic ID
+    /// The unique topic ID.
     ///
     /// Supported API versions: 13-17
     pub topic_id: Uuid,
@@ -1060,7 +1044,7 @@ impl ForgottenTopic {
     }
     /// Sets `topic_id` to the passed value.
     ///
-    /// The unique topic ID
+    /// The unique topic ID.
     ///
     /// Supported API versions: 13-17
     pub fn with_topic_id(mut self, value: Uuid) -> Self {
@@ -1228,11 +1212,11 @@ impl Default for ForgottenTopic {
 }
 
 impl Message for ForgottenTopic {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 17 };
-    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 3 });
+    const VERSIONS: VersionRange = VersionRange { min: 4, max: 17 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-17
+/// Valid versions: 4-17
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct ReplicaState {
@@ -1392,8 +1376,8 @@ impl Default for ReplicaState {
 }
 
 impl Message for ReplicaState {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 17 };
-    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 3 });
+    const VERSIONS: VersionRange = VersionRange { min: 4, max: 17 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 impl HeaderVersion for FetchRequest {

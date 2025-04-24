@@ -26,12 +26,12 @@ pub struct BeginQuorumEpochResponse {
     /// Supported API versions: 0-1
     pub error_code: i16,
 
-    ///
+    /// The topic data.
     ///
     /// Supported API versions: 0-1
     pub topics: Vec<TopicData>,
 
-    /// Endpoints for all leaders enumerated in PartitionData
+    /// Endpoints for all leaders enumerated in PartitionData.
     ///
     /// Supported API versions: 1
     pub node_endpoints: Vec<NodeEndpoint>,
@@ -52,7 +52,7 @@ impl BeginQuorumEpochResponse {
     }
     /// Sets `topics` to the passed value.
     ///
-    ///
+    /// The topic data.
     ///
     /// Supported API versions: 0-1
     pub fn with_topics(mut self, value: Vec<TopicData>) -> Self {
@@ -61,7 +61,7 @@ impl BeginQuorumEpochResponse {
     }
     /// Sets `node_endpoints` to the passed value.
     ///
-    /// Endpoints for all leaders enumerated in PartitionData
+    /// Endpoints for all leaders enumerated in PartitionData.
     ///
     /// Supported API versions: 1
     pub fn with_node_endpoints(mut self, value: Vec<NodeEndpoint>) -> Self {
@@ -223,17 +223,17 @@ impl Message for BeginQuorumEpochResponse {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct NodeEndpoint {
-    /// The ID of the associated node
+    /// The ID of the associated node.
     ///
     /// Supported API versions: 1
     pub node_id: super::BrokerId,
 
-    /// The node's hostname
+    /// The node's hostname.
     ///
     /// Supported API versions: 1
     pub host: StrBytes,
 
-    /// The node's port
+    /// The node's port.
     ///
     /// Supported API versions: 1
     pub port: u16,
@@ -245,7 +245,7 @@ pub struct NodeEndpoint {
 impl NodeEndpoint {
     /// Sets `node_id` to the passed value.
     ///
-    /// The ID of the associated node
+    /// The ID of the associated node.
     ///
     /// Supported API versions: 1
     pub fn with_node_id(mut self, value: super::BrokerId) -> Self {
@@ -254,7 +254,7 @@ impl NodeEndpoint {
     }
     /// Sets `host` to the passed value.
     ///
-    /// The node's hostname
+    /// The node's hostname.
     ///
     /// Supported API versions: 1
     pub fn with_host(mut self, value: StrBytes) -> Self {
@@ -263,7 +263,7 @@ impl NodeEndpoint {
     }
     /// Sets `port` to the passed value.
     ///
-    /// The node's port
+    /// The node's port.
     ///
     /// Supported API versions: 1
     pub fn with_port(mut self, value: u16) -> Self {
@@ -427,7 +427,7 @@ pub struct PartitionData {
     /// Supported API versions: 0-1
     pub partition_index: i32,
 
-    ///
+    /// The error code for this partition.
     ///
     /// Supported API versions: 0-1
     pub error_code: i16,
@@ -437,7 +437,7 @@ pub struct PartitionData {
     /// Supported API versions: 0-1
     pub leader_id: super::BrokerId,
 
-    /// The latest known leader epoch
+    /// The latest known leader epoch.
     ///
     /// Supported API versions: 0-1
     pub leader_epoch: i32,
@@ -458,7 +458,7 @@ impl PartitionData {
     }
     /// Sets `error_code` to the passed value.
     ///
-    ///
+    /// The error code for this partition.
     ///
     /// Supported API versions: 0-1
     pub fn with_error_code(mut self, value: i16) -> Self {
@@ -476,7 +476,7 @@ impl PartitionData {
     }
     /// Sets `leader_epoch` to the passed value.
     ///
-    /// The latest known leader epoch
+    /// The latest known leader epoch.
     ///
     /// Supported API versions: 0-1
     pub fn with_leader_epoch(mut self, value: i32) -> Self {
@@ -597,7 +597,7 @@ pub struct TopicData {
     /// Supported API versions: 0-1
     pub topic_name: super::TopicName,
 
-    ///
+    /// The partition data.
     ///
     /// Supported API versions: 0-1
     pub partitions: Vec<PartitionData>,
@@ -618,7 +618,7 @@ impl TopicData {
     }
     /// Sets `partitions` to the passed value.
     ///
-    ///
+    /// The partition data.
     ///
     /// Supported API versions: 0-1
     pub fn with_partitions(mut self, value: Vec<PartitionData>) -> Self {

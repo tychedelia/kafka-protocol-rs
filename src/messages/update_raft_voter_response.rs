@@ -21,22 +21,22 @@ use crate::protocol::{
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct CurrentLeader {
-    /// The replica id of the current leader or -1 if the leader is unknown
+    /// The replica id of the current leader or -1 if the leader is unknown.
     ///
     /// Supported API versions: 0
     pub leader_id: super::BrokerId,
 
-    /// The latest known leader epoch
+    /// The latest known leader epoch.
     ///
     /// Supported API versions: 0
     pub leader_epoch: i32,
 
-    /// The node's hostname
+    /// The node's hostname.
     ///
     /// Supported API versions: 0
     pub host: StrBytes,
 
-    /// The node's port
+    /// The node's port.
     ///
     /// Supported API versions: 0
     pub port: i32,
@@ -48,7 +48,7 @@ pub struct CurrentLeader {
 impl CurrentLeader {
     /// Sets `leader_id` to the passed value.
     ///
-    /// The replica id of the current leader or -1 if the leader is unknown
+    /// The replica id of the current leader or -1 if the leader is unknown.
     ///
     /// Supported API versions: 0
     pub fn with_leader_id(mut self, value: super::BrokerId) -> Self {
@@ -57,7 +57,7 @@ impl CurrentLeader {
     }
     /// Sets `leader_epoch` to the passed value.
     ///
-    /// The latest known leader epoch
+    /// The latest known leader epoch.
     ///
     /// Supported API versions: 0
     pub fn with_leader_epoch(mut self, value: i32) -> Self {
@@ -66,7 +66,7 @@ impl CurrentLeader {
     }
     /// Sets `host` to the passed value.
     ///
-    /// The node's hostname
+    /// The node's hostname.
     ///
     /// Supported API versions: 0
     pub fn with_host(mut self, value: StrBytes) -> Self {
@@ -75,7 +75,7 @@ impl CurrentLeader {
     }
     /// Sets `port` to the passed value.
     ///
-    /// The node's port
+    /// The node's port.
     ///
     /// Supported API versions: 0
     pub fn with_port(mut self, value: i32) -> Self {
@@ -190,12 +190,12 @@ pub struct UpdateRaftVoterResponse {
     /// Supported API versions: 0
     pub throttle_time_ms: i32,
 
-    /// The error code, or 0 if there was no error
+    /// The error code, or 0 if there was no error.
     ///
     /// Supported API versions: 0
     pub error_code: i16,
 
-    ///
+    /// Details of the current Raft cluster leader.
     ///
     /// Supported API versions: 0
     pub current_leader: CurrentLeader,
@@ -216,7 +216,7 @@ impl UpdateRaftVoterResponse {
     }
     /// Sets `error_code` to the passed value.
     ///
-    /// The error code, or 0 if there was no error
+    /// The error code, or 0 if there was no error.
     ///
     /// Supported API versions: 0
     pub fn with_error_code(mut self, value: i16) -> Self {
@@ -225,7 +225,7 @@ impl UpdateRaftVoterResponse {
     }
     /// Sets `current_leader` to the passed value.
     ///
-    ///
+    /// Details of the current Raft cluster leader.
     ///
     /// Supported API versions: 0
     pub fn with_current_leader(mut self, value: CurrentLeader) -> Self {
