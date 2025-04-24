@@ -465,6 +465,14 @@ impl Encodable for ApiVersionsResponse {
 impl Decodable for ApiVersionsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         let error_code = types::Int16.decode(buf)?;
+        let version = if error_code == crate::ResponseError::UnsupportedVersion.code() {
+            // According to "Retrieving Supported API versions" of Kafka Protocol,
+            // Kafka server can respond with ApiRequest v0 if a client sends unsupported version
+            // (the client is ahead).
+            0
+        } else {
+            version
+        };
         let api_keys = if version >= 3 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
