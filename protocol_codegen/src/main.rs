@@ -33,7 +33,7 @@ fn main() -> Result<(), Error> {
     // Checkout the release commit
     // https://github.com/apache/kafka/releases/tag/3.9.0
     // checking out a tag with git2 is annoying -- we pin to the tag's commit sha instead
-    let release_commit = "84caaa6e9da06435411510a81fa321d4f99c351f";
+    let release_commit = "985bc99521dd22bbf620591b8db8613c54f596b2";
     println!("Checking out release {}", release_commit);
     let oid = Oid::from_str(release_commit).unwrap();
     let commit = repo
