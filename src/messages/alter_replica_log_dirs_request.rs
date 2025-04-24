@@ -69,7 +69,7 @@ impl AlterReplicaLogDir {
 #[cfg(feature = "client")]
 impl Encodable for AlterReplicaLogDir {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 2 {
+        if version < 1 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         if version >= 2 {
@@ -128,7 +128,7 @@ impl Encodable for AlterReplicaLogDir {
 #[cfg(feature = "broker")]
 impl Decodable for AlterReplicaLogDir {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 2 {
+        if version < 1 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         let path = if version >= 2 {
@@ -226,7 +226,7 @@ impl AlterReplicaLogDirTopic {
 #[cfg(feature = "client")]
 impl Encodable for AlterReplicaLogDirTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 2 {
+        if version < 1 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         if version >= 2 {
@@ -284,7 +284,7 @@ impl Encodable for AlterReplicaLogDirTopic {
 #[cfg(feature = "broker")]
 impl Decodable for AlterReplicaLogDirTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 2 {
+        if version < 1 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         let name = if version >= 2 {
@@ -368,7 +368,7 @@ impl AlterReplicaLogDirsRequest {
 #[cfg(feature = "client")]
 impl Encodable for AlterReplicaLogDirsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 2 {
+        if version < 1 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         if version >= 2 {
@@ -417,7 +417,7 @@ impl Encodable for AlterReplicaLogDirsRequest {
 #[cfg(feature = "broker")]
 impl Decodable for AlterReplicaLogDirsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 2 {
+        if version < 1 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         let dirs = if version >= 2 {

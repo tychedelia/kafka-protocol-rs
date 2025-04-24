@@ -83,7 +83,7 @@ impl AlterPartitionResponse {
 #[cfg(feature = "broker")]
 impl Encodable for AlterPartitionResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 3 {
+        if version < 2 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
@@ -123,7 +123,7 @@ impl Encodable for AlterPartitionResponse {
 #[cfg(feature = "client")]
 impl Decodable for AlterPartitionResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 3 {
+        if version < 2 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         let throttle_time_ms = types::Int32.decode(buf)?;
@@ -284,7 +284,7 @@ impl PartitionData {
 #[cfg(feature = "broker")]
 impl Encodable for PartitionData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 3 {
+        if version < 2 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.partition_index)?;
@@ -332,7 +332,7 @@ impl Encodable for PartitionData {
 #[cfg(feature = "client")]
 impl Decodable for PartitionData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 3 {
+        if version < 2 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         let partition_index = types::Int32.decode(buf)?;
@@ -435,26 +435,10 @@ impl TopicData {
 #[cfg(feature = "broker")]
 impl Encodable for TopicData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-<<<<<<< HEAD
-        if version < 0 || version > 3 {
+        if version < 2 || version > 3 {
             bail!("specified version not supported by this message type");
         }
-        if version <= 1 {
-            types::CompactString.encode(buf, &self.topic_name)?;
-        }
-        if version >= 2 {
-            types::Uuid.encode(buf, &self.topic_id)?;
-        }
-||||||| parent of 8921dfd (Kafka 4.0 support)
-        if version <= 1 {
-            types::CompactString.encode(buf, &self.topic_name)?;
-        }
-        if version >= 2 {
-            types::Uuid.encode(buf, &self.topic_id)?;
-        }
-=======
         types::Uuid.encode(buf, &self.topic_id)?;
->>>>>>> 8921dfd (Kafka 4.0 support)
         types::CompactArray(types::Struct { version }).encode(buf, &self.partitions)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
@@ -490,34 +474,10 @@ impl Encodable for TopicData {
 #[cfg(feature = "client")]
 impl Decodable for TopicData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-<<<<<<< HEAD
-        if version < 0 || version > 3 {
+        if version < 2 || version > 3 {
             bail!("specified version not supported by this message type");
         }
-        let topic_name = if version <= 1 {
-            types::CompactString.decode(buf)?
-        } else {
-            Default::default()
-        };
-        let topic_id = if version >= 2 {
-            types::Uuid.decode(buf)?
-        } else {
-            Uuid::nil()
-        };
-||||||| parent of 8921dfd (Kafka 4.0 support)
-        let topic_name = if version <= 1 {
-            types::CompactString.decode(buf)?
-        } else {
-            Default::default()
-        };
-        let topic_id = if version >= 2 {
-            types::Uuid.decode(buf)?
-        } else {
-            Uuid::nil()
-        };
-=======
         let topic_id = types::Uuid.decode(buf)?;
->>>>>>> 8921dfd (Kafka 4.0 support)
         let partitions = types::CompactArray(types::Struct { version }).decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
         let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;

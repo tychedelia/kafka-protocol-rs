@@ -55,7 +55,7 @@ impl Assignment {
 #[cfg(feature = "broker")]
 impl Encodable for Assignment {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version != 0 {
+        if version < 0 || version > 1 {
             bail!("specified version not supported by this message type");
         }
         types::CompactArray(types::Struct { version }).encode(buf, &self.topic_partitions)?;
@@ -92,7 +92,7 @@ impl Encodable for Assignment {
 #[cfg(feature = "client")]
 impl Decodable for Assignment {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version != 0 {
+        if version < 0 || version > 1 {
             bail!("specified version not supported by this message type");
         }
         let topic_partitions = types::CompactArray(types::Struct { version }).decode(buf)?;
@@ -177,7 +177,7 @@ impl ConsumerGroupDescribeResponse {
 #[cfg(feature = "broker")]
 impl Encodable for ConsumerGroupDescribeResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version != 0 {
+        if version < 0 || version > 1 {
             bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
@@ -215,7 +215,7 @@ impl Encodable for ConsumerGroupDescribeResponse {
 #[cfg(feature = "client")]
 impl Decodable for ConsumerGroupDescribeResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version != 0 {
+        if version < 0 || version > 1 {
             bail!("specified version not supported by this message type");
         }
         let throttle_time_ms = types::Int32.decode(buf)?;
@@ -401,7 +401,7 @@ impl DescribedGroup {
 #[cfg(feature = "broker")]
 impl Encodable for DescribedGroup {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version != 0 {
+        if version < 0 || version > 1 {
             bail!("specified version not supported by this message type");
         }
         types::Int16.encode(buf, &self.error_code)?;
@@ -453,7 +453,7 @@ impl Encodable for DescribedGroup {
 #[cfg(feature = "client")]
 impl Decodable for DescribedGroup {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version != 0 {
+        if version < 0 || version > 1 {
             bail!("specified version not supported by this message type");
         }
         let error_code = types::Int16.decode(buf)?;
@@ -688,7 +688,7 @@ impl Member {
 #[cfg(feature = "broker")]
 impl Encodable for Member {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version != 0 {
+        if version < 0 || version > 1 {
             bail!("specified version not supported by this message type");
         }
         types::CompactString.encode(buf, &self.member_id)?;
@@ -749,7 +749,7 @@ impl Encodable for Member {
 #[cfg(feature = "client")]
 impl Decodable for Member {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version != 0 {
+        if version < 0 || version > 1 {
             bail!("specified version not supported by this message type");
         }
         let member_id = types::CompactString.decode(buf)?;
@@ -882,7 +882,7 @@ impl TopicPartitions {
 #[cfg(feature = "broker")]
 impl Encodable for TopicPartitions {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version != 0 {
+        if version < 0 || version > 1 {
             bail!("specified version not supported by this message type");
         }
         types::Uuid.encode(buf, &self.topic_id)?;
@@ -922,7 +922,7 @@ impl Encodable for TopicPartitions {
 #[cfg(feature = "client")]
 impl Decodable for TopicPartitions {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version != 0 {
+        if version < 0 || version > 1 {
             bail!("specified version not supported by this message type");
         }
         let topic_id = types::Uuid.decode(buf)?;

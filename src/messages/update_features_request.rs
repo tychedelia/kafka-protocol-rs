@@ -97,7 +97,7 @@ impl FeatureUpdateKey {
 #[cfg(feature = "client")]
 impl Encodable for FeatureUpdateKey {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 1 {
+        if version < 0 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         types::CompactString.encode(buf, &self.feature)?;
@@ -163,7 +163,7 @@ impl Encodable for FeatureUpdateKey {
 #[cfg(feature = "broker")]
 impl Decodable for FeatureUpdateKey {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 1 {
+        if version < 0 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         let feature = types::CompactString.decode(buf)?;
@@ -279,7 +279,7 @@ impl UpdateFeaturesRequest {
 #[cfg(feature = "client")]
 impl Encodable for UpdateFeaturesRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 1 {
+        if version < 0 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.timeout_ms)?;
@@ -332,7 +332,7 @@ impl Encodable for UpdateFeaturesRequest {
 #[cfg(feature = "broker")]
 impl Decodable for UpdateFeaturesRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 1 {
+        if version < 0 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         let timeout_ms = types::Int32.decode(buf)?;

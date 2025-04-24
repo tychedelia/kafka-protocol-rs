@@ -83,7 +83,7 @@ impl NodeEndpoint {
 #[cfg(feature = "broker")]
 impl Encodable for NodeEndpoint {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 1 {
+        if version < 0 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         if version >= 1 {
@@ -159,7 +159,7 @@ impl Encodable for NodeEndpoint {
 #[cfg(feature = "client")]
 impl Decodable for NodeEndpoint {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 1 {
+        if version < 0 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         let node_id = if version >= 1 {
@@ -304,7 +304,7 @@ impl PartitionData {
 #[cfg(feature = "broker")]
 impl Encodable for PartitionData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 1 {
+        if version < 0 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.partition_index)?;
@@ -348,7 +348,7 @@ impl Encodable for PartitionData {
 #[cfg(feature = "client")]
 impl Decodable for PartitionData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 1 {
+        if version < 0 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         let partition_index = types::Int32.decode(buf)?;
@@ -445,7 +445,7 @@ impl TopicData {
 #[cfg(feature = "broker")]
 impl Encodable for TopicData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 1 {
+        if version < 0 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         types::CompactString.encode(buf, &self.topic_name)?;
@@ -484,7 +484,7 @@ impl Encodable for TopicData {
 #[cfg(feature = "client")]
 impl Decodable for TopicData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 1 {
+        if version < 0 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         let topic_name = types::CompactString.decode(buf)?;
@@ -586,7 +586,7 @@ impl VoteResponse {
 #[cfg(feature = "broker")]
 impl Encodable for VoteResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 1 {
+        if version < 0 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         types::Int16.encode(buf, &self.error_code)?;
@@ -662,7 +662,7 @@ impl Encodable for VoteResponse {
 #[cfg(feature = "client")]
 impl Decodable for VoteResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 1 {
+        if version < 0 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         let error_code = types::Int16.decode(buf)?;

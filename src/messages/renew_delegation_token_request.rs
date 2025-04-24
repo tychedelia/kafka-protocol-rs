@@ -69,7 +69,7 @@ impl RenewDelegationTokenRequest {
 #[cfg(feature = "client")]
 impl Encodable for RenewDelegationTokenRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 2 {
+        if version < 1 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         if version >= 2 {
@@ -119,7 +119,7 @@ impl Encodable for RenewDelegationTokenRequest {
 #[cfg(feature = "broker")]
 impl Decodable for RenewDelegationTokenRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 2 {
+        if version < 1 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         let hmac = if version >= 2 {

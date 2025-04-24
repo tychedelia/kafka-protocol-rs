@@ -97,7 +97,7 @@ impl DeletableTopicResult {
 #[cfg(feature = "broker")]
 impl Encodable for DeletableTopicResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 6 {
+        if version < 1 || version > 6 {
             bail!("specified version not supported by this message type");
         }
         if version >= 4 {
@@ -159,7 +159,7 @@ impl Encodable for DeletableTopicResult {
 #[cfg(feature = "client")]
 impl Decodable for DeletableTopicResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 6 {
+        if version < 1 || version > 6 {
             bail!("specified version not supported by this message type");
         }
         let name = if version >= 4 {
@@ -267,20 +267,10 @@ impl DeleteTopicsResponse {
 #[cfg(feature = "broker")]
 impl Encodable for DeleteTopicsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-<<<<<<< HEAD
-        if version < 0 || version > 6 {
+        if version < 1 || version > 6 {
             bail!("specified version not supported by this message type");
         }
-        if version >= 1 {
-            types::Int32.encode(buf, &self.throttle_time_ms)?;
-        }
-||||||| parent of 8921dfd (Kafka 4.0 support)
-        if version >= 1 {
-            types::Int32.encode(buf, &self.throttle_time_ms)?;
-        }
-=======
         types::Int32.encode(buf, &self.throttle_time_ms)?;
->>>>>>> 8921dfd (Kafka 4.0 support)
         if version >= 4 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.responses)?;
         } else {
@@ -328,24 +318,10 @@ impl Encodable for DeleteTopicsResponse {
 #[cfg(feature = "client")]
 impl Decodable for DeleteTopicsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-<<<<<<< HEAD
-        if version < 0 || version > 6 {
+        if version < 1 || version > 6 {
             bail!("specified version not supported by this message type");
         }
-        let throttle_time_ms = if version >= 1 {
-            types::Int32.decode(buf)?
-        } else {
-            0
-        };
-||||||| parent of 8921dfd (Kafka 4.0 support)
-        let throttle_time_ms = if version >= 1 {
-            types::Int32.decode(buf)?
-        } else {
-            0
-        };
-=======
         let throttle_time_ms = types::Int32.decode(buf)?;
->>>>>>> 8921dfd (Kafka 4.0 support)
         let responses = if version >= 4 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
