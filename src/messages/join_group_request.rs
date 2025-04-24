@@ -153,7 +153,7 @@ impl JoinGroupRequest {
 #[cfg(feature = "client")]
 impl Encodable for JoinGroupRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 9 {
+        if version < 2 || version > 9 {
             bail!("specified version not supported by this message type");
         }
         if version >= 6 {
@@ -264,7 +264,7 @@ impl Encodable for JoinGroupRequest {
 #[cfg(feature = "broker")]
 impl Decodable for JoinGroupRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 9 {
+        if version < 2 || version > 9 {
             bail!("specified version not supported by this message type");
         }
         let group_id = if version >= 6 {
@@ -400,7 +400,7 @@ impl JoinGroupRequestProtocol {
 #[cfg(feature = "client")]
 impl Encodable for JoinGroupRequestProtocol {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 9 {
+        if version < 2 || version > 9 {
             bail!("specified version not supported by this message type");
         }
         if version >= 6 {
@@ -458,7 +458,7 @@ impl Encodable for JoinGroupRequestProtocol {
 #[cfg(feature = "broker")]
 impl Decodable for JoinGroupRequestProtocol {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 9 {
+        if version < 2 || version > 9 {
             bail!("specified version not supported by this message type");
         }
         let name = if version >= 6 {

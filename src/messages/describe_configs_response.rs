@@ -153,7 +153,7 @@ impl DescribeConfigsResourceResult {
 #[cfg(feature = "broker")]
 impl Encodable for DescribeConfigsResourceResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 4 {
+        if version < 1 || version > 4 {
             bail!("specified version not supported by this message type");
         }
         if version >= 4 {
@@ -248,7 +248,7 @@ impl Encodable for DescribeConfigsResourceResult {
 #[cfg(feature = "client")]
 impl Decodable for DescribeConfigsResourceResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 4 {
+        if version < 1 || version > 4 {
             bail!("specified version not supported by this message type");
         }
         let name = if version >= 4 {
@@ -380,7 +380,7 @@ impl DescribeConfigsResponse {
 #[cfg(feature = "broker")]
 impl Encodable for DescribeConfigsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 4 {
+        if version < 1 || version > 4 {
             bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
@@ -431,7 +431,7 @@ impl Encodable for DescribeConfigsResponse {
 #[cfg(feature = "client")]
 impl Decodable for DescribeConfigsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 4 {
+        if version < 1 || version > 4 {
             bail!("specified version not supported by this message type");
         }
         let throttle_time_ms = types::Int32.decode(buf)?;
@@ -567,7 +567,7 @@ impl DescribeConfigsResult {
 #[cfg(feature = "broker")]
 impl Encodable for DescribeConfigsResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 4 {
+        if version < 1 || version > 4 {
             bail!("specified version not supported by this message type");
         }
         types::Int16.encode(buf, &self.error_code)?;
@@ -640,7 +640,7 @@ impl Encodable for DescribeConfigsResult {
 #[cfg(feature = "client")]
 impl Decodable for DescribeConfigsResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 4 {
+        if version < 1 || version > 4 {
             bail!("specified version not supported by this message type");
         }
         let error_code = types::Int16.decode(buf)?;
@@ -765,27 +765,11 @@ impl DescribeConfigsSynonym {
 #[cfg(feature = "broker")]
 impl Encodable for DescribeConfigsSynonym {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-<<<<<<< HEAD
-        if version < 0 || version > 4 {
+        if version < 1 || version > 4 {
             bail!("specified version not supported by this message type");
         }
-        if version >= 1 {
-            if version >= 4 {
-                types::CompactString.encode(buf, &self.name)?;
-            } else {
-                types::String.encode(buf, &self.name)?;
-            }
-||||||| parent of 8921dfd (Kafka 4.0 support)
-        if version >= 1 {
-            if version >= 4 {
-                types::CompactString.encode(buf, &self.name)?;
-            } else {
-                types::String.encode(buf, &self.name)?;
-            }
-=======
         if version >= 4 {
             types::CompactString.encode(buf, &self.name)?;
->>>>>>> 8921dfd (Kafka 4.0 support)
         } else {
             types::String.encode(buf, &self.name)?;
         }
@@ -841,27 +825,11 @@ impl Encodable for DescribeConfigsSynonym {
 #[cfg(feature = "client")]
 impl Decodable for DescribeConfigsSynonym {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-<<<<<<< HEAD
-        if version < 0 || version > 4 {
+        if version < 1 || version > 4 {
             bail!("specified version not supported by this message type");
         }
-        let name = if version >= 1 {
-            if version >= 4 {
-                types::CompactString.decode(buf)?
-            } else {
-                types::String.decode(buf)?
-            }
-||||||| parent of 8921dfd (Kafka 4.0 support)
-        let name = if version >= 1 {
-            if version >= 4 {
-                types::CompactString.decode(buf)?
-            } else {
-                types::String.decode(buf)?
-            }
-=======
         let name = if version >= 4 {
             types::CompactString.decode(buf)?
->>>>>>> 8921dfd (Kafka 4.0 support)
         } else {
             types::String.decode(buf)?
         };

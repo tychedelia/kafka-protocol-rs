@@ -111,7 +111,7 @@ impl WritableTxnMarker {
 #[cfg(feature = "client")]
 impl Encodable for WritableTxnMarker {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 1 {
+        if version != 1 {
             bail!("specified version not supported by this message type");
         }
         types::Int64.encode(buf, &self.producer_id)?;
@@ -155,7 +155,7 @@ impl Encodable for WritableTxnMarker {
 #[cfg(feature = "broker")]
 impl Decodable for WritableTxnMarker {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 1 {
+        if version != 1 {
             bail!("specified version not supported by this message type");
         }
         let producer_id = types::Int64.decode(buf)?;
@@ -252,20 +252,9 @@ impl WritableTxnMarkerTopic {
 #[cfg(feature = "client")]
 impl Encodable for WritableTxnMarkerTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-<<<<<<< HEAD
-        if version < 0 || version > 1 {
+        if version != 1 {
             bail!("specified version not supported by this message type");
         }
-        if version >= 1 {
-            types::CompactString.encode(buf, &self.name)?;
-        } else {
-            types::String.encode(buf, &self.name)?;
-||||||| parent of 8921dfd (Kafka 4.0 support)
-        if version >= 1 {
-            types::CompactString.encode(buf, &self.name)?;
-        } else {
-            types::String.encode(buf, &self.name)?;
-=======
         types::CompactString.encode(buf, &self.name)?;
         types::CompactArray(types::Int32).encode(buf, &self.partition_indexes)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -274,7 +263,6 @@ impl Encodable for WritableTxnMarkerTopic {
                 "Too many tagged fields to encode ({} fields)",
                 num_tagged_fields
             );
->>>>>>> 8921dfd (Kafka 4.0 support)
         }
         types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -302,35 +290,11 @@ impl Encodable for WritableTxnMarkerTopic {
 #[cfg(feature = "broker")]
 impl Decodable for WritableTxnMarkerTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-<<<<<<< HEAD
-        if version < 0 || version > 1 {
+        if version != 1 {
             bail!("specified version not supported by this message type");
         }
-        let name = if version >= 1 {
-            types::CompactString.decode(buf)?
-        } else {
-            types::String.decode(buf)?
-        };
-        let partition_indexes = if version >= 1 {
-            types::CompactArray(types::Int32).decode(buf)?
-        } else {
-            types::Array(types::Int32).decode(buf)?
-        };
-||||||| parent of 8921dfd (Kafka 4.0 support)
-        let name = if version >= 1 {
-            types::CompactString.decode(buf)?
-        } else {
-            types::String.decode(buf)?
-        };
-        let partition_indexes = if version >= 1 {
-            types::CompactArray(types::Int32).decode(buf)?
-        } else {
-            types::Array(types::Int32).decode(buf)?
-        };
-=======
         let name = types::CompactString.decode(buf)?;
         let partition_indexes = types::CompactArray(types::Int32).decode(buf)?;
->>>>>>> 8921dfd (Kafka 4.0 support)
         let mut unknown_tagged_fields = BTreeMap::new();
         let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
         for _ in 0..num_tagged_fields {
@@ -400,20 +364,9 @@ impl WriteTxnMarkersRequest {
 #[cfg(feature = "client")]
 impl Encodable for WriteTxnMarkersRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-<<<<<<< HEAD
-        if version < 0 || version > 1 {
+        if version != 1 {
             bail!("specified version not supported by this message type");
         }
-        if version >= 1 {
-            types::CompactArray(types::Struct { version }).encode(buf, &self.markers)?;
-        } else {
-            types::Array(types::Struct { version }).encode(buf, &self.markers)?;
-||||||| parent of 8921dfd (Kafka 4.0 support)
-        if version >= 1 {
-            types::CompactArray(types::Struct { version }).encode(buf, &self.markers)?;
-        } else {
-            types::Array(types::Struct { version }).encode(buf, &self.markers)?;
-=======
         types::CompactArray(types::Struct { version }).encode(buf, &self.markers)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
@@ -421,7 +374,6 @@ impl Encodable for WriteTxnMarkersRequest {
                 "Too many tagged fields to encode ({} fields)",
                 num_tagged_fields
             );
->>>>>>> 8921dfd (Kafka 4.0 support)
         }
         types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
 
@@ -448,24 +400,10 @@ impl Encodable for WriteTxnMarkersRequest {
 #[cfg(feature = "broker")]
 impl Decodable for WriteTxnMarkersRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-<<<<<<< HEAD
-        if version < 0 || version > 1 {
+        if version != 1 {
             bail!("specified version not supported by this message type");
         }
-        let markers = if version >= 1 {
-            types::CompactArray(types::Struct { version }).decode(buf)?
-        } else {
-            types::Array(types::Struct { version }).decode(buf)?
-        };
-||||||| parent of 8921dfd (Kafka 4.0 support)
-        let markers = if version >= 1 {
-            types::CompactArray(types::Struct { version }).decode(buf)?
-        } else {
-            types::Array(types::Struct { version }).decode(buf)?
-        };
-=======
         let markers = types::CompactArray(types::Struct { version }).decode(buf)?;
->>>>>>> 8921dfd (Kafka 4.0 support)
         let mut unknown_tagged_fields = BTreeMap::new();
         let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
         for _ in 0..num_tagged_fields {

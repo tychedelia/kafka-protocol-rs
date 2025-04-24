@@ -69,7 +69,7 @@ impl DescribableLogDirTopic {
 #[cfg(feature = "client")]
 impl Encodable for DescribableLogDirTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 4 {
+        if version < 1 || version > 4 {
             bail!("specified version not supported by this message type");
         }
         if version >= 2 {
@@ -127,7 +127,7 @@ impl Encodable for DescribableLogDirTopic {
 #[cfg(feature = "broker")]
 impl Decodable for DescribableLogDirTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 4 {
+        if version < 1 || version > 4 {
             bail!("specified version not supported by this message type");
         }
         let topic = if version >= 2 {
@@ -211,7 +211,7 @@ impl DescribeLogDirsRequest {
 #[cfg(feature = "client")]
 impl Encodable for DescribeLogDirsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 4 {
+        if version < 1 || version > 4 {
             bail!("specified version not supported by this message type");
         }
         if version >= 2 {
@@ -260,7 +260,7 @@ impl Encodable for DescribeLogDirsRequest {
 #[cfg(feature = "broker")]
 impl Decodable for DescribeLogDirsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 4 {
+        if version < 1 || version > 4 {
             bail!("specified version not supported by this message type");
         }
         let topics = if version >= 2 {

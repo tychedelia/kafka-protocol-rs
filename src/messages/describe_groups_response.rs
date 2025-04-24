@@ -69,7 +69,7 @@ impl DescribeGroupsResponse {
 #[cfg(feature = "broker")]
 impl Encodable for DescribeGroupsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 5 {
+        if version < 0 || version > 6 {
             bail!("specified version not supported by this message type");
         }
         if version >= 1 {
@@ -124,7 +124,7 @@ impl Encodable for DescribeGroupsResponse {
 #[cfg(feature = "client")]
 impl Decodable for DescribeGroupsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 5 {
+        if version < 0 || version > 6 {
             bail!("specified version not supported by this message type");
         }
         let throttle_time_ms = if version >= 1 {
@@ -306,7 +306,7 @@ impl DescribedGroup {
 #[cfg(feature = "broker")]
 impl Encodable for DescribedGroup {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 5 {
+        if version < 0 || version > 6 {
             bail!("specified version not supported by this message type");
         }
         types::Int16.encode(buf, &self.error_code)?;
@@ -425,7 +425,7 @@ impl Encodable for DescribedGroup {
 #[cfg(feature = "client")]
 impl Decodable for DescribedGroup {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 5 {
+        if version < 0 || version > 6 {
             bail!("specified version not supported by this message type");
         }
         let error_code = types::Int16.decode(buf)?;
@@ -617,7 +617,7 @@ impl DescribedGroupMember {
 #[cfg(feature = "broker")]
 impl Encodable for DescribedGroupMember {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 5 {
+        if version < 0 || version > 6 {
             bail!("specified version not supported by this message type");
         }
         if version >= 5 {
@@ -719,7 +719,7 @@ impl Encodable for DescribedGroupMember {
 #[cfg(feature = "client")]
 impl Decodable for DescribedGroupMember {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 5 {
+        if version < 0 || version > 6 {
             bail!("specified version not supported by this message type");
         }
         let member_id = if version >= 5 {

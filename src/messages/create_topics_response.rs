@@ -111,7 +111,7 @@ impl CreatableTopicConfigs {
 #[cfg(feature = "broker")]
 impl Encodable for CreatableTopicConfigs {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 7 {
+        if version < 2 || version > 7 {
             bail!("specified version not supported by this message type");
         }
         if version >= 5 {
@@ -221,7 +221,7 @@ impl Encodable for CreatableTopicConfigs {
 #[cfg(feature = "client")]
 impl Decodable for CreatableTopicConfigs {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 7 {
+        if version < 2 || version > 7 {
             bail!("specified version not supported by this message type");
         }
         let name = if version >= 5 {
@@ -424,7 +424,7 @@ impl CreatableTopicResult {
 #[cfg(feature = "broker")]
 impl Encodable for CreatableTopicResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 7 {
+        if version < 2 || version > 7 {
             bail!("specified version not supported by this message type");
         }
         if version >= 5 {
@@ -539,7 +539,7 @@ impl Encodable for CreatableTopicResult {
 #[cfg(feature = "client")]
 impl Decodable for CreatableTopicResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 7 {
+        if version < 2 || version > 7 {
             bail!("specified version not supported by this message type");
         }
         let name = if version >= 5 {
@@ -678,20 +678,10 @@ impl CreateTopicsResponse {
 #[cfg(feature = "broker")]
 impl Encodable for CreateTopicsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-<<<<<<< HEAD
-        if version < 0 || version > 7 {
+        if version < 2 || version > 7 {
             bail!("specified version not supported by this message type");
         }
-        if version >= 2 {
-            types::Int32.encode(buf, &self.throttle_time_ms)?;
-        }
-||||||| parent of 8921dfd (Kafka 4.0 support)
-        if version >= 2 {
-            types::Int32.encode(buf, &self.throttle_time_ms)?;
-        }
-=======
         types::Int32.encode(buf, &self.throttle_time_ms)?;
->>>>>>> 8921dfd (Kafka 4.0 support)
         if version >= 5 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
         } else {
@@ -739,24 +729,10 @@ impl Encodable for CreateTopicsResponse {
 #[cfg(feature = "client")]
 impl Decodable for CreateTopicsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-<<<<<<< HEAD
-        if version < 0 || version > 7 {
+        if version < 2 || version > 7 {
             bail!("specified version not supported by this message type");
         }
-        let throttle_time_ms = if version >= 2 {
-            types::Int32.decode(buf)?
-        } else {
-            0
-        };
-||||||| parent of 8921dfd (Kafka 4.0 support)
-        let throttle_time_ms = if version >= 2 {
-            types::Int32.decode(buf)?
-        } else {
-            0
-        };
-=======
         let throttle_time_ms = types::Int32.decode(buf)?;
->>>>>>> 8921dfd (Kafka 4.0 support)
         let topics = if version >= 5 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {

@@ -69,7 +69,7 @@ impl DescribeDelegationTokenOwner {
 #[cfg(feature = "client")]
 impl Encodable for DescribeDelegationTokenOwner {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         if version >= 2 {
@@ -127,7 +127,7 @@ impl Encodable for DescribeDelegationTokenOwner {
 #[cfg(feature = "broker")]
 impl Decodable for DescribeDelegationTokenOwner {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         let principal_type = if version >= 2 {
@@ -211,7 +211,7 @@ impl DescribeDelegationTokenRequest {
 #[cfg(feature = "client")]
 impl Encodable for DescribeDelegationTokenRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         if version >= 2 {
@@ -260,7 +260,7 @@ impl Encodable for DescribeDelegationTokenRequest {
 #[cfg(feature = "broker")]
 impl Decodable for DescribeDelegationTokenRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         let owners = if version >= 2 {

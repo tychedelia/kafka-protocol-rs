@@ -111,7 +111,7 @@ impl ListOffsetsPartitionResponse {
 #[cfg(feature = "broker")]
 impl Encodable for ListOffsetsPartitionResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 9 {
+        if version < 1 || version > 10 {
             bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.partition_index)?;
@@ -171,7 +171,7 @@ impl Encodable for ListOffsetsPartitionResponse {
 #[cfg(feature = "client")]
 impl Decodable for ListOffsetsPartitionResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 9 {
+        if version < 1 || version > 10 {
             bail!("specified version not supported by this message type");
         }
         let partition_index = types::Int32.decode(buf)?;
@@ -274,7 +274,7 @@ impl ListOffsetsResponse {
 #[cfg(feature = "broker")]
 impl Encodable for ListOffsetsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 9 {
+        if version < 1 || version > 10 {
             bail!("specified version not supported by this message type");
         }
         if version >= 2 {
@@ -329,7 +329,7 @@ impl Encodable for ListOffsetsResponse {
 #[cfg(feature = "client")]
 impl Decodable for ListOffsetsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 9 {
+        if version < 1 || version > 10 {
             bail!("specified version not supported by this message type");
         }
         let throttle_time_ms = if version >= 2 {
@@ -427,7 +427,7 @@ impl ListOffsetsTopicResponse {
 #[cfg(feature = "broker")]
 impl Encodable for ListOffsetsTopicResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 9 {
+        if version < 1 || version > 10 {
             bail!("specified version not supported by this message type");
         }
         if version >= 6 {
@@ -486,7 +486,7 @@ impl Encodable for ListOffsetsTopicResponse {
 #[cfg(feature = "client")]
 impl Decodable for ListOffsetsTopicResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 9 {
+        if version < 1 || version > 10 {
             bail!("specified version not supported by this message type");
         }
         let name = if version >= 6 {

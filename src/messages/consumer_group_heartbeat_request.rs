@@ -181,7 +181,7 @@ impl ConsumerGroupHeartbeatRequest {
 #[cfg(feature = "client")]
 impl Encodable for ConsumerGroupHeartbeatRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version != 0 {
+        if version < 0 || version > 1 {
             bail!("specified version not supported by this message type");
         }
         types::CompactString.encode(buf, &self.group_id)?;
@@ -249,7 +249,7 @@ impl Encodable for ConsumerGroupHeartbeatRequest {
 #[cfg(feature = "broker")]
 impl Decodable for ConsumerGroupHeartbeatRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version != 0 {
+        if version < 0 || version > 1 {
             bail!("specified version not supported by this message type");
         }
         let group_id = types::CompactString.decode(buf)?;
@@ -365,7 +365,7 @@ impl TopicPartitions {
 #[cfg(feature = "client")]
 impl Encodable for TopicPartitions {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version != 0 {
+        if version < 0 || version > 1 {
             bail!("specified version not supported by this message type");
         }
         types::Uuid.encode(buf, &self.topic_id)?;
@@ -403,7 +403,7 @@ impl Encodable for TopicPartitions {
 #[cfg(feature = "broker")]
 impl Decodable for TopicPartitions {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version != 0 {
+        if version < 0 || version > 1 {
             bail!("specified version not supported by this message type");
         }
         let topic_id = types::Uuid.decode(buf)?;

@@ -83,7 +83,7 @@ impl UpdatableFeatureResult {
 #[cfg(feature = "broker")]
 impl Encodable for UpdatableFeatureResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 1 {
+        if version < 0 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         types::CompactString.encode(buf, &self.feature)?;
@@ -123,7 +123,7 @@ impl Encodable for UpdatableFeatureResult {
 #[cfg(feature = "client")]
 impl Decodable for UpdatableFeatureResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 1 {
+        if version < 0 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         let feature = types::CompactString.decode(buf)?;
@@ -242,7 +242,7 @@ impl UpdateFeaturesResponse {
 #[cfg(feature = "broker")]
 impl Encodable for UpdateFeaturesResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 1 {
+        if version < 0 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
@@ -289,7 +289,7 @@ impl Encodable for UpdateFeaturesResponse {
 #[cfg(feature = "client")]
 impl Decodable for UpdateFeaturesResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 1 {
+        if version < 0 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         let throttle_time_ms = types::Int32.decode(buf)?;

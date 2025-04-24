@@ -97,7 +97,7 @@ impl EpochEndOffset {
 #[cfg(feature = "broker")]
 impl Encodable for EpochEndOffset {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 4 {
+        if version < 2 || version > 4 {
             bail!("specified version not supported by this message type");
         }
         types::Int16.encode(buf, &self.error_code)?;
@@ -143,7 +143,7 @@ impl Encodable for EpochEndOffset {
 #[cfg(feature = "client")]
 impl Decodable for EpochEndOffset {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 4 {
+        if version < 2 || version > 4 {
             bail!("specified version not supported by this message type");
         }
         let error_code = types::Int16.decode(buf)?;
@@ -239,20 +239,10 @@ impl OffsetForLeaderEpochResponse {
 #[cfg(feature = "broker")]
 impl Encodable for OffsetForLeaderEpochResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-<<<<<<< HEAD
-        if version < 0 || version > 4 {
+        if version < 2 || version > 4 {
             bail!("specified version not supported by this message type");
         }
-        if version >= 2 {
-            types::Int32.encode(buf, &self.throttle_time_ms)?;
-        }
-||||||| parent of 8921dfd (Kafka 4.0 support)
-        if version >= 2 {
-            types::Int32.encode(buf, &self.throttle_time_ms)?;
-        }
-=======
         types::Int32.encode(buf, &self.throttle_time_ms)?;
->>>>>>> 8921dfd (Kafka 4.0 support)
         if version >= 4 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
         } else {
@@ -300,24 +290,10 @@ impl Encodable for OffsetForLeaderEpochResponse {
 #[cfg(feature = "client")]
 impl Decodable for OffsetForLeaderEpochResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-<<<<<<< HEAD
-        if version < 0 || version > 4 {
+        if version < 2 || version > 4 {
             bail!("specified version not supported by this message type");
         }
-        let throttle_time_ms = if version >= 2 {
-            types::Int32.decode(buf)?
-        } else {
-            0
-        };
-||||||| parent of 8921dfd (Kafka 4.0 support)
-        let throttle_time_ms = if version >= 2 {
-            types::Int32.decode(buf)?
-        } else {
-            0
-        };
-=======
         let throttle_time_ms = types::Int32.decode(buf)?;
->>>>>>> 8921dfd (Kafka 4.0 support)
         let topics = if version >= 4 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
@@ -408,7 +384,7 @@ impl OffsetForLeaderTopicResult {
 #[cfg(feature = "broker")]
 impl Encodable for OffsetForLeaderTopicResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 4 {
+        if version < 2 || version > 4 {
             bail!("specified version not supported by this message type");
         }
         if version >= 4 {
@@ -467,7 +443,7 @@ impl Encodable for OffsetForLeaderTopicResult {
 #[cfg(feature = "client")]
 impl Decodable for OffsetForLeaderTopicResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 4 {
+        if version < 2 || version > 4 {
             bail!("specified version not supported by this message type");
         }
         let topic = if version >= 4 {

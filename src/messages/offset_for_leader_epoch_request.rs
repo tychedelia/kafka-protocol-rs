@@ -69,7 +69,7 @@ impl OffsetForLeaderEpochRequest {
 #[cfg(feature = "client")]
 impl Encodable for OffsetForLeaderEpochRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 4 {
+        if version < 2 || version > 4 {
             bail!("specified version not supported by this message type");
         }
         if version >= 3 {
@@ -124,7 +124,7 @@ impl Encodable for OffsetForLeaderEpochRequest {
 #[cfg(feature = "broker")]
 impl Decodable for OffsetForLeaderEpochRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 4 {
+        if version < 2 || version > 4 {
             bail!("specified version not supported by this message type");
         }
         let replica_id = if version >= 3 {
@@ -236,7 +236,7 @@ impl OffsetForLeaderPartition {
 #[cfg(feature = "client")]
 impl Encodable for OffsetForLeaderPartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 4 {
+        if version < 2 || version > 4 {
             bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.partition)?;
@@ -280,7 +280,7 @@ impl Encodable for OffsetForLeaderPartition {
 #[cfg(feature = "broker")]
 impl Decodable for OffsetForLeaderPartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 4 {
+        if version < 2 || version > 4 {
             bail!("specified version not supported by this message type");
         }
         let partition = types::Int32.decode(buf)?;
@@ -373,7 +373,7 @@ impl OffsetForLeaderTopic {
 #[cfg(feature = "client")]
 impl Encodable for OffsetForLeaderTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 4 {
+        if version < 2 || version > 4 {
             bail!("specified version not supported by this message type");
         }
         if version >= 4 {
@@ -432,7 +432,7 @@ impl Encodable for OffsetForLeaderTopic {
 #[cfg(feature = "broker")]
 impl Decodable for OffsetForLeaderTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 4 {
+        if version < 2 || version > 4 {
             bail!("specified version not supported by this message type");
         }
         let topic = if version >= 4 {

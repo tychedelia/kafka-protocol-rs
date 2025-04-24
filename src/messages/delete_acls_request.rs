@@ -139,7 +139,7 @@ impl DeleteAclsFilter {
 #[cfg(feature = "client")]
 impl Encodable for DeleteAclsFilter {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         types::Int8.encode(buf, &self.resource_type_filter)?;
@@ -215,7 +215,7 @@ impl Encodable for DeleteAclsFilter {
 #[cfg(feature = "broker")]
 impl Decodable for DeleteAclsFilter {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         let resource_type_filter = types::Int8.decode(buf)?;
@@ -318,7 +318,7 @@ impl DeleteAclsRequest {
 #[cfg(feature = "client")]
 impl Encodable for DeleteAclsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         if version >= 2 {
@@ -367,7 +367,7 @@ impl Encodable for DeleteAclsRequest {
 #[cfg(feature = "broker")]
 impl Decodable for DeleteAclsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         let filters = if version >= 2 {

@@ -167,20 +167,10 @@ impl JoinGroupResponse {
 #[cfg(feature = "broker")]
 impl Encodable for JoinGroupResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-<<<<<<< HEAD
-        if version < 0 || version > 9 {
+        if version < 2 || version > 9 {
             bail!("specified version not supported by this message type");
         }
-        if version >= 2 {
-            types::Int32.encode(buf, &self.throttle_time_ms)?;
-        }
-||||||| parent of 8921dfd (Kafka 4.0 support)
-        if version >= 2 {
-            types::Int32.encode(buf, &self.throttle_time_ms)?;
-        }
-=======
         types::Int32.encode(buf, &self.throttle_time_ms)?;
->>>>>>> 8921dfd (Kafka 4.0 support)
         types::Int16.encode(buf, &self.error_code)?;
         types::Int32.encode(buf, &self.generation_id)?;
         if version >= 7 {
@@ -282,24 +272,10 @@ impl Encodable for JoinGroupResponse {
 #[cfg(feature = "client")]
 impl Decodable for JoinGroupResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-<<<<<<< HEAD
-        if version < 0 || version > 9 {
+        if version < 2 || version > 9 {
             bail!("specified version not supported by this message type");
         }
-        let throttle_time_ms = if version >= 2 {
-            types::Int32.decode(buf)?
-        } else {
-            0
-        };
-||||||| parent of 8921dfd (Kafka 4.0 support)
-        let throttle_time_ms = if version >= 2 {
-            types::Int32.decode(buf)?
-        } else {
-            0
-        };
-=======
         let throttle_time_ms = types::Int32.decode(buf)?;
->>>>>>> 8921dfd (Kafka 4.0 support)
         let error_code = types::Int16.decode(buf)?;
         let generation_id = types::Int32.decode(buf)?;
         let protocol_type = if version >= 7 {
@@ -445,7 +421,7 @@ impl JoinGroupResponseMember {
 #[cfg(feature = "broker")]
 impl Encodable for JoinGroupResponseMember {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 9 {
+        if version < 2 || version > 9 {
             bail!("specified version not supported by this message type");
         }
         if version >= 6 {
@@ -517,7 +493,7 @@ impl Encodable for JoinGroupResponseMember {
 #[cfg(feature = "client")]
 impl Decodable for JoinGroupResponseMember {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 9 {
+        if version < 2 || version > 9 {
             bail!("specified version not supported by this message type");
         }
         let member_id = if version >= 6 {

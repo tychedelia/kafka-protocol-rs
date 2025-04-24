@@ -195,7 +195,7 @@ impl CreateDelegationTokenResponse {
 #[cfg(feature = "broker")]
 impl Encodable for CreateDelegationTokenResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         types::Int16.encode(buf, &self.error_code)?;
@@ -313,7 +313,7 @@ impl Encodable for CreateDelegationTokenResponse {
 #[cfg(feature = "client")]
 impl Decodable for CreateDelegationTokenResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         let error_code = types::Int16.decode(buf)?;

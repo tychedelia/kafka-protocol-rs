@@ -69,43 +69,11 @@ impl AbortedTransaction {
 #[cfg(feature = "broker")]
 impl Encodable for AbortedTransaction {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-<<<<<<< HEAD
-        if version < 0 || version > 17 {
+        if version < 4 || version > 17 {
             bail!("specified version not supported by this message type");
         }
-        if version >= 4 {
-            types::Int64.encode(buf, &self.producer_id)?;
-        } else {
-            if self.producer_id != 0 {
-                bail!("A field is set that is not available on the selected protocol version");
-            }
-        }
-        if version >= 4 {
-            types::Int64.encode(buf, &self.first_offset)?;
-        } else {
-            if self.first_offset != 0 {
-                bail!("A field is set that is not available on the selected protocol version");
-            }
-        }
-||||||| parent of 8921dfd (Kafka 4.0 support)
-        if version >= 4 {
-            types::Int64.encode(buf, &self.producer_id)?;
-        } else {
-            if self.producer_id != 0 {
-                bail!("A field is set that is not available on the selected protocol version");
-            }
-        }
-        if version >= 4 {
-            types::Int64.encode(buf, &self.first_offset)?;
-        } else {
-            if self.first_offset != 0 {
-                bail!("A field is set that is not available on the selected protocol version");
-            }
-        }
-=======
         types::Int64.encode(buf, &self.producer_id)?;
         types::Int64.encode(buf, &self.first_offset)?;
->>>>>>> 8921dfd (Kafka 4.0 support)
         if version >= 12 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
@@ -143,35 +111,11 @@ impl Encodable for AbortedTransaction {
 #[cfg(feature = "client")]
 impl Decodable for AbortedTransaction {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-<<<<<<< HEAD
-        if version < 0 || version > 17 {
+        if version < 4 || version > 17 {
             bail!("specified version not supported by this message type");
         }
-        let producer_id = if version >= 4 {
-            types::Int64.decode(buf)?
-        } else {
-            (0).into()
-        };
-        let first_offset = if version >= 4 {
-            types::Int64.decode(buf)?
-        } else {
-            0
-        };
-||||||| parent of 8921dfd (Kafka 4.0 support)
-        let producer_id = if version >= 4 {
-            types::Int64.decode(buf)?
-        } else {
-            (0).into()
-        };
-        let first_offset = if version >= 4 {
-            types::Int64.decode(buf)?
-        } else {
-            0
-        };
-=======
         let producer_id = types::Int64.decode(buf)?;
         let first_offset = types::Int64.decode(buf)?;
->>>>>>> 8921dfd (Kafka 4.0 support)
         let mut unknown_tagged_fields = BTreeMap::new();
         if version >= 12 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
@@ -257,7 +201,7 @@ impl EpochEndOffset {
 #[cfg(feature = "broker")]
 impl Encodable for EpochEndOffset {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 17 {
+        if version < 4 || version > 17 {
             bail!("specified version not supported by this message type");
         }
         if version >= 12 {
@@ -323,7 +267,7 @@ impl Encodable for EpochEndOffset {
 #[cfg(feature = "client")]
 impl Decodable for EpochEndOffset {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 17 {
+        if version < 4 || version > 17 {
             bail!("specified version not supported by this message type");
         }
         let epoch = if version >= 12 {
@@ -463,20 +407,10 @@ impl FetchResponse {
 #[cfg(feature = "broker")]
 impl Encodable for FetchResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-<<<<<<< HEAD
-        if version < 0 || version > 17 {
+        if version < 4 || version > 17 {
             bail!("specified version not supported by this message type");
         }
-        if version >= 1 {
-            types::Int32.encode(buf, &self.throttle_time_ms)?;
-        }
-||||||| parent of 8921dfd (Kafka 4.0 support)
-        if version >= 1 {
-            types::Int32.encode(buf, &self.throttle_time_ms)?;
-        }
-=======
         types::Int32.encode(buf, &self.throttle_time_ms)?;
->>>>>>> 8921dfd (Kafka 4.0 support)
         if version >= 7 {
             types::Int16.encode(buf, &self.error_code)?;
         }
@@ -583,24 +517,10 @@ impl Encodable for FetchResponse {
 #[cfg(feature = "client")]
 impl Decodable for FetchResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-<<<<<<< HEAD
-        if version < 0 || version > 17 {
+        if version < 4 || version > 17 {
             bail!("specified version not supported by this message type");
         }
-        let throttle_time_ms = if version >= 1 {
-            types::Int32.decode(buf)?
-        } else {
-            0
-        };
-||||||| parent of 8921dfd (Kafka 4.0 support)
-        let throttle_time_ms = if version >= 1 {
-            types::Int32.decode(buf)?
-        } else {
-            0
-        };
-=======
         let throttle_time_ms = types::Int32.decode(buf)?;
->>>>>>> 8921dfd (Kafka 4.0 support)
         let error_code = if version >= 7 {
             types::Int16.decode(buf)?
         } else {
@@ -734,7 +654,7 @@ impl FetchableTopicResponse {
 #[cfg(feature = "broker")]
 impl Encodable for FetchableTopicResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 17 {
+        if version < 4 || version > 17 {
             bail!("specified version not supported by this message type");
         }
         if version <= 12 {
@@ -803,7 +723,7 @@ impl Encodable for FetchableTopicResponse {
 #[cfg(feature = "client")]
 impl Decodable for FetchableTopicResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 17 {
+        if version < 4 || version > 17 {
             bail!("specified version not supported by this message type");
         }
         let topic = if version <= 12 {
@@ -912,7 +832,7 @@ impl LeaderIdAndEpoch {
 #[cfg(feature = "broker")]
 impl Encodable for LeaderIdAndEpoch {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 17 {
+        if version < 4 || version > 17 {
             bail!("specified version not supported by this message type");
         }
         if version >= 12 {
@@ -978,7 +898,7 @@ impl Encodable for LeaderIdAndEpoch {
 #[cfg(feature = "client")]
 impl Decodable for LeaderIdAndEpoch {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 17 {
+        if version < 4 || version > 17 {
             bail!("specified version not supported by this message type");
         }
         let leader_id = if version >= 12 {
@@ -1104,7 +1024,7 @@ impl NodeEndpoint {
 #[cfg(feature = "broker")]
 impl Encodable for NodeEndpoint {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 17 {
+        if version < 4 || version > 17 {
             bail!("specified version not supported by this message type");
         }
         if version >= 16 {
@@ -1198,7 +1118,7 @@ impl Encodable for NodeEndpoint {
 #[cfg(feature = "client")]
 impl Decodable for NodeEndpoint {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 17 {
+        if version < 4 || version > 17 {
             bail!("specified version not supported by this message type");
         }
         let node_id = if version >= 16 {
@@ -1436,7 +1356,7 @@ impl PartitionData {
 #[cfg(feature = "broker")]
 impl Encodable for PartitionData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 17 {
+        if version < 4 || version > 17 {
             bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.partition_index)?;
@@ -1617,7 +1537,7 @@ impl Encodable for PartitionData {
 #[cfg(feature = "client")]
 impl Decodable for PartitionData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 17 {
+        if version < 4 || version > 17 {
             bail!("specified version not supported by this message type");
         }
         let partition_index = types::Int32.decode(buf)?;
@@ -1763,7 +1683,7 @@ impl SnapshotId {
 #[cfg(feature = "broker")]
 impl Encodable for SnapshotId {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 17 {
+        if version < 4 || version > 17 {
             bail!("specified version not supported by this message type");
         }
         types::Int64.encode(buf, &self.end_offset)?;
@@ -1805,7 +1725,7 @@ impl Encodable for SnapshotId {
 #[cfg(feature = "client")]
 impl Decodable for SnapshotId {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 17 {
+        if version < 4 || version > 17 {
             bail!("specified version not supported by this message type");
         }
         let end_offset = types::Int64.decode(buf)?;
