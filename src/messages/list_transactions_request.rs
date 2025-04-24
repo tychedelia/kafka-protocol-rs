@@ -21,17 +21,17 @@ use crate::protocol::{
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct ListTransactionsRequest {
-    /// The transaction states to filter by: if empty, all transactions are returned; if non-empty, then only transactions matching one of the filtered states will be returned
+    /// The transaction states to filter by: if empty, all transactions are returned; if non-empty, then only transactions matching one of the filtered states will be returned.
     ///
     /// Supported API versions: 0-1
     pub state_filters: Vec<StrBytes>,
 
-    /// The producerIds to filter by: if empty, all transactions will be returned; if non-empty, only transactions which match one of the filtered producerIds will be returned
+    /// The producerIds to filter by: if empty, all transactions will be returned; if non-empty, only transactions which match one of the filtered producerIds will be returned.
     ///
     /// Supported API versions: 0-1
     pub producer_id_filters: Vec<super::ProducerId>,
 
-    /// Duration (in millis) to filter by: if < 0, all transactions will be returned; otherwise, only transactions running longer than this duration will be returned
+    /// Duration (in millis) to filter by: if < 0, all transactions will be returned; otherwise, only transactions running longer than this duration will be returned.
     ///
     /// Supported API versions: 1
     pub duration_filter: i64,
@@ -43,7 +43,7 @@ pub struct ListTransactionsRequest {
 impl ListTransactionsRequest {
     /// Sets `state_filters` to the passed value.
     ///
-    /// The transaction states to filter by: if empty, all transactions are returned; if non-empty, then only transactions matching one of the filtered states will be returned
+    /// The transaction states to filter by: if empty, all transactions are returned; if non-empty, then only transactions matching one of the filtered states will be returned.
     ///
     /// Supported API versions: 0-1
     pub fn with_state_filters(mut self, value: Vec<StrBytes>) -> Self {
@@ -52,7 +52,7 @@ impl ListTransactionsRequest {
     }
     /// Sets `producer_id_filters` to the passed value.
     ///
-    /// The producerIds to filter by: if empty, all transactions will be returned; if non-empty, only transactions which match one of the filtered producerIds will be returned
+    /// The producerIds to filter by: if empty, all transactions will be returned; if non-empty, only transactions which match one of the filtered producerIds will be returned.
     ///
     /// Supported API versions: 0-1
     pub fn with_producer_id_filters(mut self, value: Vec<super::ProducerId>) -> Self {
@@ -61,7 +61,7 @@ impl ListTransactionsRequest {
     }
     /// Sets `duration_filter` to the passed value.
     ///
-    /// Duration (in millis) to filter by: if < 0, all transactions will be returned; otherwise, only transactions running longer than this duration will be returned
+    /// Duration (in millis) to filter by: if < 0, all transactions will be returned; otherwise, only transactions running longer than this duration will be returned.
     ///
     /// Supported API versions: 1
     pub fn with_duration_filter(mut self, value: i64) -> Self {

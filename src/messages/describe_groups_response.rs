@@ -17,18 +17,18 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-5
+/// Valid versions: 0-6
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct DescribeGroupsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 1-5
+    /// Supported API versions: 1-6
     pub throttle_time_ms: i32,
 
     /// Each described group.
     ///
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub groups: Vec<DescribedGroup>,
 
     /// Other tagged fields
@@ -40,7 +40,7 @@ impl DescribeGroupsResponse {
     ///
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 1-5
+    /// Supported API versions: 1-6
     pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
         self.throttle_time_ms = value;
         self
@@ -49,7 +49,7 @@ impl DescribeGroupsResponse {
     ///
     /// Each described group.
     ///
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub fn with_groups(mut self, value: Vec<DescribedGroup>) -> Self {
         self.groups = value;
         self
@@ -166,47 +166,52 @@ impl Default for DescribeGroupsResponse {
 }
 
 impl Message for DescribeGroupsResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 5 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 6 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-5
+/// Valid versions: 0-6
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct DescribedGroup {
     /// The describe error, or 0 if there was no error.
     ///
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub error_code: i16,
+
+    /// The describe error message, or null if there was no error.
+    ///
+    /// Supported API versions: 6
+    pub error_message: Option<StrBytes>,
 
     /// The group ID string.
     ///
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub group_id: super::GroupId,
 
     /// The group state string, or the empty string.
     ///
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub group_state: StrBytes,
 
     /// The group protocol type, or the empty string.
     ///
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub protocol_type: StrBytes,
 
     /// The group protocol data, or the empty string.
     ///
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub protocol_data: StrBytes,
 
     /// The group members.
     ///
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub members: Vec<DescribedGroupMember>,
 
     /// 32-bit bitfield to represent authorized operations for this group.
     ///
-    /// Supported API versions: 3-5
+    /// Supported API versions: 3-6
     pub authorized_operations: i32,
 
     /// Other tagged fields
@@ -218,16 +223,25 @@ impl DescribedGroup {
     ///
     /// The describe error, or 0 if there was no error.
     ///
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub fn with_error_code(mut self, value: i16) -> Self {
         self.error_code = value;
+        self
+    }
+    /// Sets `error_message` to the passed value.
+    ///
+    /// The describe error message, or null if there was no error.
+    ///
+    /// Supported API versions: 6
+    pub fn with_error_message(mut self, value: Option<StrBytes>) -> Self {
+        self.error_message = value;
         self
     }
     /// Sets `group_id` to the passed value.
     ///
     /// The group ID string.
     ///
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub fn with_group_id(mut self, value: super::GroupId) -> Self {
         self.group_id = value;
         self
@@ -236,7 +250,7 @@ impl DescribedGroup {
     ///
     /// The group state string, or the empty string.
     ///
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub fn with_group_state(mut self, value: StrBytes) -> Self {
         self.group_state = value;
         self
@@ -245,7 +259,7 @@ impl DescribedGroup {
     ///
     /// The group protocol type, or the empty string.
     ///
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub fn with_protocol_type(mut self, value: StrBytes) -> Self {
         self.protocol_type = value;
         self
@@ -254,7 +268,7 @@ impl DescribedGroup {
     ///
     /// The group protocol data, or the empty string.
     ///
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub fn with_protocol_data(mut self, value: StrBytes) -> Self {
         self.protocol_data = value;
         self
@@ -263,7 +277,7 @@ impl DescribedGroup {
     ///
     /// The group members.
     ///
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub fn with_members(mut self, value: Vec<DescribedGroupMember>) -> Self {
         self.members = value;
         self
@@ -272,7 +286,7 @@ impl DescribedGroup {
     ///
     /// 32-bit bitfield to represent authorized operations for this group.
     ///
-    /// Supported API versions: 3-5
+    /// Supported API versions: 3-6
     pub fn with_authorized_operations(mut self, value: i32) -> Self {
         self.authorized_operations = value;
         self
@@ -296,6 +310,13 @@ impl Encodable for DescribedGroup {
             bail!("specified version not supported by this message type");
         }
         types::Int16.encode(buf, &self.error_code)?;
+        if version >= 6 {
+            types::CompactString.encode(buf, &self.error_message)?;
+        } else {
+            if !self.error_message.is_none() {
+                bail!("A field is set that is not available on the selected protocol version");
+            }
+        }
         if version >= 5 {
             types::CompactString.encode(buf, &self.group_id)?;
         } else {
@@ -345,6 +366,13 @@ impl Encodable for DescribedGroup {
     fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int16.compute_size(&self.error_code)?;
+        if version >= 6 {
+            total_size += types::CompactString.compute_size(&self.error_message)?;
+        } else {
+            if !self.error_message.is_none() {
+                bail!("A field is set that is not available on the selected protocol version");
+            }
+        }
         if version >= 5 {
             total_size += types::CompactString.compute_size(&self.group_id)?;
         } else {
@@ -401,6 +429,11 @@ impl Decodable for DescribedGroup {
             bail!("specified version not supported by this message type");
         }
         let error_code = types::Int16.decode(buf)?;
+        let error_message = if version >= 6 {
+            types::CompactString.decode(buf)?
+        } else {
+            None
+        };
         let group_id = if version >= 5 {
             types::CompactString.decode(buf)?
         } else {
@@ -443,6 +476,7 @@ impl Decodable for DescribedGroup {
         }
         Ok(Self {
             error_code,
+            error_message,
             group_id,
             group_state,
             protocol_type,
@@ -458,6 +492,7 @@ impl Default for DescribedGroup {
     fn default() -> Self {
         Self {
             error_code: 0,
+            error_message: None,
             group_id: Default::default(),
             group_state: Default::default(),
             protocol_type: Default::default(),
@@ -470,42 +505,42 @@ impl Default for DescribedGroup {
 }
 
 impl Message for DescribedGroup {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 5 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 6 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-5
+/// Valid versions: 0-6
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct DescribedGroupMember {
-    /// The member ID assigned by the group coordinator.
+    /// The member id.
     ///
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub member_id: StrBytes,
 
     /// The unique identifier of the consumer instance provided by end user.
     ///
-    /// Supported API versions: 4-5
+    /// Supported API versions: 4-6
     pub group_instance_id: Option<StrBytes>,
 
     /// The client ID used in the member's latest join group request.
     ///
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub client_id: StrBytes,
 
     /// The client host.
     ///
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub client_host: StrBytes,
 
     /// The metadata corresponding to the current group protocol in use.
     ///
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub member_metadata: Bytes,
 
     /// The current assignment provided by the group leader.
     ///
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub member_assignment: Bytes,
 
     /// Other tagged fields
@@ -515,9 +550,9 @@ pub struct DescribedGroupMember {
 impl DescribedGroupMember {
     /// Sets `member_id` to the passed value.
     ///
-    /// The member ID assigned by the group coordinator.
+    /// The member id.
     ///
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub fn with_member_id(mut self, value: StrBytes) -> Self {
         self.member_id = value;
         self
@@ -526,7 +561,7 @@ impl DescribedGroupMember {
     ///
     /// The unique identifier of the consumer instance provided by end user.
     ///
-    /// Supported API versions: 4-5
+    /// Supported API versions: 4-6
     pub fn with_group_instance_id(mut self, value: Option<StrBytes>) -> Self {
         self.group_instance_id = value;
         self
@@ -535,7 +570,7 @@ impl DescribedGroupMember {
     ///
     /// The client ID used in the member's latest join group request.
     ///
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub fn with_client_id(mut self, value: StrBytes) -> Self {
         self.client_id = value;
         self
@@ -544,7 +579,7 @@ impl DescribedGroupMember {
     ///
     /// The client host.
     ///
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub fn with_client_host(mut self, value: StrBytes) -> Self {
         self.client_host = value;
         self
@@ -553,7 +588,7 @@ impl DescribedGroupMember {
     ///
     /// The metadata corresponding to the current group protocol in use.
     ///
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub fn with_member_metadata(mut self, value: Bytes) -> Self {
         self.member_metadata = value;
         self
@@ -562,7 +597,7 @@ impl DescribedGroupMember {
     ///
     /// The current assignment provided by the group leader.
     ///
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub fn with_member_assignment(mut self, value: Bytes) -> Self {
         self.member_assignment = value;
         self
@@ -758,7 +793,7 @@ impl Default for DescribedGroupMember {
 }
 
 impl Message for DescribedGroupMember {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 5 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 6 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 

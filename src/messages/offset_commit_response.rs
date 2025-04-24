@@ -17,7 +17,7 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-9
+/// Valid versions: 2-9
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct OffsetCommitResponse {
@@ -28,7 +28,7 @@ pub struct OffsetCommitResponse {
 
     /// The responses for each topic.
     ///
-    /// Supported API versions: 0-9
+    /// Supported API versions: 2-9
     pub topics: Vec<OffsetCommitResponseTopic>,
 
     /// Other tagged fields
@@ -49,7 +49,7 @@ impl OffsetCommitResponse {
     ///
     /// The responses for each topic.
     ///
-    /// Supported API versions: 0-9
+    /// Supported API versions: 2-9
     pub fn with_topics(mut self, value: Vec<OffsetCommitResponseTopic>) -> Self {
         self.topics = value;
         self
@@ -166,22 +166,22 @@ impl Default for OffsetCommitResponse {
 }
 
 impl Message for OffsetCommitResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 9 };
+    const VERSIONS: VersionRange = VersionRange { min: 2, max: 9 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-9
+/// Valid versions: 2-9
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct OffsetCommitResponsePartition {
     /// The partition index.
     ///
-    /// Supported API versions: 0-9
+    /// Supported API versions: 2-9
     pub partition_index: i32,
 
     /// The error code, or 0 if there was no error.
     ///
-    /// Supported API versions: 0-9
+    /// Supported API versions: 2-9
     pub error_code: i16,
 
     /// Other tagged fields
@@ -193,7 +193,7 @@ impl OffsetCommitResponsePartition {
     ///
     /// The partition index.
     ///
-    /// Supported API versions: 0-9
+    /// Supported API versions: 2-9
     pub fn with_partition_index(mut self, value: i32) -> Self {
         self.partition_index = value;
         self
@@ -202,7 +202,7 @@ impl OffsetCommitResponsePartition {
     ///
     /// The error code, or 0 if there was no error.
     ///
-    /// Supported API versions: 0-9
+    /// Supported API versions: 2-9
     pub fn with_error_code(mut self, value: i16) -> Self {
         self.error_code = value;
         self
@@ -298,22 +298,22 @@ impl Default for OffsetCommitResponsePartition {
 }
 
 impl Message for OffsetCommitResponsePartition {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 9 };
+    const VERSIONS: VersionRange = VersionRange { min: 2, max: 9 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-9
+/// Valid versions: 2-9
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct OffsetCommitResponseTopic {
     /// The topic name.
     ///
-    /// Supported API versions: 0-9
+    /// Supported API versions: 2-9
     pub name: super::TopicName,
 
     /// The responses for each partition in the topic.
     ///
-    /// Supported API versions: 0-9
+    /// Supported API versions: 2-9
     pub partitions: Vec<OffsetCommitResponsePartition>,
 
     /// Other tagged fields
@@ -325,7 +325,7 @@ impl OffsetCommitResponseTopic {
     ///
     /// The topic name.
     ///
-    /// Supported API versions: 0-9
+    /// Supported API versions: 2-9
     pub fn with_name(mut self, value: super::TopicName) -> Self {
         self.name = value;
         self
@@ -334,7 +334,7 @@ impl OffsetCommitResponseTopic {
     ///
     /// The responses for each partition in the topic.
     ///
-    /// Supported API versions: 0-9
+    /// Supported API versions: 2-9
     pub fn with_partitions(mut self, value: Vec<OffsetCommitResponsePartition>) -> Self {
         self.partitions = value;
         self
@@ -455,7 +455,7 @@ impl Default for OffsetCommitResponseTopic {
 }
 
 impl Message for OffsetCommitResponseTopic {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 9 };
+    const VERSIONS: VersionRange = VersionRange { min: 2, max: 9 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 

@@ -17,16 +17,16 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-6
+/// Valid versions: 1-6
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct DeleteTopicState {
-    /// The topic name
+    /// The topic name.
     ///
     /// Supported API versions: 6
     pub name: Option<super::TopicName>,
 
-    /// The unique topic ID
+    /// The unique topic ID.
     ///
     /// Supported API versions: 6
     pub topic_id: Uuid,
@@ -38,7 +38,7 @@ pub struct DeleteTopicState {
 impl DeleteTopicState {
     /// Sets `name` to the passed value.
     ///
-    /// The topic name
+    /// The topic name.
     ///
     /// Supported API versions: 6
     pub fn with_name(mut self, value: Option<super::TopicName>) -> Self {
@@ -47,7 +47,7 @@ impl DeleteTopicState {
     }
     /// Sets `topic_id` to the passed value.
     ///
-    /// The unique topic ID
+    /// The unique topic ID.
     ///
     /// Supported API versions: 6
     pub fn with_topic_id(mut self, value: Uuid) -> Self {
@@ -177,27 +177,27 @@ impl Default for DeleteTopicState {
 }
 
 impl Message for DeleteTopicState {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 6 };
-    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 0 });
+    const VERSIONS: VersionRange = VersionRange { min: 1, max: 6 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-6
+/// Valid versions: 1-6
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct DeleteTopicsRequest {
-    /// The name or topic ID of the topic
+    /// The name or topic ID of the topic.
     ///
     /// Supported API versions: 6
     pub topics: Vec<DeleteTopicState>,
 
-    /// The names of the topics to delete
+    /// The names of the topics to delete.
     ///
-    /// Supported API versions: 0-5
+    /// Supported API versions: 1-5
     pub topic_names: Vec<super::TopicName>,
 
     /// The length of time in milliseconds to wait for the deletions to complete.
     ///
-    /// Supported API versions: 0-6
+    /// Supported API versions: 1-6
     pub timeout_ms: i32,
 
     /// Other tagged fields
@@ -207,7 +207,7 @@ pub struct DeleteTopicsRequest {
 impl DeleteTopicsRequest {
     /// Sets `topics` to the passed value.
     ///
-    /// The name or topic ID of the topic
+    /// The name or topic ID of the topic.
     ///
     /// Supported API versions: 6
     pub fn with_topics(mut self, value: Vec<DeleteTopicState>) -> Self {
@@ -216,9 +216,9 @@ impl DeleteTopicsRequest {
     }
     /// Sets `topic_names` to the passed value.
     ///
-    /// The names of the topics to delete
+    /// The names of the topics to delete.
     ///
-    /// Supported API versions: 0-5
+    /// Supported API versions: 1-5
     pub fn with_topic_names(mut self, value: Vec<super::TopicName>) -> Self {
         self.topic_names = value;
         self
@@ -227,7 +227,7 @@ impl DeleteTopicsRequest {
     ///
     /// The length of time in milliseconds to wait for the deletions to complete.
     ///
-    /// Supported API versions: 0-6
+    /// Supported API versions: 1-6
     pub fn with_timeout_ms(mut self, value: i32) -> Self {
         self.timeout_ms = value;
         self
@@ -366,8 +366,8 @@ impl Default for DeleteTopicsRequest {
 }
 
 impl Message for DeleteTopicsRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 6 };
-    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 0 });
+    const VERSIONS: VersionRange = VersionRange { min: 1, max: 6 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 impl HeaderVersion for DeleteTopicsRequest {

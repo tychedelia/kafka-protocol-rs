@@ -21,12 +21,12 @@ use crate::protocol::{
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct DefaultPrincipalData {
-    /// The principal type
+    /// The principal type.
     ///
     /// Supported API versions: 0
     pub _type: StrBytes,
 
-    /// The principal name
+    /// The principal name.
     ///
     /// Supported API versions: 0
     pub name: StrBytes,
@@ -43,7 +43,7 @@ pub struct DefaultPrincipalData {
 impl DefaultPrincipalData {
     /// Sets `_type` to the passed value.
     ///
-    /// The principal type
+    /// The principal type.
     ///
     /// Supported API versions: 0
     pub fn with_type(mut self, value: StrBytes) -> Self {
@@ -52,7 +52,7 @@ impl DefaultPrincipalData {
     }
     /// Sets `name` to the passed value.
     ///
-    /// The principal name
+    /// The principal name.
     ///
     /// Supported API versions: 0
     pub fn with_name(mut self, value: StrBytes) -> Self {

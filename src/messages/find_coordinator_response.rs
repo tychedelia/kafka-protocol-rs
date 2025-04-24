@@ -347,7 +347,7 @@ pub struct FindCoordinatorResponse {
     /// Supported API versions: 0-3
     pub port: i32,
 
-    /// Each coordinator result in the response
+    /// Each coordinator result in the response.
     ///
     /// Supported API versions: 4-6
     pub coordinators: Vec<Coordinator>,
@@ -413,7 +413,7 @@ impl FindCoordinatorResponse {
     }
     /// Sets `coordinators` to the passed value.
     ///
-    /// Each coordinator result in the response
+    /// Each coordinator result in the response.
     ///
     /// Supported API versions: 4-6
     pub fn with_coordinators(mut self, value: Vec<Coordinator>) -> Self {

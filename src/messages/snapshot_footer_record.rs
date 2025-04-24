@@ -21,7 +21,7 @@ use crate::protocol::{
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct SnapshotFooterRecord {
-    /// The version of the snapshot footer record
+    /// The version of the snapshot footer record.
     ///
     /// Supported API versions: 0
     pub version: i16,
@@ -33,7 +33,7 @@ pub struct SnapshotFooterRecord {
 impl SnapshotFooterRecord {
     /// Sets `version` to the passed value.
     ///
-    /// The version of the snapshot footer record
+    /// The version of the snapshot footer record.
     ///
     /// Supported API versions: 0
     pub fn with_version(mut self, value: i16) -> Self {

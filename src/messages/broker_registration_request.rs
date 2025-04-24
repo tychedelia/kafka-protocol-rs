@@ -36,7 +36,7 @@ pub struct BrokerRegistrationRequest {
     /// Supported API versions: 0-4
     pub incarnation_id: Uuid,
 
-    /// The listeners of this broker
+    /// The listeners of this broker.
     ///
     /// Supported API versions: 0-4
     pub listeners: Vec<Listener>,
@@ -51,7 +51,7 @@ pub struct BrokerRegistrationRequest {
     /// Supported API versions: 0-4
     pub rack: Option<StrBytes>,
 
-    /// If the required configurations for ZK migration are present, this value is set to true
+    /// If the required configurations for ZK migration are present, this value is set to true.
     ///
     /// Supported API versions: 1-4
     pub is_migrating_zk_broker: bool,
@@ -100,7 +100,7 @@ impl BrokerRegistrationRequest {
     }
     /// Sets `listeners` to the passed value.
     ///
-    /// The listeners of this broker
+    /// The listeners of this broker.
     ///
     /// Supported API versions: 0-4
     pub fn with_listeners(mut self, value: Vec<Listener>) -> Self {
@@ -127,7 +127,7 @@ impl BrokerRegistrationRequest {
     }
     /// Sets `is_migrating_zk_broker` to the passed value.
     ///
-    /// If the required configurations for ZK migration are present, this value is set to true
+    /// If the required configurations for ZK migration are present, this value is set to true.
     ///
     /// Supported API versions: 1-4
     pub fn with_is_migrating_zk_broker(mut self, value: bool) -> Self {
