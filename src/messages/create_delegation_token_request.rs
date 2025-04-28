@@ -69,6 +69,9 @@ impl CreatableRenewers {
 #[cfg(feature = "client")]
 impl Encodable for CreatableRenewers {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 3 {
+            bail!("CreatableRenewers v{} is not supported", version);
+        }
         if version >= 2 {
             types::CompactString.encode(buf, &self.principal_type)?;
         } else {
@@ -124,6 +127,9 @@ impl Encodable for CreatableRenewers {
 #[cfg(feature = "broker")]
 impl Decodable for CreatableRenewers {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 3 {
+            bail!("CreatableRenewers v{} is not supported", version);
+        }
         let principal_type = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
@@ -247,6 +253,9 @@ impl CreateDelegationTokenRequest {
 #[cfg(feature = "client")]
 impl Encodable for CreateDelegationTokenRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 3 {
+            bail!("CreateDelegationTokenRequest v{} is not supported", version);
+        }
         if version >= 3 {
             types::CompactString.encode(buf, &self.owner_principal_type)?;
         } else {
@@ -343,6 +352,9 @@ impl Encodable for CreateDelegationTokenRequest {
 #[cfg(feature = "broker")]
 impl Decodable for CreateDelegationTokenRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 3 {
+            bail!("CreateDelegationTokenRequest v{} is not supported", version);
+        }
         let owner_principal_type = if version >= 3 {
             types::CompactString.decode(buf)?
         } else {

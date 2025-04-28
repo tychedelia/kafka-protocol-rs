@@ -83,6 +83,9 @@ impl DeleteAclsFilterResult {
 #[cfg(feature = "broker")]
 impl Encodable for DeleteAclsFilterResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 3 {
+            bail!("DeleteAclsFilterResult v{} is not supported", version);
+        }
         types::Int16.encode(buf, &self.error_code)?;
         if version >= 2 {
             types::CompactString.encode(buf, &self.error_message)?;
@@ -142,6 +145,9 @@ impl Encodable for DeleteAclsFilterResult {
 #[cfg(feature = "client")]
 impl Decodable for DeleteAclsFilterResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 3 {
+            bail!("DeleteAclsFilterResult v{} is not supported", version);
+        }
         let error_code = types::Int16.decode(buf)?;
         let error_message = if version >= 2 {
             types::CompactString.decode(buf)?
@@ -338,6 +344,9 @@ impl DeleteAclsMatchingAcl {
 #[cfg(feature = "broker")]
 impl Encodable for DeleteAclsMatchingAcl {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 3 {
+            bail!("DeleteAclsMatchingAcl v{} is not supported", version);
+        }
         types::Int16.encode(buf, &self.error_code)?;
         if version >= 2 {
             types::CompactString.encode(buf, &self.error_message)?;
@@ -435,6 +444,9 @@ impl Encodable for DeleteAclsMatchingAcl {
 #[cfg(feature = "client")]
 impl Decodable for DeleteAclsMatchingAcl {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 3 {
+            bail!("DeleteAclsMatchingAcl v{} is not supported", version);
+        }
         let error_code = types::Int16.decode(buf)?;
         let error_message = if version >= 2 {
             types::CompactString.decode(buf)?
@@ -563,6 +575,9 @@ impl DeleteAclsResponse {
 #[cfg(feature = "broker")]
 impl Encodable for DeleteAclsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 3 {
+            bail!("DeleteAclsResponse v{} is not supported", version);
+        }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         if version >= 2 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.filter_results)?;
@@ -612,6 +627,9 @@ impl Encodable for DeleteAclsResponse {
 #[cfg(feature = "client")]
 impl Decodable for DeleteAclsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 3 {
+            bail!("DeleteAclsResponse v{} is not supported", version);
+        }
         let throttle_time_ms = types::Int32.decode(buf)?;
         let filter_results = if version >= 2 {
             types::CompactArray(types::Struct { version }).decode(buf)?

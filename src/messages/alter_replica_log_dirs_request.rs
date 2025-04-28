@@ -69,6 +69,9 @@ impl AlterReplicaLogDir {
 #[cfg(feature = "client")]
 impl Encodable for AlterReplicaLogDir {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 2 {
+            bail!("AlterReplicaLogDir v{} is not supported", version);
+        }
         if version >= 2 {
             types::CompactString.encode(buf, &self.path)?;
         } else {
@@ -125,6 +128,9 @@ impl Encodable for AlterReplicaLogDir {
 #[cfg(feature = "broker")]
 impl Decodable for AlterReplicaLogDir {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 2 {
+            bail!("AlterReplicaLogDir v{} is not supported", version);
+        }
         let path = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
@@ -220,6 +226,9 @@ impl AlterReplicaLogDirTopic {
 #[cfg(feature = "client")]
 impl Encodable for AlterReplicaLogDirTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 2 {
+            bail!("AlterReplicaLogDirTopic v{} is not supported", version);
+        }
         if version >= 2 {
             types::CompactString.encode(buf, &self.name)?;
         } else {
@@ -275,6 +284,9 @@ impl Encodable for AlterReplicaLogDirTopic {
 #[cfg(feature = "broker")]
 impl Decodable for AlterReplicaLogDirTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 2 {
+            bail!("AlterReplicaLogDirTopic v{} is not supported", version);
+        }
         let name = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
@@ -356,6 +368,9 @@ impl AlterReplicaLogDirsRequest {
 #[cfg(feature = "client")]
 impl Encodable for AlterReplicaLogDirsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 2 {
+            bail!("AlterReplicaLogDirsRequest v{} is not supported", version);
+        }
         if version >= 2 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.dirs)?;
         } else {
@@ -402,6 +417,9 @@ impl Encodable for AlterReplicaLogDirsRequest {
 #[cfg(feature = "broker")]
 impl Decodable for AlterReplicaLogDirsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 2 {
+            bail!("AlterReplicaLogDirsRequest v{} is not supported", version);
+        }
         let dirs = if version >= 2 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {

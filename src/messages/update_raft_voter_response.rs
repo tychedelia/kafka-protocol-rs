@@ -97,6 +97,9 @@ impl CurrentLeader {
 #[cfg(feature = "broker")]
 impl Encodable for CurrentLeader {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!("CurrentLeader v{} is not supported", version);
+        }
         types::Int32.encode(buf, &self.leader_id)?;
         types::Int32.encode(buf, &self.leader_epoch)?;
         types::CompactString.encode(buf, &self.host)?;
@@ -136,6 +139,9 @@ impl Encodable for CurrentLeader {
 #[cfg(feature = "client")]
 impl Decodable for CurrentLeader {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!("CurrentLeader v{} is not supported", version);
+        }
         let leader_id = types::Int32.decode(buf)?;
         let leader_epoch = types::Int32.decode(buf)?;
         let host = types::CompactString.decode(buf)?;
@@ -241,6 +247,9 @@ impl UpdateRaftVoterResponse {
 #[cfg(feature = "broker")]
 impl Encodable for UpdateRaftVoterResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!("UpdateRaftVoterResponse v{} is not supported", version);
+        }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         types::Int16.encode(buf, &self.error_code)?;
         let mut num_tagged_fields = self.unknown_tagged_fields.len();
@@ -306,6 +315,9 @@ impl Encodable for UpdateRaftVoterResponse {
 #[cfg(feature = "client")]
 impl Decodable for UpdateRaftVoterResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!("UpdateRaftVoterResponse v{} is not supported", version);
+        }
         let throttle_time_ms = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
         let mut current_leader = Default::default();

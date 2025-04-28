@@ -83,6 +83,9 @@ impl BrokerRegistrationResponse {
 #[cfg(feature = "broker")]
 impl Encodable for BrokerRegistrationResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 4 {
+            bail!("BrokerRegistrationResponse v{} is not supported", version);
+        }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         types::Int16.encode(buf, &self.error_code)?;
         types::Int64.encode(buf, &self.broker_epoch)?;
@@ -120,6 +123,9 @@ impl Encodable for BrokerRegistrationResponse {
 #[cfg(feature = "client")]
 impl Decodable for BrokerRegistrationResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 4 {
+            bail!("BrokerRegistrationResponse v{} is not supported", version);
+        }
         let throttle_time_ms = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
         let broker_epoch = types::Int64.decode(buf)?;

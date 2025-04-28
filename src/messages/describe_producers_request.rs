@@ -55,6 +55,9 @@ impl DescribeProducersRequest {
 #[cfg(feature = "client")]
 impl Encodable for DescribeProducersRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!("DescribeProducersRequest v{} is not supported", version);
+        }
         types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
@@ -88,6 +91,9 @@ impl Encodable for DescribeProducersRequest {
 #[cfg(feature = "broker")]
 impl Decodable for DescribeProducersRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!("DescribeProducersRequest v{} is not supported", version);
+        }
         let topics = types::CompactArray(types::Struct { version }).decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
         let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
@@ -170,6 +176,9 @@ impl TopicRequest {
 #[cfg(feature = "client")]
 impl Encodable for TopicRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!("TopicRequest v{} is not supported", version);
+        }
         types::CompactString.encode(buf, &self.name)?;
         types::CompactArray(types::Int32).encode(buf, &self.partition_indexes)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -205,6 +214,9 @@ impl Encodable for TopicRequest {
 #[cfg(feature = "broker")]
 impl Decodable for TopicRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!("TopicRequest v{} is not supported", version);
+        }
         let name = types::CompactString.decode(buf)?;
         let partition_indexes = types::CompactArray(types::Int32).decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();

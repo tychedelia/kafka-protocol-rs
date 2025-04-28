@@ -69,6 +69,12 @@ impl AlterReplicaLogDirPartitionResult {
 #[cfg(feature = "broker")]
 impl Encodable for AlterReplicaLogDirPartitionResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 2 {
+            bail!(
+                "AlterReplicaLogDirPartitionResult v{} is not supported",
+                version
+            );
+        }
         types::Int32.encode(buf, &self.partition_index)?;
         types::Int16.encode(buf, &self.error_code)?;
         if version >= 2 {
@@ -108,6 +114,12 @@ impl Encodable for AlterReplicaLogDirPartitionResult {
 #[cfg(feature = "client")]
 impl Decodable for AlterReplicaLogDirPartitionResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 2 {
+            bail!(
+                "AlterReplicaLogDirPartitionResult v{} is not supported",
+                version
+            );
+        }
         let partition_index = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
@@ -195,6 +207,12 @@ impl AlterReplicaLogDirTopicResult {
 #[cfg(feature = "broker")]
 impl Encodable for AlterReplicaLogDirTopicResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 2 {
+            bail!(
+                "AlterReplicaLogDirTopicResult v{} is not supported",
+                version
+            );
+        }
         if version >= 2 {
             types::CompactString.encode(buf, &self.topic_name)?;
         } else {
@@ -251,6 +269,12 @@ impl Encodable for AlterReplicaLogDirTopicResult {
 #[cfg(feature = "client")]
 impl Decodable for AlterReplicaLogDirTopicResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 2 {
+            bail!(
+                "AlterReplicaLogDirTopicResult v{} is not supported",
+                version
+            );
+        }
         let topic_name = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
@@ -346,6 +370,9 @@ impl AlterReplicaLogDirsResponse {
 #[cfg(feature = "broker")]
 impl Encodable for AlterReplicaLogDirsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 2 {
+            bail!("AlterReplicaLogDirsResponse v{} is not supported", version);
+        }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         if version >= 2 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.results)?;
@@ -394,6 +421,9 @@ impl Encodable for AlterReplicaLogDirsResponse {
 #[cfg(feature = "client")]
 impl Decodable for AlterReplicaLogDirsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 2 {
+            bail!("AlterReplicaLogDirsResponse v{} is not supported", version);
+        }
         let throttle_time_ms = types::Int32.decode(buf)?;
         let results = if version >= 2 {
             types::CompactArray(types::Struct { version }).decode(buf)?

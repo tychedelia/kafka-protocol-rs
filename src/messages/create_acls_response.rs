@@ -69,6 +69,9 @@ impl AclCreationResult {
 #[cfg(feature = "broker")]
 impl Encodable for AclCreationResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 3 {
+            bail!("AclCreationResult v{} is not supported", version);
+        }
         types::Int16.encode(buf, &self.error_code)?;
         if version >= 2 {
             types::CompactString.encode(buf, &self.error_message)?;
@@ -116,6 +119,9 @@ impl Encodable for AclCreationResult {
 #[cfg(feature = "client")]
 impl Decodable for AclCreationResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 3 {
+            bail!("AclCreationResult v{} is not supported", version);
+        }
         let error_code = types::Int16.decode(buf)?;
         let error_message = if version >= 2 {
             types::CompactString.decode(buf)?
@@ -207,6 +213,9 @@ impl CreateAclsResponse {
 #[cfg(feature = "broker")]
 impl Encodable for CreateAclsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 3 {
+            bail!("CreateAclsResponse v{} is not supported", version);
+        }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         if version >= 2 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.results)?;
@@ -255,6 +264,9 @@ impl Encodable for CreateAclsResponse {
 #[cfg(feature = "client")]
 impl Decodable for CreateAclsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 3 {
+            bail!("CreateAclsResponse v{} is not supported", version);
+        }
         let throttle_time_ms = types::Int32.decode(buf)?;
         let results = if version >= 2 {
             types::CompactArray(types::Struct { version }).decode(buf)?

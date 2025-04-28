@@ -97,6 +97,12 @@ impl ListPartitionReassignmentsResponse {
 #[cfg(feature = "broker")]
 impl Encodable for ListPartitionReassignmentsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!(
+                "ListPartitionReassignmentsResponse v{} is not supported",
+                version
+            );
+        }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         types::Int16.encode(buf, &self.error_code)?;
         types::CompactString.encode(buf, &self.error_message)?;
@@ -136,6 +142,12 @@ impl Encodable for ListPartitionReassignmentsResponse {
 #[cfg(feature = "client")]
 impl Decodable for ListPartitionReassignmentsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!(
+                "ListPartitionReassignmentsResponse v{} is not supported",
+                version
+            );
+        }
         let throttle_time_ms = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
         let error_message = types::CompactString.decode(buf)?;
@@ -255,6 +267,9 @@ impl OngoingPartitionReassignment {
 #[cfg(feature = "broker")]
 impl Encodable for OngoingPartitionReassignment {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!("OngoingPartitionReassignment v{} is not supported", version);
+        }
         types::Int32.encode(buf, &self.partition_index)?;
         types::CompactArray(types::Int32).encode(buf, &self.replicas)?;
         types::CompactArray(types::Int32).encode(buf, &self.adding_replicas)?;
@@ -294,6 +309,9 @@ impl Encodable for OngoingPartitionReassignment {
 #[cfg(feature = "client")]
 impl Decodable for OngoingPartitionReassignment {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!("OngoingPartitionReassignment v{} is not supported", version);
+        }
         let partition_index = types::Int32.decode(buf)?;
         let replicas = types::CompactArray(types::Int32).decode(buf)?;
         let adding_replicas = types::CompactArray(types::Int32).decode(buf)?;
@@ -385,6 +403,9 @@ impl OngoingTopicReassignment {
 #[cfg(feature = "broker")]
 impl Encodable for OngoingTopicReassignment {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!("OngoingTopicReassignment v{} is not supported", version);
+        }
         types::CompactString.encode(buf, &self.name)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.partitions)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -421,6 +442,9 @@ impl Encodable for OngoingTopicReassignment {
 #[cfg(feature = "client")]
 impl Decodable for OngoingTopicReassignment {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!("OngoingTopicReassignment v{} is not supported", version);
+        }
         let name = types::CompactString.decode(buf)?;
         let partitions = types::CompactArray(types::Struct { version }).decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();

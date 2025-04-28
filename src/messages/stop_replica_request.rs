@@ -83,6 +83,9 @@ impl StopReplicaPartitionState {
 #[cfg(feature = "client")]
 impl Encodable for StopReplicaPartitionState {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 4 {
+            bail!("StopReplicaPartitionState v{} is not supported", version);
+        }
         if version >= 3 {
             types::Int32.encode(buf, &self.partition_index)?;
         } else {
@@ -160,6 +163,9 @@ impl Encodable for StopReplicaPartitionState {
 #[cfg(feature = "broker")]
 impl Decodable for StopReplicaPartitionState {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 4 {
+            bail!("StopReplicaPartitionState v{} is not supported", version);
+        }
         let partition_index = if version >= 3 {
             types::Int32.decode(buf)?
         } else {
@@ -262,6 +268,9 @@ impl StopReplicaPartitionV0 {
 #[cfg(feature = "client")]
 impl Encodable for StopReplicaPartitionV0 {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 4 {
+            bail!("StopReplicaPartitionV0 v{} is not supported", version);
+        }
         if version == 0 {
             types::String.encode(buf, &self.topic_name)?;
         } else {
@@ -325,6 +334,9 @@ impl Encodable for StopReplicaPartitionV0 {
 #[cfg(feature = "broker")]
 impl Decodable for StopReplicaPartitionV0 {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 4 {
+            bail!("StopReplicaPartitionV0 v{} is not supported", version);
+        }
         let topic_name = if version == 0 {
             types::String.decode(buf)?
         } else {
@@ -504,6 +516,9 @@ impl StopReplicaRequest {
 #[cfg(feature = "client")]
 impl Encodable for StopReplicaRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 4 {
+            bail!("StopReplicaRequest v{} is not supported", version);
+        }
         types::Int32.encode(buf, &self.controller_id)?;
         if version >= 4 {
             types::Boolean.encode(buf, &self.is_k_raft_controller)?;
@@ -630,6 +645,9 @@ impl Encodable for StopReplicaRequest {
 #[cfg(feature = "broker")]
 impl Decodable for StopReplicaRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 4 {
+            bail!("StopReplicaRequest v{} is not supported", version);
+        }
         let controller_id = types::Int32.decode(buf)?;
         let is_k_raft_controller = if version >= 4 {
             types::Boolean.decode(buf)?
@@ -763,6 +781,9 @@ impl StopReplicaTopicState {
 #[cfg(feature = "client")]
 impl Encodable for StopReplicaTopicState {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 4 {
+            bail!("StopReplicaTopicState v{} is not supported", version);
+        }
         if version >= 3 {
             types::CompactString.encode(buf, &self.topic_name)?;
         } else {
@@ -827,6 +848,9 @@ impl Encodable for StopReplicaTopicState {
 #[cfg(feature = "broker")]
 impl Decodable for StopReplicaTopicState {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 4 {
+            bail!("StopReplicaTopicState v{} is not supported", version);
+        }
         let topic_name = if version >= 3 {
             types::CompactString.decode(buf)?
         } else {
@@ -922,6 +946,9 @@ impl StopReplicaTopicV1 {
 #[cfg(feature = "client")]
 impl Encodable for StopReplicaTopicV1 {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 4 {
+            bail!("StopReplicaTopicV1 v{} is not supported", version);
+        }
         if version >= 1 && version <= 2 {
             if version >= 2 {
                 types::CompactString.encode(buf, &self.name)?;
@@ -1002,6 +1029,9 @@ impl Encodable for StopReplicaTopicV1 {
 #[cfg(feature = "broker")]
 impl Decodable for StopReplicaTopicV1 {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 4 {
+            bail!("StopReplicaTopicV1 v{} is not supported", version);
+        }
         let name = if version >= 1 && version <= 2 {
             if version >= 2 {
                 types::CompactString.decode(buf)?

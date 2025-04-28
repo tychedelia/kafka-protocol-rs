@@ -69,6 +69,9 @@ impl DescribeProducersResponse {
 #[cfg(feature = "broker")]
 impl Encodable for DescribeProducersResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!("DescribeProducersResponse v{} is not supported", version);
+        }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -104,6 +107,9 @@ impl Encodable for DescribeProducersResponse {
 #[cfg(feature = "client")]
 impl Decodable for DescribeProducersResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!("DescribeProducersResponse v{} is not supported", version);
+        }
         let throttle_time_ms = types::Int32.decode(buf)?;
         let topics = types::CompactArray(types::Struct { version }).decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
@@ -217,6 +223,9 @@ impl PartitionResponse {
 #[cfg(feature = "broker")]
 impl Encodable for PartitionResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!("PartitionResponse v{} is not supported", version);
+        }
         types::Int32.encode(buf, &self.partition_index)?;
         types::Int16.encode(buf, &self.error_code)?;
         types::CompactString.encode(buf, &self.error_message)?;
@@ -257,6 +266,9 @@ impl Encodable for PartitionResponse {
 #[cfg(feature = "client")]
 impl Decodable for PartitionResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!("PartitionResponse v{} is not supported", version);
+        }
         let partition_index = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
         let error_message = types::CompactString.decode(buf)?;
@@ -404,6 +416,9 @@ impl ProducerState {
 #[cfg(feature = "broker")]
 impl Encodable for ProducerState {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!("ProducerState v{} is not supported", version);
+        }
         types::Int64.encode(buf, &self.producer_id)?;
         types::Int32.encode(buf, &self.producer_epoch)?;
         types::Int32.encode(buf, &self.last_sequence)?;
@@ -447,6 +462,9 @@ impl Encodable for ProducerState {
 #[cfg(feature = "client")]
 impl Decodable for ProducerState {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!("ProducerState v{} is not supported", version);
+        }
         let producer_id = types::Int64.decode(buf)?;
         let producer_epoch = types::Int32.decode(buf)?;
         let last_sequence = types::Int32.decode(buf)?;
@@ -544,6 +562,9 @@ impl TopicResponse {
 #[cfg(feature = "broker")]
 impl Encodable for TopicResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!("TopicResponse v{} is not supported", version);
+        }
         types::CompactString.encode(buf, &self.name)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.partitions)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -580,6 +601,9 @@ impl Encodable for TopicResponse {
 #[cfg(feature = "client")]
 impl Decodable for TopicResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!("TopicResponse v{} is not supported", version);
+        }
         let name = types::CompactString.decode(buf)?;
         let partitions = types::CompactArray(types::Struct { version }).decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();

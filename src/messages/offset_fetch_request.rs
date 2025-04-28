@@ -97,6 +97,9 @@ impl OffsetFetchRequest {
 #[cfg(feature = "client")]
 impl Encodable for OffsetFetchRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 9 {
+            bail!("OffsetFetchRequest v{} is not supported", version);
+        }
         if version <= 7 {
             if version >= 6 {
                 types::CompactString.encode(buf, &self.group_id)?;
@@ -216,6 +219,9 @@ impl Encodable for OffsetFetchRequest {
 #[cfg(feature = "broker")]
 impl Decodable for OffsetFetchRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 9 {
+            bail!("OffsetFetchRequest v{} is not supported", version);
+        }
         let group_id = if version <= 7 {
             if version >= 6 {
                 types::CompactString.decode(buf)?
@@ -361,6 +367,9 @@ impl OffsetFetchRequestGroup {
 #[cfg(feature = "client")]
 impl Encodable for OffsetFetchRequestGroup {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 9 {
+            bail!("OffsetFetchRequestGroup v{} is not supported", version);
+        }
         if version >= 8 {
             types::CompactString.encode(buf, &self.group_id)?;
         } else {
@@ -447,6 +456,9 @@ impl Encodable for OffsetFetchRequestGroup {
 #[cfg(feature = "broker")]
 impl Decodable for OffsetFetchRequestGroup {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 9 {
+            bail!("OffsetFetchRequestGroup v{} is not supported", version);
+        }
         let group_id = if version >= 8 {
             types::CompactString.decode(buf)?
         } else {
@@ -556,6 +568,9 @@ impl OffsetFetchRequestTopic {
 #[cfg(feature = "client")]
 impl Encodable for OffsetFetchRequestTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 9 {
+            bail!("OffsetFetchRequestTopic v{} is not supported", version);
+        }
         if version <= 7 {
             if version >= 6 {
                 types::CompactString.encode(buf, &self.name)?;
@@ -636,6 +651,9 @@ impl Encodable for OffsetFetchRequestTopic {
 #[cfg(feature = "broker")]
 impl Decodable for OffsetFetchRequestTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 9 {
+            bail!("OffsetFetchRequestTopic v{} is not supported", version);
+        }
         let name = if version <= 7 {
             if version >= 6 {
                 types::CompactString.decode(buf)?
@@ -739,6 +757,9 @@ impl OffsetFetchRequestTopics {
 #[cfg(feature = "client")]
 impl Encodable for OffsetFetchRequestTopics {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 9 {
+            bail!("OffsetFetchRequestTopics v{} is not supported", version);
+        }
         if version >= 8 {
             types::CompactString.encode(buf, &self.name)?;
         } else {
@@ -803,6 +824,9 @@ impl Encodable for OffsetFetchRequestTopics {
 #[cfg(feature = "broker")]
 impl Decodable for OffsetFetchRequestTopics {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 9 {
+            bail!("OffsetFetchRequestTopics v{} is not supported", version);
+        }
         let name = if version >= 8 {
             types::CompactString.decode(buf)?
         } else {

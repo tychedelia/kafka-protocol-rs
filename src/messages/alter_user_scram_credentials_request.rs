@@ -69,6 +69,12 @@ impl AlterUserScramCredentialsRequest {
 #[cfg(feature = "client")]
 impl Encodable for AlterUserScramCredentialsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!(
+                "AlterUserScramCredentialsRequest v{} is not supported",
+                version
+            );
+        }
         types::CompactArray(types::Struct { version }).encode(buf, &self.deletions)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.upsertions)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -106,6 +112,12 @@ impl Encodable for AlterUserScramCredentialsRequest {
 #[cfg(feature = "broker")]
 impl Decodable for AlterUserScramCredentialsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!(
+                "AlterUserScramCredentialsRequest v{} is not supported",
+                version
+            );
+        }
         let deletions = types::CompactArray(types::Struct { version }).decode(buf)?;
         let upsertions = types::CompactArray(types::Struct { version }).decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
@@ -191,6 +203,9 @@ impl ScramCredentialDeletion {
 #[cfg(feature = "client")]
 impl Encodable for ScramCredentialDeletion {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!("ScramCredentialDeletion v{} is not supported", version);
+        }
         types::CompactString.encode(buf, &self.name)?;
         types::Int8.encode(buf, &self.mechanism)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -226,6 +241,9 @@ impl Encodable for ScramCredentialDeletion {
 #[cfg(feature = "broker")]
 impl Decodable for ScramCredentialDeletion {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!("ScramCredentialDeletion v{} is not supported", version);
+        }
         let name = types::CompactString.decode(buf)?;
         let mechanism = types::Int8.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
@@ -353,6 +371,9 @@ impl ScramCredentialUpsertion {
 #[cfg(feature = "client")]
 impl Encodable for ScramCredentialUpsertion {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!("ScramCredentialUpsertion v{} is not supported", version);
+        }
         types::CompactString.encode(buf, &self.name)?;
         types::Int8.encode(buf, &self.mechanism)?;
         types::Int32.encode(buf, &self.iterations)?;
@@ -394,6 +415,9 @@ impl Encodable for ScramCredentialUpsertion {
 #[cfg(feature = "broker")]
 impl Decodable for ScramCredentialUpsertion {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!("ScramCredentialUpsertion v{} is not supported", version);
+        }
         let name = types::CompactString.decode(buf)?;
         let mechanism = types::Int8.decode(buf)?;
         let iterations = types::Int32.decode(buf)?;

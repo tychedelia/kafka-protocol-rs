@@ -69,6 +69,12 @@ impl AddPartitionsToTxnPartitionResult {
 #[cfg(feature = "broker")]
 impl Encodable for AddPartitionsToTxnPartitionResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 5 {
+            bail!(
+                "AddPartitionsToTxnPartitionResult v{} is not supported",
+                version
+            );
+        }
         types::Int32.encode(buf, &self.partition_index)?;
         types::Int16.encode(buf, &self.partition_error_code)?;
         if version >= 3 {
@@ -108,6 +114,12 @@ impl Encodable for AddPartitionsToTxnPartitionResult {
 #[cfg(feature = "client")]
 impl Decodable for AddPartitionsToTxnPartitionResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 5 {
+            bail!(
+                "AddPartitionsToTxnPartitionResult v{} is not supported",
+                version
+            );
+        }
         let partition_index = types::Int32.decode(buf)?;
         let partition_error_code = types::Int16.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
@@ -226,6 +238,9 @@ impl AddPartitionsToTxnResponse {
 #[cfg(feature = "broker")]
 impl Encodable for AddPartitionsToTxnResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 5 {
+            bail!("AddPartitionsToTxnResponse v{} is not supported", version);
+        }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         if version >= 4 {
             types::Int16.encode(buf, &self.error_code)?;
@@ -311,6 +326,9 @@ impl Encodable for AddPartitionsToTxnResponse {
 #[cfg(feature = "client")]
 impl Decodable for AddPartitionsToTxnResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 5 {
+            bail!("AddPartitionsToTxnResponse v{} is not supported", version);
+        }
         let throttle_time_ms = types::Int32.decode(buf)?;
         let error_code = if version >= 4 {
             types::Int16.decode(buf)?
@@ -420,6 +438,9 @@ impl AddPartitionsToTxnResult {
 #[cfg(feature = "broker")]
 impl Encodable for AddPartitionsToTxnResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 5 {
+            bail!("AddPartitionsToTxnResult v{} is not supported", version);
+        }
         if version >= 4 {
             types::CompactString.encode(buf, &self.transactional_id)?;
         } else {
@@ -484,6 +505,9 @@ impl Encodable for AddPartitionsToTxnResult {
 #[cfg(feature = "client")]
 impl Decodable for AddPartitionsToTxnResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 5 {
+            bail!("AddPartitionsToTxnResult v{} is not supported", version);
+        }
         let transactional_id = if version >= 4 {
             types::CompactString.decode(buf)?
         } else {
@@ -582,6 +606,12 @@ impl AddPartitionsToTxnTopicResult {
 #[cfg(feature = "broker")]
 impl Encodable for AddPartitionsToTxnTopicResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 5 {
+            bail!(
+                "AddPartitionsToTxnTopicResult v{} is not supported",
+                version
+            );
+        }
         if version >= 3 {
             types::CompactString.encode(buf, &self.name)?;
         } else {
@@ -640,6 +670,12 @@ impl Encodable for AddPartitionsToTxnTopicResult {
 #[cfg(feature = "client")]
 impl Decodable for AddPartitionsToTxnTopicResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 5 {
+            bail!(
+                "AddPartitionsToTxnTopicResult v{} is not supported",
+                version
+            );
+        }
         let name = if version >= 3 {
             types::CompactString.decode(buf)?
         } else {

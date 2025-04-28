@@ -111,6 +111,9 @@ impl UpdateMetadataBroker {
 #[cfg(feature = "client")]
 impl Encodable for UpdateMetadataBroker {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 8 {
+            bail!("UpdateMetadataBroker v{} is not supported", version);
+        }
         types::Int32.encode(buf, &self.id)?;
         if version == 0 {
             types::String.encode(buf, &self.v0_host)?;
@@ -190,6 +193,9 @@ impl Encodable for UpdateMetadataBroker {
 #[cfg(feature = "broker")]
 impl Decodable for UpdateMetadataBroker {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 8 {
+            bail!("UpdateMetadataBroker v{} is not supported", version);
+        }
         let id = types::Int32.decode(buf)?;
         let v0_host = if version == 0 {
             types::String.decode(buf)?
@@ -338,6 +344,9 @@ impl UpdateMetadataEndpoint {
 #[cfg(feature = "client")]
 impl Encodable for UpdateMetadataEndpoint {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 8 {
+            bail!("UpdateMetadataEndpoint v{} is not supported", version);
+        }
         if version >= 1 {
             types::Int32.encode(buf, &self.port)?;
         } else {
@@ -437,6 +446,9 @@ impl Encodable for UpdateMetadataEndpoint {
 #[cfg(feature = "broker")]
 impl Decodable for UpdateMetadataEndpoint {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 8 {
+            bail!("UpdateMetadataEndpoint v{} is not supported", version);
+        }
         let port = if version >= 1 {
             types::Int32.decode(buf)?
         } else {
@@ -652,6 +664,9 @@ impl UpdateMetadataPartitionState {
 #[cfg(feature = "client")]
 impl Encodable for UpdateMetadataPartitionState {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 8 {
+            bail!("UpdateMetadataPartitionState v{} is not supported", version);
+        }
         if version <= 4 {
             types::String.encode(buf, &self.topic_name)?;
         }
@@ -738,6 +753,9 @@ impl Encodable for UpdateMetadataPartitionState {
 #[cfg(feature = "broker")]
 impl Decodable for UpdateMetadataPartitionState {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 8 {
+            bail!("UpdateMetadataPartitionState v{} is not supported", version);
+        }
         let topic_name = if version <= 4 {
             types::String.decode(buf)?
         } else {
@@ -953,6 +971,9 @@ impl UpdateMetadataRequest {
 #[cfg(feature = "client")]
 impl Encodable for UpdateMetadataRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 8 {
+            bail!("UpdateMetadataRequest v{} is not supported", version);
+        }
         types::Int32.encode(buf, &self.controller_id)?;
         if version >= 8 {
             types::Boolean.encode(buf, &self.is_k_raft_controller)?;
@@ -1100,6 +1121,9 @@ impl Encodable for UpdateMetadataRequest {
 #[cfg(feature = "broker")]
 impl Decodable for UpdateMetadataRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 8 {
+            bail!("UpdateMetadataRequest v{} is not supported", version);
+        }
         let controller_id = types::Int32.decode(buf)?;
         let is_k_raft_controller = if version >= 8 {
             types::Boolean.decode(buf)?
@@ -1254,6 +1278,9 @@ impl UpdateMetadataTopicState {
 #[cfg(feature = "client")]
 impl Encodable for UpdateMetadataTopicState {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 8 {
+            bail!("UpdateMetadataTopicState v{} is not supported", version);
+        }
         if version >= 5 {
             if version >= 6 {
                 types::CompactString.encode(buf, &self.topic_name)?;
@@ -1342,6 +1369,9 @@ impl Encodable for UpdateMetadataTopicState {
 #[cfg(feature = "broker")]
 impl Decodable for UpdateMetadataTopicState {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 8 {
+            bail!("UpdateMetadataTopicState v{} is not supported", version);
+        }
         let topic_name = if version >= 5 {
             if version >= 6 {
                 types::CompactString.decode(buf)?

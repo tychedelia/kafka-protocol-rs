@@ -167,6 +167,12 @@ impl DescribeConfigsResourceResult {
 #[cfg(feature = "broker")]
 impl Encodable for DescribeConfigsResourceResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 4 {
+            bail!(
+                "DescribeConfigsResourceResult v{} is not supported",
+                version
+            );
+        }
         if version >= 4 {
             types::CompactString.encode(buf, &self.name)?;
         } else {
@@ -282,6 +288,12 @@ impl Encodable for DescribeConfigsResourceResult {
 #[cfg(feature = "client")]
 impl Decodable for DescribeConfigsResourceResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 4 {
+            bail!(
+                "DescribeConfigsResourceResult v{} is not supported",
+                version
+            );
+        }
         let name = if version >= 4 {
             types::CompactString.decode(buf)?
         } else {
@@ -426,6 +438,9 @@ impl DescribeConfigsResponse {
 #[cfg(feature = "broker")]
 impl Encodable for DescribeConfigsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 4 {
+            bail!("DescribeConfigsResponse v{} is not supported", version);
+        }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         if version >= 4 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.results)?;
@@ -474,6 +489,9 @@ impl Encodable for DescribeConfigsResponse {
 #[cfg(feature = "client")]
 impl Decodable for DescribeConfigsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 4 {
+            bail!("DescribeConfigsResponse v{} is not supported", version);
+        }
         let throttle_time_ms = types::Int32.decode(buf)?;
         let results = if version >= 4 {
             types::CompactArray(types::Struct { version }).decode(buf)?
@@ -607,6 +625,9 @@ impl DescribeConfigsResult {
 #[cfg(feature = "broker")]
 impl Encodable for DescribeConfigsResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 4 {
+            bail!("DescribeConfigsResult v{} is not supported", version);
+        }
         types::Int16.encode(buf, &self.error_code)?;
         if version >= 4 {
             types::CompactString.encode(buf, &self.error_message)?;
@@ -677,6 +698,9 @@ impl Encodable for DescribeConfigsResult {
 #[cfg(feature = "client")]
 impl Decodable for DescribeConfigsResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 4 {
+            bail!("DescribeConfigsResult v{} is not supported", version);
+        }
         let error_code = types::Int16.decode(buf)?;
         let error_message = if version >= 4 {
             types::CompactString.decode(buf)?
@@ -799,6 +823,9 @@ impl DescribeConfigsSynonym {
 #[cfg(feature = "broker")]
 impl Encodable for DescribeConfigsSynonym {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 4 {
+            bail!("DescribeConfigsSynonym v{} is not supported", version);
+        }
         if version >= 1 {
             if version >= 4 {
                 types::CompactString.encode(buf, &self.name)?;
@@ -902,6 +929,9 @@ impl Encodable for DescribeConfigsSynonym {
 #[cfg(feature = "client")]
 impl Decodable for DescribeConfigsSynonym {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 4 {
+            bail!("DescribeConfigsSynonym v{} is not supported", version);
+        }
         let name = if version >= 1 {
             if version >= 4 {
                 types::CompactString.decode(buf)?

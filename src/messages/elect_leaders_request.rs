@@ -83,6 +83,9 @@ impl ElectLeadersRequest {
 #[cfg(feature = "client")]
 impl Encodable for ElectLeadersRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 2 {
+            bail!("ElectLeadersRequest v{} is not supported", version);
+        }
         if version >= 1 {
             types::Int8.encode(buf, &self.election_type)?;
         } else {
@@ -146,6 +149,9 @@ impl Encodable for ElectLeadersRequest {
 #[cfg(feature = "broker")]
 impl Decodable for ElectLeadersRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 2 {
+            bail!("ElectLeadersRequest v{} is not supported", version);
+        }
         let election_type = if version >= 1 {
             types::Int8.decode(buf)?
         } else {
@@ -244,6 +250,9 @@ impl TopicPartitions {
 #[cfg(feature = "client")]
 impl Encodable for TopicPartitions {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 2 {
+            bail!("TopicPartitions v{} is not supported", version);
+        }
         if version >= 2 {
             types::CompactString.encode(buf, &self.topic)?;
         } else {
@@ -299,6 +308,9 @@ impl Encodable for TopicPartitions {
 #[cfg(feature = "broker")]
 impl Decodable for TopicPartitions {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 2 {
+            bail!("TopicPartitions v{} is not supported", version);
+        }
         let topic = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {

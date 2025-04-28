@@ -111,6 +111,12 @@ impl ControllerRegistrationRequest {
 #[cfg(feature = "client")]
 impl Encodable for ControllerRegistrationRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!(
+                "ControllerRegistrationRequest v{} is not supported",
+                version
+            );
+        }
         types::Int32.encode(buf, &self.controller_id)?;
         types::Uuid.encode(buf, &self.incarnation_id)?;
         types::Boolean.encode(buf, &self.zk_migration_ready)?;
@@ -154,6 +160,12 @@ impl Encodable for ControllerRegistrationRequest {
 #[cfg(feature = "broker")]
 impl Decodable for ControllerRegistrationRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!(
+                "ControllerRegistrationRequest v{} is not supported",
+                version
+            );
+        }
         let controller_id = types::Int32.decode(buf)?;
         let incarnation_id = types::Uuid.decode(buf)?;
         let zk_migration_ready = types::Boolean.decode(buf)?;
@@ -262,6 +274,9 @@ impl Feature {
 #[cfg(feature = "client")]
 impl Encodable for Feature {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!("Feature v{} is not supported", version);
+        }
         types::CompactString.encode(buf, &self.name)?;
         types::Int16.encode(buf, &self.min_supported_version)?;
         types::Int16.encode(buf, &self.max_supported_version)?;
@@ -299,6 +314,9 @@ impl Encodable for Feature {
 #[cfg(feature = "broker")]
 impl Decodable for Feature {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!("Feature v{} is not supported", version);
+        }
         let name = types::CompactString.decode(buf)?;
         let min_supported_version = types::Int16.decode(buf)?;
         let max_supported_version = types::Int16.decode(buf)?;
@@ -415,6 +433,9 @@ impl Listener {
 #[cfg(feature = "client")]
 impl Encodable for Listener {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!("Listener v{} is not supported", version);
+        }
         types::CompactString.encode(buf, &self.name)?;
         types::CompactString.encode(buf, &self.host)?;
         types::UInt16.encode(buf, &self.port)?;
@@ -454,6 +475,9 @@ impl Encodable for Listener {
 #[cfg(feature = "broker")]
 impl Decodable for Listener {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!("Listener v{} is not supported", version);
+        }
         let name = types::CompactString.decode(buf)?;
         let host = types::CompactString.decode(buf)?;
         let port = types::UInt16.decode(buf)?;

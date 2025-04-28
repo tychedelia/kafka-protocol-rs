@@ -69,6 +69,9 @@ impl ExpireDelegationTokenRequest {
 #[cfg(feature = "client")]
 impl Encodable for ExpireDelegationTokenRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 2 {
+            bail!("ExpireDelegationTokenRequest v{} is not supported", version);
+        }
         if version >= 2 {
             types::CompactBytes.encode(buf, &self.hmac)?;
         } else {
@@ -116,6 +119,9 @@ impl Encodable for ExpireDelegationTokenRequest {
 #[cfg(feature = "broker")]
 impl Decodable for ExpireDelegationTokenRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 2 {
+            bail!("ExpireDelegationTokenRequest v{} is not supported", version);
+        }
         let hmac = if version >= 2 {
             types::CompactBytes.decode(buf)?
         } else {

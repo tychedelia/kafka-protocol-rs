@@ -139,6 +139,9 @@ impl SyncGroupRequest {
 #[cfg(feature = "client")]
 impl Encodable for SyncGroupRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 5 {
+            bail!("SyncGroupRequest v{} is not supported", version);
+        }
         if version >= 4 {
             types::CompactString.encode(buf, &self.group_id)?;
         } else {
@@ -242,6 +245,9 @@ impl Encodable for SyncGroupRequest {
 #[cfg(feature = "broker")]
 impl Decodable for SyncGroupRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 5 {
+            bail!("SyncGroupRequest v{} is not supported", version);
+        }
         let group_id = if version >= 4 {
             types::CompactString.decode(buf)?
         } else {
@@ -372,6 +378,9 @@ impl SyncGroupRequestAssignment {
 #[cfg(feature = "client")]
 impl Encodable for SyncGroupRequestAssignment {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 5 {
+            bail!("SyncGroupRequestAssignment v{} is not supported", version);
+        }
         if version >= 4 {
             types::CompactString.encode(buf, &self.member_id)?;
         } else {
@@ -427,6 +436,9 @@ impl Encodable for SyncGroupRequestAssignment {
 #[cfg(feature = "broker")]
 impl Decodable for SyncGroupRequestAssignment {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 5 {
+            bail!("SyncGroupRequestAssignment v{} is not supported", version);
+        }
         let member_id = if version >= 4 {
             types::CompactString.decode(buf)?
         } else {

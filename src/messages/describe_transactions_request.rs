@@ -55,6 +55,9 @@ impl DescribeTransactionsRequest {
 #[cfg(feature = "client")]
 impl Encodable for DescribeTransactionsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!("DescribeTransactionsRequest v{} is not supported", version);
+        }
         types::CompactArray(types::CompactString).encode(buf, &self.transactional_ids)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
@@ -89,6 +92,9 @@ impl Encodable for DescribeTransactionsRequest {
 #[cfg(feature = "broker")]
 impl Decodable for DescribeTransactionsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!("DescribeTransactionsRequest v{} is not supported", version);
+        }
         let transactional_ids = types::CompactArray(types::CompactString).decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
         let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;

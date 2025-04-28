@@ -55,6 +55,9 @@ impl UpdateMetadataResponse {
 #[cfg(feature = "broker")]
 impl Encodable for UpdateMetadataResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 8 {
+            bail!("UpdateMetadataResponse v{} is not supported", version);
+        }
         types::Int16.encode(buf, &self.error_code)?;
         if version >= 6 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -92,6 +95,9 @@ impl Encodable for UpdateMetadataResponse {
 #[cfg(feature = "client")]
 impl Decodable for UpdateMetadataResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 8 {
+            bail!("UpdateMetadataResponse v{} is not supported", version);
+        }
         let error_code = types::Int16.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
         if version >= 6 {

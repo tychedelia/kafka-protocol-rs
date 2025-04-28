@@ -83,6 +83,9 @@ impl ListTransactionsRequest {
 #[cfg(feature = "client")]
 impl Encodable for ListTransactionsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 1 {
+            bail!("ListTransactionsRequest v{} is not supported", version);
+        }
         types::CompactArray(types::CompactString).encode(buf, &self.state_filters)?;
         types::CompactArray(types::Int64).encode(buf, &self.producer_id_filters)?;
         if version >= 1 {
@@ -133,6 +136,9 @@ impl Encodable for ListTransactionsRequest {
 #[cfg(feature = "broker")]
 impl Decodable for ListTransactionsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 1 {
+            bail!("ListTransactionsRequest v{} is not supported", version);
+        }
         let state_filters = types::CompactArray(types::CompactString).decode(buf)?;
         let producer_id_filters = types::CompactArray(types::Int64).decode(buf)?;
         let duration_filter = if version >= 1 {

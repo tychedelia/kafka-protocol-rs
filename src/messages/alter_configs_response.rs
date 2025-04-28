@@ -97,6 +97,9 @@ impl AlterConfigsResourceResponse {
 #[cfg(feature = "broker")]
 impl Encodable for AlterConfigsResourceResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 2 {
+            bail!("AlterConfigsResourceResponse v{} is not supported", version);
+        }
         types::Int16.encode(buf, &self.error_code)?;
         if version >= 2 {
             types::CompactString.encode(buf, &self.error_message)?;
@@ -156,6 +159,9 @@ impl Encodable for AlterConfigsResourceResponse {
 #[cfg(feature = "client")]
 impl Decodable for AlterConfigsResourceResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 2 {
+            bail!("AlterConfigsResourceResponse v{} is not supported", version);
+        }
         let error_code = types::Int16.decode(buf)?;
         let error_message = if version >= 2 {
             types::CompactString.decode(buf)?
@@ -257,6 +263,9 @@ impl AlterConfigsResponse {
 #[cfg(feature = "broker")]
 impl Encodable for AlterConfigsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 2 {
+            bail!("AlterConfigsResponse v{} is not supported", version);
+        }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         if version >= 2 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.responses)?;
@@ -305,6 +314,9 @@ impl Encodable for AlterConfigsResponse {
 #[cfg(feature = "client")]
 impl Decodable for AlterConfigsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 2 {
+            bail!("AlterConfigsResponse v{} is not supported", version);
+        }
         let throttle_time_ms = types::Int32.decode(buf)?;
         let responses = if version >= 2 {
             types::CompactArray(types::Struct { version }).decode(buf)?

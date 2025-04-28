@@ -69,6 +69,9 @@ impl HeartbeatResponse {
 #[cfg(feature = "broker")]
 impl Encodable for HeartbeatResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 4 {
+            bail!("HeartbeatResponse v{} is not supported", version);
+        }
         if version >= 1 {
             types::Int32.encode(buf, &self.throttle_time_ms)?;
         }
@@ -112,6 +115,9 @@ impl Encodable for HeartbeatResponse {
 #[cfg(feature = "client")]
 impl Decodable for HeartbeatResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 4 {
+            bail!("HeartbeatResponse v{} is not supported", version);
+        }
         let throttle_time_ms = if version >= 1 {
             types::Int32.decode(buf)?
         } else {

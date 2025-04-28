@@ -69,6 +69,12 @@ impl ListPartitionReassignmentsRequest {
 #[cfg(feature = "client")]
 impl Encodable for ListPartitionReassignmentsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!(
+                "ListPartitionReassignmentsRequest v{} is not supported",
+                version
+            );
+        }
         types::Int32.encode(buf, &self.timeout_ms)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -104,6 +110,12 @@ impl Encodable for ListPartitionReassignmentsRequest {
 #[cfg(feature = "broker")]
 impl Decodable for ListPartitionReassignmentsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!(
+                "ListPartitionReassignmentsRequest v{} is not supported",
+                version
+            );
+        }
         let timeout_ms = types::Int32.decode(buf)?;
         let topics = types::CompactArray(types::Struct { version }).decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
@@ -189,6 +201,12 @@ impl ListPartitionReassignmentsTopics {
 #[cfg(feature = "client")]
 impl Encodable for ListPartitionReassignmentsTopics {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!(
+                "ListPartitionReassignmentsTopics v{} is not supported",
+                version
+            );
+        }
         types::CompactString.encode(buf, &self.name)?;
         types::CompactArray(types::Int32).encode(buf, &self.partition_indexes)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -224,6 +242,12 @@ impl Encodable for ListPartitionReassignmentsTopics {
 #[cfg(feature = "broker")]
 impl Decodable for ListPartitionReassignmentsTopics {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!(
+                "ListPartitionReassignmentsTopics v{} is not supported",
+                version
+            );
+        }
         let name = types::CompactString.decode(buf)?;
         let partition_indexes = types::CompactArray(types::Int32).decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();

@@ -167,6 +167,12 @@ impl ConsumerGroupHeartbeatRequest {
 #[cfg(feature = "client")]
 impl Encodable for ConsumerGroupHeartbeatRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!(
+                "ConsumerGroupHeartbeatRequest v{} is not supported",
+                version
+            );
+        }
         types::CompactString.encode(buf, &self.group_id)?;
         types::CompactString.encode(buf, &self.member_id)?;
         types::Int32.encode(buf, &self.member_epoch)?;
@@ -218,6 +224,12 @@ impl Encodable for ConsumerGroupHeartbeatRequest {
 #[cfg(feature = "broker")]
 impl Decodable for ConsumerGroupHeartbeatRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!(
+                "ConsumerGroupHeartbeatRequest v{} is not supported",
+                version
+            );
+        }
         let group_id = types::CompactString.decode(buf)?;
         let member_id = types::CompactString.decode(buf)?;
         let member_epoch = types::Int32.decode(buf)?;
@@ -324,6 +336,9 @@ impl TopicPartitions {
 #[cfg(feature = "client")]
 impl Encodable for TopicPartitions {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!("TopicPartitions v{} is not supported", version);
+        }
         types::Uuid.encode(buf, &self.topic_id)?;
         types::CompactArray(types::Int32).encode(buf, &self.partitions)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -359,6 +374,9 @@ impl Encodable for TopicPartitions {
 #[cfg(feature = "broker")]
 impl Decodable for TopicPartitions {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!("TopicPartitions v{} is not supported", version);
+        }
         let topic_id = types::Uuid.decode(buf)?;
         let partitions = types::CompactArray(types::Int32).decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();

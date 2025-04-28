@@ -111,6 +111,9 @@ impl SyncGroupResponse {
 #[cfg(feature = "broker")]
 impl Encodable for SyncGroupResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 5 {
+            bail!("SyncGroupResponse v{} is not supported", version);
+        }
         if version >= 1 {
             types::Int32.encode(buf, &self.throttle_time_ms)?;
         }
@@ -176,6 +179,9 @@ impl Encodable for SyncGroupResponse {
 #[cfg(feature = "client")]
 impl Decodable for SyncGroupResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 5 {
+            bail!("SyncGroupResponse v{} is not supported", version);
+        }
         let throttle_time_ms = if version >= 1 {
             types::Int32.decode(buf)?
         } else {

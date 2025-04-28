@@ -83,6 +83,9 @@ impl LeaveGroupRequest {
 #[cfg(feature = "client")]
 impl Encodable for LeaveGroupRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 5 {
+            bail!("LeaveGroupRequest v{} is not supported", version);
+        }
         if version >= 4 {
             types::CompactString.encode(buf, &self.group_id)?;
         } else {
@@ -166,6 +169,9 @@ impl Encodable for LeaveGroupRequest {
 #[cfg(feature = "broker")]
 impl Decodable for LeaveGroupRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 5 {
+            bail!("LeaveGroupRequest v{} is not supported", version);
+        }
         let group_id = if version >= 4 {
             types::CompactString.decode(buf)?
         } else {
@@ -286,6 +292,9 @@ impl MemberIdentity {
 #[cfg(feature = "client")]
 impl Encodable for MemberIdentity {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 5 {
+            bail!("MemberIdentity v{} is not supported", version);
+        }
         if version >= 3 {
             if version >= 4 {
                 types::CompactString.encode(buf, &self.member_id)?;
@@ -371,6 +380,9 @@ impl Encodable for MemberIdentity {
 #[cfg(feature = "broker")]
 impl Decodable for MemberIdentity {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 5 {
+            bail!("MemberIdentity v{} is not supported", version);
+        }
         let member_id = if version >= 3 {
             if version >= 4 {
                 types::CompactString.decode(buf)?

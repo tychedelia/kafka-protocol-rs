@@ -83,6 +83,9 @@ impl AlterPartitionRequest {
 #[cfg(feature = "client")]
 impl Encodable for AlterPartitionRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 3 {
+            bail!("AlterPartitionRequest v{} is not supported", version);
+        }
         types::Int32.encode(buf, &self.broker_id)?;
         types::Int64.encode(buf, &self.broker_epoch)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
@@ -120,6 +123,9 @@ impl Encodable for AlterPartitionRequest {
 #[cfg(feature = "broker")]
 impl Decodable for AlterPartitionRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 3 {
+            bail!("AlterPartitionRequest v{} is not supported", version);
+        }
         let broker_id = types::Int32.decode(buf)?;
         let broker_epoch = types::Int64.decode(buf)?;
         let topics = types::CompactArray(types::Struct { version }).decode(buf)?;
@@ -208,6 +214,9 @@ impl BrokerState {
 #[cfg(feature = "client")]
 impl Encodable for BrokerState {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 3 {
+            bail!("BrokerState v{} is not supported", version);
+        }
         if version >= 3 {
             types::Int32.encode(buf, &self.broker_id)?;
         } else {
@@ -267,6 +276,9 @@ impl Encodable for BrokerState {
 #[cfg(feature = "broker")]
 impl Decodable for BrokerState {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 3 {
+            bail!("BrokerState v{} is not supported", version);
+        }
         let broker_id = if version >= 3 {
             types::Int32.decode(buf)?
         } else {
@@ -416,6 +428,9 @@ impl PartitionData {
 #[cfg(feature = "client")]
 impl Encodable for PartitionData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 3 {
+            bail!("PartitionData v{} is not supported", version);
+        }
         types::Int32.encode(buf, &self.partition_index)?;
         types::Int32.encode(buf, &self.leader_epoch)?;
         if version <= 2 {
@@ -497,6 +512,9 @@ impl Encodable for PartitionData {
 #[cfg(feature = "broker")]
 impl Decodable for PartitionData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 3 {
+            bail!("PartitionData v{} is not supported", version);
+        }
         let partition_index = types::Int32.decode(buf)?;
         let leader_epoch = types::Int32.decode(buf)?;
         let new_isr = if version <= 2 {
@@ -620,6 +638,9 @@ impl TopicData {
 #[cfg(feature = "client")]
 impl Encodable for TopicData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 3 {
+            bail!("TopicData v{} is not supported", version);
+        }
         if version <= 1 {
             types::CompactString.encode(buf, &self.topic_name)?;
         }
@@ -666,6 +687,9 @@ impl Encodable for TopicData {
 #[cfg(feature = "broker")]
 impl Decodable for TopicData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 3 {
+            bail!("TopicData v{} is not supported", version);
+        }
         let topic_name = if version <= 1 {
             types::CompactString.decode(buf)?
         } else {

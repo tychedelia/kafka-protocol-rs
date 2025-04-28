@@ -97,6 +97,9 @@ impl ConsumerProtocolSubscription {
 
 impl Encodable for ConsumerProtocolSubscription {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 3 {
+            bail!("ConsumerProtocolSubscription v{} is not supported", version);
+        }
         types::Array(types::String).encode(buf, &self.topics)?;
         types::Bytes.encode(buf, &self.user_data)?;
         if version >= 1 {
@@ -132,6 +135,9 @@ impl Encodable for ConsumerProtocolSubscription {
 
 impl Decodable for ConsumerProtocolSubscription {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 3 {
+            bail!("ConsumerProtocolSubscription v{} is not supported", version);
+        }
         let topics = types::Array(types::String).decode(buf)?;
         let user_data = types::Bytes.decode(buf)?;
         let owned_partitions = if version >= 1 {
@@ -214,6 +220,9 @@ impl TopicPartition {
 
 impl Encodable for TopicPartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 3 {
+            bail!("TopicPartition v{} is not supported", version);
+        }
         if version >= 1 {
             types::String.encode(buf, &self.topic)?;
         } else {
@@ -254,6 +263,9 @@ impl Encodable for TopicPartition {
 
 impl Decodable for TopicPartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 3 {
+            bail!("TopicPartition v{} is not supported", version);
+        }
         let topic = if version >= 1 {
             types::String.decode(buf)?
         } else {

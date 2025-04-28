@@ -83,6 +83,9 @@ impl ApiVersion {
 #[cfg(feature = "broker")]
 impl Encodable for ApiVersion {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 4 {
+            bail!("ApiVersion v{} is not supported", version);
+        }
         types::Int16.encode(buf, &self.api_key)?;
         types::Int16.encode(buf, &self.min_version)?;
         types::Int16.encode(buf, &self.max_version)?;
@@ -124,6 +127,9 @@ impl Encodable for ApiVersion {
 #[cfg(feature = "client")]
 impl Decodable for ApiVersion {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 4 {
+            bail!("ApiVersion v{} is not supported", version);
+        }
         let api_key = types::Int16.decode(buf)?;
         let min_version = types::Int16.decode(buf)?;
         let max_version = types::Int16.decode(buf)?;
@@ -284,6 +290,9 @@ impl ApiVersionsResponse {
 #[cfg(feature = "broker")]
 impl Encodable for ApiVersionsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 4 {
+            bail!("ApiVersionsResponse v{} is not supported", version);
+        }
         types::Int16.encode(buf, &self.error_code)?;
         if version >= 3 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.api_keys)?;
@@ -464,6 +473,9 @@ impl Encodable for ApiVersionsResponse {
 #[cfg(feature = "client")]
 impl Decodable for ApiVersionsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 4 {
+            bail!("ApiVersionsResponse v{} is not supported", version);
+        }
         let error_code = types::Int16.decode(buf)?;
         let api_keys = if version >= 3 {
             types::CompactArray(types::Struct { version }).decode(buf)?
@@ -606,6 +618,9 @@ impl FinalizedFeatureKey {
 #[cfg(feature = "broker")]
 impl Encodable for FinalizedFeatureKey {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 4 {
+            bail!("FinalizedFeatureKey v{} is not supported", version);
+        }
         if version >= 3 {
             types::CompactString.encode(buf, &self.name)?;
         } else {
@@ -683,6 +698,9 @@ impl Encodable for FinalizedFeatureKey {
 #[cfg(feature = "client")]
 impl Decodable for FinalizedFeatureKey {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 4 {
+            bail!("FinalizedFeatureKey v{} is not supported", version);
+        }
         let name = if version >= 3 {
             types::CompactString.decode(buf)?
         } else {
@@ -799,6 +817,9 @@ impl SupportedFeatureKey {
 #[cfg(feature = "broker")]
 impl Encodable for SupportedFeatureKey {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 4 {
+            bail!("SupportedFeatureKey v{} is not supported", version);
+        }
         if version >= 3 {
             types::CompactString.encode(buf, &self.name)?;
         } else {
@@ -876,6 +897,9 @@ impl Encodable for SupportedFeatureKey {
 #[cfg(feature = "client")]
 impl Decodable for SupportedFeatureKey {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 4 {
+            bail!("SupportedFeatureKey v{} is not supported", version);
+        }
         let name = if version >= 3 {
             types::CompactString.decode(buf)?
         } else {

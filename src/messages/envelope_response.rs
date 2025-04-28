@@ -69,6 +69,9 @@ impl EnvelopeResponse {
 #[cfg(feature = "broker")]
 impl Encodable for EnvelopeResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!("EnvelopeResponse v{} is not supported", version);
+        }
         types::CompactBytes.encode(buf, &self.response_data)?;
         types::Int16.encode(buf, &self.error_code)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -104,6 +107,9 @@ impl Encodable for EnvelopeResponse {
 #[cfg(feature = "client")]
 impl Decodable for EnvelopeResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!("EnvelopeResponse v{} is not supported", version);
+        }
         let response_data = types::CompactBytes.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();

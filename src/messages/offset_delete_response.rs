@@ -70,6 +70,9 @@ impl OffsetDeleteResponse {
 #[cfg(feature = "broker")]
 impl Encodable for OffsetDeleteResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!("OffsetDeleteResponse v{} is not supported", version);
+        }
         types::Int16.encode(buf, &self.error_code)?;
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         types::Array(types::Struct { version }).encode(buf, &self.topics)?;
@@ -89,6 +92,9 @@ impl Encodable for OffsetDeleteResponse {
 #[cfg(feature = "client")]
 impl Decodable for OffsetDeleteResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!("OffsetDeleteResponse v{} is not supported", version);
+        }
         let error_code = types::Int16.decode(buf)?;
         let throttle_time_ms = types::Int32.decode(buf)?;
         let topics = types::Array(types::Struct { version }).decode(buf)?;
@@ -154,6 +160,12 @@ impl OffsetDeleteResponsePartition {
 #[cfg(feature = "broker")]
 impl Encodable for OffsetDeleteResponsePartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!(
+                "OffsetDeleteResponsePartition v{} is not supported",
+                version
+            );
+        }
         types::Int32.encode(buf, &self.partition_index)?;
         types::Int16.encode(buf, &self.error_code)?;
 
@@ -171,6 +183,12 @@ impl Encodable for OffsetDeleteResponsePartition {
 #[cfg(feature = "client")]
 impl Decodable for OffsetDeleteResponsePartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!(
+                "OffsetDeleteResponsePartition v{} is not supported",
+                version
+            );
+        }
         let partition_index = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
         Ok(Self {
@@ -233,6 +251,9 @@ impl OffsetDeleteResponseTopic {
 #[cfg(feature = "broker")]
 impl Encodable for OffsetDeleteResponseTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!("OffsetDeleteResponseTopic v{} is not supported", version);
+        }
         types::String.encode(buf, &self.name)?;
         types::Array(types::Struct { version }).encode(buf, &self.partitions)?;
 
@@ -250,6 +271,9 @@ impl Encodable for OffsetDeleteResponseTopic {
 #[cfg(feature = "client")]
 impl Decodable for OffsetDeleteResponseTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!("OffsetDeleteResponseTopic v{} is not supported", version);
+        }
         let name = types::String.decode(buf)?;
         let partitions = types::Array(types::Struct { version }).decode(buf)?;
         Ok(Self { name, partitions })

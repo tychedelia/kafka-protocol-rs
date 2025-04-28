@@ -83,6 +83,12 @@ impl DescribeDelegationTokenResponse {
 #[cfg(feature = "broker")]
 impl Encodable for DescribeDelegationTokenResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 3 {
+            bail!(
+                "DescribeDelegationTokenResponse v{} is not supported",
+                version
+            );
+        }
         types::Int16.encode(buf, &self.error_code)?;
         if version >= 2 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.tokens)?;
@@ -133,6 +139,12 @@ impl Encodable for DescribeDelegationTokenResponse {
 #[cfg(feature = "client")]
 impl Decodable for DescribeDelegationTokenResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 3 {
+            bail!(
+                "DescribeDelegationTokenResponse v{} is not supported",
+                version
+            );
+        }
         let error_code = types::Int16.decode(buf)?;
         let tokens = if version >= 2 {
             types::CompactArray(types::Struct { version }).decode(buf)?
@@ -339,6 +351,9 @@ impl DescribedDelegationToken {
 #[cfg(feature = "broker")]
 impl Encodable for DescribedDelegationToken {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 3 {
+            bail!("DescribedDelegationToken v{} is not supported", version);
+        }
         if version >= 2 {
             types::CompactString.encode(buf, &self.principal_type)?;
         } else {
@@ -461,6 +476,9 @@ impl Encodable for DescribedDelegationToken {
 #[cfg(feature = "client")]
 impl Decodable for DescribedDelegationToken {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 3 {
+            bail!("DescribedDelegationToken v{} is not supported", version);
+        }
         let principal_type = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
@@ -600,6 +618,12 @@ impl DescribedDelegationTokenRenewer {
 #[cfg(feature = "broker")]
 impl Encodable for DescribedDelegationTokenRenewer {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 3 {
+            bail!(
+                "DescribedDelegationTokenRenewer v{} is not supported",
+                version
+            );
+        }
         if version >= 2 {
             types::CompactString.encode(buf, &self.principal_type)?;
         } else {
@@ -655,6 +679,12 @@ impl Encodable for DescribedDelegationTokenRenewer {
 #[cfg(feature = "client")]
 impl Decodable for DescribedDelegationTokenRenewer {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 3 {
+            bail!(
+                "DescribedDelegationTokenRenewer v{} is not supported",
+                version
+            );
+        }
         let principal_type = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {

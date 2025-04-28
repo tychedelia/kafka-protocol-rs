@@ -69,6 +69,9 @@ impl DescribeGroupsResponse {
 #[cfg(feature = "broker")]
 impl Encodable for DescribeGroupsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 5 {
+            bail!("DescribeGroupsResponse v{} is not supported", version);
+        }
         if version >= 1 {
             types::Int32.encode(buf, &self.throttle_time_ms)?;
         }
@@ -121,6 +124,9 @@ impl Encodable for DescribeGroupsResponse {
 #[cfg(feature = "client")]
 impl Decodable for DescribeGroupsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 5 {
+            bail!("DescribeGroupsResponse v{} is not supported", version);
+        }
         let throttle_time_ms = if version >= 1 {
             types::Int32.decode(buf)?
         } else {
@@ -286,6 +292,9 @@ impl DescribedGroup {
 #[cfg(feature = "broker")]
 impl Encodable for DescribedGroup {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 5 {
+            bail!("DescribedGroup v{} is not supported", version);
+        }
         types::Int16.encode(buf, &self.error_code)?;
         if version >= 5 {
             types::CompactString.encode(buf, &self.group_id)?;
@@ -388,6 +397,9 @@ impl Encodable for DescribedGroup {
 #[cfg(feature = "client")]
 impl Decodable for DescribedGroup {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 5 {
+            bail!("DescribedGroup v{} is not supported", version);
+        }
         let error_code = types::Int16.decode(buf)?;
         let group_id = if version >= 5 {
             types::CompactString.decode(buf)?
@@ -570,6 +582,9 @@ impl DescribedGroupMember {
 #[cfg(feature = "broker")]
 impl Encodable for DescribedGroupMember {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 5 {
+            bail!("DescribedGroupMember v{} is not supported", version);
+        }
         if version >= 5 {
             types::CompactString.encode(buf, &self.member_id)?;
         } else {
@@ -669,6 +684,9 @@ impl Encodable for DescribedGroupMember {
 #[cfg(feature = "client")]
 impl Decodable for DescribedGroupMember {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 5 {
+            bail!("DescribedGroupMember v{} is not supported", version);
+        }
         let member_id = if version >= 5 {
             types::CompactString.decode(buf)?
         } else {

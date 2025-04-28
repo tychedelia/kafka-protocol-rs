@@ -69,6 +69,9 @@ impl CreatePartitionsResponse {
 #[cfg(feature = "broker")]
 impl Encodable for CreatePartitionsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 3 {
+            bail!("CreatePartitionsResponse v{} is not supported", version);
+        }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         if version >= 2 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.results)?;
@@ -117,6 +120,9 @@ impl Encodable for CreatePartitionsResponse {
 #[cfg(feature = "client")]
 impl Decodable for CreatePartitionsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 3 {
+            bail!("CreatePartitionsResponse v{} is not supported", version);
+        }
         let throttle_time_ms = types::Int32.decode(buf)?;
         let results = if version >= 2 {
             types::CompactArray(types::Struct { version }).decode(buf)?
@@ -222,6 +228,9 @@ impl CreatePartitionsTopicResult {
 #[cfg(feature = "broker")]
 impl Encodable for CreatePartitionsTopicResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 3 {
+            bail!("CreatePartitionsTopicResult v{} is not supported", version);
+        }
         if version >= 2 {
             types::CompactString.encode(buf, &self.name)?;
         } else {
@@ -279,6 +288,9 @@ impl Encodable for CreatePartitionsTopicResult {
 #[cfg(feature = "client")]
 impl Decodable for CreatePartitionsTopicResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 3 {
+            bail!("CreatePartitionsTopicResult v{} is not supported", version);
+        }
         let name = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {

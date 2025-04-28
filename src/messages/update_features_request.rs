@@ -97,6 +97,9 @@ impl FeatureUpdateKey {
 #[cfg(feature = "client")]
 impl Encodable for FeatureUpdateKey {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 1 {
+            bail!("FeatureUpdateKey v{} is not supported", version);
+        }
         types::CompactString.encode(buf, &self.feature)?;
         types::Int16.encode(buf, &self.max_version_level)?;
         if version == 0 {
@@ -160,6 +163,9 @@ impl Encodable for FeatureUpdateKey {
 #[cfg(feature = "broker")]
 impl Decodable for FeatureUpdateKey {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 1 {
+            bail!("FeatureUpdateKey v{} is not supported", version);
+        }
         let feature = types::CompactString.decode(buf)?;
         let max_version_level = types::Int16.decode(buf)?;
         let allow_downgrade = if version == 0 {
@@ -273,6 +279,9 @@ impl UpdateFeaturesRequest {
 #[cfg(feature = "client")]
 impl Encodable for UpdateFeaturesRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 1 {
+            bail!("UpdateFeaturesRequest v{} is not supported", version);
+        }
         types::Int32.encode(buf, &self.timeout_ms)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.feature_updates)?;
         if version >= 1 {
@@ -323,6 +332,9 @@ impl Encodable for UpdateFeaturesRequest {
 #[cfg(feature = "broker")]
 impl Decodable for UpdateFeaturesRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 1 {
+            bail!("UpdateFeaturesRequest v{} is not supported", version);
+        }
         let timeout_ms = types::Int32.decode(buf)?;
         let feature_updates = types::CompactArray(types::Struct { version }).decode(buf)?;
         let validate_only = if version >= 1 {

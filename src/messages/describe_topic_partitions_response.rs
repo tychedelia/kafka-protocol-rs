@@ -69,6 +69,9 @@ impl Cursor {
 #[cfg(feature = "broker")]
 impl Encodable for Cursor {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!("Cursor v{} is not supported", version);
+        }
         types::CompactString.encode(buf, &self.topic_name)?;
         types::Int32.encode(buf, &self.partition_index)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -104,6 +107,9 @@ impl Encodable for Cursor {
 #[cfg(feature = "client")]
 impl Decodable for Cursor {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!("Cursor v{} is not supported", version);
+        }
         let topic_name = types::CompactString.decode(buf)?;
         let partition_index = types::Int32.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
@@ -203,6 +209,12 @@ impl DescribeTopicPartitionsResponse {
 #[cfg(feature = "broker")]
 impl Encodable for DescribeTopicPartitionsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!(
+                "DescribeTopicPartitionsResponse v{} is not supported",
+                version
+            );
+        }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
         types::OptionStruct { version }.encode(buf, &self.next_cursor)?;
@@ -240,6 +252,12 @@ impl Encodable for DescribeTopicPartitionsResponse {
 #[cfg(feature = "client")]
 impl Decodable for DescribeTopicPartitionsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!(
+                "DescribeTopicPartitionsResponse v{} is not supported",
+                version
+            );
+        }
         let throttle_time_ms = types::Int32.decode(buf)?;
         let topics = types::CompactArray(types::Struct { version }).decode(buf)?;
         let next_cursor = types::OptionStruct { version }.decode(buf)?;
@@ -426,6 +444,12 @@ impl DescribeTopicPartitionsResponsePartition {
 #[cfg(feature = "broker")]
 impl Encodable for DescribeTopicPartitionsResponsePartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!(
+                "DescribeTopicPartitionsResponsePartition v{} is not supported",
+                version
+            );
+        }
         types::Int16.encode(buf, &self.error_code)?;
         types::Int32.encode(buf, &self.partition_index)?;
         types::Int32.encode(buf, &self.leader_id)?;
@@ -476,6 +500,12 @@ impl Encodable for DescribeTopicPartitionsResponsePartition {
 #[cfg(feature = "client")]
 impl Decodable for DescribeTopicPartitionsResponsePartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!(
+                "DescribeTopicPartitionsResponsePartition v{} is not supported",
+                version
+            );
+        }
         let error_code = types::Int16.decode(buf)?;
         let partition_index = types::Int32.decode(buf)?;
         let leader_id = types::Int32.decode(buf)?;
@@ -638,6 +668,12 @@ impl DescribeTopicPartitionsResponseTopic {
 #[cfg(feature = "broker")]
 impl Encodable for DescribeTopicPartitionsResponseTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!(
+                "DescribeTopicPartitionsResponseTopic v{} is not supported",
+                version
+            );
+        }
         types::Int16.encode(buf, &self.error_code)?;
         types::CompactString.encode(buf, &self.name)?;
         types::Uuid.encode(buf, &self.topic_id)?;
@@ -682,6 +718,12 @@ impl Encodable for DescribeTopicPartitionsResponseTopic {
 #[cfg(feature = "client")]
 impl Decodable for DescribeTopicPartitionsResponseTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!(
+                "DescribeTopicPartitionsResponseTopic v{} is not supported",
+                version
+            );
+        }
         let error_code = types::Int16.decode(buf)?;
         let name = types::CompactString.decode(buf)?;
         let topic_id = types::Uuid.decode(buf)?;

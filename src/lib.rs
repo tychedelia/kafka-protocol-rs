@@ -21,8 +21,8 @@
 //! request_header.correlation_id = 1;
 //! request_header.client_id = Some(StrBytes::from_static_str("test-client"));
 //! let mut buf = BytesMut::new();
-//! request_header.encode(&mut buf, 3);
-//! assert_eq!(request_header, RequestHeader::decode(&mut buf, 3).unwrap());
+//! request_header.encode(&mut buf, 2);
+//! assert_eq!(request_header, RequestHeader::decode(&mut buf, 2).unwrap());
 //! ```
 //! Note that every message implementation of [`Encodable::encode`](crate::protocol::Encodable::encode)
 //! and [`Decodable::decode`](crate::protocol::Decodable::decode) requires a version to be provided

@@ -97,6 +97,9 @@ impl AllocateProducerIdsResponse {
 #[cfg(feature = "broker")]
 impl Encodable for AllocateProducerIdsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!("AllocateProducerIdsResponse v{} is not supported", version);
+        }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         types::Int16.encode(buf, &self.error_code)?;
         types::Int64.encode(buf, &self.producer_id_start)?;
@@ -136,6 +139,9 @@ impl Encodable for AllocateProducerIdsResponse {
 #[cfg(feature = "client")]
 impl Decodable for AllocateProducerIdsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!("AllocateProducerIdsResponse v{} is not supported", version);
+        }
         let throttle_time_ms = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
         let producer_id_start = types::Int64.decode(buf)?;

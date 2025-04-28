@@ -97,6 +97,9 @@ impl ListTransactionsResponse {
 #[cfg(feature = "broker")]
 impl Encodable for ListTransactionsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 1 {
+            bail!("ListTransactionsResponse v{} is not supported", version);
+        }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         types::Int16.encode(buf, &self.error_code)?;
         types::CompactArray(types::CompactString).encode(buf, &self.unknown_state_filters)?;
@@ -138,6 +141,9 @@ impl Encodable for ListTransactionsResponse {
 #[cfg(feature = "client")]
 impl Decodable for ListTransactionsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 1 {
+            bail!("ListTransactionsResponse v{} is not supported", version);
+        }
         let throttle_time_ms = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
         let unknown_state_filters = types::CompactArray(types::CompactString).decode(buf)?;
@@ -243,6 +249,9 @@ impl TransactionState {
 #[cfg(feature = "broker")]
 impl Encodable for TransactionState {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 1 {
+            bail!("TransactionState v{} is not supported", version);
+        }
         types::CompactString.encode(buf, &self.transactional_id)?;
         types::Int64.encode(buf, &self.producer_id)?;
         types::CompactString.encode(buf, &self.transaction_state)?;
@@ -280,6 +289,9 @@ impl Encodable for TransactionState {
 #[cfg(feature = "client")]
 impl Decodable for TransactionState {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 1 {
+            bail!("TransactionState v{} is not supported", version);
+        }
         let transactional_id = types::CompactString.decode(buf)?;
         let producer_id = types::Int64.decode(buf)?;
         let transaction_state = types::CompactString.decode(buf)?;

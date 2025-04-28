@@ -83,6 +83,9 @@ impl FindCoordinatorRequest {
 #[cfg(feature = "client")]
 impl Encodable for FindCoordinatorRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 6 {
+            bail!("FindCoordinatorRequest v{} is not supported", version);
+        }
         if version <= 3 {
             if version >= 3 {
                 types::CompactString.encode(buf, &self.key)?;
@@ -169,6 +172,9 @@ impl Encodable for FindCoordinatorRequest {
 #[cfg(feature = "broker")]
 impl Decodable for FindCoordinatorRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 6 {
+            bail!("FindCoordinatorRequest v{} is not supported", version);
+        }
         let key = if version <= 3 {
             if version >= 3 {
                 types::CompactString.decode(buf)?

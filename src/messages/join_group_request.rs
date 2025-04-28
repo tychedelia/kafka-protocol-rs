@@ -153,6 +153,9 @@ impl JoinGroupRequest {
 #[cfg(feature = "client")]
 impl Encodable for JoinGroupRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 9 {
+            bail!("JoinGroupRequest v{} is not supported", version);
+        }
         if version >= 6 {
             types::CompactString.encode(buf, &self.group_id)?;
         } else {
@@ -265,6 +268,9 @@ impl Encodable for JoinGroupRequest {
 #[cfg(feature = "broker")]
 impl Decodable for JoinGroupRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 9 {
+            bail!("JoinGroupRequest v{} is not supported", version);
+        }
         let group_id = if version >= 6 {
             types::CompactString.decode(buf)?
         } else {
@@ -402,6 +408,9 @@ impl JoinGroupRequestProtocol {
 #[cfg(feature = "client")]
 impl Encodable for JoinGroupRequestProtocol {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 9 {
+            bail!("JoinGroupRequestProtocol v{} is not supported", version);
+        }
         if version >= 6 {
             types::CompactString.encode(buf, &self.name)?;
         } else {
@@ -457,6 +466,9 @@ impl Encodable for JoinGroupRequestProtocol {
 #[cfg(feature = "broker")]
 impl Decodable for JoinGroupRequestProtocol {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 9 {
+            bail!("JoinGroupRequestProtocol v{} is not supported", version);
+        }
         let name = if version >= 6 {
             types::CompactString.decode(buf)?
         } else {

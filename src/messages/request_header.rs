@@ -96,6 +96,9 @@ impl RequestHeader {
 
 impl Encodable for RequestHeader {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 2 {
+            bail!("RequestHeader v{} is not supported", version);
+        }
         types::Int16.encode(buf, &self.request_api_key)?;
         types::Int16.encode(buf, &self.request_api_version)?;
         types::Int32.encode(buf, &self.correlation_id)?;
@@ -142,6 +145,9 @@ impl Encodable for RequestHeader {
 
 impl Decodable for RequestHeader {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 2 {
+            bail!("RequestHeader v{} is not supported", version);
+        }
         let request_api_key = types::Int16.decode(buf)?;
         let request_api_version = types::Int16.decode(buf)?;
         let correlation_id = types::Int32.decode(buf)?;

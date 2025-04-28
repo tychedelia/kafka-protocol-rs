@@ -55,6 +55,12 @@ impl DescribeUserScramCredentialsRequest {
 #[cfg(feature = "client")]
 impl Encodable for DescribeUserScramCredentialsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!(
+                "DescribeUserScramCredentialsRequest v{} is not supported",
+                version
+            );
+        }
         types::CompactArray(types::Struct { version }).encode(buf, &self.users)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
@@ -88,6 +94,12 @@ impl Encodable for DescribeUserScramCredentialsRequest {
 #[cfg(feature = "broker")]
 impl Decodable for DescribeUserScramCredentialsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!(
+                "DescribeUserScramCredentialsRequest v{} is not supported",
+                version
+            );
+        }
         let users = types::CompactArray(types::Struct { version }).decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
         let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
@@ -156,6 +168,9 @@ impl UserName {
 #[cfg(feature = "client")]
 impl Encodable for UserName {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!("UserName v{} is not supported", version);
+        }
         types::CompactString.encode(buf, &self.name)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
@@ -189,6 +204,9 @@ impl Encodable for UserName {
 #[cfg(feature = "broker")]
 impl Decodable for UserName {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!("UserName v{} is not supported", version);
+        }
         let name = types::CompactString.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
         let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;

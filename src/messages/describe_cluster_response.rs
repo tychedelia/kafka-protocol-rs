@@ -97,6 +97,9 @@ impl DescribeClusterBroker {
 #[cfg(feature = "broker")]
 impl Encodable for DescribeClusterBroker {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 1 {
+            bail!("DescribeClusterBroker v{} is not supported", version);
+        }
         types::Int32.encode(buf, &self.broker_id)?;
         types::CompactString.encode(buf, &self.host)?;
         types::Int32.encode(buf, &self.port)?;
@@ -136,6 +139,9 @@ impl Encodable for DescribeClusterBroker {
 #[cfg(feature = "client")]
 impl Decodable for DescribeClusterBroker {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 1 {
+            bail!("DescribeClusterBroker v{} is not supported", version);
+        }
         let broker_id = types::Int32.decode(buf)?;
         let host = types::CompactString.decode(buf)?;
         let port = types::Int32.decode(buf)?;
@@ -311,6 +317,9 @@ impl DescribeClusterResponse {
 #[cfg(feature = "broker")]
 impl Encodable for DescribeClusterResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 1 {
+            bail!("DescribeClusterResponse v{} is not supported", version);
+        }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         types::Int16.encode(buf, &self.error_code)?;
         types::CompactString.encode(buf, &self.error_message)?;
@@ -370,6 +379,9 @@ impl Encodable for DescribeClusterResponse {
 #[cfg(feature = "client")]
 impl Decodable for DescribeClusterResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 1 {
+            bail!("DescribeClusterResponse v{} is not supported", version);
+        }
         let throttle_time_ms = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
         let error_message = types::CompactString.decode(buf)?;

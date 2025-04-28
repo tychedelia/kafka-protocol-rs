@@ -97,6 +97,9 @@ impl AclDescription {
 #[cfg(feature = "broker")]
 impl Encodable for AclDescription {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 3 {
+            bail!("AclDescription v{} is not supported", version);
+        }
         if version >= 2 {
             types::CompactString.encode(buf, &self.principal)?;
         } else {
@@ -156,6 +159,9 @@ impl Encodable for AclDescription {
 #[cfg(feature = "client")]
 impl Decodable for AclDescription {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 3 {
+            bail!("AclDescription v{} is not supported", version);
+        }
         let principal = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
@@ -285,6 +291,9 @@ impl DescribeAclsResource {
 #[cfg(feature = "broker")]
 impl Encodable for DescribeAclsResource {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 3 {
+            bail!("DescribeAclsResource v{} is not supported", version);
+        }
         types::Int8.encode(buf, &self.resource_type)?;
         if version >= 2 {
             types::CompactString.encode(buf, &self.resource_name)?;
@@ -357,6 +366,9 @@ impl Encodable for DescribeAclsResource {
 #[cfg(feature = "client")]
 impl Decodable for DescribeAclsResource {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 3 {
+            bail!("DescribeAclsResource v{} is not supported", version);
+        }
         let resource_type = types::Int8.decode(buf)?;
         let resource_name = if version >= 2 {
             types::CompactString.decode(buf)?
@@ -490,6 +502,9 @@ impl DescribeAclsResponse {
 #[cfg(feature = "broker")]
 impl Encodable for DescribeAclsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 3 {
+            bail!("DescribeAclsResponse v{} is not supported", version);
+        }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         types::Int16.encode(buf, &self.error_code)?;
         if version >= 2 {
@@ -550,6 +565,9 @@ impl Encodable for DescribeAclsResponse {
 #[cfg(feature = "client")]
 impl Decodable for DescribeAclsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 3 {
+            bail!("DescribeAclsResponse v{} is not supported", version);
+        }
         let throttle_time_ms = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
         let error_message = if version >= 2 {
