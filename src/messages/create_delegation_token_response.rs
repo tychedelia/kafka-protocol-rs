@@ -196,10 +196,7 @@ impl CreateDelegationTokenResponse {
 impl Encodable for CreateDelegationTokenResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 3 {
-            bail!(
-                "CreateDelegationTokenResponse v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         types::Int16.encode(buf, &self.error_code)?;
         if version >= 2 {
@@ -317,10 +314,7 @@ impl Encodable for CreateDelegationTokenResponse {
 impl Decodable for CreateDelegationTokenResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 3 {
-            bail!(
-                "CreateDelegationTokenResponse v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         let error_code = types::Int16.decode(buf)?;
         let principal_type = if version >= 2 {

@@ -140,7 +140,7 @@ impl AclCreation {
 impl Encodable for AclCreation {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 3 {
-            bail!("AclCreation v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int8.encode(buf, &self.resource_type)?;
         if version >= 2 {
@@ -228,7 +228,7 @@ impl Encodable for AclCreation {
 impl Decodable for AclCreation {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 3 {
-            bail!("AclCreation v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let resource_type = types::Int8.decode(buf)?;
         let resource_name = if version >= 2 {
@@ -335,7 +335,7 @@ impl CreateAclsRequest {
 impl Encodable for CreateAclsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 3 {
-            bail!("CreateAclsRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 2 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.creations)?;
@@ -384,7 +384,7 @@ impl Encodable for CreateAclsRequest {
 impl Decodable for CreateAclsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 3 {
-            bail!("CreateAclsRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let creations = if version >= 2 {
             types::CompactArray(types::Struct { version }).decode(buf)?

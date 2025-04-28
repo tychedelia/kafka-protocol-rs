@@ -84,7 +84,7 @@ impl DeleteRecordsPartitionResult {
 impl Encodable for DeleteRecordsPartitionResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 2 {
-            bail!("DeleteRecordsPartitionResult v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.partition_index)?;
         types::Int64.encode(buf, &self.low_watermark)?;
@@ -128,7 +128,7 @@ impl Encodable for DeleteRecordsPartitionResult {
 impl Decodable for DeleteRecordsPartitionResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 2 {
-            bail!("DeleteRecordsPartitionResult v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let partition_index = types::Int32.decode(buf)?;
         let low_watermark = types::Int64.decode(buf)?;
@@ -221,7 +221,7 @@ impl DeleteRecordsResponse {
 impl Encodable for DeleteRecordsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 2 {
-            bail!("DeleteRecordsResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         if version >= 2 {
@@ -272,7 +272,7 @@ impl Encodable for DeleteRecordsResponse {
 impl Decodable for DeleteRecordsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 2 {
-            bail!("DeleteRecordsResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let throttle_time_ms = types::Int32.decode(buf)?;
         let topics = if version >= 2 {
@@ -366,7 +366,7 @@ impl DeleteRecordsTopicResult {
 impl Encodable for DeleteRecordsTopicResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 2 {
-            bail!("DeleteRecordsTopicResult v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 2 {
             types::CompactString.encode(buf, &self.name)?;
@@ -425,7 +425,7 @@ impl Encodable for DeleteRecordsTopicResult {
 impl Decodable for DeleteRecordsTopicResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 2 {
-            bail!("DeleteRecordsTopicResult v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let name = if version >= 2 {
             types::CompactString.decode(buf)?

@@ -43,7 +43,7 @@ impl SaslHandshakeRequest {
 impl Encodable for SaslHandshakeRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 1 {
-            bail!("SaslHandshakeRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::String.encode(buf, &self.mechanism)?;
 
@@ -61,7 +61,7 @@ impl Encodable for SaslHandshakeRequest {
 impl Decodable for SaslHandshakeRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 1 {
-            bail!("SaslHandshakeRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let mechanism = types::String.decode(buf)?;
         Ok(Self { mechanism })

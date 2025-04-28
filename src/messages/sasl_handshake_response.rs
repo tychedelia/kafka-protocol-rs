@@ -57,7 +57,7 @@ impl SaslHandshakeResponse {
 impl Encodable for SaslHandshakeResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 1 {
-            bail!("SaslHandshakeResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int16.encode(buf, &self.error_code)?;
         types::Array(types::String).encode(buf, &self.mechanisms)?;
@@ -77,7 +77,7 @@ impl Encodable for SaslHandshakeResponse {
 impl Decodable for SaslHandshakeResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 1 {
-            bail!("SaslHandshakeResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let error_code = types::Int16.decode(buf)?;
         let mechanisms = types::Array(types::String).decode(buf)?;

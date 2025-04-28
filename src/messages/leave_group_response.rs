@@ -84,7 +84,7 @@ impl LeaveGroupResponse {
 impl Encodable for LeaveGroupResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 5 {
-            bail!("LeaveGroupResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 1 {
             types::Int32.encode(buf, &self.throttle_time_ms)?;
@@ -154,7 +154,7 @@ impl Encodable for LeaveGroupResponse {
 impl Decodable for LeaveGroupResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 5 {
-            bail!("LeaveGroupResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let throttle_time_ms = if version >= 1 {
             types::Int32.decode(buf)?
@@ -273,7 +273,7 @@ impl MemberResponse {
 impl Encodable for MemberResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 5 {
-            bail!("MemberResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 3 {
             if version >= 4 {
@@ -379,7 +379,7 @@ impl Encodable for MemberResponse {
 impl Decodable for MemberResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 5 {
-            bail!("MemberResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let member_id = if version >= 3 {
             if version >= 4 {

@@ -140,7 +140,7 @@ impl DeleteAclsFilter {
 impl Encodable for DeleteAclsFilter {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 3 {
-            bail!("DeleteAclsFilter v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int8.encode(buf, &self.resource_type_filter)?;
         if version >= 2 {
@@ -228,7 +228,7 @@ impl Encodable for DeleteAclsFilter {
 impl Decodable for DeleteAclsFilter {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 3 {
-            bail!("DeleteAclsFilter v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let resource_type_filter = types::Int8.decode(buf)?;
         let resource_name_filter = if version >= 2 {
@@ -335,7 +335,7 @@ impl DeleteAclsRequest {
 impl Encodable for DeleteAclsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 3 {
-            bail!("DeleteAclsRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 2 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.filters)?;
@@ -384,7 +384,7 @@ impl Encodable for DeleteAclsRequest {
 impl Decodable for DeleteAclsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 3 {
-            bail!("DeleteAclsRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let filters = if version >= 2 {
             types::CompactArray(types::Struct { version }).decode(buf)?

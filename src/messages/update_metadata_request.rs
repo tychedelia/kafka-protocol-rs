@@ -112,7 +112,7 @@ impl UpdateMetadataBroker {
 impl Encodable for UpdateMetadataBroker {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 8 {
-            bail!("UpdateMetadataBroker v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.id)?;
         if version == 0 {
@@ -194,7 +194,7 @@ impl Encodable for UpdateMetadataBroker {
 impl Decodable for UpdateMetadataBroker {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 8 {
-            bail!("UpdateMetadataBroker v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let id = types::Int32.decode(buf)?;
         let v0_host = if version == 0 {
@@ -345,7 +345,7 @@ impl UpdateMetadataEndpoint {
 impl Encodable for UpdateMetadataEndpoint {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 8 {
-            bail!("UpdateMetadataEndpoint v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 1 {
             types::Int32.encode(buf, &self.port)?;
@@ -447,7 +447,7 @@ impl Encodable for UpdateMetadataEndpoint {
 impl Decodable for UpdateMetadataEndpoint {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 8 {
-            bail!("UpdateMetadataEndpoint v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let port = if version >= 1 {
             types::Int32.decode(buf)?
@@ -665,7 +665,7 @@ impl UpdateMetadataPartitionState {
 impl Encodable for UpdateMetadataPartitionState {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 8 {
-            bail!("UpdateMetadataPartitionState v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version <= 4 {
             types::String.encode(buf, &self.topic_name)?;
@@ -754,7 +754,7 @@ impl Encodable for UpdateMetadataPartitionState {
 impl Decodable for UpdateMetadataPartitionState {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 8 {
-            bail!("UpdateMetadataPartitionState v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let topic_name = if version <= 4 {
             types::String.decode(buf)?
@@ -972,7 +972,7 @@ impl UpdateMetadataRequest {
 impl Encodable for UpdateMetadataRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 8 {
-            bail!("UpdateMetadataRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.controller_id)?;
         if version >= 8 {
@@ -1122,7 +1122,7 @@ impl Encodable for UpdateMetadataRequest {
 impl Decodable for UpdateMetadataRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 8 {
-            bail!("UpdateMetadataRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let controller_id = types::Int32.decode(buf)?;
         let is_k_raft_controller = if version >= 8 {
@@ -1279,7 +1279,7 @@ impl UpdateMetadataTopicState {
 impl Encodable for UpdateMetadataTopicState {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 8 {
-            bail!("UpdateMetadataTopicState v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 5 {
             if version >= 6 {
@@ -1370,7 +1370,7 @@ impl Encodable for UpdateMetadataTopicState {
 impl Decodable for UpdateMetadataTopicState {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 8 {
-            bail!("UpdateMetadataTopicState v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let topic_name = if version >= 5 {
             if version >= 6 {

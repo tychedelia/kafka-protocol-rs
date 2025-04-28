@@ -56,7 +56,7 @@ impl UnregisterBrokerRequest {
 impl Encodable for UnregisterBrokerRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("UnregisterBrokerRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.broker_id)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -92,7 +92,7 @@ impl Encodable for UnregisterBrokerRequest {
 impl Decodable for UnregisterBrokerRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("UnregisterBrokerRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let broker_id = types::Int32.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();

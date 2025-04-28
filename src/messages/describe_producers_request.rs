@@ -56,7 +56,7 @@ impl DescribeProducersRequest {
 impl Encodable for DescribeProducersRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("DescribeProducersRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -92,7 +92,7 @@ impl Encodable for DescribeProducersRequest {
 impl Decodable for DescribeProducersRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("DescribeProducersRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let topics = types::CompactArray(types::Struct { version }).decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
@@ -177,7 +177,7 @@ impl TopicRequest {
 impl Encodable for TopicRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("TopicRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::CompactString.encode(buf, &self.name)?;
         types::CompactArray(types::Int32).encode(buf, &self.partition_indexes)?;
@@ -215,7 +215,7 @@ impl Encodable for TopicRequest {
 impl Decodable for TopicRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("TopicRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let name = types::CompactString.decode(buf)?;
         let partition_indexes = types::CompactArray(types::Int32).decode(buf)?;

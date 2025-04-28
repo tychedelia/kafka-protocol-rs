@@ -70,7 +70,7 @@ impl CreatableRenewers {
 impl Encodable for CreatableRenewers {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 3 {
-            bail!("CreatableRenewers v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 2 {
             types::CompactString.encode(buf, &self.principal_type)?;
@@ -128,7 +128,7 @@ impl Encodable for CreatableRenewers {
 impl Decodable for CreatableRenewers {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 3 {
-            bail!("CreatableRenewers v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let principal_type = if version >= 2 {
             types::CompactString.decode(buf)?
@@ -254,7 +254,7 @@ impl CreateDelegationTokenRequest {
 impl Encodable for CreateDelegationTokenRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 3 {
-            bail!("CreateDelegationTokenRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 3 {
             types::CompactString.encode(buf, &self.owner_principal_type)?;
@@ -353,7 +353,7 @@ impl Encodable for CreateDelegationTokenRequest {
 impl Decodable for CreateDelegationTokenRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 3 {
-            bail!("CreateDelegationTokenRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let owner_principal_type = if version >= 3 {
             types::CompactString.decode(buf)?

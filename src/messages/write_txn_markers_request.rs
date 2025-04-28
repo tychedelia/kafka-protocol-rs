@@ -112,7 +112,7 @@ impl WritableTxnMarker {
 impl Encodable for WritableTxnMarker {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 1 {
-            bail!("WritableTxnMarker v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int64.encode(buf, &self.producer_id)?;
         types::Int16.encode(buf, &self.producer_epoch)?;
@@ -169,7 +169,7 @@ impl Encodable for WritableTxnMarker {
 impl Decodable for WritableTxnMarker {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 1 {
-            bail!("WritableTxnMarker v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let producer_id = types::Int64.decode(buf)?;
         let producer_epoch = types::Int16.decode(buf)?;
@@ -272,7 +272,7 @@ impl WritableTxnMarkerTopic {
 impl Encodable for WritableTxnMarkerTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 1 {
-            bail!("WritableTxnMarkerTopic v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 1 {
             types::CompactString.encode(buf, &self.name)?;
@@ -331,7 +331,7 @@ impl Encodable for WritableTxnMarkerTopic {
 impl Decodable for WritableTxnMarkerTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 1 {
-            bail!("WritableTxnMarkerTopic v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let name = if version >= 1 {
             types::CompactString.decode(buf)?
@@ -415,7 +415,7 @@ impl WriteTxnMarkersRequest {
 impl Encodable for WriteTxnMarkersRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 1 {
-            bail!("WriteTxnMarkersRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 1 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.markers)?;
@@ -464,7 +464,7 @@ impl Encodable for WriteTxnMarkersRequest {
 impl Decodable for WriteTxnMarkersRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 1 {
-            bail!("WriteTxnMarkersRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let markers = if version >= 1 {
             types::CompactArray(types::Struct { version }).decode(buf)?

@@ -70,7 +70,7 @@ impl DeleteTopicState {
 impl Encodable for DeleteTopicState {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 6 {
-            bail!("DeleteTopicState v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 6 {
             types::CompactString.encode(buf, &self.name)?;
@@ -136,7 +136,7 @@ impl Encodable for DeleteTopicState {
 impl Decodable for DeleteTopicState {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 6 {
-            bail!("DeleteTopicState v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let name = if version >= 6 {
             types::CompactString.decode(buf)?
@@ -248,7 +248,7 @@ impl DeleteTopicsRequest {
 impl Encodable for DeleteTopicsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 6 {
-            bail!("DeleteTopicsRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 6 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
@@ -318,7 +318,7 @@ impl Encodable for DeleteTopicsRequest {
 impl Decodable for DeleteTopicsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 6 {
-            bail!("DeleteTopicsRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let topics = if version >= 6 {
             types::CompactArray(types::Struct { version }).decode(buf)?

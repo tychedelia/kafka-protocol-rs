@@ -98,7 +98,7 @@ impl InitProducerIdRequest {
 impl Encodable for InitProducerIdRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 5 {
-            bail!("InitProducerIdRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 2 {
             types::CompactString.encode(buf, &self.transactional_id)?;
@@ -176,7 +176,7 @@ impl Encodable for InitProducerIdRequest {
 impl Decodable for InitProducerIdRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 5 {
-            bail!("InitProducerIdRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let transactional_id = if version >= 2 {
             types::CompactString.decode(buf)?

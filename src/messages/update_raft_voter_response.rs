@@ -98,7 +98,7 @@ impl CurrentLeader {
 impl Encodable for CurrentLeader {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("CurrentLeader v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.leader_id)?;
         types::Int32.encode(buf, &self.leader_epoch)?;
@@ -140,7 +140,7 @@ impl Encodable for CurrentLeader {
 impl Decodable for CurrentLeader {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("CurrentLeader v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let leader_id = types::Int32.decode(buf)?;
         let leader_epoch = types::Int32.decode(buf)?;
@@ -248,7 +248,7 @@ impl UpdateRaftVoterResponse {
 impl Encodable for UpdateRaftVoterResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("UpdateRaftVoterResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         types::Int16.encode(buf, &self.error_code)?;
@@ -316,7 +316,7 @@ impl Encodable for UpdateRaftVoterResponse {
 impl Decodable for UpdateRaftVoterResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("UpdateRaftVoterResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let throttle_time_ms = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;

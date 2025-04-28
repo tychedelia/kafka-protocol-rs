@@ -84,7 +84,7 @@ impl ElectLeadersResponse {
 impl Encodable for ElectLeadersResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 2 {
-            bail!("ElectLeadersResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         if version >= 1 {
@@ -151,7 +151,7 @@ impl Encodable for ElectLeadersResponse {
 impl Decodable for ElectLeadersResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 2 {
-            bail!("ElectLeadersResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let throttle_time_ms = types::Int32.decode(buf)?;
         let error_code = if version >= 1 {
@@ -266,7 +266,7 @@ impl PartitionResult {
 impl Encodable for PartitionResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 2 {
-            bail!("PartitionResult v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.partition_id)?;
         types::Int16.encode(buf, &self.error_code)?;
@@ -318,7 +318,7 @@ impl Encodable for PartitionResult {
 impl Decodable for PartitionResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 2 {
-            bail!("PartitionResult v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let partition_id = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
@@ -415,7 +415,7 @@ impl ReplicaElectionResult {
 impl Encodable for ReplicaElectionResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 2 {
-            bail!("ReplicaElectionResult v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 2 {
             types::CompactString.encode(buf, &self.topic)?;
@@ -475,7 +475,7 @@ impl Encodable for ReplicaElectionResult {
 impl Decodable for ReplicaElectionResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 2 {
-            bail!("ReplicaElectionResult v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let topic = if version >= 2 {
             types::CompactString.decode(buf)?

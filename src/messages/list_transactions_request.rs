@@ -84,7 +84,7 @@ impl ListTransactionsRequest {
 impl Encodable for ListTransactionsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 1 {
-            bail!("ListTransactionsRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::CompactArray(types::CompactString).encode(buf, &self.state_filters)?;
         types::CompactArray(types::Int64).encode(buf, &self.producer_id_filters)?;
@@ -137,7 +137,7 @@ impl Encodable for ListTransactionsRequest {
 impl Decodable for ListTransactionsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 1 {
-            bail!("ListTransactionsRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let state_filters = types::CompactArray(types::CompactString).decode(buf)?;
         let producer_id_filters = types::CompactArray(types::Int64).decode(buf)?;

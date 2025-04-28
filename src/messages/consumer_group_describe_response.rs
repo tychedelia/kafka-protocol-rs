@@ -56,7 +56,7 @@ impl Assignment {
 impl Encodable for Assignment {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("Assignment v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::CompactArray(types::Struct { version }).encode(buf, &self.topic_partitions)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -93,7 +93,7 @@ impl Encodable for Assignment {
 impl Decodable for Assignment {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("Assignment v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let topic_partitions = types::CompactArray(types::Struct { version }).decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
@@ -178,10 +178,7 @@ impl ConsumerGroupDescribeResponse {
 impl Encodable for ConsumerGroupDescribeResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!(
-                "ConsumerGroupDescribeResponse v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.groups)?;
@@ -219,10 +216,7 @@ impl Encodable for ConsumerGroupDescribeResponse {
 impl Decodable for ConsumerGroupDescribeResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!(
-                "ConsumerGroupDescribeResponse v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         let throttle_time_ms = types::Int32.decode(buf)?;
         let groups = types::CompactArray(types::Struct { version }).decode(buf)?;
@@ -408,7 +402,7 @@ impl DescribedGroup {
 impl Encodable for DescribedGroup {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("DescribedGroup v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int16.encode(buf, &self.error_code)?;
         types::CompactString.encode(buf, &self.error_message)?;
@@ -460,7 +454,7 @@ impl Encodable for DescribedGroup {
 impl Decodable for DescribedGroup {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("DescribedGroup v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let error_code = types::Int16.decode(buf)?;
         let error_message = types::CompactString.decode(buf)?;
@@ -681,7 +675,7 @@ impl Member {
 impl Encodable for Member {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("Member v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::CompactString.encode(buf, &self.member_id)?;
         types::CompactString.encode(buf, &self.instance_id)?;
@@ -736,7 +730,7 @@ impl Encodable for Member {
 impl Decodable for Member {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("Member v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let member_id = types::CompactString.decode(buf)?;
         let instance_id = types::CompactString.decode(buf)?;
@@ -862,7 +856,7 @@ impl TopicPartitions {
 impl Encodable for TopicPartitions {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("TopicPartitions v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Uuid.encode(buf, &self.topic_id)?;
         types::CompactString.encode(buf, &self.topic_name)?;
@@ -902,7 +896,7 @@ impl Encodable for TopicPartitions {
 impl Decodable for TopicPartitions {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("TopicPartitions v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let topic_id = types::Uuid.decode(buf)?;
         let topic_name = types::CompactString.decode(buf)?;

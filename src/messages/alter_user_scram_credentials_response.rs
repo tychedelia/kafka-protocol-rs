@@ -70,10 +70,7 @@ impl AlterUserScramCredentialsResponse {
 impl Encodable for AlterUserScramCredentialsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!(
-                "AlterUserScramCredentialsResponse v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.results)?;
@@ -111,10 +108,7 @@ impl Encodable for AlterUserScramCredentialsResponse {
 impl Decodable for AlterUserScramCredentialsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!(
-                "AlterUserScramCredentialsResponse v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         let throttle_time_ms = types::Int32.decode(buf)?;
         let results = types::CompactArray(types::Struct { version }).decode(buf)?;
@@ -216,10 +210,7 @@ impl AlterUserScramCredentialsResult {
 impl Encodable for AlterUserScramCredentialsResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!(
-                "AlterUserScramCredentialsResult v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         types::CompactString.encode(buf, &self.user)?;
         types::Int16.encode(buf, &self.error_code)?;
@@ -259,10 +250,7 @@ impl Encodable for AlterUserScramCredentialsResult {
 impl Decodable for AlterUserScramCredentialsResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!(
-                "AlterUserScramCredentialsResult v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         let user = types::CompactString.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;

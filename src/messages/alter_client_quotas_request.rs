@@ -70,7 +70,7 @@ impl AlterClientQuotasRequest {
 impl Encodable for AlterClientQuotasRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 1 {
-            bail!("AlterClientQuotasRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 1 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.entries)?;
@@ -121,7 +121,7 @@ impl Encodable for AlterClientQuotasRequest {
 impl Decodable for AlterClientQuotasRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 1 {
-            bail!("AlterClientQuotasRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let entries = if version >= 1 {
             types::CompactArray(types::Struct { version }).decode(buf)?
@@ -215,7 +215,7 @@ impl EntityData {
 impl Encodable for EntityData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 1 {
-            bail!("EntityData v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 1 {
             types::CompactString.encode(buf, &self.entity_type)?;
@@ -273,7 +273,7 @@ impl Encodable for EntityData {
 impl Decodable for EntityData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 1 {
-            bail!("EntityData v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let entity_type = if version >= 1 {
             types::CompactString.decode(buf)?
@@ -371,7 +371,7 @@ impl EntryData {
 impl Encodable for EntryData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 1 {
-            bail!("EntryData v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 1 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.entity)?;
@@ -430,7 +430,7 @@ impl Encodable for EntryData {
 impl Decodable for EntryData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 1 {
-            bail!("EntryData v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let entity = if version >= 1 {
             types::CompactArray(types::Struct { version }).decode(buf)?
@@ -542,7 +542,7 @@ impl OpData {
 impl Encodable for OpData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 1 {
-            bail!("OpData v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 1 {
             types::CompactString.encode(buf, &self.key)?;
@@ -594,7 +594,7 @@ impl Encodable for OpData {
 impl Decodable for OpData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 1 {
-            bail!("OpData v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let key = if version >= 1 {
             types::CompactString.decode(buf)?

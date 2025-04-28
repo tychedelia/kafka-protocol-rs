@@ -70,7 +70,7 @@ impl EnvelopeResponse {
 impl Encodable for EnvelopeResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("EnvelopeResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::CompactBytes.encode(buf, &self.response_data)?;
         types::Int16.encode(buf, &self.error_code)?;
@@ -108,7 +108,7 @@ impl Encodable for EnvelopeResponse {
 impl Decodable for EnvelopeResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("EnvelopeResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let response_data = types::CompactBytes.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;

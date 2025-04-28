@@ -84,7 +84,7 @@ impl AssignReplicasToDirsResponse {
 impl Encodable for AssignReplicasToDirsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("AssignReplicasToDirsResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         types::Int16.encode(buf, &self.error_code)?;
@@ -125,7 +125,7 @@ impl Encodable for AssignReplicasToDirsResponse {
 impl Decodable for AssignReplicasToDirsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("AssignReplicasToDirsResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let throttle_time_ms = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
@@ -216,7 +216,7 @@ impl DirectoryData {
 impl Encodable for DirectoryData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("DirectoryData v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Uuid.encode(buf, &self.id)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
@@ -254,7 +254,7 @@ impl Encodable for DirectoryData {
 impl Decodable for DirectoryData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("DirectoryData v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let id = types::Uuid.decode(buf)?;
         let topics = types::CompactArray(types::Struct { version }).decode(buf)?;
@@ -342,7 +342,7 @@ impl PartitionData {
 impl Encodable for PartitionData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("PartitionData v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.partition_index)?;
         types::Int16.encode(buf, &self.error_code)?;
@@ -380,7 +380,7 @@ impl Encodable for PartitionData {
 impl Decodable for PartitionData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("PartitionData v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let partition_index = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
@@ -468,7 +468,7 @@ impl TopicData {
 impl Encodable for TopicData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("TopicData v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Uuid.encode(buf, &self.topic_id)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.partitions)?;
@@ -507,7 +507,7 @@ impl Encodable for TopicData {
 impl Decodable for TopicData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("TopicData v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let topic_id = types::Uuid.decode(buf)?;
         let partitions = types::CompactArray(types::Struct { version }).decode(buf)?;

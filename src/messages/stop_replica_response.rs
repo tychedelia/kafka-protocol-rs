@@ -84,7 +84,7 @@ impl StopReplicaPartitionError {
 impl Encodable for StopReplicaPartitionError {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 4 {
-            bail!("StopReplicaPartitionError v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 2 {
             types::CompactString.encode(buf, &self.topic_name)?;
@@ -136,7 +136,7 @@ impl Encodable for StopReplicaPartitionError {
 impl Decodable for StopReplicaPartitionError {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 4 {
-            bail!("StopReplicaPartitionError v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let topic_name = if version >= 2 {
             types::CompactString.decode(buf)?
@@ -233,7 +233,7 @@ impl StopReplicaResponse {
 impl Encodable for StopReplicaResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 4 {
-            bail!("StopReplicaResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int16.encode(buf, &self.error_code)?;
         if version >= 2 {
@@ -285,7 +285,7 @@ impl Encodable for StopReplicaResponse {
 impl Decodable for StopReplicaResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 4 {
-            bail!("StopReplicaResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let error_code = types::Int16.decode(buf)?;
         let partition_errors = if version >= 2 {

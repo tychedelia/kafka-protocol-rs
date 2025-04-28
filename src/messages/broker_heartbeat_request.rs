@@ -126,7 +126,7 @@ impl BrokerHeartbeatRequest {
 impl Encodable for BrokerHeartbeatRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 1 {
-            bail!("BrokerHeartbeatRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.broker_id)?;
         types::Int64.encode(buf, &self.broker_epoch)?;
@@ -208,7 +208,7 @@ impl Encodable for BrokerHeartbeatRequest {
 impl Decodable for BrokerHeartbeatRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 1 {
-            bail!("BrokerHeartbeatRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let broker_id = types::Int32.decode(buf)?;
         let broker_epoch = types::Int64.decode(buf)?;

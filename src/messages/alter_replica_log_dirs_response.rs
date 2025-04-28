@@ -70,10 +70,7 @@ impl AlterReplicaLogDirPartitionResult {
 impl Encodable for AlterReplicaLogDirPartitionResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 2 {
-            bail!(
-                "AlterReplicaLogDirPartitionResult v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.partition_index)?;
         types::Int16.encode(buf, &self.error_code)?;
@@ -115,10 +112,7 @@ impl Encodable for AlterReplicaLogDirPartitionResult {
 impl Decodable for AlterReplicaLogDirPartitionResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 2 {
-            bail!(
-                "AlterReplicaLogDirPartitionResult v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         let partition_index = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
@@ -208,10 +202,7 @@ impl AlterReplicaLogDirTopicResult {
 impl Encodable for AlterReplicaLogDirTopicResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 2 {
-            bail!(
-                "AlterReplicaLogDirTopicResult v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         if version >= 2 {
             types::CompactString.encode(buf, &self.topic_name)?;
@@ -270,10 +261,7 @@ impl Encodable for AlterReplicaLogDirTopicResult {
 impl Decodable for AlterReplicaLogDirTopicResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 2 {
-            bail!(
-                "AlterReplicaLogDirTopicResult v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         let topic_name = if version >= 2 {
             types::CompactString.decode(buf)?
@@ -371,7 +359,7 @@ impl AlterReplicaLogDirsResponse {
 impl Encodable for AlterReplicaLogDirsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 2 {
-            bail!("AlterReplicaLogDirsResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         if version >= 2 {
@@ -422,7 +410,7 @@ impl Encodable for AlterReplicaLogDirsResponse {
 impl Decodable for AlterReplicaLogDirsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 2 {
-            bail!("AlterReplicaLogDirsResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let throttle_time_ms = types::Int32.decode(buf)?;
         let results = if version >= 2 {

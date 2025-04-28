@@ -69,7 +69,7 @@ impl KRaftVersionRecord {
 impl Encodable for KRaftVersionRecord {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("KRaftVersionRecord v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int16.encode(buf, &self.version)?;
         types::Int16.encode(buf, &self.k_raft_version)?;
@@ -106,7 +106,7 @@ impl Encodable for KRaftVersionRecord {
 impl Decodable for KRaftVersionRecord {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("KRaftVersionRecord v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let version = types::Int16.decode(buf)?;
         let k_raft_version = types::Int16.decode(buf)?;

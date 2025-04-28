@@ -70,7 +70,7 @@ impl CreatableReplicaAssignment {
 impl Encodable for CreatableReplicaAssignment {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 7 {
-            bail!("CreatableReplicaAssignment v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.partition_index)?;
         if version >= 5 {
@@ -120,7 +120,7 @@ impl Encodable for CreatableReplicaAssignment {
 impl Decodable for CreatableReplicaAssignment {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 7 {
-            bail!("CreatableReplicaAssignment v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let partition_index = types::Int32.decode(buf)?;
         let broker_ids = if version >= 5 {
@@ -256,7 +256,7 @@ impl CreatableTopic {
 impl Encodable for CreatableTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 7 {
-            bail!("CreatableTopic v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 5 {
             types::CompactString.encode(buf, &self.name)?;
@@ -331,7 +331,7 @@ impl Encodable for CreatableTopic {
 impl Decodable for CreatableTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 7 {
-            bail!("CreatableTopic v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let name = if version >= 5 {
             types::CompactString.decode(buf)?
@@ -442,7 +442,7 @@ impl CreatableTopicConfig {
 impl Encodable for CreatableTopicConfig {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 7 {
-            bail!("CreatableTopicConfig v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 5 {
             types::CompactString.encode(buf, &self.name)?;
@@ -500,7 +500,7 @@ impl Encodable for CreatableTopicConfig {
 impl Decodable for CreatableTopicConfig {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 7 {
-            bail!("CreatableTopicConfig v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let name = if version >= 5 {
             types::CompactString.decode(buf)?
@@ -612,7 +612,7 @@ impl CreateTopicsRequest {
 impl Encodable for CreateTopicsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 7 {
-            bail!("CreateTopicsRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 5 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
@@ -677,7 +677,7 @@ impl Encodable for CreateTopicsRequest {
 impl Decodable for CreateTopicsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 7 {
-            bail!("CreateTopicsRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let topics = if version >= 5 {
             types::CompactArray(types::Struct { version }).decode(buf)?

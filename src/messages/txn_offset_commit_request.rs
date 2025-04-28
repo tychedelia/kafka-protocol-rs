@@ -154,7 +154,7 @@ impl TxnOffsetCommitRequest {
 impl Encodable for TxnOffsetCommitRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 4 {
-            bail!("TxnOffsetCommitRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 3 {
             types::CompactString.encode(buf, &self.transactional_id)?;
@@ -269,7 +269,7 @@ impl Encodable for TxnOffsetCommitRequest {
 impl Decodable for TxnOffsetCommitRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 4 {
-            bail!("TxnOffsetCommitRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let transactional_id = if version >= 3 {
             types::CompactString.decode(buf)?
@@ -429,10 +429,7 @@ impl TxnOffsetCommitRequestPartition {
 impl Encodable for TxnOffsetCommitRequestPartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 4 {
-            bail!(
-                "TxnOffsetCommitRequestPartition v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.partition_index)?;
         types::Int64.encode(buf, &self.committed_offset)?;
@@ -490,10 +487,7 @@ impl Encodable for TxnOffsetCommitRequestPartition {
 impl Decodable for TxnOffsetCommitRequestPartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 4 {
-            bail!(
-                "TxnOffsetCommitRequestPartition v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         let partition_index = types::Int32.decode(buf)?;
         let committed_offset = types::Int64.decode(buf)?;
@@ -597,7 +591,7 @@ impl TxnOffsetCommitRequestTopic {
 impl Encodable for TxnOffsetCommitRequestTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 4 {
-            bail!("TxnOffsetCommitRequestTopic v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 3 {
             types::CompactString.encode(buf, &self.name)?;
@@ -656,7 +650,7 @@ impl Encodable for TxnOffsetCommitRequestTopic {
 impl Decodable for TxnOffsetCommitRequestTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 4 {
-            bail!("TxnOffsetCommitRequestTopic v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let name = if version >= 3 {
             types::CompactString.decode(buf)?

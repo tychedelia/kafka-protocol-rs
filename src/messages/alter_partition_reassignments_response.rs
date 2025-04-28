@@ -98,10 +98,7 @@ impl AlterPartitionReassignmentsResponse {
 impl Encodable for AlterPartitionReassignmentsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!(
-                "AlterPartitionReassignmentsResponse v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         types::Int16.encode(buf, &self.error_code)?;
@@ -144,10 +141,7 @@ impl Encodable for AlterPartitionReassignmentsResponse {
 impl Decodable for AlterPartitionReassignmentsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!(
-                "AlterPartitionReassignmentsResponse v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         let throttle_time_ms = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
@@ -255,10 +249,7 @@ impl ReassignablePartitionResponse {
 impl Encodable for ReassignablePartitionResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!(
-                "ReassignablePartitionResponse v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.partition_index)?;
         types::Int16.encode(buf, &self.error_code)?;
@@ -298,10 +289,7 @@ impl Encodable for ReassignablePartitionResponse {
 impl Decodable for ReassignablePartitionResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!(
-                "ReassignablePartitionResponse v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         let partition_index = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
@@ -392,7 +380,7 @@ impl ReassignableTopicResponse {
 impl Encodable for ReassignableTopicResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("ReassignableTopicResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::CompactString.encode(buf, &self.name)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.partitions)?;
@@ -431,7 +419,7 @@ impl Encodable for ReassignableTopicResponse {
 impl Decodable for ReassignableTopicResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("ReassignableTopicResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let name = types::CompactString.decode(buf)?;
         let partitions = types::CompactArray(types::Struct { version }).decode(buf)?;

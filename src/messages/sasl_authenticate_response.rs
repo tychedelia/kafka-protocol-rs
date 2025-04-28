@@ -98,7 +98,7 @@ impl SaslAuthenticateResponse {
 impl Encodable for SaslAuthenticateResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 2 {
-            bail!("SaslAuthenticateResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int16.encode(buf, &self.error_code)?;
         if version >= 2 {
@@ -164,7 +164,7 @@ impl Encodable for SaslAuthenticateResponse {
 impl Decodable for SaslAuthenticateResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 2 {
-            bail!("SaslAuthenticateResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let error_code = types::Int16.decode(buf)?;
         let error_message = if version >= 2 {

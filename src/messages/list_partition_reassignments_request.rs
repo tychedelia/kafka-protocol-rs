@@ -70,10 +70,7 @@ impl ListPartitionReassignmentsRequest {
 impl Encodable for ListPartitionReassignmentsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!(
-                "ListPartitionReassignmentsRequest v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.timeout_ms)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
@@ -111,10 +108,7 @@ impl Encodable for ListPartitionReassignmentsRequest {
 impl Decodable for ListPartitionReassignmentsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!(
-                "ListPartitionReassignmentsRequest v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         let timeout_ms = types::Int32.decode(buf)?;
         let topics = types::CompactArray(types::Struct { version }).decode(buf)?;
@@ -202,10 +196,7 @@ impl ListPartitionReassignmentsTopics {
 impl Encodable for ListPartitionReassignmentsTopics {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!(
-                "ListPartitionReassignmentsTopics v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         types::CompactString.encode(buf, &self.name)?;
         types::CompactArray(types::Int32).encode(buf, &self.partition_indexes)?;
@@ -243,10 +234,7 @@ impl Encodable for ListPartitionReassignmentsTopics {
 impl Decodable for ListPartitionReassignmentsTopics {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!(
-                "ListPartitionReassignmentsTopics v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         let name = types::CompactString.decode(buf)?;
         let partition_indexes = types::CompactArray(types::Int32).decode(buf)?;

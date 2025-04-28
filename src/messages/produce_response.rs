@@ -70,7 +70,7 @@ impl BatchIndexAndErrorMessage {
 impl Encodable for BatchIndexAndErrorMessage {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 11 {
-            bail!("BatchIndexAndErrorMessage v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 8 {
             types::Int32.encode(buf, &self.batch_index)?;
@@ -144,7 +144,7 @@ impl Encodable for BatchIndexAndErrorMessage {
 impl Decodable for BatchIndexAndErrorMessage {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 11 {
-            bail!("BatchIndexAndErrorMessage v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let batch_index = if version >= 8 {
             types::Int32.decode(buf)?
@@ -246,7 +246,7 @@ impl LeaderIdAndEpoch {
 impl Encodable for LeaderIdAndEpoch {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 11 {
-            bail!("LeaderIdAndEpoch v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 10 {
             types::Int32.encode(buf, &self.leader_id)?;
@@ -312,7 +312,7 @@ impl Encodable for LeaderIdAndEpoch {
 impl Decodable for LeaderIdAndEpoch {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 11 {
-            bail!("LeaderIdAndEpoch v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let leader_id = if version >= 10 {
             types::Int32.decode(buf)?
@@ -438,7 +438,7 @@ impl NodeEndpoint {
 impl Encodable for NodeEndpoint {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 11 {
-            bail!("NodeEndpoint v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 10 {
             types::Int32.encode(buf, &self.node_id)?;
@@ -532,7 +532,7 @@ impl Encodable for NodeEndpoint {
 impl Decodable for NodeEndpoint {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 11 {
-            bail!("NodeEndpoint v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let node_id = if version >= 10 {
             types::Int32.decode(buf)?
@@ -728,7 +728,7 @@ impl PartitionProduceResponse {
 impl Encodable for PartitionProduceResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 11 {
-            bail!("PartitionProduceResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.index)?;
         types::Int16.encode(buf, &self.error_code)?;
@@ -852,7 +852,7 @@ impl Encodable for PartitionProduceResponse {
 impl Decodable for PartitionProduceResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 11 {
-            bail!("PartitionProduceResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let index = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
@@ -1009,7 +1009,7 @@ impl ProduceResponse {
 impl Encodable for ProduceResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 11 {
-            bail!("ProduceResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 9 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.responses)?;
@@ -1103,7 +1103,7 @@ impl Encodable for ProduceResponse {
 impl Decodable for ProduceResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 11 {
-            bail!("ProduceResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let responses = if version >= 9 {
             types::CompactArray(types::Struct { version }).decode(buf)?
@@ -1216,7 +1216,7 @@ impl TopicProduceResponse {
 impl Encodable for TopicProduceResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 11 {
-            bail!("TopicProduceResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 9 {
             types::CompactString.encode(buf, &self.name)?;
@@ -1277,7 +1277,7 @@ impl Encodable for TopicProduceResponse {
 impl Decodable for TopicProduceResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 11 {
-            bail!("TopicProduceResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let name = if version >= 9 {
             types::CompactString.decode(buf)?

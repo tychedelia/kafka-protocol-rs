@@ -70,7 +70,7 @@ impl DescribeProducersResponse {
 impl Encodable for DescribeProducersResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("DescribeProducersResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
@@ -108,7 +108,7 @@ impl Encodable for DescribeProducersResponse {
 impl Decodable for DescribeProducersResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("DescribeProducersResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let throttle_time_ms = types::Int32.decode(buf)?;
         let topics = types::CompactArray(types::Struct { version }).decode(buf)?;
@@ -224,7 +224,7 @@ impl PartitionResponse {
 impl Encodable for PartitionResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("PartitionResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.partition_index)?;
         types::Int16.encode(buf, &self.error_code)?;
@@ -267,7 +267,7 @@ impl Encodable for PartitionResponse {
 impl Decodable for PartitionResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("PartitionResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let partition_index = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
@@ -417,7 +417,7 @@ impl ProducerState {
 impl Encodable for ProducerState {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("ProducerState v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int64.encode(buf, &self.producer_id)?;
         types::Int32.encode(buf, &self.producer_epoch)?;
@@ -463,7 +463,7 @@ impl Encodable for ProducerState {
 impl Decodable for ProducerState {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("ProducerState v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let producer_id = types::Int64.decode(buf)?;
         let producer_epoch = types::Int32.decode(buf)?;
@@ -563,7 +563,7 @@ impl TopicResponse {
 impl Encodable for TopicResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("TopicResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::CompactString.encode(buf, &self.name)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.partitions)?;
@@ -602,7 +602,7 @@ impl Encodable for TopicResponse {
 impl Decodable for TopicResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("TopicResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let name = types::CompactString.decode(buf)?;
         let partitions = types::CompactArray(types::Struct { version }).decode(buf)?;

@@ -56,10 +56,7 @@ impl GetTelemetrySubscriptionsRequest {
 impl Encodable for GetTelemetrySubscriptionsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!(
-                "GetTelemetrySubscriptionsRequest v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         types::Uuid.encode(buf, &self.client_instance_id)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -95,10 +92,7 @@ impl Encodable for GetTelemetrySubscriptionsRequest {
 impl Decodable for GetTelemetrySubscriptionsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!(
-                "GetTelemetrySubscriptionsRequest v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         let client_instance_id = types::Uuid.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();

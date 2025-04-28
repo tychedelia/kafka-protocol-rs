@@ -1304,22 +1304,30 @@ impl PreparedStruct {
     }
 
     fn write_version_validation<W: Write>(&self, w: &mut CodeWriter<W>) -> Result<(), Error> {
-        let name = &self.name;
         match self.valid_versions {
             VersionSpec::None => {}
             VersionSpec::Exact(exact) => {
-                writeln!(w, "if version != {} {{", exact)?;
-                writeln!(w, "    bail!(\"{name} v{{}} is not supported\", version);")?;
+                writeln!(w, "if version != {exact} {{")?;
+                writeln!(
+                    w,
+                    "    bail!(\"specified version not supported by this message type\");"
+                )?;
                 writeln!(w, "}}")?;
             }
             VersionSpec::Since(since) => {
-                writeln!(w, "if version >= {} {{", since)?;
-                writeln!(w, "    bail!(\"{name} v{{}} is not supported\", version);")?;
+                writeln!(w, "if version >= {since} {{")?;
+                writeln!(
+                    w,
+                    "    bail!(\"specified version not supported by this message type\");"
+                )?;
                 writeln!(w, "}}")?;
             }
             VersionSpec::Range(start, end) => {
                 writeln!(w, "if version < {start} || version > {end} {{")?;
-                writeln!(w, "    bail!(\"{name} v{{}} is not supported\", version);")?;
+                writeln!(
+                    w,
+                    "    bail!(\"specified version not supported by this message type\");"
+                )?;
                 writeln!(w, "}}")?;
             }
         }

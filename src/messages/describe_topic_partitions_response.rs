@@ -70,7 +70,7 @@ impl Cursor {
 impl Encodable for Cursor {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("Cursor v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::CompactString.encode(buf, &self.topic_name)?;
         types::Int32.encode(buf, &self.partition_index)?;
@@ -108,7 +108,7 @@ impl Encodable for Cursor {
 impl Decodable for Cursor {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("Cursor v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let topic_name = types::CompactString.decode(buf)?;
         let partition_index = types::Int32.decode(buf)?;
@@ -210,10 +210,7 @@ impl DescribeTopicPartitionsResponse {
 impl Encodable for DescribeTopicPartitionsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!(
-                "DescribeTopicPartitionsResponse v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
@@ -253,10 +250,7 @@ impl Encodable for DescribeTopicPartitionsResponse {
 impl Decodable for DescribeTopicPartitionsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!(
-                "DescribeTopicPartitionsResponse v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         let throttle_time_ms = types::Int32.decode(buf)?;
         let topics = types::CompactArray(types::Struct { version }).decode(buf)?;
@@ -445,10 +439,7 @@ impl DescribeTopicPartitionsResponsePartition {
 impl Encodable for DescribeTopicPartitionsResponsePartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!(
-                "DescribeTopicPartitionsResponsePartition v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         types::Int16.encode(buf, &self.error_code)?;
         types::Int32.encode(buf, &self.partition_index)?;
@@ -501,10 +492,7 @@ impl Encodable for DescribeTopicPartitionsResponsePartition {
 impl Decodable for DescribeTopicPartitionsResponsePartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!(
-                "DescribeTopicPartitionsResponsePartition v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         let error_code = types::Int16.decode(buf)?;
         let partition_index = types::Int32.decode(buf)?;
@@ -669,10 +657,7 @@ impl DescribeTopicPartitionsResponseTopic {
 impl Encodable for DescribeTopicPartitionsResponseTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!(
-                "DescribeTopicPartitionsResponseTopic v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         types::Int16.encode(buf, &self.error_code)?;
         types::CompactString.encode(buf, &self.name)?;
@@ -719,10 +704,7 @@ impl Encodable for DescribeTopicPartitionsResponseTopic {
 impl Decodable for DescribeTopicPartitionsResponseTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!(
-                "DescribeTopicPartitionsResponseTopic v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         let error_code = types::Int16.decode(buf)?;
         let name = types::CompactString.decode(buf)?;

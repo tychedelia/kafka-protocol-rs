@@ -112,10 +112,7 @@ impl ControllerRegistrationRequest {
 impl Encodable for ControllerRegistrationRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!(
-                "ControllerRegistrationRequest v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.controller_id)?;
         types::Uuid.encode(buf, &self.incarnation_id)?;
@@ -161,10 +158,7 @@ impl Encodable for ControllerRegistrationRequest {
 impl Decodable for ControllerRegistrationRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!(
-                "ControllerRegistrationRequest v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         let controller_id = types::Int32.decode(buf)?;
         let incarnation_id = types::Uuid.decode(buf)?;
@@ -275,7 +269,7 @@ impl Feature {
 impl Encodable for Feature {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("Feature v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::CompactString.encode(buf, &self.name)?;
         types::Int16.encode(buf, &self.min_supported_version)?;
@@ -315,7 +309,7 @@ impl Encodable for Feature {
 impl Decodable for Feature {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("Feature v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let name = types::CompactString.decode(buf)?;
         let min_supported_version = types::Int16.decode(buf)?;
@@ -434,7 +428,7 @@ impl Listener {
 impl Encodable for Listener {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("Listener v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::CompactString.encode(buf, &self.name)?;
         types::CompactString.encode(buf, &self.host)?;
@@ -476,7 +470,7 @@ impl Encodable for Listener {
 impl Decodable for Listener {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("Listener v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let name = types::CompactString.decode(buf)?;
         let host = types::CompactString.decode(buf)?;

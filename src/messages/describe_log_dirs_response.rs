@@ -98,7 +98,7 @@ impl DescribeLogDirsPartition {
 impl Encodable for DescribeLogDirsPartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 4 {
-            bail!("DescribeLogDirsPartition v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.partition_index)?;
         types::Int64.encode(buf, &self.partition_size)?;
@@ -144,7 +144,7 @@ impl Encodable for DescribeLogDirsPartition {
 impl Decodable for DescribeLogDirsPartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 4 {
-            bail!("DescribeLogDirsPartition v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let partition_index = types::Int32.decode(buf)?;
         let partition_size = types::Int64.decode(buf)?;
@@ -254,7 +254,7 @@ impl DescribeLogDirsResponse {
 impl Encodable for DescribeLogDirsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 4 {
-            bail!("DescribeLogDirsResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         if version >= 3 {
@@ -311,7 +311,7 @@ impl Encodable for DescribeLogDirsResponse {
 impl Decodable for DescribeLogDirsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 4 {
-            bail!("DescribeLogDirsResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let throttle_time_ms = types::Int32.decode(buf)?;
         let error_code = if version >= 3 {
@@ -454,7 +454,7 @@ impl DescribeLogDirsResult {
 impl Encodable for DescribeLogDirsResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 4 {
-            bail!("DescribeLogDirsResult v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int16.encode(buf, &self.error_code)?;
         if version >= 2 {
@@ -527,7 +527,7 @@ impl Encodable for DescribeLogDirsResult {
 impl Decodable for DescribeLogDirsResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 4 {
-            bail!("DescribeLogDirsResult v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let error_code = types::Int16.decode(buf)?;
         let log_dir = if version >= 2 {
@@ -642,7 +642,7 @@ impl DescribeLogDirsTopic {
 impl Encodable for DescribeLogDirsTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 4 {
-            bail!("DescribeLogDirsTopic v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 2 {
             types::CompactString.encode(buf, &self.name)?;
@@ -701,7 +701,7 @@ impl Encodable for DescribeLogDirsTopic {
 impl Decodable for DescribeLogDirsTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 4 {
-            bail!("DescribeLogDirsTopic v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let name = if version >= 2 {
             types::CompactString.decode(buf)?

@@ -84,7 +84,7 @@ impl LeaderAndIsrPartitionError {
 impl Encodable for LeaderAndIsrPartitionError {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 7 {
-            bail!("LeaderAndIsrPartitionError v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version <= 4 {
             if version >= 4 {
@@ -140,7 +140,7 @@ impl Encodable for LeaderAndIsrPartitionError {
 impl Decodable for LeaderAndIsrPartitionError {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 7 {
-            bail!("LeaderAndIsrPartitionError v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let topic_name = if version <= 4 {
             if version >= 4 {
@@ -255,7 +255,7 @@ impl LeaderAndIsrResponse {
 impl Encodable for LeaderAndIsrResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 7 {
-            bail!("LeaderAndIsrResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int16.encode(buf, &self.error_code)?;
         if version <= 4 {
@@ -335,7 +335,7 @@ impl Encodable for LeaderAndIsrResponse {
 impl Decodable for LeaderAndIsrResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 7 {
-            bail!("LeaderAndIsrResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let error_code = types::Int16.decode(buf)?;
         let partition_errors = if version <= 4 {
@@ -440,7 +440,7 @@ impl LeaderAndIsrTopicError {
 impl Encodable for LeaderAndIsrTopicError {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 7 {
-            bail!("LeaderAndIsrTopicError v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 5 {
             types::Uuid.encode(buf, &self.topic_id)?;
@@ -507,7 +507,7 @@ impl Encodable for LeaderAndIsrTopicError {
 impl Decodable for LeaderAndIsrTopicError {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 7 {
-            bail!("LeaderAndIsrTopicError v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let topic_id = if version >= 5 {
             types::Uuid.decode(buf)?

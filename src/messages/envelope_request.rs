@@ -84,7 +84,7 @@ impl EnvelopeRequest {
 impl Encodable for EnvelopeRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("EnvelopeRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::CompactBytes.encode(buf, &self.request_data)?;
         types::CompactBytes.encode(buf, &self.request_principal)?;
@@ -124,7 +124,7 @@ impl Encodable for EnvelopeRequest {
 impl Decodable for EnvelopeRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("EnvelopeRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let request_data = types::CompactBytes.decode(buf)?;
         let request_principal = types::CompactBytes.decode(buf)?;

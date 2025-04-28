@@ -98,7 +98,7 @@ impl MetadataRequest {
 impl Encodable for MetadataRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 12 {
-            bail!("MetadataRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 9 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
@@ -190,7 +190,7 @@ impl Encodable for MetadataRequest {
 impl Decodable for MetadataRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 12 {
-            bail!("MetadataRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let topics = if version >= 9 {
             types::CompactArray(types::Struct { version }).decode(buf)?
@@ -302,7 +302,7 @@ impl MetadataRequestTopic {
 impl Encodable for MetadataRequestTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 12 {
-            bail!("MetadataRequestTopic v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 10 {
             types::Uuid.encode(buf, &self.topic_id)?;
@@ -356,7 +356,7 @@ impl Encodable for MetadataRequestTopic {
 impl Decodable for MetadataRequestTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 12 {
-            bail!("MetadataRequestTopic v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let topic_id = if version >= 10 {
             types::Uuid.decode(buf)?

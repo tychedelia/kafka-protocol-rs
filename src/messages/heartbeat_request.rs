@@ -98,7 +98,7 @@ impl HeartbeatRequest {
 impl Encodable for HeartbeatRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 4 {
-            bail!("HeartbeatRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 4 {
             types::CompactString.encode(buf, &self.group_id)?;
@@ -180,7 +180,7 @@ impl Encodable for HeartbeatRequest {
 impl Decodable for HeartbeatRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 4 {
-            bail!("HeartbeatRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let group_id = if version >= 4 {
             types::CompactString.decode(buf)?

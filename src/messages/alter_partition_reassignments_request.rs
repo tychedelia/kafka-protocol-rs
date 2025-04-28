@@ -70,10 +70,7 @@ impl AlterPartitionReassignmentsRequest {
 impl Encodable for AlterPartitionReassignmentsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!(
-                "AlterPartitionReassignmentsRequest v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.timeout_ms)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
@@ -111,10 +108,7 @@ impl Encodable for AlterPartitionReassignmentsRequest {
 impl Decodable for AlterPartitionReassignmentsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!(
-                "AlterPartitionReassignmentsRequest v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         let timeout_ms = types::Int32.decode(buf)?;
         let topics = types::CompactArray(types::Struct { version }).decode(buf)?;
@@ -202,7 +196,7 @@ impl ReassignablePartition {
 impl Encodable for ReassignablePartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("ReassignablePartition v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.partition_index)?;
         types::CompactArray(types::Int32).encode(buf, &self.replicas)?;
@@ -240,7 +234,7 @@ impl Encodable for ReassignablePartition {
 impl Decodable for ReassignablePartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("ReassignablePartition v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let partition_index = types::Int32.decode(buf)?;
         let replicas = types::CompactArray(types::Int32).decode(buf)?;
@@ -328,7 +322,7 @@ impl ReassignableTopic {
 impl Encodable for ReassignableTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("ReassignableTopic v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::CompactString.encode(buf, &self.name)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.partitions)?;
@@ -367,7 +361,7 @@ impl Encodable for ReassignableTopic {
 impl Decodable for ReassignableTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("ReassignableTopic v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let name = types::CompactString.decode(buf)?;
         let partitions = types::CompactArray(types::Struct { version }).decode(buf)?;

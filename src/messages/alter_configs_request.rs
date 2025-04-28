@@ -70,7 +70,7 @@ impl AlterConfigsRequest {
 impl Encodable for AlterConfigsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 2 {
-            bail!("AlterConfigsRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 2 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.resources)?;
@@ -121,7 +121,7 @@ impl Encodable for AlterConfigsRequest {
 impl Decodable for AlterConfigsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 2 {
-            bail!("AlterConfigsRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let resources = if version >= 2 {
             types::CompactArray(types::Struct { version }).decode(buf)?
@@ -229,7 +229,7 @@ impl AlterConfigsResource {
 impl Encodable for AlterConfigsResource {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 2 {
-            bail!("AlterConfigsResource v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int8.encode(buf, &self.resource_type)?;
         if version >= 2 {
@@ -290,7 +290,7 @@ impl Encodable for AlterConfigsResource {
 impl Decodable for AlterConfigsResource {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 2 {
-            bail!("AlterConfigsResource v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let resource_type = types::Int8.decode(buf)?;
         let resource_name = if version >= 2 {
@@ -391,7 +391,7 @@ impl AlterableConfig {
 impl Encodable for AlterableConfig {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 2 {
-            bail!("AlterableConfig v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 2 {
             types::CompactString.encode(buf, &self.name)?;
@@ -449,7 +449,7 @@ impl Encodable for AlterableConfig {
 impl Decodable for AlterableConfig {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 2 {
-            bail!("AlterableConfig v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let name = if version >= 2 {
             types::CompactString.decode(buf)?

@@ -70,7 +70,7 @@ impl AlterReplicaLogDir {
 impl Encodable for AlterReplicaLogDir {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 2 {
-            bail!("AlterReplicaLogDir v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 2 {
             types::CompactString.encode(buf, &self.path)?;
@@ -129,7 +129,7 @@ impl Encodable for AlterReplicaLogDir {
 impl Decodable for AlterReplicaLogDir {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 2 {
-            bail!("AlterReplicaLogDir v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let path = if version >= 2 {
             types::CompactString.decode(buf)?
@@ -227,7 +227,7 @@ impl AlterReplicaLogDirTopic {
 impl Encodable for AlterReplicaLogDirTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 2 {
-            bail!("AlterReplicaLogDirTopic v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 2 {
             types::CompactString.encode(buf, &self.name)?;
@@ -285,7 +285,7 @@ impl Encodable for AlterReplicaLogDirTopic {
 impl Decodable for AlterReplicaLogDirTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 2 {
-            bail!("AlterReplicaLogDirTopic v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let name = if version >= 2 {
             types::CompactString.decode(buf)?
@@ -369,7 +369,7 @@ impl AlterReplicaLogDirsRequest {
 impl Encodable for AlterReplicaLogDirsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 2 {
-            bail!("AlterReplicaLogDirsRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 2 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.dirs)?;
@@ -418,7 +418,7 @@ impl Encodable for AlterReplicaLogDirsRequest {
 impl Decodable for AlterReplicaLogDirsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 2 {
-            bail!("AlterReplicaLogDirsRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let dirs = if version >= 2 {
             types::CompactArray(types::Struct { version }).decode(buf)?

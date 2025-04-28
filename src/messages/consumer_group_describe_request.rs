@@ -70,7 +70,7 @@ impl ConsumerGroupDescribeRequest {
 impl Encodable for ConsumerGroupDescribeRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("ConsumerGroupDescribeRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::CompactArray(types::CompactString).encode(buf, &self.group_ids)?;
         types::Boolean.encode(buf, &self.include_authorized_operations)?;
@@ -108,7 +108,7 @@ impl Encodable for ConsumerGroupDescribeRequest {
 impl Decodable for ConsumerGroupDescribeRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("ConsumerGroupDescribeRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let group_ids = types::CompactArray(types::CompactString).decode(buf)?;
         let include_authorized_operations = types::Boolean.decode(buf)?;

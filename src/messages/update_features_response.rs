@@ -84,7 +84,7 @@ impl UpdatableFeatureResult {
 impl Encodable for UpdatableFeatureResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 1 {
-            bail!("UpdatableFeatureResult v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::CompactString.encode(buf, &self.feature)?;
         types::Int16.encode(buf, &self.error_code)?;
@@ -124,7 +124,7 @@ impl Encodable for UpdatableFeatureResult {
 impl Decodable for UpdatableFeatureResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 1 {
-            bail!("UpdatableFeatureResult v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let feature = types::CompactString.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
@@ -243,7 +243,7 @@ impl UpdateFeaturesResponse {
 impl Encodable for UpdateFeaturesResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 1 {
-            bail!("UpdateFeaturesResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         types::Int16.encode(buf, &self.error_code)?;
@@ -285,7 +285,7 @@ impl Encodable for UpdateFeaturesResponse {
 impl Decodable for UpdateFeaturesResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 1 {
-            bail!("UpdateFeaturesResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let throttle_time_ms = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;

@@ -84,7 +84,7 @@ impl FindCoordinatorRequest {
 impl Encodable for FindCoordinatorRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 6 {
-            bail!("FindCoordinatorRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version <= 3 {
             if version >= 3 {
@@ -173,7 +173,7 @@ impl Encodable for FindCoordinatorRequest {
 impl Decodable for FindCoordinatorRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 6 {
-            bail!("FindCoordinatorRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let key = if version <= 3 {
             if version >= 3 {

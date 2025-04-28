@@ -70,7 +70,7 @@ impl KRaftVersionFeature {
 impl Encodable for KRaftVersionFeature {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("KRaftVersionFeature v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int16.encode(buf, &self.min_supported_version)?;
         types::Int16.encode(buf, &self.max_supported_version)?;
@@ -108,7 +108,7 @@ impl Encodable for KRaftVersionFeature {
 impl Decodable for KRaftVersionFeature {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("KRaftVersionFeature v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let min_supported_version = types::Int16.decode(buf)?;
         let max_supported_version = types::Int16.decode(buf)?;
@@ -210,7 +210,7 @@ impl Listener {
 impl Encodable for Listener {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("Listener v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::CompactString.encode(buf, &self.name)?;
         types::CompactString.encode(buf, &self.host)?;
@@ -250,7 +250,7 @@ impl Encodable for Listener {
 impl Decodable for Listener {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("Listener v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let name = types::CompactString.decode(buf)?;
         let host = types::CompactString.decode(buf)?;
@@ -397,7 +397,7 @@ impl UpdateRaftVoterRequest {
 impl Encodable for UpdateRaftVoterRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("UpdateRaftVoterRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::CompactString.encode(buf, &self.cluster_id)?;
         types::Int32.encode(buf, &self.current_leader_epoch)?;
@@ -444,7 +444,7 @@ impl Encodable for UpdateRaftVoterRequest {
 impl Decodable for UpdateRaftVoterRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("UpdateRaftVoterRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let cluster_id = types::CompactString.decode(buf)?;
         let current_leader_epoch = types::Int32.decode(buf)?;

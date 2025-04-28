@@ -70,7 +70,7 @@ impl CreatePartitionsResponse {
 impl Encodable for CreatePartitionsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 3 {
-            bail!("CreatePartitionsResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         if version >= 2 {
@@ -121,7 +121,7 @@ impl Encodable for CreatePartitionsResponse {
 impl Decodable for CreatePartitionsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 3 {
-            bail!("CreatePartitionsResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let throttle_time_ms = types::Int32.decode(buf)?;
         let results = if version >= 2 {
@@ -229,7 +229,7 @@ impl CreatePartitionsTopicResult {
 impl Encodable for CreatePartitionsTopicResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 3 {
-            bail!("CreatePartitionsTopicResult v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 2 {
             types::CompactString.encode(buf, &self.name)?;
@@ -289,7 +289,7 @@ impl Encodable for CreatePartitionsTopicResult {
 impl Decodable for CreatePartitionsTopicResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 3 {
-            bail!("CreatePartitionsTopicResult v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let name = if version >= 2 {
             types::CompactString.decode(buf)?

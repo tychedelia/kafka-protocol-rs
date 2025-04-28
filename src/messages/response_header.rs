@@ -55,7 +55,7 @@ impl ResponseHeader {
 impl Encodable for ResponseHeader {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 1 {
-            bail!("ResponseHeader v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.correlation_id)?;
         if version >= 1 {
@@ -94,7 +94,7 @@ impl Encodable for ResponseHeader {
 impl Decodable for ResponseHeader {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 1 {
-            bail!("ResponseHeader v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let correlation_id = types::Int32.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();

@@ -70,7 +70,7 @@ impl DescribeGroupsRequest {
 impl Encodable for DescribeGroupsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 5 {
-            bail!("DescribeGroupsRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 5 {
             types::CompactArray(types::CompactString).encode(buf, &self.groups)?;
@@ -132,7 +132,7 @@ impl Encodable for DescribeGroupsRequest {
 impl Decodable for DescribeGroupsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 5 {
-            bail!("DescribeGroupsRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let groups = if version >= 5 {
             types::CompactArray(types::CompactString).decode(buf)?

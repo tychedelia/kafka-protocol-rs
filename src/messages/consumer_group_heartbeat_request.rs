@@ -168,10 +168,7 @@ impl ConsumerGroupHeartbeatRequest {
 impl Encodable for ConsumerGroupHeartbeatRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!(
-                "ConsumerGroupHeartbeatRequest v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         types::CompactString.encode(buf, &self.group_id)?;
         types::CompactString.encode(buf, &self.member_id)?;
@@ -225,10 +222,7 @@ impl Encodable for ConsumerGroupHeartbeatRequest {
 impl Decodable for ConsumerGroupHeartbeatRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!(
-                "ConsumerGroupHeartbeatRequest v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         let group_id = types::CompactString.decode(buf)?;
         let member_id = types::CompactString.decode(buf)?;
@@ -337,7 +331,7 @@ impl TopicPartitions {
 impl Encodable for TopicPartitions {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("TopicPartitions v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Uuid.encode(buf, &self.topic_id)?;
         types::CompactArray(types::Int32).encode(buf, &self.partitions)?;
@@ -375,7 +369,7 @@ impl Encodable for TopicPartitions {
 impl Decodable for TopicPartitions {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("TopicPartitions v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let topic_id = types::Uuid.decode(buf)?;
         let partitions = types::CompactArray(types::Int32).decode(buf)?;

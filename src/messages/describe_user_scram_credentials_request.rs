@@ -56,10 +56,7 @@ impl DescribeUserScramCredentialsRequest {
 impl Encodable for DescribeUserScramCredentialsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!(
-                "DescribeUserScramCredentialsRequest v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         types::CompactArray(types::Struct { version }).encode(buf, &self.users)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -95,10 +92,7 @@ impl Encodable for DescribeUserScramCredentialsRequest {
 impl Decodable for DescribeUserScramCredentialsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!(
-                "DescribeUserScramCredentialsRequest v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         let users = types::CompactArray(types::Struct { version }).decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
@@ -169,7 +163,7 @@ impl UserName {
 impl Encodable for UserName {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("UserName v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::CompactString.encode(buf, &self.name)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -205,7 +199,7 @@ impl Encodable for UserName {
 impl Decodable for UserName {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("UserName v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let name = types::CompactString.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();

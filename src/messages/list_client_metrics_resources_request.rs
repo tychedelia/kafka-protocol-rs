@@ -42,10 +42,7 @@ impl ListClientMetricsResourcesRequest {
 impl Encodable for ListClientMetricsResourcesRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!(
-                "ListClientMetricsResourcesRequest v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
@@ -79,10 +76,7 @@ impl Encodable for ListClientMetricsResourcesRequest {
 impl Decodable for ListClientMetricsResourcesRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!(
-                "ListClientMetricsResourcesRequest v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         let mut unknown_tagged_fields = BTreeMap::new();
         let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;

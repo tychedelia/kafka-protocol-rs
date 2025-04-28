@@ -70,7 +70,7 @@ impl DeletableGroupResult {
 impl Encodable for DeletableGroupResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 2 {
-            bail!("DeletableGroupResult v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 2 {
             types::CompactString.encode(buf, &self.group_id)?;
@@ -120,7 +120,7 @@ impl Encodable for DeletableGroupResult {
 impl Decodable for DeletableGroupResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 2 {
-            bail!("DeletableGroupResult v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let group_id = if version >= 2 {
             types::CompactString.decode(buf)?
@@ -214,7 +214,7 @@ impl DeleteGroupsResponse {
 impl Encodable for DeleteGroupsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 2 {
-            bail!("DeleteGroupsResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         if version >= 2 {
@@ -265,7 +265,7 @@ impl Encodable for DeleteGroupsResponse {
 impl Decodable for DeleteGroupsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 2 {
-            bail!("DeleteGroupsResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let throttle_time_ms = types::Int32.decode(buf)?;
         let results = if version >= 2 {

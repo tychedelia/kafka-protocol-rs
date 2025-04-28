@@ -98,7 +98,7 @@ impl OffsetFetchRequest {
 impl Encodable for OffsetFetchRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 9 {
-            bail!("OffsetFetchRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version <= 7 {
             if version >= 6 {
@@ -220,7 +220,7 @@ impl Encodable for OffsetFetchRequest {
 impl Decodable for OffsetFetchRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 9 {
-            bail!("OffsetFetchRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let group_id = if version <= 7 {
             if version >= 6 {
@@ -368,7 +368,7 @@ impl OffsetFetchRequestGroup {
 impl Encodable for OffsetFetchRequestGroup {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 9 {
-            bail!("OffsetFetchRequestGroup v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 8 {
             types::CompactString.encode(buf, &self.group_id)?;
@@ -457,7 +457,7 @@ impl Encodable for OffsetFetchRequestGroup {
 impl Decodable for OffsetFetchRequestGroup {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 9 {
-            bail!("OffsetFetchRequestGroup v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let group_id = if version >= 8 {
             types::CompactString.decode(buf)?
@@ -569,7 +569,7 @@ impl OffsetFetchRequestTopic {
 impl Encodable for OffsetFetchRequestTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 9 {
-            bail!("OffsetFetchRequestTopic v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version <= 7 {
             if version >= 6 {
@@ -652,7 +652,7 @@ impl Encodable for OffsetFetchRequestTopic {
 impl Decodable for OffsetFetchRequestTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 9 {
-            bail!("OffsetFetchRequestTopic v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let name = if version <= 7 {
             if version >= 6 {
@@ -758,7 +758,7 @@ impl OffsetFetchRequestTopics {
 impl Encodable for OffsetFetchRequestTopics {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 9 {
-            bail!("OffsetFetchRequestTopics v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 8 {
             types::CompactString.encode(buf, &self.name)?;
@@ -825,7 +825,7 @@ impl Encodable for OffsetFetchRequestTopics {
 impl Decodable for OffsetFetchRequestTopics {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 9 {
-            bail!("OffsetFetchRequestTopics v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let name = if version >= 8 {
             types::CompactString.decode(buf)?

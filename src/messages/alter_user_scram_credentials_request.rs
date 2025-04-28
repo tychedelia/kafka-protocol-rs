@@ -70,10 +70,7 @@ impl AlterUserScramCredentialsRequest {
 impl Encodable for AlterUserScramCredentialsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!(
-                "AlterUserScramCredentialsRequest v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         types::CompactArray(types::Struct { version }).encode(buf, &self.deletions)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.upsertions)?;
@@ -113,10 +110,7 @@ impl Encodable for AlterUserScramCredentialsRequest {
 impl Decodable for AlterUserScramCredentialsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!(
-                "AlterUserScramCredentialsRequest v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         let deletions = types::CompactArray(types::Struct { version }).decode(buf)?;
         let upsertions = types::CompactArray(types::Struct { version }).decode(buf)?;
@@ -204,7 +198,7 @@ impl ScramCredentialDeletion {
 impl Encodable for ScramCredentialDeletion {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("ScramCredentialDeletion v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::CompactString.encode(buf, &self.name)?;
         types::Int8.encode(buf, &self.mechanism)?;
@@ -242,7 +236,7 @@ impl Encodable for ScramCredentialDeletion {
 impl Decodable for ScramCredentialDeletion {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("ScramCredentialDeletion v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let name = types::CompactString.decode(buf)?;
         let mechanism = types::Int8.decode(buf)?;
@@ -372,7 +366,7 @@ impl ScramCredentialUpsertion {
 impl Encodable for ScramCredentialUpsertion {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("ScramCredentialUpsertion v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::CompactString.encode(buf, &self.name)?;
         types::Int8.encode(buf, &self.mechanism)?;
@@ -416,7 +410,7 @@ impl Encodable for ScramCredentialUpsertion {
 impl Decodable for ScramCredentialUpsertion {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("ScramCredentialUpsertion v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let name = types::CompactString.decode(buf)?;
         let mechanism = types::Int8.decode(buf)?;

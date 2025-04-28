@@ -97,7 +97,7 @@ impl LeaderChangeMessage {
 impl Encodable for LeaderChangeMessage {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 1 {
-            bail!("LeaderChangeMessage v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int16.encode(buf, &self.version)?;
         types::Int32.encode(buf, &self.leader_id)?;
@@ -139,7 +139,7 @@ impl Encodable for LeaderChangeMessage {
 impl Decodable for LeaderChangeMessage {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 1 {
-            bail!("LeaderChangeMessage v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let version = types::Int16.decode(buf)?;
         let leader_id = types::Int32.decode(buf)?;
@@ -232,7 +232,7 @@ impl Voter {
 impl Encodable for Voter {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 1 {
-            bail!("Voter v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.voter_id)?;
         if version >= 1 {
@@ -281,7 +281,7 @@ impl Encodable for Voter {
 impl Decodable for Voter {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 1 {
-            bail!("Voter v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let voter_id = types::Int32.decode(buf)?;
         let voter_directory_id = if version >= 1 {

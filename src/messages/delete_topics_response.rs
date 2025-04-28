@@ -98,7 +98,7 @@ impl DeletableTopicResult {
 impl Encodable for DeletableTopicResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 6 {
-            bail!("DeletableTopicResult v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 4 {
             types::CompactString.encode(buf, &self.name)?;
@@ -160,7 +160,7 @@ impl Encodable for DeletableTopicResult {
 impl Decodable for DeletableTopicResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 6 {
-            bail!("DeletableTopicResult v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let name = if version >= 4 {
             types::CompactString.decode(buf)?
@@ -268,7 +268,7 @@ impl DeleteTopicsResponse {
 impl Encodable for DeleteTopicsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 6 {
-            bail!("DeleteTopicsResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 1 {
             types::Int32.encode(buf, &self.throttle_time_ms)?;
@@ -323,7 +323,7 @@ impl Encodable for DeleteTopicsResponse {
 impl Decodable for DeleteTopicsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 6 {
-            bail!("DeleteTopicsResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let throttle_time_ms = if version >= 1 {
             types::Int32.decode(buf)?

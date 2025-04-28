@@ -55,7 +55,7 @@ impl SnapshotFooterRecord {
 impl Encodable for SnapshotFooterRecord {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("SnapshotFooterRecord v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int16.encode(buf, &self.version)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -90,7 +90,7 @@ impl Encodable for SnapshotFooterRecord {
 impl Decodable for SnapshotFooterRecord {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("SnapshotFooterRecord v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let version = types::Int16.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();

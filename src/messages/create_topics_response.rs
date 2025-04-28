@@ -112,7 +112,7 @@ impl CreatableTopicConfigs {
 impl Encodable for CreatableTopicConfigs {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 7 {
-            bail!("CreatableTopicConfigs v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 5 {
             types::CompactString.encode(buf, &self.name)?;
@@ -222,7 +222,7 @@ impl Encodable for CreatableTopicConfigs {
 impl Decodable for CreatableTopicConfigs {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 7 {
-            bail!("CreatableTopicConfigs v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let name = if version >= 5 {
             types::CompactString.decode(buf)?
@@ -425,7 +425,7 @@ impl CreatableTopicResult {
 impl Encodable for CreatableTopicResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 7 {
-            bail!("CreatableTopicResult v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 5 {
             types::CompactString.encode(buf, &self.name)?;
@@ -544,7 +544,7 @@ impl Encodable for CreatableTopicResult {
 impl Decodable for CreatableTopicResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 7 {
-            bail!("CreatableTopicResult v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let name = if version >= 5 {
             types::CompactString.decode(buf)?
@@ -687,7 +687,7 @@ impl CreateTopicsResponse {
 impl Encodable for CreateTopicsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 7 {
-            bail!("CreateTopicsResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 2 {
             types::Int32.encode(buf, &self.throttle_time_ms)?;
@@ -742,7 +742,7 @@ impl Encodable for CreateTopicsResponse {
 impl Decodable for CreateTopicsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 7 {
-            bail!("CreateTopicsResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let throttle_time_ms = if version >= 2 {
             types::Int32.decode(buf)?

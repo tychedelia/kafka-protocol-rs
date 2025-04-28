@@ -140,7 +140,7 @@ impl DescribeAclsRequest {
 impl Encodable for DescribeAclsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 3 {
-            bail!("DescribeAclsRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int8.encode(buf, &self.resource_type_filter)?;
         if version >= 2 {
@@ -228,7 +228,7 @@ impl Encodable for DescribeAclsRequest {
 impl Decodable for DescribeAclsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 3 {
-            bail!("DescribeAclsRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let resource_type_filter = types::Int8.decode(buf)?;
         let resource_name_filter = if version >= 2 {

@@ -84,7 +84,7 @@ impl RemoveRaftVoterRequest {
 impl Encodable for RemoveRaftVoterRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("RemoveRaftVoterRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::CompactString.encode(buf, &self.cluster_id)?;
         types::Int32.encode(buf, &self.voter_id)?;
@@ -124,7 +124,7 @@ impl Encodable for RemoveRaftVoterRequest {
 impl Decodable for RemoveRaftVoterRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("RemoveRaftVoterRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let cluster_id = types::CompactString.decode(buf)?;
         let voter_id = types::Int32.decode(buf)?;

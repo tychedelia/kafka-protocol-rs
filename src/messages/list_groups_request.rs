@@ -70,7 +70,7 @@ impl ListGroupsRequest {
 impl Encodable for ListGroupsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 5 {
-            bail!("ListGroupsRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 4 {
             types::CompactArray(types::CompactString).encode(buf, &self.states_filter)?;
@@ -138,7 +138,7 @@ impl Encodable for ListGroupsRequest {
 impl Decodable for ListGroupsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 5 {
-            bail!("ListGroupsRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let states_filter = if version >= 4 {
             types::CompactArray(types::CompactString).decode(buf)?

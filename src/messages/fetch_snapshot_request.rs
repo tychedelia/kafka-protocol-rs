@@ -98,7 +98,7 @@ impl FetchSnapshotRequest {
 impl Encodable for FetchSnapshotRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 1 {
-            bail!("FetchSnapshotRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.replica_id)?;
         types::Int32.encode(buf, &self.max_bytes)?;
@@ -168,7 +168,7 @@ impl Encodable for FetchSnapshotRequest {
 impl Decodable for FetchSnapshotRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 1 {
-            bail!("FetchSnapshotRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let mut cluster_id = None;
         let replica_id = types::Int32.decode(buf)?;
@@ -311,7 +311,7 @@ impl PartitionSnapshot {
 impl Encodable for PartitionSnapshot {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 1 {
-            bail!("PartitionSnapshot v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.partition)?;
         types::Int32.encode(buf, &self.current_leader_epoch)?;
@@ -389,7 +389,7 @@ impl Encodable for PartitionSnapshot {
 impl Decodable for PartitionSnapshot {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 1 {
-            bail!("PartitionSnapshot v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let partition = types::Int32.decode(buf)?;
         let current_leader_epoch = types::Int32.decode(buf)?;
@@ -497,7 +497,7 @@ impl SnapshotId {
 impl Encodable for SnapshotId {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 1 {
-            bail!("SnapshotId v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int64.encode(buf, &self.end_offset)?;
         types::Int32.encode(buf, &self.epoch)?;
@@ -535,7 +535,7 @@ impl Encodable for SnapshotId {
 impl Decodable for SnapshotId {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 1 {
-            bail!("SnapshotId v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let end_offset = types::Int64.decode(buf)?;
         let epoch = types::Int32.decode(buf)?;
@@ -623,7 +623,7 @@ impl TopicSnapshot {
 impl Encodable for TopicSnapshot {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 1 {
-            bail!("TopicSnapshot v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::CompactString.encode(buf, &self.name)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.partitions)?;
@@ -662,7 +662,7 @@ impl Encodable for TopicSnapshot {
 impl Decodable for TopicSnapshot {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 1 {
-            bail!("TopicSnapshot v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let name = types::CompactString.decode(buf)?;
         let partitions = types::CompactArray(types::Struct { version }).decode(buf)?;

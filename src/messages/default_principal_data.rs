@@ -83,7 +83,7 @@ impl DefaultPrincipalData {
 impl Encodable for DefaultPrincipalData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("DefaultPrincipalData v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::CompactString.encode(buf, &self._type)?;
         types::CompactString.encode(buf, &self.name)?;
@@ -122,7 +122,7 @@ impl Encodable for DefaultPrincipalData {
 impl Decodable for DefaultPrincipalData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("DefaultPrincipalData v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let _type = types::CompactString.decode(buf)?;
         let name = types::CompactString.decode(buf)?;

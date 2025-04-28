@@ -70,7 +70,7 @@ impl AlterClientQuotasResponse {
 impl Encodable for AlterClientQuotasResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 1 {
-            bail!("AlterClientQuotasResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         if version >= 1 {
@@ -121,7 +121,7 @@ impl Encodable for AlterClientQuotasResponse {
 impl Decodable for AlterClientQuotasResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 1 {
-            bail!("AlterClientQuotasResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let throttle_time_ms = types::Int32.decode(buf)?;
         let entries = if version >= 1 {
@@ -215,7 +215,7 @@ impl EntityData {
 impl Encodable for EntityData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 1 {
-            bail!("EntityData v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 1 {
             types::CompactString.encode(buf, &self.entity_type)?;
@@ -273,7 +273,7 @@ impl Encodable for EntityData {
 impl Decodable for EntityData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 1 {
-            bail!("EntityData v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let entity_type = if version >= 1 {
             types::CompactString.decode(buf)?
@@ -385,7 +385,7 @@ impl EntryData {
 impl Encodable for EntryData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 1 {
-            bail!("EntryData v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int16.encode(buf, &self.error_code)?;
         if version >= 1 {
@@ -446,7 +446,7 @@ impl Encodable for EntryData {
 impl Decodable for EntryData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 1 {
-            bail!("EntryData v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let error_code = types::Int16.decode(buf)?;
         let error_message = if version >= 1 {

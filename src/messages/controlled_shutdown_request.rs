@@ -70,7 +70,7 @@ impl ControlledShutdownRequest {
 impl Encodable for ControlledShutdownRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 3 {
-            bail!("ControlledShutdownRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.broker_id)?;
         if version >= 2 {
@@ -116,7 +116,7 @@ impl Encodable for ControlledShutdownRequest {
 impl Decodable for ControlledShutdownRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 3 {
-            bail!("ControlledShutdownRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let broker_id = types::Int32.decode(buf)?;
         let broker_epoch = if version >= 2 {

@@ -70,7 +70,7 @@ impl DescribeClusterRequest {
 impl Encodable for DescribeClusterRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 1 {
-            bail!("DescribeClusterRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Boolean.encode(buf, &self.include_cluster_authorized_operations)?;
         if version >= 1 {
@@ -120,7 +120,7 @@ impl Encodable for DescribeClusterRequest {
 impl Decodable for DescribeClusterRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 1 {
-            bail!("DescribeClusterRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let include_cluster_authorized_operations = types::Boolean.decode(buf)?;
         let endpoint_type = if version >= 1 {

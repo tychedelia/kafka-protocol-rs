@@ -69,7 +69,7 @@ impl SnapshotHeaderRecord {
 impl Encodable for SnapshotHeaderRecord {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("SnapshotHeaderRecord v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int16.encode(buf, &self.version)?;
         types::Int64.encode(buf, &self.last_contained_log_timestamp)?;
@@ -106,7 +106,7 @@ impl Encodable for SnapshotHeaderRecord {
 impl Decodable for SnapshotHeaderRecord {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("SnapshotHeaderRecord v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let version = types::Int16.decode(buf)?;
         let last_contained_log_timestamp = types::Int64.decode(buf)?;

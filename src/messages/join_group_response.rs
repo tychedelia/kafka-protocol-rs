@@ -168,7 +168,7 @@ impl JoinGroupResponse {
 impl Encodable for JoinGroupResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 9 {
-            bail!("JoinGroupResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 2 {
             types::Int32.encode(buf, &self.throttle_time_ms)?;
@@ -277,7 +277,7 @@ impl Encodable for JoinGroupResponse {
 impl Decodable for JoinGroupResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 9 {
-            bail!("JoinGroupResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let throttle_time_ms = if version >= 2 {
             types::Int32.decode(buf)?
@@ -430,7 +430,7 @@ impl JoinGroupResponseMember {
 impl Encodable for JoinGroupResponseMember {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 9 {
-            bail!("JoinGroupResponseMember v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 6 {
             types::CompactString.encode(buf, &self.member_id)?;
@@ -502,7 +502,7 @@ impl Encodable for JoinGroupResponseMember {
 impl Decodable for JoinGroupResponseMember {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 9 {
-            bail!("JoinGroupResponseMember v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let member_id = if version >= 6 {
             types::CompactString.decode(buf)?

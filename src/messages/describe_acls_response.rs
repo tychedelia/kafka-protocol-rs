@@ -98,7 +98,7 @@ impl AclDescription {
 impl Encodable for AclDescription {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 3 {
-            bail!("AclDescription v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 2 {
             types::CompactString.encode(buf, &self.principal)?;
@@ -160,7 +160,7 @@ impl Encodable for AclDescription {
 impl Decodable for AclDescription {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 3 {
-            bail!("AclDescription v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let principal = if version >= 2 {
             types::CompactString.decode(buf)?
@@ -292,7 +292,7 @@ impl DescribeAclsResource {
 impl Encodable for DescribeAclsResource {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 3 {
-            bail!("DescribeAclsResource v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int8.encode(buf, &self.resource_type)?;
         if version >= 2 {
@@ -367,7 +367,7 @@ impl Encodable for DescribeAclsResource {
 impl Decodable for DescribeAclsResource {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 3 {
-            bail!("DescribeAclsResource v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let resource_type = types::Int8.decode(buf)?;
         let resource_name = if version >= 2 {
@@ -503,7 +503,7 @@ impl DescribeAclsResponse {
 impl Encodable for DescribeAclsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 3 {
-            bail!("DescribeAclsResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         types::Int16.encode(buf, &self.error_code)?;
@@ -566,7 +566,7 @@ impl Encodable for DescribeAclsResponse {
 impl Decodable for DescribeAclsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 3 {
-            bail!("DescribeAclsResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let throttle_time_ms = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;

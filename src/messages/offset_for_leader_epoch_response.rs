@@ -98,7 +98,7 @@ impl EpochEndOffset {
 impl Encodable for EpochEndOffset {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 4 {
-            bail!("EpochEndOffset v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int16.encode(buf, &self.error_code)?;
         types::Int32.encode(buf, &self.partition)?;
@@ -148,7 +148,7 @@ impl Encodable for EpochEndOffset {
 impl Decodable for EpochEndOffset {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 4 {
-            bail!("EpochEndOffset v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let error_code = types::Int16.decode(buf)?;
         let partition = types::Int32.decode(buf)?;
@@ -248,7 +248,7 @@ impl OffsetForLeaderEpochResponse {
 impl Encodable for OffsetForLeaderEpochResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 4 {
-            bail!("OffsetForLeaderEpochResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 2 {
             types::Int32.encode(buf, &self.throttle_time_ms)?;
@@ -303,7 +303,7 @@ impl Encodable for OffsetForLeaderEpochResponse {
 impl Decodable for OffsetForLeaderEpochResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 4 {
-            bail!("OffsetForLeaderEpochResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let throttle_time_ms = if version >= 2 {
             types::Int32.decode(buf)?
@@ -401,7 +401,7 @@ impl OffsetForLeaderTopicResult {
 impl Encodable for OffsetForLeaderTopicResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 4 {
-            bail!("OffsetForLeaderTopicResult v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 4 {
             types::CompactString.encode(buf, &self.topic)?;
@@ -460,7 +460,7 @@ impl Encodable for OffsetForLeaderTopicResult {
 impl Decodable for OffsetForLeaderTopicResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 4 {
-            bail!("OffsetForLeaderTopicResult v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let topic = if version >= 4 {
             types::CompactString.decode(buf)?

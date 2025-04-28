@@ -112,7 +112,7 @@ impl PushTelemetryRequest {
 impl Encodable for PushTelemetryRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("PushTelemetryRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Uuid.encode(buf, &self.client_instance_id)?;
         types::Int32.encode(buf, &self.subscription_id)?;
@@ -156,7 +156,7 @@ impl Encodable for PushTelemetryRequest {
 impl Decodable for PushTelemetryRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("PushTelemetryRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let client_instance_id = types::Uuid.decode(buf)?;
         let subscription_id = types::Int32.decode(buf)?;

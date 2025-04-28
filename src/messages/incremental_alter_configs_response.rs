@@ -98,7 +98,7 @@ impl AlterConfigsResourceResponse {
 impl Encodable for AlterConfigsResourceResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 1 {
-            bail!("AlterConfigsResourceResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int16.encode(buf, &self.error_code)?;
         if version >= 1 {
@@ -160,7 +160,7 @@ impl Encodable for AlterConfigsResourceResponse {
 impl Decodable for AlterConfigsResourceResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 1 {
-            bail!("AlterConfigsResourceResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let error_code = types::Int16.decode(buf)?;
         let error_message = if version >= 1 {
@@ -264,10 +264,7 @@ impl IncrementalAlterConfigsResponse {
 impl Encodable for IncrementalAlterConfigsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 1 {
-            bail!(
-                "IncrementalAlterConfigsResponse v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         if version >= 1 {
@@ -318,10 +315,7 @@ impl Encodable for IncrementalAlterConfigsResponse {
 impl Decodable for IncrementalAlterConfigsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 1 {
-            bail!(
-                "IncrementalAlterConfigsResponse v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         let throttle_time_ms = types::Int32.decode(buf)?;
         let responses = if version >= 1 {

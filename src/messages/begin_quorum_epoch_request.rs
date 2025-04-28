@@ -98,7 +98,7 @@ impl BeginQuorumEpochRequest {
 impl Encodable for BeginQuorumEpochRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 1 {
-            bail!("BeginQuorumEpochRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 1 {
             types::CompactString.encode(buf, &self.cluster_id)?;
@@ -170,7 +170,7 @@ impl Encodable for BeginQuorumEpochRequest {
 impl Decodable for BeginQuorumEpochRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 1 {
-            bail!("BeginQuorumEpochRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let cluster_id = if version >= 1 {
             types::CompactString.decode(buf)?
@@ -296,7 +296,7 @@ impl LeaderEndpoint {
 impl Encodable for LeaderEndpoint {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 1 {
-            bail!("LeaderEndpoint v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 1 {
             types::CompactString.encode(buf, &self.name)?;
@@ -376,7 +376,7 @@ impl Encodable for LeaderEndpoint {
 impl Decodable for LeaderEndpoint {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 1 {
-            bail!("LeaderEndpoint v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let name = if version >= 1 {
             types::CompactString.decode(buf)?
@@ -509,7 +509,7 @@ impl PartitionData {
 impl Encodable for PartitionData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 1 {
-            bail!("PartitionData v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.partition_index)?;
         if version >= 1 {
@@ -559,7 +559,7 @@ impl Encodable for PartitionData {
 impl Decodable for PartitionData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 1 {
-            bail!("PartitionData v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let partition_index = types::Int32.decode(buf)?;
         let voter_directory_id = if version >= 1 {
@@ -659,7 +659,7 @@ impl TopicData {
 impl Encodable for TopicData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 1 {
-            bail!("TopicData v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 1 {
             types::CompactString.encode(buf, &self.topic_name)?;
@@ -718,7 +718,7 @@ impl Encodable for TopicData {
 impl Decodable for TopicData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 1 {
-            bail!("TopicData v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let topic_name = if version >= 1 {
             types::CompactString.decode(buf)?

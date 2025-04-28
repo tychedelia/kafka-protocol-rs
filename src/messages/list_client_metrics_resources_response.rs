@@ -56,7 +56,7 @@ impl ClientMetricsResource {
 impl Encodable for ClientMetricsResource {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("ClientMetricsResource v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::CompactString.encode(buf, &self.name)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -92,7 +92,7 @@ impl Encodable for ClientMetricsResource {
 impl Decodable for ClientMetricsResource {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("ClientMetricsResource v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let name = types::CompactString.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
@@ -191,10 +191,7 @@ impl ListClientMetricsResourcesResponse {
 impl Encodable for ListClientMetricsResourcesResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!(
-                "ListClientMetricsResourcesResponse v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         types::Int16.encode(buf, &self.error_code)?;
@@ -236,10 +233,7 @@ impl Encodable for ListClientMetricsResourcesResponse {
 impl Decodable for ListClientMetricsResourcesResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!(
-                "ListClientMetricsResourcesResponse v{} is not supported",
-                version
-            );
+            bail!("specified version not supported by this message type");
         }
         let throttle_time_ms = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;

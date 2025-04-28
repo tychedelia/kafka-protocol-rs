@@ -98,7 +98,7 @@ impl EndTxnRequest {
 impl Encodable for EndTxnRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 4 {
-            bail!("EndTxnRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 3 {
             types::CompactString.encode(buf, &self.transactional_id)?;
@@ -152,7 +152,7 @@ impl Encodable for EndTxnRequest {
 impl Decodable for EndTxnRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 4 {
-            bail!("EndTxnRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let transactional_id = if version >= 3 {
             types::CompactString.decode(buf)?

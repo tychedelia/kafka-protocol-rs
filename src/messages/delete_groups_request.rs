@@ -56,7 +56,7 @@ impl DeleteGroupsRequest {
 impl Encodable for DeleteGroupsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 2 {
-            bail!("DeleteGroupsRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 2 {
             types::CompactArray(types::CompactString).encode(buf, &self.groups_names)?;
@@ -105,7 +105,7 @@ impl Encodable for DeleteGroupsRequest {
 impl Decodable for DeleteGroupsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 2 {
-            bail!("DeleteGroupsRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let groups_names = if version >= 2 {
             types::CompactArray(types::CompactString).decode(buf)?

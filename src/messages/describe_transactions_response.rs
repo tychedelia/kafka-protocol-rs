@@ -70,7 +70,7 @@ impl DescribeTransactionsResponse {
 impl Encodable for DescribeTransactionsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("DescribeTransactionsResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.transaction_states)?;
@@ -109,7 +109,7 @@ impl Encodable for DescribeTransactionsResponse {
 impl Decodable for DescribeTransactionsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("DescribeTransactionsResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let throttle_time_ms = types::Int32.decode(buf)?;
         let transaction_states = types::CompactArray(types::Struct { version }).decode(buf)?;
@@ -197,7 +197,7 @@ impl TopicData {
 impl Encodable for TopicData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("TopicData v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::CompactString.encode(buf, &self.topic)?;
         types::CompactArray(types::Int32).encode(buf, &self.partitions)?;
@@ -235,7 +235,7 @@ impl Encodable for TopicData {
 impl Decodable for TopicData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("TopicData v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let topic = types::CompactString.decode(buf)?;
         let partitions = types::CompactArray(types::Int32).decode(buf)?;
@@ -407,7 +407,7 @@ impl TransactionState {
 impl Encodable for TransactionState {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("TransactionState v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int16.encode(buf, &self.error_code)?;
         types::CompactString.encode(buf, &self.transactional_id)?;
@@ -457,7 +457,7 @@ impl Encodable for TransactionState {
 impl Decodable for TransactionState {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("TransactionState v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let error_code = types::Int16.decode(buf)?;
         let transactional_id = types::CompactString.decode(buf)?;

@@ -56,7 +56,7 @@ impl DescribeTransactionsRequest {
 impl Encodable for DescribeTransactionsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
-            bail!("DescribeTransactionsRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::CompactArray(types::CompactString).encode(buf, &self.transactional_ids)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -93,7 +93,7 @@ impl Encodable for DescribeTransactionsRequest {
 impl Decodable for DescribeTransactionsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
-            bail!("DescribeTransactionsRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let transactional_ids = types::CompactArray(types::CompactString).decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();

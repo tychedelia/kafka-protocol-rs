@@ -84,7 +84,7 @@ impl RenewDelegationTokenResponse {
 impl Encodable for RenewDelegationTokenResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 2 {
-            bail!("RenewDelegationTokenResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int16.encode(buf, &self.error_code)?;
         types::Int64.encode(buf, &self.expiry_timestamp_ms)?;
@@ -128,7 +128,7 @@ impl Encodable for RenewDelegationTokenResponse {
 impl Decodable for RenewDelegationTokenResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 2 {
-            bail!("RenewDelegationTokenResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let error_code = types::Int16.decode(buf)?;
         let expiry_timestamp_ms = types::Int64.decode(buf)?;

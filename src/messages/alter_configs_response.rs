@@ -98,7 +98,7 @@ impl AlterConfigsResourceResponse {
 impl Encodable for AlterConfigsResourceResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 2 {
-            bail!("AlterConfigsResourceResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int16.encode(buf, &self.error_code)?;
         if version >= 2 {
@@ -160,7 +160,7 @@ impl Encodable for AlterConfigsResourceResponse {
 impl Decodable for AlterConfigsResourceResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 2 {
-            bail!("AlterConfigsResourceResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let error_code = types::Int16.decode(buf)?;
         let error_message = if version >= 2 {
@@ -264,7 +264,7 @@ impl AlterConfigsResponse {
 impl Encodable for AlterConfigsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 2 {
-            bail!("AlterConfigsResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         if version >= 2 {
@@ -315,7 +315,7 @@ impl Encodable for AlterConfigsResponse {
 impl Decodable for AlterConfigsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 2 {
-            bail!("AlterConfigsResponse v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let throttle_time_ms = types::Int32.decode(buf)?;
         let responses = if version >= 2 {

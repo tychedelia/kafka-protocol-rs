@@ -98,7 +98,7 @@ impl ListOffsetsPartition {
 impl Encodable for ListOffsetsPartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 9 {
-            bail!("ListOffsetsPartition v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.partition_index)?;
         if version >= 4 {
@@ -160,7 +160,7 @@ impl Encodable for ListOffsetsPartition {
 impl Decodable for ListOffsetsPartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 9 {
-            bail!("ListOffsetsPartition v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let partition_index = types::Int32.decode(buf)?;
         let current_leader_epoch = if version >= 4 {
@@ -278,7 +278,7 @@ impl ListOffsetsRequest {
 impl Encodable for ListOffsetsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 9 {
-            bail!("ListOffsetsRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.replica_id)?;
         if version >= 2 {
@@ -343,7 +343,7 @@ impl Encodable for ListOffsetsRequest {
 impl Decodable for ListOffsetsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 9 {
-            bail!("ListOffsetsRequest v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let replica_id = types::Int32.decode(buf)?;
         let isolation_level = if version >= 2 {
@@ -444,7 +444,7 @@ impl ListOffsetsTopic {
 impl Encodable for ListOffsetsTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version < 0 || version > 9 {
-            bail!("ListOffsetsTopic v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         if version >= 6 {
             types::CompactString.encode(buf, &self.name)?;
@@ -503,7 +503,7 @@ impl Encodable for ListOffsetsTopic {
 impl Decodable for ListOffsetsTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version < 0 || version > 9 {
-            bail!("ListOffsetsTopic v{} is not supported", version);
+            bail!("specified version not supported by this message type");
         }
         let name = if version >= 6 {
             types::CompactString.decode(buf)?
