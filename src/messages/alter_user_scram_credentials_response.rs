@@ -69,6 +69,9 @@ impl AlterUserScramCredentialsResponse {
 #[cfg(feature = "broker")]
 impl Encodable for AlterUserScramCredentialsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!("specified version not supported by this message type");
+        }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.results)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -104,6 +107,9 @@ impl Encodable for AlterUserScramCredentialsResponse {
 #[cfg(feature = "client")]
 impl Decodable for AlterUserScramCredentialsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!("specified version not supported by this message type");
+        }
         let throttle_time_ms = types::Int32.decode(buf)?;
         let results = types::CompactArray(types::Struct { version }).decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
@@ -203,6 +209,9 @@ impl AlterUserScramCredentialsResult {
 #[cfg(feature = "broker")]
 impl Encodable for AlterUserScramCredentialsResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!("specified version not supported by this message type");
+        }
         types::CompactString.encode(buf, &self.user)?;
         types::Int16.encode(buf, &self.error_code)?;
         types::CompactString.encode(buf, &self.error_message)?;
@@ -240,6 +249,9 @@ impl Encodable for AlterUserScramCredentialsResult {
 #[cfg(feature = "client")]
 impl Decodable for AlterUserScramCredentialsResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!("specified version not supported by this message type");
+        }
         let user = types::CompactString.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
         let error_message = types::CompactString.decode(buf)?;

@@ -139,6 +139,9 @@ impl FetchPartition {
 #[cfg(feature = "client")]
 impl Encodable for FetchPartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 17 {
+            bail!("specified version not supported by this message type");
+        }
         types::Int32.encode(buf, &self.partition)?;
         if version >= 9 {
             types::Int32.encode(buf, &self.current_leader_epoch)?;
@@ -242,6 +245,9 @@ impl Encodable for FetchPartition {
 #[cfg(feature = "broker")]
 impl Decodable for FetchPartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 17 {
+            bail!("specified version not supported by this message type");
+        }
         let partition = types::Int32.decode(buf)?;
         let current_leader_epoch = if version >= 9 {
             types::Int32.decode(buf)?
@@ -507,6 +513,9 @@ impl FetchRequest {
 #[cfg(feature = "client")]
 impl Encodable for FetchRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 17 {
+            bail!("specified version not supported by this message type");
+        }
         if version <= 14 {
             types::Int32.encode(buf, &self.replica_id)?;
         } else {
@@ -702,6 +711,9 @@ impl Encodable for FetchRequest {
 #[cfg(feature = "broker")]
 impl Decodable for FetchRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 17 {
+            bail!("specified version not supported by this message type");
+        }
         let mut cluster_id = None;
         let replica_id = if version <= 14 {
             types::Int32.decode(buf)?
@@ -887,6 +899,9 @@ impl FetchTopic {
 #[cfg(feature = "client")]
 impl Encodable for FetchTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 17 {
+            bail!("specified version not supported by this message type");
+        }
         if version <= 12 {
             if version >= 12 {
                 types::CompactString.encode(buf, &self.topic)?;
@@ -953,6 +968,9 @@ impl Encodable for FetchTopic {
 #[cfg(feature = "broker")]
 impl Decodable for FetchTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 17 {
+            bail!("specified version not supported by this message type");
+        }
         let topic = if version <= 12 {
             if version >= 12 {
                 types::CompactString.decode(buf)?
@@ -1073,6 +1091,9 @@ impl ForgottenTopic {
 #[cfg(feature = "client")]
 impl Encodable for ForgottenTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 17 {
+            bail!("specified version not supported by this message type");
+        }
         if version >= 7 && version <= 12 {
             if version >= 12 {
                 types::CompactString.encode(buf, &self.topic)?;
@@ -1150,6 +1171,9 @@ impl Encodable for ForgottenTopic {
 #[cfg(feature = "broker")]
 impl Decodable for ForgottenTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 17 {
+            bail!("specified version not supported by this message type");
+        }
         let topic = if version >= 7 && version <= 12 {
             if version >= 12 {
                 types::CompactString.decode(buf)?
@@ -1260,6 +1284,9 @@ impl ReplicaState {
 #[cfg(feature = "client")]
 impl Encodable for ReplicaState {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 17 {
+            bail!("specified version not supported by this message type");
+        }
         if version >= 15 {
             types::Int32.encode(buf, &self.replica_id)?;
         } else {
@@ -1323,6 +1350,9 @@ impl Encodable for ReplicaState {
 #[cfg(feature = "broker")]
 impl Decodable for ReplicaState {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 17 {
+            bail!("specified version not supported by this message type");
+        }
         let replica_id = if version >= 15 {
             types::Int32.decode(buf)?
         } else {

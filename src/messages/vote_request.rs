@@ -139,6 +139,9 @@ impl PartitionData {
 #[cfg(feature = "client")]
 impl Encodable for PartitionData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 1 {
+            bail!("specified version not supported by this message type");
+        }
         types::Int32.encode(buf, &self.partition_index)?;
         types::Int32.encode(buf, &self.candidate_epoch)?;
         types::Int32.encode(buf, &self.candidate_id)?;
@@ -192,6 +195,9 @@ impl Encodable for PartitionData {
 #[cfg(feature = "broker")]
 impl Decodable for PartitionData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 1 {
+            bail!("specified version not supported by this message type");
+        }
         let partition_index = types::Int32.decode(buf)?;
         let candidate_epoch = types::Int32.decode(buf)?;
         let candidate_id = types::Int32.decode(buf)?;
@@ -300,6 +306,9 @@ impl TopicData {
 #[cfg(feature = "client")]
 impl Encodable for TopicData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 1 {
+            bail!("specified version not supported by this message type");
+        }
         types::CompactString.encode(buf, &self.topic_name)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.partitions)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -336,6 +345,9 @@ impl Encodable for TopicData {
 #[cfg(feature = "broker")]
 impl Decodable for TopicData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 1 {
+            bail!("specified version not supported by this message type");
+        }
         let topic_name = types::CompactString.decode(buf)?;
         let partitions = types::CompactArray(types::Struct { version }).decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
@@ -435,6 +447,9 @@ impl VoteRequest {
 #[cfg(feature = "client")]
 impl Encodable for VoteRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 1 {
+            bail!("specified version not supported by this message type");
+        }
         types::CompactString.encode(buf, &self.cluster_id)?;
         if version >= 1 {
             types::Int32.encode(buf, &self.voter_id)?;
@@ -476,6 +491,9 @@ impl Encodable for VoteRequest {
 #[cfg(feature = "broker")]
 impl Decodable for VoteRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 1 {
+            bail!("specified version not supported by this message type");
+        }
         let cluster_id = types::CompactString.decode(buf)?;
         let voter_id = if version >= 1 {
             types::Int32.decode(buf)?

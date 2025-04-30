@@ -97,6 +97,9 @@ impl OffsetFetchResponse {
 #[cfg(feature = "broker")]
 impl Encodable for OffsetFetchResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 9 {
+            bail!("specified version not supported by this message type");
+        }
         if version >= 3 {
             types::Int32.encode(buf, &self.throttle_time_ms)?;
         }
@@ -182,6 +185,9 @@ impl Encodable for OffsetFetchResponse {
 #[cfg(feature = "client")]
 impl Decodable for OffsetFetchResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 9 {
+            bail!("specified version not supported by this message type");
+        }
         let throttle_time_ms = if version >= 3 {
             types::Int32.decode(buf)?
         } else {
@@ -309,6 +315,9 @@ impl OffsetFetchResponseGroup {
 #[cfg(feature = "broker")]
 impl Encodable for OffsetFetchResponseGroup {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 9 {
+            bail!("specified version not supported by this message type");
+        }
         if version >= 8 {
             types::CompactString.encode(buf, &self.group_id)?;
         } else {
@@ -387,6 +396,9 @@ impl Encodable for OffsetFetchResponseGroup {
 #[cfg(feature = "client")]
 impl Decodable for OffsetFetchResponseGroup {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 9 {
+            bail!("specified version not supported by this message type");
+        }
         let group_id = if version >= 8 {
             types::CompactString.decode(buf)?
         } else {
@@ -531,6 +543,9 @@ impl OffsetFetchResponsePartition {
 #[cfg(feature = "broker")]
 impl Encodable for OffsetFetchResponsePartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 9 {
+            bail!("specified version not supported by this message type");
+        }
         if version <= 7 {
             types::Int32.encode(buf, &self.partition_index)?;
         } else {
@@ -646,6 +661,9 @@ impl Encodable for OffsetFetchResponsePartition {
 #[cfg(feature = "client")]
 impl Decodable for OffsetFetchResponsePartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 9 {
+            bail!("specified version not supported by this message type");
+        }
         let partition_index = if version <= 7 {
             types::Int32.decode(buf)?
         } else {
@@ -808,6 +826,9 @@ impl OffsetFetchResponsePartitions {
 #[cfg(feature = "broker")]
 impl Encodable for OffsetFetchResponsePartitions {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 9 {
+            bail!("specified version not supported by this message type");
+        }
         if version >= 8 {
             types::Int32.encode(buf, &self.partition_index)?;
         } else {
@@ -915,6 +936,9 @@ impl Encodable for OffsetFetchResponsePartitions {
 #[cfg(feature = "client")]
 impl Decodable for OffsetFetchResponsePartitions {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 9 {
+            bail!("specified version not supported by this message type");
+        }
         let partition_index = if version >= 8 {
             types::Int32.decode(buf)?
         } else {
@@ -1031,6 +1055,9 @@ impl OffsetFetchResponseTopic {
 #[cfg(feature = "broker")]
 impl Encodable for OffsetFetchResponseTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 9 {
+            bail!("specified version not supported by this message type");
+        }
         if version <= 7 {
             if version >= 6 {
                 types::CompactString.encode(buf, &self.name)?;
@@ -1112,6 +1139,9 @@ impl Encodable for OffsetFetchResponseTopic {
 #[cfg(feature = "client")]
 impl Decodable for OffsetFetchResponseTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 9 {
+            bail!("specified version not supported by this message type");
+        }
         let name = if version <= 7 {
             if version >= 6 {
                 types::CompactString.decode(buf)?
@@ -1215,6 +1245,9 @@ impl OffsetFetchResponseTopics {
 #[cfg(feature = "broker")]
 impl Encodable for OffsetFetchResponseTopics {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 9 {
+            bail!("specified version not supported by this message type");
+        }
         if version >= 8 {
             types::CompactString.encode(buf, &self.name)?;
         } else {
@@ -1279,6 +1312,9 @@ impl Encodable for OffsetFetchResponseTopics {
 #[cfg(feature = "client")]
 impl Decodable for OffsetFetchResponseTopics {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 9 {
+            bail!("specified version not supported by this message type");
+        }
         let name = if version >= 8 {
             types::CompactString.decode(buf)?
         } else {

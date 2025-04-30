@@ -83,6 +83,9 @@ impl LeaderAndIsrLiveLeader {
 #[cfg(feature = "client")]
 impl Encodable for LeaderAndIsrLiveLeader {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 7 {
+            bail!("specified version not supported by this message type");
+        }
         types::Int32.encode(buf, &self.broker_id)?;
         if version >= 4 {
             types::CompactString.encode(buf, &self.host_name)?;
@@ -132,6 +135,9 @@ impl Encodable for LeaderAndIsrLiveLeader {
 #[cfg(feature = "broker")]
 impl Decodable for LeaderAndIsrLiveLeader {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 7 {
+            bail!("specified version not supported by this message type");
+        }
         let broker_id = types::Int32.decode(buf)?;
         let host_name = if version >= 4 {
             types::CompactString.decode(buf)?
@@ -366,6 +372,9 @@ impl LeaderAndIsrPartitionState {
 #[cfg(feature = "client")]
 impl Encodable for LeaderAndIsrPartitionState {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 7 {
+            bail!("specified version not supported by this message type");
+        }
         if version <= 1 {
             types::String.encode(buf, &self.topic_name)?;
         }
@@ -487,6 +496,9 @@ impl Encodable for LeaderAndIsrPartitionState {
 #[cfg(feature = "broker")]
 impl Decodable for LeaderAndIsrPartitionState {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 7 {
+            bail!("specified version not supported by this message type");
+        }
         let topic_name = if version <= 1 {
             types::String.decode(buf)?
         } else {
@@ -727,6 +739,9 @@ impl LeaderAndIsrRequest {
 #[cfg(feature = "client")]
 impl Encodable for LeaderAndIsrRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 7 {
+            bail!("specified version not supported by this message type");
+        }
         types::Int32.encode(buf, &self.controller_id)?;
         if version >= 7 {
             types::Boolean.encode(buf, &self.is_k_raft_controller)?;
@@ -852,6 +867,9 @@ impl Encodable for LeaderAndIsrRequest {
 #[cfg(feature = "broker")]
 impl Decodable for LeaderAndIsrRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 7 {
+            bail!("specified version not supported by this message type");
+        }
         let controller_id = types::Int32.decode(buf)?;
         let is_k_raft_controller = if version >= 7 {
             types::Boolean.decode(buf)?
@@ -999,6 +1017,9 @@ impl LeaderAndIsrTopicState {
 #[cfg(feature = "client")]
 impl Encodable for LeaderAndIsrTopicState {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 7 {
+            bail!("specified version not supported by this message type");
+        }
         if version >= 2 {
             if version >= 4 {
                 types::CompactString.encode(buf, &self.topic_name)?;
@@ -1087,6 +1108,9 @@ impl Encodable for LeaderAndIsrTopicState {
 #[cfg(feature = "broker")]
 impl Decodable for LeaderAndIsrTopicState {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 7 {
+            bail!("specified version not supported by this message type");
+        }
         let topic_name = if version >= 2 {
             if version >= 4 {
                 types::CompactString.decode(buf)?

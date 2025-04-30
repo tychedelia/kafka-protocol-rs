@@ -125,6 +125,9 @@ impl Coordinator {
 #[cfg(feature = "broker")]
 impl Encodable for Coordinator {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 6 {
+            bail!("specified version not supported by this message type");
+        }
         if version >= 4 {
             types::CompactString.encode(buf, &self.key)?;
         } else {
@@ -236,6 +239,9 @@ impl Encodable for Coordinator {
 #[cfg(feature = "client")]
 impl Decodable for Coordinator {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 6 {
+            bail!("specified version not supported by this message type");
+        }
         let key = if version >= 4 {
             types::CompactString.decode(buf)?
         } else {
@@ -429,6 +435,9 @@ impl FindCoordinatorResponse {
 #[cfg(feature = "broker")]
 impl Encodable for FindCoordinatorResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 6 {
+            bail!("specified version not supported by this message type");
+        }
         if version >= 1 {
             types::Int32.encode(buf, &self.throttle_time_ms)?;
         }
@@ -563,6 +572,9 @@ impl Encodable for FindCoordinatorResponse {
 #[cfg(feature = "client")]
 impl Decodable for FindCoordinatorResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 6 {
+            bail!("specified version not supported by this message type");
+        }
         let throttle_time_ms = if version >= 1 {
             types::Int32.decode(buf)?
         } else {

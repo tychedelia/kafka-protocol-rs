@@ -69,6 +69,9 @@ impl DescribeTransactionsResponse {
 #[cfg(feature = "broker")]
 impl Encodable for DescribeTransactionsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!("specified version not supported by this message type");
+        }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.transaction_states)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -105,6 +108,9 @@ impl Encodable for DescribeTransactionsResponse {
 #[cfg(feature = "client")]
 impl Decodable for DescribeTransactionsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!("specified version not supported by this message type");
+        }
         let throttle_time_ms = types::Int32.decode(buf)?;
         let transaction_states = types::CompactArray(types::Struct { version }).decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
@@ -190,6 +196,9 @@ impl TopicData {
 #[cfg(feature = "broker")]
 impl Encodable for TopicData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!("specified version not supported by this message type");
+        }
         types::CompactString.encode(buf, &self.topic)?;
         types::CompactArray(types::Int32).encode(buf, &self.partitions)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -225,6 +234,9 @@ impl Encodable for TopicData {
 #[cfg(feature = "client")]
 impl Decodable for TopicData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!("specified version not supported by this message type");
+        }
         let topic = types::CompactString.decode(buf)?;
         let partitions = types::CompactArray(types::Int32).decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
@@ -394,6 +406,9 @@ impl TransactionState {
 #[cfg(feature = "broker")]
 impl Encodable for TransactionState {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!("specified version not supported by this message type");
+        }
         types::Int16.encode(buf, &self.error_code)?;
         types::CompactString.encode(buf, &self.transactional_id)?;
         types::CompactString.encode(buf, &self.transaction_state)?;
@@ -441,6 +456,9 @@ impl Encodable for TransactionState {
 #[cfg(feature = "client")]
 impl Decodable for TransactionState {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!("specified version not supported by this message type");
+        }
         let error_code = types::Int16.decode(buf)?;
         let transactional_id = types::CompactString.decode(buf)?;
         let transaction_state = types::CompactString.decode(buf)?;

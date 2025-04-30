@@ -83,6 +83,9 @@ impl ExpireDelegationTokenResponse {
 #[cfg(feature = "broker")]
 impl Encodable for ExpireDelegationTokenResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 2 {
+            bail!("specified version not supported by this message type");
+        }
         types::Int16.encode(buf, &self.error_code)?;
         types::Int64.encode(buf, &self.expiry_timestamp_ms)?;
         types::Int32.encode(buf, &self.throttle_time_ms)?;
@@ -124,6 +127,9 @@ impl Encodable for ExpireDelegationTokenResponse {
 #[cfg(feature = "client")]
 impl Decodable for ExpireDelegationTokenResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 2 {
+            bail!("specified version not supported by this message type");
+        }
         let error_code = types::Int16.decode(buf)?;
         let expiry_timestamp_ms = types::Int64.decode(buf)?;
         let throttle_time_ms = types::Int32.decode(buf)?;

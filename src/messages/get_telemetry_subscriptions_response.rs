@@ -167,6 +167,9 @@ impl GetTelemetrySubscriptionsResponse {
 #[cfg(feature = "broker")]
 impl Encodable for GetTelemetrySubscriptionsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!("specified version not supported by this message type");
+        }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         types::Int16.encode(buf, &self.error_code)?;
         types::Uuid.encode(buf, &self.client_instance_id)?;
@@ -218,6 +221,9 @@ impl Encodable for GetTelemetrySubscriptionsResponse {
 #[cfg(feature = "client")]
 impl Decodable for GetTelemetrySubscriptionsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!("specified version not supported by this message type");
+        }
         let throttle_time_ms = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
         let client_instance_id = types::Uuid.decode(buf)?;

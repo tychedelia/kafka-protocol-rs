@@ -83,6 +83,9 @@ impl DescribeConfigsRequest {
 #[cfg(feature = "client")]
 impl Encodable for DescribeConfigsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 4 {
+            bail!("specified version not supported by this message type");
+        }
         if version >= 4 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.resources)?;
         } else {
@@ -157,6 +160,9 @@ impl Encodable for DescribeConfigsRequest {
 #[cfg(feature = "broker")]
 impl Decodable for DescribeConfigsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 4 {
+            bail!("specified version not supported by this message type");
+        }
         let resources = if version >= 4 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
@@ -273,6 +279,9 @@ impl DescribeConfigsResource {
 #[cfg(feature = "client")]
 impl Encodable for DescribeConfigsResource {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 4 {
+            bail!("specified version not supported by this message type");
+        }
         types::Int8.encode(buf, &self.resource_type)?;
         if version >= 4 {
             types::CompactString.encode(buf, &self.resource_name)?;
@@ -331,6 +340,9 @@ impl Encodable for DescribeConfigsResource {
 #[cfg(feature = "broker")]
 impl Decodable for DescribeConfigsResource {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 4 {
+            bail!("specified version not supported by this message type");
+        }
         let resource_type = types::Int8.decode(buf)?;
         let resource_name = if version >= 4 {
             types::CompactString.decode(buf)?

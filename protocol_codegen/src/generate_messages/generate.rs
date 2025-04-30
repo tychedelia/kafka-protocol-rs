@@ -1163,6 +1163,8 @@ impl PreparedStruct {
                 "fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> "
             )?;
             w.block(|w| {
+                self.write_version_validation(w)?;
+
                 for prepared_field in &self.prepared_fields {
                     write_encode_field(w, prepared_field, self.valid_versions, false)?;
                 }
@@ -1210,6 +1212,7 @@ impl PreparedStruct {
                 "fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> "
             )?;
             w.block(|w| {
+                self.write_version_validation(w)?;
                 for prepared_field in &self.prepared_fields {
                     write_decode_field(w, prepared_field, self.valid_versions)?;
                 }
@@ -1297,6 +1300,37 @@ impl PreparedStruct {
         writeln!(w)?;
         writeln!(w)?;
 
+        Ok(())
+    }
+
+    fn write_version_validation<W: Write>(&self, w: &mut CodeWriter<W>) -> Result<(), Error> {
+        match self.valid_versions {
+            VersionSpec::None => {}
+            VersionSpec::Exact(exact) => {
+                writeln!(w, "if version != {exact} {{")?;
+                writeln!(
+                    w,
+                    "    bail!(\"specified version not supported by this message type\");"
+                )?;
+                writeln!(w, "}}")?;
+            }
+            VersionSpec::Since(since) => {
+                writeln!(w, "if version >= {since} {{")?;
+                writeln!(
+                    w,
+                    "    bail!(\"specified version not supported by this message type\");"
+                )?;
+                writeln!(w, "}}")?;
+            }
+            VersionSpec::Range(start, end) => {
+                writeln!(w, "if version < {start} || version > {end} {{")?;
+                writeln!(
+                    w,
+                    "    bail!(\"specified version not supported by this message type\");"
+                )?;
+                writeln!(w, "}}")?;
+            }
+        }
         Ok(())
     }
 }

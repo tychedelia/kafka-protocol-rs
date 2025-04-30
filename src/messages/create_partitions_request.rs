@@ -55,6 +55,9 @@ impl CreatePartitionsAssignment {
 #[cfg(feature = "client")]
 impl Encodable for CreatePartitionsAssignment {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 3 {
+            bail!("specified version not supported by this message type");
+        }
         if version >= 2 {
             types::CompactArray(types::Int32).encode(buf, &self.broker_ids)?;
         } else {
@@ -100,6 +103,9 @@ impl Encodable for CreatePartitionsAssignment {
 #[cfg(feature = "broker")]
 impl Decodable for CreatePartitionsAssignment {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 3 {
+            bail!("specified version not supported by this message type");
+        }
         let broker_ids = if version >= 2 {
             types::CompactArray(types::Int32).decode(buf)?
         } else {
@@ -202,6 +208,9 @@ impl CreatePartitionsRequest {
 #[cfg(feature = "client")]
 impl Encodable for CreatePartitionsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 3 {
+            bail!("specified version not supported by this message type");
+        }
         if version >= 2 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
         } else {
@@ -252,6 +261,9 @@ impl Encodable for CreatePartitionsRequest {
 #[cfg(feature = "broker")]
 impl Decodable for CreatePartitionsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 3 {
+            bail!("specified version not supported by this message type");
+        }
         let topics = if version >= 2 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
@@ -360,6 +372,9 @@ impl CreatePartitionsTopic {
 #[cfg(feature = "client")]
 impl Encodable for CreatePartitionsTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 3 {
+            bail!("specified version not supported by this message type");
+        }
         if version >= 2 {
             types::CompactString.encode(buf, &self.name)?;
         } else {
@@ -419,6 +434,9 @@ impl Encodable for CreatePartitionsTopic {
 #[cfg(feature = "broker")]
 impl Decodable for CreatePartitionsTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 3 {
+            bail!("specified version not supported by this message type");
+        }
         let name = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {

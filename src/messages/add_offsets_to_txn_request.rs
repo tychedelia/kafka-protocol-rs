@@ -97,6 +97,9 @@ impl AddOffsetsToTxnRequest {
 #[cfg(feature = "client")]
 impl Encodable for AddOffsetsToTxnRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 4 {
+            bail!("specified version not supported by this message type");
+        }
         if version >= 3 {
             types::CompactString.encode(buf, &self.transactional_id)?;
         } else {
@@ -156,6 +159,9 @@ impl Encodable for AddOffsetsToTxnRequest {
 #[cfg(feature = "broker")]
 impl Decodable for AddOffsetsToTxnRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 4 {
+            bail!("specified version not supported by this message type");
+        }
         let transactional_id = if version >= 3 {
             types::CompactString.decode(buf)?
         } else {

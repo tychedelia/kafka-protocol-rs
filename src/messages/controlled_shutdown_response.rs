@@ -69,6 +69,9 @@ impl ControlledShutdownResponse {
 #[cfg(feature = "broker")]
 impl Encodable for ControlledShutdownResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 3 {
+            bail!("specified version not supported by this message type");
+        }
         types::Int16.encode(buf, &self.error_code)?;
         if version >= 3 {
             types::CompactArray(types::Struct { version })
@@ -119,6 +122,9 @@ impl Encodable for ControlledShutdownResponse {
 #[cfg(feature = "client")]
 impl Decodable for ControlledShutdownResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 3 {
+            bail!("specified version not supported by this message type");
+        }
         let error_code = types::Int16.decode(buf)?;
         let remaining_partitions = if version >= 3 {
             types::CompactArray(types::Struct { version }).decode(buf)?
@@ -210,6 +216,9 @@ impl RemainingPartition {
 #[cfg(feature = "broker")]
 impl Encodable for RemainingPartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 3 {
+            bail!("specified version not supported by this message type");
+        }
         if version >= 3 {
             types::CompactString.encode(buf, &self.topic_name)?;
         } else {
@@ -257,6 +266,9 @@ impl Encodable for RemainingPartition {
 #[cfg(feature = "client")]
 impl Decodable for RemainingPartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 3 {
+            bail!("specified version not supported by this message type");
+        }
         let topic_name = if version >= 3 {
             types::CompactString.decode(buf)?
         } else {

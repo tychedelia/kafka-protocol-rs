@@ -69,6 +69,9 @@ impl AlterPartitionReassignmentsRequest {
 #[cfg(feature = "client")]
 impl Encodable for AlterPartitionReassignmentsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!("specified version not supported by this message type");
+        }
         types::Int32.encode(buf, &self.timeout_ms)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -104,6 +107,9 @@ impl Encodable for AlterPartitionReassignmentsRequest {
 #[cfg(feature = "broker")]
 impl Decodable for AlterPartitionReassignmentsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!("specified version not supported by this message type");
+        }
         let timeout_ms = types::Int32.decode(buf)?;
         let topics = types::CompactArray(types::Struct { version }).decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
@@ -189,6 +195,9 @@ impl ReassignablePartition {
 #[cfg(feature = "client")]
 impl Encodable for ReassignablePartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!("specified version not supported by this message type");
+        }
         types::Int32.encode(buf, &self.partition_index)?;
         types::CompactArray(types::Int32).encode(buf, &self.replicas)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -224,6 +233,9 @@ impl Encodable for ReassignablePartition {
 #[cfg(feature = "broker")]
 impl Decodable for ReassignablePartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!("specified version not supported by this message type");
+        }
         let partition_index = types::Int32.decode(buf)?;
         let replicas = types::CompactArray(types::Int32).decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
@@ -309,6 +321,9 @@ impl ReassignableTopic {
 #[cfg(feature = "client")]
 impl Encodable for ReassignableTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!("specified version not supported by this message type");
+        }
         types::CompactString.encode(buf, &self.name)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.partitions)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -345,6 +360,9 @@ impl Encodable for ReassignableTopic {
 #[cfg(feature = "broker")]
 impl Decodable for ReassignableTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!("specified version not supported by this message type");
+        }
         let name = types::CompactString.decode(buf)?;
         let partitions = types::CompactArray(types::Struct { version }).decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();

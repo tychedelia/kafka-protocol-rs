@@ -111,6 +111,9 @@ impl AddRaftVoterRequest {
 #[cfg(feature = "client")]
 impl Encodable for AddRaftVoterRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!("specified version not supported by this message type");
+        }
         types::CompactString.encode(buf, &self.cluster_id)?;
         types::Int32.encode(buf, &self.timeout_ms)?;
         types::Int32.encode(buf, &self.voter_id)?;
@@ -153,6 +156,9 @@ impl Encodable for AddRaftVoterRequest {
 #[cfg(feature = "broker")]
 impl Decodable for AddRaftVoterRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!("specified version not supported by this message type");
+        }
         let cluster_id = types::CompactString.decode(buf)?;
         let timeout_ms = types::Int32.decode(buf)?;
         let voter_id = types::Int32.decode(buf)?;
@@ -261,6 +267,9 @@ impl Listener {
 #[cfg(feature = "client")]
 impl Encodable for Listener {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!("specified version not supported by this message type");
+        }
         types::CompactString.encode(buf, &self.name)?;
         types::CompactString.encode(buf, &self.host)?;
         types::UInt16.encode(buf, &self.port)?;
@@ -298,6 +307,9 @@ impl Encodable for Listener {
 #[cfg(feature = "broker")]
 impl Decodable for Listener {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!("specified version not supported by this message type");
+        }
         let name = types::CompactString.decode(buf)?;
         let host = types::CompactString.decode(buf)?;
         let port = types::UInt16.decode(buf)?;

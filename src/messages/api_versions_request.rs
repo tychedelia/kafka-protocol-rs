@@ -69,6 +69,9 @@ impl ApiVersionsRequest {
 #[cfg(feature = "client")]
 impl Encodable for ApiVersionsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 4 {
+            bail!("specified version not supported by this message type");
+        }
         if version >= 3 {
             types::CompactString.encode(buf, &self.client_software_name)?;
         }
@@ -116,6 +119,9 @@ impl Encodable for ApiVersionsRequest {
 #[cfg(feature = "broker")]
 impl Decodable for ApiVersionsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 4 {
+            bail!("specified version not supported by this message type");
+        }
         let client_software_name = if version >= 3 {
             types::CompactString.decode(buf)?
         } else {

@@ -97,6 +97,9 @@ impl DescribeQuorumResponse {
 #[cfg(feature = "broker")]
 impl Encodable for DescribeQuorumResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 2 {
+            bail!("specified version not supported by this message type");
+        }
         types::Int16.encode(buf, &self.error_code)?;
         if version >= 2 {
             types::CompactString.encode(buf, &self.error_message)?;
@@ -153,6 +156,9 @@ impl Encodable for DescribeQuorumResponse {
 #[cfg(feature = "client")]
 impl Decodable for DescribeQuorumResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 2 {
+            bail!("specified version not supported by this message type");
+        }
         let error_code = types::Int16.decode(buf)?;
         let error_message = if version >= 2 {
             types::CompactString.decode(buf)?
@@ -266,6 +272,9 @@ impl Listener {
 #[cfg(feature = "broker")]
 impl Encodable for Listener {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 2 {
+            bail!("specified version not supported by this message type");
+        }
         if version >= 2 {
             types::CompactString.encode(buf, &self.name)?;
         } else {
@@ -339,6 +348,9 @@ impl Encodable for Listener {
 #[cfg(feature = "client")]
 impl Decodable for Listener {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 2 {
+            bail!("specified version not supported by this message type");
+        }
         let name = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
@@ -439,6 +451,9 @@ impl Node {
 #[cfg(feature = "broker")]
 impl Encodable for Node {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 2 {
+            bail!("specified version not supported by this message type");
+        }
         if version >= 2 {
             types::Int32.encode(buf, &self.node_id)?;
         } else {
@@ -499,6 +514,9 @@ impl Encodable for Node {
 #[cfg(feature = "client")]
 impl Decodable for Node {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 2 {
+            bail!("specified version not supported by this message type");
+        }
         let node_id = if version >= 2 {
             types::Int32.decode(buf)?
         } else {
@@ -676,6 +694,9 @@ impl PartitionData {
 #[cfg(feature = "broker")]
 impl Encodable for PartitionData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 2 {
+            bail!("specified version not supported by this message type");
+        }
         types::Int32.encode(buf, &self.partition_index)?;
         types::Int16.encode(buf, &self.error_code)?;
         if version >= 2 {
@@ -729,6 +750,9 @@ impl Encodable for PartitionData {
 #[cfg(feature = "client")]
 impl Decodable for PartitionData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 2 {
+            bail!("specified version not supported by this message type");
+        }
         let partition_index = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
         let error_message = if version >= 2 {
@@ -878,6 +902,9 @@ impl ReplicaState {
 #[cfg(feature = "broker")]
 impl Encodable for ReplicaState {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 2 {
+            bail!("specified version not supported by this message type");
+        }
         types::Int32.encode(buf, &self.replica_id)?;
         if version >= 2 {
             types::Uuid.encode(buf, &self.replica_directory_id)?;
@@ -939,6 +966,9 @@ impl Encodable for ReplicaState {
 #[cfg(feature = "client")]
 impl Decodable for ReplicaState {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 2 {
+            bail!("specified version not supported by this message type");
+        }
         let replica_id = types::Int32.decode(buf)?;
         let replica_directory_id = if version >= 2 {
             types::Uuid.decode(buf)?
@@ -1045,6 +1075,9 @@ impl TopicData {
 #[cfg(feature = "broker")]
 impl Encodable for TopicData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 2 {
+            bail!("specified version not supported by this message type");
+        }
         types::CompactString.encode(buf, &self.topic_name)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.partitions)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -1081,6 +1114,9 @@ impl Encodable for TopicData {
 #[cfg(feature = "client")]
 impl Decodable for TopicData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 2 {
+            bail!("specified version not supported by this message type");
+        }
         let topic_name = types::CompactString.decode(buf)?;
         let partitions = types::CompactArray(types::Struct { version }).decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();

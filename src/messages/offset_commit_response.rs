@@ -69,6 +69,9 @@ impl OffsetCommitResponse {
 #[cfg(feature = "broker")]
 impl Encodable for OffsetCommitResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 9 {
+            bail!("specified version not supported by this message type");
+        }
         if version >= 3 {
             types::Int32.encode(buf, &self.throttle_time_ms)?;
         }
@@ -121,6 +124,9 @@ impl Encodable for OffsetCommitResponse {
 #[cfg(feature = "client")]
 impl Decodable for OffsetCommitResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 9 {
+            bail!("specified version not supported by this message type");
+        }
         let throttle_time_ms = if version >= 3 {
             types::Int32.decode(buf)?
         } else {
@@ -216,6 +222,9 @@ impl OffsetCommitResponsePartition {
 #[cfg(feature = "broker")]
 impl Encodable for OffsetCommitResponsePartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 9 {
+            bail!("specified version not supported by this message type");
+        }
         types::Int32.encode(buf, &self.partition_index)?;
         types::Int16.encode(buf, &self.error_code)?;
         if version >= 8 {
@@ -255,6 +264,9 @@ impl Encodable for OffsetCommitResponsePartition {
 #[cfg(feature = "client")]
 impl Decodable for OffsetCommitResponsePartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 9 {
+            bail!("specified version not supported by this message type");
+        }
         let partition_index = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
@@ -342,6 +354,9 @@ impl OffsetCommitResponseTopic {
 #[cfg(feature = "broker")]
 impl Encodable for OffsetCommitResponseTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 9 {
+            bail!("specified version not supported by this message type");
+        }
         if version >= 8 {
             types::CompactString.encode(buf, &self.name)?;
         } else {
@@ -398,6 +413,9 @@ impl Encodable for OffsetCommitResponseTopic {
 #[cfg(feature = "client")]
 impl Decodable for OffsetCommitResponseTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 9 {
+            bail!("specified version not supported by this message type");
+        }
         let name = if version >= 8 {
             types::CompactString.decode(buf)?
         } else {
