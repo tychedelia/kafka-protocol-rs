@@ -69,6 +69,9 @@ impl ConsumerGroupDescribeRequest {
 #[cfg(feature = "client")]
 impl Encodable for ConsumerGroupDescribeRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!("specified version not supported by this message type");
+        }
         types::CompactArray(types::CompactString).encode(buf, &self.group_ids)?;
         types::Boolean.encode(buf, &self.include_authorized_operations)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -104,6 +107,9 @@ impl Encodable for ConsumerGroupDescribeRequest {
 #[cfg(feature = "broker")]
 impl Decodable for ConsumerGroupDescribeRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!("specified version not supported by this message type");
+        }
         let group_ids = types::CompactArray(types::CompactString).decode(buf)?;
         let include_authorized_operations = types::Boolean.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();

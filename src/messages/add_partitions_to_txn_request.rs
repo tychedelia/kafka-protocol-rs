@@ -111,6 +111,9 @@ impl AddPartitionsToTxnRequest {
 #[cfg(feature = "client")]
 impl Encodable for AddPartitionsToTxnRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 5 {
+            bail!("specified version not supported by this message type");
+        }
         if version >= 4 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.transactions)?;
         } else {
@@ -237,6 +240,9 @@ impl Encodable for AddPartitionsToTxnRequest {
 #[cfg(feature = "broker")]
 impl Decodable for AddPartitionsToTxnRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 5 {
+            bail!("specified version not supported by this message type");
+        }
         let transactions = if version >= 4 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
@@ -361,6 +367,9 @@ impl AddPartitionsToTxnTopic {
 #[cfg(feature = "client")]
 impl Encodable for AddPartitionsToTxnTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 5 {
+            bail!("specified version not supported by this message type");
+        }
         if version >= 3 {
             types::CompactString.encode(buf, &self.name)?;
         } else {
@@ -416,6 +425,9 @@ impl Encodable for AddPartitionsToTxnTopic {
 #[cfg(feature = "broker")]
 impl Decodable for AddPartitionsToTxnTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 5 {
+            bail!("specified version not supported by this message type");
+        }
         let name = if version >= 3 {
             types::CompactString.decode(buf)?
         } else {
@@ -553,6 +565,9 @@ impl AddPartitionsToTxnTransaction {
 #[cfg(feature = "client")]
 impl Encodable for AddPartitionsToTxnTransaction {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 5 {
+            bail!("specified version not supported by this message type");
+        }
         if version >= 4 {
             types::CompactString.encode(buf, &self.transactional_id)?;
         } else {
@@ -659,6 +674,9 @@ impl Encodable for AddPartitionsToTxnTransaction {
 #[cfg(feature = "broker")]
 impl Decodable for AddPartitionsToTxnTransaction {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 5 {
+            bail!("specified version not supported by this message type");
+        }
         let transactional_id = if version >= 4 {
             types::CompactString.decode(buf)?
         } else {

@@ -69,6 +69,9 @@ impl DescribeClusterRequest {
 #[cfg(feature = "client")]
 impl Encodable for DescribeClusterRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 1 {
+            bail!("specified version not supported by this message type");
+        }
         types::Boolean.encode(buf, &self.include_cluster_authorized_operations)?;
         if version >= 1 {
             types::Int8.encode(buf, &self.endpoint_type)?;
@@ -116,6 +119,9 @@ impl Encodable for DescribeClusterRequest {
 #[cfg(feature = "broker")]
 impl Decodable for DescribeClusterRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 1 {
+            bail!("specified version not supported by this message type");
+        }
         let include_cluster_authorized_operations = types::Boolean.decode(buf)?;
         let endpoint_type = if version >= 1 {
             types::Int8.decode(buf)?

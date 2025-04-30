@@ -83,6 +83,9 @@ impl ComponentData {
 #[cfg(feature = "client")]
 impl Encodable for ComponentData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 1 {
+            bail!("specified version not supported by this message type");
+        }
         if version >= 1 {
             types::CompactString.encode(buf, &self.entity_type)?;
         } else {
@@ -140,6 +143,9 @@ impl Encodable for ComponentData {
 #[cfg(feature = "broker")]
 impl Decodable for ComponentData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 1 {
+            bail!("specified version not supported by this message type");
+        }
         let entity_type = if version >= 1 {
             types::CompactString.decode(buf)?
         } else {
@@ -238,6 +244,9 @@ impl DescribeClientQuotasRequest {
 #[cfg(feature = "client")]
 impl Encodable for DescribeClientQuotasRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 1 {
+            bail!("specified version not supported by this message type");
+        }
         if version >= 1 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.components)?;
         } else {
@@ -286,6 +295,9 @@ impl Encodable for DescribeClientQuotasRequest {
 #[cfg(feature = "broker")]
 impl Decodable for DescribeClientQuotasRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 1 {
+            bail!("specified version not supported by this message type");
+        }
         let components = if version >= 1 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {

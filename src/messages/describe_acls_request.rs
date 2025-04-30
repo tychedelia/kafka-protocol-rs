@@ -139,6 +139,9 @@ impl DescribeAclsRequest {
 #[cfg(feature = "client")]
 impl Encodable for DescribeAclsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 3 {
+            bail!("specified version not supported by this message type");
+        }
         types::Int8.encode(buf, &self.resource_type_filter)?;
         if version >= 2 {
             types::CompactString.encode(buf, &self.resource_name_filter)?;
@@ -224,6 +227,9 @@ impl Encodable for DescribeAclsRequest {
 #[cfg(feature = "broker")]
 impl Decodable for DescribeAclsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 3 {
+            bail!("specified version not supported by this message type");
+        }
         let resource_type_filter = types::Int8.decode(buf)?;
         let resource_name_filter = if version >= 2 {
             types::CompactString.decode(buf)?

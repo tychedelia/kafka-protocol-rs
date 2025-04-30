@@ -69,6 +69,9 @@ impl CredentialInfo {
 #[cfg(feature = "broker")]
 impl Encodable for CredentialInfo {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!("specified version not supported by this message type");
+        }
         types::Int8.encode(buf, &self.mechanism)?;
         types::Int32.encode(buf, &self.iterations)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -104,6 +107,9 @@ impl Encodable for CredentialInfo {
 #[cfg(feature = "client")]
 impl Decodable for CredentialInfo {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!("specified version not supported by this message type");
+        }
         let mechanism = types::Int8.decode(buf)?;
         let iterations = types::Int32.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
@@ -217,6 +223,9 @@ impl DescribeUserScramCredentialsResponse {
 #[cfg(feature = "broker")]
 impl Encodable for DescribeUserScramCredentialsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!("specified version not supported by this message type");
+        }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         types::Int16.encode(buf, &self.error_code)?;
         types::CompactString.encode(buf, &self.error_message)?;
@@ -256,6 +265,9 @@ impl Encodable for DescribeUserScramCredentialsResponse {
 #[cfg(feature = "client")]
 impl Decodable for DescribeUserScramCredentialsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!("specified version not supported by this message type");
+        }
         let throttle_time_ms = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
         let error_message = types::CompactString.decode(buf)?;
@@ -375,6 +387,9 @@ impl DescribeUserScramCredentialsResult {
 #[cfg(feature = "broker")]
 impl Encodable for DescribeUserScramCredentialsResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!("specified version not supported by this message type");
+        }
         types::CompactString.encode(buf, &self.user)?;
         types::Int16.encode(buf, &self.error_code)?;
         types::CompactString.encode(buf, &self.error_message)?;
@@ -415,6 +430,9 @@ impl Encodable for DescribeUserScramCredentialsResult {
 #[cfg(feature = "client")]
 impl Decodable for DescribeUserScramCredentialsResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!("specified version not supported by this message type");
+        }
         let user = types::CompactString.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
         let error_message = types::CompactString.decode(buf)?;

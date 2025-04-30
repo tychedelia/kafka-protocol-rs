@@ -3,6 +3,7 @@
 ## Unreleased
 
 - `Records::encode`/`Records::decode` no longer has unneeded trait bounds.
+- `ByteBuf::try_get_*` methods that already exist on `Buf` are removed in favor of the `Buf` method
 
 ## v0.14.0
 

@@ -83,6 +83,9 @@ impl StopReplicaPartitionError {
 #[cfg(feature = "broker")]
 impl Encodable for StopReplicaPartitionError {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 4 {
+            bail!("specified version not supported by this message type");
+        }
         if version >= 2 {
             types::CompactString.encode(buf, &self.topic_name)?;
         } else {
@@ -132,6 +135,9 @@ impl Encodable for StopReplicaPartitionError {
 #[cfg(feature = "client")]
 impl Decodable for StopReplicaPartitionError {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 4 {
+            bail!("specified version not supported by this message type");
+        }
         let topic_name = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
@@ -226,6 +232,9 @@ impl StopReplicaResponse {
 #[cfg(feature = "broker")]
 impl Encodable for StopReplicaResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 4 {
+            bail!("specified version not supported by this message type");
+        }
         types::Int16.encode(buf, &self.error_code)?;
         if version >= 2 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.partition_errors)?;
@@ -275,6 +284,9 @@ impl Encodable for StopReplicaResponse {
 #[cfg(feature = "client")]
 impl Decodable for StopReplicaResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 4 {
+            bail!("specified version not supported by this message type");
+        }
         let error_code = types::Int16.decode(buf)?;
         let partition_errors = if version >= 2 {
             types::CompactArray(types::Struct { version }).decode(buf)?

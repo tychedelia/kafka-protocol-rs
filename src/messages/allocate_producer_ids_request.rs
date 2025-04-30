@@ -69,6 +69,9 @@ impl AllocateProducerIdsRequest {
 #[cfg(feature = "client")]
 impl Encodable for AllocateProducerIdsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!("specified version not supported by this message type");
+        }
         types::Int32.encode(buf, &self.broker_id)?;
         types::Int64.encode(buf, &self.broker_epoch)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -104,6 +107,9 @@ impl Encodable for AllocateProducerIdsRequest {
 #[cfg(feature = "broker")]
 impl Decodable for AllocateProducerIdsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!("specified version not supported by this message type");
+        }
         let broker_id = types::Int32.decode(buf)?;
         let broker_epoch = types::Int64.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();

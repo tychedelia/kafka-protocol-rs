@@ -69,6 +69,9 @@ impl AlterConfigsRequest {
 #[cfg(feature = "client")]
 impl Encodable for AlterConfigsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 2 {
+            bail!("specified version not supported by this message type");
+        }
         if version >= 2 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.resources)?;
         } else {
@@ -117,6 +120,9 @@ impl Encodable for AlterConfigsRequest {
 #[cfg(feature = "broker")]
 impl Decodable for AlterConfigsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 2 {
+            bail!("specified version not supported by this message type");
+        }
         let resources = if version >= 2 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
@@ -222,6 +228,9 @@ impl AlterConfigsResource {
 #[cfg(feature = "client")]
 impl Encodable for AlterConfigsResource {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 2 {
+            bail!("specified version not supported by this message type");
+        }
         types::Int8.encode(buf, &self.resource_type)?;
         if version >= 2 {
             types::CompactString.encode(buf, &self.resource_name)?;
@@ -280,6 +289,9 @@ impl Encodable for AlterConfigsResource {
 #[cfg(feature = "broker")]
 impl Decodable for AlterConfigsResource {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 2 {
+            bail!("specified version not supported by this message type");
+        }
         let resource_type = types::Int8.decode(buf)?;
         let resource_name = if version >= 2 {
             types::CompactString.decode(buf)?
@@ -378,6 +390,9 @@ impl AlterableConfig {
 #[cfg(feature = "client")]
 impl Encodable for AlterableConfig {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 2 {
+            bail!("specified version not supported by this message type");
+        }
         if version >= 2 {
             types::CompactString.encode(buf, &self.name)?;
         } else {
@@ -433,6 +448,9 @@ impl Encodable for AlterableConfig {
 #[cfg(feature = "broker")]
 impl Decodable for AlterableConfig {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 2 {
+            bail!("specified version not supported by this message type");
+        }
         let name = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {

@@ -125,6 +125,9 @@ impl MetadataResponse {
 #[cfg(feature = "broker")]
 impl Encodable for MetadataResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 12 {
+            bail!("specified version not supported by this message type");
+        }
         if version >= 3 {
             types::Int32.encode(buf, &self.throttle_time_ms)?;
         }
@@ -222,6 +225,9 @@ impl Encodable for MetadataResponse {
 #[cfg(feature = "client")]
 impl Decodable for MetadataResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 12 {
+            bail!("specified version not supported by this message type");
+        }
         let throttle_time_ms = if version >= 3 {
             types::Int32.decode(buf)?
         } else {
@@ -377,6 +383,9 @@ impl MetadataResponseBroker {
 #[cfg(feature = "broker")]
 impl Encodable for MetadataResponseBroker {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 12 {
+            bail!("specified version not supported by this message type");
+        }
         types::Int32.encode(buf, &self.node_id)?;
         if version >= 9 {
             types::CompactString.encode(buf, &self.host)?;
@@ -440,6 +449,9 @@ impl Encodable for MetadataResponseBroker {
 #[cfg(feature = "client")]
 impl Decodable for MetadataResponseBroker {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 12 {
+            bail!("specified version not supported by this message type");
+        }
         let node_id = types::Int32.decode(buf)?;
         let host = if version >= 9 {
             types::CompactString.decode(buf)?
@@ -615,6 +627,9 @@ impl MetadataResponsePartition {
 #[cfg(feature = "broker")]
 impl Encodable for MetadataResponsePartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 12 {
+            bail!("specified version not supported by this message type");
+        }
         types::Int16.encode(buf, &self.error_code)?;
         types::Int32.encode(buf, &self.partition_index)?;
         types::Int32.encode(buf, &self.leader_id)?;
@@ -697,6 +712,9 @@ impl Encodable for MetadataResponsePartition {
 #[cfg(feature = "client")]
 impl Decodable for MetadataResponsePartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 12 {
+            bail!("specified version not supported by this message type");
+        }
         let error_code = types::Int16.decode(buf)?;
         let partition_index = types::Int32.decode(buf)?;
         let leader_id = types::Int32.decode(buf)?;
@@ -875,6 +893,9 @@ impl MetadataResponseTopic {
 #[cfg(feature = "broker")]
 impl Encodable for MetadataResponseTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version < 0 || version > 12 {
+            bail!("specified version not supported by this message type");
+        }
         types::Int16.encode(buf, &self.error_code)?;
         if version >= 9 {
             types::CompactString.encode(buf, &self.name)?;
@@ -959,6 +980,9 @@ impl Encodable for MetadataResponseTopic {
 #[cfg(feature = "client")]
 impl Decodable for MetadataResponseTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version < 0 || version > 12 {
+            bail!("specified version not supported by this message type");
+        }
         let error_code = types::Int16.decode(buf)?;
         let name = if version >= 9 {
             types::CompactString.decode(buf)?

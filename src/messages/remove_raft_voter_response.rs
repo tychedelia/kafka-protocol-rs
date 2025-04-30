@@ -83,6 +83,9 @@ impl RemoveRaftVoterResponse {
 #[cfg(feature = "broker")]
 impl Encodable for RemoveRaftVoterResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!("specified version not supported by this message type");
+        }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         types::Int16.encode(buf, &self.error_code)?;
         types::CompactString.encode(buf, &self.error_message)?;
@@ -120,6 +123,9 @@ impl Encodable for RemoveRaftVoterResponse {
 #[cfg(feature = "client")]
 impl Decodable for RemoveRaftVoterResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!("specified version not supported by this message type");
+        }
         let throttle_time_ms = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
         let error_message = types::CompactString.decode(buf)?;
