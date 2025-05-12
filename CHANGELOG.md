@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## 0.15.1
+
+- Ensure bytes dependency is at least 0.10.1
+
+## 0.15.0
 
 - `Records::encode`/`Records::decode` no longer has unneeded trait bounds.
 - `ByteBuf::try_get_*` methods that already exist on `Buf` are removed in favor of the `Buf` method
