@@ -21,27 +21,27 @@ use crate::protocol::{
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct AddRaftVoterRequest {
-    ///
+    /// The cluster id.
     ///
     /// Supported API versions: 0
     pub cluster_id: Option<StrBytes>,
 
-    ///
+    /// The maximum time to wait for the request to complete before returning.
     ///
     /// Supported API versions: 0
     pub timeout_ms: i32,
 
-    /// The replica id of the voter getting added to the topic partition
+    /// The replica id of the voter getting added to the topic partition.
     ///
     /// Supported API versions: 0
     pub voter_id: i32,
 
-    /// The directory id of the voter getting added to the topic partition
+    /// The directory id of the voter getting added to the topic partition.
     ///
     /// Supported API versions: 0
     pub voter_directory_id: Uuid,
 
-    /// The endpoints that can be used to communicate with the voter
+    /// The endpoints that can be used to communicate with the voter.
     ///
     /// Supported API versions: 0
     pub listeners: Vec<Listener>,
@@ -53,7 +53,7 @@ pub struct AddRaftVoterRequest {
 impl AddRaftVoterRequest {
     /// Sets `cluster_id` to the passed value.
     ///
-    ///
+    /// The cluster id.
     ///
     /// Supported API versions: 0
     pub fn with_cluster_id(mut self, value: Option<StrBytes>) -> Self {
@@ -62,7 +62,7 @@ impl AddRaftVoterRequest {
     }
     /// Sets `timeout_ms` to the passed value.
     ///
-    ///
+    /// The maximum time to wait for the request to complete before returning.
     ///
     /// Supported API versions: 0
     pub fn with_timeout_ms(mut self, value: i32) -> Self {
@@ -71,7 +71,7 @@ impl AddRaftVoterRequest {
     }
     /// Sets `voter_id` to the passed value.
     ///
-    /// The replica id of the voter getting added to the topic partition
+    /// The replica id of the voter getting added to the topic partition.
     ///
     /// Supported API versions: 0
     pub fn with_voter_id(mut self, value: i32) -> Self {
@@ -80,7 +80,7 @@ impl AddRaftVoterRequest {
     }
     /// Sets `voter_directory_id` to the passed value.
     ///
-    /// The directory id of the voter getting added to the topic partition
+    /// The directory id of the voter getting added to the topic partition.
     ///
     /// Supported API versions: 0
     pub fn with_voter_directory_id(mut self, value: Uuid) -> Self {
@@ -89,7 +89,7 @@ impl AddRaftVoterRequest {
     }
     /// Sets `listeners` to the passed value.
     ///
-    /// The endpoints that can be used to communicate with the voter
+    /// The endpoints that can be used to communicate with the voter.
     ///
     /// Supported API versions: 0
     pub fn with_listeners(mut self, value: Vec<Listener>) -> Self {
@@ -205,17 +205,17 @@ impl Message for AddRaftVoterRequest {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct Listener {
-    /// The name of the endpoint
+    /// The name of the endpoint.
     ///
     /// Supported API versions: 0
     pub name: StrBytes,
 
-    /// The hostname
+    /// The hostname.
     ///
     /// Supported API versions: 0
     pub host: StrBytes,
 
-    /// The port
+    /// The port.
     ///
     /// Supported API versions: 0
     pub port: u16,
@@ -227,7 +227,7 @@ pub struct Listener {
 impl Listener {
     /// Sets `name` to the passed value.
     ///
-    /// The name of the endpoint
+    /// The name of the endpoint.
     ///
     /// Supported API versions: 0
     pub fn with_name(mut self, value: StrBytes) -> Self {
@@ -236,7 +236,7 @@ impl Listener {
     }
     /// Sets `host` to the passed value.
     ///
-    /// The hostname
+    /// The hostname.
     ///
     /// Supported API versions: 0
     pub fn with_host(mut self, value: StrBytes) -> Self {
@@ -245,7 +245,7 @@ impl Listener {
     }
     /// Sets `port` to the passed value.
     ///
-    /// The port
+    /// The port.
     ///
     /// Supported API versions: 0
     pub fn with_port(mut self, value: u16) -> Self {

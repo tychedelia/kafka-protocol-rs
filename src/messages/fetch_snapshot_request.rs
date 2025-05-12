@@ -21,22 +21,22 @@ use crate::protocol::{
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct FetchSnapshotRequest {
-    /// The clusterId if known, this is used to validate metadata fetches prior to broker registration
+    /// The clusterId if known, this is used to validate metadata fetches prior to broker registration.
     ///
     /// Supported API versions: 0-1
     pub cluster_id: Option<StrBytes>,
 
-    /// The broker ID of the follower
+    /// The broker ID of the follower.
     ///
     /// Supported API versions: 0-1
     pub replica_id: super::BrokerId,
 
-    /// The maximum bytes to fetch from all of the snapshots
+    /// The maximum bytes to fetch from all of the snapshots.
     ///
     /// Supported API versions: 0-1
     pub max_bytes: i32,
 
-    /// The topics to fetch
+    /// The topics to fetch.
     ///
     /// Supported API versions: 0-1
     pub topics: Vec<TopicSnapshot>,
@@ -48,7 +48,7 @@ pub struct FetchSnapshotRequest {
 impl FetchSnapshotRequest {
     /// Sets `cluster_id` to the passed value.
     ///
-    /// The clusterId if known, this is used to validate metadata fetches prior to broker registration
+    /// The clusterId if known, this is used to validate metadata fetches prior to broker registration.
     ///
     /// Supported API versions: 0-1
     pub fn with_cluster_id(mut self, value: Option<StrBytes>) -> Self {
@@ -57,7 +57,7 @@ impl FetchSnapshotRequest {
     }
     /// Sets `replica_id` to the passed value.
     ///
-    /// The broker ID of the follower
+    /// The broker ID of the follower.
     ///
     /// Supported API versions: 0-1
     pub fn with_replica_id(mut self, value: super::BrokerId) -> Self {
@@ -66,7 +66,7 @@ impl FetchSnapshotRequest {
     }
     /// Sets `max_bytes` to the passed value.
     ///
-    /// The maximum bytes to fetch from all of the snapshots
+    /// The maximum bytes to fetch from all of the snapshots.
     ///
     /// Supported API versions: 0-1
     pub fn with_max_bytes(mut self, value: i32) -> Self {
@@ -75,7 +75,7 @@ impl FetchSnapshotRequest {
     }
     /// Sets `topics` to the passed value.
     ///
-    /// The topics to fetch
+    /// The topics to fetch.
     ///
     /// Supported API versions: 0-1
     pub fn with_topics(mut self, value: Vec<TopicSnapshot>) -> Self {
@@ -220,27 +220,27 @@ impl Message for FetchSnapshotRequest {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct PartitionSnapshot {
-    /// The partition index
+    /// The partition index.
     ///
     /// Supported API versions: 0-1
     pub partition: i32,
 
-    /// The current leader epoch of the partition, -1 for unknown leader epoch
+    /// The current leader epoch of the partition, -1 for unknown leader epoch.
     ///
     /// Supported API versions: 0-1
     pub current_leader_epoch: i32,
 
-    /// The snapshot endOffset and epoch to fetch
+    /// The snapshot endOffset and epoch to fetch.
     ///
     /// Supported API versions: 0-1
     pub snapshot_id: SnapshotId,
 
-    /// The byte position within the snapshot to start fetching from
+    /// The byte position within the snapshot to start fetching from.
     ///
     /// Supported API versions: 0-1
     pub position: i64,
 
-    /// The directory id of the follower fetching
+    /// The directory id of the follower fetching.
     ///
     /// Supported API versions: 1
     pub replica_directory_id: Uuid,
@@ -252,7 +252,7 @@ pub struct PartitionSnapshot {
 impl PartitionSnapshot {
     /// Sets `partition` to the passed value.
     ///
-    /// The partition index
+    /// The partition index.
     ///
     /// Supported API versions: 0-1
     pub fn with_partition(mut self, value: i32) -> Self {
@@ -261,7 +261,7 @@ impl PartitionSnapshot {
     }
     /// Sets `current_leader_epoch` to the passed value.
     ///
-    /// The current leader epoch of the partition, -1 for unknown leader epoch
+    /// The current leader epoch of the partition, -1 for unknown leader epoch.
     ///
     /// Supported API versions: 0-1
     pub fn with_current_leader_epoch(mut self, value: i32) -> Self {
@@ -270,7 +270,7 @@ impl PartitionSnapshot {
     }
     /// Sets `snapshot_id` to the passed value.
     ///
-    /// The snapshot endOffset and epoch to fetch
+    /// The snapshot endOffset and epoch to fetch.
     ///
     /// Supported API versions: 0-1
     pub fn with_snapshot_id(mut self, value: SnapshotId) -> Self {
@@ -279,7 +279,7 @@ impl PartitionSnapshot {
     }
     /// Sets `position` to the passed value.
     ///
-    /// The byte position within the snapshot to start fetching from
+    /// The byte position within the snapshot to start fetching from.
     ///
     /// Supported API versions: 0-1
     pub fn with_position(mut self, value: i64) -> Self {
@@ -288,7 +288,7 @@ impl PartitionSnapshot {
     }
     /// Sets `replica_directory_id` to the passed value.
     ///
-    /// The directory id of the follower fetching
+    /// The directory id of the follower fetching.
     ///
     /// Supported API versions: 1
     pub fn with_replica_directory_id(mut self, value: Uuid) -> Self {
@@ -448,12 +448,12 @@ impl Message for PartitionSnapshot {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct SnapshotId {
-    ///
+    /// The end offset of the snapshot.
     ///
     /// Supported API versions: 0-1
     pub end_offset: i64,
 
-    ///
+    /// The epoch of the snapshot.
     ///
     /// Supported API versions: 0-1
     pub epoch: i32,
@@ -465,7 +465,7 @@ pub struct SnapshotId {
 impl SnapshotId {
     /// Sets `end_offset` to the passed value.
     ///
-    ///
+    /// The end offset of the snapshot.
     ///
     /// Supported API versions: 0-1
     pub fn with_end_offset(mut self, value: i64) -> Self {
@@ -474,7 +474,7 @@ impl SnapshotId {
     }
     /// Sets `epoch` to the passed value.
     ///
-    ///
+    /// The epoch of the snapshot.
     ///
     /// Supported API versions: 0-1
     pub fn with_epoch(mut self, value: i32) -> Self {
@@ -574,12 +574,12 @@ impl Message for SnapshotId {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct TopicSnapshot {
-    /// The name of the topic to fetch
+    /// The name of the topic to fetch.
     ///
     /// Supported API versions: 0-1
     pub name: super::TopicName,
 
-    /// The partitions to fetch
+    /// The partitions to fetch.
     ///
     /// Supported API versions: 0-1
     pub partitions: Vec<PartitionSnapshot>,
@@ -591,7 +591,7 @@ pub struct TopicSnapshot {
 impl TopicSnapshot {
     /// Sets `name` to the passed value.
     ///
-    /// The name of the topic to fetch
+    /// The name of the topic to fetch.
     ///
     /// Supported API versions: 0-1
     pub fn with_name(mut self, value: super::TopicName) -> Self {
@@ -600,7 +600,7 @@ impl TopicSnapshot {
     }
     /// Sets `partitions` to the passed value.
     ///
-    /// The partitions to fetch
+    /// The partitions to fetch.
     ///
     /// Supported API versions: 0-1
     pub fn with_partitions(mut self, value: Vec<PartitionSnapshot>) -> Self {

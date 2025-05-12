@@ -26,7 +26,7 @@ pub struct OffsetDeleteRequest {
     /// Supported API versions: 0
     pub group_id: super::GroupId,
 
-    /// The topics to delete offsets for
+    /// The topics to delete offsets for.
     ///
     /// Supported API versions: 0
     pub topics: Vec<OffsetDeleteRequestTopic>,
@@ -44,7 +44,7 @@ impl OffsetDeleteRequest {
     }
     /// Sets `topics` to the passed value.
     ///
-    /// The topics to delete offsets for
+    /// The topics to delete offsets for.
     ///
     /// Supported API versions: 0
     pub fn with_topics(mut self, value: Vec<OffsetDeleteRequestTopic>) -> Self {

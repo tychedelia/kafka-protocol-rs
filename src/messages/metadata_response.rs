@@ -17,39 +17,44 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-12
+/// Valid versions: 0-13
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct MetadataResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 3-12
+    /// Supported API versions: 3-13
     pub throttle_time_ms: i32,
 
     /// A list of brokers present in the cluster.
     ///
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub brokers: Vec<MetadataResponseBroker>,
 
     /// The cluster ID that responding broker belongs to.
     ///
-    /// Supported API versions: 2-12
+    /// Supported API versions: 2-13
     pub cluster_id: Option<StrBytes>,
 
     /// The ID of the controller broker.
     ///
-    /// Supported API versions: 1-12
+    /// Supported API versions: 1-13
     pub controller_id: super::BrokerId,
 
     /// Each topic in the response.
     ///
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub topics: Vec<MetadataResponseTopic>,
 
     /// 32-bit bitfield to represent authorized operations for this cluster.
     ///
     /// Supported API versions: 8-10
     pub cluster_authorized_operations: i32,
+
+    /// The top-level error code, or 0 if there was no error.
+    ///
+    /// Supported API versions: 13
+    pub error_code: i16,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
@@ -60,7 +65,7 @@ impl MetadataResponse {
     ///
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 3-12
+    /// Supported API versions: 3-13
     pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
         self.throttle_time_ms = value;
         self
@@ -69,7 +74,7 @@ impl MetadataResponse {
     ///
     /// A list of brokers present in the cluster.
     ///
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub fn with_brokers(mut self, value: Vec<MetadataResponseBroker>) -> Self {
         self.brokers = value;
         self
@@ -78,7 +83,7 @@ impl MetadataResponse {
     ///
     /// The cluster ID that responding broker belongs to.
     ///
-    /// Supported API versions: 2-12
+    /// Supported API versions: 2-13
     pub fn with_cluster_id(mut self, value: Option<StrBytes>) -> Self {
         self.cluster_id = value;
         self
@@ -87,7 +92,7 @@ impl MetadataResponse {
     ///
     /// The ID of the controller broker.
     ///
-    /// Supported API versions: 1-12
+    /// Supported API versions: 1-13
     pub fn with_controller_id(mut self, value: super::BrokerId) -> Self {
         self.controller_id = value;
         self
@@ -96,7 +101,7 @@ impl MetadataResponse {
     ///
     /// Each topic in the response.
     ///
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub fn with_topics(mut self, value: Vec<MetadataResponseTopic>) -> Self {
         self.topics = value;
         self
@@ -108,6 +113,15 @@ impl MetadataResponse {
     /// Supported API versions: 8-10
     pub fn with_cluster_authorized_operations(mut self, value: i32) -> Self {
         self.cluster_authorized_operations = value;
+        self
+    }
+    /// Sets `error_code` to the passed value.
+    ///
+    /// The top-level error code, or 0 if there was no error.
+    ///
+    /// Supported API versions: 13
+    pub fn with_error_code(mut self, value: i16) -> Self {
+        self.error_code = value;
         self
     }
     /// Sets unknown_tagged_fields to the passed value.
@@ -125,7 +139,7 @@ impl MetadataResponse {
 #[cfg(feature = "broker")]
 impl Encodable for MetadataResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 12 {
+        if version < 0 || version > 13 {
             bail!("specified version not supported by this message type");
         }
         if version >= 3 {
@@ -157,6 +171,9 @@ impl Encodable for MetadataResponse {
             if self.cluster_authorized_operations != -2147483648 {
                 bail!("A field is set that is not available on the selected protocol version");
             }
+        }
+        if version >= 13 {
+            types::Int16.encode(buf, &self.error_code)?;
         }
         if version >= 9 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -206,6 +223,9 @@ impl Encodable for MetadataResponse {
                 bail!("A field is set that is not available on the selected protocol version");
             }
         }
+        if version >= 13 {
+            total_size += types::Int16.compute_size(&self.error_code)?;
+        }
         if version >= 9 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
@@ -225,7 +245,7 @@ impl Encodable for MetadataResponse {
 #[cfg(feature = "client")]
 impl Decodable for MetadataResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 12 {
+        if version < 0 || version > 13 {
             bail!("specified version not supported by this message type");
         }
         let throttle_time_ms = if version >= 3 {
@@ -262,6 +282,11 @@ impl Decodable for MetadataResponse {
         } else {
             -2147483648
         };
+        let error_code = if version >= 13 {
+            types::Int16.decode(buf)?
+        } else {
+            0
+        };
         let mut unknown_tagged_fields = BTreeMap::new();
         if version >= 9 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
@@ -279,6 +304,7 @@ impl Decodable for MetadataResponse {
             controller_id,
             topics,
             cluster_authorized_operations,
+            error_code,
             unknown_tagged_fields,
         })
     }
@@ -293,38 +319,39 @@ impl Default for MetadataResponse {
             controller_id: (-1).into(),
             topics: Default::default(),
             cluster_authorized_operations: -2147483648,
+            error_code: 0,
             unknown_tagged_fields: BTreeMap::new(),
         }
     }
 }
 
 impl Message for MetadataResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 12 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 13 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-12
+/// Valid versions: 0-13
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct MetadataResponseBroker {
     /// The broker ID.
     ///
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub node_id: super::BrokerId,
 
     /// The broker hostname.
     ///
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub host: StrBytes,
 
     /// The broker port.
     ///
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub port: i32,
 
     /// The rack of the broker, or null if it has not been assigned to a rack.
     ///
-    /// Supported API versions: 1-12
+    /// Supported API versions: 1-13
     pub rack: Option<StrBytes>,
 
     /// Other tagged fields
@@ -336,7 +363,7 @@ impl MetadataResponseBroker {
     ///
     /// The broker ID.
     ///
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub fn with_node_id(mut self, value: super::BrokerId) -> Self {
         self.node_id = value;
         self
@@ -345,7 +372,7 @@ impl MetadataResponseBroker {
     ///
     /// The broker hostname.
     ///
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub fn with_host(mut self, value: StrBytes) -> Self {
         self.host = value;
         self
@@ -354,7 +381,7 @@ impl MetadataResponseBroker {
     ///
     /// The broker port.
     ///
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub fn with_port(mut self, value: i32) -> Self {
         self.port = value;
         self
@@ -363,7 +390,7 @@ impl MetadataResponseBroker {
     ///
     /// The rack of the broker, or null if it has not been assigned to a rack.
     ///
-    /// Supported API versions: 1-12
+    /// Supported API versions: 1-13
     pub fn with_rack(mut self, value: Option<StrBytes>) -> Self {
         self.rack = value;
         self
@@ -383,7 +410,7 @@ impl MetadataResponseBroker {
 #[cfg(feature = "broker")]
 impl Encodable for MetadataResponseBroker {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 12 {
+        if version < 0 || version > 13 {
             bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.node_id)?;
@@ -449,7 +476,7 @@ impl Encodable for MetadataResponseBroker {
 #[cfg(feature = "client")]
 impl Decodable for MetadataResponseBroker {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 12 {
+        if version < 0 || version > 13 {
             bail!("specified version not supported by this message type");
         }
         let node_id = types::Int32.decode(buf)?;
@@ -501,47 +528,47 @@ impl Default for MetadataResponseBroker {
 }
 
 impl Message for MetadataResponseBroker {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 12 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 13 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-12
+/// Valid versions: 0-13
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct MetadataResponsePartition {
     /// The partition error, or 0 if there was no error.
     ///
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub error_code: i16,
 
     /// The partition index.
     ///
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub partition_index: i32,
 
     /// The ID of the leader broker.
     ///
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub leader_id: super::BrokerId,
 
     /// The leader epoch of this partition.
     ///
-    /// Supported API versions: 7-12
+    /// Supported API versions: 7-13
     pub leader_epoch: i32,
 
     /// The set of all nodes that host this partition.
     ///
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub replica_nodes: Vec<super::BrokerId>,
 
     /// The set of nodes that are in sync with the leader for this partition.
     ///
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub isr_nodes: Vec<super::BrokerId>,
 
     /// The set of offline replicas of this partition.
     ///
-    /// Supported API versions: 5-12
+    /// Supported API versions: 5-13
     pub offline_replicas: Vec<super::BrokerId>,
 
     /// Other tagged fields
@@ -553,7 +580,7 @@ impl MetadataResponsePartition {
     ///
     /// The partition error, or 0 if there was no error.
     ///
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub fn with_error_code(mut self, value: i16) -> Self {
         self.error_code = value;
         self
@@ -562,7 +589,7 @@ impl MetadataResponsePartition {
     ///
     /// The partition index.
     ///
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub fn with_partition_index(mut self, value: i32) -> Self {
         self.partition_index = value;
         self
@@ -571,7 +598,7 @@ impl MetadataResponsePartition {
     ///
     /// The ID of the leader broker.
     ///
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub fn with_leader_id(mut self, value: super::BrokerId) -> Self {
         self.leader_id = value;
         self
@@ -580,7 +607,7 @@ impl MetadataResponsePartition {
     ///
     /// The leader epoch of this partition.
     ///
-    /// Supported API versions: 7-12
+    /// Supported API versions: 7-13
     pub fn with_leader_epoch(mut self, value: i32) -> Self {
         self.leader_epoch = value;
         self
@@ -589,7 +616,7 @@ impl MetadataResponsePartition {
     ///
     /// The set of all nodes that host this partition.
     ///
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub fn with_replica_nodes(mut self, value: Vec<super::BrokerId>) -> Self {
         self.replica_nodes = value;
         self
@@ -598,7 +625,7 @@ impl MetadataResponsePartition {
     ///
     /// The set of nodes that are in sync with the leader for this partition.
     ///
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub fn with_isr_nodes(mut self, value: Vec<super::BrokerId>) -> Self {
         self.isr_nodes = value;
         self
@@ -607,7 +634,7 @@ impl MetadataResponsePartition {
     ///
     /// The set of offline replicas of this partition.
     ///
-    /// Supported API versions: 5-12
+    /// Supported API versions: 5-13
     pub fn with_offline_replicas(mut self, value: Vec<super::BrokerId>) -> Self {
         self.offline_replicas = value;
         self
@@ -627,7 +654,7 @@ impl MetadataResponsePartition {
 #[cfg(feature = "broker")]
 impl Encodable for MetadataResponsePartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 12 {
+        if version < 0 || version > 13 {
             bail!("specified version not supported by this message type");
         }
         types::Int16.encode(buf, &self.error_code)?;
@@ -712,7 +739,7 @@ impl Encodable for MetadataResponsePartition {
 #[cfg(feature = "client")]
 impl Decodable for MetadataResponsePartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 12 {
+        if version < 0 || version > 13 {
             bail!("specified version not supported by this message type");
         }
         let error_code = types::Int16.decode(buf)?;
@@ -781,42 +808,42 @@ impl Default for MetadataResponsePartition {
 }
 
 impl Message for MetadataResponsePartition {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 12 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 13 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-12
+/// Valid versions: 0-13
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct MetadataResponseTopic {
     /// The topic error, or 0 if there was no error.
     ///
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub error_code: i16,
 
     /// The topic name. Null for non-existing topics queried by ID. This is never null when ErrorCode is zero. One of Name and TopicId is always populated.
     ///
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub name: Option<super::TopicName>,
 
     /// The topic id. Zero for non-existing topics queried by name. This is never zero when ErrorCode is zero. One of Name and TopicId is always populated.
     ///
-    /// Supported API versions: 10-12
+    /// Supported API versions: 10-13
     pub topic_id: Uuid,
 
     /// True if the topic is internal.
     ///
-    /// Supported API versions: 1-12
+    /// Supported API versions: 1-13
     pub is_internal: bool,
 
     /// Each partition in the topic.
     ///
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub partitions: Vec<MetadataResponsePartition>,
 
     /// 32-bit bitfield to represent authorized operations for this topic.
     ///
-    /// Supported API versions: 8-12
+    /// Supported API versions: 8-13
     pub topic_authorized_operations: i32,
 
     /// Other tagged fields
@@ -828,7 +855,7 @@ impl MetadataResponseTopic {
     ///
     /// The topic error, or 0 if there was no error.
     ///
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub fn with_error_code(mut self, value: i16) -> Self {
         self.error_code = value;
         self
@@ -837,7 +864,7 @@ impl MetadataResponseTopic {
     ///
     /// The topic name. Null for non-existing topics queried by ID. This is never null when ErrorCode is zero. One of Name and TopicId is always populated.
     ///
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub fn with_name(mut self, value: Option<super::TopicName>) -> Self {
         self.name = value;
         self
@@ -846,7 +873,7 @@ impl MetadataResponseTopic {
     ///
     /// The topic id. Zero for non-existing topics queried by name. This is never zero when ErrorCode is zero. One of Name and TopicId is always populated.
     ///
-    /// Supported API versions: 10-12
+    /// Supported API versions: 10-13
     pub fn with_topic_id(mut self, value: Uuid) -> Self {
         self.topic_id = value;
         self
@@ -855,7 +882,7 @@ impl MetadataResponseTopic {
     ///
     /// True if the topic is internal.
     ///
-    /// Supported API versions: 1-12
+    /// Supported API versions: 1-13
     pub fn with_is_internal(mut self, value: bool) -> Self {
         self.is_internal = value;
         self
@@ -864,7 +891,7 @@ impl MetadataResponseTopic {
     ///
     /// Each partition in the topic.
     ///
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub fn with_partitions(mut self, value: Vec<MetadataResponsePartition>) -> Self {
         self.partitions = value;
         self
@@ -873,7 +900,7 @@ impl MetadataResponseTopic {
     ///
     /// 32-bit bitfield to represent authorized operations for this topic.
     ///
-    /// Supported API versions: 8-12
+    /// Supported API versions: 8-13
     pub fn with_topic_authorized_operations(mut self, value: i32) -> Self {
         self.topic_authorized_operations = value;
         self
@@ -893,7 +920,7 @@ impl MetadataResponseTopic {
 #[cfg(feature = "broker")]
 impl Encodable for MetadataResponseTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 12 {
+        if version < 0 || version > 13 {
             bail!("specified version not supported by this message type");
         }
         types::Int16.encode(buf, &self.error_code)?;
@@ -980,7 +1007,7 @@ impl Encodable for MetadataResponseTopic {
 #[cfg(feature = "client")]
 impl Decodable for MetadataResponseTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 12 {
+        if version < 0 || version > 13 {
             bail!("specified version not supported by this message type");
         }
         let error_code = types::Int16.decode(buf)?;
@@ -1046,7 +1073,7 @@ impl Default for MetadataResponseTopic {
 }
 
 impl Message for MetadataResponseTopic {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 12 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 13 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 

@@ -17,18 +17,18 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-7
+/// Valid versions: 2-7
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct CreatableReplicaAssignment {
     /// The partition index.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 2-7
     pub partition_index: i32,
 
     /// The brokers to place the partition on.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 2-7
     pub broker_ids: Vec<super::BrokerId>,
 
     /// Other tagged fields
@@ -40,7 +40,7 @@ impl CreatableReplicaAssignment {
     ///
     /// The partition index.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 2-7
     pub fn with_partition_index(mut self, value: i32) -> Self {
         self.partition_index = value;
         self
@@ -49,7 +49,7 @@ impl CreatableReplicaAssignment {
     ///
     /// The brokers to place the partition on.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 2-7
     pub fn with_broker_ids(mut self, value: Vec<super::BrokerId>) -> Self {
         self.broker_ids = value;
         self
@@ -69,7 +69,7 @@ impl CreatableReplicaAssignment {
 #[cfg(feature = "client")]
 impl Encodable for CreatableReplicaAssignment {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 7 {
+        if version < 2 || version > 7 {
             bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.partition_index)?;
@@ -119,7 +119,7 @@ impl Encodable for CreatableReplicaAssignment {
 #[cfg(feature = "broker")]
 impl Decodable for CreatableReplicaAssignment {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 7 {
+        if version < 2 || version > 7 {
             bail!("specified version not supported by this message type");
         }
         let partition_index = types::Int32.decode(buf)?;
@@ -157,37 +157,37 @@ impl Default for CreatableReplicaAssignment {
 }
 
 impl Message for CreatableReplicaAssignment {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 7 };
-    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 1 });
+    const VERSIONS: VersionRange = VersionRange { min: 2, max: 7 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-7
+/// Valid versions: 2-7
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct CreatableTopic {
     /// The topic name.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 2-7
     pub name: super::TopicName,
 
     /// The number of partitions to create in the topic, or -1 if we are either specifying a manual partition assignment or using the default partitions.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 2-7
     pub num_partitions: i32,
 
     /// The number of replicas to create for each partition in the topic, or -1 if we are either specifying a manual partition assignment or using the default replication factor.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 2-7
     pub replication_factor: i16,
 
     /// The manual partition assignment, or the empty array if we are using automatic assignment.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 2-7
     pub assignments: Vec<CreatableReplicaAssignment>,
 
     /// The custom topic configurations to set.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 2-7
     pub configs: Vec<CreatableTopicConfig>,
 
     /// Other tagged fields
@@ -199,7 +199,7 @@ impl CreatableTopic {
     ///
     /// The topic name.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 2-7
     pub fn with_name(mut self, value: super::TopicName) -> Self {
         self.name = value;
         self
@@ -208,7 +208,7 @@ impl CreatableTopic {
     ///
     /// The number of partitions to create in the topic, or -1 if we are either specifying a manual partition assignment or using the default partitions.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 2-7
     pub fn with_num_partitions(mut self, value: i32) -> Self {
         self.num_partitions = value;
         self
@@ -217,7 +217,7 @@ impl CreatableTopic {
     ///
     /// The number of replicas to create for each partition in the topic, or -1 if we are either specifying a manual partition assignment or using the default replication factor.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 2-7
     pub fn with_replication_factor(mut self, value: i16) -> Self {
         self.replication_factor = value;
         self
@@ -226,7 +226,7 @@ impl CreatableTopic {
     ///
     /// The manual partition assignment, or the empty array if we are using automatic assignment.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 2-7
     pub fn with_assignments(mut self, value: Vec<CreatableReplicaAssignment>) -> Self {
         self.assignments = value;
         self
@@ -235,7 +235,7 @@ impl CreatableTopic {
     ///
     /// The custom topic configurations to set.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 2-7
     pub fn with_configs(mut self, value: Vec<CreatableTopicConfig>) -> Self {
         self.configs = value;
         self
@@ -255,7 +255,7 @@ impl CreatableTopic {
 #[cfg(feature = "client")]
 impl Encodable for CreatableTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 7 {
+        if version < 2 || version > 7 {
             bail!("specified version not supported by this message type");
         }
         if version >= 5 {
@@ -330,7 +330,7 @@ impl Encodable for CreatableTopic {
 #[cfg(feature = "broker")]
 impl Decodable for CreatableTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 7 {
+        if version < 2 || version > 7 {
             bail!("specified version not supported by this message type");
         }
         let name = if version >= 5 {
@@ -385,22 +385,22 @@ impl Default for CreatableTopic {
 }
 
 impl Message for CreatableTopic {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 7 };
-    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 1 });
+    const VERSIONS: VersionRange = VersionRange { min: 2, max: 7 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-7
+/// Valid versions: 2-7
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct CreatableTopicConfig {
     /// The configuration name.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 2-7
     pub name: StrBytes,
 
     /// The configuration value.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 2-7
     pub value: Option<StrBytes>,
 
     /// Other tagged fields
@@ -412,7 +412,7 @@ impl CreatableTopicConfig {
     ///
     /// The configuration name.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 2-7
     pub fn with_name(mut self, value: StrBytes) -> Self {
         self.name = value;
         self
@@ -421,7 +421,7 @@ impl CreatableTopicConfig {
     ///
     /// The configuration value.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 2-7
     pub fn with_value(mut self, value: Option<StrBytes>) -> Self {
         self.value = value;
         self
@@ -441,7 +441,7 @@ impl CreatableTopicConfig {
 #[cfg(feature = "client")]
 impl Encodable for CreatableTopicConfig {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 7 {
+        if version < 2 || version > 7 {
             bail!("specified version not supported by this message type");
         }
         if version >= 5 {
@@ -499,7 +499,7 @@ impl Encodable for CreatableTopicConfig {
 #[cfg(feature = "broker")]
 impl Decodable for CreatableTopicConfig {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 7 {
+        if version < 2 || version > 7 {
             bail!("specified version not supported by this message type");
         }
         let name = if version >= 5 {
@@ -541,27 +541,27 @@ impl Default for CreatableTopicConfig {
 }
 
 impl Message for CreatableTopicConfig {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 7 };
-    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 1 });
+    const VERSIONS: VersionRange = VersionRange { min: 2, max: 7 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-7
+/// Valid versions: 2-7
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct CreateTopicsRequest {
     /// The topics to create.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 2-7
     pub topics: Vec<CreatableTopic>,
 
     /// How long to wait in milliseconds before timing out the request.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 2-7
     pub timeout_ms: i32,
 
     /// If true, check that the topics can be created as specified, but don't create anything.
     ///
-    /// Supported API versions: 1-7
+    /// Supported API versions: 2-7
     pub validate_only: bool,
 
     /// Other tagged fields
@@ -573,7 +573,7 @@ impl CreateTopicsRequest {
     ///
     /// The topics to create.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 2-7
     pub fn with_topics(mut self, value: Vec<CreatableTopic>) -> Self {
         self.topics = value;
         self
@@ -582,7 +582,7 @@ impl CreateTopicsRequest {
     ///
     /// How long to wait in milliseconds before timing out the request.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 2-7
     pub fn with_timeout_ms(mut self, value: i32) -> Self {
         self.timeout_ms = value;
         self
@@ -591,7 +591,7 @@ impl CreateTopicsRequest {
     ///
     /// If true, check that the topics can be created as specified, but don't create anything.
     ///
-    /// Supported API versions: 1-7
+    /// Supported API versions: 2-7
     pub fn with_validate_only(mut self, value: bool) -> Self {
         self.validate_only = value;
         self
@@ -611,7 +611,7 @@ impl CreateTopicsRequest {
 #[cfg(feature = "client")]
 impl Encodable for CreateTopicsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 7 {
+        if version < 2 || version > 7 {
             bail!("specified version not supported by this message type");
         }
         if version >= 5 {
@@ -620,13 +620,7 @@ impl Encodable for CreateTopicsRequest {
             types::Array(types::Struct { version }).encode(buf, &self.topics)?;
         }
         types::Int32.encode(buf, &self.timeout_ms)?;
-        if version >= 1 {
-            types::Boolean.encode(buf, &self.validate_only)?;
-        } else {
-            if self.validate_only {
-                bail!("A field is set that is not available on the selected protocol version");
-            }
-        }
+        types::Boolean.encode(buf, &self.validate_only)?;
         if version >= 5 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
@@ -650,13 +644,7 @@ impl Encodable for CreateTopicsRequest {
             total_size += types::Array(types::Struct { version }).compute_size(&self.topics)?;
         }
         total_size += types::Int32.compute_size(&self.timeout_ms)?;
-        if version >= 1 {
-            total_size += types::Boolean.compute_size(&self.validate_only)?;
-        } else {
-            if self.validate_only {
-                bail!("A field is set that is not available on the selected protocol version");
-            }
-        }
+        total_size += types::Boolean.compute_size(&self.validate_only)?;
         if version >= 5 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
@@ -676,7 +664,7 @@ impl Encodable for CreateTopicsRequest {
 #[cfg(feature = "broker")]
 impl Decodable for CreateTopicsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 7 {
+        if version < 2 || version > 7 {
             bail!("specified version not supported by this message type");
         }
         let topics = if version >= 5 {
@@ -685,11 +673,7 @@ impl Decodable for CreateTopicsRequest {
             types::Array(types::Struct { version }).decode(buf)?
         };
         let timeout_ms = types::Int32.decode(buf)?;
-        let validate_only = if version >= 1 {
-            types::Boolean.decode(buf)?
-        } else {
-            false
-        };
+        let validate_only = types::Boolean.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
         if version >= 5 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
@@ -721,8 +705,8 @@ impl Default for CreateTopicsRequest {
 }
 
 impl Message for CreateTopicsRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 7 };
-    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 1 });
+    const VERSIONS: VersionRange = VersionRange { min: 2, max: 7 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 impl HeaderVersion for CreateTopicsRequest {

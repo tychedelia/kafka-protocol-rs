@@ -17,18 +17,18 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-3
+/// Valid versions: 1-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct DeleteAclsFilter {
     /// The resource type.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub resource_type_filter: i8,
 
     /// The resource name.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub resource_name_filter: Option<StrBytes>,
 
     /// The pattern type.
@@ -38,22 +38,22 @@ pub struct DeleteAclsFilter {
 
     /// The principal filter, or null to accept all principals.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub principal_filter: Option<StrBytes>,
 
     /// The host filter, or null to accept all hosts.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub host_filter: Option<StrBytes>,
 
     /// The ACL operation.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub operation: i8,
 
     /// The permission type.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub permission_type: i8,
 
     /// Other tagged fields
@@ -65,7 +65,7 @@ impl DeleteAclsFilter {
     ///
     /// The resource type.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_resource_type_filter(mut self, value: i8) -> Self {
         self.resource_type_filter = value;
         self
@@ -74,7 +74,7 @@ impl DeleteAclsFilter {
     ///
     /// The resource name.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_resource_name_filter(mut self, value: Option<StrBytes>) -> Self {
         self.resource_name_filter = value;
         self
@@ -92,7 +92,7 @@ impl DeleteAclsFilter {
     ///
     /// The principal filter, or null to accept all principals.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_principal_filter(mut self, value: Option<StrBytes>) -> Self {
         self.principal_filter = value;
         self
@@ -101,7 +101,7 @@ impl DeleteAclsFilter {
     ///
     /// The host filter, or null to accept all hosts.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_host_filter(mut self, value: Option<StrBytes>) -> Self {
         self.host_filter = value;
         self
@@ -110,7 +110,7 @@ impl DeleteAclsFilter {
     ///
     /// The ACL operation.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_operation(mut self, value: i8) -> Self {
         self.operation = value;
         self
@@ -119,7 +119,7 @@ impl DeleteAclsFilter {
     ///
     /// The permission type.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_permission_type(mut self, value: i8) -> Self {
         self.permission_type = value;
         self
@@ -139,7 +139,7 @@ impl DeleteAclsFilter {
 #[cfg(feature = "client")]
 impl Encodable for DeleteAclsFilter {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         types::Int8.encode(buf, &self.resource_type_filter)?;
@@ -148,13 +148,7 @@ impl Encodable for DeleteAclsFilter {
         } else {
             types::String.encode(buf, &self.resource_name_filter)?;
         }
-        if version >= 1 {
-            types::Int8.encode(buf, &self.pattern_type_filter)?;
-        } else {
-            if self.pattern_type_filter != 3 {
-                bail!("A field is set that is not available on the selected protocol version");
-            }
-        }
+        types::Int8.encode(buf, &self.pattern_type_filter)?;
         if version >= 2 {
             types::CompactString.encode(buf, &self.principal_filter)?;
         } else {
@@ -189,13 +183,7 @@ impl Encodable for DeleteAclsFilter {
         } else {
             total_size += types::String.compute_size(&self.resource_name_filter)?;
         }
-        if version >= 1 {
-            total_size += types::Int8.compute_size(&self.pattern_type_filter)?;
-        } else {
-            if self.pattern_type_filter != 3 {
-                bail!("A field is set that is not available on the selected protocol version");
-            }
-        }
+        total_size += types::Int8.compute_size(&self.pattern_type_filter)?;
         if version >= 2 {
             total_size += types::CompactString.compute_size(&self.principal_filter)?;
         } else {
@@ -227,7 +215,7 @@ impl Encodable for DeleteAclsFilter {
 #[cfg(feature = "broker")]
 impl Decodable for DeleteAclsFilter {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         let resource_type_filter = types::Int8.decode(buf)?;
@@ -236,11 +224,7 @@ impl Decodable for DeleteAclsFilter {
         } else {
             types::String.decode(buf)?
         };
-        let pattern_type_filter = if version >= 1 {
-            types::Int8.decode(buf)?
-        } else {
-            3
-        };
+        let pattern_type_filter = types::Int8.decode(buf)?;
         let principal_filter = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
@@ -292,17 +276,17 @@ impl Default for DeleteAclsFilter {
 }
 
 impl Message for DeleteAclsFilter {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
-    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 0 });
+    const VERSIONS: VersionRange = VersionRange { min: 1, max: 3 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-3
+/// Valid versions: 1-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct DeleteAclsRequest {
     /// The filters to use when deleting ACLs.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub filters: Vec<DeleteAclsFilter>,
 
     /// Other tagged fields
@@ -314,7 +298,7 @@ impl DeleteAclsRequest {
     ///
     /// The filters to use when deleting ACLs.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_filters(mut self, value: Vec<DeleteAclsFilter>) -> Self {
         self.filters = value;
         self
@@ -334,7 +318,7 @@ impl DeleteAclsRequest {
 #[cfg(feature = "client")]
 impl Encodable for DeleteAclsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         if version >= 2 {
@@ -383,7 +367,7 @@ impl Encodable for DeleteAclsRequest {
 #[cfg(feature = "broker")]
 impl Decodable for DeleteAclsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         let filters = if version >= 2 {
@@ -418,8 +402,8 @@ impl Default for DeleteAclsRequest {
 }
 
 impl Message for DeleteAclsRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
-    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 0 });
+    const VERSIONS: VersionRange = VersionRange { min: 1, max: 3 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 impl HeaderVersion for DeleteAclsRequest {

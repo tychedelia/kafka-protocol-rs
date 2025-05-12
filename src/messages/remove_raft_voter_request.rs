@@ -21,17 +21,17 @@ use crate::protocol::{
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct RemoveRaftVoterRequest {
-    ///
+    /// The cluster id of the request.
     ///
     /// Supported API versions: 0
     pub cluster_id: Option<StrBytes>,
 
-    /// The replica id of the voter getting removed from the topic partition
+    /// The replica id of the voter getting removed from the topic partition.
     ///
     /// Supported API versions: 0
     pub voter_id: i32,
 
-    /// The directory id of the voter getting removed from the topic partition
+    /// The directory id of the voter getting removed from the topic partition.
     ///
     /// Supported API versions: 0
     pub voter_directory_id: Uuid,
@@ -43,7 +43,7 @@ pub struct RemoveRaftVoterRequest {
 impl RemoveRaftVoterRequest {
     /// Sets `cluster_id` to the passed value.
     ///
-    ///
+    /// The cluster id of the request.
     ///
     /// Supported API versions: 0
     pub fn with_cluster_id(mut self, value: Option<StrBytes>) -> Self {
@@ -52,7 +52,7 @@ impl RemoveRaftVoterRequest {
     }
     /// Sets `voter_id` to the passed value.
     ///
-    /// The replica id of the voter getting removed from the topic partition
+    /// The replica id of the voter getting removed from the topic partition.
     ///
     /// Supported API versions: 0
     pub fn with_voter_id(mut self, value: i32) -> Self {
@@ -61,7 +61,7 @@ impl RemoveRaftVoterRequest {
     }
     /// Sets `voter_directory_id` to the passed value.
     ///
-    /// The directory id of the voter getting removed from the topic partition
+    /// The directory id of the voter getting removed from the topic partition.
     ///
     /// Supported API versions: 0
     pub fn with_voter_directory_id(mut self, value: Uuid) -> Self {

@@ -36,7 +36,7 @@ pub struct FetchSnapshotResponse {
     /// Supported API versions: 0-1
     pub topics: Vec<TopicSnapshot>,
 
-    /// Endpoints for all current-leaders enumerated in PartitionSnapshot
+    /// Endpoints for all current-leaders enumerated in PartitionSnapshot.
     ///
     /// Supported API versions: 1
     pub node_endpoints: Vec<NodeEndpoint>,
@@ -75,7 +75,7 @@ impl FetchSnapshotResponse {
     }
     /// Sets `node_endpoints` to the passed value.
     ///
-    /// Endpoints for all current-leaders enumerated in PartitionSnapshot
+    /// Endpoints for all current-leaders enumerated in PartitionSnapshot.
     ///
     /// Supported API versions: 1
     pub fn with_node_endpoints(mut self, value: Vec<NodeEndpoint>) -> Self {
@@ -238,7 +238,7 @@ pub struct LeaderIdAndEpoch {
     /// Supported API versions: 0-1
     pub leader_id: super::BrokerId,
 
-    /// The latest known leader epoch
+    /// The latest known leader epoch.
     ///
     /// Supported API versions: 0-1
     pub leader_epoch: i32,
@@ -259,7 +259,7 @@ impl LeaderIdAndEpoch {
     }
     /// Sets `leader_epoch` to the passed value.
     ///
-    /// The latest known leader epoch
+    /// The latest known leader epoch.
     ///
     /// Supported API versions: 0-1
     pub fn with_leader_epoch(mut self, value: i32) -> Self {
@@ -359,17 +359,17 @@ impl Message for LeaderIdAndEpoch {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct NodeEndpoint {
-    /// The ID of the associated node
+    /// The ID of the associated node.
     ///
     /// Supported API versions: 1
     pub node_id: super::BrokerId,
 
-    /// The node's hostname
+    /// The node's hostname.
     ///
     /// Supported API versions: 1
     pub host: StrBytes,
 
-    /// The node's port
+    /// The node's port.
     ///
     /// Supported API versions: 1
     pub port: u16,
@@ -381,7 +381,7 @@ pub struct NodeEndpoint {
 impl NodeEndpoint {
     /// Sets `node_id` to the passed value.
     ///
-    /// The ID of the associated node
+    /// The ID of the associated node.
     ///
     /// Supported API versions: 1
     pub fn with_node_id(mut self, value: super::BrokerId) -> Self {
@@ -390,7 +390,7 @@ impl NodeEndpoint {
     }
     /// Sets `host` to the passed value.
     ///
-    /// The node's hostname
+    /// The node's hostname.
     ///
     /// Supported API versions: 1
     pub fn with_host(mut self, value: StrBytes) -> Self {
@@ -399,7 +399,7 @@ impl NodeEndpoint {
     }
     /// Sets `port` to the passed value.
     ///
-    /// The node's port
+    /// The node's port.
     ///
     /// Supported API versions: 1
     pub fn with_port(mut self, value: u16) -> Self {
@@ -562,12 +562,12 @@ pub struct PartitionSnapshot {
     /// Supported API versions: 0-1
     pub error_code: i16,
 
-    /// The snapshot endOffset and epoch fetched
+    /// The snapshot endOffset and epoch fetched.
     ///
     /// Supported API versions: 0-1
     pub snapshot_id: SnapshotId,
 
-    ///
+    /// The leader of the partition at the time of the snapshot.
     ///
     /// Supported API versions: 0-1
     pub current_leader: LeaderIdAndEpoch,
@@ -582,7 +582,7 @@ pub struct PartitionSnapshot {
     /// Supported API versions: 0-1
     pub position: i64,
 
-    /// Snapshot data in records format which may not be aligned on an offset boundary
+    /// Snapshot data in records format which may not be aligned on an offset boundary.
     ///
     /// Supported API versions: 0-1
     pub unaligned_records: Bytes,
@@ -612,7 +612,7 @@ impl PartitionSnapshot {
     }
     /// Sets `snapshot_id` to the passed value.
     ///
-    /// The snapshot endOffset and epoch fetched
+    /// The snapshot endOffset and epoch fetched.
     ///
     /// Supported API versions: 0-1
     pub fn with_snapshot_id(mut self, value: SnapshotId) -> Self {
@@ -621,7 +621,7 @@ impl PartitionSnapshot {
     }
     /// Sets `current_leader` to the passed value.
     ///
-    ///
+    /// The leader of the partition at the time of the snapshot.
     ///
     /// Supported API versions: 0-1
     pub fn with_current_leader(mut self, value: LeaderIdAndEpoch) -> Self {
@@ -648,7 +648,7 @@ impl PartitionSnapshot {
     }
     /// Sets `unaligned_records` to the passed value.
     ///
-    /// Snapshot data in records format which may not be aligned on an offset boundary
+    /// Snapshot data in records format which may not be aligned on an offset boundary.
     ///
     /// Supported API versions: 0-1
     pub fn with_unaligned_records(mut self, value: Bytes) -> Self {
@@ -808,12 +808,12 @@ impl Message for PartitionSnapshot {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct SnapshotId {
-    ///
+    /// The snapshot end offset.
     ///
     /// Supported API versions: 0-1
     pub end_offset: i64,
 
-    ///
+    /// The snapshot epoch.
     ///
     /// Supported API versions: 0-1
     pub epoch: i32,
@@ -825,7 +825,7 @@ pub struct SnapshotId {
 impl SnapshotId {
     /// Sets `end_offset` to the passed value.
     ///
-    ///
+    /// The snapshot end offset.
     ///
     /// Supported API versions: 0-1
     pub fn with_end_offset(mut self, value: i64) -> Self {
@@ -834,7 +834,7 @@ impl SnapshotId {
     }
     /// Sets `epoch` to the passed value.
     ///
-    ///
+    /// The snapshot epoch.
     ///
     /// Supported API versions: 0-1
     pub fn with_epoch(mut self, value: i32) -> Self {

@@ -17,7 +17,7 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-4
+/// Valid versions: 2-4
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct OffsetForLeaderEpochRequest {
@@ -28,7 +28,7 @@ pub struct OffsetForLeaderEpochRequest {
 
     /// Each topic to get offsets for.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 2-4
     pub topics: Vec<OffsetForLeaderTopic>,
 
     /// Other tagged fields
@@ -49,7 +49,7 @@ impl OffsetForLeaderEpochRequest {
     ///
     /// Each topic to get offsets for.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 2-4
     pub fn with_topics(mut self, value: Vec<OffsetForLeaderTopic>) -> Self {
         self.topics = value;
         self
@@ -69,7 +69,7 @@ impl OffsetForLeaderEpochRequest {
 #[cfg(feature = "client")]
 impl Encodable for OffsetForLeaderEpochRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 4 {
+        if version < 2 || version > 4 {
             bail!("specified version not supported by this message type");
         }
         if version >= 3 {
@@ -124,7 +124,7 @@ impl Encodable for OffsetForLeaderEpochRequest {
 #[cfg(feature = "broker")]
 impl Decodable for OffsetForLeaderEpochRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 4 {
+        if version < 2 || version > 4 {
             bail!("specified version not supported by this message type");
         }
         let replica_id = if version >= 3 {
@@ -166,17 +166,17 @@ impl Default for OffsetForLeaderEpochRequest {
 }
 
 impl Message for OffsetForLeaderEpochRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
-    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 1 });
+    const VERSIONS: VersionRange = VersionRange { min: 2, max: 4 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-4
+/// Valid versions: 2-4
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct OffsetForLeaderPartition {
     /// The partition index.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 2-4
     pub partition: i32,
 
     /// An epoch used to fence consumers/replicas with old metadata. If the epoch provided by the client is larger than the current epoch known to the broker, then the UNKNOWN_LEADER_EPOCH error code will be returned. If the provided epoch is smaller, then the FENCED_LEADER_EPOCH error code will be returned.
@@ -186,7 +186,7 @@ pub struct OffsetForLeaderPartition {
 
     /// The epoch to look up an offset for.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 2-4
     pub leader_epoch: i32,
 
     /// Other tagged fields
@@ -198,7 +198,7 @@ impl OffsetForLeaderPartition {
     ///
     /// The partition index.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 2-4
     pub fn with_partition(mut self, value: i32) -> Self {
         self.partition = value;
         self
@@ -216,7 +216,7 @@ impl OffsetForLeaderPartition {
     ///
     /// The epoch to look up an offset for.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 2-4
     pub fn with_leader_epoch(mut self, value: i32) -> Self {
         self.leader_epoch = value;
         self
@@ -236,13 +236,11 @@ impl OffsetForLeaderPartition {
 #[cfg(feature = "client")]
 impl Encodable for OffsetForLeaderPartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 4 {
+        if version < 2 || version > 4 {
             bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.partition)?;
-        if version >= 2 {
-            types::Int32.encode(buf, &self.current_leader_epoch)?;
-        }
+        types::Int32.encode(buf, &self.current_leader_epoch)?;
         types::Int32.encode(buf, &self.leader_epoch)?;
         if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -261,9 +259,7 @@ impl Encodable for OffsetForLeaderPartition {
     fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.partition)?;
-        if version >= 2 {
-            total_size += types::Int32.compute_size(&self.current_leader_epoch)?;
-        }
+        total_size += types::Int32.compute_size(&self.current_leader_epoch)?;
         total_size += types::Int32.compute_size(&self.leader_epoch)?;
         if version >= 4 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -284,15 +280,11 @@ impl Encodable for OffsetForLeaderPartition {
 #[cfg(feature = "broker")]
 impl Decodable for OffsetForLeaderPartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 4 {
+        if version < 2 || version > 4 {
             bail!("specified version not supported by this message type");
         }
         let partition = types::Int32.decode(buf)?;
-        let current_leader_epoch = if version >= 2 {
-            types::Int32.decode(buf)?
-        } else {
-            -1
-        };
+        let current_leader_epoch = types::Int32.decode(buf)?;
         let leader_epoch = types::Int32.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
         if version >= 4 {
@@ -325,22 +317,22 @@ impl Default for OffsetForLeaderPartition {
 }
 
 impl Message for OffsetForLeaderPartition {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
-    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 1 });
+    const VERSIONS: VersionRange = VersionRange { min: 2, max: 4 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-4
+/// Valid versions: 2-4
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct OffsetForLeaderTopic {
     /// The topic name.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 2-4
     pub topic: super::TopicName,
 
     /// Each partition to get offsets for.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 2-4
     pub partitions: Vec<OffsetForLeaderPartition>,
 
     /// Other tagged fields
@@ -352,7 +344,7 @@ impl OffsetForLeaderTopic {
     ///
     /// The topic name.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 2-4
     pub fn with_topic(mut self, value: super::TopicName) -> Self {
         self.topic = value;
         self
@@ -361,7 +353,7 @@ impl OffsetForLeaderTopic {
     ///
     /// Each partition to get offsets for.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 2-4
     pub fn with_partitions(mut self, value: Vec<OffsetForLeaderPartition>) -> Self {
         self.partitions = value;
         self
@@ -381,7 +373,7 @@ impl OffsetForLeaderTopic {
 #[cfg(feature = "client")]
 impl Encodable for OffsetForLeaderTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 4 {
+        if version < 2 || version > 4 {
             bail!("specified version not supported by this message type");
         }
         if version >= 4 {
@@ -440,7 +432,7 @@ impl Encodable for OffsetForLeaderTopic {
 #[cfg(feature = "broker")]
 impl Decodable for OffsetForLeaderTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 4 {
+        if version < 2 || version > 4 {
             bail!("specified version not supported by this message type");
         }
         let topic = if version >= 4 {
@@ -482,8 +474,8 @@ impl Default for OffsetForLeaderTopic {
 }
 
 impl Message for OffsetForLeaderTopic {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
-    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 1 });
+    const VERSIONS: VersionRange = VersionRange { min: 2, max: 4 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 impl HeaderVersion for OffsetForLeaderEpochRequest {

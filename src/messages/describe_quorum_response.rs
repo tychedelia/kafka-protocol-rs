@@ -31,12 +31,12 @@ pub struct DescribeQuorumResponse {
     /// Supported API versions: 2
     pub error_message: Option<StrBytes>,
 
-    ///
+    /// The response from the describe quorum API.
     ///
     /// Supported API versions: 0-2
     pub topics: Vec<TopicData>,
 
-    ///
+    /// The nodes in the quorum.
     ///
     /// Supported API versions: 2
     pub nodes: Vec<Node>,
@@ -66,7 +66,7 @@ impl DescribeQuorumResponse {
     }
     /// Sets `topics` to the passed value.
     ///
-    ///
+    /// The response from the describe quorum API.
     ///
     /// Supported API versions: 0-2
     pub fn with_topics(mut self, value: Vec<TopicData>) -> Self {
@@ -75,7 +75,7 @@ impl DescribeQuorumResponse {
     }
     /// Sets `nodes` to the passed value.
     ///
-    ///
+    /// The nodes in the quorum.
     ///
     /// Supported API versions: 2
     pub fn with_nodes(mut self, value: Vec<Node>) -> Self {
@@ -210,17 +210,17 @@ impl Message for DescribeQuorumResponse {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct Listener {
-    /// The name of the endpoint
+    /// The name of the endpoint.
     ///
     /// Supported API versions: 2
     pub name: StrBytes,
 
-    /// The hostname
+    /// The hostname.
     ///
     /// Supported API versions: 2
     pub host: StrBytes,
 
-    /// The port
+    /// The port.
     ///
     /// Supported API versions: 2
     pub port: u16,
@@ -232,7 +232,7 @@ pub struct Listener {
 impl Listener {
     /// Sets `name` to the passed value.
     ///
-    /// The name of the endpoint
+    /// The name of the endpoint.
     ///
     /// Supported API versions: 2
     pub fn with_name(mut self, value: StrBytes) -> Self {
@@ -241,7 +241,7 @@ impl Listener {
     }
     /// Sets `host` to the passed value.
     ///
-    /// The hostname
+    /// The hostname.
     ///
     /// Supported API versions: 2
     pub fn with_host(mut self, value: StrBytes) -> Self {
@@ -250,7 +250,7 @@ impl Listener {
     }
     /// Sets `port` to the passed value.
     ///
-    /// The port
+    /// The port.
     ///
     /// Supported API versions: 2
     pub fn with_port(mut self, value: u16) -> Self {
@@ -403,12 +403,12 @@ impl Message for Listener {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct Node {
-    /// The ID of the associated node
+    /// The ID of the associated node.
     ///
     /// Supported API versions: 2
     pub node_id: super::BrokerId,
 
-    /// The listeners of this controller
+    /// The listeners of this controller.
     ///
     /// Supported API versions: 2
     pub listeners: Vec<Listener>,
@@ -420,7 +420,7 @@ pub struct Node {
 impl Node {
     /// Sets `node_id` to the passed value.
     ///
-    /// The ID of the associated node
+    /// The ID of the associated node.
     ///
     /// Supported API versions: 2
     pub fn with_node_id(mut self, value: super::BrokerId) -> Self {
@@ -429,7 +429,7 @@ impl Node {
     }
     /// Sets `listeners` to the passed value.
     ///
-    /// The listeners of this controller
+    /// The listeners of this controller.
     ///
     /// Supported API versions: 2
     pub fn with_listeners(mut self, value: Vec<Listener>) -> Self {
@@ -567,7 +567,7 @@ pub struct PartitionData {
     /// Supported API versions: 0-2
     pub partition_index: i32,
 
-    ///
+    /// The partition error code.
     ///
     /// Supported API versions: 0-2
     pub error_code: i16,
@@ -582,22 +582,22 @@ pub struct PartitionData {
     /// Supported API versions: 0-2
     pub leader_id: super::BrokerId,
 
-    /// The latest known leader epoch
+    /// The latest known leader epoch.
     ///
     /// Supported API versions: 0-2
     pub leader_epoch: i32,
 
-    ///
+    /// The high water mark.
     ///
     /// Supported API versions: 0-2
     pub high_watermark: i64,
 
-    ///
+    /// The current voters of the partition.
     ///
     /// Supported API versions: 0-2
     pub current_voters: Vec<ReplicaState>,
 
-    ///
+    /// The observers of the partition.
     ///
     /// Supported API versions: 0-2
     pub observers: Vec<ReplicaState>,
@@ -618,7 +618,7 @@ impl PartitionData {
     }
     /// Sets `error_code` to the passed value.
     ///
-    ///
+    /// The partition error code.
     ///
     /// Supported API versions: 0-2
     pub fn with_error_code(mut self, value: i16) -> Self {
@@ -645,7 +645,7 @@ impl PartitionData {
     }
     /// Sets `leader_epoch` to the passed value.
     ///
-    /// The latest known leader epoch
+    /// The latest known leader epoch.
     ///
     /// Supported API versions: 0-2
     pub fn with_leader_epoch(mut self, value: i32) -> Self {
@@ -654,7 +654,7 @@ impl PartitionData {
     }
     /// Sets `high_watermark` to the passed value.
     ///
-    ///
+    /// The high water mark.
     ///
     /// Supported API versions: 0-2
     pub fn with_high_watermark(mut self, value: i64) -> Self {
@@ -663,7 +663,7 @@ impl PartitionData {
     }
     /// Sets `current_voters` to the passed value.
     ///
-    ///
+    /// The current voters of the partition.
     ///
     /// Supported API versions: 0-2
     pub fn with_current_voters(mut self, value: Vec<ReplicaState>) -> Self {
@@ -672,7 +672,7 @@ impl PartitionData {
     }
     /// Sets `observers` to the passed value.
     ///
-    ///
+    /// The observers of the partition.
     ///
     /// Supported API versions: 0-2
     pub fn with_observers(mut self, value: Vec<ReplicaState>) -> Self {
@@ -812,27 +812,27 @@ impl Message for PartitionData {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct ReplicaState {
-    ///
+    /// The ID of the replica.
     ///
     /// Supported API versions: 0-2
     pub replica_id: super::BrokerId,
 
-    ///
+    /// The replica directory ID of the replica.
     ///
     /// Supported API versions: 2
     pub replica_directory_id: Uuid,
 
-    /// The last known log end offset of the follower or -1 if it is unknown
+    /// The last known log end offset of the follower or -1 if it is unknown.
     ///
     /// Supported API versions: 0-2
     pub log_end_offset: i64,
 
-    /// The last known leader wall clock time time when a follower fetched from the leader. This is reported as -1 both for the current leader or if it is unknown for a voter
+    /// The last known leader wall clock time time when a follower fetched from the leader. This is reported as -1 both for the current leader or if it is unknown for a voter.
     ///
     /// Supported API versions: 1-2
     pub last_fetch_timestamp: i64,
 
-    /// The leader wall clock append time of the offset for which the follower made the most recent fetch request. This is reported as the current time for the leader and -1 if unknown for a voter
+    /// The leader wall clock append time of the offset for which the follower made the most recent fetch request. This is reported as the current time for the leader and -1 if unknown for a voter.
     ///
     /// Supported API versions: 1-2
     pub last_caught_up_timestamp: i64,
@@ -844,7 +844,7 @@ pub struct ReplicaState {
 impl ReplicaState {
     /// Sets `replica_id` to the passed value.
     ///
-    ///
+    /// The ID of the replica.
     ///
     /// Supported API versions: 0-2
     pub fn with_replica_id(mut self, value: super::BrokerId) -> Self {
@@ -853,7 +853,7 @@ impl ReplicaState {
     }
     /// Sets `replica_directory_id` to the passed value.
     ///
-    ///
+    /// The replica directory ID of the replica.
     ///
     /// Supported API versions: 2
     pub fn with_replica_directory_id(mut self, value: Uuid) -> Self {
@@ -862,7 +862,7 @@ impl ReplicaState {
     }
     /// Sets `log_end_offset` to the passed value.
     ///
-    /// The last known log end offset of the follower or -1 if it is unknown
+    /// The last known log end offset of the follower or -1 if it is unknown.
     ///
     /// Supported API versions: 0-2
     pub fn with_log_end_offset(mut self, value: i64) -> Self {
@@ -871,7 +871,7 @@ impl ReplicaState {
     }
     /// Sets `last_fetch_timestamp` to the passed value.
     ///
-    /// The last known leader wall clock time time when a follower fetched from the leader. This is reported as -1 both for the current leader or if it is unknown for a voter
+    /// The last known leader wall clock time time when a follower fetched from the leader. This is reported as -1 both for the current leader or if it is unknown for a voter.
     ///
     /// Supported API versions: 1-2
     pub fn with_last_fetch_timestamp(mut self, value: i64) -> Self {
@@ -880,7 +880,7 @@ impl ReplicaState {
     }
     /// Sets `last_caught_up_timestamp` to the passed value.
     ///
-    /// The leader wall clock append time of the offset for which the follower made the most recent fetch request. This is reported as the current time for the leader and -1 if unknown for a voter
+    /// The leader wall clock append time of the offset for which the follower made the most recent fetch request. This is reported as the current time for the leader and -1 if unknown for a voter.
     ///
     /// Supported API versions: 1-2
     pub fn with_last_caught_up_timestamp(mut self, value: i64) -> Self {
@@ -1032,7 +1032,7 @@ pub struct TopicData {
     /// Supported API versions: 0-2
     pub topic_name: super::TopicName,
 
-    ///
+    /// The partition data.
     ///
     /// Supported API versions: 0-2
     pub partitions: Vec<PartitionData>,
@@ -1053,7 +1053,7 @@ impl TopicData {
     }
     /// Sets `partitions` to the passed value.
     ///
-    ///
+    /// The partition data.
     ///
     /// Supported API versions: 0-2
     pub fn with_partitions(mut self, value: Vec<PartitionData>) -> Self {

@@ -17,23 +17,23 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-3
+/// Valid versions: 2-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct AlterPartitionResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 2-3
     pub throttle_time_ms: i32,
 
-    /// The top level response error code
+    /// The top level response error code.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 2-3
     pub error_code: i16,
 
+    /// The responses for each topic.
     ///
-    ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 2-3
     pub topics: Vec<TopicData>,
 
     /// Other tagged fields
@@ -45,25 +45,25 @@ impl AlterPartitionResponse {
     ///
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 2-3
     pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
         self.throttle_time_ms = value;
         self
     }
     /// Sets `error_code` to the passed value.
     ///
-    /// The top level response error code
+    /// The top level response error code.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 2-3
     pub fn with_error_code(mut self, value: i16) -> Self {
         self.error_code = value;
         self
     }
     /// Sets `topics` to the passed value.
     ///
+    /// The responses for each topic.
     ///
-    ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 2-3
     pub fn with_topics(mut self, value: Vec<TopicData>) -> Self {
         self.topics = value;
         self
@@ -83,7 +83,7 @@ impl AlterPartitionResponse {
 #[cfg(feature = "broker")]
 impl Encodable for AlterPartitionResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 3 {
+        if version < 2 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
@@ -123,7 +123,7 @@ impl Encodable for AlterPartitionResponse {
 #[cfg(feature = "client")]
 impl Decodable for AlterPartitionResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 3 {
+        if version < 2 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         let throttle_time_ms = types::Int32.decode(buf)?;
@@ -158,47 +158,47 @@ impl Default for AlterPartitionResponse {
 }
 
 impl Message for AlterPartitionResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const VERSIONS: VersionRange = VersionRange { min: 2, max: 3 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-3
+/// Valid versions: 2-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct PartitionData {
-    /// The partition index
+    /// The partition index.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 2-3
     pub partition_index: i32,
 
-    /// The partition level error code
+    /// The partition level error code.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 2-3
     pub error_code: i16,
 
     /// The broker ID of the leader.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 2-3
     pub leader_id: super::BrokerId,
 
     /// The leader epoch.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 2-3
     pub leader_epoch: i32,
 
     /// The in-sync replica IDs.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 2-3
     pub isr: Vec<super::BrokerId>,
 
     /// 1 if the partition is recovering from an unclean leader election; 0 otherwise.
     ///
-    /// Supported API versions: 1-3
+    /// Supported API versions: 2-3
     pub leader_recovery_state: i8,
 
-    /// The current epoch for the partition for KRaft controllers. The current ZK version for the legacy controllers.
+    /// The current epoch for the partition for KRaft controllers.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 2-3
     pub partition_epoch: i32,
 
     /// Other tagged fields
@@ -208,18 +208,18 @@ pub struct PartitionData {
 impl PartitionData {
     /// Sets `partition_index` to the passed value.
     ///
-    /// The partition index
+    /// The partition index.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 2-3
     pub fn with_partition_index(mut self, value: i32) -> Self {
         self.partition_index = value;
         self
     }
     /// Sets `error_code` to the passed value.
     ///
-    /// The partition level error code
+    /// The partition level error code.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 2-3
     pub fn with_error_code(mut self, value: i16) -> Self {
         self.error_code = value;
         self
@@ -228,7 +228,7 @@ impl PartitionData {
     ///
     /// The broker ID of the leader.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 2-3
     pub fn with_leader_id(mut self, value: super::BrokerId) -> Self {
         self.leader_id = value;
         self
@@ -237,7 +237,7 @@ impl PartitionData {
     ///
     /// The leader epoch.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 2-3
     pub fn with_leader_epoch(mut self, value: i32) -> Self {
         self.leader_epoch = value;
         self
@@ -246,7 +246,7 @@ impl PartitionData {
     ///
     /// The in-sync replica IDs.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 2-3
     pub fn with_isr(mut self, value: Vec<super::BrokerId>) -> Self {
         self.isr = value;
         self
@@ -255,16 +255,16 @@ impl PartitionData {
     ///
     /// 1 if the partition is recovering from an unclean leader election; 0 otherwise.
     ///
-    /// Supported API versions: 1-3
+    /// Supported API versions: 2-3
     pub fn with_leader_recovery_state(mut self, value: i8) -> Self {
         self.leader_recovery_state = value;
         self
     }
     /// Sets `partition_epoch` to the passed value.
     ///
-    /// The current epoch for the partition for KRaft controllers. The current ZK version for the legacy controllers.
+    /// The current epoch for the partition for KRaft controllers.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 2-3
     pub fn with_partition_epoch(mut self, value: i32) -> Self {
         self.partition_epoch = value;
         self
@@ -284,7 +284,7 @@ impl PartitionData {
 #[cfg(feature = "broker")]
 impl Encodable for PartitionData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 3 {
+        if version < 2 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.partition_index)?;
@@ -292,9 +292,7 @@ impl Encodable for PartitionData {
         types::Int32.encode(buf, &self.leader_id)?;
         types::Int32.encode(buf, &self.leader_epoch)?;
         types::CompactArray(types::Int32).encode(buf, &self.isr)?;
-        if version >= 1 {
-            types::Int8.encode(buf, &self.leader_recovery_state)?;
-        }
+        types::Int8.encode(buf, &self.leader_recovery_state)?;
         types::Int32.encode(buf, &self.partition_epoch)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
@@ -315,9 +313,7 @@ impl Encodable for PartitionData {
         total_size += types::Int32.compute_size(&self.leader_id)?;
         total_size += types::Int32.compute_size(&self.leader_epoch)?;
         total_size += types::CompactArray(types::Int32).compute_size(&self.isr)?;
-        if version >= 1 {
-            total_size += types::Int8.compute_size(&self.leader_recovery_state)?;
-        }
+        total_size += types::Int8.compute_size(&self.leader_recovery_state)?;
         total_size += types::Int32.compute_size(&self.partition_epoch)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
@@ -336,7 +332,7 @@ impl Encodable for PartitionData {
 #[cfg(feature = "client")]
 impl Decodable for PartitionData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 3 {
+        if version < 2 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         let partition_index = types::Int32.decode(buf)?;
@@ -344,11 +340,7 @@ impl Decodable for PartitionData {
         let leader_id = types::Int32.decode(buf)?;
         let leader_epoch = types::Int32.decode(buf)?;
         let isr = types::CompactArray(types::Int32).decode(buf)?;
-        let leader_recovery_state = if version >= 1 {
-            types::Int8.decode(buf)?
-        } else {
-            0
-        };
+        let leader_recovery_state = types::Int8.decode(buf)?;
         let partition_epoch = types::Int32.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
         let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
@@ -387,27 +379,22 @@ impl Default for PartitionData {
 }
 
 impl Message for PartitionData {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const VERSIONS: VersionRange = VersionRange { min: 2, max: 3 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-3
+/// Valid versions: 2-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct TopicData {
-    /// The name of the topic
-    ///
-    /// Supported API versions: 0-1
-    pub topic_name: super::TopicName,
-
-    /// The ID of the topic
+    /// The ID of the topic.
     ///
     /// Supported API versions: 2-3
     pub topic_id: Uuid,
 
+    /// The responses for each partition.
     ///
-    ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 2-3
     pub partitions: Vec<PartitionData>,
 
     /// Other tagged fields
@@ -415,18 +402,9 @@ pub struct TopicData {
 }
 
 impl TopicData {
-    /// Sets `topic_name` to the passed value.
-    ///
-    /// The name of the topic
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_topic_name(mut self, value: super::TopicName) -> Self {
-        self.topic_name = value;
-        self
-    }
     /// Sets `topic_id` to the passed value.
     ///
-    /// The ID of the topic
+    /// The ID of the topic.
     ///
     /// Supported API versions: 2-3
     pub fn with_topic_id(mut self, value: Uuid) -> Self {
@@ -435,9 +413,9 @@ impl TopicData {
     }
     /// Sets `partitions` to the passed value.
     ///
+    /// The responses for each partition.
     ///
-    ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 2-3
     pub fn with_partitions(mut self, value: Vec<PartitionData>) -> Self {
         self.partitions = value;
         self
@@ -457,15 +435,10 @@ impl TopicData {
 #[cfg(feature = "broker")]
 impl Encodable for TopicData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 3 {
+        if version < 2 || version > 3 {
             bail!("specified version not supported by this message type");
         }
-        if version <= 1 {
-            types::CompactString.encode(buf, &self.topic_name)?;
-        }
-        if version >= 2 {
-            types::Uuid.encode(buf, &self.topic_id)?;
-        }
+        types::Uuid.encode(buf, &self.topic_id)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.partitions)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
@@ -481,12 +454,7 @@ impl Encodable for TopicData {
     }
     fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
-        if version <= 1 {
-            total_size += types::CompactString.compute_size(&self.topic_name)?;
-        }
-        if version >= 2 {
-            total_size += types::Uuid.compute_size(&self.topic_id)?;
-        }
+        total_size += types::Uuid.compute_size(&self.topic_id)?;
         total_size +=
             types::CompactArray(types::Struct { version }).compute_size(&self.partitions)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -506,19 +474,10 @@ impl Encodable for TopicData {
 #[cfg(feature = "client")]
 impl Decodable for TopicData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 3 {
+        if version < 2 || version > 3 {
             bail!("specified version not supported by this message type");
         }
-        let topic_name = if version <= 1 {
-            types::CompactString.decode(buf)?
-        } else {
-            Default::default()
-        };
-        let topic_id = if version >= 2 {
-            types::Uuid.decode(buf)?
-        } else {
-            Uuid::nil()
-        };
+        let topic_id = types::Uuid.decode(buf)?;
         let partitions = types::CompactArray(types::Struct { version }).decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
         let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
@@ -529,7 +488,6 @@ impl Decodable for TopicData {
             unknown_tagged_fields.insert(tag as i32, unknown_value);
         }
         Ok(Self {
-            topic_name,
             topic_id,
             partitions,
             unknown_tagged_fields,
@@ -540,7 +498,6 @@ impl Decodable for TopicData {
 impl Default for TopicData {
     fn default() -> Self {
         Self {
-            topic_name: Default::default(),
             topic_id: Uuid::nil(),
             partitions: Default::default(),
             unknown_tagged_fields: BTreeMap::new(),
@@ -549,7 +506,7 @@ impl Default for TopicData {
 }
 
 impl Message for TopicData {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const VERSIONS: VersionRange = VersionRange { min: 2, max: 3 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 

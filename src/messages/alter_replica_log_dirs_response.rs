@@ -17,18 +17,18 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-2
+/// Valid versions: 1-2
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct AlterReplicaLogDirPartitionResult {
     /// The partition index.
     ///
-    /// Supported API versions: 0-2
+    /// Supported API versions: 1-2
     pub partition_index: i32,
 
     /// The error code, or 0 if there was no error.
     ///
-    /// Supported API versions: 0-2
+    /// Supported API versions: 1-2
     pub error_code: i16,
 
     /// Other tagged fields
@@ -40,7 +40,7 @@ impl AlterReplicaLogDirPartitionResult {
     ///
     /// The partition index.
     ///
-    /// Supported API versions: 0-2
+    /// Supported API versions: 1-2
     pub fn with_partition_index(mut self, value: i32) -> Self {
         self.partition_index = value;
         self
@@ -49,7 +49,7 @@ impl AlterReplicaLogDirPartitionResult {
     ///
     /// The error code, or 0 if there was no error.
     ///
-    /// Supported API versions: 0-2
+    /// Supported API versions: 1-2
     pub fn with_error_code(mut self, value: i16) -> Self {
         self.error_code = value;
         self
@@ -69,7 +69,7 @@ impl AlterReplicaLogDirPartitionResult {
 #[cfg(feature = "broker")]
 impl Encodable for AlterReplicaLogDirPartitionResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 2 {
+        if version < 1 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.partition_index)?;
@@ -111,7 +111,7 @@ impl Encodable for AlterReplicaLogDirPartitionResult {
 #[cfg(feature = "client")]
 impl Decodable for AlterReplicaLogDirPartitionResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 2 {
+        if version < 1 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         let partition_index = types::Int32.decode(buf)?;
@@ -145,22 +145,22 @@ impl Default for AlterReplicaLogDirPartitionResult {
 }
 
 impl Message for AlterReplicaLogDirPartitionResult {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
+    const VERSIONS: VersionRange = VersionRange { min: 1, max: 2 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-2
+/// Valid versions: 1-2
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct AlterReplicaLogDirTopicResult {
     /// The name of the topic.
     ///
-    /// Supported API versions: 0-2
+    /// Supported API versions: 1-2
     pub topic_name: super::TopicName,
 
     /// The results for each partition.
     ///
-    /// Supported API versions: 0-2
+    /// Supported API versions: 1-2
     pub partitions: Vec<AlterReplicaLogDirPartitionResult>,
 
     /// Other tagged fields
@@ -172,7 +172,7 @@ impl AlterReplicaLogDirTopicResult {
     ///
     /// The name of the topic.
     ///
-    /// Supported API versions: 0-2
+    /// Supported API versions: 1-2
     pub fn with_topic_name(mut self, value: super::TopicName) -> Self {
         self.topic_name = value;
         self
@@ -181,7 +181,7 @@ impl AlterReplicaLogDirTopicResult {
     ///
     /// The results for each partition.
     ///
-    /// Supported API versions: 0-2
+    /// Supported API versions: 1-2
     pub fn with_partitions(mut self, value: Vec<AlterReplicaLogDirPartitionResult>) -> Self {
         self.partitions = value;
         self
@@ -201,7 +201,7 @@ impl AlterReplicaLogDirTopicResult {
 #[cfg(feature = "broker")]
 impl Encodable for AlterReplicaLogDirTopicResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 2 {
+        if version < 1 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         if version >= 2 {
@@ -260,7 +260,7 @@ impl Encodable for AlterReplicaLogDirTopicResult {
 #[cfg(feature = "client")]
 impl Decodable for AlterReplicaLogDirTopicResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 2 {
+        if version < 1 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         let topic_name = if version >= 2 {
@@ -302,22 +302,22 @@ impl Default for AlterReplicaLogDirTopicResult {
 }
 
 impl Message for AlterReplicaLogDirTopicResult {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
+    const VERSIONS: VersionRange = VersionRange { min: 1, max: 2 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-2
+/// Valid versions: 1-2
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct AlterReplicaLogDirsResponse {
     /// Duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 0-2
+    /// Supported API versions: 1-2
     pub throttle_time_ms: i32,
 
     /// The results for each topic.
     ///
-    /// Supported API versions: 0-2
+    /// Supported API versions: 1-2
     pub results: Vec<AlterReplicaLogDirTopicResult>,
 
     /// Other tagged fields
@@ -329,7 +329,7 @@ impl AlterReplicaLogDirsResponse {
     ///
     /// Duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 0-2
+    /// Supported API versions: 1-2
     pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
         self.throttle_time_ms = value;
         self
@@ -338,7 +338,7 @@ impl AlterReplicaLogDirsResponse {
     ///
     /// The results for each topic.
     ///
-    /// Supported API versions: 0-2
+    /// Supported API versions: 1-2
     pub fn with_results(mut self, value: Vec<AlterReplicaLogDirTopicResult>) -> Self {
         self.results = value;
         self
@@ -358,7 +358,7 @@ impl AlterReplicaLogDirsResponse {
 #[cfg(feature = "broker")]
 impl Encodable for AlterReplicaLogDirsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 2 {
+        if version < 1 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
@@ -409,7 +409,7 @@ impl Encodable for AlterReplicaLogDirsResponse {
 #[cfg(feature = "client")]
 impl Decodable for AlterReplicaLogDirsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 2 {
+        if version < 1 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         let throttle_time_ms = types::Int32.decode(buf)?;
@@ -447,7 +447,7 @@ impl Default for AlterReplicaLogDirsResponse {
 }
 
 impl Message for AlterReplicaLogDirsResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
+    const VERSIONS: VersionRange = VersionRange { min: 1, max: 2 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
