@@ -17,28 +17,28 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 2-9
+/// Valid versions: 0-9
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct JoinGroupRequest {
     /// The group identifier.
     ///
-    /// Supported API versions: 2-9
+    /// Supported API versions: 0-9
     pub group_id: super::GroupId,
 
     /// The coordinator considers the consumer dead if it receives no heartbeat after this timeout in milliseconds.
     ///
-    /// Supported API versions: 2-9
+    /// Supported API versions: 0-9
     pub session_timeout_ms: i32,
 
     /// The maximum time in milliseconds that the coordinator will wait for each member to rejoin when rebalancing the group.
     ///
-    /// Supported API versions: 2-9
+    /// Supported API versions: 1-9
     pub rebalance_timeout_ms: i32,
 
     /// The member id assigned by the group coordinator.
     ///
-    /// Supported API versions: 2-9
+    /// Supported API versions: 0-9
     pub member_id: StrBytes,
 
     /// The unique identifier of the consumer instance provided by end user.
@@ -48,12 +48,12 @@ pub struct JoinGroupRequest {
 
     /// The unique name the for class of protocols implemented by the group we want to join.
     ///
-    /// Supported API versions: 2-9
+    /// Supported API versions: 0-9
     pub protocol_type: StrBytes,
 
     /// The list of protocols that the member supports.
     ///
-    /// Supported API versions: 2-9
+    /// Supported API versions: 0-9
     pub protocols: Vec<JoinGroupRequestProtocol>,
 
     /// The reason why the member (re-)joins the group.
@@ -70,7 +70,7 @@ impl JoinGroupRequest {
     ///
     /// The group identifier.
     ///
-    /// Supported API versions: 2-9
+    /// Supported API versions: 0-9
     pub fn with_group_id(mut self, value: super::GroupId) -> Self {
         self.group_id = value;
         self
@@ -79,7 +79,7 @@ impl JoinGroupRequest {
     ///
     /// The coordinator considers the consumer dead if it receives no heartbeat after this timeout in milliseconds.
     ///
-    /// Supported API versions: 2-9
+    /// Supported API versions: 0-9
     pub fn with_session_timeout_ms(mut self, value: i32) -> Self {
         self.session_timeout_ms = value;
         self
@@ -88,7 +88,7 @@ impl JoinGroupRequest {
     ///
     /// The maximum time in milliseconds that the coordinator will wait for each member to rejoin when rebalancing the group.
     ///
-    /// Supported API versions: 2-9
+    /// Supported API versions: 1-9
     pub fn with_rebalance_timeout_ms(mut self, value: i32) -> Self {
         self.rebalance_timeout_ms = value;
         self
@@ -97,7 +97,7 @@ impl JoinGroupRequest {
     ///
     /// The member id assigned by the group coordinator.
     ///
-    /// Supported API versions: 2-9
+    /// Supported API versions: 0-9
     pub fn with_member_id(mut self, value: StrBytes) -> Self {
         self.member_id = value;
         self
@@ -115,7 +115,7 @@ impl JoinGroupRequest {
     ///
     /// The unique name the for class of protocols implemented by the group we want to join.
     ///
-    /// Supported API versions: 2-9
+    /// Supported API versions: 0-9
     pub fn with_protocol_type(mut self, value: StrBytes) -> Self {
         self.protocol_type = value;
         self
@@ -124,7 +124,7 @@ impl JoinGroupRequest {
     ///
     /// The list of protocols that the member supports.
     ///
-    /// Supported API versions: 2-9
+    /// Supported API versions: 0-9
     pub fn with_protocols(mut self, value: Vec<JoinGroupRequestProtocol>) -> Self {
         self.protocols = value;
         self
@@ -153,7 +153,7 @@ impl JoinGroupRequest {
 #[cfg(feature = "client")]
 impl Encodable for JoinGroupRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 2 || version > 9 {
+        if version < 0 || version > 9 {
             bail!("specified version not supported by this message type");
         }
         if version >= 6 {
@@ -162,7 +162,9 @@ impl Encodable for JoinGroupRequest {
             types::String.encode(buf, &self.group_id)?;
         }
         types::Int32.encode(buf, &self.session_timeout_ms)?;
-        types::Int32.encode(buf, &self.rebalance_timeout_ms)?;
+        if version >= 1 {
+            types::Int32.encode(buf, &self.rebalance_timeout_ms)?;
+        }
         if version >= 6 {
             types::CompactString.encode(buf, &self.member_id)?;
         } else {
@@ -214,7 +216,9 @@ impl Encodable for JoinGroupRequest {
             total_size += types::String.compute_size(&self.group_id)?;
         }
         total_size += types::Int32.compute_size(&self.session_timeout_ms)?;
-        total_size += types::Int32.compute_size(&self.rebalance_timeout_ms)?;
+        if version >= 1 {
+            total_size += types::Int32.compute_size(&self.rebalance_timeout_ms)?;
+        }
         if version >= 6 {
             total_size += types::CompactString.compute_size(&self.member_id)?;
         } else {
@@ -264,7 +268,7 @@ impl Encodable for JoinGroupRequest {
 #[cfg(feature = "broker")]
 impl Decodable for JoinGroupRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 2 || version > 9 {
+        if version < 0 || version > 9 {
             bail!("specified version not supported by this message type");
         }
         let group_id = if version >= 6 {
@@ -273,7 +277,11 @@ impl Decodable for JoinGroupRequest {
             types::String.decode(buf)?
         };
         let session_timeout_ms = types::Int32.decode(buf)?;
-        let rebalance_timeout_ms = types::Int32.decode(buf)?;
+        let rebalance_timeout_ms = if version >= 1 {
+            types::Int32.decode(buf)?
+        } else {
+            -1
+        };
         let member_id = if version >= 6 {
             types::CompactString.decode(buf)?
         } else {
@@ -344,22 +352,22 @@ impl Default for JoinGroupRequest {
 }
 
 impl Message for JoinGroupRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 2, max: 9 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 9 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 2-9
+/// Valid versions: 0-9
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct JoinGroupRequestProtocol {
     /// The protocol name.
     ///
-    /// Supported API versions: 2-9
+    /// Supported API versions: 0-9
     pub name: StrBytes,
 
     /// The protocol metadata.
     ///
-    /// Supported API versions: 2-9
+    /// Supported API versions: 0-9
     pub metadata: Bytes,
 
     /// Other tagged fields
@@ -371,7 +379,7 @@ impl JoinGroupRequestProtocol {
     ///
     /// The protocol name.
     ///
-    /// Supported API versions: 2-9
+    /// Supported API versions: 0-9
     pub fn with_name(mut self, value: StrBytes) -> Self {
         self.name = value;
         self
@@ -380,7 +388,7 @@ impl JoinGroupRequestProtocol {
     ///
     /// The protocol metadata.
     ///
-    /// Supported API versions: 2-9
+    /// Supported API versions: 0-9
     pub fn with_metadata(mut self, value: Bytes) -> Self {
         self.metadata = value;
         self
@@ -400,7 +408,7 @@ impl JoinGroupRequestProtocol {
 #[cfg(feature = "client")]
 impl Encodable for JoinGroupRequestProtocol {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 2 || version > 9 {
+        if version < 0 || version > 9 {
             bail!("specified version not supported by this message type");
         }
         if version >= 6 {
@@ -458,7 +466,7 @@ impl Encodable for JoinGroupRequestProtocol {
 #[cfg(feature = "broker")]
 impl Decodable for JoinGroupRequestProtocol {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 2 || version > 9 {
+        if version < 0 || version > 9 {
             bail!("specified version not supported by this message type");
         }
         let name = if version >= 6 {
@@ -500,7 +508,7 @@ impl Default for JoinGroupRequestProtocol {
 }
 
 impl Message for JoinGroupRequestProtocol {
-    const VERSIONS: VersionRange = VersionRange { min: 2, max: 9 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 9 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 

@@ -1319,7 +1319,7 @@ impl ApiKey {
             ApiKey::OffsetCommit => VersionRange { min: 2, max: 9 },
             ApiKey::OffsetFetch => VersionRange { min: 1, max: 9 },
             ApiKey::FindCoordinator => VersionRange { min: 0, max: 6 },
-            ApiKey::JoinGroup => VersionRange { min: 2, max: 9 },
+            ApiKey::JoinGroup => VersionRange { min: 0, max: 9 },
             ApiKey::Heartbeat => VersionRange { min: 0, max: 4 },
             ApiKey::LeaveGroup => VersionRange { min: 0, max: 5 },
             ApiKey::SyncGroup => VersionRange { min: 0, max: 5 },

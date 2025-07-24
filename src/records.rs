@@ -203,7 +203,7 @@ impl RecordBatchEncoder {
     {
         let records = records.into_iter();
         match options.version {
-            0..=1 => bail!("message sets v {} are unsupported", options.version),
+            0..=1 => bail!("message sets v{} are unsupported", options.version),
             2 => Self::encode_new(buf, records, options, compressor),
             _ => bail!("Unknown record batch version"),
         }
@@ -464,7 +464,7 @@ impl RecordBatchDecoder {
     {
         let version = buf.try_peek_bytes(MAGIC_BYTE_OFFSET..(MAGIC_BYTE_OFFSET + 1))?[0] as i8;
         let compression = match version {
-            0..=1 => bail!("message sets v {} are unsupported", version),
+            0..=1 => bail!("message sets v{} are unsupported", version),
             2 => Self::decode_new_batch(buf, version, records, decompress_func),
             _ => {
                 bail!("Unknown record batch version ({})", version);
