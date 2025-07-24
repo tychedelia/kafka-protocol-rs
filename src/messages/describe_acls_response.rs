@@ -17,28 +17,28 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-3
+/// Valid versions: 1-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct AclDescription {
     /// The ACL principal.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub principal: StrBytes,
 
     /// The ACL host.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub host: StrBytes,
 
     /// The ACL operation.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub operation: i8,
 
     /// The ACL permission type.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub permission_type: i8,
 
     /// Other tagged fields
@@ -50,7 +50,7 @@ impl AclDescription {
     ///
     /// The ACL principal.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_principal(mut self, value: StrBytes) -> Self {
         self.principal = value;
         self
@@ -59,7 +59,7 @@ impl AclDescription {
     ///
     /// The ACL host.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_host(mut self, value: StrBytes) -> Self {
         self.host = value;
         self
@@ -68,7 +68,7 @@ impl AclDescription {
     ///
     /// The ACL operation.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_operation(mut self, value: i8) -> Self {
         self.operation = value;
         self
@@ -77,7 +77,7 @@ impl AclDescription {
     ///
     /// The ACL permission type.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_permission_type(mut self, value: i8) -> Self {
         self.permission_type = value;
         self
@@ -97,7 +97,7 @@ impl AclDescription {
 #[cfg(feature = "broker")]
 impl Encodable for AclDescription {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         if version >= 2 {
@@ -159,7 +159,7 @@ impl Encodable for AclDescription {
 #[cfg(feature = "client")]
 impl Decodable for AclDescription {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         let principal = if version >= 2 {
@@ -207,22 +207,22 @@ impl Default for AclDescription {
 }
 
 impl Message for AclDescription {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const VERSIONS: VersionRange = VersionRange { min: 1, max: 3 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-3
+/// Valid versions: 1-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct DescribeAclsResource {
     /// The resource type.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub resource_type: i8,
 
     /// The resource name.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub resource_name: StrBytes,
 
     /// The resource pattern type.
@@ -232,7 +232,7 @@ pub struct DescribeAclsResource {
 
     /// The ACLs.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub acls: Vec<AclDescription>,
 
     /// Other tagged fields
@@ -244,7 +244,7 @@ impl DescribeAclsResource {
     ///
     /// The resource type.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_resource_type(mut self, value: i8) -> Self {
         self.resource_type = value;
         self
@@ -253,7 +253,7 @@ impl DescribeAclsResource {
     ///
     /// The resource name.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_resource_name(mut self, value: StrBytes) -> Self {
         self.resource_name = value;
         self
@@ -271,7 +271,7 @@ impl DescribeAclsResource {
     ///
     /// The ACLs.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_acls(mut self, value: Vec<AclDescription>) -> Self {
         self.acls = value;
         self
@@ -291,7 +291,7 @@ impl DescribeAclsResource {
 #[cfg(feature = "broker")]
 impl Encodable for DescribeAclsResource {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         types::Int8.encode(buf, &self.resource_type)?;
@@ -300,13 +300,7 @@ impl Encodable for DescribeAclsResource {
         } else {
             types::String.encode(buf, &self.resource_name)?;
         }
-        if version >= 1 {
-            types::Int8.encode(buf, &self.pattern_type)?;
-        } else {
-            if self.pattern_type != 3 {
-                bail!("A field is set that is not available on the selected protocol version");
-            }
-        }
+        types::Int8.encode(buf, &self.pattern_type)?;
         if version >= 2 {
             types::CompactArray(types::Struct { version }).encode(buf, &self.acls)?;
         } else {
@@ -334,13 +328,7 @@ impl Encodable for DescribeAclsResource {
         } else {
             total_size += types::String.compute_size(&self.resource_name)?;
         }
-        if version >= 1 {
-            total_size += types::Int8.compute_size(&self.pattern_type)?;
-        } else {
-            if self.pattern_type != 3 {
-                bail!("A field is set that is not available on the selected protocol version");
-            }
-        }
+        total_size += types::Int8.compute_size(&self.pattern_type)?;
         if version >= 2 {
             total_size +=
                 types::CompactArray(types::Struct { version }).compute_size(&self.acls)?;
@@ -366,7 +354,7 @@ impl Encodable for DescribeAclsResource {
 #[cfg(feature = "client")]
 impl Decodable for DescribeAclsResource {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         let resource_type = types::Int8.decode(buf)?;
@@ -375,11 +363,7 @@ impl Decodable for DescribeAclsResource {
         } else {
             types::String.decode(buf)?
         };
-        let pattern_type = if version >= 1 {
-            types::Int8.decode(buf)?
-        } else {
-            3
-        };
+        let pattern_type = types::Int8.decode(buf)?;
         let acls = if version >= 2 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
@@ -418,32 +402,32 @@ impl Default for DescribeAclsResource {
 }
 
 impl Message for DescribeAclsResource {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const VERSIONS: VersionRange = VersionRange { min: 1, max: 3 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-3
+/// Valid versions: 1-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct DescribeAclsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub throttle_time_ms: i32,
 
     /// The error code, or 0 if there was no error.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub error_code: i16,
 
     /// The error message, or null if there was no error.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub error_message: Option<StrBytes>,
 
     /// Each Resource that is referenced in an ACL.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub resources: Vec<DescribeAclsResource>,
 
     /// Other tagged fields
@@ -455,7 +439,7 @@ impl DescribeAclsResponse {
     ///
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
         self.throttle_time_ms = value;
         self
@@ -464,7 +448,7 @@ impl DescribeAclsResponse {
     ///
     /// The error code, or 0 if there was no error.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_error_code(mut self, value: i16) -> Self {
         self.error_code = value;
         self
@@ -473,7 +457,7 @@ impl DescribeAclsResponse {
     ///
     /// The error message, or null if there was no error.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_error_message(mut self, value: Option<StrBytes>) -> Self {
         self.error_message = value;
         self
@@ -482,7 +466,7 @@ impl DescribeAclsResponse {
     ///
     /// Each Resource that is referenced in an ACL.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_resources(mut self, value: Vec<DescribeAclsResource>) -> Self {
         self.resources = value;
         self
@@ -502,7 +486,7 @@ impl DescribeAclsResponse {
 #[cfg(feature = "broker")]
 impl Encodable for DescribeAclsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
@@ -565,7 +549,7 @@ impl Encodable for DescribeAclsResponse {
 #[cfg(feature = "client")]
 impl Decodable for DescribeAclsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         let throttle_time_ms = types::Int32.decode(buf)?;
@@ -613,7 +597,7 @@ impl Default for DescribeAclsResponse {
 }
 
 impl Message for DescribeAclsResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const VERSIONS: VersionRange = VersionRange { min: 1, max: 3 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 

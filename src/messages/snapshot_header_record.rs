@@ -21,12 +21,12 @@ use crate::protocol::{
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct SnapshotHeaderRecord {
-    /// The version of the snapshot header record
+    /// The version of the snapshot header record.
     ///
     /// Supported API versions: 0
     pub version: i16,
 
-    /// The append time of the last record from the log contained in this snapshot
+    /// The append time of the last record from the log contained in this snapshot.
     ///
     /// Supported API versions: 0
     pub last_contained_log_timestamp: i64,
@@ -38,7 +38,7 @@ pub struct SnapshotHeaderRecord {
 impl SnapshotHeaderRecord {
     /// Sets `version` to the passed value.
     ///
-    /// The version of the snapshot header record
+    /// The version of the snapshot header record.
     ///
     /// Supported API versions: 0
     pub fn with_version(mut self, value: i16) -> Self {
@@ -47,7 +47,7 @@ impl SnapshotHeaderRecord {
     }
     /// Sets `last_contained_log_timestamp` to the passed value.
     ///
-    /// The append time of the last record from the log contained in this snapshot
+    /// The append time of the last record from the log contained in this snapshot.
     ///
     /// Supported API versions: 0
     pub fn with_last_contained_log_timestamp(mut self, value: i64) -> Self {

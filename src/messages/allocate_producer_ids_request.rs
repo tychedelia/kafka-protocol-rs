@@ -21,12 +21,12 @@ use crate::protocol::{
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct AllocateProducerIdsRequest {
-    /// The ID of the requesting broker
+    /// The ID of the requesting broker.
     ///
     /// Supported API versions: 0
     pub broker_id: super::BrokerId,
 
-    /// The epoch of the requesting broker
+    /// The epoch of the requesting broker.
     ///
     /// Supported API versions: 0
     pub broker_epoch: i64,
@@ -38,7 +38,7 @@ pub struct AllocateProducerIdsRequest {
 impl AllocateProducerIdsRequest {
     /// Sets `broker_id` to the passed value.
     ///
-    /// The ID of the requesting broker
+    /// The ID of the requesting broker.
     ///
     /// Supported API versions: 0
     pub fn with_broker_id(mut self, value: super::BrokerId) -> Self {
@@ -47,7 +47,7 @@ impl AllocateProducerIdsRequest {
     }
     /// Sets `broker_epoch` to the passed value.
     ///
-    /// The epoch of the requesting broker
+    /// The epoch of the requesting broker.
     ///
     /// Supported API versions: 0
     pub fn with_broker_epoch(mut self, value: i64) -> Self {

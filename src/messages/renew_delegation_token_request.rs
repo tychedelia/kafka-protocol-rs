@@ -17,18 +17,18 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-2
+/// Valid versions: 1-2
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct RenewDelegationTokenRequest {
     /// The HMAC of the delegation token to be renewed.
     ///
-    /// Supported API versions: 0-2
+    /// Supported API versions: 1-2
     pub hmac: Bytes,
 
     /// The renewal time period in milliseconds.
     ///
-    /// Supported API versions: 0-2
+    /// Supported API versions: 1-2
     pub renew_period_ms: i64,
 
     /// Other tagged fields
@@ -40,7 +40,7 @@ impl RenewDelegationTokenRequest {
     ///
     /// The HMAC of the delegation token to be renewed.
     ///
-    /// Supported API versions: 0-2
+    /// Supported API versions: 1-2
     pub fn with_hmac(mut self, value: Bytes) -> Self {
         self.hmac = value;
         self
@@ -49,7 +49,7 @@ impl RenewDelegationTokenRequest {
     ///
     /// The renewal time period in milliseconds.
     ///
-    /// Supported API versions: 0-2
+    /// Supported API versions: 1-2
     pub fn with_renew_period_ms(mut self, value: i64) -> Self {
         self.renew_period_ms = value;
         self
@@ -69,7 +69,7 @@ impl RenewDelegationTokenRequest {
 #[cfg(feature = "client")]
 impl Encodable for RenewDelegationTokenRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 2 {
+        if version < 1 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         if version >= 2 {
@@ -119,7 +119,7 @@ impl Encodable for RenewDelegationTokenRequest {
 #[cfg(feature = "broker")]
 impl Decodable for RenewDelegationTokenRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 2 {
+        if version < 1 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         let hmac = if version >= 2 {
@@ -157,8 +157,8 @@ impl Default for RenewDelegationTokenRequest {
 }
 
 impl Message for RenewDelegationTokenRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
-    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 0 });
+    const VERSIONS: VersionRange = VersionRange { min: 1, max: 2 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 impl HeaderVersion for RenewDelegationTokenRequest {

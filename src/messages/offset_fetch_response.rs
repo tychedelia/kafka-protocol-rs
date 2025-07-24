@@ -17,7 +17,7 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-9
+/// Valid versions: 1-9
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct OffsetFetchResponse {
@@ -28,7 +28,7 @@ pub struct OffsetFetchResponse {
 
     /// The responses per topic.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 1-7
     pub topics: Vec<OffsetFetchResponseTopic>,
 
     /// The top-level error code, or 0 if there was no error.
@@ -59,7 +59,7 @@ impl OffsetFetchResponse {
     ///
     /// The responses per topic.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 1-7
     pub fn with_topics(mut self, value: Vec<OffsetFetchResponseTopic>) -> Self {
         self.topics = value;
         self
@@ -97,7 +97,7 @@ impl OffsetFetchResponse {
 #[cfg(feature = "broker")]
 impl Encodable for OffsetFetchResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 9 {
+        if version < 1 || version > 9 {
             bail!("specified version not supported by this message type");
         }
         if version >= 3 {
@@ -185,7 +185,7 @@ impl Encodable for OffsetFetchResponse {
 #[cfg(feature = "client")]
 impl Decodable for OffsetFetchResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 9 {
+        if version < 1 || version > 9 {
             bail!("specified version not supported by this message type");
         }
         let throttle_time_ms = if version >= 3 {
@@ -245,11 +245,11 @@ impl Default for OffsetFetchResponse {
 }
 
 impl Message for OffsetFetchResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 9 };
+    const VERSIONS: VersionRange = VersionRange { min: 1, max: 9 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-9
+/// Valid versions: 1-9
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct OffsetFetchResponseGroup {
@@ -315,7 +315,7 @@ impl OffsetFetchResponseGroup {
 #[cfg(feature = "broker")]
 impl Encodable for OffsetFetchResponseGroup {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 9 {
+        if version < 1 || version > 9 {
             bail!("specified version not supported by this message type");
         }
         if version >= 8 {
@@ -396,7 +396,7 @@ impl Encodable for OffsetFetchResponseGroup {
 #[cfg(feature = "client")]
 impl Decodable for OffsetFetchResponseGroup {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 9 {
+        if version < 1 || version > 9 {
             bail!("specified version not supported by this message type");
         }
         let group_id = if version >= 8 {
@@ -445,22 +445,22 @@ impl Default for OffsetFetchResponseGroup {
 }
 
 impl Message for OffsetFetchResponseGroup {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 9 };
+    const VERSIONS: VersionRange = VersionRange { min: 1, max: 9 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-9
+/// Valid versions: 1-9
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct OffsetFetchResponsePartition {
     /// The partition index.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 1-7
     pub partition_index: i32,
 
     /// The committed message offset.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 1-7
     pub committed_offset: i64,
 
     /// The leader epoch.
@@ -470,12 +470,12 @@ pub struct OffsetFetchResponsePartition {
 
     /// The partition metadata.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 1-7
     pub metadata: Option<StrBytes>,
 
     /// The error code, or 0 if there was no error.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 1-7
     pub error_code: i16,
 
     /// Other tagged fields
@@ -487,7 +487,7 @@ impl OffsetFetchResponsePartition {
     ///
     /// The partition index.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 1-7
     pub fn with_partition_index(mut self, value: i32) -> Self {
         self.partition_index = value;
         self
@@ -496,7 +496,7 @@ impl OffsetFetchResponsePartition {
     ///
     /// The committed message offset.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 1-7
     pub fn with_committed_offset(mut self, value: i64) -> Self {
         self.committed_offset = value;
         self
@@ -514,7 +514,7 @@ impl OffsetFetchResponsePartition {
     ///
     /// The partition metadata.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 1-7
     pub fn with_metadata(mut self, value: Option<StrBytes>) -> Self {
         self.metadata = value;
         self
@@ -523,7 +523,7 @@ impl OffsetFetchResponsePartition {
     ///
     /// The error code, or 0 if there was no error.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 1-7
     pub fn with_error_code(mut self, value: i16) -> Self {
         self.error_code = value;
         self
@@ -543,7 +543,7 @@ impl OffsetFetchResponsePartition {
 #[cfg(feature = "broker")]
 impl Encodable for OffsetFetchResponsePartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 9 {
+        if version < 1 || version > 9 {
             bail!("specified version not supported by this message type");
         }
         if version <= 7 {
@@ -661,7 +661,7 @@ impl Encodable for OffsetFetchResponsePartition {
 #[cfg(feature = "client")]
 impl Decodable for OffsetFetchResponsePartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 9 {
+        if version < 1 || version > 9 {
             bail!("specified version not supported by this message type");
         }
         let partition_index = if version <= 7 {
@@ -728,11 +728,11 @@ impl Default for OffsetFetchResponsePartition {
 }
 
 impl Message for OffsetFetchResponsePartition {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 9 };
+    const VERSIONS: VersionRange = VersionRange { min: 1, max: 9 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-9
+/// Valid versions: 1-9
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct OffsetFetchResponsePartitions {
@@ -826,7 +826,7 @@ impl OffsetFetchResponsePartitions {
 #[cfg(feature = "broker")]
 impl Encodable for OffsetFetchResponsePartitions {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 9 {
+        if version < 1 || version > 9 {
             bail!("specified version not supported by this message type");
         }
         if version >= 8 {
@@ -936,7 +936,7 @@ impl Encodable for OffsetFetchResponsePartitions {
 #[cfg(feature = "client")]
 impl Decodable for OffsetFetchResponsePartitions {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 9 {
+        if version < 1 || version > 9 {
             bail!("specified version not supported by this message type");
         }
         let partition_index = if version >= 8 {
@@ -999,22 +999,22 @@ impl Default for OffsetFetchResponsePartitions {
 }
 
 impl Message for OffsetFetchResponsePartitions {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 9 };
+    const VERSIONS: VersionRange = VersionRange { min: 1, max: 9 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-9
+/// Valid versions: 1-9
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct OffsetFetchResponseTopic {
     /// The topic name.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 1-7
     pub name: super::TopicName,
 
-    /// The responses per partition
+    /// The responses per partition.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 1-7
     pub partitions: Vec<OffsetFetchResponsePartition>,
 
     /// Other tagged fields
@@ -1026,16 +1026,16 @@ impl OffsetFetchResponseTopic {
     ///
     /// The topic name.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 1-7
     pub fn with_name(mut self, value: super::TopicName) -> Self {
         self.name = value;
         self
     }
     /// Sets `partitions` to the passed value.
     ///
-    /// The responses per partition
+    /// The responses per partition.
     ///
-    /// Supported API versions: 0-7
+    /// Supported API versions: 1-7
     pub fn with_partitions(mut self, value: Vec<OffsetFetchResponsePartition>) -> Self {
         self.partitions = value;
         self
@@ -1055,7 +1055,7 @@ impl OffsetFetchResponseTopic {
 #[cfg(feature = "broker")]
 impl Encodable for OffsetFetchResponseTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 9 {
+        if version < 1 || version > 9 {
             bail!("specified version not supported by this message type");
         }
         if version <= 7 {
@@ -1139,7 +1139,7 @@ impl Encodable for OffsetFetchResponseTopic {
 #[cfg(feature = "client")]
 impl Decodable for OffsetFetchResponseTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 9 {
+        if version < 1 || version > 9 {
             bail!("specified version not supported by this message type");
         }
         let name = if version <= 7 {
@@ -1189,11 +1189,11 @@ impl Default for OffsetFetchResponseTopic {
 }
 
 impl Message for OffsetFetchResponseTopic {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 9 };
+    const VERSIONS: VersionRange = VersionRange { min: 1, max: 9 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-9
+/// Valid versions: 1-9
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct OffsetFetchResponseTopics {
@@ -1202,7 +1202,7 @@ pub struct OffsetFetchResponseTopics {
     /// Supported API versions: 8-9
     pub name: super::TopicName,
 
-    /// The responses per partition
+    /// The responses per partition.
     ///
     /// Supported API versions: 8-9
     pub partitions: Vec<OffsetFetchResponsePartitions>,
@@ -1223,7 +1223,7 @@ impl OffsetFetchResponseTopics {
     }
     /// Sets `partitions` to the passed value.
     ///
-    /// The responses per partition
+    /// The responses per partition.
     ///
     /// Supported API versions: 8-9
     pub fn with_partitions(mut self, value: Vec<OffsetFetchResponsePartitions>) -> Self {
@@ -1245,7 +1245,7 @@ impl OffsetFetchResponseTopics {
 #[cfg(feature = "broker")]
 impl Encodable for OffsetFetchResponseTopics {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 9 {
+        if version < 1 || version > 9 {
             bail!("specified version not supported by this message type");
         }
         if version >= 8 {
@@ -1312,7 +1312,7 @@ impl Encodable for OffsetFetchResponseTopics {
 #[cfg(feature = "client")]
 impl Decodable for OffsetFetchResponseTopics {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 9 {
+        if version < 1 || version > 9 {
             bail!("specified version not supported by this message type");
         }
         let name = if version >= 8 {
@@ -1354,7 +1354,7 @@ impl Default for OffsetFetchResponseTopics {
 }
 
 impl Message for OffsetFetchResponseTopics {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 9 };
+    const VERSIONS: VersionRange = VersionRange { min: 1, max: 9 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 

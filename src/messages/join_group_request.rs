@@ -353,7 +353,7 @@ impl Default for JoinGroupRequest {
 
 impl Message for JoinGroupRequest {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 9 };
-    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 1 });
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 /// Valid versions: 0-9
@@ -509,7 +509,7 @@ impl Default for JoinGroupRequestProtocol {
 
 impl Message for JoinGroupRequestProtocol {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 9 };
-    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 1 });
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 impl HeaderVersion for JoinGroupRequest {

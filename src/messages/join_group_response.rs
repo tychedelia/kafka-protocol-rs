@@ -61,7 +61,7 @@ pub struct JoinGroupResponse {
     /// Supported API versions: 0-9
     pub member_id: StrBytes,
 
-    ///
+    /// The group members.
     ///
     /// Supported API versions: 0-9
     pub members: Vec<JoinGroupResponseMember>,
@@ -145,7 +145,7 @@ impl JoinGroupResponse {
     }
     /// Sets `members` to the passed value.
     ///
-    ///
+    /// The group members.
     ///
     /// Supported API versions: 0-9
     pub fn with_members(mut self, value: Vec<JoinGroupResponseMember>) -> Self {

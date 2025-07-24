@@ -17,23 +17,23 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-3
+/// Valid versions: 1-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct DescribeDelegationTokenResponse {
     /// The error code, or 0 if there was no error.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub error_code: i16,
 
     /// The tokens.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub tokens: Vec<DescribedDelegationToken>,
 
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub throttle_time_ms: i32,
 
     /// Other tagged fields
@@ -45,7 +45,7 @@ impl DescribeDelegationTokenResponse {
     ///
     /// The error code, or 0 if there was no error.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_error_code(mut self, value: i16) -> Self {
         self.error_code = value;
         self
@@ -54,7 +54,7 @@ impl DescribeDelegationTokenResponse {
     ///
     /// The tokens.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_tokens(mut self, value: Vec<DescribedDelegationToken>) -> Self {
         self.tokens = value;
         self
@@ -63,7 +63,7 @@ impl DescribeDelegationTokenResponse {
     ///
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
         self.throttle_time_ms = value;
         self
@@ -83,7 +83,7 @@ impl DescribeDelegationTokenResponse {
 #[cfg(feature = "broker")]
 impl Encodable for DescribeDelegationTokenResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         types::Int16.encode(buf, &self.error_code)?;
@@ -136,7 +136,7 @@ impl Encodable for DescribeDelegationTokenResponse {
 #[cfg(feature = "client")]
 impl Decodable for DescribeDelegationTokenResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         let error_code = types::Int16.decode(buf)?;
@@ -177,22 +177,22 @@ impl Default for DescribeDelegationTokenResponse {
 }
 
 impl Message for DescribeDelegationTokenResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const VERSIONS: VersionRange = VersionRange { min: 1, max: 3 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-3
+/// Valid versions: 1-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct DescribedDelegationToken {
     /// The token principal type.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub principal_type: StrBytes,
 
     /// The token principal name.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub principal_name: StrBytes,
 
     /// The principal type of the requester of the token.
@@ -207,32 +207,32 @@ pub struct DescribedDelegationToken {
 
     /// The token issue timestamp in milliseconds.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub issue_timestamp: i64,
 
     /// The token expiry timestamp in milliseconds.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub expiry_timestamp: i64,
 
     /// The token maximum timestamp length in milliseconds.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub max_timestamp: i64,
 
     /// The token ID.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub token_id: StrBytes,
 
     /// The token HMAC.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub hmac: Bytes,
 
     /// Those who are able to renew this token before it expires.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub renewers: Vec<DescribedDelegationTokenRenewer>,
 
     /// Other tagged fields
@@ -244,7 +244,7 @@ impl DescribedDelegationToken {
     ///
     /// The token principal type.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_principal_type(mut self, value: StrBytes) -> Self {
         self.principal_type = value;
         self
@@ -253,7 +253,7 @@ impl DescribedDelegationToken {
     ///
     /// The token principal name.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_principal_name(mut self, value: StrBytes) -> Self {
         self.principal_name = value;
         self
@@ -280,7 +280,7 @@ impl DescribedDelegationToken {
     ///
     /// The token issue timestamp in milliseconds.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_issue_timestamp(mut self, value: i64) -> Self {
         self.issue_timestamp = value;
         self
@@ -289,7 +289,7 @@ impl DescribedDelegationToken {
     ///
     /// The token expiry timestamp in milliseconds.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_expiry_timestamp(mut self, value: i64) -> Self {
         self.expiry_timestamp = value;
         self
@@ -298,7 +298,7 @@ impl DescribedDelegationToken {
     ///
     /// The token maximum timestamp length in milliseconds.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_max_timestamp(mut self, value: i64) -> Self {
         self.max_timestamp = value;
         self
@@ -307,7 +307,7 @@ impl DescribedDelegationToken {
     ///
     /// The token ID.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_token_id(mut self, value: StrBytes) -> Self {
         self.token_id = value;
         self
@@ -316,7 +316,7 @@ impl DescribedDelegationToken {
     ///
     /// The token HMAC.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_hmac(mut self, value: Bytes) -> Self {
         self.hmac = value;
         self
@@ -325,7 +325,7 @@ impl DescribedDelegationToken {
     ///
     /// Those who are able to renew this token before it expires.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_renewers(mut self, value: Vec<DescribedDelegationTokenRenewer>) -> Self {
         self.renewers = value;
         self
@@ -345,7 +345,7 @@ impl DescribedDelegationToken {
 #[cfg(feature = "broker")]
 impl Encodable for DescribedDelegationToken {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         if version >= 2 {
@@ -470,7 +470,7 @@ impl Encodable for DescribedDelegationToken {
 #[cfg(feature = "client")]
 impl Decodable for DescribedDelegationToken {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         let principal_type = if version >= 2 {
@@ -556,22 +556,22 @@ impl Default for DescribedDelegationToken {
 }
 
 impl Message for DescribedDelegationToken {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const VERSIONS: VersionRange = VersionRange { min: 1, max: 3 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-3
+/// Valid versions: 1-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct DescribedDelegationTokenRenewer {
-    /// The renewer principal type
+    /// The renewer principal type.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub principal_type: StrBytes,
 
-    /// The renewer principal name
+    /// The renewer principal name.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub principal_name: StrBytes,
 
     /// Other tagged fields
@@ -581,18 +581,18 @@ pub struct DescribedDelegationTokenRenewer {
 impl DescribedDelegationTokenRenewer {
     /// Sets `principal_type` to the passed value.
     ///
-    /// The renewer principal type
+    /// The renewer principal type.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_principal_type(mut self, value: StrBytes) -> Self {
         self.principal_type = value;
         self
     }
     /// Sets `principal_name` to the passed value.
     ///
-    /// The renewer principal name
+    /// The renewer principal name.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_principal_name(mut self, value: StrBytes) -> Self {
         self.principal_name = value;
         self
@@ -612,7 +612,7 @@ impl DescribedDelegationTokenRenewer {
 #[cfg(feature = "broker")]
 impl Encodable for DescribedDelegationTokenRenewer {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         if version >= 2 {
@@ -670,7 +670,7 @@ impl Encodable for DescribedDelegationTokenRenewer {
 #[cfg(feature = "client")]
 impl Decodable for DescribedDelegationTokenRenewer {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         let principal_type = if version >= 2 {
@@ -712,7 +712,7 @@ impl Default for DescribedDelegationTokenRenewer {
 }
 
 impl Message for DescribedDelegationTokenRenewer {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const VERSIONS: VersionRange = VersionRange { min: 1, max: 3 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
