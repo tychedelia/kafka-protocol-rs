@@ -292,4 +292,39 @@ define_errors! { ResponseError,
     (INCONSISTENT_CLUSTER_ID,               104, false, "The clusterId in the request does not match that found on the server"),
     (TRANSACTIONAL_ID_NOT_FOUND,            105, false, "The transactionalId could not be found"),
     (FETCH_SESSION_TOPIC_ID_ERROR,          106, true, "The fetch session encountered inconsistent topic ID usage"),
+    // since Kafka 3.3.0
+    (INELIGIBLE_REPLICA,                    107, false, "The new ISR contains at least one ineligible replica."),
+    (NEW_LEADER_ELECTED,                    108, false, "The AlterPartition request successfully updated the partition state but the leader has changed."),
+    // since Kafka 3.5.0
+    (OFFSET_MOVED_TO_TIERED_STORAGE,        109, false, "The requested offset is moved to tiered storage."),
+    (FENCED_MEMBER_EPOCH,                   110, false, "The member epoch is fenced by the group coordinator. The member must abandon all its partitions and rejoin."),
+    (UNRELEASED_INSTANCE_ID,                111, false, "The instance ID is still used by another member in the consumer group. That member must leave first."),
+    (UNSUPPORTED_ASSIGNOR,                  112, false, "The assignor or its version range is not supported by the consumer group."),
+    // since Kafka 3.6.0
+    (STALE_MEMBER_EPOCH,                    113, false, "The member epoch is stale. The member must retry after receiving its updated member epoch via the ConsumerGroupHeartbeat API."),
+    // since Kafka 3.7.0
+    (MISMATCHED_ENDPOINT_TYPE,              114, false, "The request was sent to an endpoint of the wrong type."),
+    (UNSUPPORTED_ENDPOINT_TYPE,             115, false, "This endpoint type is not supported yet."),
+    (UNKNOWN_CONTROLLER_ID,                 116, false, "This controller ID is not known."),
+    (UNKNOWN_SUBSCRIPTION_ID,               117, false, "Client sent a push telemetry request with an invalid or outdated subscription ID."),
+    (TELEMETRY_TOO_LARGE,                   118, false, "Client sent a push telemetry request larger than the maximum size the broker will accept."),
+    (INVALID_REGISTRATION,                  119, false, "The controller has considered the broker registration to be invalid."),
+    // since Kafka 3.8.0
+    (TRANSACTION_ABORTABLE,                 120, false, "The server encountered an error with the transaction. The client can abort the transaction to continue using this transactional ID."),
+    // since Kafka 3.9.0
+    (INVALID_RECORD_STATE,                  121, false, "The record state is invalid. The acknowledgement of delivery could not be completed."),
+    (SHARE_SESSION_NOT_FOUND,               122, true,  "The share session was not found."),
+    (INVALID_SHARE_SESSION_EPOCH,           123, true,  "The share session epoch is invalid."),
+    (FENCED_STATE_EPOCH,                    124, false, "The share coordinator rejected the request because the share-group state epoch did not match."),
+    (INVALID_VOTER_KEY,                     125, false, "The voter key doesn't match the receiving replica's key."),
+    (DUPLICATE_VOTER,                       126, false, "The voter is already part of the set of voters."),
+    (VOTER_NOT_FOUND,                       127, false, "The voter is not part of the set of voters."),
+    // since Kafka 4.0.0
+    (INVALID_REGULAR_EXPRESSION,            128, false, "The regular expression is not valid."),
+    (REBOOTSTRAP_REQUIRED,                  129, false, "Client metadata is stale, client should rebootstrap to obtain new metadata."),
+    // since Kafka 4.1.0
+    (STREAMS_INVALID_TOPOLOGY,              130, false, "The supplied topology is invalid."),
+    (STREAMS_INVALID_TOPOLOGY_EPOCH,        131, false, "The supplied topology epoch is invalid."),
+    (STREAMS_TOPOLOGY_FENCED,               132, false, "The supplied topology epoch is outdated."),
+    (SHARE_SESSION_LIMIT_REACHED,           133, true, "The limit of share sessions has been reached."),
 }
