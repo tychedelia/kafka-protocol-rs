@@ -17,23 +17,23 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-3
+/// Valid versions: 1-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct CreateDelegationTokenResponse {
     /// The top-level error, or zero if there was no error.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub error_code: i16,
 
     /// The principal type of the token owner.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub principal_type: StrBytes,
 
     /// The name of the token owner.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub principal_name: StrBytes,
 
     /// The principal type of the requester of the token.
@@ -48,32 +48,32 @@ pub struct CreateDelegationTokenResponse {
 
     /// When this token was generated.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub issue_timestamp_ms: i64,
 
     /// When this token expires.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub expiry_timestamp_ms: i64,
 
     /// The maximum lifetime of this token.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub max_timestamp_ms: i64,
 
     /// The token UUID.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub token_id: StrBytes,
 
     /// HMAC of the delegation token.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub hmac: Bytes,
 
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub throttle_time_ms: i32,
 
     /// Other tagged fields
@@ -85,7 +85,7 @@ impl CreateDelegationTokenResponse {
     ///
     /// The top-level error, or zero if there was no error.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_error_code(mut self, value: i16) -> Self {
         self.error_code = value;
         self
@@ -94,7 +94,7 @@ impl CreateDelegationTokenResponse {
     ///
     /// The principal type of the token owner.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_principal_type(mut self, value: StrBytes) -> Self {
         self.principal_type = value;
         self
@@ -103,7 +103,7 @@ impl CreateDelegationTokenResponse {
     ///
     /// The name of the token owner.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_principal_name(mut self, value: StrBytes) -> Self {
         self.principal_name = value;
         self
@@ -130,7 +130,7 @@ impl CreateDelegationTokenResponse {
     ///
     /// When this token was generated.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_issue_timestamp_ms(mut self, value: i64) -> Self {
         self.issue_timestamp_ms = value;
         self
@@ -139,7 +139,7 @@ impl CreateDelegationTokenResponse {
     ///
     /// When this token expires.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_expiry_timestamp_ms(mut self, value: i64) -> Self {
         self.expiry_timestamp_ms = value;
         self
@@ -148,7 +148,7 @@ impl CreateDelegationTokenResponse {
     ///
     /// The maximum lifetime of this token.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_max_timestamp_ms(mut self, value: i64) -> Self {
         self.max_timestamp_ms = value;
         self
@@ -157,7 +157,7 @@ impl CreateDelegationTokenResponse {
     ///
     /// The token UUID.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_token_id(mut self, value: StrBytes) -> Self {
         self.token_id = value;
         self
@@ -166,7 +166,7 @@ impl CreateDelegationTokenResponse {
     ///
     /// HMAC of the delegation token.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_hmac(mut self, value: Bytes) -> Self {
         self.hmac = value;
         self
@@ -175,7 +175,7 @@ impl CreateDelegationTokenResponse {
     ///
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
         self.throttle_time_ms = value;
         self
@@ -195,7 +195,7 @@ impl CreateDelegationTokenResponse {
 #[cfg(feature = "broker")]
 impl Encodable for CreateDelegationTokenResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         types::Int16.encode(buf, &self.error_code)?;
@@ -313,7 +313,7 @@ impl Encodable for CreateDelegationTokenResponse {
 #[cfg(feature = "client")]
 impl Decodable for CreateDelegationTokenResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         let error_code = types::Int16.decode(buf)?;
@@ -398,7 +398,7 @@ impl Default for CreateDelegationTokenResponse {
 }
 
 impl Message for CreateDelegationTokenResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const VERSIONS: VersionRange = VersionRange { min: 1, max: 3 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 

@@ -21,7 +21,7 @@ use crate::protocol::{
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct DescribeProducersRequest {
-    ///
+    /// The topics to list producers for.
     ///
     /// Supported API versions: 0
     pub topics: Vec<TopicRequest>,
@@ -33,7 +33,7 @@ pub struct DescribeProducersRequest {
 impl DescribeProducersRequest {
     /// Sets `topics` to the passed value.
     ///
-    ///
+    /// The topics to list producers for.
     ///
     /// Supported API versions: 0
     pub fn with_topics(mut self, value: Vec<TopicRequest>) -> Self {

@@ -26,7 +26,7 @@ pub struct DescribeTransactionsResponse {
     /// Supported API versions: 0
     pub throttle_time_ms: i32,
 
-    ///
+    /// The current state of the transaction.
     ///
     /// Supported API versions: 0
     pub transaction_states: Vec<TransactionState>,
@@ -47,7 +47,7 @@ impl DescribeTransactionsResponse {
     }
     /// Sets `transaction_states` to the passed value.
     ///
-    ///
+    /// The current state of the transaction.
     ///
     /// Supported API versions: 0
     pub fn with_transaction_states(mut self, value: Vec<TransactionState>) -> Self {
@@ -148,12 +148,12 @@ impl Message for DescribeTransactionsResponse {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct TopicData {
-    ///
+    /// The topic name.
     ///
     /// Supported API versions: 0
     pub topic: super::TopicName,
 
-    ///
+    /// The partition ids included in the current transaction.
     ///
     /// Supported API versions: 0
     pub partitions: Vec<i32>,
@@ -165,7 +165,7 @@ pub struct TopicData {
 impl TopicData {
     /// Sets `topic` to the passed value.
     ///
-    ///
+    /// The topic name.
     ///
     /// Supported API versions: 0
     pub fn with_topic(mut self, value: super::TopicName) -> Self {
@@ -174,7 +174,7 @@ impl TopicData {
     }
     /// Sets `partitions` to the passed value.
     ///
-    ///
+    /// The partition ids included in the current transaction.
     ///
     /// Supported API versions: 0
     pub fn with_partitions(mut self, value: Vec<i32>) -> Self {
@@ -274,37 +274,37 @@ impl Message for TopicData {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct TransactionState {
-    ///
+    /// The error code.
     ///
     /// Supported API versions: 0
     pub error_code: i16,
 
-    ///
+    /// The transactional id.
     ///
     /// Supported API versions: 0
     pub transactional_id: super::TransactionalId,
 
-    ///
+    /// The current transaction state of the producer.
     ///
     /// Supported API versions: 0
     pub transaction_state: StrBytes,
 
-    ///
+    /// The timeout in milliseconds for the transaction.
     ///
     /// Supported API versions: 0
     pub transaction_timeout_ms: i32,
 
-    ///
+    /// The start time of the transaction in milliseconds.
     ///
     /// Supported API versions: 0
     pub transaction_start_time_ms: i64,
 
-    ///
+    /// The current producer id associated with the transaction.
     ///
     /// Supported API versions: 0
     pub producer_id: super::ProducerId,
 
-    ///
+    /// The current epoch associated with the producer id.
     ///
     /// Supported API versions: 0
     pub producer_epoch: i16,
@@ -321,7 +321,7 @@ pub struct TransactionState {
 impl TransactionState {
     /// Sets `error_code` to the passed value.
     ///
-    ///
+    /// The error code.
     ///
     /// Supported API versions: 0
     pub fn with_error_code(mut self, value: i16) -> Self {
@@ -330,7 +330,7 @@ impl TransactionState {
     }
     /// Sets `transactional_id` to the passed value.
     ///
-    ///
+    /// The transactional id.
     ///
     /// Supported API versions: 0
     pub fn with_transactional_id(mut self, value: super::TransactionalId) -> Self {
@@ -339,7 +339,7 @@ impl TransactionState {
     }
     /// Sets `transaction_state` to the passed value.
     ///
-    ///
+    /// The current transaction state of the producer.
     ///
     /// Supported API versions: 0
     pub fn with_transaction_state(mut self, value: StrBytes) -> Self {
@@ -348,7 +348,7 @@ impl TransactionState {
     }
     /// Sets `transaction_timeout_ms` to the passed value.
     ///
-    ///
+    /// The timeout in milliseconds for the transaction.
     ///
     /// Supported API versions: 0
     pub fn with_transaction_timeout_ms(mut self, value: i32) -> Self {
@@ -357,7 +357,7 @@ impl TransactionState {
     }
     /// Sets `transaction_start_time_ms` to the passed value.
     ///
-    ///
+    /// The start time of the transaction in milliseconds.
     ///
     /// Supported API versions: 0
     pub fn with_transaction_start_time_ms(mut self, value: i64) -> Self {
@@ -366,7 +366,7 @@ impl TransactionState {
     }
     /// Sets `producer_id` to the passed value.
     ///
-    ///
+    /// The current producer id associated with the transaction.
     ///
     /// Supported API versions: 0
     pub fn with_producer_id(mut self, value: super::ProducerId) -> Self {
@@ -375,7 +375,7 @@ impl TransactionState {
     }
     /// Sets `producer_epoch` to the passed value.
     ///
-    ///
+    /// The current epoch associated with the producer id.
     ///
     /// Supported API versions: 0
     pub fn with_producer_epoch(mut self, value: i16) -> Self {

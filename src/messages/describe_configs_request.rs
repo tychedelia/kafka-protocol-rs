@@ -17,13 +17,13 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-4
+/// Valid versions: 1-4
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct DescribeConfigsRequest {
     /// The resources whose configurations we want to describe.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 1-4
     pub resources: Vec<DescribeConfigsResource>,
 
     /// True if we should include all synonyms.
@@ -45,7 +45,7 @@ impl DescribeConfigsRequest {
     ///
     /// The resources whose configurations we want to describe.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 1-4
     pub fn with_resources(mut self, value: Vec<DescribeConfigsResource>) -> Self {
         self.resources = value;
         self
@@ -83,7 +83,7 @@ impl DescribeConfigsRequest {
 #[cfg(feature = "client")]
 impl Encodable for DescribeConfigsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 4 {
+        if version < 1 || version > 4 {
             bail!("specified version not supported by this message type");
         }
         if version >= 4 {
@@ -91,13 +91,7 @@ impl Encodable for DescribeConfigsRequest {
         } else {
             types::Array(types::Struct { version }).encode(buf, &self.resources)?;
         }
-        if version >= 1 {
-            types::Boolean.encode(buf, &self.include_synonyms)?;
-        } else {
-            if self.include_synonyms {
-                bail!("A field is set that is not available on the selected protocol version");
-            }
-        }
+        types::Boolean.encode(buf, &self.include_synonyms)?;
         if version >= 3 {
             types::Boolean.encode(buf, &self.include_documentation)?;
         } else {
@@ -127,13 +121,7 @@ impl Encodable for DescribeConfigsRequest {
         } else {
             total_size += types::Array(types::Struct { version }).compute_size(&self.resources)?;
         }
-        if version >= 1 {
-            total_size += types::Boolean.compute_size(&self.include_synonyms)?;
-        } else {
-            if self.include_synonyms {
-                bail!("A field is set that is not available on the selected protocol version");
-            }
-        }
+        total_size += types::Boolean.compute_size(&self.include_synonyms)?;
         if version >= 3 {
             total_size += types::Boolean.compute_size(&self.include_documentation)?;
         } else {
@@ -160,7 +148,7 @@ impl Encodable for DescribeConfigsRequest {
 #[cfg(feature = "broker")]
 impl Decodable for DescribeConfigsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 4 {
+        if version < 1 || version > 4 {
             bail!("specified version not supported by this message type");
         }
         let resources = if version >= 4 {
@@ -168,11 +156,7 @@ impl Decodable for DescribeConfigsRequest {
         } else {
             types::Array(types::Struct { version }).decode(buf)?
         };
-        let include_synonyms = if version >= 1 {
-            types::Boolean.decode(buf)?
-        } else {
-            false
-        };
+        let include_synonyms = types::Boolean.decode(buf)?;
         let include_documentation = if version >= 3 {
             types::Boolean.decode(buf)?
         } else {
@@ -209,27 +193,27 @@ impl Default for DescribeConfigsRequest {
 }
 
 impl Message for DescribeConfigsRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
-    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 0 });
+    const VERSIONS: VersionRange = VersionRange { min: 1, max: 4 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-4
+/// Valid versions: 1-4
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct DescribeConfigsResource {
     /// The resource type.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 1-4
     pub resource_type: i8,
 
     /// The resource name.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 1-4
     pub resource_name: StrBytes,
 
     /// The configuration keys to list, or null to list all configuration keys.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 1-4
     pub configuration_keys: Option<Vec<StrBytes>>,
 
     /// Other tagged fields
@@ -241,7 +225,7 @@ impl DescribeConfigsResource {
     ///
     /// The resource type.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 1-4
     pub fn with_resource_type(mut self, value: i8) -> Self {
         self.resource_type = value;
         self
@@ -250,7 +234,7 @@ impl DescribeConfigsResource {
     ///
     /// The resource name.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 1-4
     pub fn with_resource_name(mut self, value: StrBytes) -> Self {
         self.resource_name = value;
         self
@@ -259,7 +243,7 @@ impl DescribeConfigsResource {
     ///
     /// The configuration keys to list, or null to list all configuration keys.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 1-4
     pub fn with_configuration_keys(mut self, value: Option<Vec<StrBytes>>) -> Self {
         self.configuration_keys = value;
         self
@@ -279,7 +263,7 @@ impl DescribeConfigsResource {
 #[cfg(feature = "client")]
 impl Encodable for DescribeConfigsResource {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 4 {
+        if version < 1 || version > 4 {
             bail!("specified version not supported by this message type");
         }
         types::Int8.encode(buf, &self.resource_type)?;
@@ -340,7 +324,7 @@ impl Encodable for DescribeConfigsResource {
 #[cfg(feature = "broker")]
 impl Decodable for DescribeConfigsResource {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 4 {
+        if version < 1 || version > 4 {
             bail!("specified version not supported by this message type");
         }
         let resource_type = types::Int8.decode(buf)?;
@@ -385,8 +369,8 @@ impl Default for DescribeConfigsResource {
 }
 
 impl Message for DescribeConfigsResource {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
-    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 0 });
+    const VERSIONS: VersionRange = VersionRange { min: 1, max: 4 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 impl HeaderVersion for DescribeConfigsRequest {

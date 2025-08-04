@@ -17,18 +17,18 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-5
+/// Valid versions: 0-6
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct DescribeGroupsRequest {
-    /// The names of the groups to describe
+    /// The names of the groups to describe.
     ///
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub groups: Vec<super::GroupId>,
 
     /// Whether to include authorized operations.
     ///
-    /// Supported API versions: 3-5
+    /// Supported API versions: 3-6
     pub include_authorized_operations: bool,
 
     /// Other tagged fields
@@ -38,9 +38,9 @@ pub struct DescribeGroupsRequest {
 impl DescribeGroupsRequest {
     /// Sets `groups` to the passed value.
     ///
-    /// The names of the groups to describe
+    /// The names of the groups to describe.
     ///
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub fn with_groups(mut self, value: Vec<super::GroupId>) -> Self {
         self.groups = value;
         self
@@ -49,7 +49,7 @@ impl DescribeGroupsRequest {
     ///
     /// Whether to include authorized operations.
     ///
-    /// Supported API versions: 3-5
+    /// Supported API versions: 3-6
     pub fn with_include_authorized_operations(mut self, value: bool) -> Self {
         self.include_authorized_operations = value;
         self
@@ -69,7 +69,7 @@ impl DescribeGroupsRequest {
 #[cfg(feature = "client")]
 impl Encodable for DescribeGroupsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 5 {
+        if version < 0 || version > 6 {
             bail!("specified version not supported by this message type");
         }
         if version >= 5 {
@@ -131,7 +131,7 @@ impl Encodable for DescribeGroupsRequest {
 #[cfg(feature = "broker")]
 impl Decodable for DescribeGroupsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 5 {
+        if version < 0 || version > 6 {
             bail!("specified version not supported by this message type");
         }
         let groups = if version >= 5 {
@@ -173,7 +173,7 @@ impl Default for DescribeGroupsRequest {
 }
 
 impl Message for DescribeGroupsRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 5 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 6 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 

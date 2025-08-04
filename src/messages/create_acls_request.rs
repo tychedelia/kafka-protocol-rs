@@ -17,18 +17,18 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-3
+/// Valid versions: 1-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct AclCreation {
     /// The type of the resource.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub resource_type: i8,
 
     /// The resource name for the ACL.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub resource_name: StrBytes,
 
     /// The pattern type for the ACL.
@@ -38,22 +38,22 @@ pub struct AclCreation {
 
     /// The principal for the ACL.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub principal: StrBytes,
 
     /// The host for the ACL.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub host: StrBytes,
 
     /// The operation type for the ACL (read, write, etc.).
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub operation: i8,
 
     /// The permission type for the ACL (allow, deny, etc.).
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub permission_type: i8,
 
     /// Other tagged fields
@@ -65,7 +65,7 @@ impl AclCreation {
     ///
     /// The type of the resource.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_resource_type(mut self, value: i8) -> Self {
         self.resource_type = value;
         self
@@ -74,7 +74,7 @@ impl AclCreation {
     ///
     /// The resource name for the ACL.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_resource_name(mut self, value: StrBytes) -> Self {
         self.resource_name = value;
         self
@@ -92,7 +92,7 @@ impl AclCreation {
     ///
     /// The principal for the ACL.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_principal(mut self, value: StrBytes) -> Self {
         self.principal = value;
         self
@@ -101,7 +101,7 @@ impl AclCreation {
     ///
     /// The host for the ACL.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_host(mut self, value: StrBytes) -> Self {
         self.host = value;
         self
@@ -110,7 +110,7 @@ impl AclCreation {
     ///
     /// The operation type for the ACL (read, write, etc.).
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_operation(mut self, value: i8) -> Self {
         self.operation = value;
         self
@@ -119,7 +119,7 @@ impl AclCreation {
     ///
     /// The permission type for the ACL (allow, deny, etc.).
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_permission_type(mut self, value: i8) -> Self {
         self.permission_type = value;
         self
@@ -139,7 +139,7 @@ impl AclCreation {
 #[cfg(feature = "client")]
 impl Encodable for AclCreation {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         types::Int8.encode(buf, &self.resource_type)?;
@@ -148,13 +148,7 @@ impl Encodable for AclCreation {
         } else {
             types::String.encode(buf, &self.resource_name)?;
         }
-        if version >= 1 {
-            types::Int8.encode(buf, &self.resource_pattern_type)?;
-        } else {
-            if self.resource_pattern_type != 3 {
-                bail!("A field is set that is not available on the selected protocol version");
-            }
-        }
+        types::Int8.encode(buf, &self.resource_pattern_type)?;
         if version >= 2 {
             types::CompactString.encode(buf, &self.principal)?;
         } else {
@@ -189,13 +183,7 @@ impl Encodable for AclCreation {
         } else {
             total_size += types::String.compute_size(&self.resource_name)?;
         }
-        if version >= 1 {
-            total_size += types::Int8.compute_size(&self.resource_pattern_type)?;
-        } else {
-            if self.resource_pattern_type != 3 {
-                bail!("A field is set that is not available on the selected protocol version");
-            }
-        }
+        total_size += types::Int8.compute_size(&self.resource_pattern_type)?;
         if version >= 2 {
             total_size += types::CompactString.compute_size(&self.principal)?;
         } else {
@@ -227,7 +215,7 @@ impl Encodable for AclCreation {
 #[cfg(feature = "broker")]
 impl Decodable for AclCreation {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         let resource_type = types::Int8.decode(buf)?;
@@ -236,11 +224,7 @@ impl Decodable for AclCreation {
         } else {
             types::String.decode(buf)?
         };
-        let resource_pattern_type = if version >= 1 {
-            types::Int8.decode(buf)?
-        } else {
-            3
-        };
+        let resource_pattern_type = types::Int8.decode(buf)?;
         let principal = if version >= 2 {
             types::CompactString.decode(buf)?
         } else {
@@ -292,17 +276,17 @@ impl Default for AclCreation {
 }
 
 impl Message for AclCreation {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
-    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 0 });
+    const VERSIONS: VersionRange = VersionRange { min: 1, max: 3 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-3
+/// Valid versions: 1-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct CreateAclsRequest {
     /// The ACLs that we want to create.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub creations: Vec<AclCreation>,
 
     /// Other tagged fields
@@ -314,7 +298,7 @@ impl CreateAclsRequest {
     ///
     /// The ACLs that we want to create.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_creations(mut self, value: Vec<AclCreation>) -> Self {
         self.creations = value;
         self
@@ -334,7 +318,7 @@ impl CreateAclsRequest {
 #[cfg(feature = "client")]
 impl Encodable for CreateAclsRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         if version >= 2 {
@@ -383,7 +367,7 @@ impl Encodable for CreateAclsRequest {
 #[cfg(feature = "broker")]
 impl Decodable for CreateAclsRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         let creations = if version >= 2 {
@@ -418,8 +402,8 @@ impl Default for CreateAclsRequest {
 }
 
 impl Message for CreateAclsRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
-    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 0 });
+    const VERSIONS: VersionRange = VersionRange { min: 1, max: 3 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 impl HeaderVersion for CreateAclsRequest {

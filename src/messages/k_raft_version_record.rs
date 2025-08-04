@@ -21,12 +21,12 @@ use crate::protocol::{
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct KRaftVersionRecord {
-    /// The version of the kraft version record
+    /// The version of the kraft version record.
     ///
     /// Supported API versions: 0
     pub version: i16,
 
-    /// The kraft protocol version
+    /// The kraft protocol version.
     ///
     /// Supported API versions: 0
     pub k_raft_version: i16,
@@ -38,7 +38,7 @@ pub struct KRaftVersionRecord {
 impl KRaftVersionRecord {
     /// Sets `version` to the passed value.
     ///
-    /// The version of the kraft version record
+    /// The version of the kraft version record.
     ///
     /// Supported API versions: 0
     pub fn with_version(mut self, value: i16) -> Self {
@@ -47,7 +47,7 @@ impl KRaftVersionRecord {
     }
     /// Sets `k_raft_version` to the passed value.
     ///
-    /// The kraft protocol version
+    /// The kraft protocol version.
     ///
     /// Supported API versions: 0
     pub fn with_k_raft_version(mut self, value: i16) -> Self {

@@ -21,27 +21,27 @@ use crate::protocol::{
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct ConsumerProtocolSubscription {
-    ///
+    /// The topics that the member wants to consume.
     ///
     /// Supported API versions: 0-3
     pub topics: Vec<StrBytes>,
 
-    ///
+    /// User data that will be passed back to the consumer.
     ///
     /// Supported API versions: 0-3
     pub user_data: Option<Bytes>,
 
-    ///
+    /// The partitions that the member owns.
     ///
     /// Supported API versions: 1-3
     pub owned_partitions: Vec<TopicPartition>,
 
-    ///
+    /// The generation id of the member.
     ///
     /// Supported API versions: 2-3
     pub generation_id: i32,
 
-    ///
+    /// The rack id of the member.
     ///
     /// Supported API versions: 3
     pub rack_id: Option<StrBytes>,
@@ -50,7 +50,7 @@ pub struct ConsumerProtocolSubscription {
 impl ConsumerProtocolSubscription {
     /// Sets `topics` to the passed value.
     ///
-    ///
+    /// The topics that the member wants to consume.
     ///
     /// Supported API versions: 0-3
     pub fn with_topics(mut self, value: Vec<StrBytes>) -> Self {
@@ -59,7 +59,7 @@ impl ConsumerProtocolSubscription {
     }
     /// Sets `user_data` to the passed value.
     ///
-    ///
+    /// User data that will be passed back to the consumer.
     ///
     /// Supported API versions: 0-3
     pub fn with_user_data(mut self, value: Option<Bytes>) -> Self {
@@ -68,7 +68,7 @@ impl ConsumerProtocolSubscription {
     }
     /// Sets `owned_partitions` to the passed value.
     ///
-    ///
+    /// The partitions that the member owns.
     ///
     /// Supported API versions: 1-3
     pub fn with_owned_partitions(mut self, value: Vec<TopicPartition>) -> Self {
@@ -77,7 +77,7 @@ impl ConsumerProtocolSubscription {
     }
     /// Sets `generation_id` to the passed value.
     ///
-    ///
+    /// The generation id of the member.
     ///
     /// Supported API versions: 2-3
     pub fn with_generation_id(mut self, value: i32) -> Self {
@@ -86,7 +86,7 @@ impl ConsumerProtocolSubscription {
     }
     /// Sets `rack_id` to the passed value.
     ///
-    ///
+    /// The rack id of the member.
     ///
     /// Supported API versions: 3
     pub fn with_rack_id(mut self, value: Option<StrBytes>) -> Self {
@@ -186,12 +186,12 @@ impl Message for ConsumerProtocolSubscription {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct TopicPartition {
-    ///
+    /// The topic name.
     ///
     /// Supported API versions: 1-3
     pub topic: super::TopicName,
 
-    ///
+    /// The partition ids.
     ///
     /// Supported API versions: 1-3
     pub partitions: Vec<i32>,
@@ -200,7 +200,7 @@ pub struct TopicPartition {
 impl TopicPartition {
     /// Sets `topic` to the passed value.
     ///
-    ///
+    /// The topic name.
     ///
     /// Supported API versions: 1-3
     pub fn with_topic(mut self, value: super::TopicName) -> Self {
@@ -209,7 +209,7 @@ impl TopicPartition {
     }
     /// Sets `partitions` to the passed value.
     ///
-    ///
+    /// The partition ids.
     ///
     /// Supported API versions: 1-3
     pub fn with_partitions(mut self, value: Vec<i32>) -> Self {

@@ -56,7 +56,7 @@ pub struct GetTelemetrySubscriptionsResponse {
     /// Supported API versions: 0
     pub telemetry_max_bytes: i32,
 
-    /// Flag to indicate monotonic/counter metrics are to be emitted as deltas or cumulative values
+    /// Flag to indicate monotonic/counter metrics are to be emitted as deltas or cumulative values.
     ///
     /// Supported API versions: 0
     pub delta_temporality: bool,
@@ -136,7 +136,7 @@ impl GetTelemetrySubscriptionsResponse {
     }
     /// Sets `delta_temporality` to the passed value.
     ///
-    /// Flag to indicate monotonic/counter metrics are to be emitted as deltas or cumulative values
+    /// Flag to indicate monotonic/counter metrics are to be emitted as deltas or cumulative values.
     ///
     /// Supported API versions: 0
     pub fn with_delta_temporality(mut self, value: bool) -> Self {

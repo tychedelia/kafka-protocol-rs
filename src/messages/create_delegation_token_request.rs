@@ -17,18 +17,18 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-3
+/// Valid versions: 1-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct CreatableRenewers {
     /// The type of the Kafka principal.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub principal_type: StrBytes,
 
     /// The name of the Kafka principal.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub principal_name: StrBytes,
 
     /// Other tagged fields
@@ -40,7 +40,7 @@ impl CreatableRenewers {
     ///
     /// The type of the Kafka principal.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_principal_type(mut self, value: StrBytes) -> Self {
         self.principal_type = value;
         self
@@ -49,7 +49,7 @@ impl CreatableRenewers {
     ///
     /// The name of the Kafka principal.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_principal_name(mut self, value: StrBytes) -> Self {
         self.principal_name = value;
         self
@@ -69,7 +69,7 @@ impl CreatableRenewers {
 #[cfg(feature = "client")]
 impl Encodable for CreatableRenewers {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         if version >= 2 {
@@ -127,7 +127,7 @@ impl Encodable for CreatableRenewers {
 #[cfg(feature = "broker")]
 impl Decodable for CreatableRenewers {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         let principal_type = if version >= 2 {
@@ -169,11 +169,11 @@ impl Default for CreatableRenewers {
 }
 
 impl Message for CreatableRenewers {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
-    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 0 });
+    const VERSIONS: VersionRange = VersionRange { min: 1, max: 3 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-3
+/// Valid versions: 1-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct CreateDelegationTokenRequest {
@@ -189,12 +189,12 @@ pub struct CreateDelegationTokenRequest {
 
     /// A list of those who are allowed to renew this token before it expires.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub renewers: Vec<CreatableRenewers>,
 
     /// The maximum lifetime of the token in milliseconds, or -1 to use the server side default.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub max_lifetime_ms: i64,
 
     /// Other tagged fields
@@ -224,7 +224,7 @@ impl CreateDelegationTokenRequest {
     ///
     /// A list of those who are allowed to renew this token before it expires.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_renewers(mut self, value: Vec<CreatableRenewers>) -> Self {
         self.renewers = value;
         self
@@ -233,7 +233,7 @@ impl CreateDelegationTokenRequest {
     ///
     /// The maximum lifetime of the token in milliseconds, or -1 to use the server side default.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_max_lifetime_ms(mut self, value: i64) -> Self {
         self.max_lifetime_ms = value;
         self
@@ -253,7 +253,7 @@ impl CreateDelegationTokenRequest {
 #[cfg(feature = "client")]
 impl Encodable for CreateDelegationTokenRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         if version >= 3 {
@@ -352,7 +352,7 @@ impl Encodable for CreateDelegationTokenRequest {
 #[cfg(feature = "broker")]
 impl Decodable for CreateDelegationTokenRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         let owner_principal_type = if version >= 3 {
@@ -404,8 +404,8 @@ impl Default for CreateDelegationTokenRequest {
 }
 
 impl Message for CreateDelegationTokenRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
-    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 0 });
+    const VERSIONS: VersionRange = VersionRange { min: 1, max: 3 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 impl HeaderVersion for CreateDelegationTokenRequest {

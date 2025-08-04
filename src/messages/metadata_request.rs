@@ -17,18 +17,18 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-12
+/// Valid versions: 0-13
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct MetadataRequest {
     /// The topics to fetch metadata for.
     ///
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub topics: Option<Vec<MetadataRequestTopic>>,
 
     /// If this is true, the broker may auto-create topics that we requested which do not already exist, if it is configured to do so.
     ///
-    /// Supported API versions: 4-12
+    /// Supported API versions: 4-13
     pub allow_auto_topic_creation: bool,
 
     /// Whether to include cluster authorized operations.
@@ -38,7 +38,7 @@ pub struct MetadataRequest {
 
     /// Whether to include topic authorized operations.
     ///
-    /// Supported API versions: 8-12
+    /// Supported API versions: 8-13
     pub include_topic_authorized_operations: bool,
 
     /// Other tagged fields
@@ -50,7 +50,7 @@ impl MetadataRequest {
     ///
     /// The topics to fetch metadata for.
     ///
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub fn with_topics(mut self, value: Option<Vec<MetadataRequestTopic>>) -> Self {
         self.topics = value;
         self
@@ -59,7 +59,7 @@ impl MetadataRequest {
     ///
     /// If this is true, the broker may auto-create topics that we requested which do not already exist, if it is configured to do so.
     ///
-    /// Supported API versions: 4-12
+    /// Supported API versions: 4-13
     pub fn with_allow_auto_topic_creation(mut self, value: bool) -> Self {
         self.allow_auto_topic_creation = value;
         self
@@ -77,7 +77,7 @@ impl MetadataRequest {
     ///
     /// Whether to include topic authorized operations.
     ///
-    /// Supported API versions: 8-12
+    /// Supported API versions: 8-13
     pub fn with_include_topic_authorized_operations(mut self, value: bool) -> Self {
         self.include_topic_authorized_operations = value;
         self
@@ -97,7 +97,7 @@ impl MetadataRequest {
 #[cfg(feature = "client")]
 impl Encodable for MetadataRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 12 {
+        if version < 0 || version > 13 {
             bail!("specified version not supported by this message type");
         }
         if version >= 9 {
@@ -189,7 +189,7 @@ impl Encodable for MetadataRequest {
 #[cfg(feature = "broker")]
 impl Decodable for MetadataRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 12 {
+        if version < 0 || version > 13 {
             bail!("specified version not supported by this message type");
         }
         let topics = if version >= 9 {
@@ -245,22 +245,22 @@ impl Default for MetadataRequest {
 }
 
 impl Message for MetadataRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 12 };
-    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 3 });
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 13 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-12
+/// Valid versions: 0-13
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct MetadataRequestTopic {
     /// The topic id.
     ///
-    /// Supported API versions: 10-12
+    /// Supported API versions: 10-13
     pub topic_id: Uuid,
 
     /// The topic name.
     ///
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub name: Option<super::TopicName>,
 
     /// Other tagged fields
@@ -272,7 +272,7 @@ impl MetadataRequestTopic {
     ///
     /// The topic id.
     ///
-    /// Supported API versions: 10-12
+    /// Supported API versions: 10-13
     pub fn with_topic_id(mut self, value: Uuid) -> Self {
         self.topic_id = value;
         self
@@ -281,7 +281,7 @@ impl MetadataRequestTopic {
     ///
     /// The topic name.
     ///
-    /// Supported API versions: 0-12
+    /// Supported API versions: 0-13
     pub fn with_name(mut self, value: Option<super::TopicName>) -> Self {
         self.name = value;
         self
@@ -301,7 +301,7 @@ impl MetadataRequestTopic {
 #[cfg(feature = "client")]
 impl Encodable for MetadataRequestTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 12 {
+        if version < 0 || version > 13 {
             bail!("specified version not supported by this message type");
         }
         if version >= 10 {
@@ -355,7 +355,7 @@ impl Encodable for MetadataRequestTopic {
 #[cfg(feature = "broker")]
 impl Decodable for MetadataRequestTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 12 {
+        if version < 0 || version > 13 {
             bail!("specified version not supported by this message type");
         }
         let topic_id = if version >= 10 {
@@ -397,8 +397,8 @@ impl Default for MetadataRequestTopic {
 }
 
 impl Message for MetadataRequestTopic {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 12 };
-    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 3 });
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 13 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 impl HeaderVersion for MetadataRequest {

@@ -17,23 +17,23 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-1
+/// Valid versions: 0-2
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct NodeEndpoint {
-    /// The ID of the associated node
+    /// The ID of the associated node.
     ///
-    /// Supported API versions: 1
+    /// Supported API versions: 1-2
     pub node_id: super::BrokerId,
 
-    /// The node's hostname
+    /// The node's hostname.
     ///
-    /// Supported API versions: 1
+    /// Supported API versions: 1-2
     pub host: StrBytes,
 
-    /// The node's port
+    /// The node's port.
     ///
-    /// Supported API versions: 1
+    /// Supported API versions: 1-2
     pub port: u16,
 
     /// Other tagged fields
@@ -43,27 +43,27 @@ pub struct NodeEndpoint {
 impl NodeEndpoint {
     /// Sets `node_id` to the passed value.
     ///
-    /// The ID of the associated node
+    /// The ID of the associated node.
     ///
-    /// Supported API versions: 1
+    /// Supported API versions: 1-2
     pub fn with_node_id(mut self, value: super::BrokerId) -> Self {
         self.node_id = value;
         self
     }
     /// Sets `host` to the passed value.
     ///
-    /// The node's hostname
+    /// The node's hostname.
     ///
-    /// Supported API versions: 1
+    /// Supported API versions: 1-2
     pub fn with_host(mut self, value: StrBytes) -> Self {
         self.host = value;
         self
     }
     /// Sets `port` to the passed value.
     ///
-    /// The node's port
+    /// The node's port.
     ///
-    /// Supported API versions: 1
+    /// Supported API versions: 1-2
     pub fn with_port(mut self, value: u16) -> Self {
         self.port = value;
         self
@@ -83,7 +83,7 @@ impl NodeEndpoint {
 #[cfg(feature = "broker")]
 impl Encodable for NodeEndpoint {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 1 {
+        if version < 0 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         if version >= 1 {
@@ -159,7 +159,7 @@ impl Encodable for NodeEndpoint {
 #[cfg(feature = "client")]
 impl Decodable for NodeEndpoint {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 1 {
+        if version < 0 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         let node_id = if version >= 1 {
@@ -206,37 +206,37 @@ impl Default for NodeEndpoint {
 }
 
 impl Message for NodeEndpoint {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-1
+/// Valid versions: 0-2
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct PartitionData {
     /// The partition index.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub partition_index: i32,
 
+    /// The partition level error code.
     ///
-    ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub error_code: i16,
 
     /// The ID of the current leader or -1 if the leader is unknown.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub leader_id: super::BrokerId,
 
-    /// The latest known leader epoch
+    /// The latest known leader epoch.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub leader_epoch: i32,
 
-    /// True if the vote was granted and false otherwise
+    /// True if the vote was granted and false otherwise.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub vote_granted: bool,
 
     /// Other tagged fields
@@ -248,16 +248,16 @@ impl PartitionData {
     ///
     /// The partition index.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub fn with_partition_index(mut self, value: i32) -> Self {
         self.partition_index = value;
         self
     }
     /// Sets `error_code` to the passed value.
     ///
+    /// The partition level error code.
     ///
-    ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub fn with_error_code(mut self, value: i16) -> Self {
         self.error_code = value;
         self
@@ -266,25 +266,25 @@ impl PartitionData {
     ///
     /// The ID of the current leader or -1 if the leader is unknown.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub fn with_leader_id(mut self, value: super::BrokerId) -> Self {
         self.leader_id = value;
         self
     }
     /// Sets `leader_epoch` to the passed value.
     ///
-    /// The latest known leader epoch
+    /// The latest known leader epoch.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub fn with_leader_epoch(mut self, value: i32) -> Self {
         self.leader_epoch = value;
         self
     }
     /// Sets `vote_granted` to the passed value.
     ///
-    /// True if the vote was granted and false otherwise
+    /// True if the vote was granted and false otherwise.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub fn with_vote_granted(mut self, value: bool) -> Self {
         self.vote_granted = value;
         self
@@ -304,7 +304,7 @@ impl PartitionData {
 #[cfg(feature = "broker")]
 impl Encodable for PartitionData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 1 {
+        if version < 0 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.partition_index)?;
@@ -348,7 +348,7 @@ impl Encodable for PartitionData {
 #[cfg(feature = "client")]
 impl Decodable for PartitionData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 1 {
+        if version < 0 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         let partition_index = types::Int32.decode(buf)?;
@@ -389,22 +389,22 @@ impl Default for PartitionData {
 }
 
 impl Message for PartitionData {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-1
+/// Valid versions: 0-2
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct TopicData {
     /// The topic name.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub topic_name: super::TopicName,
 
+    /// The results for each partition.
     ///
-    ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub partitions: Vec<PartitionData>,
 
     /// Other tagged fields
@@ -416,16 +416,16 @@ impl TopicData {
     ///
     /// The topic name.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub fn with_topic_name(mut self, value: super::TopicName) -> Self {
         self.topic_name = value;
         self
     }
     /// Sets `partitions` to the passed value.
     ///
+    /// The results for each partition.
     ///
-    ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub fn with_partitions(mut self, value: Vec<PartitionData>) -> Self {
         self.partitions = value;
         self
@@ -445,7 +445,7 @@ impl TopicData {
 #[cfg(feature = "broker")]
 impl Encodable for TopicData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 1 {
+        if version < 0 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         types::CompactString.encode(buf, &self.topic_name)?;
@@ -484,7 +484,7 @@ impl Encodable for TopicData {
 #[cfg(feature = "client")]
 impl Decodable for TopicData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 1 {
+        if version < 0 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         let topic_name = types::CompactString.decode(buf)?;
@@ -516,27 +516,27 @@ impl Default for TopicData {
 }
 
 impl Message for TopicData {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-1
+/// Valid versions: 0-2
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct VoteResponse {
     /// The top level error code.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub error_code: i16,
 
+    /// The results for each topic.
     ///
-    ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub topics: Vec<TopicData>,
 
-    /// Endpoints for all current-leaders enumerated in PartitionData
+    /// Endpoints for all current-leaders enumerated in PartitionData.
     ///
-    /// Supported API versions: 1
+    /// Supported API versions: 1-2
     pub node_endpoints: Vec<NodeEndpoint>,
 
     /// Other tagged fields
@@ -548,25 +548,25 @@ impl VoteResponse {
     ///
     /// The top level error code.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub fn with_error_code(mut self, value: i16) -> Self {
         self.error_code = value;
         self
     }
     /// Sets `topics` to the passed value.
     ///
+    /// The results for each topic.
     ///
-    ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub fn with_topics(mut self, value: Vec<TopicData>) -> Self {
         self.topics = value;
         self
     }
     /// Sets `node_endpoints` to the passed value.
     ///
-    /// Endpoints for all current-leaders enumerated in PartitionData
+    /// Endpoints for all current-leaders enumerated in PartitionData.
     ///
-    /// Supported API versions: 1
+    /// Supported API versions: 1-2
     pub fn with_node_endpoints(mut self, value: Vec<NodeEndpoint>) -> Self {
         self.node_endpoints = value;
         self
@@ -586,7 +586,7 @@ impl VoteResponse {
 #[cfg(feature = "broker")]
 impl Encodable for VoteResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 1 {
+        if version < 0 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         types::Int16.encode(buf, &self.error_code)?;
@@ -662,7 +662,7 @@ impl Encodable for VoteResponse {
 #[cfg(feature = "client")]
 impl Decodable for VoteResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 1 {
+        if version < 0 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         let error_code = types::Int16.decode(buf)?;
@@ -709,7 +709,7 @@ impl Default for VoteResponse {
 }
 
 impl Message for VoteResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 

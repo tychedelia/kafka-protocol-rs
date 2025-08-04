@@ -17,44 +17,49 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-1
+/// Valid versions: 0-2
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct PartitionData {
     /// The partition index.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub partition_index: i32,
 
-    /// The bumped epoch of the candidate sending the request
+    /// The epoch of the voter sending the request
     ///
-    /// Supported API versions: 0-1
-    pub candidate_epoch: i32,
+    /// Supported API versions: 0-2
+    pub replica_epoch: i32,
 
     /// The replica id of the voter sending the request
     ///
-    /// Supported API versions: 0-1
-    pub candidate_id: super::BrokerId,
+    /// Supported API versions: 0-2
+    pub replica_id: super::BrokerId,
 
     /// The directory id of the voter sending the request
     ///
-    /// Supported API versions: 1
-    pub candidate_directory_id: Uuid,
+    /// Supported API versions: 1-2
+    pub replica_directory_id: Uuid,
 
-    /// The ID of the voter sending the request
+    /// The directory id of the voter receiving the request
     ///
-    /// Supported API versions: 1
+    /// Supported API versions: 1-2
     pub voter_directory_id: Uuid,
 
-    /// The epoch of the last record written to the metadata log
+    /// The epoch of the last record written to the metadata log.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub last_offset_epoch: i32,
 
-    /// The offset of the last record written to the metadata log
+    /// The log end offset of the metadata log of the voter sending the request.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub last_offset: i64,
+
+    /// Whether the request is a PreVote request (not persisted) or not.
+    ///
+    /// Supported API versions: 2
+    pub pre_vote: bool,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
@@ -65,63 +70,72 @@ impl PartitionData {
     ///
     /// The partition index.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub fn with_partition_index(mut self, value: i32) -> Self {
         self.partition_index = value;
         self
     }
-    /// Sets `candidate_epoch` to the passed value.
+    /// Sets `replica_epoch` to the passed value.
     ///
-    /// The bumped epoch of the candidate sending the request
+    /// The epoch of the voter sending the request
     ///
-    /// Supported API versions: 0-1
-    pub fn with_candidate_epoch(mut self, value: i32) -> Self {
-        self.candidate_epoch = value;
+    /// Supported API versions: 0-2
+    pub fn with_replica_epoch(mut self, value: i32) -> Self {
+        self.replica_epoch = value;
         self
     }
-    /// Sets `candidate_id` to the passed value.
+    /// Sets `replica_id` to the passed value.
     ///
     /// The replica id of the voter sending the request
     ///
-    /// Supported API versions: 0-1
-    pub fn with_candidate_id(mut self, value: super::BrokerId) -> Self {
-        self.candidate_id = value;
+    /// Supported API versions: 0-2
+    pub fn with_replica_id(mut self, value: super::BrokerId) -> Self {
+        self.replica_id = value;
         self
     }
-    /// Sets `candidate_directory_id` to the passed value.
+    /// Sets `replica_directory_id` to the passed value.
     ///
     /// The directory id of the voter sending the request
     ///
-    /// Supported API versions: 1
-    pub fn with_candidate_directory_id(mut self, value: Uuid) -> Self {
-        self.candidate_directory_id = value;
+    /// Supported API versions: 1-2
+    pub fn with_replica_directory_id(mut self, value: Uuid) -> Self {
+        self.replica_directory_id = value;
         self
     }
     /// Sets `voter_directory_id` to the passed value.
     ///
-    /// The ID of the voter sending the request
+    /// The directory id of the voter receiving the request
     ///
-    /// Supported API versions: 1
+    /// Supported API versions: 1-2
     pub fn with_voter_directory_id(mut self, value: Uuid) -> Self {
         self.voter_directory_id = value;
         self
     }
     /// Sets `last_offset_epoch` to the passed value.
     ///
-    /// The epoch of the last record written to the metadata log
+    /// The epoch of the last record written to the metadata log.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub fn with_last_offset_epoch(mut self, value: i32) -> Self {
         self.last_offset_epoch = value;
         self
     }
     /// Sets `last_offset` to the passed value.
     ///
-    /// The offset of the last record written to the metadata log
+    /// The log end offset of the metadata log of the voter sending the request.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub fn with_last_offset(mut self, value: i64) -> Self {
         self.last_offset = value;
+        self
+    }
+    /// Sets `pre_vote` to the passed value.
+    ///
+    /// Whether the request is a PreVote request (not persisted) or not.
+    ///
+    /// Supported API versions: 2
+    pub fn with_pre_vote(mut self, value: bool) -> Self {
+        self.pre_vote = value;
         self
     }
     /// Sets unknown_tagged_fields to the passed value.
@@ -139,20 +153,27 @@ impl PartitionData {
 #[cfg(feature = "client")]
 impl Encodable for PartitionData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 1 {
+        if version < 0 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.partition_index)?;
-        types::Int32.encode(buf, &self.candidate_epoch)?;
-        types::Int32.encode(buf, &self.candidate_id)?;
+        types::Int32.encode(buf, &self.replica_epoch)?;
+        types::Int32.encode(buf, &self.replica_id)?;
         if version >= 1 {
-            types::Uuid.encode(buf, &self.candidate_directory_id)?;
+            types::Uuid.encode(buf, &self.replica_directory_id)?;
         }
         if version >= 1 {
             types::Uuid.encode(buf, &self.voter_directory_id)?;
         }
         types::Int32.encode(buf, &self.last_offset_epoch)?;
         types::Int64.encode(buf, &self.last_offset)?;
+        if version >= 2 {
+            types::Boolean.encode(buf, &self.pre_vote)?;
+        } else {
+            if self.pre_vote {
+                bail!("A field is set that is not available on the selected protocol version");
+            }
+        }
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             bail!(
@@ -168,16 +189,23 @@ impl Encodable for PartitionData {
     fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
         total_size += types::Int32.compute_size(&self.partition_index)?;
-        total_size += types::Int32.compute_size(&self.candidate_epoch)?;
-        total_size += types::Int32.compute_size(&self.candidate_id)?;
+        total_size += types::Int32.compute_size(&self.replica_epoch)?;
+        total_size += types::Int32.compute_size(&self.replica_id)?;
         if version >= 1 {
-            total_size += types::Uuid.compute_size(&self.candidate_directory_id)?;
+            total_size += types::Uuid.compute_size(&self.replica_directory_id)?;
         }
         if version >= 1 {
             total_size += types::Uuid.compute_size(&self.voter_directory_id)?;
         }
         total_size += types::Int32.compute_size(&self.last_offset_epoch)?;
         total_size += types::Int64.compute_size(&self.last_offset)?;
+        if version >= 2 {
+            total_size += types::Boolean.compute_size(&self.pre_vote)?;
+        } else {
+            if self.pre_vote {
+                bail!("A field is set that is not available on the selected protocol version");
+            }
+        }
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             bail!(
@@ -195,13 +223,13 @@ impl Encodable for PartitionData {
 #[cfg(feature = "broker")]
 impl Decodable for PartitionData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 1 {
+        if version < 0 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         let partition_index = types::Int32.decode(buf)?;
-        let candidate_epoch = types::Int32.decode(buf)?;
-        let candidate_id = types::Int32.decode(buf)?;
-        let candidate_directory_id = if version >= 1 {
+        let replica_epoch = types::Int32.decode(buf)?;
+        let replica_id = types::Int32.decode(buf)?;
+        let replica_directory_id = if version >= 1 {
             types::Uuid.decode(buf)?
         } else {
             Uuid::nil()
@@ -213,6 +241,11 @@ impl Decodable for PartitionData {
         };
         let last_offset_epoch = types::Int32.decode(buf)?;
         let last_offset = types::Int64.decode(buf)?;
+        let pre_vote = if version >= 2 {
+            types::Boolean.decode(buf)?
+        } else {
+            false
+        };
         let mut unknown_tagged_fields = BTreeMap::new();
         let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
         for _ in 0..num_tagged_fields {
@@ -223,12 +256,13 @@ impl Decodable for PartitionData {
         }
         Ok(Self {
             partition_index,
-            candidate_epoch,
-            candidate_id,
-            candidate_directory_id,
+            replica_epoch,
+            replica_id,
+            replica_directory_id,
             voter_directory_id,
             last_offset_epoch,
             last_offset,
+            pre_vote,
             unknown_tagged_fields,
         })
     }
@@ -238,34 +272,35 @@ impl Default for PartitionData {
     fn default() -> Self {
         Self {
             partition_index: 0,
-            candidate_epoch: 0,
-            candidate_id: (0).into(),
-            candidate_directory_id: Uuid::nil(),
+            replica_epoch: 0,
+            replica_id: (0).into(),
+            replica_directory_id: Uuid::nil(),
             voter_directory_id: Uuid::nil(),
             last_offset_epoch: 0,
             last_offset: 0,
+            pre_vote: false,
             unknown_tagged_fields: BTreeMap::new(),
         }
     }
 }
 
 impl Message for PartitionData {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-1
+/// Valid versions: 0-2
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct TopicData {
     /// The topic name.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub topic_name: super::TopicName,
 
+    /// The partition data.
     ///
-    ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub partitions: Vec<PartitionData>,
 
     /// Other tagged fields
@@ -277,16 +312,16 @@ impl TopicData {
     ///
     /// The topic name.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub fn with_topic_name(mut self, value: super::TopicName) -> Self {
         self.topic_name = value;
         self
     }
     /// Sets `partitions` to the passed value.
     ///
+    /// The partition data.
     ///
-    ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub fn with_partitions(mut self, value: Vec<PartitionData>) -> Self {
         self.partitions = value;
         self
@@ -306,7 +341,7 @@ impl TopicData {
 #[cfg(feature = "client")]
 impl Encodable for TopicData {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 1 {
+        if version < 0 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         types::CompactString.encode(buf, &self.topic_name)?;
@@ -345,7 +380,7 @@ impl Encodable for TopicData {
 #[cfg(feature = "broker")]
 impl Decodable for TopicData {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 1 {
+        if version < 0 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         let topic_name = types::CompactString.decode(buf)?;
@@ -377,27 +412,27 @@ impl Default for TopicData {
 }
 
 impl Message for TopicData {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-1
+/// Valid versions: 0-2
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct VoteRequest {
+    /// The cluster id.
     ///
-    ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub cluster_id: Option<StrBytes>,
 
-    /// The replica id of the voter receiving the request
+    /// The replica id of the voter receiving the request.
     ///
-    /// Supported API versions: 1
+    /// Supported API versions: 1-2
     pub voter_id: super::BrokerId,
 
+    /// The topic data.
     ///
-    ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub topics: Vec<TopicData>,
 
     /// Other tagged fields
@@ -407,27 +442,27 @@ pub struct VoteRequest {
 impl VoteRequest {
     /// Sets `cluster_id` to the passed value.
     ///
+    /// The cluster id.
     ///
-    ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub fn with_cluster_id(mut self, value: Option<StrBytes>) -> Self {
         self.cluster_id = value;
         self
     }
     /// Sets `voter_id` to the passed value.
     ///
-    /// The replica id of the voter receiving the request
+    /// The replica id of the voter receiving the request.
     ///
-    /// Supported API versions: 1
+    /// Supported API versions: 1-2
     pub fn with_voter_id(mut self, value: super::BrokerId) -> Self {
         self.voter_id = value;
         self
     }
     /// Sets `topics` to the passed value.
     ///
+    /// The topic data.
     ///
-    ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub fn with_topics(mut self, value: Vec<TopicData>) -> Self {
         self.topics = value;
         self
@@ -447,7 +482,7 @@ impl VoteRequest {
 #[cfg(feature = "client")]
 impl Encodable for VoteRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 1 {
+        if version < 0 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         types::CompactString.encode(buf, &self.cluster_id)?;
@@ -491,7 +526,7 @@ impl Encodable for VoteRequest {
 #[cfg(feature = "broker")]
 impl Decodable for VoteRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 1 {
+        if version < 0 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         let cluster_id = types::CompactString.decode(buf)?;
@@ -530,7 +565,7 @@ impl Default for VoteRequest {
 }
 
 impl Message for VoteRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 

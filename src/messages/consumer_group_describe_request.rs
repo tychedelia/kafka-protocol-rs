@@ -17,18 +17,18 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0
+/// Valid versions: 0-1
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct ConsumerGroupDescribeRequest {
-    /// The ids of the groups to describe
+    /// The ids of the groups to describe.
     ///
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub group_ids: Vec<super::GroupId>,
 
     /// Whether to include authorized operations.
     ///
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub include_authorized_operations: bool,
 
     /// Other tagged fields
@@ -38,9 +38,9 @@ pub struct ConsumerGroupDescribeRequest {
 impl ConsumerGroupDescribeRequest {
     /// Sets `group_ids` to the passed value.
     ///
-    /// The ids of the groups to describe
+    /// The ids of the groups to describe.
     ///
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub fn with_group_ids(mut self, value: Vec<super::GroupId>) -> Self {
         self.group_ids = value;
         self
@@ -49,7 +49,7 @@ impl ConsumerGroupDescribeRequest {
     ///
     /// Whether to include authorized operations.
     ///
-    /// Supported API versions: 0
+    /// Supported API versions: 0-1
     pub fn with_include_authorized_operations(mut self, value: bool) -> Self {
         self.include_authorized_operations = value;
         self
@@ -69,7 +69,7 @@ impl ConsumerGroupDescribeRequest {
 #[cfg(feature = "client")]
 impl Encodable for ConsumerGroupDescribeRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version != 0 {
+        if version < 0 || version > 1 {
             bail!("specified version not supported by this message type");
         }
         types::CompactArray(types::CompactString).encode(buf, &self.group_ids)?;
@@ -107,7 +107,7 @@ impl Encodable for ConsumerGroupDescribeRequest {
 #[cfg(feature = "broker")]
 impl Decodable for ConsumerGroupDescribeRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version != 0 {
+        if version < 0 || version > 1 {
             bail!("specified version not supported by this message type");
         }
         let group_ids = types::CompactArray(types::CompactString).decode(buf)?;
@@ -139,7 +139,7 @@ impl Default for ConsumerGroupDescribeRequest {
 }
 
 impl Message for ConsumerGroupDescribeRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 0 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 

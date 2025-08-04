@@ -26,17 +26,17 @@ pub struct ListTransactionsResponse {
     /// Supported API versions: 0-1
     pub throttle_time_ms: i32,
 
-    ///
+    /// The error code, or 0 if there was no error.
     ///
     /// Supported API versions: 0-1
     pub error_code: i16,
 
-    /// Set of state filters provided in the request which were unknown to the transaction coordinator
+    /// Set of state filters provided in the request which were unknown to the transaction coordinator.
     ///
     /// Supported API versions: 0-1
     pub unknown_state_filters: Vec<StrBytes>,
 
-    ///
+    /// The current state of the transaction for the transactional id.
     ///
     /// Supported API versions: 0-1
     pub transaction_states: Vec<TransactionState>,
@@ -57,7 +57,7 @@ impl ListTransactionsResponse {
     }
     /// Sets `error_code` to the passed value.
     ///
-    ///
+    /// The error code, or 0 if there was no error.
     ///
     /// Supported API versions: 0-1
     pub fn with_error_code(mut self, value: i16) -> Self {
@@ -66,7 +66,7 @@ impl ListTransactionsResponse {
     }
     /// Sets `unknown_state_filters` to the passed value.
     ///
-    /// Set of state filters provided in the request which were unknown to the transaction coordinator
+    /// Set of state filters provided in the request which were unknown to the transaction coordinator.
     ///
     /// Supported API versions: 0-1
     pub fn with_unknown_state_filters(mut self, value: Vec<StrBytes>) -> Self {
@@ -75,7 +75,7 @@ impl ListTransactionsResponse {
     }
     /// Sets `transaction_states` to the passed value.
     ///
-    ///
+    /// The current state of the transaction for the transactional id.
     ///
     /// Supported API versions: 0-1
     pub fn with_transaction_states(mut self, value: Vec<TransactionState>) -> Self {
@@ -187,17 +187,17 @@ impl Message for ListTransactionsResponse {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct TransactionState {
-    ///
+    /// The transactional id.
     ///
     /// Supported API versions: 0-1
     pub transactional_id: super::TransactionalId,
 
-    ///
+    /// The producer id.
     ///
     /// Supported API versions: 0-1
     pub producer_id: super::ProducerId,
 
-    /// The current transaction state of the producer
+    /// The current transaction state of the producer.
     ///
     /// Supported API versions: 0-1
     pub transaction_state: StrBytes,
@@ -209,7 +209,7 @@ pub struct TransactionState {
 impl TransactionState {
     /// Sets `transactional_id` to the passed value.
     ///
-    ///
+    /// The transactional id.
     ///
     /// Supported API versions: 0-1
     pub fn with_transactional_id(mut self, value: super::TransactionalId) -> Self {
@@ -218,7 +218,7 @@ impl TransactionState {
     }
     /// Sets `producer_id` to the passed value.
     ///
-    ///
+    /// The producer id.
     ///
     /// Supported API versions: 0-1
     pub fn with_producer_id(mut self, value: super::ProducerId) -> Self {
@@ -227,7 +227,7 @@ impl TransactionState {
     }
     /// Sets `transaction_state` to the passed value.
     ///
-    /// The current transaction state of the producer
+    /// The current transaction state of the producer.
     ///
     /// Supported API versions: 0-1
     pub fn with_transaction_state(mut self, value: StrBytes) -> Self {

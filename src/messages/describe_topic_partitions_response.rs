@@ -21,12 +21,12 @@ use crate::protocol::{
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct Cursor {
-    /// The name for the first topic to process
+    /// The name for the first topic to process.
     ///
     /// Supported API versions: 0
     pub topic_name: super::TopicName,
 
-    /// The partition index to start with
+    /// The partition index to start with.
     ///
     /// Supported API versions: 0
     pub partition_index: i32,
@@ -38,7 +38,7 @@ pub struct Cursor {
 impl Cursor {
     /// Sets `topic_name` to the passed value.
     ///
-    /// The name for the first topic to process
+    /// The name for the first topic to process.
     ///
     /// Supported API versions: 0
     pub fn with_topic_name(mut self, value: super::TopicName) -> Self {
@@ -47,7 +47,7 @@ impl Cursor {
     }
     /// Sets `partition_index` to the passed value.
     ///
-    /// The partition index to start with
+    /// The partition index to start with.
     ///
     /// Supported API versions: 0
     pub fn with_partition_index(mut self, value: i32) -> Self {

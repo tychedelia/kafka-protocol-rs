@@ -17,18 +17,18 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-3
+/// Valid versions: 1-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct DescribeDelegationTokenOwner {
     /// The owner principal type.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub principal_type: StrBytes,
 
     /// The owner principal name.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub principal_name: StrBytes,
 
     /// Other tagged fields
@@ -40,7 +40,7 @@ impl DescribeDelegationTokenOwner {
     ///
     /// The owner principal type.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_principal_type(mut self, value: StrBytes) -> Self {
         self.principal_type = value;
         self
@@ -49,7 +49,7 @@ impl DescribeDelegationTokenOwner {
     ///
     /// The owner principal name.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_principal_name(mut self, value: StrBytes) -> Self {
         self.principal_name = value;
         self
@@ -69,7 +69,7 @@ impl DescribeDelegationTokenOwner {
 #[cfg(feature = "client")]
 impl Encodable for DescribeDelegationTokenOwner {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         if version >= 2 {
@@ -127,7 +127,7 @@ impl Encodable for DescribeDelegationTokenOwner {
 #[cfg(feature = "broker")]
 impl Decodable for DescribeDelegationTokenOwner {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         let principal_type = if version >= 2 {
@@ -169,17 +169,17 @@ impl Default for DescribeDelegationTokenOwner {
 }
 
 impl Message for DescribeDelegationTokenOwner {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
-    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 0 });
+    const VERSIONS: VersionRange = VersionRange { min: 1, max: 3 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-3
+/// Valid versions: 1-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct DescribeDelegationTokenRequest {
     /// Each owner that we want to describe delegation tokens for, or null to describe all tokens.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub owners: Option<Vec<DescribeDelegationTokenOwner>>,
 
     /// Other tagged fields
@@ -191,7 +191,7 @@ impl DescribeDelegationTokenRequest {
     ///
     /// Each owner that we want to describe delegation tokens for, or null to describe all tokens.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_owners(mut self, value: Option<Vec<DescribeDelegationTokenOwner>>) -> Self {
         self.owners = value;
         self
@@ -211,7 +211,7 @@ impl DescribeDelegationTokenRequest {
 #[cfg(feature = "client")]
 impl Encodable for DescribeDelegationTokenRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         if version >= 2 {
@@ -260,7 +260,7 @@ impl Encodable for DescribeDelegationTokenRequest {
 #[cfg(feature = "broker")]
 impl Decodable for DescribeDelegationTokenRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         let owners = if version >= 2 {
@@ -295,8 +295,8 @@ impl Default for DescribeDelegationTokenRequest {
 }
 
 impl Message for DescribeDelegationTokenRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
-    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 0 });
+    const VERSIONS: VersionRange = VersionRange { min: 1, max: 3 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 impl HeaderVersion for DescribeDelegationTokenRequest {

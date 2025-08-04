@@ -22,6 +22,7 @@ pub struct Spec {
     pub valid_versions: VersionSpec,
     #[serde(default)]
     pub flexible_versions: VersionSpec,
+    #[serde(default)]
     pub fields: Vec<FieldSpec>,
     #[serde(default)]
     pub common_structs: Vec<StructSpec>,

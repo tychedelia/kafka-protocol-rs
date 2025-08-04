@@ -17,48 +17,48 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-4
+/// Valid versions: 0-5
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct TxnOffsetCommitRequest {
     /// The ID of the transaction.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub transactional_id: super::TransactionalId,
 
     /// The ID of the group.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub group_id: super::GroupId,
 
     /// The current producer ID in use by the transactional ID.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub producer_id: super::ProducerId,
 
     /// The current epoch associated with the producer ID.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub producer_epoch: i16,
 
     /// The generation of the consumer.
     ///
-    /// Supported API versions: 3-4
+    /// Supported API versions: 3-5
     pub generation_id: i32,
 
     /// The member ID assigned by the group coordinator.
     ///
-    /// Supported API versions: 3-4
+    /// Supported API versions: 3-5
     pub member_id: StrBytes,
 
     /// The unique identifier of the consumer instance provided by end user.
     ///
-    /// Supported API versions: 3-4
+    /// Supported API versions: 3-5
     pub group_instance_id: Option<StrBytes>,
 
     /// Each topic that we want to commit offsets for.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub topics: Vec<TxnOffsetCommitRequestTopic>,
 
     /// Other tagged fields
@@ -70,7 +70,7 @@ impl TxnOffsetCommitRequest {
     ///
     /// The ID of the transaction.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub fn with_transactional_id(mut self, value: super::TransactionalId) -> Self {
         self.transactional_id = value;
         self
@@ -79,7 +79,7 @@ impl TxnOffsetCommitRequest {
     ///
     /// The ID of the group.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub fn with_group_id(mut self, value: super::GroupId) -> Self {
         self.group_id = value;
         self
@@ -88,7 +88,7 @@ impl TxnOffsetCommitRequest {
     ///
     /// The current producer ID in use by the transactional ID.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub fn with_producer_id(mut self, value: super::ProducerId) -> Self {
         self.producer_id = value;
         self
@@ -97,7 +97,7 @@ impl TxnOffsetCommitRequest {
     ///
     /// The current epoch associated with the producer ID.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub fn with_producer_epoch(mut self, value: i16) -> Self {
         self.producer_epoch = value;
         self
@@ -106,7 +106,7 @@ impl TxnOffsetCommitRequest {
     ///
     /// The generation of the consumer.
     ///
-    /// Supported API versions: 3-4
+    /// Supported API versions: 3-5
     pub fn with_generation_id(mut self, value: i32) -> Self {
         self.generation_id = value;
         self
@@ -115,7 +115,7 @@ impl TxnOffsetCommitRequest {
     ///
     /// The member ID assigned by the group coordinator.
     ///
-    /// Supported API versions: 3-4
+    /// Supported API versions: 3-5
     pub fn with_member_id(mut self, value: StrBytes) -> Self {
         self.member_id = value;
         self
@@ -124,7 +124,7 @@ impl TxnOffsetCommitRequest {
     ///
     /// The unique identifier of the consumer instance provided by end user.
     ///
-    /// Supported API versions: 3-4
+    /// Supported API versions: 3-5
     pub fn with_group_instance_id(mut self, value: Option<StrBytes>) -> Self {
         self.group_instance_id = value;
         self
@@ -133,7 +133,7 @@ impl TxnOffsetCommitRequest {
     ///
     /// Each topic that we want to commit offsets for.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub fn with_topics(mut self, value: Vec<TxnOffsetCommitRequestTopic>) -> Self {
         self.topics = value;
         self
@@ -153,7 +153,7 @@ impl TxnOffsetCommitRequest {
 #[cfg(feature = "client")]
 impl Encodable for TxnOffsetCommitRequest {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 4 {
+        if version < 0 || version > 5 {
             bail!("specified version not supported by this message type");
         }
         if version >= 3 {
@@ -268,7 +268,7 @@ impl Encodable for TxnOffsetCommitRequest {
 #[cfg(feature = "broker")]
 impl Decodable for TxnOffsetCommitRequest {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 4 {
+        if version < 0 || version > 5 {
             bail!("specified version not supported by this message type");
         }
         let transactional_id = if version >= 3 {
@@ -344,32 +344,32 @@ impl Default for TxnOffsetCommitRequest {
 }
 
 impl Message for TxnOffsetCommitRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 5 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-4
+/// Valid versions: 0-5
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct TxnOffsetCommitRequestPartition {
     /// The index of the partition within the topic.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub partition_index: i32,
 
     /// The message offset to be committed.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub committed_offset: i64,
 
     /// The leader epoch of the last consumed record.
     ///
-    /// Supported API versions: 2-4
+    /// Supported API versions: 2-5
     pub committed_leader_epoch: i32,
 
     /// Any associated metadata the client wants to keep.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub committed_metadata: Option<StrBytes>,
 
     /// Other tagged fields
@@ -381,7 +381,7 @@ impl TxnOffsetCommitRequestPartition {
     ///
     /// The index of the partition within the topic.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub fn with_partition_index(mut self, value: i32) -> Self {
         self.partition_index = value;
         self
@@ -390,7 +390,7 @@ impl TxnOffsetCommitRequestPartition {
     ///
     /// The message offset to be committed.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub fn with_committed_offset(mut self, value: i64) -> Self {
         self.committed_offset = value;
         self
@@ -399,7 +399,7 @@ impl TxnOffsetCommitRequestPartition {
     ///
     /// The leader epoch of the last consumed record.
     ///
-    /// Supported API versions: 2-4
+    /// Supported API versions: 2-5
     pub fn with_committed_leader_epoch(mut self, value: i32) -> Self {
         self.committed_leader_epoch = value;
         self
@@ -408,7 +408,7 @@ impl TxnOffsetCommitRequestPartition {
     ///
     /// Any associated metadata the client wants to keep.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub fn with_committed_metadata(mut self, value: Option<StrBytes>) -> Self {
         self.committed_metadata = value;
         self
@@ -428,7 +428,7 @@ impl TxnOffsetCommitRequestPartition {
 #[cfg(feature = "client")]
 impl Encodable for TxnOffsetCommitRequestPartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 4 {
+        if version < 0 || version > 5 {
             bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.partition_index)?;
@@ -486,7 +486,7 @@ impl Encodable for TxnOffsetCommitRequestPartition {
 #[cfg(feature = "broker")]
 impl Decodable for TxnOffsetCommitRequestPartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 4 {
+        if version < 0 || version > 5 {
             bail!("specified version not supported by this message type");
         }
         let partition_index = types::Int32.decode(buf)?;
@@ -534,22 +534,22 @@ impl Default for TxnOffsetCommitRequestPartition {
 }
 
 impl Message for TxnOffsetCommitRequestPartition {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 5 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-4
+/// Valid versions: 0-5
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct TxnOffsetCommitRequestTopic {
     /// The topic name.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub name: super::TopicName,
 
     /// The partitions inside the topic that we want to commit offsets for.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub partitions: Vec<TxnOffsetCommitRequestPartition>,
 
     /// Other tagged fields
@@ -561,7 +561,7 @@ impl TxnOffsetCommitRequestTopic {
     ///
     /// The topic name.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub fn with_name(mut self, value: super::TopicName) -> Self {
         self.name = value;
         self
@@ -570,7 +570,7 @@ impl TxnOffsetCommitRequestTopic {
     ///
     /// The partitions inside the topic that we want to commit offsets for.
     ///
-    /// Supported API versions: 0-4
+    /// Supported API versions: 0-5
     pub fn with_partitions(mut self, value: Vec<TxnOffsetCommitRequestPartition>) -> Self {
         self.partitions = value;
         self
@@ -590,7 +590,7 @@ impl TxnOffsetCommitRequestTopic {
 #[cfg(feature = "client")]
 impl Encodable for TxnOffsetCommitRequestTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 4 {
+        if version < 0 || version > 5 {
             bail!("specified version not supported by this message type");
         }
         if version >= 3 {
@@ -649,7 +649,7 @@ impl Encodable for TxnOffsetCommitRequestTopic {
 #[cfg(feature = "broker")]
 impl Decodable for TxnOffsetCommitRequestTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 4 {
+        if version < 0 || version > 5 {
             bail!("specified version not supported by this message type");
         }
         let name = if version >= 3 {
@@ -691,7 +691,7 @@ impl Default for TxnOffsetCommitRequestTopic {
 }
 
 impl Message for TxnOffsetCommitRequestTopic {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 4 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 5 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 

@@ -17,18 +17,18 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-3
+/// Valid versions: 1-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct AclCreationResult {
     /// The result error, or zero if there was no error.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub error_code: i16,
 
     /// The result message, or null if there was no error.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub error_message: Option<StrBytes>,
 
     /// Other tagged fields
@@ -40,7 +40,7 @@ impl AclCreationResult {
     ///
     /// The result error, or zero if there was no error.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_error_code(mut self, value: i16) -> Self {
         self.error_code = value;
         self
@@ -49,7 +49,7 @@ impl AclCreationResult {
     ///
     /// The result message, or null if there was no error.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_error_message(mut self, value: Option<StrBytes>) -> Self {
         self.error_message = value;
         self
@@ -69,7 +69,7 @@ impl AclCreationResult {
 #[cfg(feature = "broker")]
 impl Encodable for AclCreationResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         types::Int16.encode(buf, &self.error_code)?;
@@ -119,7 +119,7 @@ impl Encodable for AclCreationResult {
 #[cfg(feature = "client")]
 impl Decodable for AclCreationResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         let error_code = types::Int16.decode(buf)?;
@@ -157,22 +157,22 @@ impl Default for AclCreationResult {
 }
 
 impl Message for AclCreationResult {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const VERSIONS: VersionRange = VersionRange { min: 1, max: 3 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-3
+/// Valid versions: 1-3
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct CreateAclsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub throttle_time_ms: i32,
 
     /// The results for each ACL creation.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub results: Vec<AclCreationResult>,
 
     /// Other tagged fields
@@ -184,7 +184,7 @@ impl CreateAclsResponse {
     ///
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
         self.throttle_time_ms = value;
         self
@@ -193,7 +193,7 @@ impl CreateAclsResponse {
     ///
     /// The results for each ACL creation.
     ///
-    /// Supported API versions: 0-3
+    /// Supported API versions: 1-3
     pub fn with_results(mut self, value: Vec<AclCreationResult>) -> Self {
         self.results = value;
         self
@@ -213,7 +213,7 @@ impl CreateAclsResponse {
 #[cfg(feature = "broker")]
 impl Encodable for CreateAclsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
@@ -264,7 +264,7 @@ impl Encodable for CreateAclsResponse {
 #[cfg(feature = "client")]
 impl Decodable for CreateAclsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 3 {
+        if version < 1 || version > 3 {
             bail!("specified version not supported by this message type");
         }
         let throttle_time_ms = types::Int32.decode(buf)?;
@@ -302,7 +302,7 @@ impl Default for CreateAclsResponse {
 }
 
 impl Message for CreateAclsResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 3 };
+    const VERSIONS: VersionRange = VersionRange { min: 1, max: 3 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 

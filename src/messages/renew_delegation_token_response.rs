@@ -17,23 +17,23 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-2
+/// Valid versions: 1-2
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct RenewDelegationTokenResponse {
     /// The error code, or 0 if there was no error.
     ///
-    /// Supported API versions: 0-2
+    /// Supported API versions: 1-2
     pub error_code: i16,
 
     /// The timestamp in milliseconds at which this token expires.
     ///
-    /// Supported API versions: 0-2
+    /// Supported API versions: 1-2
     pub expiry_timestamp_ms: i64,
 
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 0-2
+    /// Supported API versions: 1-2
     pub throttle_time_ms: i32,
 
     /// Other tagged fields
@@ -45,7 +45,7 @@ impl RenewDelegationTokenResponse {
     ///
     /// The error code, or 0 if there was no error.
     ///
-    /// Supported API versions: 0-2
+    /// Supported API versions: 1-2
     pub fn with_error_code(mut self, value: i16) -> Self {
         self.error_code = value;
         self
@@ -54,7 +54,7 @@ impl RenewDelegationTokenResponse {
     ///
     /// The timestamp in milliseconds at which this token expires.
     ///
-    /// Supported API versions: 0-2
+    /// Supported API versions: 1-2
     pub fn with_expiry_timestamp_ms(mut self, value: i64) -> Self {
         self.expiry_timestamp_ms = value;
         self
@@ -63,7 +63,7 @@ impl RenewDelegationTokenResponse {
     ///
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 0-2
+    /// Supported API versions: 1-2
     pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
         self.throttle_time_ms = value;
         self
@@ -83,7 +83,7 @@ impl RenewDelegationTokenResponse {
 #[cfg(feature = "broker")]
 impl Encodable for RenewDelegationTokenResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 2 {
+        if version < 1 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         types::Int16.encode(buf, &self.error_code)?;
@@ -127,7 +127,7 @@ impl Encodable for RenewDelegationTokenResponse {
 #[cfg(feature = "client")]
 impl Decodable for RenewDelegationTokenResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 2 {
+        if version < 1 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         let error_code = types::Int16.decode(buf)?;
@@ -164,7 +164,7 @@ impl Default for RenewDelegationTokenResponse {
 }
 
 impl Message for RenewDelegationTokenResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
+    const VERSIONS: VersionRange = VersionRange { min: 1, max: 2 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 

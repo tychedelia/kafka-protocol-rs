@@ -61,18 +61,6 @@ pub use list_offsets_request::ListOffsetsRequest;
 pub mod metadata_request;
 pub use metadata_request::MetadataRequest;
 
-pub mod leader_and_isr_request;
-pub use leader_and_isr_request::LeaderAndIsrRequest;
-
-pub mod stop_replica_request;
-pub use stop_replica_request::StopReplicaRequest;
-
-pub mod update_metadata_request;
-pub use update_metadata_request::UpdateMetadataRequest;
-
-pub mod controlled_shutdown_request;
-pub use controlled_shutdown_request::ControlledShutdownRequest;
-
 pub mod offset_commit_request;
 pub use offset_commit_request::OffsetCommitRequest;
 
@@ -297,18 +285,6 @@ pub use list_offsets_response::ListOffsetsResponse;
 
 pub mod metadata_response;
 pub use metadata_response::MetadataResponse;
-
-pub mod leader_and_isr_response;
-pub use leader_and_isr_response::LeaderAndIsrResponse;
-
-pub mod stop_replica_response;
-pub use stop_replica_response::StopReplicaResponse;
-
-pub mod update_metadata_response;
-pub use update_metadata_response::UpdateMetadataResponse;
-
-pub mod controlled_shutdown_response;
-pub use controlled_shutdown_response::ControlledShutdownResponse;
 
 pub mod offset_commit_response;
 pub use offset_commit_response::OffsetCommitResponse;
@@ -545,30 +521,6 @@ impl Request for ListOffsetsRequest {
 impl Request for MetadataRequest {
     const KEY: i16 = 3;
     type Response = MetadataResponse;
-}
-
-#[cfg(all(feature = "client", feature = "broker"))]
-impl Request for LeaderAndIsrRequest {
-    const KEY: i16 = 4;
-    type Response = LeaderAndIsrResponse;
-}
-
-#[cfg(all(feature = "client", feature = "broker"))]
-impl Request for StopReplicaRequest {
-    const KEY: i16 = 5;
-    type Response = StopReplicaResponse;
-}
-
-#[cfg(all(feature = "client", feature = "broker"))]
-impl Request for UpdateMetadataRequest {
-    const KEY: i16 = 6;
-    type Response = UpdateMetadataResponse;
-}
-
-#[cfg(all(feature = "client", feature = "broker"))]
-impl Request for ControlledShutdownRequest {
-    const KEY: i16 = 7;
-    type Response = ControlledShutdownResponse;
 }
 
 #[cfg(all(feature = "client", feature = "broker"))]
@@ -1008,14 +960,6 @@ pub enum ApiKey {
     ListOffsets = 2,
     /// API key for request MetadataRequest
     Metadata = 3,
-    /// API key for request LeaderAndIsrRequest
-    LeaderAndIsr = 4,
-    /// API key for request StopReplicaRequest
-    StopReplica = 5,
-    /// API key for request UpdateMetadataRequest
-    UpdateMetadata = 6,
-    /// API key for request ControlledShutdownRequest
-    ControlledShutdown = 7,
     /// API key for request OffsetCommitRequest
     OffsetCommit = 8,
     /// API key for request OffsetFetchRequest
@@ -1168,10 +1112,6 @@ impl ApiKey {
             ApiKey::Fetch => FetchRequest::header_version(version),
             ApiKey::ListOffsets => ListOffsetsRequest::header_version(version),
             ApiKey::Metadata => MetadataRequest::header_version(version),
-            ApiKey::LeaderAndIsr => LeaderAndIsrRequest::header_version(version),
-            ApiKey::StopReplica => StopReplicaRequest::header_version(version),
-            ApiKey::UpdateMetadata => UpdateMetadataRequest::header_version(version),
-            ApiKey::ControlledShutdown => ControlledShutdownRequest::header_version(version),
             ApiKey::OffsetCommit => OffsetCommitRequest::header_version(version),
             ApiKey::OffsetFetch => OffsetFetchRequest::header_version(version),
             ApiKey::FindCoordinator => FindCoordinatorRequest::header_version(version),
@@ -1274,10 +1214,6 @@ impl ApiKey {
             ApiKey::Fetch => FetchResponse::header_version(version),
             ApiKey::ListOffsets => ListOffsetsResponse::header_version(version),
             ApiKey::Metadata => MetadataResponse::header_version(version),
-            ApiKey::LeaderAndIsr => LeaderAndIsrResponse::header_version(version),
-            ApiKey::StopReplica => StopReplicaResponse::header_version(version),
-            ApiKey::UpdateMetadata => UpdateMetadataResponse::header_version(version),
-            ApiKey::ControlledShutdown => ControlledShutdownResponse::header_version(version),
             ApiKey::OffsetCommit => OffsetCommitResponse::header_version(version),
             ApiKey::OffsetFetch => OffsetFetchResponse::header_version(version),
             ApiKey::FindCoordinator => FindCoordinatorResponse::header_version(version),
@@ -1376,48 +1312,44 @@ impl ApiKey {
     /// Returns the valid versions that can be used with this ApiKey
     pub fn valid_versions(&self) -> VersionRange {
         match self {
-            ApiKey::Produce => VersionRange { min: 0, max: 11 },
-            ApiKey::Fetch => VersionRange { min: 0, max: 17 },
-            ApiKey::ListOffsets => VersionRange { min: 0, max: 9 },
-            ApiKey::Metadata => VersionRange { min: 0, max: 12 },
-            ApiKey::LeaderAndIsr => VersionRange { min: 0, max: 7 },
-            ApiKey::StopReplica => VersionRange { min: 0, max: 4 },
-            ApiKey::UpdateMetadata => VersionRange { min: 0, max: 8 },
-            ApiKey::ControlledShutdown => VersionRange { min: 0, max: 3 },
-            ApiKey::OffsetCommit => VersionRange { min: 0, max: 9 },
-            ApiKey::OffsetFetch => VersionRange { min: 0, max: 9 },
+            ApiKey::Produce => VersionRange { min: 3, max: 12 },
+            ApiKey::Fetch => VersionRange { min: 4, max: 17 },
+            ApiKey::ListOffsets => VersionRange { min: 1, max: 10 },
+            ApiKey::Metadata => VersionRange { min: 0, max: 13 },
+            ApiKey::OffsetCommit => VersionRange { min: 2, max: 9 },
+            ApiKey::OffsetFetch => VersionRange { min: 1, max: 9 },
             ApiKey::FindCoordinator => VersionRange { min: 0, max: 6 },
             ApiKey::JoinGroup => VersionRange { min: 0, max: 9 },
             ApiKey::Heartbeat => VersionRange { min: 0, max: 4 },
             ApiKey::LeaveGroup => VersionRange { min: 0, max: 5 },
             ApiKey::SyncGroup => VersionRange { min: 0, max: 5 },
-            ApiKey::DescribeGroups => VersionRange { min: 0, max: 5 },
+            ApiKey::DescribeGroups => VersionRange { min: 0, max: 6 },
             ApiKey::ListGroups => VersionRange { min: 0, max: 5 },
             ApiKey::SaslHandshake => VersionRange { min: 0, max: 1 },
             ApiKey::ApiVersions => VersionRange { min: 0, max: 4 },
-            ApiKey::CreateTopics => VersionRange { min: 0, max: 7 },
-            ApiKey::DeleteTopics => VersionRange { min: 0, max: 6 },
+            ApiKey::CreateTopics => VersionRange { min: 2, max: 7 },
+            ApiKey::DeleteTopics => VersionRange { min: 1, max: 6 },
             ApiKey::DeleteRecords => VersionRange { min: 0, max: 2 },
             ApiKey::InitProducerId => VersionRange { min: 0, max: 5 },
-            ApiKey::OffsetForLeaderEpoch => VersionRange { min: 0, max: 4 },
+            ApiKey::OffsetForLeaderEpoch => VersionRange { min: 2, max: 4 },
             ApiKey::AddPartitionsToTxn => VersionRange { min: 0, max: 5 },
             ApiKey::AddOffsetsToTxn => VersionRange { min: 0, max: 4 },
-            ApiKey::EndTxn => VersionRange { min: 0, max: 4 },
-            ApiKey::WriteTxnMarkers => VersionRange { min: 0, max: 1 },
-            ApiKey::TxnOffsetCommit => VersionRange { min: 0, max: 4 },
-            ApiKey::DescribeAcls => VersionRange { min: 0, max: 3 },
-            ApiKey::CreateAcls => VersionRange { min: 0, max: 3 },
-            ApiKey::DeleteAcls => VersionRange { min: 0, max: 3 },
-            ApiKey::DescribeConfigs => VersionRange { min: 0, max: 4 },
+            ApiKey::EndTxn => VersionRange { min: 0, max: 5 },
+            ApiKey::WriteTxnMarkers => VersionRange { min: 1, max: 1 },
+            ApiKey::TxnOffsetCommit => VersionRange { min: 0, max: 5 },
+            ApiKey::DescribeAcls => VersionRange { min: 1, max: 3 },
+            ApiKey::CreateAcls => VersionRange { min: 1, max: 3 },
+            ApiKey::DeleteAcls => VersionRange { min: 1, max: 3 },
+            ApiKey::DescribeConfigs => VersionRange { min: 1, max: 4 },
             ApiKey::AlterConfigs => VersionRange { min: 0, max: 2 },
-            ApiKey::AlterReplicaLogDirs => VersionRange { min: 0, max: 2 },
-            ApiKey::DescribeLogDirs => VersionRange { min: 0, max: 4 },
+            ApiKey::AlterReplicaLogDirs => VersionRange { min: 1, max: 2 },
+            ApiKey::DescribeLogDirs => VersionRange { min: 1, max: 4 },
             ApiKey::SaslAuthenticate => VersionRange { min: 0, max: 2 },
             ApiKey::CreatePartitions => VersionRange { min: 0, max: 3 },
-            ApiKey::CreateDelegationToken => VersionRange { min: 0, max: 3 },
-            ApiKey::RenewDelegationToken => VersionRange { min: 0, max: 2 },
-            ApiKey::ExpireDelegationToken => VersionRange { min: 0, max: 2 },
-            ApiKey::DescribeDelegationToken => VersionRange { min: 0, max: 3 },
+            ApiKey::CreateDelegationToken => VersionRange { min: 1, max: 3 },
+            ApiKey::RenewDelegationToken => VersionRange { min: 1, max: 2 },
+            ApiKey::ExpireDelegationToken => VersionRange { min: 1, max: 2 },
+            ApiKey::DescribeDelegationToken => VersionRange { min: 1, max: 3 },
             ApiKey::DeleteGroups => VersionRange { min: 0, max: 2 },
             ApiKey::ElectLeaders => VersionRange { min: 0, max: 2 },
             ApiKey::IncrementalAlterConfigs => VersionRange { min: 0, max: 1 },
@@ -1428,15 +1360,15 @@ impl ApiKey {
             ApiKey::AlterClientQuotas => VersionRange { min: 0, max: 1 },
             ApiKey::DescribeUserScramCredentials => VersionRange { min: 0, max: 0 },
             ApiKey::AlterUserScramCredentials => VersionRange { min: 0, max: 0 },
-            ApiKey::Vote => VersionRange { min: 0, max: 1 },
+            ApiKey::Vote => VersionRange { min: 0, max: 2 },
             ApiKey::BeginQuorumEpoch => VersionRange { min: 0, max: 1 },
             ApiKey::EndQuorumEpoch => VersionRange { min: 0, max: 1 },
             ApiKey::DescribeQuorum => VersionRange { min: 0, max: 2 },
-            ApiKey::AlterPartition => VersionRange { min: 0, max: 3 },
-            ApiKey::UpdateFeatures => VersionRange { min: 0, max: 1 },
+            ApiKey::AlterPartition => VersionRange { min: 2, max: 3 },
+            ApiKey::UpdateFeatures => VersionRange { min: 0, max: 2 },
             ApiKey::Envelope => VersionRange { min: 0, max: 0 },
             ApiKey::FetchSnapshot => VersionRange { min: 0, max: 1 },
-            ApiKey::DescribeCluster => VersionRange { min: 0, max: 1 },
+            ApiKey::DescribeCluster => VersionRange { min: 0, max: 2 },
             ApiKey::DescribeProducers => VersionRange { min: 0, max: 0 },
             ApiKey::BrokerRegistration => VersionRange { min: 0, max: 4 },
             ApiKey::BrokerHeartbeat => VersionRange { min: 0, max: 1 },
@@ -1444,8 +1376,8 @@ impl ApiKey {
             ApiKey::DescribeTransactions => VersionRange { min: 0, max: 0 },
             ApiKey::ListTransactions => VersionRange { min: 0, max: 1 },
             ApiKey::AllocateProducerIds => VersionRange { min: 0, max: 0 },
-            ApiKey::ConsumerGroupHeartbeat => VersionRange { min: 0, max: 0 },
-            ApiKey::ConsumerGroupDescribe => VersionRange { min: 0, max: 0 },
+            ApiKey::ConsumerGroupHeartbeat => VersionRange { min: 0, max: 1 },
+            ApiKey::ConsumerGroupDescribe => VersionRange { min: 0, max: 1 },
             ApiKey::ControllerRegistration => VersionRange { min: 0, max: 0 },
             ApiKey::GetTelemetrySubscriptions => VersionRange { min: 0, max: 0 },
             ApiKey::PushTelemetry => VersionRange { min: 0, max: 0 },
@@ -1472,10 +1404,6 @@ impl TryFrom<i16> for ApiKey {
             x if x == ApiKey::Fetch as i16 => Ok(ApiKey::Fetch),
             x if x == ApiKey::ListOffsets as i16 => Ok(ApiKey::ListOffsets),
             x if x == ApiKey::Metadata as i16 => Ok(ApiKey::Metadata),
-            x if x == ApiKey::LeaderAndIsr as i16 => Ok(ApiKey::LeaderAndIsr),
-            x if x == ApiKey::StopReplica as i16 => Ok(ApiKey::StopReplica),
-            x if x == ApiKey::UpdateMetadata as i16 => Ok(ApiKey::UpdateMetadata),
-            x if x == ApiKey::ControlledShutdown as i16 => Ok(ApiKey::ControlledShutdown),
             x if x == ApiKey::OffsetCommit as i16 => Ok(ApiKey::OffsetCommit),
             x if x == ApiKey::OffsetFetch as i16 => Ok(ApiKey::OffsetFetch),
             x if x == ApiKey::FindCoordinator as i16 => Ok(ApiKey::FindCoordinator),
@@ -1577,14 +1505,6 @@ pub enum RequestKind {
     ListOffsets(ListOffsetsRequest),
     /// MetadataRequest,
     Metadata(MetadataRequest),
-    /// LeaderAndIsrRequest,
-    LeaderAndIsr(LeaderAndIsrRequest),
-    /// StopReplicaRequest,
-    StopReplica(StopReplicaRequest),
-    /// UpdateMetadataRequest,
-    UpdateMetadata(UpdateMetadataRequest),
-    /// ControlledShutdownRequest,
-    ControlledShutdown(ControlledShutdownRequest),
     /// OffsetCommitRequest,
     OffsetCommit(OffsetCommitRequest),
     /// OffsetFetchRequest,
@@ -1739,10 +1659,6 @@ impl RequestKind {
             RequestKind::Fetch(x) => encode(x, bytes, version),
             RequestKind::ListOffsets(x) => encode(x, bytes, version),
             RequestKind::Metadata(x) => encode(x, bytes, version),
-            RequestKind::LeaderAndIsr(x) => encode(x, bytes, version),
-            RequestKind::StopReplica(x) => encode(x, bytes, version),
-            RequestKind::UpdateMetadata(x) => encode(x, bytes, version),
-            RequestKind::ControlledShutdown(x) => encode(x, bytes, version),
             RequestKind::OffsetCommit(x) => encode(x, bytes, version),
             RequestKind::OffsetFetch(x) => encode(x, bytes, version),
             RequestKind::FindCoordinator(x) => encode(x, bytes, version),
@@ -1828,12 +1744,6 @@ impl RequestKind {
             ApiKey::Fetch => Ok(RequestKind::Fetch(decode(bytes, version)?)),
             ApiKey::ListOffsets => Ok(RequestKind::ListOffsets(decode(bytes, version)?)),
             ApiKey::Metadata => Ok(RequestKind::Metadata(decode(bytes, version)?)),
-            ApiKey::LeaderAndIsr => Ok(RequestKind::LeaderAndIsr(decode(bytes, version)?)),
-            ApiKey::StopReplica => Ok(RequestKind::StopReplica(decode(bytes, version)?)),
-            ApiKey::UpdateMetadata => Ok(RequestKind::UpdateMetadata(decode(bytes, version)?)),
-            ApiKey::ControlledShutdown => {
-                Ok(RequestKind::ControlledShutdown(decode(bytes, version)?))
-            }
             ApiKey::OffsetCommit => Ok(RequestKind::OffsetCommit(decode(bytes, version)?)),
             ApiKey::OffsetFetch => Ok(RequestKind::OffsetFetch(decode(bytes, version)?)),
             ApiKey::FindCoordinator => Ok(RequestKind::FindCoordinator(decode(bytes, version)?)),
@@ -1983,34 +1893,6 @@ impl From<ListOffsetsRequest> for RequestKind {
 impl From<MetadataRequest> for RequestKind {
     fn from(value: MetadataRequest) -> RequestKind {
         RequestKind::Metadata(value)
-    }
-}
-
-#[cfg(feature = "messages_enums")]
-impl From<LeaderAndIsrRequest> for RequestKind {
-    fn from(value: LeaderAndIsrRequest) -> RequestKind {
-        RequestKind::LeaderAndIsr(value)
-    }
-}
-
-#[cfg(feature = "messages_enums")]
-impl From<StopReplicaRequest> for RequestKind {
-    fn from(value: StopReplicaRequest) -> RequestKind {
-        RequestKind::StopReplica(value)
-    }
-}
-
-#[cfg(feature = "messages_enums")]
-impl From<UpdateMetadataRequest> for RequestKind {
-    fn from(value: UpdateMetadataRequest) -> RequestKind {
-        RequestKind::UpdateMetadata(value)
-    }
-}
-
-#[cfg(feature = "messages_enums")]
-impl From<ControlledShutdownRequest> for RequestKind {
-    fn from(value: ControlledShutdownRequest) -> RequestKind {
-        RequestKind::ControlledShutdown(value)
     }
 }
 
@@ -2548,14 +2430,6 @@ pub enum ResponseKind {
     ListOffsets(ListOffsetsResponse),
     /// MetadataResponse,
     Metadata(MetadataResponse),
-    /// LeaderAndIsrResponse,
-    LeaderAndIsr(LeaderAndIsrResponse),
-    /// StopReplicaResponse,
-    StopReplica(StopReplicaResponse),
-    /// UpdateMetadataResponse,
-    UpdateMetadata(UpdateMetadataResponse),
-    /// ControlledShutdownResponse,
-    ControlledShutdown(ControlledShutdownResponse),
     /// OffsetCommitResponse,
     OffsetCommit(OffsetCommitResponse),
     /// OffsetFetchResponse,
@@ -2710,10 +2584,6 @@ impl ResponseKind {
             ResponseKind::Fetch(x) => encode(x, bytes, version),
             ResponseKind::ListOffsets(x) => encode(x, bytes, version),
             ResponseKind::Metadata(x) => encode(x, bytes, version),
-            ResponseKind::LeaderAndIsr(x) => encode(x, bytes, version),
-            ResponseKind::StopReplica(x) => encode(x, bytes, version),
-            ResponseKind::UpdateMetadata(x) => encode(x, bytes, version),
-            ResponseKind::ControlledShutdown(x) => encode(x, bytes, version),
             ResponseKind::OffsetCommit(x) => encode(x, bytes, version),
             ResponseKind::OffsetFetch(x) => encode(x, bytes, version),
             ResponseKind::FindCoordinator(x) => encode(x, bytes, version),
@@ -2799,12 +2669,6 @@ impl ResponseKind {
             ApiKey::Fetch => Ok(ResponseKind::Fetch(decode(bytes, version)?)),
             ApiKey::ListOffsets => Ok(ResponseKind::ListOffsets(decode(bytes, version)?)),
             ApiKey::Metadata => Ok(ResponseKind::Metadata(decode(bytes, version)?)),
-            ApiKey::LeaderAndIsr => Ok(ResponseKind::LeaderAndIsr(decode(bytes, version)?)),
-            ApiKey::StopReplica => Ok(ResponseKind::StopReplica(decode(bytes, version)?)),
-            ApiKey::UpdateMetadata => Ok(ResponseKind::UpdateMetadata(decode(bytes, version)?)),
-            ApiKey::ControlledShutdown => {
-                Ok(ResponseKind::ControlledShutdown(decode(bytes, version)?))
-            }
             ApiKey::OffsetCommit => Ok(ResponseKind::OffsetCommit(decode(bytes, version)?)),
             ApiKey::OffsetFetch => Ok(ResponseKind::OffsetFetch(decode(bytes, version)?)),
             ApiKey::FindCoordinator => Ok(ResponseKind::FindCoordinator(decode(bytes, version)?)),
@@ -2935,12 +2799,6 @@ impl ResponseKind {
             ResponseKind::Fetch(_) => FetchResponse::header_version(version),
             ResponseKind::ListOffsets(_) => ListOffsetsResponse::header_version(version),
             ResponseKind::Metadata(_) => MetadataResponse::header_version(version),
-            ResponseKind::LeaderAndIsr(_) => LeaderAndIsrResponse::header_version(version),
-            ResponseKind::StopReplica(_) => StopReplicaResponse::header_version(version),
-            ResponseKind::UpdateMetadata(_) => UpdateMetadataResponse::header_version(version),
-            ResponseKind::ControlledShutdown(_) => {
-                ControlledShutdownResponse::header_version(version)
-            }
             ResponseKind::OffsetCommit(_) => OffsetCommitResponse::header_version(version),
             ResponseKind::OffsetFetch(_) => OffsetFetchResponse::header_version(version),
             ResponseKind::FindCoordinator(_) => FindCoordinatorResponse::header_version(version),
@@ -3091,34 +2949,6 @@ impl From<ListOffsetsResponse> for ResponseKind {
 impl From<MetadataResponse> for ResponseKind {
     fn from(value: MetadataResponse) -> ResponseKind {
         ResponseKind::Metadata(value)
-    }
-}
-
-#[cfg(feature = "messages_enums")]
-impl From<LeaderAndIsrResponse> for ResponseKind {
-    fn from(value: LeaderAndIsrResponse) -> ResponseKind {
-        ResponseKind::LeaderAndIsr(value)
-    }
-}
-
-#[cfg(feature = "messages_enums")]
-impl From<StopReplicaResponse> for ResponseKind {
-    fn from(value: StopReplicaResponse) -> ResponseKind {
-        ResponseKind::StopReplica(value)
-    }
-}
-
-#[cfg(feature = "messages_enums")]
-impl From<UpdateMetadataResponse> for ResponseKind {
-    fn from(value: UpdateMetadataResponse) -> ResponseKind {
-        ResponseKind::UpdateMetadata(value)
-    }
-}
-
-#[cfg(feature = "messages_enums")]
-impl From<ControlledShutdownResponse> for ResponseKind {
-    fn from(value: ControlledShutdownResponse) -> ResponseKind {
-        ResponseKind::ControlledShutdown(value)
     }
 }
 
@@ -3619,7 +3449,7 @@ impl From<UpdateRaftVoterResponse> for ResponseKind {
     }
 }
 
-/// The replica id of the current leader or -1 if the leader is unknown
+/// The replica id of the current leader or -1 if the leader is unknown.
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default, Copy)]
 pub struct BrokerId(pub i32);
 
@@ -3703,7 +3533,7 @@ impl std::fmt::Debug for GroupId {
 }
 impl NewType<StrBytes> for GroupId {}
 
-/// The first producer ID in this range, inclusive
+/// The first producer ID in this range, inclusive.
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default, Copy)]
 pub struct ProducerId(pub i64);
 
@@ -3787,7 +3617,7 @@ impl std::fmt::Debug for TopicName {
 }
 impl NewType<StrBytes> for TopicName {}
 
-///
+/// The transactional id.
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default)]
 pub struct TransactionalId(pub StrBytes);
 
