@@ -39,6 +39,8 @@ snappy = ["dep:snap"]
 lz4 = ["dep:lz4"]
 
 default = ["client", "broker", "gzip", "zstd", "snappy", "lz4"]
+# Enable messages_enums for doctests only
+doctest = ["messages_enums"]
 
 [dependencies]
 bytes = "1.10.1"
@@ -55,6 +57,7 @@ anyhow = "1.0.80"
 
 [dev-dependencies]
 testcontainers = { version = "0.20.1", features = ["blocking", "watchdog"] }
+kafka-protocol = { path = ".", features = ["messages_enums"] }
 
 # Display required features for items when rendering for docs.rs
 [package.metadata.docs.rs]
