@@ -13,7 +13,8 @@
 //! easy serialization and deserialization via [`bytes::Bytes`].
 //!
 //! ```rust
-//! use bytes::{Bytes, BytesMut};
+//! use bytes::BytesMut;
+//! use kafka_protocol::protocol::{encode_request_header_into_buffer, decode_request_header_from_buffer};
 //! use kafka_protocol::messages::RequestHeader;
 //! use kafka_protocol::protocol::{StrBytes, Encodable, Decodable};
 //!
@@ -21,8 +22,8 @@
 //! request_header.correlation_id = 1;
 //! request_header.client_id = Some(StrBytes::from_static_str("test-client"));
 //! let mut buf = BytesMut::new();
-//! request_header.encode(&mut buf, 2);
-//! assert_eq!(request_header, RequestHeader::decode(&mut buf, 2).unwrap());
+//! encode_request_header_into_buffer(&mut buf, &request_header).unwrap();
+//! assert_eq!(request_header, decode_request_header_from_buffer(&mut buf).unwrap());
 //! ```
 //! Note that every message implementation of [`Encodable::encode`](crate::protocol::Encodable::encode)
 //! and [`Decodable::decode`](crate::protocol::Decodable::decode) requires a version to be provided
@@ -37,7 +38,7 @@
 //! type to a [`bytes::Bytes`] buffer.
 //!
 //! ```rust
-//! use kafka_protocol::protocol::{StrBytes, Encodable, HeaderVersion};
+//! use kafka_protocol::protocol::{StrBytes, Encodable, HeaderVersion, encode_request_header_into_buffer};
 //! use bytes::{BytesMut, Bytes};
 //! use kafka_protocol::messages::{RequestHeader, ApiKey, ApiVersionsRequest};
 //! # use std::error::Error;
@@ -47,7 +48,7 @@
 //! req_header.request_api_version = 3;
 //! req_header.request_api_key = ApiKey::ApiVersions as i16;
 //! req_header.client_id = Some(StrBytes::from_static_str("example"));
-//! req_header.encode(&mut buf, ApiVersionsRequest::header_version(req_header.request_api_version)).unwrap();
+//! encode_request_header_into_buffer(&mut buf, &req_header).unwrap();
 //! let mut api_versions_req = ApiVersionsRequest::default();
 //! api_versions_req.client_software_version = StrBytes::from_static_str("1.0");
 //! api_versions_req.client_software_name = StrBytes::from_static_str("example-client");
@@ -69,7 +70,7 @@
 //! A simple example for decoding an unknown message encoded in `buf`:
 //! ```rust
 //! use kafka_protocol::messages::{RequestHeader, ApiVersionsRequest, ApiKey, RequestKind};
-//! use kafka_protocol::protocol::{Encodable, Decodable, StrBytes, HeaderVersion};
+//! use kafka_protocol::protocol::{Encodable, Decodable, StrBytes, HeaderVersion, decode_request_header_from_buffer, encode_request_header_into_buffer};
 //! use bytes::{BytesMut, Buf};
 //! use std::convert::TryFrom;
 //! use kafka_protocol::protocol::buf::ByteBuf;
@@ -78,17 +79,14 @@
 //! # req_header.request_api_version = 3;
 //! # req_header.request_api_key = ApiKey::ApiVersions as i16;
 //! # req_header.client_id = Some(StrBytes::from_static_str("example"));
-//! # req_header.encode(&mut buf, ApiVersionsRequest::header_version(req_header.request_api_version)).unwrap();
+//! # encode_request_header_into_buffer(&mut buf, &req_header).unwrap();
 //! # let mut api_versions_req = ApiVersionsRequest::default();
 //! # api_versions_req.client_software_version = StrBytes::from_static_str("1.0");
 //! # api_versions_req.client_software_name = StrBytes::from_static_str("example-client");
-//! # api_versions_req.encode(&mut buf, 3);
+//! # api_versions_req.encode(&mut buf, 3).unwrap();
 //!
-//! let api_key = buf.peek_bytes(0..2).get_i16();
-//! let api_version = buf.peek_bytes(2..4).get_i16();
-//! let header_version = ApiKey::try_from(api_key).unwrap().request_header_version(api_version);
 //!
-//! let header = RequestHeader::decode(&mut buf, header_version).unwrap();
+//! let header = decode_request_header_from_buffer(&mut buf).unwrap();
 //! let api_key = ApiKey::try_from(header.request_api_version);
 //! let req = match api_key {
 //!     ApiVersionsKey => RequestKind::ApiVersions(ApiVersionsRequest::decode(&mut buf, header.request_api_version).unwrap()),

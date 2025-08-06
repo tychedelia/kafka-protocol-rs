@@ -1109,7 +1109,6 @@ dependencies = [
  "crc32c",
  "flate2",
  "indexmap 2.9.0",
- "kafka-protocol",
  "lz4",
  "paste",
  "snap",
