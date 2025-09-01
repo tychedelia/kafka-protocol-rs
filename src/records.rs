@@ -1144,7 +1144,7 @@ impl Record {
             let value_len: i32 = types::VarInt.decode(buf)?;
 
             // Value
-            let value = match value_len.cmp(&-2) {
+            let value = match value_len.cmp(&-1) {
                 Ordering::Less => {
                     bail!(
                         "Unexpected negative record header value length ({} bytes)",
