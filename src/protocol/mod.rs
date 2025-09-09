@@ -121,6 +121,8 @@ mod str_bytes {
 
 pub use str_bytes::StrBytes;
 
+use crate::messages::{ApiKey, RequestHeader};
+
 pub(crate) trait NewType<Inner>: From<Inner> + Into<Inner> + Borrow<Inner> {}
 
 impl<T> NewType<T> for T {}
@@ -207,6 +209,26 @@ pub trait Request: Message + Encodable + Decodable + HeaderVersion {
     const KEY: i16;
     /// The response associated with this request.
     type Response: Message + Encodable + Decodable + HeaderVersion;
+}
+
+/// Decode the request header from the provided buffer.
+pub fn decode_request_header_from_buffer<B: ByteBuf>(buf: &mut B) -> Result<RequestHeader> {
+    let api_key = ApiKey::try_from(bytes::Buf::get_i16(&mut buf.peek_bytes(0..2)))
+        .map_err(|_| anyhow::Error::msg("Unknown API key"))?;
+    let api_version = bytes::Buf::get_i16(&mut buf.peek_bytes(2..4));
+    let header_version = api_key.request_header_version(api_version);
+    RequestHeader::decode(buf, header_version)
+}
+
+/// Encode the request header into the provided buffer.
+pub fn encode_request_header_into_buffer<B: ByteBufMut>(
+    buf: &mut B,
+    header: &RequestHeader,
+) -> Result<()> {
+    let api_key = ApiKey::try_from(header.request_api_key)
+        .map_err(|_| anyhow::Error::msg("Unknown API key"))?;
+    let version = api_key.request_header_version(header.request_api_version);
+    header.encode(buf, version)
 }
 
 pub(crate) fn write_unknown_tagged_fields<B: ByteBufMut, R: RangeBounds<i32>>(
