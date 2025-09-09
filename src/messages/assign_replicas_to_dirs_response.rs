@@ -26,12 +26,12 @@ pub struct AssignReplicasToDirsResponse {
     /// Supported API versions: 0
     pub throttle_time_ms: i32,
 
-    /// The top level response error code
+    /// The top level response error code.
     ///
     /// Supported API versions: 0
     pub error_code: i16,
 
-    ///
+    /// The list of directories and their assigned partitions.
     ///
     /// Supported API versions: 0
     pub directories: Vec<DirectoryData>,
@@ -52,7 +52,7 @@ impl AssignReplicasToDirsResponse {
     }
     /// Sets `error_code` to the passed value.
     ///
-    /// The top level response error code
+    /// The top level response error code.
     ///
     /// Supported API versions: 0
     pub fn with_error_code(mut self, value: i16) -> Self {
@@ -61,7 +61,7 @@ impl AssignReplicasToDirsResponse {
     }
     /// Sets `directories` to the passed value.
     ///
-    ///
+    /// The list of directories and their assigned partitions.
     ///
     /// Supported API versions: 0
     pub fn with_directories(mut self, value: Vec<DirectoryData>) -> Self {
@@ -167,12 +167,12 @@ impl Message for AssignReplicasToDirsResponse {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct DirectoryData {
-    /// The ID of the directory
+    /// The ID of the directory.
     ///
     /// Supported API versions: 0
     pub id: Uuid,
 
-    ///
+    /// The list of topics and their assigned partitions.
     ///
     /// Supported API versions: 0
     pub topics: Vec<TopicData>,
@@ -184,7 +184,7 @@ pub struct DirectoryData {
 impl DirectoryData {
     /// Sets `id` to the passed value.
     ///
-    /// The ID of the directory
+    /// The ID of the directory.
     ///
     /// Supported API versions: 0
     pub fn with_id(mut self, value: Uuid) -> Self {
@@ -193,7 +193,7 @@ impl DirectoryData {
     }
     /// Sets `topics` to the passed value.
     ///
-    ///
+    /// The list of topics and their assigned partitions.
     ///
     /// Supported API versions: 0
     pub fn with_topics(mut self, value: Vec<TopicData>) -> Self {
@@ -293,12 +293,12 @@ impl Message for DirectoryData {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct PartitionData {
-    /// The partition index
+    /// The partition index.
     ///
     /// Supported API versions: 0
     pub partition_index: i32,
 
-    /// The partition level error code
+    /// The partition level error code.
     ///
     /// Supported API versions: 0
     pub error_code: i16,
@@ -310,7 +310,7 @@ pub struct PartitionData {
 impl PartitionData {
     /// Sets `partition_index` to the passed value.
     ///
-    /// The partition index
+    /// The partition index.
     ///
     /// Supported API versions: 0
     pub fn with_partition_index(mut self, value: i32) -> Self {
@@ -319,7 +319,7 @@ impl PartitionData {
     }
     /// Sets `error_code` to the passed value.
     ///
-    /// The partition level error code
+    /// The partition level error code.
     ///
     /// Supported API versions: 0
     pub fn with_error_code(mut self, value: i16) -> Self {
@@ -419,12 +419,12 @@ impl Message for PartitionData {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct TopicData {
-    /// The ID of the assigned topic
+    /// The ID of the assigned topic.
     ///
     /// Supported API versions: 0
     pub topic_id: Uuid,
 
-    ///
+    /// The list of assigned partitions.
     ///
     /// Supported API versions: 0
     pub partitions: Vec<PartitionData>,
@@ -436,7 +436,7 @@ pub struct TopicData {
 impl TopicData {
     /// Sets `topic_id` to the passed value.
     ///
-    /// The ID of the assigned topic
+    /// The ID of the assigned topic.
     ///
     /// Supported API versions: 0
     pub fn with_topic_id(mut self, value: Uuid) -> Self {
@@ -445,7 +445,7 @@ impl TopicData {
     }
     /// Sets `partitions` to the passed value.
     ///
-    ///
+    /// The list of assigned partitions.
     ///
     /// Supported API versions: 0
     pub fn with_partitions(mut self, value: Vec<PartitionData>) -> Self {

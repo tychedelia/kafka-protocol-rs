@@ -147,7 +147,7 @@ impl Message for ListPartitionReassignmentsRequest {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct ListPartitionReassignmentsTopics {
-    /// The topic name
+    /// The topic name.
     ///
     /// Supported API versions: 0
     pub name: super::TopicName,
@@ -164,7 +164,7 @@ pub struct ListPartitionReassignmentsTopics {
 impl ListPartitionReassignmentsTopics {
     /// Sets `name` to the passed value.
     ///
-    /// The topic name
+    /// The topic name.
     ///
     /// Supported API versions: 0
     pub fn with_name(mut self, value: super::TopicName) -> Self {

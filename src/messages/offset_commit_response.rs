@@ -17,7 +17,7 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-9
+/// Valid versions: 2-9
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct OffsetCommitResponse {
@@ -28,7 +28,7 @@ pub struct OffsetCommitResponse {
 
     /// The responses for each topic.
     ///
-    /// Supported API versions: 0-9
+    /// Supported API versions: 2-9
     pub topics: Vec<OffsetCommitResponseTopic>,
 
     /// Other tagged fields
@@ -49,7 +49,7 @@ impl OffsetCommitResponse {
     ///
     /// The responses for each topic.
     ///
-    /// Supported API versions: 0-9
+    /// Supported API versions: 2-9
     pub fn with_topics(mut self, value: Vec<OffsetCommitResponseTopic>) -> Self {
         self.topics = value;
         self
@@ -69,7 +69,7 @@ impl OffsetCommitResponse {
 #[cfg(feature = "broker")]
 impl Encodable for OffsetCommitResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 9 {
+        if version < 2 || version > 9 {
             bail!("specified version not supported by this message type");
         }
         if version >= 3 {
@@ -124,7 +124,7 @@ impl Encodable for OffsetCommitResponse {
 #[cfg(feature = "client")]
 impl Decodable for OffsetCommitResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 9 {
+        if version < 2 || version > 9 {
             bail!("specified version not supported by this message type");
         }
         let throttle_time_ms = if version >= 3 {
@@ -166,22 +166,22 @@ impl Default for OffsetCommitResponse {
 }
 
 impl Message for OffsetCommitResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 9 };
+    const VERSIONS: VersionRange = VersionRange { min: 2, max: 9 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-9
+/// Valid versions: 2-9
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct OffsetCommitResponsePartition {
     /// The partition index.
     ///
-    /// Supported API versions: 0-9
+    /// Supported API versions: 2-9
     pub partition_index: i32,
 
     /// The error code, or 0 if there was no error.
     ///
-    /// Supported API versions: 0-9
+    /// Supported API versions: 2-9
     pub error_code: i16,
 
     /// Other tagged fields
@@ -193,7 +193,7 @@ impl OffsetCommitResponsePartition {
     ///
     /// The partition index.
     ///
-    /// Supported API versions: 0-9
+    /// Supported API versions: 2-9
     pub fn with_partition_index(mut self, value: i32) -> Self {
         self.partition_index = value;
         self
@@ -202,7 +202,7 @@ impl OffsetCommitResponsePartition {
     ///
     /// The error code, or 0 if there was no error.
     ///
-    /// Supported API versions: 0-9
+    /// Supported API versions: 2-9
     pub fn with_error_code(mut self, value: i16) -> Self {
         self.error_code = value;
         self
@@ -222,7 +222,7 @@ impl OffsetCommitResponsePartition {
 #[cfg(feature = "broker")]
 impl Encodable for OffsetCommitResponsePartition {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 9 {
+        if version < 2 || version > 9 {
             bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.partition_index)?;
@@ -264,7 +264,7 @@ impl Encodable for OffsetCommitResponsePartition {
 #[cfg(feature = "client")]
 impl Decodable for OffsetCommitResponsePartition {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 9 {
+        if version < 2 || version > 9 {
             bail!("specified version not supported by this message type");
         }
         let partition_index = types::Int32.decode(buf)?;
@@ -298,22 +298,22 @@ impl Default for OffsetCommitResponsePartition {
 }
 
 impl Message for OffsetCommitResponsePartition {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 9 };
+    const VERSIONS: VersionRange = VersionRange { min: 2, max: 9 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-9
+/// Valid versions: 2-9
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct OffsetCommitResponseTopic {
     /// The topic name.
     ///
-    /// Supported API versions: 0-9
+    /// Supported API versions: 2-9
     pub name: super::TopicName,
 
     /// The responses for each partition in the topic.
     ///
-    /// Supported API versions: 0-9
+    /// Supported API versions: 2-9
     pub partitions: Vec<OffsetCommitResponsePartition>,
 
     /// Other tagged fields
@@ -325,7 +325,7 @@ impl OffsetCommitResponseTopic {
     ///
     /// The topic name.
     ///
-    /// Supported API versions: 0-9
+    /// Supported API versions: 2-9
     pub fn with_name(mut self, value: super::TopicName) -> Self {
         self.name = value;
         self
@@ -334,7 +334,7 @@ impl OffsetCommitResponseTopic {
     ///
     /// The responses for each partition in the topic.
     ///
-    /// Supported API versions: 0-9
+    /// Supported API versions: 2-9
     pub fn with_partitions(mut self, value: Vec<OffsetCommitResponsePartition>) -> Self {
         self.partitions = value;
         self
@@ -354,7 +354,7 @@ impl OffsetCommitResponseTopic {
 #[cfg(feature = "broker")]
 impl Encodable for OffsetCommitResponseTopic {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 9 {
+        if version < 2 || version > 9 {
             bail!("specified version not supported by this message type");
         }
         if version >= 8 {
@@ -413,7 +413,7 @@ impl Encodable for OffsetCommitResponseTopic {
 #[cfg(feature = "client")]
 impl Decodable for OffsetCommitResponseTopic {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 9 {
+        if version < 2 || version > 9 {
             bail!("specified version not supported by this message type");
         }
         let name = if version >= 8 {
@@ -455,7 +455,7 @@ impl Default for OffsetCommitResponseTopic {
 }
 
 impl Message for OffsetCommitResponseTopic {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 9 };
+    const VERSIONS: VersionRange = VersionRange { min: 2, max: 9 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 

@@ -26,7 +26,7 @@ pub struct FindCoordinatorRequest {
     /// Supported API versions: 0-3
     pub key: StrBytes,
 
-    /// The coordinator key type. (Group, transaction, etc.)
+    /// The coordinator key type. (group, transaction, share).
     ///
     /// Supported API versions: 1-6
     pub key_type: i8,
@@ -52,7 +52,7 @@ impl FindCoordinatorRequest {
     }
     /// Sets `key_type` to the passed value.
     ///
-    /// The coordinator key type. (Group, transaction, etc.)
+    /// The coordinator key type. (group, transaction, share).
     ///
     /// Supported API versions: 1-6
     pub fn with_key_type(mut self, value: i8) -> Self {
@@ -226,7 +226,7 @@ impl Default for FindCoordinatorRequest {
 
 impl Message for FindCoordinatorRequest {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 6 };
-    const DEPRECATED_VERSIONS: Option<VersionRange> = Some(VersionRange { min: 0, max: 0 });
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
 impl HeaderVersion for FindCoordinatorRequest {

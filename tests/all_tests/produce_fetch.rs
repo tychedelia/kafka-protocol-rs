@@ -11,8 +11,8 @@ use kafka_protocol::{
     },
     protocol::StrBytes,
     records::{
-        Compression, Record, RecordBatchDecoder, RecordBatchEncoder, RecordCompression,
-        RecordEncodeOptions, TimestampType,
+        Compression, Record, RecordBatchDecoder, RecordBatchEncoder, RecordEncodeOptions,
+        TimestampType,
     },
 };
 
@@ -54,47 +54,7 @@ fn record_batch_produce_fetch() {
         topic_name.clone(),
         12,
         records,
-        (2, RecordCompression::RecordBatch(Compression::None)),
-        &mut socket,
-    );
-}
-
-#[test]
-fn message_set_v1_produce_fetch() {
-    let topic_name = TopicName(StrBytes::from_static_str("message_set_v1_produce_fetch"));
-
-    let container = start_kafka();
-    let mut socket = connect_to_kafka(&container);
-
-    let records = vec![
-        new_record(0, false),
-        new_record(1, false),
-        new_record(2, false),
-    ];
-
-    let mut encoded = BytesMut::new();
-    RecordBatchEncoder::encode(
-        &mut encoded,
-        &records,
-        &RecordEncodeOptions {
-            version: 1,
-            compression: Compression::None,
-        },
-    )
-    .unwrap();
-
-    create_topic(topic_name.clone(), &mut socket);
-
-    // Sometimes (rarely) the produce request will fail with error code 6 (NOT_LEADER_OR_FOLLOWER)
-    // Hopefully a 1s sleep will prevent that
-    std::thread::sleep(Duration::from_secs(1));
-
-    produce_records(topic_name.clone(), 2, encoded.freeze(), &mut socket);
-    fetch_records(
-        topic_name.clone(),
-        3,
-        records,
-        (1, RecordCompression::MessageSet),
+        (2, Compression::None),
         &mut socket,
     );
 }
@@ -169,7 +129,7 @@ fn fetch_records(
     topic_name: TopicName,
     api_version: i16,
     expected: Vec<Record>,
-    (expected_record_version, expected_compression): (i8, RecordCompression),
+    (expected_record_version, expected_compression): (i8, Compression),
     socket: &mut TcpStream,
 ) {
     let header = RequestHeader::default()

@@ -21,17 +21,17 @@ use crate::protocol::{
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct Endpoint {
-    /// The name of the endpoint
+    /// The name of the endpoint.
     ///
     /// Supported API versions: 0
     pub name: StrBytes,
 
-    /// The hostname
+    /// The hostname.
     ///
     /// Supported API versions: 0
     pub host: StrBytes,
 
-    /// The port
+    /// The port.
     ///
     /// Supported API versions: 0
     pub port: u16,
@@ -43,7 +43,7 @@ pub struct Endpoint {
 impl Endpoint {
     /// Sets `name` to the passed value.
     ///
-    /// The name of the endpoint
+    /// The name of the endpoint.
     ///
     /// Supported API versions: 0
     pub fn with_name(mut self, value: StrBytes) -> Self {
@@ -52,7 +52,7 @@ impl Endpoint {
     }
     /// Sets `host` to the passed value.
     ///
-    /// The hostname
+    /// The hostname.
     ///
     /// Supported API versions: 0
     pub fn with_host(mut self, value: StrBytes) -> Self {
@@ -61,7 +61,7 @@ impl Endpoint {
     }
     /// Sets `port` to the passed value.
     ///
-    /// The port
+    /// The port.
     ///
     /// Supported API versions: 0
     pub fn with_port(mut self, value: u16) -> Self {
@@ -164,12 +164,12 @@ impl Message for Endpoint {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct KRaftVersionFeature {
-    /// The minimum supported KRaft protocol version
+    /// The minimum supported KRaft protocol version.
     ///
     /// Supported API versions: 0
     pub min_supported_version: i16,
 
-    /// The maximum supported KRaft protocol version
+    /// The maximum supported KRaft protocol version.
     ///
     /// Supported API versions: 0
     pub max_supported_version: i16,
@@ -181,7 +181,7 @@ pub struct KRaftVersionFeature {
 impl KRaftVersionFeature {
     /// Sets `min_supported_version` to the passed value.
     ///
-    /// The minimum supported KRaft protocol version
+    /// The minimum supported KRaft protocol version.
     ///
     /// Supported API versions: 0
     pub fn with_min_supported_version(mut self, value: i16) -> Self {
@@ -190,7 +190,7 @@ impl KRaftVersionFeature {
     }
     /// Sets `max_supported_version` to the passed value.
     ///
-    /// The maximum supported KRaft protocol version
+    /// The maximum supported KRaft protocol version.
     ///
     /// Supported API versions: 0
     pub fn with_max_supported_version(mut self, value: i16) -> Self {
@@ -288,22 +288,22 @@ impl Message for KRaftVersionFeature {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct Voter {
-    /// The replica id of the voter in the topic partition
+    /// The replica id of the voter in the topic partition.
     ///
     /// Supported API versions: 0
     pub voter_id: super::BrokerId,
 
-    /// The directory id of the voter in the topic partition
+    /// The directory id of the voter in the topic partition.
     ///
     /// Supported API versions: 0
     pub voter_directory_id: Uuid,
 
-    /// The endpoint that can be used to communicate with the voter
+    /// The endpoint that can be used to communicate with the voter.
     ///
     /// Supported API versions: 0
     pub endpoints: Vec<Endpoint>,
 
-    /// The range of versions of the protocol that the replica supports
+    /// The range of versions of the protocol that the replica supports.
     ///
     /// Supported API versions: 0
     pub k_raft_version_feature: KRaftVersionFeature,
@@ -315,7 +315,7 @@ pub struct Voter {
 impl Voter {
     /// Sets `voter_id` to the passed value.
     ///
-    /// The replica id of the voter in the topic partition
+    /// The replica id of the voter in the topic partition.
     ///
     /// Supported API versions: 0
     pub fn with_voter_id(mut self, value: super::BrokerId) -> Self {
@@ -324,7 +324,7 @@ impl Voter {
     }
     /// Sets `voter_directory_id` to the passed value.
     ///
-    /// The directory id of the voter in the topic partition
+    /// The directory id of the voter in the topic partition.
     ///
     /// Supported API versions: 0
     pub fn with_voter_directory_id(mut self, value: Uuid) -> Self {
@@ -333,7 +333,7 @@ impl Voter {
     }
     /// Sets `endpoints` to the passed value.
     ///
-    /// The endpoint that can be used to communicate with the voter
+    /// The endpoint that can be used to communicate with the voter.
     ///
     /// Supported API versions: 0
     pub fn with_endpoints(mut self, value: Vec<Endpoint>) -> Self {
@@ -342,7 +342,7 @@ impl Voter {
     }
     /// Sets `k_raft_version_feature` to the passed value.
     ///
-    /// The range of versions of the protocol that the replica supports
+    /// The range of versions of the protocol that the replica supports.
     ///
     /// Supported API versions: 0
     pub fn with_k_raft_version_feature(mut self, value: KRaftVersionFeature) -> Self {
@@ -451,12 +451,12 @@ impl Message for Voter {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct VotersRecord {
-    /// The version of the voters record
+    /// The version of the voters record.
     ///
     /// Supported API versions: 0
     pub version: i16,
 
-    ///
+    /// The set of voters in the quorum for this epoch.
     ///
     /// Supported API versions: 0
     pub voters: Vec<Voter>,
@@ -468,7 +468,7 @@ pub struct VotersRecord {
 impl VotersRecord {
     /// Sets `version` to the passed value.
     ///
-    /// The version of the voters record
+    /// The version of the voters record.
     ///
     /// Supported API versions: 0
     pub fn with_version(mut self, value: i16) -> Self {
@@ -477,7 +477,7 @@ impl VotersRecord {
     }
     /// Sets `voters` to the passed value.
     ///
-    ///
+    /// The set of voters in the quorum for this epoch.
     ///
     /// Supported API versions: 0
     pub fn with_voters(mut self, value: Vec<Voter>) -> Self {

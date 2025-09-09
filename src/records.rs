@@ -121,20 +121,11 @@ struct BatchDecodeInfo {
     producer_epoch: i16,
 }
 
-/// Record compression for a set of records.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum RecordCompression {
-    /// The set of records was a record batch with the given `Compression`.
-    RecordBatch(Compression),
-    /// The set of records was a message set and does not have a well-defined `Compression`.
-    MessageSet,
-}
-
 /// Decoded records plus information about compression.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RecordSet {
     /// Compression used for this set of records
-    pub compression: RecordCompression,
+    pub compression: Compression,
     /// Version used to encode the set of records
     pub version: i8,
     /// Records decoded in this set
@@ -212,107 +203,10 @@ impl RecordBatchEncoder {
     {
         let records = records.into_iter();
         match options.version {
-            0..=1 => Self::encode_legacy(buf, records, options, compressor),
+            0..=1 => bail!("message sets v{} are unsupported", options.version),
             2 => Self::encode_new(buf, records, options, compressor),
             _ => bail!("Unknown record batch version"),
         }
-    }
-    fn encode_legacy_records<'a, B, I>(
-        buf: &mut B,
-        records: I,
-        options: &RecordEncodeOptions,
-    ) -> Result<()>
-    where
-        B: ByteBufMut,
-        I: Iterator<Item = &'a Record> + Clone,
-    {
-        for record in records {
-            record.encode_legacy(buf, options)?;
-        }
-        Ok(())
-    }
-    fn encode_legacy<'a, B, I, CF>(
-        buf: &mut B,
-        records: I,
-        options: &RecordEncodeOptions,
-        compressor: Option<CF>,
-    ) -> Result<()>
-    where
-        B: ByteBufMut,
-        I: Iterator<Item = &'a Record> + Clone,
-        CF: Fn(&mut BytesMut, &mut B, Compression) -> Result<()>,
-    {
-        if options.compression == Compression::None {
-            // No wrapper needed
-            Self::encode_legacy_records(buf, records, options)?;
-        } else {
-            // Need a "wrapper" message
-            let inner_opts = RecordEncodeOptions {
-                compression: Compression::None,
-                version: options.version,
-            };
-
-            Record::encode_legacy_static(buf, options, |buf| {
-                // Timestamp
-                if options.version > 0 {
-                    let min_timestamp = records
-                        .clone()
-                        .map(|r| r.timestamp)
-                        .min()
-                        .unwrap_or_default();
-                    types::Int64.encode(buf, min_timestamp)?;
-                };
-
-                // Key
-                buf.put_i32(-1);
-
-                // Value (Compressed MessageSet)
-                let size_gap = buf.put_typed_gap(gap::I32);
-                let value_start = buf.offset();
-                if let Some(compressor) = compressor {
-                    let mut encoded_buf = BytesMut::new();
-                    Self::encode_legacy_records(&mut encoded_buf, records, &inner_opts)?;
-                    compressor(&mut encoded_buf, buf, options.compression)?;
-                } else {
-                    match options.compression {
-                        #[cfg(feature = "snappy")]
-                        Compression::Snappy => cmpr::Snappy::compress(buf, |buf| {
-                            Self::encode_legacy_records(buf, records, &inner_opts)
-                        })?,
-                        #[cfg(feature = "gzip")]
-                        Compression::Gzip => cmpr::Gzip::compress(buf, |buf| {
-                            Self::encode_legacy_records(buf, records, &inner_opts)
-                        })?,
-                        #[cfg(feature = "lz4")]
-                        Compression::Lz4 => cmpr::Lz4::compress(buf, |buf| {
-                            Self::encode_legacy_records(buf, records, &inner_opts)
-                        })?,
-                        #[cfg(feature = "zstd")]
-                        Compression::Zstd => cmpr::Zstd::compress(buf, |buf| {
-                            Self::encode_legacy_records(buf, records, &inner_opts)
-                        })?,
-                        c => {
-                            return Err(anyhow!(
-                                "Support for {c:?} is not enabled as a cargo feature"
-                            ))
-                        }
-                    }
-                }
-
-                let value_end = buf.offset();
-                let value_size = value_end - value_start;
-                if value_size > i32::MAX as usize {
-                    bail!(
-                        "Record batch was too large to encode ({} bytes)",
-                        value_size
-                    );
-                }
-                buf.fill_typed_gap(size_gap, value_size as i32);
-
-                Ok(())
-            })?;
-        }
-        Ok(())
     }
 
     fn encode_new_records<'a, B, I>(
@@ -564,17 +458,14 @@ impl RecordBatchDecoder {
         buf: &mut B,
         records: &mut Vec<Record>,
         decompress_func: Option<&F>,
-    ) -> Result<(i8, RecordCompression)>
+    ) -> Result<(i8, Compression)>
     where
         F: Fn(&mut bytes::Bytes, Compression) -> Result<B>,
     {
         let version = buf.try_peek_bytes(MAGIC_BYTE_OFFSET..(MAGIC_BYTE_OFFSET + 1))?[0] as i8;
         let compression = match version {
-            0..=1 => {
-                Record::decode_legacy(buf, version, records).map(|()| RecordCompression::MessageSet)
-            }
-            2 => Self::decode_new_batch(buf, version, records, decompress_func)
-                .map(RecordCompression::RecordBatch),
+            0..=1 => bail!("message sets v{} are unsupported", version),
+            2 => Self::decode_new_batch(buf, version, records, decompress_func),
             _ => {
                 bail!("Unknown record batch version ({})", version);
             }
@@ -732,72 +623,6 @@ impl RecordBatchDecoder {
 }
 
 impl Record {
-    fn encode_legacy_static<B, F>(
-        buf: &mut B,
-        options: &RecordEncodeOptions,
-        content_writer: F,
-    ) -> Result<()>
-    where
-        B: ByteBufMut,
-        F: FnOnce(&mut B) -> Result<()>,
-    {
-        types::Int64.encode(buf, 0)?;
-        let size_gap = buf.put_typed_gap(gap::I32);
-        let message_start = buf.offset();
-        let crc_gap = buf.put_typed_gap(gap::U32);
-        let content_start = buf.offset();
-
-        types::Int8.encode(buf, options.version)?;
-
-        let compression = options.compression as i8;
-        if compression > 2 + options.version {
-            bail!(
-                "Compression algorithm '{:?}' is unsupported for record version '{}'",
-                options.compression,
-                options.version
-            );
-        }
-        types::Int8.encode(buf, compression)?;
-
-        // Write content
-        content_writer(buf)?;
-
-        let message_end = buf.offset();
-
-        let message_size = message_end - message_start;
-        if message_start > i32::MAX as usize {
-            bail!("Record was too large to encode ({} bytes)", message_size);
-        }
-        buf.fill_typed_gap(size_gap, message_size as i32);
-
-        let crc = IEEE.checksum(buf.range(content_start..message_end));
-        buf.fill_typed_gap(crc_gap, crc);
-
-        Ok(())
-    }
-    fn encode_legacy<B: ByteBufMut>(
-        &self,
-        buf: &mut B,
-        options: &RecordEncodeOptions,
-    ) -> Result<()> {
-        if self.transactional || self.control {
-            bail!("Transactional and control records are not supported in this version of the protocol!");
-        }
-
-        if !self.headers.is_empty() {
-            bail!("Record headers are not supported in this version of the protocol!");
-        }
-
-        Self::encode_legacy_static(buf, options, |buf| {
-            if options.version > 0 {
-                types::Int64.encode(buf, self.timestamp)?;
-            }
-            types::Bytes.encode(buf, &self.key)?;
-            types::Bytes.encode(buf, &self.value)?;
-
-            Ok(())
-        })
-    }
     fn encode_new<B: ByteBufMut>(
         &self,
         buf: &mut B,
@@ -983,92 +808,6 @@ impl Record {
         }
 
         Ok(total_size)
-    }
-    fn decode_legacy<B: ByteBuf>(
-        buf: &mut B,
-        version: i8,
-        records: &mut Vec<Record>,
-    ) -> Result<()> {
-        let offset = types::Int64.decode(buf)?;
-        let size: i32 = types::Int32.decode(buf)?;
-        if size < 0 {
-            bail!("Unexpected negative record size: {}", size);
-        }
-
-        // Ensure we don't over-read
-        let buf = &mut buf.try_get_bytes(size as usize)?;
-
-        // CRC
-        let supplied_crc: u32 = types::UInt32.decode(buf)?;
-        let actual_crc = IEEE.checksum(buf);
-
-        if supplied_crc != actual_crc {
-            bail!(
-                "Cyclic redundancy check failed ({} != {})",
-                supplied_crc,
-                actual_crc
-            );
-        }
-
-        // Magic
-        let magic: i8 = types::Int8.decode(buf)?;
-        if magic != version {
-            bail!("Version mismatch ({} != {})", magic, version);
-        }
-
-        // Attributes
-        let attributes: i8 = types::Int8.decode(buf)?;
-        let compression = match attributes & 0x7 {
-            0 => Compression::None,
-            1 => Compression::Gzip,
-            2 => Compression::Snappy,
-            3 if version > 0 => Compression::Lz4,
-            other => {
-                bail!("Unknown compression algorithm used: {}", other);
-            }
-        };
-        let timestamp_type = if (attributes & (1 << 3)) != 0 {
-            TimestampType::LogAppend
-        } else {
-            TimestampType::Creation
-        };
-
-        // Write content
-        let timestamp = if version > 0 {
-            types::Int64.decode(buf)?
-        } else {
-            NO_TIMESTAMP
-        };
-        let key = types::Bytes.decode(buf)?;
-        let value = types::Bytes.decode(buf)?;
-
-        if compression == Compression::None {
-            // Uncompressed record
-            records.push(Record {
-                transactional: false,
-                control: false,
-                partition_leader_epoch: NO_PARTITION_LEADER_EPOCH,
-                producer_id: NO_PRODUCER_ID,
-                producer_epoch: NO_PRODUCER_EPOCH,
-                sequence: NO_SEQUENCE,
-                timestamp_type,
-                offset,
-                timestamp,
-                key,
-                value,
-                headers: Default::default(),
-            });
-        } else {
-            // Wrapper record around a compressed MessageSet
-            let mut value = value
-                .ok_or_else(|| anyhow!("Received compressed legacy record without a value"))?;
-
-            while !value.is_empty() {
-                Record::decode_legacy(&mut value, version, records)?;
-            }
-        }
-
-        Ok(())
     }
     fn decode_new<B: ByteBuf>(
         buf: &mut B,

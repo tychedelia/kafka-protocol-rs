@@ -26,7 +26,7 @@ pub struct ListPartitionReassignmentsResponse {
     /// Supported API versions: 0
     pub throttle_time_ms: i32,
 
-    /// The top-level error code, or 0 if there was no error
+    /// The top-level error code, or 0 if there was no error.
     ///
     /// Supported API versions: 0
     pub error_code: i16,
@@ -57,7 +57,7 @@ impl ListPartitionReassignmentsResponse {
     }
     /// Sets `error_code` to the passed value.
     ///
-    /// The top-level error code, or 0 if there was no error
+    /// The top-level error code, or 0 if there was no error.
     ///
     /// Supported API versions: 0
     pub fn with_error_code(mut self, value: i16) -> Self {

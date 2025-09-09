@@ -157,12 +157,12 @@ pub struct PartitionResponse {
     /// Supported API versions: 0
     pub error_code: i16,
 
-    /// The partition error message, which may be null if no additional details are available
+    /// The partition error message, which may be null if no additional details are available.
     ///
     /// Supported API versions: 0
     pub error_message: Option<StrBytes>,
 
-    ///
+    /// The active producers for the partition.
     ///
     /// Supported API versions: 0
     pub active_producers: Vec<ProducerState>,
@@ -192,7 +192,7 @@ impl PartitionResponse {
     }
     /// Sets `error_message` to the passed value.
     ///
-    /// The partition error message, which may be null if no additional details are available
+    /// The partition error message, which may be null if no additional details are available.
     ///
     /// Supported API versions: 0
     pub fn with_error_message(mut self, value: Option<StrBytes>) -> Self {
@@ -201,7 +201,7 @@ impl PartitionResponse {
     }
     /// Sets `active_producers` to the passed value.
     ///
-    ///
+    /// The active producers for the partition.
     ///
     /// Supported API versions: 0
     pub fn with_active_producers(mut self, value: Vec<ProducerState>) -> Self {
@@ -312,32 +312,32 @@ impl Message for PartitionResponse {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct ProducerState {
-    ///
+    /// The producer id.
     ///
     /// Supported API versions: 0
     pub producer_id: super::ProducerId,
 
-    ///
+    /// The producer epoch.
     ///
     /// Supported API versions: 0
     pub producer_epoch: i32,
 
-    ///
+    /// The last sequence number sent by the producer.
     ///
     /// Supported API versions: 0
     pub last_sequence: i32,
 
-    ///
+    /// The last timestamp sent by the producer.
     ///
     /// Supported API versions: 0
     pub last_timestamp: i64,
 
-    ///
+    /// The current epoch of the producer group.
     ///
     /// Supported API versions: 0
     pub coordinator_epoch: i32,
 
-    ///
+    /// The current transaction start offset of the producer.
     ///
     /// Supported API versions: 0
     pub current_txn_start_offset: i64,
@@ -349,7 +349,7 @@ pub struct ProducerState {
 impl ProducerState {
     /// Sets `producer_id` to the passed value.
     ///
-    ///
+    /// The producer id.
     ///
     /// Supported API versions: 0
     pub fn with_producer_id(mut self, value: super::ProducerId) -> Self {
@@ -358,7 +358,7 @@ impl ProducerState {
     }
     /// Sets `producer_epoch` to the passed value.
     ///
-    ///
+    /// The producer epoch.
     ///
     /// Supported API versions: 0
     pub fn with_producer_epoch(mut self, value: i32) -> Self {
@@ -367,7 +367,7 @@ impl ProducerState {
     }
     /// Sets `last_sequence` to the passed value.
     ///
-    ///
+    /// The last sequence number sent by the producer.
     ///
     /// Supported API versions: 0
     pub fn with_last_sequence(mut self, value: i32) -> Self {
@@ -376,7 +376,7 @@ impl ProducerState {
     }
     /// Sets `last_timestamp` to the passed value.
     ///
-    ///
+    /// The last timestamp sent by the producer.
     ///
     /// Supported API versions: 0
     pub fn with_last_timestamp(mut self, value: i64) -> Self {
@@ -385,7 +385,7 @@ impl ProducerState {
     }
     /// Sets `coordinator_epoch` to the passed value.
     ///
-    ///
+    /// The current epoch of the producer group.
     ///
     /// Supported API versions: 0
     pub fn with_coordinator_epoch(mut self, value: i32) -> Self {
@@ -394,7 +394,7 @@ impl ProducerState {
     }
     /// Sets `current_txn_start_offset` to the passed value.
     ///
-    ///
+    /// The current transaction start offset of the producer.
     ///
     /// Supported API versions: 0
     pub fn with_current_txn_start_offset(mut self, value: i64) -> Self {
@@ -514,7 +514,7 @@ impl Message for ProducerState {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct TopicResponse {
-    /// The topic name
+    /// The topic name.
     ///
     /// Supported API versions: 0
     pub name: super::TopicName,
@@ -531,7 +531,7 @@ pub struct TopicResponse {
 impl TopicResponse {
     /// Sets `name` to the passed value.
     ///
-    /// The topic name
+    /// The topic name.
     ///
     /// Supported API versions: 0
     pub fn with_name(mut self, value: super::TopicName) -> Self {

@@ -21,17 +21,17 @@ use crate::protocol::{
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct EndQuorumEpochRequest {
-    ///
+    /// The cluster id.
     ///
     /// Supported API versions: 0-1
     pub cluster_id: Option<StrBytes>,
 
-    ///
+    /// The topics.
     ///
     /// Supported API versions: 0-1
     pub topics: Vec<TopicData>,
 
-    /// Endpoints for the leader
+    /// Endpoints for the leader.
     ///
     /// Supported API versions: 1
     pub leader_endpoints: Vec<LeaderEndpoint>,
@@ -43,7 +43,7 @@ pub struct EndQuorumEpochRequest {
 impl EndQuorumEpochRequest {
     /// Sets `cluster_id` to the passed value.
     ///
-    ///
+    /// The cluster id.
     ///
     /// Supported API versions: 0-1
     pub fn with_cluster_id(mut self, value: Option<StrBytes>) -> Self {
@@ -52,7 +52,7 @@ impl EndQuorumEpochRequest {
     }
     /// Sets `topics` to the passed value.
     ///
-    ///
+    /// The topics.
     ///
     /// Supported API versions: 0-1
     pub fn with_topics(mut self, value: Vec<TopicData>) -> Self {
@@ -61,7 +61,7 @@ impl EndQuorumEpochRequest {
     }
     /// Sets `leader_endpoints` to the passed value.
     ///
-    /// Endpoints for the leader
+    /// Endpoints for the leader.
     ///
     /// Supported API versions: 1
     pub fn with_leader_endpoints(mut self, value: Vec<LeaderEndpoint>) -> Self {
@@ -206,17 +206,17 @@ impl Message for EndQuorumEpochRequest {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct LeaderEndpoint {
-    /// The name of the endpoint
+    /// The name of the endpoint.
     ///
     /// Supported API versions: 1
     pub name: StrBytes,
 
-    /// The node's hostname
+    /// The node's hostname.
     ///
     /// Supported API versions: 1
     pub host: StrBytes,
 
-    /// The node's port
+    /// The node's port.
     ///
     /// Supported API versions: 1
     pub port: u16,
@@ -228,7 +228,7 @@ pub struct LeaderEndpoint {
 impl LeaderEndpoint {
     /// Sets `name` to the passed value.
     ///
-    /// The name of the endpoint
+    /// The name of the endpoint.
     ///
     /// Supported API versions: 1
     pub fn with_name(mut self, value: StrBytes) -> Self {
@@ -237,7 +237,7 @@ impl LeaderEndpoint {
     }
     /// Sets `host` to the passed value.
     ///
-    /// The node's hostname
+    /// The node's hostname.
     ///
     /// Supported API versions: 1
     pub fn with_host(mut self, value: StrBytes) -> Self {
@@ -246,7 +246,7 @@ impl LeaderEndpoint {
     }
     /// Sets `port` to the passed value.
     ///
-    /// The node's port
+    /// The node's port.
     ///
     /// Supported API versions: 1
     pub fn with_port(mut self, value: u16) -> Self {
@@ -410,22 +410,22 @@ pub struct PartitionData {
     /// Supported API versions: 0-1
     pub partition_index: i32,
 
-    /// The current leader ID that is resigning
+    /// The current leader ID that is resigning.
     ///
     /// Supported API versions: 0-1
     pub leader_id: super::BrokerId,
 
-    /// The current epoch
+    /// The current epoch.
     ///
     /// Supported API versions: 0-1
     pub leader_epoch: i32,
 
-    /// A sorted list of preferred successors to start the election
+    /// A sorted list of preferred successors to start the election.
     ///
     /// Supported API versions: 0
     pub preferred_successors: Vec<i32>,
 
-    /// A sorted list of preferred candidates to start the election
+    /// A sorted list of preferred candidates to start the election.
     ///
     /// Supported API versions: 1
     pub preferred_candidates: Vec<ReplicaInfo>,
@@ -446,7 +446,7 @@ impl PartitionData {
     }
     /// Sets `leader_id` to the passed value.
     ///
-    /// The current leader ID that is resigning
+    /// The current leader ID that is resigning.
     ///
     /// Supported API versions: 0-1
     pub fn with_leader_id(mut self, value: super::BrokerId) -> Self {
@@ -455,7 +455,7 @@ impl PartitionData {
     }
     /// Sets `leader_epoch` to the passed value.
     ///
-    /// The current epoch
+    /// The current epoch.
     ///
     /// Supported API versions: 0-1
     pub fn with_leader_epoch(mut self, value: i32) -> Self {
@@ -464,7 +464,7 @@ impl PartitionData {
     }
     /// Sets `preferred_successors` to the passed value.
     ///
-    /// A sorted list of preferred successors to start the election
+    /// A sorted list of preferred successors to start the election.
     ///
     /// Supported API versions: 0
     pub fn with_preferred_successors(mut self, value: Vec<i32>) -> Self {
@@ -473,7 +473,7 @@ impl PartitionData {
     }
     /// Sets `preferred_candidates` to the passed value.
     ///
-    /// A sorted list of preferred candidates to start the election
+    /// A sorted list of preferred candidates to start the election.
     ///
     /// Supported API versions: 1
     pub fn with_preferred_candidates(mut self, value: Vec<ReplicaInfo>) -> Self {
@@ -612,12 +612,12 @@ impl Message for PartitionData {
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct ReplicaInfo {
-    ///
+    /// The ID of the candidate replica.
     ///
     /// Supported API versions: 1
     pub candidate_id: super::BrokerId,
 
-    ///
+    /// The directory ID of the candidate replica.
     ///
     /// Supported API versions: 1
     pub candidate_directory_id: Uuid,
@@ -629,7 +629,7 @@ pub struct ReplicaInfo {
 impl ReplicaInfo {
     /// Sets `candidate_id` to the passed value.
     ///
-    ///
+    /// The ID of the candidate replica.
     ///
     /// Supported API versions: 1
     pub fn with_candidate_id(mut self, value: super::BrokerId) -> Self {
@@ -638,7 +638,7 @@ impl ReplicaInfo {
     }
     /// Sets `candidate_directory_id` to the passed value.
     ///
-    ///
+    /// The directory ID of the candidate replica.
     ///
     /// Supported API versions: 1
     pub fn with_candidate_directory_id(mut self, value: Uuid) -> Self {
@@ -781,7 +781,7 @@ pub struct TopicData {
     /// Supported API versions: 0-1
     pub topic_name: super::TopicName,
 
-    ///
+    /// The partitions.
     ///
     /// Supported API versions: 0-1
     pub partitions: Vec<PartitionData>,
@@ -802,7 +802,7 @@ impl TopicData {
     }
     /// Sets `partitions` to the passed value.
     ///
-    ///
+    /// The partitions.
     ///
     /// Supported API versions: 0-1
     pub fn with_partitions(mut self, value: Vec<PartitionData>) -> Self {

@@ -12,6 +12,7 @@ use testcontainers::{
     runners::SyncRunner,
     Container, GenericImage, ImageExt,
 };
+use kafka_protocol::protocol::encode_request_header_into_buffer;
 
 pub fn start_kafka() -> Container<GenericImage> {
     GenericImage::new("bitnami/kafka", "3.6.1-debian-11-r24")
@@ -48,9 +49,7 @@ pub fn send_request<T: Encodable + HeaderVersion>(
 ) {
     let mut bytes = BytesMut::new();
 
-    header
-        .encode(&mut bytes, T::header_version(header.request_api_version))
-        .unwrap();
+    encode_request_header_into_buffer(&mut bytes, &header).unwrap();
     body.encode(&mut bytes, header.request_api_version).unwrap();
 
     let size = bytes.len() as i32;

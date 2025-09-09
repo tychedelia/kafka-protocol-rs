@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.16.0
+
+- Added support for kafka 4.0
+  - deprecated message types were removed in kafka 4.0 and those types have also been removed from this crate.
+  - removed support for message sets v0 and v1
+
 ## 0.15.1
 
 - Ensure bytes dependency is at least 0.10.1
