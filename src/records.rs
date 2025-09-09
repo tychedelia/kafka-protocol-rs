@@ -983,7 +983,7 @@ mod tests {
 
         Record::decode_new(
             &mut buf,
-            &BatchDecodeInfo{
+            &BatchDecodeInfo {
                 record_count: 1,
                 timestamp_type: TimestampType::Creation,
                 min_offset: 0,
@@ -996,6 +996,7 @@ mod tests {
                 producer_epoch: 0,
             },
             2,
-        ).expect("decode works");
+        )
+        .expect("decode works");
     }
 }

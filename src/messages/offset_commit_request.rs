@@ -497,6 +497,11 @@ pub struct OffsetCommitRequestTopic {
     /// Supported API versions: 2-9
     pub name: super::TopicName,
 
+    /// The topic ID.
+    ///
+    /// Supported API versions: none
+    pub topic_id: Uuid,
+
     /// Each partition to commit offsets for.
     ///
     /// Supported API versions: 2-9
@@ -514,6 +519,15 @@ impl OffsetCommitRequestTopic {
     /// Supported API versions: 2-9
     pub fn with_name(mut self, value: super::TopicName) -> Self {
         self.name = value;
+        self
+    }
+    /// Sets `topic_id` to the passed value.
+    ///
+    /// The topic ID.
+    ///
+    /// Supported API versions: none
+    pub fn with_topic_id(mut self, value: Uuid) -> Self {
+        self.topic_id = value;
         self
     }
     /// Sets `partitions` to the passed value.
@@ -607,6 +621,7 @@ impl Decodable for OffsetCommitRequestTopic {
         } else {
             types::String.decode(buf)?
         };
+        let topic_id = Uuid::nil();
         let partitions = if version >= 8 {
             types::CompactArray(types::Struct { version }).decode(buf)?
         } else {
@@ -624,6 +639,7 @@ impl Decodable for OffsetCommitRequestTopic {
         }
         Ok(Self {
             name,
+            topic_id,
             partitions,
             unknown_tagged_fields,
         })
@@ -634,6 +650,7 @@ impl Default for OffsetCommitRequestTopic {
     fn default() -> Self {
         Self {
             name: Default::default(),
+            topic_id: Uuid::nil(),
             partitions: Default::default(),
             unknown_tagged_fields: BTreeMap::new(),
         }
