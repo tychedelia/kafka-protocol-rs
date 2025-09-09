@@ -17,18 +17,18 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 3-12
+/// Valid versions: 3-13
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct BatchIndexAndErrorMessage {
     /// The batch index of the record that caused the batch to be dropped.
     ///
-    /// Supported API versions: 8-12
+    /// Supported API versions: 8-13
     pub batch_index: i32,
 
     /// The error message of the record that caused the batch to be dropped.
     ///
-    /// Supported API versions: 8-12
+    /// Supported API versions: 8-13
     pub batch_index_error_message: Option<StrBytes>,
 
     /// Other tagged fields
@@ -40,7 +40,7 @@ impl BatchIndexAndErrorMessage {
     ///
     /// The batch index of the record that caused the batch to be dropped.
     ///
-    /// Supported API versions: 8-12
+    /// Supported API versions: 8-13
     pub fn with_batch_index(mut self, value: i32) -> Self {
         self.batch_index = value;
         self
@@ -49,7 +49,7 @@ impl BatchIndexAndErrorMessage {
     ///
     /// The error message of the record that caused the batch to be dropped.
     ///
-    /// Supported API versions: 8-12
+    /// Supported API versions: 8-13
     pub fn with_batch_index_error_message(mut self, value: Option<StrBytes>) -> Self {
         self.batch_index_error_message = value;
         self
@@ -69,7 +69,7 @@ impl BatchIndexAndErrorMessage {
 #[cfg(feature = "broker")]
 impl Encodable for BatchIndexAndErrorMessage {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 3 || version > 12 {
+        if version < 3 || version > 13 {
             bail!("specified version not supported by this message type");
         }
         if version >= 8 {
@@ -143,7 +143,7 @@ impl Encodable for BatchIndexAndErrorMessage {
 #[cfg(feature = "client")]
 impl Decodable for BatchIndexAndErrorMessage {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 3 || version > 12 {
+        if version < 3 || version > 13 {
             bail!("specified version not supported by this message type");
         }
         let batch_index = if version >= 8 {
@@ -189,22 +189,22 @@ impl Default for BatchIndexAndErrorMessage {
 }
 
 impl Message for BatchIndexAndErrorMessage {
-    const VERSIONS: VersionRange = VersionRange { min: 3, max: 12 };
+    const VERSIONS: VersionRange = VersionRange { min: 3, max: 13 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 3-12
+/// Valid versions: 3-13
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct LeaderIdAndEpoch {
     /// The ID of the current leader or -1 if the leader is unknown.
     ///
-    /// Supported API versions: 10-12
+    /// Supported API versions: 10-13
     pub leader_id: super::BrokerId,
 
     /// The latest known leader epoch.
     ///
-    /// Supported API versions: 10-12
+    /// Supported API versions: 10-13
     pub leader_epoch: i32,
 
     /// Other tagged fields
@@ -216,7 +216,7 @@ impl LeaderIdAndEpoch {
     ///
     /// The ID of the current leader or -1 if the leader is unknown.
     ///
-    /// Supported API versions: 10-12
+    /// Supported API versions: 10-13
     pub fn with_leader_id(mut self, value: super::BrokerId) -> Self {
         self.leader_id = value;
         self
@@ -225,7 +225,7 @@ impl LeaderIdAndEpoch {
     ///
     /// The latest known leader epoch.
     ///
-    /// Supported API versions: 10-12
+    /// Supported API versions: 10-13
     pub fn with_leader_epoch(mut self, value: i32) -> Self {
         self.leader_epoch = value;
         self
@@ -245,7 +245,7 @@ impl LeaderIdAndEpoch {
 #[cfg(feature = "broker")]
 impl Encodable for LeaderIdAndEpoch {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 3 || version > 12 {
+        if version < 3 || version > 13 {
             bail!("specified version not supported by this message type");
         }
         if version >= 10 {
@@ -311,7 +311,7 @@ impl Encodable for LeaderIdAndEpoch {
 #[cfg(feature = "client")]
 impl Decodable for LeaderIdAndEpoch {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 3 || version > 12 {
+        if version < 3 || version > 13 {
             bail!("specified version not supported by this message type");
         }
         let leader_id = if version >= 10 {
@@ -353,32 +353,32 @@ impl Default for LeaderIdAndEpoch {
 }
 
 impl Message for LeaderIdAndEpoch {
-    const VERSIONS: VersionRange = VersionRange { min: 3, max: 12 };
+    const VERSIONS: VersionRange = VersionRange { min: 3, max: 13 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 3-12
+/// Valid versions: 3-13
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct NodeEndpoint {
     /// The ID of the associated node.
     ///
-    /// Supported API versions: 10-12
+    /// Supported API versions: 10-13
     pub node_id: super::BrokerId,
 
     /// The node's hostname.
     ///
-    /// Supported API versions: 10-12
+    /// Supported API versions: 10-13
     pub host: StrBytes,
 
     /// The node's port.
     ///
-    /// Supported API versions: 10-12
+    /// Supported API versions: 10-13
     pub port: i32,
 
     /// The rack of the node, or null if it has not been assigned to a rack.
     ///
-    /// Supported API versions: 10-12
+    /// Supported API versions: 10-13
     pub rack: Option<StrBytes>,
 
     /// Other tagged fields
@@ -390,7 +390,7 @@ impl NodeEndpoint {
     ///
     /// The ID of the associated node.
     ///
-    /// Supported API versions: 10-12
+    /// Supported API versions: 10-13
     pub fn with_node_id(mut self, value: super::BrokerId) -> Self {
         self.node_id = value;
         self
@@ -399,7 +399,7 @@ impl NodeEndpoint {
     ///
     /// The node's hostname.
     ///
-    /// Supported API versions: 10-12
+    /// Supported API versions: 10-13
     pub fn with_host(mut self, value: StrBytes) -> Self {
         self.host = value;
         self
@@ -408,7 +408,7 @@ impl NodeEndpoint {
     ///
     /// The node's port.
     ///
-    /// Supported API versions: 10-12
+    /// Supported API versions: 10-13
     pub fn with_port(mut self, value: i32) -> Self {
         self.port = value;
         self
@@ -417,7 +417,7 @@ impl NodeEndpoint {
     ///
     /// The rack of the node, or null if it has not been assigned to a rack.
     ///
-    /// Supported API versions: 10-12
+    /// Supported API versions: 10-13
     pub fn with_rack(mut self, value: Option<StrBytes>) -> Self {
         self.rack = value;
         self
@@ -437,7 +437,7 @@ impl NodeEndpoint {
 #[cfg(feature = "broker")]
 impl Encodable for NodeEndpoint {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 3 || version > 12 {
+        if version < 3 || version > 13 {
             bail!("specified version not supported by this message type");
         }
         if version >= 10 {
@@ -531,7 +531,7 @@ impl Encodable for NodeEndpoint {
 #[cfg(feature = "client")]
 impl Decodable for NodeEndpoint {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 3 || version > 12 {
+        if version < 3 || version > 13 {
             bail!("specified version not supported by this message type");
         }
         let node_id = if version >= 10 {
@@ -587,52 +587,52 @@ impl Default for NodeEndpoint {
 }
 
 impl Message for NodeEndpoint {
-    const VERSIONS: VersionRange = VersionRange { min: 3, max: 12 };
+    const VERSIONS: VersionRange = VersionRange { min: 3, max: 13 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 3-12
+/// Valid versions: 3-13
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct PartitionProduceResponse {
     /// The partition index.
     ///
-    /// Supported API versions: 3-12
+    /// Supported API versions: 3-13
     pub index: i32,
 
     /// The error code, or 0 if there was no error.
     ///
-    /// Supported API versions: 3-12
+    /// Supported API versions: 3-13
     pub error_code: i16,
 
     /// The base offset.
     ///
-    /// Supported API versions: 3-12
+    /// Supported API versions: 3-13
     pub base_offset: i64,
 
     /// The timestamp returned by broker after appending the messages. If CreateTime is used for the topic, the timestamp will be -1.  If LogAppendTime is used for the topic, the timestamp will be the broker local time when the messages are appended.
     ///
-    /// Supported API versions: 3-12
+    /// Supported API versions: 3-13
     pub log_append_time_ms: i64,
 
     /// The log start offset.
     ///
-    /// Supported API versions: 5-12
+    /// Supported API versions: 5-13
     pub log_start_offset: i64,
 
     /// The batch indices of records that caused the batch to be dropped.
     ///
-    /// Supported API versions: 8-12
+    /// Supported API versions: 8-13
     pub record_errors: Vec<BatchIndexAndErrorMessage>,
 
     /// The global error message summarizing the common root cause of the records that caused the batch to be dropped.
     ///
-    /// Supported API versions: 8-12
+    /// Supported API versions: 8-13
     pub error_message: Option<StrBytes>,
 
     /// The leader broker that the producer should use for future requests.
     ///
-    /// Supported API versions: 10-12
+    /// Supported API versions: 10-13
     pub current_leader: LeaderIdAndEpoch,
 
     /// Other tagged fields
@@ -644,7 +644,7 @@ impl PartitionProduceResponse {
     ///
     /// The partition index.
     ///
-    /// Supported API versions: 3-12
+    /// Supported API versions: 3-13
     pub fn with_index(mut self, value: i32) -> Self {
         self.index = value;
         self
@@ -653,7 +653,7 @@ impl PartitionProduceResponse {
     ///
     /// The error code, or 0 if there was no error.
     ///
-    /// Supported API versions: 3-12
+    /// Supported API versions: 3-13
     pub fn with_error_code(mut self, value: i16) -> Self {
         self.error_code = value;
         self
@@ -662,7 +662,7 @@ impl PartitionProduceResponse {
     ///
     /// The base offset.
     ///
-    /// Supported API versions: 3-12
+    /// Supported API versions: 3-13
     pub fn with_base_offset(mut self, value: i64) -> Self {
         self.base_offset = value;
         self
@@ -671,7 +671,7 @@ impl PartitionProduceResponse {
     ///
     /// The timestamp returned by broker after appending the messages. If CreateTime is used for the topic, the timestamp will be -1.  If LogAppendTime is used for the topic, the timestamp will be the broker local time when the messages are appended.
     ///
-    /// Supported API versions: 3-12
+    /// Supported API versions: 3-13
     pub fn with_log_append_time_ms(mut self, value: i64) -> Self {
         self.log_append_time_ms = value;
         self
@@ -680,7 +680,7 @@ impl PartitionProduceResponse {
     ///
     /// The log start offset.
     ///
-    /// Supported API versions: 5-12
+    /// Supported API versions: 5-13
     pub fn with_log_start_offset(mut self, value: i64) -> Self {
         self.log_start_offset = value;
         self
@@ -689,7 +689,7 @@ impl PartitionProduceResponse {
     ///
     /// The batch indices of records that caused the batch to be dropped.
     ///
-    /// Supported API versions: 8-12
+    /// Supported API versions: 8-13
     pub fn with_record_errors(mut self, value: Vec<BatchIndexAndErrorMessage>) -> Self {
         self.record_errors = value;
         self
@@ -698,7 +698,7 @@ impl PartitionProduceResponse {
     ///
     /// The global error message summarizing the common root cause of the records that caused the batch to be dropped.
     ///
-    /// Supported API versions: 8-12
+    /// Supported API versions: 8-13
     pub fn with_error_message(mut self, value: Option<StrBytes>) -> Self {
         self.error_message = value;
         self
@@ -707,7 +707,7 @@ impl PartitionProduceResponse {
     ///
     /// The leader broker that the producer should use for future requests.
     ///
-    /// Supported API versions: 10-12
+    /// Supported API versions: 10-13
     pub fn with_current_leader(mut self, value: LeaderIdAndEpoch) -> Self {
         self.current_leader = value;
         self
@@ -727,7 +727,7 @@ impl PartitionProduceResponse {
 #[cfg(feature = "broker")]
 impl Encodable for PartitionProduceResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 3 || version > 12 {
+        if version < 3 || version > 13 {
             bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.index)?;
@@ -847,7 +847,7 @@ impl Encodable for PartitionProduceResponse {
 #[cfg(feature = "client")]
 impl Decodable for PartitionProduceResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 3 || version > 12 {
+        if version < 3 || version > 13 {
             bail!("specified version not supported by this message type");
         }
         let index = types::Int32.decode(buf)?;
@@ -930,27 +930,27 @@ impl Default for PartitionProduceResponse {
 }
 
 impl Message for PartitionProduceResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 3, max: 12 };
+    const VERSIONS: VersionRange = VersionRange { min: 3, max: 13 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 3-12
+/// Valid versions: 3-13
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct ProduceResponse {
     /// Each produce response.
     ///
-    /// Supported API versions: 3-12
+    /// Supported API versions: 3-13
     pub responses: Vec<TopicProduceResponse>,
 
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 3-12
+    /// Supported API versions: 3-13
     pub throttle_time_ms: i32,
 
     /// Endpoints for all current-leaders enumerated in PartitionProduceResponses, with errors NOT_LEADER_OR_FOLLOWER.
     ///
-    /// Supported API versions: 10-12
+    /// Supported API versions: 10-13
     pub node_endpoints: Vec<NodeEndpoint>,
 
     /// Other tagged fields
@@ -962,7 +962,7 @@ impl ProduceResponse {
     ///
     /// Each produce response.
     ///
-    /// Supported API versions: 3-12
+    /// Supported API versions: 3-13
     pub fn with_responses(mut self, value: Vec<TopicProduceResponse>) -> Self {
         self.responses = value;
         self
@@ -971,7 +971,7 @@ impl ProduceResponse {
     ///
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 3-12
+    /// Supported API versions: 3-13
     pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
         self.throttle_time_ms = value;
         self
@@ -980,7 +980,7 @@ impl ProduceResponse {
     ///
     /// Endpoints for all current-leaders enumerated in PartitionProduceResponses, with errors NOT_LEADER_OR_FOLLOWER.
     ///
-    /// Supported API versions: 10-12
+    /// Supported API versions: 10-13
     pub fn with_node_endpoints(mut self, value: Vec<NodeEndpoint>) -> Self {
         self.node_endpoints = value;
         self
@@ -1000,7 +1000,7 @@ impl ProduceResponse {
 #[cfg(feature = "broker")]
 impl Encodable for ProduceResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 3 || version > 12 {
+        if version < 3 || version > 13 {
             bail!("specified version not supported by this message type");
         }
         if version >= 9 {
@@ -1090,7 +1090,7 @@ impl Encodable for ProduceResponse {
 #[cfg(feature = "client")]
 impl Decodable for ProduceResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 3 || version > 12 {
+        if version < 3 || version > 13 {
             bail!("specified version not supported by this message type");
         }
         let responses = if version >= 9 {
@@ -1143,11 +1143,11 @@ impl Default for ProduceResponse {
 }
 
 impl Message for ProduceResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 3, max: 12 };
+    const VERSIONS: VersionRange = VersionRange { min: 3, max: 13 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 3-12
+/// Valid versions: 3-13
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct TopicProduceResponse {
@@ -1156,9 +1156,14 @@ pub struct TopicProduceResponse {
     /// Supported API versions: 3-12
     pub name: super::TopicName,
 
+    /// The unique topic ID
+    ///
+    /// Supported API versions: 13
+    pub topic_id: Uuid,
+
     /// Each partition that we produced to within the topic.
     ///
-    /// Supported API versions: 3-12
+    /// Supported API versions: 3-13
     pub partition_responses: Vec<PartitionProduceResponse>,
 
     /// Other tagged fields
@@ -1175,11 +1180,20 @@ impl TopicProduceResponse {
         self.name = value;
         self
     }
+    /// Sets `topic_id` to the passed value.
+    ///
+    /// The unique topic ID
+    ///
+    /// Supported API versions: 13
+    pub fn with_topic_id(mut self, value: Uuid) -> Self {
+        self.topic_id = value;
+        self
+    }
     /// Sets `partition_responses` to the passed value.
     ///
     /// Each partition that we produced to within the topic.
     ///
-    /// Supported API versions: 3-12
+    /// Supported API versions: 3-13
     pub fn with_partition_responses(mut self, value: Vec<PartitionProduceResponse>) -> Self {
         self.partition_responses = value;
         self
@@ -1199,13 +1213,18 @@ impl TopicProduceResponse {
 #[cfg(feature = "broker")]
 impl Encodable for TopicProduceResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 3 || version > 12 {
+        if version < 3 || version > 13 {
             bail!("specified version not supported by this message type");
         }
-        if version >= 9 {
-            types::CompactString.encode(buf, &self.name)?;
-        } else {
-            types::String.encode(buf, &self.name)?;
+        if version <= 12 {
+            if version >= 9 {
+                types::CompactString.encode(buf, &self.name)?;
+            } else {
+                types::String.encode(buf, &self.name)?;
+            }
+        }
+        if version >= 13 {
+            types::Uuid.encode(buf, &self.topic_id)?;
         }
         if version >= 9 {
             types::CompactArray(types::Struct { version })
@@ -1229,10 +1248,15 @@ impl Encodable for TopicProduceResponse {
     }
     fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
-        if version >= 9 {
-            total_size += types::CompactString.compute_size(&self.name)?;
-        } else {
-            total_size += types::String.compute_size(&self.name)?;
+        if version <= 12 {
+            if version >= 9 {
+                total_size += types::CompactString.compute_size(&self.name)?;
+            } else {
+                total_size += types::String.compute_size(&self.name)?;
+            }
+        }
+        if version >= 13 {
+            total_size += types::Uuid.compute_size(&self.topic_id)?;
         }
         if version >= 9 {
             total_size += types::CompactArray(types::Struct { version })
@@ -1260,13 +1284,22 @@ impl Encodable for TopicProduceResponse {
 #[cfg(feature = "client")]
 impl Decodable for TopicProduceResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 3 || version > 12 {
+        if version < 3 || version > 13 {
             bail!("specified version not supported by this message type");
         }
-        let name = if version >= 9 {
-            types::CompactString.decode(buf)?
+        let name = if version <= 12 {
+            if version >= 9 {
+                types::CompactString.decode(buf)?
+            } else {
+                types::String.decode(buf)?
+            }
         } else {
-            types::String.decode(buf)?
+            Default::default()
+        };
+        let topic_id = if version >= 13 {
+            types::Uuid.decode(buf)?
+        } else {
+            Uuid::nil()
         };
         let partition_responses = if version >= 9 {
             types::CompactArray(types::Struct { version }).decode(buf)?
@@ -1285,6 +1318,7 @@ impl Decodable for TopicProduceResponse {
         }
         Ok(Self {
             name,
+            topic_id,
             partition_responses,
             unknown_tagged_fields,
         })
@@ -1295,6 +1329,7 @@ impl Default for TopicProduceResponse {
     fn default() -> Self {
         Self {
             name: Default::default(),
+            topic_id: Uuid::nil(),
             partition_responses: Default::default(),
             unknown_tagged_fields: BTreeMap::new(),
         }
@@ -1302,7 +1337,7 @@ impl Default for TopicProduceResponse {
 }
 
 impl Message for TopicProduceResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 3, max: 12 };
+    const VERSIONS: VersionRange = VersionRange { min: 3, max: 13 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 

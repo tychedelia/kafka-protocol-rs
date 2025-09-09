@@ -1,6 +1,6 @@
-//! ListClientMetricsResourcesResponse
+//! DeleteShareGroupStateResponse
 //!
-//! See the schema for this message [here](https://github.com/apache/kafka/blob/trunk/clients/src/main/resources/common/message/ListClientMetricsResourcesResponse.json).
+//! See the schema for this message [here](https://github.com/apache/kafka/blob/trunk/clients/src/main/resources/common/message/DeleteShareGroupStateResponse.json).
 // WARNING: the items of this module are generated and should not be edited directly
 #![allow(unused)]
 
@@ -20,24 +20,24 @@ use crate::protocol::{
 /// Valid versions: 0
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
-pub struct ClientMetricsResource {
-    /// The resource name.
+pub struct DeleteShareGroupStateResponse {
+    /// The delete results.
     ///
     /// Supported API versions: 0
-    pub name: StrBytes,
+    pub results: Vec<DeleteStateResult>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl ClientMetricsResource {
-    /// Sets `name` to the passed value.
+impl DeleteShareGroupStateResponse {
+    /// Sets `results` to the passed value.
     ///
-    /// The resource name.
+    /// The delete results.
     ///
     /// Supported API versions: 0
-    pub fn with_name(mut self, value: StrBytes) -> Self {
-        self.name = value;
+    pub fn with_results(mut self, value: Vec<DeleteStateResult>) -> Self {
+        self.results = value;
         self
     }
     /// Sets unknown_tagged_fields to the passed value.
@@ -53,12 +53,12 @@ impl ClientMetricsResource {
 }
 
 #[cfg(feature = "broker")]
-impl Encodable for ClientMetricsResource {
+impl Encodable for DeleteShareGroupStateResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
             bail!("specified version not supported by this message type");
         }
-        types::CompactString.encode(buf, &self.name)?;
+        types::CompactArray(types::Struct { version }).encode(buf, &self.results)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             bail!(
@@ -73,7 +73,7 @@ impl Encodable for ClientMetricsResource {
     }
     fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
-        total_size += types::CompactString.compute_size(&self.name)?;
+        total_size += types::CompactArray(types::Struct { version }).compute_size(&self.results)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             bail!(
@@ -89,12 +89,12 @@ impl Encodable for ClientMetricsResource {
 }
 
 #[cfg(feature = "client")]
-impl Decodable for ClientMetricsResource {
+impl Decodable for DeleteShareGroupStateResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
             bail!("specified version not supported by this message type");
         }
-        let name = types::CompactString.decode(buf)?;
+        let results = types::CompactArray(types::Struct { version }).decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
         let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
         for _ in 0..num_tagged_fields {
@@ -104,22 +104,22 @@ impl Decodable for ClientMetricsResource {
             unknown_tagged_fields.insert(tag as i32, unknown_value);
         }
         Ok(Self {
-            name,
+            results,
             unknown_tagged_fields,
         })
     }
 }
 
-impl Default for ClientMetricsResource {
+impl Default for DeleteShareGroupStateResponse {
     fn default() -> Self {
         Self {
-            name: Default::default(),
+            results: Default::default(),
             unknown_tagged_fields: BTreeMap::new(),
         }
     }
 }
 
-impl Message for ClientMetricsResource {
+impl Message for DeleteShareGroupStateResponse {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 0 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
@@ -127,34 +127,161 @@ impl Message for ClientMetricsResource {
 /// Valid versions: 0
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
-pub struct ListClientMetricsResourcesResponse {
-    /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
+pub struct DeleteStateResult {
+    /// The topic identifier.
     ///
     /// Supported API versions: 0
-    pub throttle_time_ms: i32,
+    pub topic_id: Uuid,
+
+    /// The results for the partitions.
+    ///
+    /// Supported API versions: 0
+    pub partitions: Vec<PartitionResult>,
+
+    /// Other tagged fields
+    pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
+}
+
+impl DeleteStateResult {
+    /// Sets `topic_id` to the passed value.
+    ///
+    /// The topic identifier.
+    ///
+    /// Supported API versions: 0
+    pub fn with_topic_id(mut self, value: Uuid) -> Self {
+        self.topic_id = value;
+        self
+    }
+    /// Sets `partitions` to the passed value.
+    ///
+    /// The results for the partitions.
+    ///
+    /// Supported API versions: 0
+    pub fn with_partitions(mut self, value: Vec<PartitionResult>) -> Self {
+        self.partitions = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
+    }
+}
+
+#[cfg(feature = "broker")]
+impl Encodable for DeleteStateResult {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!("specified version not supported by this message type");
+        }
+        types::Uuid.encode(buf, &self.topic_id)?;
+        types::CompactArray(types::Struct { version }).encode(buf, &self.partitions)?;
+        let num_tagged_fields = self.unknown_tagged_fields.len();
+        if num_tagged_fields > std::u32::MAX as usize {
+            bail!(
+                "Too many tagged fields to encode ({} fields)",
+                num_tagged_fields
+            );
+        }
+        types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+
+        write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
+        Ok(())
+    }
+    fn compute_size(&self, version: i16) -> Result<usize> {
+        let mut total_size = 0;
+        total_size += types::Uuid.compute_size(&self.topic_id)?;
+        total_size +=
+            types::CompactArray(types::Struct { version }).compute_size(&self.partitions)?;
+        let num_tagged_fields = self.unknown_tagged_fields.len();
+        if num_tagged_fields > std::u32::MAX as usize {
+            bail!(
+                "Too many tagged fields to encode ({} fields)",
+                num_tagged_fields
+            );
+        }
+        total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
+
+        total_size += compute_unknown_tagged_fields_size(&self.unknown_tagged_fields)?;
+        Ok(total_size)
+    }
+}
+
+#[cfg(feature = "client")]
+impl Decodable for DeleteStateResult {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!("specified version not supported by this message type");
+        }
+        let topic_id = types::Uuid.decode(buf)?;
+        let partitions = types::CompactArray(types::Struct { version }).decode(buf)?;
+        let mut unknown_tagged_fields = BTreeMap::new();
+        let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
+        for _ in 0..num_tagged_fields {
+            let tag: u32 = types::UnsignedVarInt.decode(buf)?;
+            let size: u32 = types::UnsignedVarInt.decode(buf)?;
+            let unknown_value = buf.try_get_bytes(size as usize)?;
+            unknown_tagged_fields.insert(tag as i32, unknown_value);
+        }
+        Ok(Self {
+            topic_id,
+            partitions,
+            unknown_tagged_fields,
+        })
+    }
+}
+
+impl Default for DeleteStateResult {
+    fn default() -> Self {
+        Self {
+            topic_id: Uuid::nil(),
+            partitions: Default::default(),
+            unknown_tagged_fields: BTreeMap::new(),
+        }
+    }
+}
+
+impl Message for DeleteStateResult {
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 0 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
+}
+
+/// Valid versions: 0
+#[non_exhaustive]
+#[derive(Debug, Clone, PartialEq)]
+pub struct PartitionResult {
+    /// The partition index.
+    ///
+    /// Supported API versions: 0
+    pub partition: i32,
 
     /// The error code, or 0 if there was no error.
     ///
     /// Supported API versions: 0
     pub error_code: i16,
 
-    /// Each client metrics resource in the response.
+    /// The error message, or null if there was no error.
     ///
     /// Supported API versions: 0
-    pub client_metrics_resources: Vec<ClientMetricsResource>,
+    pub error_message: Option<StrBytes>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl ListClientMetricsResourcesResponse {
-    /// Sets `throttle_time_ms` to the passed value.
+impl PartitionResult {
+    /// Sets `partition` to the passed value.
     ///
-    /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
+    /// The partition index.
     ///
     /// Supported API versions: 0
-    pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
-        self.throttle_time_ms = value;
+    pub fn with_partition(mut self, value: i32) -> Self {
+        self.partition = value;
         self
     }
     /// Sets `error_code` to the passed value.
@@ -166,13 +293,13 @@ impl ListClientMetricsResourcesResponse {
         self.error_code = value;
         self
     }
-    /// Sets `client_metrics_resources` to the passed value.
+    /// Sets `error_message` to the passed value.
     ///
-    /// Each client metrics resource in the response.
+    /// The error message, or null if there was no error.
     ///
     /// Supported API versions: 0
-    pub fn with_client_metrics_resources(mut self, value: Vec<ClientMetricsResource>) -> Self {
-        self.client_metrics_resources = value;
+    pub fn with_error_message(mut self, value: Option<StrBytes>) -> Self {
+        self.error_message = value;
         self
     }
     /// Sets unknown_tagged_fields to the passed value.
@@ -188,15 +315,14 @@ impl ListClientMetricsResourcesResponse {
 }
 
 #[cfg(feature = "broker")]
-impl Encodable for ListClientMetricsResourcesResponse {
+impl Encodable for PartitionResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
         if version != 0 {
             bail!("specified version not supported by this message type");
         }
-        types::Int32.encode(buf, &self.throttle_time_ms)?;
+        types::Int32.encode(buf, &self.partition)?;
         types::Int16.encode(buf, &self.error_code)?;
-        types::CompactArray(types::Struct { version })
-            .encode(buf, &self.client_metrics_resources)?;
+        types::CompactString.encode(buf, &self.error_message)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             bail!(
@@ -211,10 +337,9 @@ impl Encodable for ListClientMetricsResourcesResponse {
     }
     fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
-        total_size += types::Int32.compute_size(&self.throttle_time_ms)?;
+        total_size += types::Int32.compute_size(&self.partition)?;
         total_size += types::Int16.compute_size(&self.error_code)?;
-        total_size += types::CompactArray(types::Struct { version })
-            .compute_size(&self.client_metrics_resources)?;
+        total_size += types::CompactString.compute_size(&self.error_message)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             bail!(
@@ -230,15 +355,14 @@ impl Encodable for ListClientMetricsResourcesResponse {
 }
 
 #[cfg(feature = "client")]
-impl Decodable for ListClientMetricsResourcesResponse {
+impl Decodable for PartitionResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
         if version != 0 {
             bail!("specified version not supported by this message type");
         }
-        let throttle_time_ms = types::Int32.decode(buf)?;
+        let partition = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
-        let client_metrics_resources =
-            types::CompactArray(types::Struct { version }).decode(buf)?;
+        let error_message = types::CompactString.decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
         let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
         for _ in 0..num_tagged_fields {
@@ -248,31 +372,31 @@ impl Decodable for ListClientMetricsResourcesResponse {
             unknown_tagged_fields.insert(tag as i32, unknown_value);
         }
         Ok(Self {
-            throttle_time_ms,
+            partition,
             error_code,
-            client_metrics_resources,
+            error_message,
             unknown_tagged_fields,
         })
     }
 }
 
-impl Default for ListClientMetricsResourcesResponse {
+impl Default for PartitionResult {
     fn default() -> Self {
         Self {
-            throttle_time_ms: 0,
+            partition: 0,
             error_code: 0,
-            client_metrics_resources: Default::default(),
+            error_message: None,
             unknown_tagged_fields: BTreeMap::new(),
         }
     }
 }
 
-impl Message for ListClientMetricsResourcesResponse {
+impl Message for PartitionResult {
     const VERSIONS: VersionRange = VersionRange { min: 0, max: 0 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-impl HeaderVersion for ListClientMetricsResourcesResponse {
+impl HeaderVersion for DeleteShareGroupStateResponse {
     fn header_version(version: i16) -> i16 {
         1
     }

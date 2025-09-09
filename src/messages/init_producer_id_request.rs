@@ -41,6 +41,16 @@ pub struct InitProducerIdRequest {
     /// Supported API versions: 3-5
     pub producer_epoch: i16,
 
+    /// True if the client wants to enable two-phase commit (2PC) protocol for transactions.
+    ///
+    /// Supported API versions: none
+    pub enable_2_pc: bool,
+
+    /// True if the client wants to keep the currently ongoing transaction instead of aborting it.
+    ///
+    /// Supported API versions: none
+    pub keep_prepared_txn: bool,
+
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
@@ -80,6 +90,24 @@ impl InitProducerIdRequest {
     /// Supported API versions: 3-5
     pub fn with_producer_epoch(mut self, value: i16) -> Self {
         self.producer_epoch = value;
+        self
+    }
+    /// Sets `enable_2_pc` to the passed value.
+    ///
+    /// True if the client wants to enable two-phase commit (2PC) protocol for transactions.
+    ///
+    /// Supported API versions: none
+    pub fn with_enable_2_pc(mut self, value: bool) -> Self {
+        self.enable_2_pc = value;
+        self
+    }
+    /// Sets `keep_prepared_txn` to the passed value.
+    ///
+    /// True if the client wants to keep the currently ongoing transaction instead of aborting it.
+    ///
+    /// Supported API versions: none
+    pub fn with_keep_prepared_txn(mut self, value: bool) -> Self {
+        self.keep_prepared_txn = value;
         self
     }
     /// Sets unknown_tagged_fields to the passed value.
@@ -194,6 +222,8 @@ impl Decodable for InitProducerIdRequest {
         } else {
             -1
         };
+        let enable_2_pc = false;
+        let keep_prepared_txn = false;
         let mut unknown_tagged_fields = BTreeMap::new();
         if version >= 2 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
@@ -209,6 +239,8 @@ impl Decodable for InitProducerIdRequest {
             transaction_timeout_ms,
             producer_id,
             producer_epoch,
+            enable_2_pc,
+            keep_prepared_txn,
             unknown_tagged_fields,
         })
     }
@@ -221,6 +253,8 @@ impl Default for InitProducerIdRequest {
             transaction_timeout_ms: 0,
             producer_id: (-1).into(),
             producer_epoch: -1,
+            enable_2_pc: false,
+            keep_prepared_txn: false,
             unknown_tagged_fields: BTreeMap::new(),
         }
     }
