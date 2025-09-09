@@ -17,28 +17,28 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-1
+/// Valid versions: 0-2
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct ListTransactionsResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub throttle_time_ms: i32,
 
     /// The error code, or 0 if there was no error.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub error_code: i16,
 
     /// Set of state filters provided in the request which were unknown to the transaction coordinator.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub unknown_state_filters: Vec<StrBytes>,
 
     /// The current state of the transaction for the transactional id.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub transaction_states: Vec<TransactionState>,
 
     /// Other tagged fields
@@ -50,7 +50,7 @@ impl ListTransactionsResponse {
     ///
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
         self.throttle_time_ms = value;
         self
@@ -59,7 +59,7 @@ impl ListTransactionsResponse {
     ///
     /// The error code, or 0 if there was no error.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub fn with_error_code(mut self, value: i16) -> Self {
         self.error_code = value;
         self
@@ -68,7 +68,7 @@ impl ListTransactionsResponse {
     ///
     /// Set of state filters provided in the request which were unknown to the transaction coordinator.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub fn with_unknown_state_filters(mut self, value: Vec<StrBytes>) -> Self {
         self.unknown_state_filters = value;
         self
@@ -77,7 +77,7 @@ impl ListTransactionsResponse {
     ///
     /// The current state of the transaction for the transactional id.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub fn with_transaction_states(mut self, value: Vec<TransactionState>) -> Self {
         self.transaction_states = value;
         self
@@ -97,7 +97,7 @@ impl ListTransactionsResponse {
 #[cfg(feature = "broker")]
 impl Encodable for ListTransactionsResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 1 {
+        if version < 0 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
@@ -141,7 +141,7 @@ impl Encodable for ListTransactionsResponse {
 #[cfg(feature = "client")]
 impl Decodable for ListTransactionsResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 1 {
+        if version < 0 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         let throttle_time_ms = types::Int32.decode(buf)?;
@@ -179,27 +179,27 @@ impl Default for ListTransactionsResponse {
 }
 
 impl Message for ListTransactionsResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-1
+/// Valid versions: 0-2
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct TransactionState {
     /// The transactional id.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub transactional_id: super::TransactionalId,
 
     /// The producer id.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub producer_id: super::ProducerId,
 
     /// The current transaction state of the producer.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub transaction_state: StrBytes,
 
     /// Other tagged fields
@@ -211,7 +211,7 @@ impl TransactionState {
     ///
     /// The transactional id.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub fn with_transactional_id(mut self, value: super::TransactionalId) -> Self {
         self.transactional_id = value;
         self
@@ -220,7 +220,7 @@ impl TransactionState {
     ///
     /// The producer id.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub fn with_producer_id(mut self, value: super::ProducerId) -> Self {
         self.producer_id = value;
         self
@@ -229,7 +229,7 @@ impl TransactionState {
     ///
     /// The current transaction state of the producer.
     ///
-    /// Supported API versions: 0-1
+    /// Supported API versions: 0-2
     pub fn with_transaction_state(mut self, value: StrBytes) -> Self {
         self.transaction_state = value;
         self
@@ -249,7 +249,7 @@ impl TransactionState {
 #[cfg(feature = "broker")]
 impl Encodable for TransactionState {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 1 {
+        if version < 0 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         types::CompactString.encode(buf, &self.transactional_id)?;
@@ -289,7 +289,7 @@ impl Encodable for TransactionState {
 #[cfg(feature = "client")]
 impl Decodable for TransactionState {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 1 {
+        if version < 0 || version > 2 {
             bail!("specified version not supported by this message type");
         }
         let transactional_id = types::CompactString.decode(buf)?;
@@ -324,7 +324,7 @@ impl Default for TransactionState {
 }
 
 impl Message for TransactionState {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 2 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 

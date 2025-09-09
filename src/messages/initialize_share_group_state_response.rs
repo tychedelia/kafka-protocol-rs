@@ -1,6 +1,6 @@
-//! AlterPartitionReassignmentsRequest
+//! InitializeShareGroupStateResponse
 //!
-//! See the schema for this message [here](https://github.com/apache/kafka/blob/trunk/clients/src/main/resources/common/message/AlterPartitionReassignmentsRequest.json).
+//! See the schema for this message [here](https://github.com/apache/kafka/blob/trunk/clients/src/main/resources/common/message/InitializeShareGroupStateResponse.json).
 // WARNING: the items of this module are generated and should not be edited directly
 #![allow(unused)]
 
@@ -17,55 +17,27 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-1
+/// Valid versions: 0
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
-pub struct AlterPartitionReassignmentsRequest {
-    /// The time in ms to wait for the request to complete.
+pub struct InitializeShareGroupStateResponse {
+    /// The initialization results.
     ///
-    /// Supported API versions: 0-1
-    pub timeout_ms: i32,
-
-    /// The option indicating whether changing the replication factor of any given partition as part of this request is a valid move.
-    ///
-    /// Supported API versions: 1
-    pub allow_replication_factor_change: bool,
-
-    /// The topics to reassign.
-    ///
-    /// Supported API versions: 0-1
-    pub topics: Vec<ReassignableTopic>,
+    /// Supported API versions: 0
+    pub results: Vec<InitializeStateResult>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl AlterPartitionReassignmentsRequest {
-    /// Sets `timeout_ms` to the passed value.
+impl InitializeShareGroupStateResponse {
+    /// Sets `results` to the passed value.
     ///
-    /// The time in ms to wait for the request to complete.
+    /// The initialization results.
     ///
-    /// Supported API versions: 0-1
-    pub fn with_timeout_ms(mut self, value: i32) -> Self {
-        self.timeout_ms = value;
-        self
-    }
-    /// Sets `allow_replication_factor_change` to the passed value.
-    ///
-    /// The option indicating whether changing the replication factor of any given partition as part of this request is a valid move.
-    ///
-    /// Supported API versions: 1
-    pub fn with_allow_replication_factor_change(mut self, value: bool) -> Self {
-        self.allow_replication_factor_change = value;
-        self
-    }
-    /// Sets `topics` to the passed value.
-    ///
-    /// The topics to reassign.
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_topics(mut self, value: Vec<ReassignableTopic>) -> Self {
-        self.topics = value;
+    /// Supported API versions: 0
+    pub fn with_results(mut self, value: Vec<InitializeStateResult>) -> Self {
+        self.results = value;
         self
     }
     /// Sets unknown_tagged_fields to the passed value.
@@ -80,21 +52,13 @@ impl AlterPartitionReassignmentsRequest {
     }
 }
 
-#[cfg(feature = "client")]
-impl Encodable for AlterPartitionReassignmentsRequest {
+#[cfg(feature = "broker")]
+impl Encodable for InitializeShareGroupStateResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 1 {
+        if version != 0 {
             bail!("specified version not supported by this message type");
         }
-        types::Int32.encode(buf, &self.timeout_ms)?;
-        if version >= 1 {
-            types::Boolean.encode(buf, &self.allow_replication_factor_change)?;
-        } else {
-            if !self.allow_replication_factor_change {
-                bail!("A field is set that is not available on the selected protocol version");
-            }
-        }
-        types::CompactArray(types::Struct { version }).encode(buf, &self.topics)?;
+        types::CompactArray(types::Struct { version }).encode(buf, &self.results)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             bail!(
@@ -109,15 +73,7 @@ impl Encodable for AlterPartitionReassignmentsRequest {
     }
     fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
-        total_size += types::Int32.compute_size(&self.timeout_ms)?;
-        if version >= 1 {
-            total_size += types::Boolean.compute_size(&self.allow_replication_factor_change)?;
-        } else {
-            if !self.allow_replication_factor_change {
-                bail!("A field is set that is not available on the selected protocol version");
-            }
-        }
-        total_size += types::CompactArray(types::Struct { version }).compute_size(&self.topics)?;
+        total_size += types::CompactArray(types::Struct { version }).compute_size(&self.results)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
             bail!(
@@ -129,150 +85,16 @@ impl Encodable for AlterPartitionReassignmentsRequest {
 
         total_size += compute_unknown_tagged_fields_size(&self.unknown_tagged_fields)?;
         Ok(total_size)
-    }
-}
-
-#[cfg(feature = "broker")]
-impl Decodable for AlterPartitionReassignmentsRequest {
-    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 1 {
-            bail!("specified version not supported by this message type");
-        }
-        let timeout_ms = types::Int32.decode(buf)?;
-        let allow_replication_factor_change = if version >= 1 {
-            types::Boolean.decode(buf)?
-        } else {
-            true
-        };
-        let topics = types::CompactArray(types::Struct { version }).decode(buf)?;
-        let mut unknown_tagged_fields = BTreeMap::new();
-        let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
-        for _ in 0..num_tagged_fields {
-            let tag: u32 = types::UnsignedVarInt.decode(buf)?;
-            let size: u32 = types::UnsignedVarInt.decode(buf)?;
-            let unknown_value = buf.try_get_bytes(size as usize)?;
-            unknown_tagged_fields.insert(tag as i32, unknown_value);
-        }
-        Ok(Self {
-            timeout_ms,
-            allow_replication_factor_change,
-            topics,
-            unknown_tagged_fields,
-        })
-    }
-}
-
-impl Default for AlterPartitionReassignmentsRequest {
-    fn default() -> Self {
-        Self {
-            timeout_ms: 60000,
-            allow_replication_factor_change: true,
-            topics: Default::default(),
-            unknown_tagged_fields: BTreeMap::new(),
-        }
-    }
-}
-
-impl Message for AlterPartitionReassignmentsRequest {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
-    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
-}
-
-/// Valid versions: 0-1
-#[non_exhaustive]
-#[derive(Debug, Clone, PartialEq)]
-pub struct ReassignablePartition {
-    /// The partition index.
-    ///
-    /// Supported API versions: 0-1
-    pub partition_index: i32,
-
-    /// The replicas to place the partitions on, or null to cancel a pending reassignment for this partition.
-    ///
-    /// Supported API versions: 0-1
-    pub replicas: Option<Vec<super::BrokerId>>,
-
-    /// Other tagged fields
-    pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
-}
-
-impl ReassignablePartition {
-    /// Sets `partition_index` to the passed value.
-    ///
-    /// The partition index.
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_partition_index(mut self, value: i32) -> Self {
-        self.partition_index = value;
-        self
-    }
-    /// Sets `replicas` to the passed value.
-    ///
-    /// The replicas to place the partitions on, or null to cancel a pending reassignment for this partition.
-    ///
-    /// Supported API versions: 0-1
-    pub fn with_replicas(mut self, value: Option<Vec<super::BrokerId>>) -> Self {
-        self.replicas = value;
-        self
-    }
-    /// Sets unknown_tagged_fields to the passed value.
-    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
-        self.unknown_tagged_fields = value;
-        self
-    }
-    /// Inserts an entry into unknown_tagged_fields.
-    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
-        self.unknown_tagged_fields.insert(key, value);
-        self
     }
 }
 
 #[cfg(feature = "client")]
-impl Encodable for ReassignablePartition {
-    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 1 {
-            bail!("specified version not supported by this message type");
-        }
-        types::Int32.encode(buf, &self.partition_index)?;
-        types::CompactArray(types::Int32).encode(buf, &self.replicas)?;
-        let num_tagged_fields = self.unknown_tagged_fields.len();
-        if num_tagged_fields > std::u32::MAX as usize {
-            bail!(
-                "Too many tagged fields to encode ({} fields)",
-                num_tagged_fields
-            );
-        }
-        types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
-
-        write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
-        Ok(())
-    }
-    fn compute_size(&self, version: i16) -> Result<usize> {
-        let mut total_size = 0;
-        total_size += types::Int32.compute_size(&self.partition_index)?;
-        total_size += types::CompactArray(types::Int32).compute_size(&self.replicas)?;
-        let num_tagged_fields = self.unknown_tagged_fields.len();
-        if num_tagged_fields > std::u32::MAX as usize {
-            bail!(
-                "Too many tagged fields to encode ({} fields)",
-                num_tagged_fields
-            );
-        }
-        total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
-
-        total_size += compute_unknown_tagged_fields_size(&self.unknown_tagged_fields)?;
-        Ok(total_size)
-    }
-}
-
-#[cfg(feature = "broker")]
-impl Decodable for ReassignablePartition {
+impl Decodable for InitializeShareGroupStateResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 1 {
+        if version != 0 {
             bail!("specified version not supported by this message type");
         }
-        let partition_index = types::Int32.decode(buf)?;
-        let replicas = types::CompactArray(types::Int32).decode(buf)?;
+        let results = types::CompactArray(types::Struct { version }).decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
         let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
         for _ in 0..num_tagged_fields {
@@ -282,62 +104,60 @@ impl Decodable for ReassignablePartition {
             unknown_tagged_fields.insert(tag as i32, unknown_value);
         }
         Ok(Self {
-            partition_index,
-            replicas,
+            results,
             unknown_tagged_fields,
         })
     }
 }
 
-impl Default for ReassignablePartition {
+impl Default for InitializeShareGroupStateResponse {
     fn default() -> Self {
         Self {
-            partition_index: 0,
-            replicas: None,
+            results: Default::default(),
             unknown_tagged_fields: BTreeMap::new(),
         }
     }
 }
 
-impl Message for ReassignablePartition {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
+impl Message for InitializeShareGroupStateResponse {
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 0 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-/// Valid versions: 0-1
+/// Valid versions: 0
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
-pub struct ReassignableTopic {
-    /// The topic name.
+pub struct InitializeStateResult {
+    /// The topic identifier.
     ///
-    /// Supported API versions: 0-1
-    pub name: super::TopicName,
+    /// Supported API versions: 0
+    pub topic_id: Uuid,
 
-    /// The partitions to reassign.
+    /// The results for the partitions.
     ///
-    /// Supported API versions: 0-1
-    pub partitions: Vec<ReassignablePartition>,
+    /// Supported API versions: 0
+    pub partitions: Vec<PartitionResult>,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
 }
 
-impl ReassignableTopic {
-    /// Sets `name` to the passed value.
+impl InitializeStateResult {
+    /// Sets `topic_id` to the passed value.
     ///
-    /// The topic name.
+    /// The topic identifier.
     ///
-    /// Supported API versions: 0-1
-    pub fn with_name(mut self, value: super::TopicName) -> Self {
-        self.name = value;
+    /// Supported API versions: 0
+    pub fn with_topic_id(mut self, value: Uuid) -> Self {
+        self.topic_id = value;
         self
     }
     /// Sets `partitions` to the passed value.
     ///
-    /// The partitions to reassign.
+    /// The results for the partitions.
     ///
-    /// Supported API versions: 0-1
-    pub fn with_partitions(mut self, value: Vec<ReassignablePartition>) -> Self {
+    /// Supported API versions: 0
+    pub fn with_partitions(mut self, value: Vec<PartitionResult>) -> Self {
         self.partitions = value;
         self
     }
@@ -353,13 +173,13 @@ impl ReassignableTopic {
     }
 }
 
-#[cfg(feature = "client")]
-impl Encodable for ReassignableTopic {
+#[cfg(feature = "broker")]
+impl Encodable for InitializeStateResult {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 1 {
+        if version != 0 {
             bail!("specified version not supported by this message type");
         }
-        types::CompactString.encode(buf, &self.name)?;
+        types::Uuid.encode(buf, &self.topic_id)?;
         types::CompactArray(types::Struct { version }).encode(buf, &self.partitions)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
         if num_tagged_fields > std::u32::MAX as usize {
@@ -375,7 +195,7 @@ impl Encodable for ReassignableTopic {
     }
     fn compute_size(&self, version: i16) -> Result<usize> {
         let mut total_size = 0;
-        total_size += types::CompactString.compute_size(&self.name)?;
+        total_size += types::Uuid.compute_size(&self.topic_id)?;
         total_size +=
             types::CompactArray(types::Struct { version }).compute_size(&self.partitions)?;
         let num_tagged_fields = self.unknown_tagged_fields.len();
@@ -392,13 +212,13 @@ impl Encodable for ReassignableTopic {
     }
 }
 
-#[cfg(feature = "broker")]
-impl Decodable for ReassignableTopic {
+#[cfg(feature = "client")]
+impl Decodable for InitializeStateResult {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 1 {
+        if version != 0 {
             bail!("specified version not supported by this message type");
         }
-        let name = types::CompactString.decode(buf)?;
+        let topic_id = types::Uuid.decode(buf)?;
         let partitions = types::CompactArray(types::Struct { version }).decode(buf)?;
         let mut unknown_tagged_fields = BTreeMap::new();
         let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
@@ -409,30 +229,175 @@ impl Decodable for ReassignableTopic {
             unknown_tagged_fields.insert(tag as i32, unknown_value);
         }
         Ok(Self {
-            name,
+            topic_id,
             partitions,
             unknown_tagged_fields,
         })
     }
 }
 
-impl Default for ReassignableTopic {
+impl Default for InitializeStateResult {
     fn default() -> Self {
         Self {
-            name: Default::default(),
+            topic_id: Uuid::nil(),
             partitions: Default::default(),
             unknown_tagged_fields: BTreeMap::new(),
         }
     }
 }
 
-impl Message for ReassignableTopic {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 1 };
+impl Message for InitializeStateResult {
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 0 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 
-impl HeaderVersion for AlterPartitionReassignmentsRequest {
+/// Valid versions: 0
+#[non_exhaustive]
+#[derive(Debug, Clone, PartialEq)]
+pub struct PartitionResult {
+    /// The partition index.
+    ///
+    /// Supported API versions: 0
+    pub partition: i32,
+
+    /// The error code, or 0 if there was no error.
+    ///
+    /// Supported API versions: 0
+    pub error_code: i16,
+
+    /// The error message, or null if there was no error.
+    ///
+    /// Supported API versions: 0
+    pub error_message: Option<StrBytes>,
+
+    /// Other tagged fields
+    pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
+}
+
+impl PartitionResult {
+    /// Sets `partition` to the passed value.
+    ///
+    /// The partition index.
+    ///
+    /// Supported API versions: 0
+    pub fn with_partition(mut self, value: i32) -> Self {
+        self.partition = value;
+        self
+    }
+    /// Sets `error_code` to the passed value.
+    ///
+    /// The error code, or 0 if there was no error.
+    ///
+    /// Supported API versions: 0
+    pub fn with_error_code(mut self, value: i16) -> Self {
+        self.error_code = value;
+        self
+    }
+    /// Sets `error_message` to the passed value.
+    ///
+    /// The error message, or null if there was no error.
+    ///
+    /// Supported API versions: 0
+    pub fn with_error_message(mut self, value: Option<StrBytes>) -> Self {
+        self.error_message = value;
+        self
+    }
+    /// Sets unknown_tagged_fields to the passed value.
+    pub fn with_unknown_tagged_fields(mut self, value: BTreeMap<i32, Bytes>) -> Self {
+        self.unknown_tagged_fields = value;
+        self
+    }
+    /// Inserts an entry into unknown_tagged_fields.
+    pub fn with_unknown_tagged_field(mut self, key: i32, value: Bytes) -> Self {
+        self.unknown_tagged_fields.insert(key, value);
+        self
+    }
+}
+
+#[cfg(feature = "broker")]
+impl Encodable for PartitionResult {
+    fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
+        if version != 0 {
+            bail!("specified version not supported by this message type");
+        }
+        types::Int32.encode(buf, &self.partition)?;
+        types::Int16.encode(buf, &self.error_code)?;
+        types::CompactString.encode(buf, &self.error_message)?;
+        let num_tagged_fields = self.unknown_tagged_fields.len();
+        if num_tagged_fields > std::u32::MAX as usize {
+            bail!(
+                "Too many tagged fields to encode ({} fields)",
+                num_tagged_fields
+            );
+        }
+        types::UnsignedVarInt.encode(buf, num_tagged_fields as u32)?;
+
+        write_unknown_tagged_fields(buf, 0.., &self.unknown_tagged_fields)?;
+        Ok(())
+    }
+    fn compute_size(&self, version: i16) -> Result<usize> {
+        let mut total_size = 0;
+        total_size += types::Int32.compute_size(&self.partition)?;
+        total_size += types::Int16.compute_size(&self.error_code)?;
+        total_size += types::CompactString.compute_size(&self.error_message)?;
+        let num_tagged_fields = self.unknown_tagged_fields.len();
+        if num_tagged_fields > std::u32::MAX as usize {
+            bail!(
+                "Too many tagged fields to encode ({} fields)",
+                num_tagged_fields
+            );
+        }
+        total_size += types::UnsignedVarInt.compute_size(num_tagged_fields as u32)?;
+
+        total_size += compute_unknown_tagged_fields_size(&self.unknown_tagged_fields)?;
+        Ok(total_size)
+    }
+}
+
+#[cfg(feature = "client")]
+impl Decodable for PartitionResult {
+    fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
+        if version != 0 {
+            bail!("specified version not supported by this message type");
+        }
+        let partition = types::Int32.decode(buf)?;
+        let error_code = types::Int16.decode(buf)?;
+        let error_message = types::CompactString.decode(buf)?;
+        let mut unknown_tagged_fields = BTreeMap::new();
+        let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
+        for _ in 0..num_tagged_fields {
+            let tag: u32 = types::UnsignedVarInt.decode(buf)?;
+            let size: u32 = types::UnsignedVarInt.decode(buf)?;
+            let unknown_value = buf.try_get_bytes(size as usize)?;
+            unknown_tagged_fields.insert(tag as i32, unknown_value);
+        }
+        Ok(Self {
+            partition,
+            error_code,
+            error_message,
+            unknown_tagged_fields,
+        })
+    }
+}
+
+impl Default for PartitionResult {
+    fn default() -> Self {
+        Self {
+            partition: 0,
+            error_code: 0,
+            error_message: None,
+            unknown_tagged_fields: BTreeMap::new(),
+        }
+    }
+}
+
+impl Message for PartitionResult {
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 0 };
+    const DEPRECATED_VERSIONS: Option<VersionRange> = None;
+}
+
+impl HeaderVersion for InitializeShareGroupStateResponse {
     fn header_version(version: i16) -> i16 {
-        2
+        1
     }
 }

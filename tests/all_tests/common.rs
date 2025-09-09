@@ -1,4 +1,5 @@
 use bytes::{Buf, BufMut, BytesMut};
+use kafka_protocol::protocol::encode_request_header_into_buffer;
 use kafka_protocol::{
     messages::{RequestHeader, ResponseHeader},
     protocol::{Decodable, Encodable, HeaderVersion},
@@ -12,7 +13,6 @@ use testcontainers::{
     runners::SyncRunner,
     Container, GenericImage, ImageExt,
 };
-use kafka_protocol::protocol::encode_request_header_into_buffer;
 
 pub fn start_kafka() -> Container<GenericImage> {
     GenericImage::new("bitnami/kafka", "3.6.1-debian-11-r24")
