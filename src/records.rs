@@ -1057,4 +1057,53 @@ mod tests {
         )
         .expect("decode works");
     }
+
+    #[test]
+    fn test_record_iterator() {
+        let records_to_encode = vec![
+            Record {
+                transactional: false,
+                control: false,
+                partition_leader_epoch: 0,
+                producer_id: 0,
+                producer_epoch: 0,
+                sequence: 0,
+                timestamp_type: TimestampType::Creation,
+                offset: 0,
+                timestamp: 0,
+                key: Some(Bytes::from("key1")),
+                value: Some(Bytes::from("value1")),
+                headers: IndexMap::new(),
+            },
+            Record {
+                transactional: false,
+                control: false,
+                partition_leader_epoch: 0,
+                producer_id: 0,
+                producer_epoch: 0,
+                sequence: 1,
+                timestamp_type: TimestampType::Creation,
+                offset: 1,
+                timestamp: 1,
+                key: Some(Bytes::from("key2")),
+                value: Some(Bytes::from("value2")),
+                headers: IndexMap::new(),
+            },
+        ];
+
+        let mut buf = BytesMut::new();
+        RecordBatchEncoder::encode(
+            &mut buf,
+            &records_to_encode,
+            &RecordEncodeOptions {
+                version: 2,
+                compression: Compression::None,
+            },
+        )
+        .unwrap();
+
+        let decoded_records: Vec<Record> = RecordBatchDecoder::records(&mut buf.freeze(), 2).collect();
+
+        assert_eq!(records_to_encode, decoded_records);
+    }
 }
