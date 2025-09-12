@@ -1,4 +1,4 @@
-'''//! Provides utilities for working with records (Kafka messages).
+//! Provides utilities for working with records (Kafka messages).
 //!
 //! [`FetchResponse`](crate::messages::fetch_response::FetchResponse) and associated APIs for interacting with reading and writing
 //! contain records in a raw format, allowing the user to implement their own logic for interacting
@@ -1058,4 +1058,3 @@ mod tests {
         .expect("decode works");
     }
 }
-''
