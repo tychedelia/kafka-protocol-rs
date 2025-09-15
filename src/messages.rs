@@ -1615,7 +1615,7 @@ impl ApiKey {
 
     /// Iterate through every ApiKey variant in the order of the internal code.
     pub fn iter() -> impl Iterator<Item = ApiKey> {
-        (0..i16::MAX).map_while(|i| ApiKey::try_from(i).ok())
+        (0..=92).filter_map(|i| ApiKey::try_from(i).ok())
     }
 }
 impl TryFrom<i16> for ApiKey {
