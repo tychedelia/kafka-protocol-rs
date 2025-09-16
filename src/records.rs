@@ -415,31 +415,30 @@ impl RecordBatchEncoder {
     }
 }
 
-struct RecordIterator
-{
+struct RecordIterator {
     buf: Bytes,
     batch_decode_info: BatchDecodeInfo,
     current: i64,
 }
 
-impl Iterator for RecordIterator
-{
-    type Item = Record;
+impl Iterator for RecordIterator {
+    type Item = Result<Record>;
 
-    fn next(&mut self) -> Option<Record>
-    {
-        if self.current >= self.batch_decode_info.record_count as i64
-        {
+    fn next(&mut self) -> Option<Result<Record>> {
+        if self.current >= self.batch_decode_info.record_count as i64 {
             return None;
         }
         self.current += 1;
-        Record::decode_new(&mut self.buf, &self.batch_decode_info, 2).ok()
+        Some(Record::decode_new(
+            &mut self.buf,
+            &self.batch_decode_info,
+            2,
+        ))
     }
 }
 
 impl RecordIterator {
-    fn new(buf: &mut Bytes, version: i8) -> Self
-    {
+    fn new(buf: &mut Bytes, version: i8) -> Self {
         let (batch_decode_info, buf) = RecordBatchDecoder::decode_batch_info(buf, version).unwrap();
         RecordIterator {
             buf,
@@ -450,12 +449,11 @@ impl RecordIterator {
 }
 
 impl RecordBatchDecoder {
-    /// Decode the provided buffer into a RecordIterator.
+    /// Decode the provided buffer into an iterator over Result<Record> items.
     /// # Arguments
     /// * `buf` - The buffer to decode.
     /// * `version` - The version of the record batch.
-    pub fn records(buf: &mut Bytes, version: i8) -> Box<dyn Iterator<Item=Record>>
-    {
+    pub fn records(buf: &mut Bytes, version: i8) -> Box<dyn Iterator<Item = Result<Record>>> {
         Box::new(RecordIterator::new(buf, version))
     }
 
@@ -517,11 +515,7 @@ impl RecordBatchDecoder {
         Ok((version, compression))
     }
 
-    fn decode_batch_info<B: ByteBuf>(
-        buf: &mut B,
-        version: i8,
-    ) -> Result<(BatchDecodeInfo, Bytes)>
-    {
+    fn decode_batch_info<B: ByteBuf>(buf: &mut B, version: i8) -> Result<(BatchDecodeInfo, Bytes)> {
         // Base offset
         let min_offset = types::Int64.decode(buf)?;
 
@@ -600,19 +594,22 @@ impl RecordBatchDecoder {
         }
         let record_count = record_count as usize;
 
-        Ok((BatchDecodeInfo {
-            record_count,
-            timestamp_type,
-            min_offset,
-            min_timestamp,
-            base_sequence,
-            transactional,
-            control,
-            partition_leader_epoch,
-            producer_id,
-            producer_epoch,
-            compression,
-        }, buf.to_owned()))
+        Ok((
+            BatchDecodeInfo {
+                record_count,
+                timestamp_type,
+                min_offset,
+                min_timestamp,
+                base_sequence,
+                transactional,
+                control,
+                partition_leader_epoch,
+                producer_id,
+                producer_epoch,
+                compression,
+            },
+            buf.to_owned(),
+        ))
     }
 
     fn decode_new_records<B: ByteBuf>(
@@ -923,7 +920,6 @@ impl Record {
 
         let mut headers = IndexMap::with_capacity(num_headers);
         for _ in 0..num_headers {
-
             // Key len
             let key_len: i32 = types::VarInt.decode(buf)?;
             if key_len < 0 {
@@ -1102,8 +1098,126 @@ mod tests {
         )
         .unwrap();
 
-        let decoded_records: Vec<Record> = RecordBatchDecoder::records(&mut buf.freeze(), 2).collect();
+        let decoded_records: Vec<Record> = RecordBatchDecoder::records(&mut buf.freeze(), 2)
+            .map(|r| r.unwrap())
+            .collect();
 
         assert_eq!(records_to_encode, decoded_records);
+    }
+
+    #[test]
+    fn test_record_iterator_invalid_record() {
+        // Create a minimal batch with valid header but invalid record data
+        // We'll create the BatchDecodeInfo manually and test Record::decode_new directly
+        let batch_decode_info = BatchDecodeInfo {
+            record_count: 1,
+            timestamp_type: TimestampType::Creation,
+            min_offset: 0,
+            min_timestamp: 0,
+            base_sequence: 0,
+            transactional: false,
+            control: false,
+            partition_leader_epoch: 0,
+            producer_id: 0,
+            producer_epoch: 0,
+            compression: Compression::None,
+        };
+
+        // Create invalid record data - this will be missing required fields
+        // causing Record::decode_new to fail when it tries to read beyond the buffer
+        let invalid_record_data = Bytes::from(vec![0x01, 0x02]); // Too short to be a valid record
+
+        // Create RecordIterator directly with invalid data
+        let mut iterator = RecordIterator {
+            buf: invalid_record_data,
+            batch_decode_info,
+            current: 0,
+        };
+
+        // The first call to next() should return Some(Err(...)) due to invalid record data
+        match iterator.next() {
+            Some(Err(_)) => {
+                // This is what we expect - an error when trying to decode invalid record data
+            }
+            Some(Ok(_)) => panic!("Expected error when decoding invalid record, but got success"),
+            None => panic!("Expected error when decoding invalid record, but got None"),
+        }
+
+        // After the first record fails, there are no more records to decode
+        assert!(iterator.next().is_none());
+    }
+
+    #[test]
+    fn test_record_iterator_error_handling_usage() {
+        // This test demonstrates how to properly handle errors when using the iterator
+        // in practical scenarios where you want to collect both successful and failed records
+
+        let batch_decode_info = BatchDecodeInfo {
+            record_count: 2, // Tell it there are 2 records
+            timestamp_type: TimestampType::Creation,
+            min_offset: 0,
+            min_timestamp: 0,
+            base_sequence: 0,
+            transactional: false,
+            control: false,
+            partition_leader_epoch: 0,
+            producer_id: 0,
+            producer_epoch: 0,
+            compression: Compression::None,
+        };
+
+        // Create invalid record data that will cause parsing errors
+        let invalid_data = Bytes::from(vec![0x01, 0x02, 0x03]); // Too short to be valid records
+
+        let mut iterator = RecordIterator {
+            buf: invalid_data,
+            batch_decode_info,
+            current: 0,
+        };
+
+        // Demonstrate proper error handling patterns
+        let mut successful_records = Vec::new();
+        let mut error_count = 0;
+
+        // Pattern 1: Handle each result individually
+        for result in &mut iterator {
+            match result {
+                Ok(record) => successful_records.push(record),
+                Err(_err) => {
+                    error_count += 1;
+                    // In practice, you might log the error or handle it specifically
+                    // println!("Failed to parse record: {}", _err);
+                }
+            }
+        }
+
+        // Verify we got the expected error handling behavior
+        assert_eq!(successful_records.len(), 0); // No valid records in this test
+        assert!(error_count > 0); // At least one error occurred
+
+        // Pattern 2: Collect only successful records (filter out errors)
+        let batch_decode_info2 = BatchDecodeInfo {
+            record_count: 1,
+            timestamp_type: TimestampType::Creation,
+            min_offset: 0,
+            min_timestamp: 0,
+            base_sequence: 0,
+            transactional: false,
+            control: false,
+            partition_leader_epoch: 0,
+            producer_id: 0,
+            producer_epoch: 0,
+            compression: Compression::None,
+        };
+
+        let iterator2 = RecordIterator {
+            buf: Bytes::from(vec![0xFF]),
+            batch_decode_info: batch_decode_info2,
+            current: 0,
+        };
+
+        let only_successful: Vec<Record> = iterator2.filter_map(|result| result.ok()).collect();
+
+        assert_eq!(only_successful.len(), 0); // No successful records with invalid data
     }
 }
