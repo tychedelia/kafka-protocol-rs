@@ -950,7 +950,7 @@ impl Request for UpdateRaftVoterRequest {
 }
 
 /// Valid API keys in the Kafka protocol.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum ApiKey {
     /// API key for request ProduceRequest
     Produce = 0,
