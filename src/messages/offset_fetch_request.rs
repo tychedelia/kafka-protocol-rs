@@ -714,6 +714,11 @@ pub struct OffsetFetchRequestTopics {
     /// Supported API versions: 8-9
     pub name: super::TopicName,
 
+    /// The topic ID.
+    ///
+    /// Supported API versions: none
+    pub topic_id: Uuid,
+
     /// The partition indexes we would like to fetch offsets for.
     ///
     /// Supported API versions: 8-9
@@ -731,6 +736,15 @@ impl OffsetFetchRequestTopics {
     /// Supported API versions: 8-9
     pub fn with_name(mut self, value: super::TopicName) -> Self {
         self.name = value;
+        self
+    }
+    /// Sets `topic_id` to the passed value.
+    ///
+    /// The topic ID.
+    ///
+    /// Supported API versions: none
+    pub fn with_topic_id(mut self, value: Uuid) -> Self {
+        self.topic_id = value;
         self
     }
     /// Sets `partition_indexes` to the passed value.
@@ -762,10 +776,6 @@ impl Encodable for OffsetFetchRequestTopics {
         }
         if version >= 8 {
             types::CompactString.encode(buf, &self.name)?;
-        } else {
-            if !self.name.is_empty() {
-                bail!("A field is set that is not available on the selected protocol version");
-            }
         }
         if version >= 8 {
             types::CompactArray(types::Int32).encode(buf, &self.partition_indexes)?;
@@ -792,10 +802,6 @@ impl Encodable for OffsetFetchRequestTopics {
         let mut total_size = 0;
         if version >= 8 {
             total_size += types::CompactString.compute_size(&self.name)?;
-        } else {
-            if !self.name.is_empty() {
-                bail!("A field is set that is not available on the selected protocol version");
-            }
         }
         if version >= 8 {
             total_size +=
@@ -832,6 +838,7 @@ impl Decodable for OffsetFetchRequestTopics {
         } else {
             Default::default()
         };
+        let topic_id = Uuid::nil();
         let partition_indexes = if version >= 8 {
             types::CompactArray(types::Int32).decode(buf)?
         } else {
@@ -849,6 +856,7 @@ impl Decodable for OffsetFetchRequestTopics {
         }
         Ok(Self {
             name,
+            topic_id,
             partition_indexes,
             unknown_tagged_fields,
         })
@@ -859,6 +867,7 @@ impl Default for OffsetFetchRequestTopics {
     fn default() -> Self {
         Self {
             name: Default::default(),
+            topic_id: Uuid::nil(),
             partition_indexes: Default::default(),
             unknown_tagged_fields: BTreeMap::new(),
         }

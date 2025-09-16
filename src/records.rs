@@ -883,7 +883,7 @@ impl Record {
             let value_len: i32 = types::VarInt.decode(buf)?;
 
             // Value
-            let value = match value_len.cmp(&-2) {
+            let value = match value_len.cmp(&-1) {
                 Ordering::Less => {
                     bail!(
                         "Unexpected negative record header value length ({} bytes)",
@@ -918,7 +918,7 @@ impl Record {
 mod tests {
     use bytes::Bytes;
 
-    use super::{Record, TimestampType};
+    use super::*;
 
     #[test]
     fn lookup_header_via_u8_slice() {
@@ -950,5 +950,53 @@ mod tests {
                 .as_ref()
                 .expect("value is present")
         );
+    }
+
+    #[test]
+    fn decode_record_header_no_value() {
+        let record = Record {
+            transactional: false,
+            control: false,
+            partition_leader_epoch: 0,
+            producer_id: 0,
+            producer_epoch: 0,
+            sequence: 0,
+            timestamp_type: TimestampType::Creation,
+            offset: Default::default(),
+            timestamp: Default::default(),
+            key: Default::default(),
+            value: Default::default(),
+            headers: [("other-header".into(), None)].into(),
+        };
+        let mut buf = &mut bytes::BytesMut::new();
+        record
+            .encode_new(
+                buf,
+                0,
+                0,
+                &RecordEncodeOptions {
+                    version: 2,
+                    compression: super::Compression::None,
+                },
+            )
+            .expect("encode works");
+
+        Record::decode_new(
+            &mut buf,
+            &BatchDecodeInfo {
+                record_count: 1,
+                timestamp_type: TimestampType::Creation,
+                min_offset: 0,
+                min_timestamp: 0,
+                base_sequence: 0,
+                transactional: false,
+                control: false,
+                partition_leader_epoch: 0,
+                producer_id: 0,
+                producer_epoch: 0,
+            },
+            2,
+        )
+        .expect("decode works");
     }
 }

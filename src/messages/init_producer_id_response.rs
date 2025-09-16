@@ -17,29 +17,39 @@ use crate::protocol::{
     Encodable, Encoder, HeaderVersion, Message, StrBytes, VersionRange,
 };
 
-/// Valid versions: 0-5
+/// Valid versions: 0-6
 #[non_exhaustive]
 #[derive(Debug, Clone, PartialEq)]
 pub struct InitProducerIdResponse {
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub throttle_time_ms: i32,
 
     /// The error code, or 0 if there was no error.
     ///
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub error_code: i16,
 
     /// The current producer id.
     ///
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub producer_id: super::ProducerId,
 
     /// The current epoch associated with the producer id.
     ///
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub producer_epoch: i16,
+
+    /// The producer id for ongoing transaction when KeepPreparedTxn is used, -1 if there is no transaction ongoing.
+    ///
+    /// Supported API versions: 6
+    pub ongoing_txn_producer_id: super::ProducerId,
+
+    /// The epoch associated with the  producer id for ongoing transaction when KeepPreparedTxn is used, -1 if there is no transaction ongoing.
+    ///
+    /// Supported API versions: 6
+    pub ongoing_txn_producer_epoch: i16,
 
     /// Other tagged fields
     pub unknown_tagged_fields: BTreeMap<i32, Bytes>,
@@ -50,7 +60,7 @@ impl InitProducerIdResponse {
     ///
     /// The duration in milliseconds for which the request was throttled due to a quota violation, or zero if the request did not violate any quota.
     ///
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub fn with_throttle_time_ms(mut self, value: i32) -> Self {
         self.throttle_time_ms = value;
         self
@@ -59,7 +69,7 @@ impl InitProducerIdResponse {
     ///
     /// The error code, or 0 if there was no error.
     ///
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub fn with_error_code(mut self, value: i16) -> Self {
         self.error_code = value;
         self
@@ -68,7 +78,7 @@ impl InitProducerIdResponse {
     ///
     /// The current producer id.
     ///
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub fn with_producer_id(mut self, value: super::ProducerId) -> Self {
         self.producer_id = value;
         self
@@ -77,9 +87,27 @@ impl InitProducerIdResponse {
     ///
     /// The current epoch associated with the producer id.
     ///
-    /// Supported API versions: 0-5
+    /// Supported API versions: 0-6
     pub fn with_producer_epoch(mut self, value: i16) -> Self {
         self.producer_epoch = value;
+        self
+    }
+    /// Sets `ongoing_txn_producer_id` to the passed value.
+    ///
+    /// The producer id for ongoing transaction when KeepPreparedTxn is used, -1 if there is no transaction ongoing.
+    ///
+    /// Supported API versions: 6
+    pub fn with_ongoing_txn_producer_id(mut self, value: super::ProducerId) -> Self {
+        self.ongoing_txn_producer_id = value;
+        self
+    }
+    /// Sets `ongoing_txn_producer_epoch` to the passed value.
+    ///
+    /// The epoch associated with the  producer id for ongoing transaction when KeepPreparedTxn is used, -1 if there is no transaction ongoing.
+    ///
+    /// Supported API versions: 6
+    pub fn with_ongoing_txn_producer_epoch(mut self, value: i16) -> Self {
+        self.ongoing_txn_producer_epoch = value;
         self
     }
     /// Sets unknown_tagged_fields to the passed value.
@@ -97,13 +125,27 @@ impl InitProducerIdResponse {
 #[cfg(feature = "broker")]
 impl Encodable for InitProducerIdResponse {
     fn encode<B: ByteBufMut>(&self, buf: &mut B, version: i16) -> Result<()> {
-        if version < 0 || version > 5 {
+        if version < 0 || version > 6 {
             bail!("specified version not supported by this message type");
         }
         types::Int32.encode(buf, &self.throttle_time_ms)?;
         types::Int16.encode(buf, &self.error_code)?;
         types::Int64.encode(buf, &self.producer_id)?;
         types::Int16.encode(buf, &self.producer_epoch)?;
+        if version >= 6 {
+            types::Int64.encode(buf, &self.ongoing_txn_producer_id)?;
+        } else {
+            if self.ongoing_txn_producer_id != -1 {
+                bail!("A field is set that is not available on the selected protocol version");
+            }
+        }
+        if version >= 6 {
+            types::Int16.encode(buf, &self.ongoing_txn_producer_epoch)?;
+        } else {
+            if self.ongoing_txn_producer_epoch != -1 {
+                bail!("A field is set that is not available on the selected protocol version");
+            }
+        }
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
@@ -124,6 +166,20 @@ impl Encodable for InitProducerIdResponse {
         total_size += types::Int16.compute_size(&self.error_code)?;
         total_size += types::Int64.compute_size(&self.producer_id)?;
         total_size += types::Int16.compute_size(&self.producer_epoch)?;
+        if version >= 6 {
+            total_size += types::Int64.compute_size(&self.ongoing_txn_producer_id)?;
+        } else {
+            if self.ongoing_txn_producer_id != -1 {
+                bail!("A field is set that is not available on the selected protocol version");
+            }
+        }
+        if version >= 6 {
+            total_size += types::Int16.compute_size(&self.ongoing_txn_producer_epoch)?;
+        } else {
+            if self.ongoing_txn_producer_epoch != -1 {
+                bail!("A field is set that is not available on the selected protocol version");
+            }
+        }
         if version >= 2 {
             let num_tagged_fields = self.unknown_tagged_fields.len();
             if num_tagged_fields > std::u32::MAX as usize {
@@ -143,13 +199,23 @@ impl Encodable for InitProducerIdResponse {
 #[cfg(feature = "client")]
 impl Decodable for InitProducerIdResponse {
     fn decode<B: ByteBuf>(buf: &mut B, version: i16) -> Result<Self> {
-        if version < 0 || version > 5 {
+        if version < 0 || version > 6 {
             bail!("specified version not supported by this message type");
         }
         let throttle_time_ms = types::Int32.decode(buf)?;
         let error_code = types::Int16.decode(buf)?;
         let producer_id = types::Int64.decode(buf)?;
         let producer_epoch = types::Int16.decode(buf)?;
+        let ongoing_txn_producer_id = if version >= 6 {
+            types::Int64.decode(buf)?
+        } else {
+            (-1).into()
+        };
+        let ongoing_txn_producer_epoch = if version >= 6 {
+            types::Int16.decode(buf)?
+        } else {
+            -1
+        };
         let mut unknown_tagged_fields = BTreeMap::new();
         if version >= 2 {
             let num_tagged_fields = types::UnsignedVarInt.decode(buf)?;
@@ -165,6 +231,8 @@ impl Decodable for InitProducerIdResponse {
             error_code,
             producer_id,
             producer_epoch,
+            ongoing_txn_producer_id,
+            ongoing_txn_producer_epoch,
             unknown_tagged_fields,
         })
     }
@@ -177,13 +245,15 @@ impl Default for InitProducerIdResponse {
             error_code: 0,
             producer_id: (-1).into(),
             producer_epoch: 0,
+            ongoing_txn_producer_id: (-1).into(),
+            ongoing_txn_producer_epoch: -1,
             unknown_tagged_fields: BTreeMap::new(),
         }
     }
 }
 
 impl Message for InitProducerIdResponse {
-    const VERSIONS: VersionRange = VersionRange { min: 0, max: 5 };
+    const VERSIONS: VersionRange = VersionRange { min: 0, max: 6 };
     const DEPRECATED_VERSIONS: Option<VersionRange> = None;
 }
 

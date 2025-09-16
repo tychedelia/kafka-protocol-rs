@@ -1,3 +1,4 @@
+mod api_key;
 #[cfg(feature = "broker")]
 mod api_versions;
 #[cfg(feature = "client")]

@@ -213,9 +213,10 @@ pub fn run(messages_module_dir: &str, mut input_file_paths: Vec<PathBuf>) -> Res
         r#"
   /// Iterate through every ApiKey variant in the order of the internal code.
   pub fn iter() -> impl Iterator<Item = ApiKey> {{
-    (0..i16::MAX).map_while(|i| ApiKey::try_from(i).ok())
+    (0..={}).filter_map(|i| ApiKey::try_from(i).ok())
   }}
-    "#
+    "#,
+        request_types.iter().map(|x| x.0).max().unwrap()
     )?;
 
     writeln!(m, "}}")?;

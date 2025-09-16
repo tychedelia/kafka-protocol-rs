@@ -28,6 +28,9 @@ pub use consumer_protocol_subscription::ConsumerProtocolSubscription;
 pub mod default_principal_data;
 pub use default_principal_data::DefaultPrincipalData;
 
+pub mod end_txn_marker;
+pub use end_txn_marker::EndTxnMarker;
+
 pub mod k_raft_version_record;
 pub use k_raft_version_record::KRaftVersionRecord;
 
@@ -259,11 +262,23 @@ pub use push_telemetry_request::PushTelemetryRequest;
 pub mod assign_replicas_to_dirs_request;
 pub use assign_replicas_to_dirs_request::AssignReplicasToDirsRequest;
 
-pub mod list_client_metrics_resources_request;
-pub use list_client_metrics_resources_request::ListClientMetricsResourcesRequest;
+pub mod list_config_resources_request;
+pub use list_config_resources_request::ListConfigResourcesRequest;
 
 pub mod describe_topic_partitions_request;
 pub use describe_topic_partitions_request::DescribeTopicPartitionsRequest;
+
+pub mod share_group_heartbeat_request;
+pub use share_group_heartbeat_request::ShareGroupHeartbeatRequest;
+
+pub mod share_group_describe_request;
+pub use share_group_describe_request::ShareGroupDescribeRequest;
+
+pub mod share_fetch_request;
+pub use share_fetch_request::ShareFetchRequest;
+
+pub mod share_acknowledge_request;
+pub use share_acknowledge_request::ShareAcknowledgeRequest;
 
 pub mod add_raft_voter_request;
 pub use add_raft_voter_request::AddRaftVoterRequest;
@@ -273,6 +288,30 @@ pub use remove_raft_voter_request::RemoveRaftVoterRequest;
 
 pub mod update_raft_voter_request;
 pub use update_raft_voter_request::UpdateRaftVoterRequest;
+
+pub mod initialize_share_group_state_request;
+pub use initialize_share_group_state_request::InitializeShareGroupStateRequest;
+
+pub mod read_share_group_state_request;
+pub use read_share_group_state_request::ReadShareGroupStateRequest;
+
+pub mod write_share_group_state_request;
+pub use write_share_group_state_request::WriteShareGroupStateRequest;
+
+pub mod delete_share_group_state_request;
+pub use delete_share_group_state_request::DeleteShareGroupStateRequest;
+
+pub mod read_share_group_state_summary_request;
+pub use read_share_group_state_summary_request::ReadShareGroupStateSummaryRequest;
+
+pub mod describe_share_group_offsets_request;
+pub use describe_share_group_offsets_request::DescribeShareGroupOffsetsRequest;
+
+pub mod alter_share_group_offsets_request;
+pub use alter_share_group_offsets_request::AlterShareGroupOffsetsRequest;
+
+pub mod delete_share_group_offsets_request;
+pub use delete_share_group_offsets_request::DeleteShareGroupOffsetsRequest;
 
 pub mod produce_response;
 pub use produce_response::ProduceResponse;
@@ -484,11 +523,23 @@ pub use push_telemetry_response::PushTelemetryResponse;
 pub mod assign_replicas_to_dirs_response;
 pub use assign_replicas_to_dirs_response::AssignReplicasToDirsResponse;
 
-pub mod list_client_metrics_resources_response;
-pub use list_client_metrics_resources_response::ListClientMetricsResourcesResponse;
+pub mod list_config_resources_response;
+pub use list_config_resources_response::ListConfigResourcesResponse;
 
 pub mod describe_topic_partitions_response;
 pub use describe_topic_partitions_response::DescribeTopicPartitionsResponse;
+
+pub mod share_group_heartbeat_response;
+pub use share_group_heartbeat_response::ShareGroupHeartbeatResponse;
+
+pub mod share_group_describe_response;
+pub use share_group_describe_response::ShareGroupDescribeResponse;
+
+pub mod share_fetch_response;
+pub use share_fetch_response::ShareFetchResponse;
+
+pub mod share_acknowledge_response;
+pub use share_acknowledge_response::ShareAcknowledgeResponse;
 
 pub mod add_raft_voter_response;
 pub use add_raft_voter_response::AddRaftVoterResponse;
@@ -498,6 +549,30 @@ pub use remove_raft_voter_response::RemoveRaftVoterResponse;
 
 pub mod update_raft_voter_response;
 pub use update_raft_voter_response::UpdateRaftVoterResponse;
+
+pub mod initialize_share_group_state_response;
+pub use initialize_share_group_state_response::InitializeShareGroupStateResponse;
+
+pub mod read_share_group_state_response;
+pub use read_share_group_state_response::ReadShareGroupStateResponse;
+
+pub mod write_share_group_state_response;
+pub use write_share_group_state_response::WriteShareGroupStateResponse;
+
+pub mod delete_share_group_state_response;
+pub use delete_share_group_state_response::DeleteShareGroupStateResponse;
+
+pub mod read_share_group_state_summary_response;
+pub use read_share_group_state_summary_response::ReadShareGroupStateSummaryResponse;
+
+pub mod describe_share_group_offsets_response;
+pub use describe_share_group_offsets_response::DescribeShareGroupOffsetsResponse;
+
+pub mod alter_share_group_offsets_response;
+pub use alter_share_group_offsets_response::AlterShareGroupOffsetsResponse;
+
+pub mod delete_share_group_offsets_response;
+pub use delete_share_group_offsets_response::DeleteShareGroupOffsetsResponse;
 
 #[cfg(all(feature = "client", feature = "broker"))]
 impl Request for ProduceRequest {
@@ -920,15 +995,39 @@ impl Request for AssignReplicasToDirsRequest {
 }
 
 #[cfg(all(feature = "client", feature = "broker"))]
-impl Request for ListClientMetricsResourcesRequest {
+impl Request for ListConfigResourcesRequest {
     const KEY: i16 = 74;
-    type Response = ListClientMetricsResourcesResponse;
+    type Response = ListConfigResourcesResponse;
 }
 
 #[cfg(all(feature = "client", feature = "broker"))]
 impl Request for DescribeTopicPartitionsRequest {
     const KEY: i16 = 75;
     type Response = DescribeTopicPartitionsResponse;
+}
+
+#[cfg(all(feature = "client", feature = "broker"))]
+impl Request for ShareGroupHeartbeatRequest {
+    const KEY: i16 = 76;
+    type Response = ShareGroupHeartbeatResponse;
+}
+
+#[cfg(all(feature = "client", feature = "broker"))]
+impl Request for ShareGroupDescribeRequest {
+    const KEY: i16 = 77;
+    type Response = ShareGroupDescribeResponse;
+}
+
+#[cfg(all(feature = "client", feature = "broker"))]
+impl Request for ShareFetchRequest {
+    const KEY: i16 = 78;
+    type Response = ShareFetchResponse;
+}
+
+#[cfg(all(feature = "client", feature = "broker"))]
+impl Request for ShareAcknowledgeRequest {
+    const KEY: i16 = 79;
+    type Response = ShareAcknowledgeResponse;
 }
 
 #[cfg(all(feature = "client", feature = "broker"))]
@@ -947,6 +1046,54 @@ impl Request for RemoveRaftVoterRequest {
 impl Request for UpdateRaftVoterRequest {
     const KEY: i16 = 82;
     type Response = UpdateRaftVoterResponse;
+}
+
+#[cfg(all(feature = "client", feature = "broker"))]
+impl Request for InitializeShareGroupStateRequest {
+    const KEY: i16 = 83;
+    type Response = InitializeShareGroupStateResponse;
+}
+
+#[cfg(all(feature = "client", feature = "broker"))]
+impl Request for ReadShareGroupStateRequest {
+    const KEY: i16 = 84;
+    type Response = ReadShareGroupStateResponse;
+}
+
+#[cfg(all(feature = "client", feature = "broker"))]
+impl Request for WriteShareGroupStateRequest {
+    const KEY: i16 = 85;
+    type Response = WriteShareGroupStateResponse;
+}
+
+#[cfg(all(feature = "client", feature = "broker"))]
+impl Request for DeleteShareGroupStateRequest {
+    const KEY: i16 = 86;
+    type Response = DeleteShareGroupStateResponse;
+}
+
+#[cfg(all(feature = "client", feature = "broker"))]
+impl Request for ReadShareGroupStateSummaryRequest {
+    const KEY: i16 = 87;
+    type Response = ReadShareGroupStateSummaryResponse;
+}
+
+#[cfg(all(feature = "client", feature = "broker"))]
+impl Request for DescribeShareGroupOffsetsRequest {
+    const KEY: i16 = 90;
+    type Response = DescribeShareGroupOffsetsResponse;
+}
+
+#[cfg(all(feature = "client", feature = "broker"))]
+impl Request for AlterShareGroupOffsetsRequest {
+    const KEY: i16 = 91;
+    type Response = AlterShareGroupOffsetsResponse;
+}
+
+#[cfg(all(feature = "client", feature = "broker"))]
+impl Request for DeleteShareGroupOffsetsRequest {
+    const KEY: i16 = 92;
+    type Response = DeleteShareGroupOffsetsResponse;
 }
 
 /// Valid API keys in the Kafka protocol.
@@ -1092,16 +1239,40 @@ pub enum ApiKey {
     PushTelemetry = 72,
     /// API key for request AssignReplicasToDirsRequest
     AssignReplicasToDirs = 73,
-    /// API key for request ListClientMetricsResourcesRequest
-    ListClientMetricsResources = 74,
+    /// API key for request ListConfigResourcesRequest
+    ListConfigResources = 74,
     /// API key for request DescribeTopicPartitionsRequest
     DescribeTopicPartitions = 75,
+    /// API key for request ShareGroupHeartbeatRequest
+    ShareGroupHeartbeat = 76,
+    /// API key for request ShareGroupDescribeRequest
+    ShareGroupDescribe = 77,
+    /// API key for request ShareFetchRequest
+    ShareFetch = 78,
+    /// API key for request ShareAcknowledgeRequest
+    ShareAcknowledge = 79,
     /// API key for request AddRaftVoterRequest
     AddRaftVoter = 80,
     /// API key for request RemoveRaftVoterRequest
     RemoveRaftVoter = 81,
     /// API key for request UpdateRaftVoterRequest
     UpdateRaftVoter = 82,
+    /// API key for request InitializeShareGroupStateRequest
+    InitializeShareGroupState = 83,
+    /// API key for request ReadShareGroupStateRequest
+    ReadShareGroupState = 84,
+    /// API key for request WriteShareGroupStateRequest
+    WriteShareGroupState = 85,
+    /// API key for request DeleteShareGroupStateRequest
+    DeleteShareGroupState = 86,
+    /// API key for request ReadShareGroupStateSummaryRequest
+    ReadShareGroupStateSummary = 87,
+    /// API key for request DescribeShareGroupOffsetsRequest
+    DescribeShareGroupOffsets = 90,
+    /// API key for request AlterShareGroupOffsetsRequest
+    AlterShareGroupOffsets = 91,
+    /// API key for request DeleteShareGroupOffsetsRequest
+    DeleteShareGroupOffsets = 92,
 }
 
 impl ApiKey {
@@ -1196,15 +1367,35 @@ impl ApiKey {
             }
             ApiKey::PushTelemetry => PushTelemetryRequest::header_version(version),
             ApiKey::AssignReplicasToDirs => AssignReplicasToDirsRequest::header_version(version),
-            ApiKey::ListClientMetricsResources => {
-                ListClientMetricsResourcesRequest::header_version(version)
-            }
+            ApiKey::ListConfigResources => ListConfigResourcesRequest::header_version(version),
             ApiKey::DescribeTopicPartitions => {
                 DescribeTopicPartitionsRequest::header_version(version)
             }
+            ApiKey::ShareGroupHeartbeat => ShareGroupHeartbeatRequest::header_version(version),
+            ApiKey::ShareGroupDescribe => ShareGroupDescribeRequest::header_version(version),
+            ApiKey::ShareFetch => ShareFetchRequest::header_version(version),
+            ApiKey::ShareAcknowledge => ShareAcknowledgeRequest::header_version(version),
             ApiKey::AddRaftVoter => AddRaftVoterRequest::header_version(version),
             ApiKey::RemoveRaftVoter => RemoveRaftVoterRequest::header_version(version),
             ApiKey::UpdateRaftVoter => UpdateRaftVoterRequest::header_version(version),
+            ApiKey::InitializeShareGroupState => {
+                InitializeShareGroupStateRequest::header_version(version)
+            }
+            ApiKey::ReadShareGroupState => ReadShareGroupStateRequest::header_version(version),
+            ApiKey::WriteShareGroupState => WriteShareGroupStateRequest::header_version(version),
+            ApiKey::DeleteShareGroupState => DeleteShareGroupStateRequest::header_version(version),
+            ApiKey::ReadShareGroupStateSummary => {
+                ReadShareGroupStateSummaryRequest::header_version(version)
+            }
+            ApiKey::DescribeShareGroupOffsets => {
+                DescribeShareGroupOffsetsRequest::header_version(version)
+            }
+            ApiKey::AlterShareGroupOffsets => {
+                AlterShareGroupOffsetsRequest::header_version(version)
+            }
+            ApiKey::DeleteShareGroupOffsets => {
+                DeleteShareGroupOffsetsRequest::header_version(version)
+            }
         }
     }
     /// Get the version of response header that needs to be prepended to this message
@@ -1298,26 +1489,46 @@ impl ApiKey {
             }
             ApiKey::PushTelemetry => PushTelemetryResponse::header_version(version),
             ApiKey::AssignReplicasToDirs => AssignReplicasToDirsResponse::header_version(version),
-            ApiKey::ListClientMetricsResources => {
-                ListClientMetricsResourcesResponse::header_version(version)
-            }
+            ApiKey::ListConfigResources => ListConfigResourcesResponse::header_version(version),
             ApiKey::DescribeTopicPartitions => {
                 DescribeTopicPartitionsResponse::header_version(version)
             }
+            ApiKey::ShareGroupHeartbeat => ShareGroupHeartbeatResponse::header_version(version),
+            ApiKey::ShareGroupDescribe => ShareGroupDescribeResponse::header_version(version),
+            ApiKey::ShareFetch => ShareFetchResponse::header_version(version),
+            ApiKey::ShareAcknowledge => ShareAcknowledgeResponse::header_version(version),
             ApiKey::AddRaftVoter => AddRaftVoterResponse::header_version(version),
             ApiKey::RemoveRaftVoter => RemoveRaftVoterResponse::header_version(version),
             ApiKey::UpdateRaftVoter => UpdateRaftVoterResponse::header_version(version),
+            ApiKey::InitializeShareGroupState => {
+                InitializeShareGroupStateResponse::header_version(version)
+            }
+            ApiKey::ReadShareGroupState => ReadShareGroupStateResponse::header_version(version),
+            ApiKey::WriteShareGroupState => WriteShareGroupStateResponse::header_version(version),
+            ApiKey::DeleteShareGroupState => DeleteShareGroupStateResponse::header_version(version),
+            ApiKey::ReadShareGroupStateSummary => {
+                ReadShareGroupStateSummaryResponse::header_version(version)
+            }
+            ApiKey::DescribeShareGroupOffsets => {
+                DescribeShareGroupOffsetsResponse::header_version(version)
+            }
+            ApiKey::AlterShareGroupOffsets => {
+                AlterShareGroupOffsetsResponse::header_version(version)
+            }
+            ApiKey::DeleteShareGroupOffsets => {
+                DeleteShareGroupOffsetsResponse::header_version(version)
+            }
         }
     }
     /// Returns the valid versions that can be used with this ApiKey
     pub fn valid_versions(&self) -> VersionRange {
         match self {
-            ApiKey::Produce => VersionRange { min: 3, max: 12 },
-            ApiKey::Fetch => VersionRange { min: 4, max: 17 },
+            ApiKey::Produce => VersionRange { min: 3, max: 13 },
+            ApiKey::Fetch => VersionRange { min: 4, max: 18 },
             ApiKey::ListOffsets => VersionRange { min: 1, max: 10 },
             ApiKey::Metadata => VersionRange { min: 0, max: 13 },
-            ApiKey::OffsetCommit => VersionRange { min: 2, max: 9 },
-            ApiKey::OffsetFetch => VersionRange { min: 1, max: 9 },
+            ApiKey::OffsetCommit => VersionRange { min: 2, max: 10 },
+            ApiKey::OffsetFetch => VersionRange { min: 1, max: 10 },
             ApiKey::FindCoordinator => VersionRange { min: 0, max: 6 },
             ApiKey::JoinGroup => VersionRange { min: 0, max: 9 },
             ApiKey::Heartbeat => VersionRange { min: 0, max: 4 },
@@ -1330,7 +1541,7 @@ impl ApiKey {
             ApiKey::CreateTopics => VersionRange { min: 2, max: 7 },
             ApiKey::DeleteTopics => VersionRange { min: 1, max: 6 },
             ApiKey::DeleteRecords => VersionRange { min: 0, max: 2 },
-            ApiKey::InitProducerId => VersionRange { min: 0, max: 5 },
+            ApiKey::InitProducerId => VersionRange { min: 0, max: 6 },
             ApiKey::OffsetForLeaderEpoch => VersionRange { min: 2, max: 4 },
             ApiKey::AddPartitionsToTxn => VersionRange { min: 0, max: 5 },
             ApiKey::AddOffsetsToTxn => VersionRange { min: 0, max: 4 },
@@ -1353,7 +1564,7 @@ impl ApiKey {
             ApiKey::DeleteGroups => VersionRange { min: 0, max: 2 },
             ApiKey::ElectLeaders => VersionRange { min: 0, max: 2 },
             ApiKey::IncrementalAlterConfigs => VersionRange { min: 0, max: 1 },
-            ApiKey::AlterPartitionReassignments => VersionRange { min: 0, max: 0 },
+            ApiKey::AlterPartitionReassignments => VersionRange { min: 0, max: 1 },
             ApiKey::ListPartitionReassignments => VersionRange { min: 0, max: 0 },
             ApiKey::OffsetDelete => VersionRange { min: 0, max: 0 },
             ApiKey::DescribeClientQuotas => VersionRange { min: 0, max: 1 },
@@ -1374,7 +1585,7 @@ impl ApiKey {
             ApiKey::BrokerHeartbeat => VersionRange { min: 0, max: 1 },
             ApiKey::UnregisterBroker => VersionRange { min: 0, max: 0 },
             ApiKey::DescribeTransactions => VersionRange { min: 0, max: 0 },
-            ApiKey::ListTransactions => VersionRange { min: 0, max: 1 },
+            ApiKey::ListTransactions => VersionRange { min: 0, max: 2 },
             ApiKey::AllocateProducerIds => VersionRange { min: 0, max: 0 },
             ApiKey::ConsumerGroupHeartbeat => VersionRange { min: 0, max: 1 },
             ApiKey::ConsumerGroupDescribe => VersionRange { min: 0, max: 1 },
@@ -1382,17 +1593,29 @@ impl ApiKey {
             ApiKey::GetTelemetrySubscriptions => VersionRange { min: 0, max: 0 },
             ApiKey::PushTelemetry => VersionRange { min: 0, max: 0 },
             ApiKey::AssignReplicasToDirs => VersionRange { min: 0, max: 0 },
-            ApiKey::ListClientMetricsResources => VersionRange { min: 0, max: 0 },
+            ApiKey::ListConfigResources => VersionRange { min: 0, max: 1 },
             ApiKey::DescribeTopicPartitions => VersionRange { min: 0, max: 0 },
+            ApiKey::ShareGroupHeartbeat => VersionRange { min: 1, max: 1 },
+            ApiKey::ShareGroupDescribe => VersionRange { min: 1, max: 1 },
+            ApiKey::ShareFetch => VersionRange { min: 1, max: 1 },
+            ApiKey::ShareAcknowledge => VersionRange { min: 1, max: 1 },
             ApiKey::AddRaftVoter => VersionRange { min: 0, max: 0 },
             ApiKey::RemoveRaftVoter => VersionRange { min: 0, max: 0 },
             ApiKey::UpdateRaftVoter => VersionRange { min: 0, max: 0 },
+            ApiKey::InitializeShareGroupState => VersionRange { min: 0, max: 0 },
+            ApiKey::ReadShareGroupState => VersionRange { min: 0, max: 0 },
+            ApiKey::WriteShareGroupState => VersionRange { min: 0, max: 0 },
+            ApiKey::DeleteShareGroupState => VersionRange { min: 0, max: 0 },
+            ApiKey::ReadShareGroupStateSummary => VersionRange { min: 0, max: 0 },
+            ApiKey::DescribeShareGroupOffsets => VersionRange { min: 0, max: 0 },
+            ApiKey::AlterShareGroupOffsets => VersionRange { min: 0, max: 0 },
+            ApiKey::DeleteShareGroupOffsets => VersionRange { min: 0, max: 0 },
         }
     }
 
     /// Iterate through every ApiKey variant in the order of the internal code.
     pub fn iter() -> impl Iterator<Item = ApiKey> {
-        (0..i16::MAX).map_while(|i| ApiKey::try_from(i).ok())
+        (0..=92).filter_map(|i| ApiKey::try_from(i).ok())
     }
 }
 impl TryFrom<i16> for ApiKey {
@@ -1480,13 +1703,29 @@ impl TryFrom<i16> for ApiKey {
             }
             x if x == ApiKey::PushTelemetry as i16 => Ok(ApiKey::PushTelemetry),
             x if x == ApiKey::AssignReplicasToDirs as i16 => Ok(ApiKey::AssignReplicasToDirs),
-            x if x == ApiKey::ListClientMetricsResources as i16 => {
-                Ok(ApiKey::ListClientMetricsResources)
-            }
+            x if x == ApiKey::ListConfigResources as i16 => Ok(ApiKey::ListConfigResources),
             x if x == ApiKey::DescribeTopicPartitions as i16 => Ok(ApiKey::DescribeTopicPartitions),
+            x if x == ApiKey::ShareGroupHeartbeat as i16 => Ok(ApiKey::ShareGroupHeartbeat),
+            x if x == ApiKey::ShareGroupDescribe as i16 => Ok(ApiKey::ShareGroupDescribe),
+            x if x == ApiKey::ShareFetch as i16 => Ok(ApiKey::ShareFetch),
+            x if x == ApiKey::ShareAcknowledge as i16 => Ok(ApiKey::ShareAcknowledge),
             x if x == ApiKey::AddRaftVoter as i16 => Ok(ApiKey::AddRaftVoter),
             x if x == ApiKey::RemoveRaftVoter as i16 => Ok(ApiKey::RemoveRaftVoter),
             x if x == ApiKey::UpdateRaftVoter as i16 => Ok(ApiKey::UpdateRaftVoter),
+            x if x == ApiKey::InitializeShareGroupState as i16 => {
+                Ok(ApiKey::InitializeShareGroupState)
+            }
+            x if x == ApiKey::ReadShareGroupState as i16 => Ok(ApiKey::ReadShareGroupState),
+            x if x == ApiKey::WriteShareGroupState as i16 => Ok(ApiKey::WriteShareGroupState),
+            x if x == ApiKey::DeleteShareGroupState as i16 => Ok(ApiKey::DeleteShareGroupState),
+            x if x == ApiKey::ReadShareGroupStateSummary as i16 => {
+                Ok(ApiKey::ReadShareGroupStateSummary)
+            }
+            x if x == ApiKey::DescribeShareGroupOffsets as i16 => {
+                Ok(ApiKey::DescribeShareGroupOffsets)
+            }
+            x if x == ApiKey::AlterShareGroupOffsets as i16 => Ok(ApiKey::AlterShareGroupOffsets),
+            x if x == ApiKey::DeleteShareGroupOffsets as i16 => Ok(ApiKey::DeleteShareGroupOffsets),
             _ => Err(()),
         }
     }
@@ -1637,16 +1876,40 @@ pub enum RequestKind {
     PushTelemetry(PushTelemetryRequest),
     /// AssignReplicasToDirsRequest,
     AssignReplicasToDirs(AssignReplicasToDirsRequest),
-    /// ListClientMetricsResourcesRequest,
-    ListClientMetricsResources(ListClientMetricsResourcesRequest),
+    /// ListConfigResourcesRequest,
+    ListConfigResources(ListConfigResourcesRequest),
     /// DescribeTopicPartitionsRequest,
     DescribeTopicPartitions(DescribeTopicPartitionsRequest),
+    /// ShareGroupHeartbeatRequest,
+    ShareGroupHeartbeat(ShareGroupHeartbeatRequest),
+    /// ShareGroupDescribeRequest,
+    ShareGroupDescribe(ShareGroupDescribeRequest),
+    /// ShareFetchRequest,
+    ShareFetch(ShareFetchRequest),
+    /// ShareAcknowledgeRequest,
+    ShareAcknowledge(ShareAcknowledgeRequest),
     /// AddRaftVoterRequest,
     AddRaftVoter(AddRaftVoterRequest),
     /// RemoveRaftVoterRequest,
     RemoveRaftVoter(RemoveRaftVoterRequest),
     /// UpdateRaftVoterRequest,
     UpdateRaftVoter(UpdateRaftVoterRequest),
+    /// InitializeShareGroupStateRequest,
+    InitializeShareGroupState(InitializeShareGroupStateRequest),
+    /// ReadShareGroupStateRequest,
+    ReadShareGroupState(ReadShareGroupStateRequest),
+    /// WriteShareGroupStateRequest,
+    WriteShareGroupState(WriteShareGroupStateRequest),
+    /// DeleteShareGroupStateRequest,
+    DeleteShareGroupState(DeleteShareGroupStateRequest),
+    /// ReadShareGroupStateSummaryRequest,
+    ReadShareGroupStateSummary(ReadShareGroupStateSummaryRequest),
+    /// DescribeShareGroupOffsetsRequest,
+    DescribeShareGroupOffsets(DescribeShareGroupOffsetsRequest),
+    /// AlterShareGroupOffsetsRequest,
+    AlterShareGroupOffsets(AlterShareGroupOffsetsRequest),
+    /// DeleteShareGroupOffsetsRequest,
+    DeleteShareGroupOffsets(DeleteShareGroupOffsetsRequest),
 }
 
 #[cfg(feature = "messages_enums")]
@@ -1725,11 +1988,23 @@ impl RequestKind {
             RequestKind::GetTelemetrySubscriptions(x) => encode(x, bytes, version),
             RequestKind::PushTelemetry(x) => encode(x, bytes, version),
             RequestKind::AssignReplicasToDirs(x) => encode(x, bytes, version),
-            RequestKind::ListClientMetricsResources(x) => encode(x, bytes, version),
+            RequestKind::ListConfigResources(x) => encode(x, bytes, version),
             RequestKind::DescribeTopicPartitions(x) => encode(x, bytes, version),
+            RequestKind::ShareGroupHeartbeat(x) => encode(x, bytes, version),
+            RequestKind::ShareGroupDescribe(x) => encode(x, bytes, version),
+            RequestKind::ShareFetch(x) => encode(x, bytes, version),
+            RequestKind::ShareAcknowledge(x) => encode(x, bytes, version),
             RequestKind::AddRaftVoter(x) => encode(x, bytes, version),
             RequestKind::RemoveRaftVoter(x) => encode(x, bytes, version),
             RequestKind::UpdateRaftVoter(x) => encode(x, bytes, version),
+            RequestKind::InitializeShareGroupState(x) => encode(x, bytes, version),
+            RequestKind::ReadShareGroupState(x) => encode(x, bytes, version),
+            RequestKind::WriteShareGroupState(x) => encode(x, bytes, version),
+            RequestKind::DeleteShareGroupState(x) => encode(x, bytes, version),
+            RequestKind::ReadShareGroupStateSummary(x) => encode(x, bytes, version),
+            RequestKind::DescribeShareGroupOffsets(x) => encode(x, bytes, version),
+            RequestKind::AlterShareGroupOffsets(x) => encode(x, bytes, version),
+            RequestKind::DeleteShareGroupOffsets(x) => encode(x, bytes, version),
         }
     }
     /// Decode the message from the provided buffer and version
@@ -1856,15 +2131,47 @@ impl RequestKind {
             ApiKey::AssignReplicasToDirs => {
                 Ok(RequestKind::AssignReplicasToDirs(decode(bytes, version)?))
             }
-            ApiKey::ListClientMetricsResources => Ok(RequestKind::ListClientMetricsResources(
-                decode(bytes, version)?,
-            )),
+            ApiKey::ListConfigResources => {
+                Ok(RequestKind::ListConfigResources(decode(bytes, version)?))
+            }
             ApiKey::DescribeTopicPartitions => Ok(RequestKind::DescribeTopicPartitions(decode(
                 bytes, version,
             )?)),
+            ApiKey::ShareGroupHeartbeat => {
+                Ok(RequestKind::ShareGroupHeartbeat(decode(bytes, version)?))
+            }
+            ApiKey::ShareGroupDescribe => {
+                Ok(RequestKind::ShareGroupDescribe(decode(bytes, version)?))
+            }
+            ApiKey::ShareFetch => Ok(RequestKind::ShareFetch(decode(bytes, version)?)),
+            ApiKey::ShareAcknowledge => Ok(RequestKind::ShareAcknowledge(decode(bytes, version)?)),
             ApiKey::AddRaftVoter => Ok(RequestKind::AddRaftVoter(decode(bytes, version)?)),
             ApiKey::RemoveRaftVoter => Ok(RequestKind::RemoveRaftVoter(decode(bytes, version)?)),
             ApiKey::UpdateRaftVoter => Ok(RequestKind::UpdateRaftVoter(decode(bytes, version)?)),
+            ApiKey::InitializeShareGroupState => Ok(RequestKind::InitializeShareGroupState(
+                decode(bytes, version)?,
+            )),
+            ApiKey::ReadShareGroupState => {
+                Ok(RequestKind::ReadShareGroupState(decode(bytes, version)?))
+            }
+            ApiKey::WriteShareGroupState => {
+                Ok(RequestKind::WriteShareGroupState(decode(bytes, version)?))
+            }
+            ApiKey::DeleteShareGroupState => {
+                Ok(RequestKind::DeleteShareGroupState(decode(bytes, version)?))
+            }
+            ApiKey::ReadShareGroupStateSummary => Ok(RequestKind::ReadShareGroupStateSummary(
+                decode(bytes, version)?,
+            )),
+            ApiKey::DescribeShareGroupOffsets => Ok(RequestKind::DescribeShareGroupOffsets(
+                decode(bytes, version)?,
+            )),
+            ApiKey::AlterShareGroupOffsets => {
+                Ok(RequestKind::AlterShareGroupOffsets(decode(bytes, version)?))
+            }
+            ApiKey::DeleteShareGroupOffsets => Ok(RequestKind::DeleteShareGroupOffsets(decode(
+                bytes, version,
+            )?)),
         }
     }
 }
@@ -2359,9 +2666,9 @@ impl From<AssignReplicasToDirsRequest> for RequestKind {
 }
 
 #[cfg(feature = "messages_enums")]
-impl From<ListClientMetricsResourcesRequest> for RequestKind {
-    fn from(value: ListClientMetricsResourcesRequest) -> RequestKind {
-        RequestKind::ListClientMetricsResources(value)
+impl From<ListConfigResourcesRequest> for RequestKind {
+    fn from(value: ListConfigResourcesRequest) -> RequestKind {
+        RequestKind::ListConfigResources(value)
     }
 }
 
@@ -2369,6 +2676,34 @@ impl From<ListClientMetricsResourcesRequest> for RequestKind {
 impl From<DescribeTopicPartitionsRequest> for RequestKind {
     fn from(value: DescribeTopicPartitionsRequest) -> RequestKind {
         RequestKind::DescribeTopicPartitions(value)
+    }
+}
+
+#[cfg(feature = "messages_enums")]
+impl From<ShareGroupHeartbeatRequest> for RequestKind {
+    fn from(value: ShareGroupHeartbeatRequest) -> RequestKind {
+        RequestKind::ShareGroupHeartbeat(value)
+    }
+}
+
+#[cfg(feature = "messages_enums")]
+impl From<ShareGroupDescribeRequest> for RequestKind {
+    fn from(value: ShareGroupDescribeRequest) -> RequestKind {
+        RequestKind::ShareGroupDescribe(value)
+    }
+}
+
+#[cfg(feature = "messages_enums")]
+impl From<ShareFetchRequest> for RequestKind {
+    fn from(value: ShareFetchRequest) -> RequestKind {
+        RequestKind::ShareFetch(value)
+    }
+}
+
+#[cfg(feature = "messages_enums")]
+impl From<ShareAcknowledgeRequest> for RequestKind {
+    fn from(value: ShareAcknowledgeRequest) -> RequestKind {
+        RequestKind::ShareAcknowledge(value)
     }
 }
 
@@ -2390,6 +2725,62 @@ impl From<RemoveRaftVoterRequest> for RequestKind {
 impl From<UpdateRaftVoterRequest> for RequestKind {
     fn from(value: UpdateRaftVoterRequest) -> RequestKind {
         RequestKind::UpdateRaftVoter(value)
+    }
+}
+
+#[cfg(feature = "messages_enums")]
+impl From<InitializeShareGroupStateRequest> for RequestKind {
+    fn from(value: InitializeShareGroupStateRequest) -> RequestKind {
+        RequestKind::InitializeShareGroupState(value)
+    }
+}
+
+#[cfg(feature = "messages_enums")]
+impl From<ReadShareGroupStateRequest> for RequestKind {
+    fn from(value: ReadShareGroupStateRequest) -> RequestKind {
+        RequestKind::ReadShareGroupState(value)
+    }
+}
+
+#[cfg(feature = "messages_enums")]
+impl From<WriteShareGroupStateRequest> for RequestKind {
+    fn from(value: WriteShareGroupStateRequest) -> RequestKind {
+        RequestKind::WriteShareGroupState(value)
+    }
+}
+
+#[cfg(feature = "messages_enums")]
+impl From<DeleteShareGroupStateRequest> for RequestKind {
+    fn from(value: DeleteShareGroupStateRequest) -> RequestKind {
+        RequestKind::DeleteShareGroupState(value)
+    }
+}
+
+#[cfg(feature = "messages_enums")]
+impl From<ReadShareGroupStateSummaryRequest> for RequestKind {
+    fn from(value: ReadShareGroupStateSummaryRequest) -> RequestKind {
+        RequestKind::ReadShareGroupStateSummary(value)
+    }
+}
+
+#[cfg(feature = "messages_enums")]
+impl From<DescribeShareGroupOffsetsRequest> for RequestKind {
+    fn from(value: DescribeShareGroupOffsetsRequest) -> RequestKind {
+        RequestKind::DescribeShareGroupOffsets(value)
+    }
+}
+
+#[cfg(feature = "messages_enums")]
+impl From<AlterShareGroupOffsetsRequest> for RequestKind {
+    fn from(value: AlterShareGroupOffsetsRequest) -> RequestKind {
+        RequestKind::AlterShareGroupOffsets(value)
+    }
+}
+
+#[cfg(feature = "messages_enums")]
+impl From<DeleteShareGroupOffsetsRequest> for RequestKind {
+    fn from(value: DeleteShareGroupOffsetsRequest) -> RequestKind {
+        RequestKind::DeleteShareGroupOffsets(value)
     }
 }
 
@@ -2562,16 +2953,40 @@ pub enum ResponseKind {
     PushTelemetry(PushTelemetryResponse),
     /// AssignReplicasToDirsResponse,
     AssignReplicasToDirs(AssignReplicasToDirsResponse),
-    /// ListClientMetricsResourcesResponse,
-    ListClientMetricsResources(ListClientMetricsResourcesResponse),
+    /// ListConfigResourcesResponse,
+    ListConfigResources(ListConfigResourcesResponse),
     /// DescribeTopicPartitionsResponse,
     DescribeTopicPartitions(DescribeTopicPartitionsResponse),
+    /// ShareGroupHeartbeatResponse,
+    ShareGroupHeartbeat(ShareGroupHeartbeatResponse),
+    /// ShareGroupDescribeResponse,
+    ShareGroupDescribe(ShareGroupDescribeResponse),
+    /// ShareFetchResponse,
+    ShareFetch(ShareFetchResponse),
+    /// ShareAcknowledgeResponse,
+    ShareAcknowledge(ShareAcknowledgeResponse),
     /// AddRaftVoterResponse,
     AddRaftVoter(AddRaftVoterResponse),
     /// RemoveRaftVoterResponse,
     RemoveRaftVoter(RemoveRaftVoterResponse),
     /// UpdateRaftVoterResponse,
     UpdateRaftVoter(UpdateRaftVoterResponse),
+    /// InitializeShareGroupStateResponse,
+    InitializeShareGroupState(InitializeShareGroupStateResponse),
+    /// ReadShareGroupStateResponse,
+    ReadShareGroupState(ReadShareGroupStateResponse),
+    /// WriteShareGroupStateResponse,
+    WriteShareGroupState(WriteShareGroupStateResponse),
+    /// DeleteShareGroupStateResponse,
+    DeleteShareGroupState(DeleteShareGroupStateResponse),
+    /// ReadShareGroupStateSummaryResponse,
+    ReadShareGroupStateSummary(ReadShareGroupStateSummaryResponse),
+    /// DescribeShareGroupOffsetsResponse,
+    DescribeShareGroupOffsets(DescribeShareGroupOffsetsResponse),
+    /// AlterShareGroupOffsetsResponse,
+    AlterShareGroupOffsets(AlterShareGroupOffsetsResponse),
+    /// DeleteShareGroupOffsetsResponse,
+    DeleteShareGroupOffsets(DeleteShareGroupOffsetsResponse),
 }
 
 #[cfg(feature = "messages_enums")]
@@ -2650,11 +3065,23 @@ impl ResponseKind {
             ResponseKind::GetTelemetrySubscriptions(x) => encode(x, bytes, version),
             ResponseKind::PushTelemetry(x) => encode(x, bytes, version),
             ResponseKind::AssignReplicasToDirs(x) => encode(x, bytes, version),
-            ResponseKind::ListClientMetricsResources(x) => encode(x, bytes, version),
+            ResponseKind::ListConfigResources(x) => encode(x, bytes, version),
             ResponseKind::DescribeTopicPartitions(x) => encode(x, bytes, version),
+            ResponseKind::ShareGroupHeartbeat(x) => encode(x, bytes, version),
+            ResponseKind::ShareGroupDescribe(x) => encode(x, bytes, version),
+            ResponseKind::ShareFetch(x) => encode(x, bytes, version),
+            ResponseKind::ShareAcknowledge(x) => encode(x, bytes, version),
             ResponseKind::AddRaftVoter(x) => encode(x, bytes, version),
             ResponseKind::RemoveRaftVoter(x) => encode(x, bytes, version),
             ResponseKind::UpdateRaftVoter(x) => encode(x, bytes, version),
+            ResponseKind::InitializeShareGroupState(x) => encode(x, bytes, version),
+            ResponseKind::ReadShareGroupState(x) => encode(x, bytes, version),
+            ResponseKind::WriteShareGroupState(x) => encode(x, bytes, version),
+            ResponseKind::DeleteShareGroupState(x) => encode(x, bytes, version),
+            ResponseKind::ReadShareGroupStateSummary(x) => encode(x, bytes, version),
+            ResponseKind::DescribeShareGroupOffsets(x) => encode(x, bytes, version),
+            ResponseKind::AlterShareGroupOffsets(x) => encode(x, bytes, version),
+            ResponseKind::DeleteShareGroupOffsets(x) => encode(x, bytes, version),
         }
     }
     /// Decode the message from the provided buffer and version
@@ -2781,15 +3208,47 @@ impl ResponseKind {
             ApiKey::AssignReplicasToDirs => {
                 Ok(ResponseKind::AssignReplicasToDirs(decode(bytes, version)?))
             }
-            ApiKey::ListClientMetricsResources => Ok(ResponseKind::ListClientMetricsResources(
-                decode(bytes, version)?,
-            )),
+            ApiKey::ListConfigResources => {
+                Ok(ResponseKind::ListConfigResources(decode(bytes, version)?))
+            }
             ApiKey::DescribeTopicPartitions => Ok(ResponseKind::DescribeTopicPartitions(decode(
                 bytes, version,
             )?)),
+            ApiKey::ShareGroupHeartbeat => {
+                Ok(ResponseKind::ShareGroupHeartbeat(decode(bytes, version)?))
+            }
+            ApiKey::ShareGroupDescribe => {
+                Ok(ResponseKind::ShareGroupDescribe(decode(bytes, version)?))
+            }
+            ApiKey::ShareFetch => Ok(ResponseKind::ShareFetch(decode(bytes, version)?)),
+            ApiKey::ShareAcknowledge => Ok(ResponseKind::ShareAcknowledge(decode(bytes, version)?)),
             ApiKey::AddRaftVoter => Ok(ResponseKind::AddRaftVoter(decode(bytes, version)?)),
             ApiKey::RemoveRaftVoter => Ok(ResponseKind::RemoveRaftVoter(decode(bytes, version)?)),
             ApiKey::UpdateRaftVoter => Ok(ResponseKind::UpdateRaftVoter(decode(bytes, version)?)),
+            ApiKey::InitializeShareGroupState => Ok(ResponseKind::InitializeShareGroupState(
+                decode(bytes, version)?,
+            )),
+            ApiKey::ReadShareGroupState => {
+                Ok(ResponseKind::ReadShareGroupState(decode(bytes, version)?))
+            }
+            ApiKey::WriteShareGroupState => {
+                Ok(ResponseKind::WriteShareGroupState(decode(bytes, version)?))
+            }
+            ApiKey::DeleteShareGroupState => {
+                Ok(ResponseKind::DeleteShareGroupState(decode(bytes, version)?))
+            }
+            ApiKey::ReadShareGroupStateSummary => Ok(ResponseKind::ReadShareGroupStateSummary(
+                decode(bytes, version)?,
+            )),
+            ApiKey::DescribeShareGroupOffsets => Ok(ResponseKind::DescribeShareGroupOffsets(
+                decode(bytes, version)?,
+            )),
+            ApiKey::AlterShareGroupOffsets => Ok(ResponseKind::AlterShareGroupOffsets(decode(
+                bytes, version,
+            )?)),
+            ApiKey::DeleteShareGroupOffsets => Ok(ResponseKind::DeleteShareGroupOffsets(decode(
+                bytes, version,
+            )?)),
         }
     }
     /// Get the version of request header that needs to be prepended to this message
@@ -2911,15 +3370,47 @@ impl ResponseKind {
             ResponseKind::AssignReplicasToDirs(_) => {
                 AssignReplicasToDirsResponse::header_version(version)
             }
-            ResponseKind::ListClientMetricsResources(_) => {
-                ListClientMetricsResourcesResponse::header_version(version)
+            ResponseKind::ListConfigResources(_) => {
+                ListConfigResourcesResponse::header_version(version)
             }
             ResponseKind::DescribeTopicPartitions(_) => {
                 DescribeTopicPartitionsResponse::header_version(version)
             }
+            ResponseKind::ShareGroupHeartbeat(_) => {
+                ShareGroupHeartbeatResponse::header_version(version)
+            }
+            ResponseKind::ShareGroupDescribe(_) => {
+                ShareGroupDescribeResponse::header_version(version)
+            }
+            ResponseKind::ShareFetch(_) => ShareFetchResponse::header_version(version),
+            ResponseKind::ShareAcknowledge(_) => ShareAcknowledgeResponse::header_version(version),
             ResponseKind::AddRaftVoter(_) => AddRaftVoterResponse::header_version(version),
             ResponseKind::RemoveRaftVoter(_) => RemoveRaftVoterResponse::header_version(version),
             ResponseKind::UpdateRaftVoter(_) => UpdateRaftVoterResponse::header_version(version),
+            ResponseKind::InitializeShareGroupState(_) => {
+                InitializeShareGroupStateResponse::header_version(version)
+            }
+            ResponseKind::ReadShareGroupState(_) => {
+                ReadShareGroupStateResponse::header_version(version)
+            }
+            ResponseKind::WriteShareGroupState(_) => {
+                WriteShareGroupStateResponse::header_version(version)
+            }
+            ResponseKind::DeleteShareGroupState(_) => {
+                DeleteShareGroupStateResponse::header_version(version)
+            }
+            ResponseKind::ReadShareGroupStateSummary(_) => {
+                ReadShareGroupStateSummaryResponse::header_version(version)
+            }
+            ResponseKind::DescribeShareGroupOffsets(_) => {
+                DescribeShareGroupOffsetsResponse::header_version(version)
+            }
+            ResponseKind::AlterShareGroupOffsets(_) => {
+                AlterShareGroupOffsetsResponse::header_version(version)
+            }
+            ResponseKind::DeleteShareGroupOffsets(_) => {
+                DeleteShareGroupOffsetsResponse::header_version(version)
+            }
         }
     }
 }
@@ -3415,9 +3906,9 @@ impl From<AssignReplicasToDirsResponse> for ResponseKind {
 }
 
 #[cfg(feature = "messages_enums")]
-impl From<ListClientMetricsResourcesResponse> for ResponseKind {
-    fn from(value: ListClientMetricsResourcesResponse) -> ResponseKind {
-        ResponseKind::ListClientMetricsResources(value)
+impl From<ListConfigResourcesResponse> for ResponseKind {
+    fn from(value: ListConfigResourcesResponse) -> ResponseKind {
+        ResponseKind::ListConfigResources(value)
     }
 }
 
@@ -3425,6 +3916,34 @@ impl From<ListClientMetricsResourcesResponse> for ResponseKind {
 impl From<DescribeTopicPartitionsResponse> for ResponseKind {
     fn from(value: DescribeTopicPartitionsResponse) -> ResponseKind {
         ResponseKind::DescribeTopicPartitions(value)
+    }
+}
+
+#[cfg(feature = "messages_enums")]
+impl From<ShareGroupHeartbeatResponse> for ResponseKind {
+    fn from(value: ShareGroupHeartbeatResponse) -> ResponseKind {
+        ResponseKind::ShareGroupHeartbeat(value)
+    }
+}
+
+#[cfg(feature = "messages_enums")]
+impl From<ShareGroupDescribeResponse> for ResponseKind {
+    fn from(value: ShareGroupDescribeResponse) -> ResponseKind {
+        ResponseKind::ShareGroupDescribe(value)
+    }
+}
+
+#[cfg(feature = "messages_enums")]
+impl From<ShareFetchResponse> for ResponseKind {
+    fn from(value: ShareFetchResponse) -> ResponseKind {
+        ResponseKind::ShareFetch(value)
+    }
+}
+
+#[cfg(feature = "messages_enums")]
+impl From<ShareAcknowledgeResponse> for ResponseKind {
+    fn from(value: ShareAcknowledgeResponse) -> ResponseKind {
+        ResponseKind::ShareAcknowledge(value)
     }
 }
 
@@ -3446,6 +3965,62 @@ impl From<RemoveRaftVoterResponse> for ResponseKind {
 impl From<UpdateRaftVoterResponse> for ResponseKind {
     fn from(value: UpdateRaftVoterResponse) -> ResponseKind {
         ResponseKind::UpdateRaftVoter(value)
+    }
+}
+
+#[cfg(feature = "messages_enums")]
+impl From<InitializeShareGroupStateResponse> for ResponseKind {
+    fn from(value: InitializeShareGroupStateResponse) -> ResponseKind {
+        ResponseKind::InitializeShareGroupState(value)
+    }
+}
+
+#[cfg(feature = "messages_enums")]
+impl From<ReadShareGroupStateResponse> for ResponseKind {
+    fn from(value: ReadShareGroupStateResponse) -> ResponseKind {
+        ResponseKind::ReadShareGroupState(value)
+    }
+}
+
+#[cfg(feature = "messages_enums")]
+impl From<WriteShareGroupStateResponse> for ResponseKind {
+    fn from(value: WriteShareGroupStateResponse) -> ResponseKind {
+        ResponseKind::WriteShareGroupState(value)
+    }
+}
+
+#[cfg(feature = "messages_enums")]
+impl From<DeleteShareGroupStateResponse> for ResponseKind {
+    fn from(value: DeleteShareGroupStateResponse) -> ResponseKind {
+        ResponseKind::DeleteShareGroupState(value)
+    }
+}
+
+#[cfg(feature = "messages_enums")]
+impl From<ReadShareGroupStateSummaryResponse> for ResponseKind {
+    fn from(value: ReadShareGroupStateSummaryResponse) -> ResponseKind {
+        ResponseKind::ReadShareGroupStateSummary(value)
+    }
+}
+
+#[cfg(feature = "messages_enums")]
+impl From<DescribeShareGroupOffsetsResponse> for ResponseKind {
+    fn from(value: DescribeShareGroupOffsetsResponse) -> ResponseKind {
+        ResponseKind::DescribeShareGroupOffsets(value)
+    }
+}
+
+#[cfg(feature = "messages_enums")]
+impl From<AlterShareGroupOffsetsResponse> for ResponseKind {
+    fn from(value: AlterShareGroupOffsetsResponse) -> ResponseKind {
+        ResponseKind::AlterShareGroupOffsets(value)
+    }
+}
+
+#[cfg(feature = "messages_enums")]
+impl From<DeleteShareGroupOffsetsResponse> for ResponseKind {
+    fn from(value: DeleteShareGroupOffsetsResponse) -> ResponseKind {
+        ResponseKind::DeleteShareGroupOffsets(value)
     }
 }
 
@@ -3491,7 +4066,7 @@ impl std::fmt::Debug for BrokerId {
 }
 impl NewType<i32> for BrokerId {}
 
-/// The group ID string.
+/// The group identifier.
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default)]
 pub struct GroupId(pub StrBytes);
 
