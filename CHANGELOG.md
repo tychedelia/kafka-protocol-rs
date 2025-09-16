@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.16.1
+
+- Fix ApiKey::iter which would terminate early in 0.16.0
+
 ## 0.16.0
 
 - Added support for kafka 4.0
