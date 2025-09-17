@@ -130,7 +130,7 @@ pub fn run(messages_module_dir: &str, mut input_file_paths: Vec<PathBuf>) -> Res
     }
 
     writeln!(m, "/// Valid API keys in the Kafka protocol.")?;
-    writeln!(m, "#[derive(Debug, Clone, Copy, PartialEq, Eq)]")?;
+    writeln!(m, "#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]")?;
     writeln!(m, "pub enum ApiKey {{")?;
     for (api_key, request_type) in request_types.iter() {
         writeln!(m, "    /// API key for request {}", request_type)?;
