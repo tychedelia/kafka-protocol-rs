@@ -415,7 +415,12 @@ impl RecordBatchEncoder {
     }
 }
 
-struct RecordIterator {
+/// An iterator over records in a Kafka record batch.
+///
+/// This iterator provides a way to sequentially access individual records
+/// within a decoded record batch, handling decompression and deserialization
+/// as needed.
+pub struct RecordIterator {
     buf: Bytes,
     batch_decode_info: BatchDecodeInfo,
     current: i64,
@@ -438,8 +443,12 @@ impl Iterator for RecordIterator {
 }
 
 impl RecordIterator {
-    fn new(buf: &mut Bytes, version: i8) -> Self {
+    fn new(buf: &mut Bytes) -> Self {
+        let version = buf
+            .try_peek_bytes(MAGIC_BYTE_OFFSET..(MAGIC_BYTE_OFFSET + 1))
+            .unwrap()[0] as i8;
         let (batch_decode_info, buf) = RecordBatchDecoder::decode_batch_info(buf, version).unwrap();
+
         RecordIterator {
             buf,
             batch_decode_info,
@@ -452,9 +461,8 @@ impl RecordBatchDecoder {
     /// Decode the provided buffer into an iterator over Result<Record> items.
     /// # Arguments
     /// * `buf` - The buffer to decode.
-    /// * `version` - The version of the record batch.
-    pub fn records(buf: &mut Bytes, version: i8) -> Box<dyn Iterator<Item = Result<Record>>> {
-        Box::new(RecordIterator::new(buf, version))
+    pub fn records(buf: &mut Bytes) -> RecordIterator {
+        RecordIterator::new(buf)
     }
 
     /// Decode the provided buffer into a vec of records.
@@ -1098,7 +1106,7 @@ mod tests {
         )
         .unwrap();
 
-        let decoded_records: Vec<Record> = RecordBatchDecoder::records(&mut buf.freeze(), 2)
+        let decoded_records: Vec<Record> = RecordBatchDecoder::records(&mut buf.freeze())
             .map(|r| r.unwrap())
             .collect();
 
