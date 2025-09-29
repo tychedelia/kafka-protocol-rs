@@ -99,6 +99,10 @@ pub const NO_PARTITION_LEADER_EPOCH: i32 = -1;
 pub const NO_SEQUENCE: i32 = -1;
 /// Value to indicate missing timestamp.
 pub const NO_TIMESTAMP: i64 = -1;
+// In this range of versions of the Kafka protocol
+// the only valid record batch request version is 2.
+// 0-1 are officially deprecated with Kafka 4.0
+const CURRENT_VALID_RECORD_BATCH_VERSION: i8 = 2;
 
 #[derive(Debug, Clone)]
 /// Batch encoder for Kafka records.
@@ -442,7 +446,7 @@ impl Iterator for RecordIterator {
         Some(Record::decode_new(
             &mut self.buf,
             &self.batch_decode_info,
-            2,
+            CURRENT_VALID_RECORD_BATCH_VERSION,
         ))
     }
 }
