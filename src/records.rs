@@ -431,6 +431,11 @@ impl Iterator for RecordIterator {
 
     fn next(&mut self) -> Option<Result<Record>> {
         if self.current >= self.batch_decode_info.record_count as i64 {
+            debug_assert!(
+                !self.has_bytes_remaining(),
+                "Iterator exhausted but buffer still has {} bytes remaining",
+                self.buf.len()
+            );
             return None;
         }
         self.current += 1;
@@ -454,6 +459,12 @@ impl RecordIterator {
             batch_decode_info,
             current: 0,
         }
+    }
+
+    /// Returns `true` if there are bytes remaining in the buffer after iteration is complete.
+    /// This can be used to detect if the record batch contains extra data beyond the expected records.
+    pub fn has_bytes_remaining(&self) -> bool {
+        !self.buf.is_empty()
     }
 }
 
@@ -1106,11 +1117,11 @@ mod tests {
         )
         .unwrap();
 
-        let decoded_records: Vec<Record> = RecordBatchDecoder::records(&mut buf.freeze())
-            .map(|r| r.unwrap())
-            .collect();
+        let mut iterator = RecordBatchDecoder::records(&mut buf.freeze());
+        let decoded_records: Vec<Record> = iterator.by_ref().map(|r| r.unwrap()).collect();
 
         assert_eq!(records_to_encode, decoded_records);
+        assert!(!iterator.has_bytes_remaining());
     }
 
     #[test]
