@@ -26,6 +26,13 @@ mod str_bytes {
     pub struct StrBytes(Bytes);
 
     impl StrBytes {
+        /// Creates a new empty `StrBytes`.
+        ///
+        /// This will not allocate and the returned `StrBytes` handle will be empty.
+        pub const fn new() -> Self {
+            Self(Bytes::new())
+        }
+
         /// Construct a [StrBytes] from the given [Bytes] instance,
         /// checking that it contains valid UTF-8 data.
         pub fn from_utf8(bytes: Bytes) -> Result<Self, Utf8Error> {
@@ -34,7 +41,7 @@ mod str_bytes {
         }
 
         /// Construct a [StrBytes] from the provided static [str].
-        pub fn from_static_str(s: &'static str) -> Self {
+        pub const fn from_static_str(s: &'static str) -> Self {
             Self(Bytes::from_static(s.as_bytes()))
         }
 
