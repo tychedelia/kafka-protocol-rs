@@ -15,7 +15,7 @@ use testcontainers::{
 };
 
 pub fn start_kafka() -> Container<GenericImage> {
-    GenericImage::new("bitnami/kafka", "3.6.1-debian-11-r24")
+    GenericImage::new("bitnamilegacy/kafka", "3.6.1-debian-11-r24")
         .with_exposed_port(ContainerPort::Tcp(9092))
         .with_wait_for(WaitFor::Log(LogWaitStrategy::stdout(
             b"Kafka Server started",
