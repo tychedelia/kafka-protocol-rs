@@ -2,6 +2,9 @@
 
 ## 0.16.1
 
+- Breaking change: fix snappy compression to match the upstream java algorithm.
+  This makes it possible to decompress bytes compressed by the upstream java
+  kafka libraries.
 - Fix ApiKey::iter which would terminate early in 0.16.0
 
 ## 0.16.0
