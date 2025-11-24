@@ -64,11 +64,26 @@ impl<B: ByteBuf> Decompressor<B> for Snappy {
         F: FnOnce(&mut Self::Buf) -> Result<R>,
     {
         // See https://github.com/xerial/snappy-java?tab=readme-ov-file#compatibility-notes
-        let magic = compressed
+        if !compressed.has_remaining() {
+            anyhow::bail!("expected some bytes in snappy stream");
+        }
+
+        // We fall back to non-Kafka "raw" snappy compression if the magic header is not present
+        // just like the [Java implementation](https://github.com/xerial/snappy-java/blob/48b31663c8b9d01d758368a26416ef6194045c5f/src/main/java/org/xerial/snappy/SnappyInputStream.java#L114).
+        if compressed
             .try_get_bytes(MAGIC_HEADER.len())
-            .context("not enough bytes for magic header")?;
-        if *magic != MAGIC_HEADER[..] {
-            anyhow::bail!("invalid snappy magic header");
+            .ok()
+            .is_none_or(|magic| *magic != MAGIC_HEADER[..])
+        {
+            let compressed = compressed.copy_to_bytes(compressed.remaining());
+            let actual_len = decompress_len(&compressed).context("Failed to decompress snappy")?;
+            let mut tmp = BytesMut::new();
+            tmp.resize(actual_len, 0);
+            Decoder::new()
+                .decompress(&compressed, &mut tmp)
+                .context("Failed to decompress snappy")?;
+
+            return f(&mut tmp.into());
         }
 
         let mut uncompressed = BytesMut::new();
