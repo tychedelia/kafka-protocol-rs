@@ -221,4 +221,50 @@ mod tests {
         expected_bytes.advance(61);
         assert_eq!(expected_bytes, decompressed);
     }
+
+    #[test]
+    fn decompression_fallback() {
+        // Some pure snappy-compressed record batch bytes
+        let mut raw_bytes = Bytes::from_static(
+            b"\r0\x18\0\0\0\x01\x0csdfdsf\0",
+        );
+        let decompressed = Snappy::decompress(&mut raw_bytes, |buf| {
+            let mut out = Bytes::new();
+            std::mem::swap(buf, &mut out);
+            Ok(out)
+        })
+        .expect("valid snappy");
+
+        // The module doesn't expose record encode/decode directly so we have to put everything
+        // into a batch to compare the bytes
+        let mut expected_bytes = BytesMut::new();
+        let expected_record = Record {
+            transactional: false,
+            control: false,
+            partition_leader_epoch: 0,
+            producer_id: 0,
+            producer_epoch: 0,
+            sequence: 0,
+            timestamp_type: TimestampType::Creation,
+            offset: Default::default(),
+            timestamp: Default::default(),
+            key: None,
+            value: Some(Bytes::from_static(b"sdfdsf")),
+            headers: IndexMap::default(),
+        };
+        RecordBatchEncoder::encode(
+            &mut expected_bytes,
+            vec![&expected_record],
+            &RecordEncodeOptions {
+                version: 2,
+                compression: Compression::None,
+            },
+        )
+        .expect("should encode");
+
+        let mut expected_bytes = expected_bytes.freeze();
+        // Chop off all the record batch bytes before the records
+        expected_bytes.advance(61);
+        assert_eq!(expected_bytes, decompressed);
+    }
 }
