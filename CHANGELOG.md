@@ -1,10 +1,12 @@
 # Changelog
 
-## 0.16.1
+## 0.17.0
 
-- Breaking change: fix snappy compression to match the upstream java algorithm.
-  This makes it possible to decompress bytes compressed by the upstream java
-  kafka libraries.
+- Breaking change:
+  - change snappy compression to:
+    - encode using the upstream java algorithm
+    - and decode by autodetecting the upstream java algorithm or true snappy algorithm (previous kafka-protocol-rs encoding implementation)
+  - This change makes it possible to decompress bytes compressed by the upstream java
 - Fix ApiKey::iter which would terminate early in 0.16.0
 
 ## 0.16.0
