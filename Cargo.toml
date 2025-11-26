@@ -10,6 +10,7 @@ authors = [
     "belltoy <belltoy@gmail.com>",
 ]
 edition = "2021"
+rust-version = "1.82"
 license = "MIT/Apache-2.0"
 description = "Implementation of Kafka wire protocol."
 homepage = "https://github.com/tychedelia/kafka-protocol-rs"

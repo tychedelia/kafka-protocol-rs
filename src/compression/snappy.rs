@@ -64,11 +64,25 @@ impl<B: ByteBuf> Decompressor<B> for Snappy {
         F: FnOnce(&mut Self::Buf) -> Result<R>,
     {
         // See https://github.com/xerial/snappy-java?tab=readme-ov-file#compatibility-notes
-        let magic = compressed
+        if !compressed.has_remaining() {
+            anyhow::bail!("expected some bytes in snappy stream");
+        }
+
+        // We fall back to non-Kafka "raw" snappy compression if the magic header is not present
+        // just like the [Java implementation](https://github.com/xerial/snappy-java/blob/48b31663c8b9d01d758368a26416ef6194045c5f/src/main/java/org/xerial/snappy/SnappyInputStream.java#L114).
+        if compressed
             .try_get_bytes(MAGIC_HEADER.len())
-            .context("not enough bytes for magic header")?;
-        if *magic != MAGIC_HEADER[..] {
-            anyhow::bail!("invalid snappy magic header");
+            .ok()
+            .is_none_or(|magic| *magic != MAGIC_HEADER[..])
+        {
+            let compressed = compressed.copy_to_bytes(compressed.remaining());
+            let actual_len = decompress_len(&compressed).context("failed to read snappy header")?;
+            let mut tmp = BytesMut::zeroed(actual_len);
+            Decoder::new()
+                .decompress(&compressed, &mut tmp)
+                .context("failed to decompress raw snappy bytes")?;
+
+            return f(&mut tmp.into());
         }
 
         let mut uncompressed = BytesMut::new();
@@ -153,9 +167,9 @@ mod tests {
         })
         .expect("should compress");
 
-        // Some snappy-compressed record batch bytes
+        // Some upstream snappy-compressed record batch bytes
         let expected_bytes = Bytes::from_static(
-            b"\x82\x53\x4e\x41\x50\x50\x59\x00\x00\x00\x00\x01\x00\x00\x00\x01\x00\x00\x00\x0f\x0d\x30\x18\x00\x00\x00\x01\x0c\x73\x64\x66\x64\x73\x66\x00",
+            b"\x82\x53\x4e\x41\x50\x50\x59\x00\x00\x00\x00\x01\x00\x00\x00\x01\x00\x00\x00\x0f\x0d\x30\x18\x00\x00\x00\x01\x0csdfdsf\x00",
         );
 
         assert_eq!(expected_bytes, compressed);
@@ -163,10 +177,54 @@ mod tests {
 
     #[test]
     fn decompression() {
-        // Some snappy-compressed record batch bytes
+        // Some upstream kafka snappy-compressed record batch bytes
         let mut raw_bytes = Bytes::from_static(
-            b"\x82\x53\x4e\x41\x50\x50\x59\x00\x00\x00\x00\x01\x00\x00\x00\x01\x00\x00\x00\x0f\x0d\x30\x18\x00\x00\x00\x01\x0c\x73\x64\x66\x64\x73\x66\x00",
+            b"\x82\x53\x4e\x41\x50\x50\x59\x00\x00\x00\x00\x01\x00\x00\x00\x01\x00\x00\x00\x0f\x0d\x30\x18\x00\x00\x00\x01\x0csdfdsf\x00",
         );
+        let decompressed = Snappy::decompress(&mut raw_bytes, |buf| {
+            let mut out = Bytes::new();
+            std::mem::swap(buf, &mut out);
+            Ok(out)
+        })
+        .expect("valid snappy");
+
+        // The module doesn't expose record encode/decode directly so we have to put everything
+        // into a batch to compare the bytes
+        let mut expected_bytes = BytesMut::new();
+        let expected_record = Record {
+            transactional: false,
+            control: false,
+            partition_leader_epoch: 0,
+            producer_id: 0,
+            producer_epoch: 0,
+            sequence: 0,
+            timestamp_type: TimestampType::Creation,
+            offset: Default::default(),
+            timestamp: Default::default(),
+            key: None,
+            value: Some(Bytes::from_static(b"sdfdsf")),
+            headers: IndexMap::default(),
+        };
+        RecordBatchEncoder::encode(
+            &mut expected_bytes,
+            vec![&expected_record],
+            &RecordEncodeOptions {
+                version: 2,
+                compression: Compression::None,
+            },
+        )
+        .expect("should encode");
+
+        let mut expected_bytes = expected_bytes.freeze();
+        // Chop off all the record batch bytes before the records
+        expected_bytes.advance(61);
+        assert_eq!(expected_bytes, decompressed);
+    }
+
+    #[test]
+    fn decompression_fallback() {
+        // Some pure snappy-compressed record batch bytes
+        let mut raw_bytes = Bytes::from_static(b"\r0\x18\0\0\0\x01\x0csdfdsf\0");
         let decompressed = Snappy::decompress(&mut raw_bytes, |buf| {
             let mut out = Bytes::new();
             std::mem::swap(buf, &mut out);
