@@ -225,9 +225,7 @@ mod tests {
     #[test]
     fn decompression_fallback() {
         // Some pure snappy-compressed record batch bytes
-        let mut raw_bytes = Bytes::from_static(
-            b"\r0\x18\0\0\0\x01\x0csdfdsf\0",
-        );
+        let mut raw_bytes = Bytes::from_static(b"\r0\x18\0\0\0\x01\x0csdfdsf\0");
         let decompressed = Snappy::decompress(&mut raw_bytes, |buf| {
             let mut out = Bytes::new();
             std::mem::swap(buf, &mut out);
