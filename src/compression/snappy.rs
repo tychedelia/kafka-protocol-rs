@@ -77,8 +77,7 @@ impl<B: ByteBuf> Decompressor<B> for Snappy {
         {
             let compressed = compressed.copy_to_bytes(compressed.remaining());
             let actual_len = decompress_len(&compressed).context("failed to read snappy header")?;
-            let mut tmp = BytesMut::new();
-            tmp.resize(actual_len, 0);
+            let mut tmp = BytesMut::zeroed(actual_len);
             Decoder::new()
                 .decompress(&compressed, &mut tmp)
                 .context("failed to decompress raw snappy bytes")?;
