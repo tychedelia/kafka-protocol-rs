@@ -68,7 +68,9 @@
 //! and [`messages::ApiKey`] for matching on unknown requests and responses.
 //!
 //! A simple example for decoding an unknown message encoded in `buf`:
-//! ```rust
+//! ```
+//! # #[cfg(feature = "messages_enums")]
+//! # {
 //! use kafka_protocol::messages::{RequestHeader, ApiVersionsRequest, ApiKey, RequestKind};
 //! use kafka_protocol::protocol::{Encodable, Decodable, StrBytes, HeaderVersion, decode_request_header_from_buffer, encode_request_header_into_buffer};
 //! use bytes::{BytesMut, Buf};
@@ -87,9 +89,10 @@
 //!
 //!
 //! let header = decode_request_header_from_buffer(&mut buf).unwrap();
-//! let api_key = ApiKey::try_from(header.request_api_version);
+//! let api_key = ApiKey::try_from(header.request_api_key).unwrap();
 //! let req = match api_key {
-//!     ApiVersionsKey => RequestKind::ApiVersions(ApiVersionsRequest::decode(&mut buf, header.request_api_version).unwrap()),
+//!     ApiKey::ApiVersions => RequestKind::ApiVersions(ApiVersionsRequest::decode(&mut buf, header.request_api_version).unwrap()),
+//!     _ => panic!("Unsupported API key"),
 //! };
 //!
 //! // match on enum elsewhere and do work
@@ -99,6 +102,7 @@
 //!     }
 //!     _ => panic!()
 //! }
+//! # }
 //! ```
 #![deny(missing_docs)]
 // Display required features for items when rendering for docs.rs
