@@ -336,8 +336,7 @@ impl RecordBatchEncoder {
         // Record count
         if num_records > i32::MAX as usize {
             bail!(
-                "Too many records to encode in one batch ({} records)",
-                num_records
+                "Too many records to encode in one batch ({num_records} records)"
             );
         }
         types::Int32.encode(buf, num_records as i32)?;
@@ -384,8 +383,7 @@ impl RecordBatchEncoder {
         let batch_size = batch_end - batch_start;
         if batch_size > i32::MAX as usize {
             bail!(
-                "Record batch was too large to encode ({} bytes)",
-                batch_size
+                "Record batch was too large to encode ({batch_size} bytes)"
             );
         }
 
@@ -464,10 +462,10 @@ impl RecordBatchDecoder {
     {
         let version = buf.try_peek_bytes(MAGIC_BYTE_OFFSET..(MAGIC_BYTE_OFFSET + 1))?[0] as i8;
         let compression = match version {
-            0..=1 => bail!("message sets v{} are unsupported", version),
+            0..=1 => bail!("message sets v{version} are unsupported"),
             2 => Self::decode_new_batch(buf, version, records, decompress_func),
             _ => {
-                bail!("Unknown record batch version ({})", version);
+                bail!("Unknown record batch version ({version})");
             }
         }?;
         Ok((version, compression))
@@ -499,7 +497,7 @@ impl RecordBatchDecoder {
         // Batch length
         let batch_length: i32 = types::Int32.decode(buf)?;
         if batch_length < 0 {
-            bail!("Unexpected negative batch size: {}", batch_length);
+            bail!("Unexpected negative batch size: {batch_length}");
         }
 
         // Convert buf to bytes
@@ -511,7 +509,7 @@ impl RecordBatchDecoder {
         // Magic byte
         let magic: i8 = types::Int8.decode(buf)?;
         if magic != version {
-            bail!("Version mismatch ({} != {})", magic, version);
+            bail!("Version mismatch ({magic} != {version})");
         }
 
         // CRC
@@ -520,9 +518,7 @@ impl RecordBatchDecoder {
 
         if supplied_crc != actual_crc {
             bail!(
-                "Cyclic redundancy check failed ({} != {})",
-                supplied_crc,
-                actual_crc
+                "Cyclic redundancy check failed ({supplied_crc} != {actual_crc})"
             );
         }
 
@@ -537,7 +533,7 @@ impl RecordBatchDecoder {
             3 => Compression::Lz4,
             4 => Compression::Zstd,
             other => {
-                bail!("Unknown compression algorithm used: {}", other);
+                bail!("Unknown compression algorithm used: {other}");
             }
         };
         let timestamp_type = if (attributes & (1 << 3)) != 0 {
@@ -567,7 +563,7 @@ impl RecordBatchDecoder {
         // Record count
         let record_count: i32 = types::Int32.decode(buf)?;
         if record_count < 0 {
-            bail!("Unexpected negative record count ({})", record_count);
+            bail!("Unexpected negative record count ({record_count})");
         }
         let record_count = record_count as usize;
 
@@ -633,7 +629,7 @@ impl Record {
         // Size
         let size = self.compute_size_new(min_offset, min_timestamp, options)?;
         if size > i32::MAX as usize {
-            bail!("Record was too large to encode ({} bytes)", size);
+            bail!("Record was too large to encode ({size} bytes)");
         }
         types::VarInt.encode(buf, size as i32)?;
 
@@ -817,7 +813,7 @@ impl Record {
         // Size
         let size: i32 = types::VarInt.decode(buf)?;
         if size < 0 {
-            bail!("Unexpected negative record size: {}", size);
+            bail!("Unexpected negative record size: {size}");
         }
 
         // Ensure we don't over-read
@@ -839,7 +835,7 @@ impl Record {
         let key_len: i32 = types::VarInt.decode(buf)?;
         let key = match key_len.cmp(&-1) {
             Ordering::Less => {
-                bail!("Unexpected negative record key length ({} bytes)", key_len);
+                bail!("Unexpected negative record key length ({key_len} bytes)");
             }
             Ordering::Equal => None,
             Ordering::Greater => Some(buf.try_get_bytes(key_len as usize)?),
@@ -850,8 +846,7 @@ impl Record {
         let value = match value_len.cmp(&-1) {
             Ordering::Less => {
                 bail!(
-                    "Unexpected negative record value length ({} bytes)",
-                    value_len
+                    "Unexpected negative record value length ({value_len} bytes)"
                 );
             }
             Ordering::Equal => None,
@@ -861,7 +856,7 @@ impl Record {
         // Headers
         let num_headers: i32 = types::VarInt.decode(buf)?;
         if num_headers < 0 {
-            bail!("Unexpected negative record header count: {}", num_headers);
+            bail!("Unexpected negative record header count: {num_headers}");
         }
         let num_headers = num_headers as usize;
 
@@ -871,8 +866,7 @@ impl Record {
             let key_len: i32 = types::VarInt.decode(buf)?;
             if key_len < 0 {
                 bail!(
-                    "Unexpected negative record header key length ({} bytes)",
-                    key_len
+                    "Unexpected negative record header key length ({key_len} bytes)"
                 );
             }
 
@@ -886,8 +880,7 @@ impl Record {
             let value = match value_len.cmp(&-1) {
                 Ordering::Less => {
                     bail!(
-                        "Unexpected negative record header value length ({} bytes)",
-                        value_len
+                        "Unexpected negative record header value length ({value_len} bytes)"
                     );
                 }
                 Ordering::Equal => None,

@@ -10,7 +10,6 @@ authors = [
     "belltoy <belltoy@gmail.com>",
 ]
 edition = "2021"
-rust-version = "1.82"
 license = "MIT/Apache-2.0"
 description = "Implementation of Kafka wire protocol."
 homepage = "https://github.com/tychedelia/kafka-protocol-rs"
@@ -55,7 +54,7 @@ crc32c = "0.6.4"
 anyhow = "1.0.80"
 
 [dev-dependencies]
-testcontainers = { version = "0.20.1", features = ["blocking", "watchdog"] }
+testcontainers = { version = "0.25.0", features = ["blocking", "watchdog"] }
 
 # Display required features for items when rendering for docs.rs
 [package.metadata.docs.rs]
