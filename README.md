@@ -88,3 +88,9 @@ protocol schema.
 
 Originally implemented by
 [@Diggsey](https://github.com/Diggsey) in a minimal Kafka client implementation [Franz](https://github.com/Diggsey/franz)
+
+## MSRV
+
+Any release is guaranteed to be compatible with the last 3 rust releases.
+
+In practice we will likely be compatible with many more releases, and we try to avoid bumping the version without a good reason.

@@ -364,7 +364,7 @@ impl Decoder<Option<StdString>> for String {
                 Ok(Some(std::string::String::from_utf8(strbuf)?))
             }
             n => {
-                bail!("String length is negative ({})", n);
+                bail!("String length is negative ({n})");
             }
         }
     }
@@ -379,7 +379,7 @@ impl<T: NewType<StrBytes>> Decoder<Option<T>> for String {
                 Ok(Some(strbuf.into()))
             }
             n => {
-                bail!("String length is negative ({})", n);
+                bail!("String length is negative ({n})");
             }
         }
     }
@@ -660,7 +660,7 @@ impl Decoder<Option<Vec<u8>>> for Bytes {
                 Ok(Some(data))
             }
             n => {
-                bail!("Data length is negative ({})", n);
+                bail!("Data length is negative ({n})");
             }
         }
     }
@@ -672,7 +672,7 @@ impl Decoder<Option<bytes::Bytes>> for Bytes {
             -1 => Ok(None),
             n if n >= 0 => Ok(Some(buf.try_get_bytes(n as usize)?)),
             n => {
-                bail!("Data length is negative ({})", n);
+                bail!("Data length is negative ({n})");
             }
         }
     }
@@ -992,7 +992,7 @@ impl<T, E: Decoder<T>> Decoder<Option<Vec<T>>> for Array<E> {
                 Ok(Some(result))
             }
             n => {
-                bail!("Array length is negative ({})", n);
+                bail!("Array length is negative ({n})");
             }
         }
     }

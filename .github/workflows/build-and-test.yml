@@ -46,3 +46,4 @@ jobs:
         with:
           tool: cargo-hack@0.6.31
       - run: cargo hack --feature-powerset clippy --all-targets --locked -- -D warnings
+      - run: cargo publish --dry-run
