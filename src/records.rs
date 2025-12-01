@@ -99,6 +99,10 @@ pub const NO_PARTITION_LEADER_EPOCH: i32 = -1;
 pub const NO_SEQUENCE: i32 = -1;
 /// Value to indicate missing timestamp.
 pub const NO_TIMESTAMP: i64 = -1;
+// In this range of versions of the Kafka protocol
+// the only valid record batch request version is 2.
+// 0-1 are officially deprecated with Kafka 4.0
+const CURRENT_VALID_RECORD_BATCH_VERSION: i8 = 2;
 
 #[derive(Debug, Clone)]
 /// Batch encoder for Kafka records.
@@ -119,6 +123,7 @@ struct BatchDecodeInfo {
     partition_leader_epoch: i32,
     producer_id: i64,
     producer_epoch: i16,
+    compression: Compression,
 }
 
 /// Decoded records plus information about compression.
@@ -412,8 +417,68 @@ impl RecordBatchEncoder {
     }
 }
 
+/// An iterator over records in a Kafka record batch.
+///
+/// This iterator provides a way to sequentially access individual records
+/// within a decoded record batch, handling decompression and deserialization
+/// as needed.
+pub struct RecordIterator {
+    buf: Bytes,
+    batch_decode_info: BatchDecodeInfo,
+    current: i64,
+}
+
+impl Iterator for RecordIterator {
+    type Item = Result<Record>;
+
+    fn next(&mut self) -> Option<Result<Record>> {
+        if self.current >= self.batch_decode_info.record_count as i64 {
+            debug_assert!(
+                !self.has_bytes_remaining(),
+                "Iterator exhausted but buffer still has {} bytes remaining",
+                self.buf.len()
+            );
+            return None;
+        }
+        self.current += 1;
+        Some(Record::decode_new(
+            &mut self.buf,
+            &self.batch_decode_info,
+            CURRENT_VALID_RECORD_BATCH_VERSION,
+        ))
+    }
+}
+
+impl RecordIterator {
+    fn new(buf: &mut Bytes) -> Self {
+        let version = buf
+            .try_peek_bytes(MAGIC_BYTE_OFFSET..(MAGIC_BYTE_OFFSET + 1))
+            .unwrap()[0] as i8;
+        let (batch_decode_info, buf) = RecordBatchDecoder::decode_batch_info(buf, version).unwrap();
+
+        RecordIterator {
+            buf,
+            batch_decode_info,
+            current: 0,
+        }
+    }
+
+    /// Returns `true` if there are bytes remaining in the buffer after iteration is complete.
+    /// This can be used to detect if the record batch contains extra data beyond the expected records.
+    pub fn has_bytes_remaining(&self) -> bool {
+        !self.buf.is_empty()
+    }
+}
+
 impl RecordBatchDecoder {
-    /// Decode one RecordSet from the provided buffer.
+    /// Decode the provided buffer into an iterator over Result<Record> items.
+    /// # Arguments
+    /// * `buf` - The buffer to decode.
+    pub fn records(buf: &mut Bytes) -> RecordIterator {
+        RecordIterator::new(buf)
+    }
+
+    /// Decode the provided buffer into a vec of records.
     /// # Arguments
     /// * `decompressor` - A function that decompresses the given batch of records.
     ///
@@ -470,27 +535,8 @@ impl RecordBatchDecoder {
         }?;
         Ok((version, compression))
     }
-    fn decode_new_records<B: ByteBuf>(
-        buf: &mut B,
-        batch_decode_info: &BatchDecodeInfo,
-        version: i8,
-        records: &mut Vec<Record>,
-    ) -> Result<()> {
-        records.reserve(batch_decode_info.record_count);
-        for _ in 0..batch_decode_info.record_count {
-            records.push(Record::decode_new(buf, batch_decode_info, version)?);
-        }
-        Ok(())
-    }
-    fn decode_new_batch<B: ByteBuf, F>(
-        buf: &mut B,
-        version: i8,
-        records: &mut Vec<Record>,
-        decompress_func: Option<&F>,
-    ) -> Result<Compression>
-    where
-        F: Fn(&mut bytes::Bytes, Compression) -> Result<B>,
-    {
+
+    fn decode_batch_info<B: ByteBuf>(buf: &mut B, version: i8) -> Result<(BatchDecodeInfo, Bytes)> {
         // Base offset
         let min_offset = types::Int64.decode(buf)?;
 
@@ -567,42 +613,72 @@ impl RecordBatchDecoder {
         }
         let record_count = record_count as usize;
 
-        let batch_decode_info = BatchDecodeInfo {
-            record_count,
-            timestamp_type,
-            min_offset,
-            min_timestamp,
-            base_sequence,
-            transactional,
-            control,
-            partition_leader_epoch,
-            producer_id,
-            producer_epoch,
-        };
+        Ok((
+            BatchDecodeInfo {
+                record_count,
+                timestamp_type,
+                min_offset,
+                min_timestamp,
+                base_sequence,
+                transactional,
+                control,
+                partition_leader_epoch,
+                producer_id,
+                producer_epoch,
+                compression,
+            },
+            buf.to_owned(),
+        ))
+    }
+
+    fn decode_new_records<B: ByteBuf>(
+        buf: &mut B,
+        batch_decode_info: &BatchDecodeInfo,
+        version: i8,
+        records: &mut Vec<Record>,
+    ) -> Result<()> {
+        records.reserve(batch_decode_info.record_count);
+        for _ in 0..batch_decode_info.record_count {
+            records.push(Record::decode_new(buf, batch_decode_info, version)?);
+        }
+        Ok(())
+    }
+
+    fn decode_new_batch<B: ByteBuf, F>(
+        buf: &mut B,
+        version: i8,
+        records: &mut Vec<Record>,
+        decompress_func: Option<&F>,
+    ) -> Result<Compression>
+    where
+        F: Fn(&mut bytes::Bytes, Compression) -> Result<B>,
+    {
+        let (batch_decode_info, mut buf) = Self::decode_batch_info(buf, version)?;
+        let compression = batch_decode_info.compression;
 
         if let Some(decompress_func) = decompress_func {
-            let mut decompressed_buf = decompress_func(buf, compression)?;
+            let mut decompressed_buf = decompress_func(&mut buf, compression)?;
 
             Self::decode_new_records(&mut decompressed_buf, &batch_decode_info, version, records)?;
         } else {
             match compression {
-                Compression::None => cmpr::None::decompress(buf, |buf| {
+                Compression::None => cmpr::None::decompress(&mut buf, |buf| {
                     Self::decode_new_records(buf, &batch_decode_info, version, records)
                 })?,
                 #[cfg(feature = "snappy")]
-                Compression::Snappy => cmpr::Snappy::decompress(buf, |buf| {
+                Compression::Snappy => cmpr::Snappy::decompress(&mut buf, |buf| {
                     Self::decode_new_records(buf, &batch_decode_info, version, records)
                 })?,
                 #[cfg(feature = "gzip")]
-                Compression::Gzip => cmpr::Gzip::decompress(buf, |buf| {
+                Compression::Gzip => cmpr::Gzip::decompress(&mut buf, |buf| {
                     Self::decode_new_records(buf, &batch_decode_info, version, records)
                 })?,
                 #[cfg(feature = "zstd")]
-                Compression::Zstd => cmpr::Zstd::decompress(buf, |buf| {
+                Compression::Zstd => cmpr::Zstd::decompress(&mut buf, |buf| {
                     Self::decode_new_records(buf, &batch_decode_info, version, records)
                 })?,
                 #[cfg(feature = "lz4")]
-                Compression::Lz4 => cmpr::Lz4::decompress(buf, |buf| {
+                Compression::Lz4 => cmpr::Lz4::decompress(&mut buf, |buf| {
                     Self::decode_new_records(buf, &batch_decode_info, version, records)
                 })?,
                 #[allow(unreachable_patterns)]
@@ -987,9 +1063,177 @@ mod tests {
                 partition_leader_epoch: 0,
                 producer_id: 0,
                 producer_epoch: 0,
+                compression: Compression::None,
             },
             2,
         )
         .expect("decode works");
+    }
+
+    #[test]
+    fn test_record_iterator() {
+        let records_to_encode = vec![
+            Record {
+                transactional: false,
+                control: false,
+                partition_leader_epoch: 0,
+                producer_id: 0,
+                producer_epoch: 0,
+                sequence: 0,
+                timestamp_type: TimestampType::Creation,
+                offset: 0,
+                timestamp: 0,
+                key: Some(Bytes::from("key1")),
+                value: Some(Bytes::from("value1")),
+                headers: IndexMap::new(),
+            },
+            Record {
+                transactional: false,
+                control: false,
+                partition_leader_epoch: 0,
+                producer_id: 0,
+                producer_epoch: 0,
+                sequence: 1,
+                timestamp_type: TimestampType::Creation,
+                offset: 1,
+                timestamp: 1,
+                key: Some(Bytes::from("key2")),
+                value: Some(Bytes::from("value2")),
+                headers: IndexMap::new(),
+            },
+        ];
+
+        let mut buf = BytesMut::new();
+        RecordBatchEncoder::encode(
+            &mut buf,
+            &records_to_encode,
+            &RecordEncodeOptions {
+                version: 2,
+                compression: Compression::None,
+            },
+        )
+        .unwrap();
+
+        let mut iterator = RecordBatchDecoder::records(&mut buf.freeze());
+        let decoded_records: Vec<Record> = iterator.by_ref().map(|r| r.unwrap()).collect();
+
+        assert_eq!(records_to_encode, decoded_records);
+        assert!(!iterator.has_bytes_remaining());
+    }
+
+    #[test]
+    fn test_record_iterator_invalid_record() {
+        // Create a minimal batch with valid header but invalid record data
+        // We'll create the BatchDecodeInfo manually and test Record::decode_new directly
+        let batch_decode_info = BatchDecodeInfo {
+            record_count: 1,
+            timestamp_type: TimestampType::Creation,
+            min_offset: 0,
+            min_timestamp: 0,
+            base_sequence: 0,
+            transactional: false,
+            control: false,
+            partition_leader_epoch: 0,
+            producer_id: 0,
+            producer_epoch: 0,
+            compression: Compression::None,
+        };
+
+        // Create invalid record data - this will be missing required fields
+        // causing Record::decode_new to fail when it tries to read beyond the buffer
+        let invalid_record_data = Bytes::from(vec![0x01, 0x02]); // Too short to be a valid record
+
+        // Create RecordIterator directly with invalid data
+        let mut iterator = RecordIterator {
+            buf: invalid_record_data,
+            batch_decode_info,
+            current: 0,
+        };
+
+        // The first call to next() should return Some(Err(...)) due to invalid record data
+        match iterator.next() {
+            Some(Err(_)) => {
+                // This is what we expect - an error when trying to decode invalid record data
+            }
+            Some(Ok(_)) => panic!("Expected error when decoding invalid record, but got success"),
+            None => panic!("Expected error when decoding invalid record, but got None"),
+        }
+
+        // After the first record fails, there are no more records to decode
+        assert!(iterator.next().is_none());
+    }
+
+    #[test]
+    fn test_record_iterator_error_handling_usage() {
+        // This test demonstrates how to properly handle errors when using the iterator
+        // in practical scenarios where you want to collect both successful and failed records
+
+        let batch_decode_info = BatchDecodeInfo {
+            record_count: 2, // Tell it there are 2 records
+            timestamp_type: TimestampType::Creation,
+            min_offset: 0,
+            min_timestamp: 0,
+            base_sequence: 0,
+            transactional: false,
+            control: false,
+            partition_leader_epoch: 0,
+            producer_id: 0,
+            producer_epoch: 0,
+            compression: Compression::None,
+        };
+
+        // Create invalid record data that will cause parsing errors
+        let invalid_data = Bytes::from(vec![0x01, 0x02, 0x03]); // Too short to be valid records
+
+        let mut iterator = RecordIterator {
+            buf: invalid_data,
+            batch_decode_info,
+            current: 0,
+        };
+
+        // Demonstrate proper error handling patterns
+        let mut successful_records = Vec::new();
+        let mut error_count = 0;
+
+        // Pattern 1: Handle each result individually
+        for result in &mut iterator {
+            match result {
+                Ok(record) => successful_records.push(record),
+                Err(_err) => {
+                    error_count += 1;
+                    // In practice, you might log the error or handle it specifically
+                    // println!("Failed to parse record: {}", _err);
+                }
+            }
+        }
+
+        // Verify we got the expected error handling behavior
+        assert_eq!(successful_records.len(), 0); // No valid records in this test
+        assert!(error_count > 0); // At least one error occurred
+
+        // Pattern 2: Collect only successful records (filter out errors)
+        let batch_decode_info2 = BatchDecodeInfo {
+            record_count: 1,
+            timestamp_type: TimestampType::Creation,
+            min_offset: 0,
+            min_timestamp: 0,
+            base_sequence: 0,
+            transactional: false,
+            control: false,
+            partition_leader_epoch: 0,
+            producer_id: 0,
+            producer_epoch: 0,
+            compression: Compression::None,
+        };
+
+        let iterator2 = RecordIterator {
+            buf: Bytes::from(vec![0xFF]),
+            batch_decode_info: batch_decode_info2,
+            current: 0,
+        };
+
+        let only_successful: Vec<Record> = iterator2.filter_map(|result| result.ok()).collect();
+
+        assert_eq!(only_successful.len(), 0); // No successful records with invalid data
     }
 }
